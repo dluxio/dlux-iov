@@ -487,25 +487,25 @@
                             <div class="py-5">
                                 <div class="container">
                                     <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
-                                        <div class="me-2">
-                                            <div role="group" class="input-group">
-                                                <div class="input-group-prepend l-radius-hotfix"><span
-                                                        class="input-group-text bg-darkg border-dark text-secondary"
+                                        <div>
+                                        <div class="input-group me-2">
+                                            <span class="input-group-text bg-darkg border-dark text-secondary"
                                                         @click="focus('filteraccount')"><i
-                                                            class="fas fa-search"></i></span></div>
+                                                            class="fas fa-search"></i></span>
                                                 <input type="text" v-on:keyup="searchRunners()"
                                                     class="form-control bg-darkg border-dark text-info"
                                                     id="filteraccount" v-model="filteraccount.value" @
                                                     aria-required="true" placeholder="Search">
-                                                <div class="input-group-append p-0 m-0">
-                                                    <div class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix"
+                                                
+                                                    <span class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix"
                                                         style="width: 42px"> <span v-if="filteraccount.value"> <a
                                                                 href="#" class="badge badge-secondary"
                                                                 @click="setValue('filteraccount.value','')"><i
-                                                                    class="fas fa-times"></i></a> </span> </div>
-                                                </div>
+                                                                    class="fas fa-times"></i></a> </span>
+                                                        </span>
                                             </div>
                                         </div>
+                                    
                                         <div class=""> <span class="text-muted">{{lapi}} - {{behind}} block(s) behind
                                                 HIVE</span> </div>
                                     </div>
@@ -573,7 +573,7 @@
                                                     v-if="!filteraccount.value">
                                                     <td role="cell" class="" aria-colindex="1"><a
                                                             :href="atref(node.account)">@{{node.account}}</a></td>
-                                                    <td role="cell" class="" aria-colindex="2">
+                                                    <td role="cell" class="text-white-50" aria-colindex="2">
                                                         {{formatNumber(node.g/1000,3,'.',',')}}</td>
                                                     <td role="cell" class="" aria-colindex="3"><a href="#"
                                                             @click="setApi(node.api)">{{node.api}}</a></td>
