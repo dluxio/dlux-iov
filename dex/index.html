@@ -313,16 +313,15 @@
                                                 <div class="row mb-3 text-center">
                                                     <div>
                                                     <div class="btn-group">
-                                                        
                                                             <input class="btn-check" type="radio" name="govPair" id="govLock"
-                                                                :checked="features.govsel_up"
+                                                            :checked="features.govsel_up"
                                                                 @click="setValue('features.govsel_up', true)">
-                                                                <label class="btn btn-outline-info active"> LOCK </label>
+                                                                <label for="govLock" class="btn btn-outline-info"> LOCK </label>
                                                         
                                                             <input class="btn-check" type="radio" name="govPair" id="govUnlock"
-                                                                :checked="!features.govsel_up"
-                                                                @click="setValue('features.govsel_up', false)">
-                                                                <label class="btn btn-outline-info"> UNLOCK </label>
+                                                            :checked="!features.govsel_up"
+                                                               @click="setValue('features.govsel_up', false)">
+                                                                <label for="govUnlock" class="btn btn-outline-info"> UNLOCK </label>
                                                     </div>
                                                 </div>
                                                 </div>
