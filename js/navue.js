@@ -28,7 +28,8 @@ export default {
       notifications: ["Here I am!"],
     };
   },
-  emits: ["login", "logout"],
+  emits: ["login", "logout", "ack"],
+  inject: ['op'],
   methods: {
     useHAS() {
       this.HAS = true;
@@ -44,6 +45,43 @@ export default {
       this.HAS = false;
       this.HKC = true;
       this.HSR = false;
+    },
+    sign(op, status){
+      return new Promise((resolve, reject) => {
+        if(this.HKS){
+          this.HKCsign(op)
+            .then(r=>resolve(e))
+            .catch(e=>reject(e));
+        } else if (this.HAS){
+          this.HASsign(op)
+            .then((r) => resolve(r))
+            .catch((e) => reject(e));
+        } else {
+          this.HSRsign(op)
+            .then(r=>resolve(r))
+            .catch(e=>reject(e));
+        }
+      })
+    },
+    HKCsign(op){
+      return new Promise((resolve, reject) => {
+        if (window.hive_keychain) {
+          try {
+            window.hive_keychain.requestBroadcast(
+              op[0],
+              op[1],
+              op[2],
+              function (response) {;
+                resolve(response);
+              }
+            );
+          } catch (e) {
+            reject(e);
+          }
+        } else {
+          reject({ error: "Hive Keychain is not installed." });
+        }
+      });
     },
     searchRecents() {
       this.filterRecents = this.recentUsers.reduce((a, b) => {
