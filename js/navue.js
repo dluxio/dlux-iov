@@ -26,6 +26,7 @@ export default {
       filterUsers: "",
       filterRecents: [],
       notifications: ["Here I am!"],
+      op: [],
     };
   },
   emits: ["login", "logout", "ack"],

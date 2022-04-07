@@ -75,6 +75,7 @@ var app = new Vue({
       barhbd: "",
       bargov: "",
       barpow: "",
+      toSign: {},
       buyFormValid: false,
       sellFormValid: false,
       govFormValid: false,
@@ -306,7 +307,10 @@ var app = new Vue({
       govunlock: {
         checked: false,
       },
-    };
+    }
+  },
+  provide(){
+    return {op:this.toSign}
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.onResize);
