@@ -1239,12 +1239,6 @@ var app = new Vue({
           ).toFixed(3);
           this.bargov = (data.gov / 1000).toFixed(3);
           this.accountapi = data;
-          console.log(
-            "claim logic",
-            new Date().getMonth() + 1,
-            data.drop?.last_claim,
-            data.drop?.availible.amount
-          );
           if (
             new Date().getMonth() + 1 != parseInt(data.drop?.last_claim, 16) &&
             data.drop?.availible.amount > 0
