@@ -35,7 +35,7 @@
                         <div class="d-flex align-itmes-center justify-content-between w-100">
                             <div class="d-flex align-items-center">
                                 <!-- token select -->
-                                <div id="userselectapi">
+                                <div id="userApiSelect">
                                     <div class="dropdown">
                                         <a class="btn btn-sm btn-dark dropdown-toggle" href="#" role="button"
                                             id="tokenDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false"> Token
@@ -57,16 +57,16 @@
                                     </div>
                                 </div>
                                 <!-- node settings -->
-                                <div id="usernode" class="ms-3" v-if="isnode">
-                                    <div class="dropdown d-flex align-items-center ">
-                                        <a class="btn btn-sm btn-dark" href="#" role="button" id="settingsDropdownBtn"
+                                <div id="userNode" class="ms-3" v-if="isnode">
+                                    
+                                        <a class="dropdown btn btn-sm btn-dark" data-bs-auto-close="outside" href="#" role="button" id="settingsDropdownBtn"
                                             data-bs-toggle="dropdown" aria-expanded="false"> <i
                                                 class="fas fa-cog"></i></a>
                                         <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black dropdown-menu-left"
                                             aria-labelledby="settingsDropdownBtn" style="width: 300px">
-                                            <h6 class="dropdown-header text-center">{{TOKEN}} NODE SETTINGS</h6>
-                                            <h4 class="text-center text-white-50">@{{account}}</h4>
-                                            <form name="nodeSettings" class="needs-validation" novalidate>
+                                            <li><h6 class="dropdown-header text-center">{{TOKEN}} NODE SETTINGS</h6></li>
+                                            <li><h4 class="text-center text-white-50">@{{account}}</h4></li>
+                                            <li><form name="nodeSettings" class="needs-validation" novalidate>
                                                 <div class="row mb-3" v-for="opt in features.node.opts">
                                                     <label :for="opt.json" class="form-label">{{opt.S}}:</label>
                                                     <div class="input-group">
@@ -99,9 +99,9 @@
                                                         class="btn btn-secondary" @click="saveNodeSettings()">Save<i
                                                             class="far fa-save ms-2"></i></button>
                                                 </div>
-                                            </form>
+                                            </form></li>
                                         </ul>
-                                    </div>
+                                    
                                 </div>
                                 <!-- runner status  -->
                                 <div :title="behindTitle" class="d-flex align-items-center mx-3">
@@ -120,13 +120,13 @@
                             <div class="d-flex align-items-center">
                                 <!-- claim tokens form -->
                                 <div v-if="hasDrop || accountapi.claim" id="userdlux" class="mx-4">
-                                    <div class="dropdown d-flex align-items-center "> <a class="btn btn-sm btn-rb"
+                                     <a class="dropdown btn btn-sm btn-rb" data-bs-auto-close="outside"
                                             href="#" role="button" id="claimDropdownBtn" data-bs-toggle="dropdown"
                                             aria-expanded="false">Claim <i class="fas fa-gift"></i></a>
-                                        <div class="dropdown-menu p-4 text-white-50 text-left bg-black dropdown-menu-left"
+                                        <ul class="dropdown-menu p-4 text-white-50 text-left bg-black dropdown-menu-left"
                                             aria-labelledby="claimDropdownBtn" style="width: 300px">
-                                            <h6 class="dropdown-header text-center">CLAIM {{TOKEN}}</h6>
-                                            <form v-if="hasDrop">
+                                            <li><h6 class="dropdown-header text-center">CLAIM {{TOKEN}}</h6></li>
+                                            <li v-if="hasDrop"><form>
                                                 <div class="row mb-3">
                                                     <label class="form-label" for="nodeDrop">Airdrop:</label>
                                                     <div class="input-group">
@@ -141,9 +141,8 @@
                                                                 class="fas fa-coins ms-2"></i></button>
                                                     </div>
                                                 </div>
-                                            </form>
-                                           
-                                            <form v-if="accountapi.claim">
+                                            </form></li>
+                                            <li v-if="accountapi.claim"><form>
                                                 <div class="row mb-2">
                                                     <label class="form-label" for="nodeRewards">Rewards:</label>
                                                     <div class="input-group">
@@ -166,22 +165,21 @@
                                                                 class="fas fa-coins ms-2"></i></button>
                                                     </div>
                                                 </div>
-                                            </form>
-                                        </div>
-                                    </div>
+                                            </form></li>
+                                        </ul>
                                 </div>
                             </div>
                             <div class="d-flex align-items-center text-white-50">
                                 <!-- send token form -->
                                 <div id="userSendToken" class="mx-4" v-if="features.send_B">
-                                    <div class="dropdown show d-flex align-items-center "><a class="text-warning"
+                                    <a class="dropdown text-warning" data-bs-auto-close="outside"
                                             href="#" role="button" id="sendDropdownBtn" data-bs-toggle="dropdown"
                                             aria-expanded="false" v-cloak> {{formatNumber(bartoken,3,'.',',')}}
                                             {{TOKEN}}</a>
-                                        <div class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black"
+                                        <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black"
                                             style="width: 300px" aria-labelledby="sendDropdownBtn">
-                                            <h6 class="dropdown-header text-center">SEND {{TOKEN}}</h6>
-                                            <form id="sendForm"
+                                            <li><h6 class="dropdown-header text-center">SEND {{TOKEN}}</h6></li>
+                                            <li><form id="sendForm"
                                                 @submit.prevent="validateForm('sendForm', 'sendFormValid');tokenSend()"
                                                 class="needs-validation" novalidate>
                                                 <div class="row mb-3">
@@ -227,20 +225,20 @@
                                                         class="btn btn-warning">Send<i
                                                             class="fas fa-paper-plane ms-2"></i></button>
                                                 </div>
-                                            </form>
-                                        </div>
-                                    </div>
+                                            </form></li>
+                                        </ul>
+                                    
                                 </div>
                                 <!-- power form -->
-                                <div id="userdpwr" class="mx-4" v-if="features.powup_B || features.powdn_B">
-                                    <div class="dropdown show d-flex align-items-center "><a class="text-primary"
+                                <div id="userPwr" class="mx-4" v-if="features.powup_B || features.powdn_B">
+                                    <a class="dropdown text-primary" data-bs-auto-close="outside"
                                             href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
                                             aria-expanded="false" v-cloak>{{formatNumber(barpow,3,'.',',')}}
                                             {{TOKEN}}P</a>
-                                        <div class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black"
+                                        <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black"
                                             style="width: 300px">
-                                            <h6 class="dropdown-header text-center">{{TOKEN}} POWER</h6>
-                                            <form id="powForm"
+                                            <li><h6 class="dropdown-header text-center">{{TOKEN}} POWER</h6></li>
+                                            <li><form id="powForm"
                                                 @submit.prevent="validateForm('powForm', 'powFormValid');power()"
                                                 class=" needs-validation" novalidate>
                                                 <div class="row mb-3 text-center">
@@ -295,22 +293,21 @@
                                                         class="btn btn-primary" v-if="!features.powsel_up">Power Down<i
                                                             class="fas fa-arrow-alt-circle-down ms-2"></i></button>
                                                 </div>
-                                            </form>
-                                        </div>
-                                    </div>
+                                            </form></li>
+                                        </ul>
                                 </div>
                                 <!-- gov form -->
                                 <div id="userdgov" class="mx-4" v-if="isnode && (features.govup_B || features.govdn_B)">
-                                    <div class="dropdown show d-flex align-items-center "><a class="text-info" href="#"
+                                    <a class="dropdown text-info" href="#" data-bs-auto-close="outside"
                                             role="button" data-bs-toggle="dropdown" aria-haspopup="true"
                                             aria-expanded="false" v-cloak>{{formatNumber(bargov,3,'.',',')}}
                                             {{TOKEN}}G</a>
-                                        <div class="dropdown-menu dropdown-menu-dark p-4 text-left bg-black"
+                                        <ul class="dropdown-menu dropdown-menu-dark p-4 text-left bg-black"
                                             style="width: 300px">
-                                            <h6 class="dropdown-header text-center">{{TOKEN}} GOVERNANCE</h6>
-                                            <h4 class="dropdown-header text-center">Current Threshold:
-                                                {{formatNumber(stats.gov_threshhold/1000,3,'.',',')}}</h4>
-                                            <form id="govForm"
+                                            <li><h6 class="dropdown-header text-center">{{TOKEN}} GOVERNANCE</h6></li>
+                                            <li><h4 class="dropdown-header text-center">Current Threshold:
+                                                {{formatNumber(stats.gov_threshhold/1000,3,'.',',')}}</h4></li>
+                                            <li><form id="govForm"
                                                 @submit.prevent="validateForm('govForm', 'govFormValid');gov()"
                                                 class="needs-validation" novalidate>
                                                 <div class="row mb-3 text-center">
@@ -364,9 +361,8 @@
                                                         class="btn btn-info" v-if="!features.govsel_up">Unlock Gov<i
                                                             class="fas fa-lock-open ms-2"></i></button>
                                                 </div>
-                                            </form>
-                                        </div>
-                                    </div>
+                                            </form></li>
+                                        </ul>
                                 </div>
                                 <!-- send hive form -->
                                 <div id="userhive" class="mx-4">
