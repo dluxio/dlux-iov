@@ -285,7 +285,7 @@
                                                             class="text-primary">{{formatNumber(barpow,3,'.',',')}}
                                                             {{TOKEN}}P</a> Available</div>
                                                 </div>
-                                                <div class="row text-center">
+                                                <div class="text-center">
                                                     <button id="pwruplarynxmodalsend" type="submit"
                                                         class="btn btn-primary" v-if="features.powsel_up">Power Up<i
                                                             class="fas fa-arrow-alt-circle-up ms-2"></i></button>
@@ -597,7 +597,7 @@
                 </div>
                 <div class="container text-white" style="margin-top: 50px;">
                     <!-- current token tick -->
-                    <div class="row">
+                    <div class="row mb-3">
                         <div class="col-4">
                             <div class="rounded p-3 bg-darkg" v-if="buyhive.checked">
                                 <div class="d-flex align-items-center" id="tokenHiveTick">
@@ -686,8 +686,8 @@
                         </div>
                     </div>
                     <!-- market stats -->
-                    <div id="market" class="row text-center">
-                        <div class="mt-2 col-lg-3">
+                    <div id="market" class="row mb-3 text-center">
+                        <div class="col-lg-3">
                             <h5>Market</h5>
                             <div class="container-fluid mt-3">
                                 <div>
@@ -780,7 +780,7 @@
                                 <!-- <script type="text/javascript">
     $('#time-scale').multiselect();
 </script>  -->
-                                <select id="time-scale" class="custom-select bg-darker border-dark text-muted"
+                                <select id="time-scale" class="form-select bg-darker border-dark text-muted"
                                     v-model="barwidth" @change="getHistorical()">
                                     <option value="60000">1m</option>
                                     <option value="300000">5m</option>
