@@ -5,6 +5,21 @@ body {
 a {
 	text-decoration: none;
 }
+.text-hbd {
+  color: green;
+}
+.text-hive {
+  color: red;
+}
+.text-token {
+  color: yellow;
+}
+.text-tokenp {
+  color: blue;
+}
+.text-tokeng {
+  color: cyan;
+}
 [v-cloak] { 
 display: none;
 }

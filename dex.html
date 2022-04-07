@@ -66,9 +66,9 @@
                                             aria-labelledby="settingsDropdownBtn" style="width: 300px">
                                             <h6 class="dropdown-header text-center">{{TOKEN}} NODE SETTINGS</h6>
                                             <h4 class="text-center text-white-50">@{{account}}</h4>
-                                            <form name="nodesettings" class="needs-validation" novalidate>
-                                                <div class="form-group" v-for="opt in features.node.opts">
-                                                    <label :for="opt.json">{{opt.S}}:</label>
+                                            <form name="nodeSettings" class="needs-validation" novalidate>
+                                                <div class="row mb-3" v-for="opt in features.node.opts">
+                                                    <label :for="opt.json" class="form-label">{{opt.S}}:</label>
                                                     <div class="input-group">
                                                         <!-- <div class="input-group-prepend">
                               <div class="input-group-text bg-darkg border-dark text-white-50">https://</div>
@@ -95,7 +95,7 @@
                           </div>
                         </div> -->
                                                 <div class="text-center mt-3">
-                                                    <button id="savenodesettings" type="button"
+                                                    <button id="saveSettingsBtn" type="button"
                                                         class="btn btn-secondary" @click="saveNodeSettings()">Save<i
                                                             class="far fa-save ms-2"></i></button>
                                                 </div>
@@ -126,42 +126,42 @@
                                         <div class="dropdown-menu p-4 text-white-50 text-left bg-black dropdown-menu-left"
                                             aria-labelledby="claimDropdownBtn" style="width: 300px">
                                             <h6 class="dropdown-header text-center">CLAIM {{TOKEN}}</h6>
-                                            <form v-if="hasDrop" name="claimlarynxad">
-                                                <div class="form-group">
-                                                    <label>Airdrop:</label>
+                                            <form v-if="hasDrop">
+                                                <div class="row mb-3">
+                                                    <label class="form-label" for="nodeDrop">Airdrop:</label>
                                                     <div class="input-group">
-                                                        <div
-                                                            class="form-control bg-black border-rb text-white text-center">
+                                                        <div id="nodeDrop" class="form-control bg-black border-rb text-white text-center">
                                                             {{dropnai}}</div>
                                                     </div>
                                                 </div>
-                                                <div class="form-group">
+                                                <div class="row mb-3">
                                                     <div class="text-center mt-3">
-                                                        <button id="claimlarynxad" type="button"
+                                                        <button id="claimDrop" type="button"
                                                             class="btn background-rb" @click="dropClaim()">Claim<i
                                                                 class="fas fa-coins ms-2"></i></button>
                                                     </div>
                                                 </div>
                                             </form>
-                                            <div class="d-none dropdown-divider dark-divider"></div>
-                                            <form v-if="accountapi.claim" name="claimlarynxrewards">
-                                                <div class="form-group">
-                                                    <label>Rewards:</label>
+                                           
+                                            <form v-if="accountapi.claim">
+                                                <div class="row mb-2">
+                                                    <label class="form-label" for="nodeRewards">Rewards:</label>
                                                     <div class="input-group">
-                                                        <div
-                                                            class="form-control bg-black border-rb text-white text-center">
+                                                        <div id="nodeRewards" class="form-control bg-black border-rb text-white text-center">
                                                             {{toFixed(accountapi.claim/1000,3)}} {{TOKEN}}</div>
                                                     </div>
                                                 </div>
-                                                <div class="form-check form-switch" v-if="isnode && features.rewardSel">
-                                                    <input type="checkbox" class="form-check-input"
+                                                <div class="row mb-3">
+                                                <div class="form-check form-switch d-flex justify-content-center" v-if="isnode && features.rewardSel">
+                                                    <input type="checkbox" class="form-check-input me-2"
                                                         v-model="features.reward2Gov" role="switch" id="claimToGov">
                                                     <label class="form-check-label" for="claimToGov">Claim 1/2 to
                                                         Gov</label>
                                                 </div>
-                                                <div class="form-group">
-                                                    <div class="text-center mt-3">
-                                                        <button id="claimlarynxrewards" type="button"
+                                            </div>
+                                                <div class="row">
+                                                    <div class="text-center">
+                                                        <button id="claimRewards" type="button"
                                                             class="btn background-rb" @click="rewardClaim()">Claim<i
                                                                 class="fas fa-coins ms-2"></i></button>
                                                     </div>
@@ -178,14 +178,14 @@
                                             href="#" role="button" id="sendDropdownBtn" data-bs-toggle="dropdown"
                                             aria-expanded="false" v-cloak> {{formatNumber(bartoken,3,'.',',')}}
                                             {{TOKEN}}</a>
-                                        <div class="dropdown-menu p-4 text-white-50 text-left bg-black dropdown-menu-right"
+                                        <div class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black"
                                             style="width: 300px" aria-labelledby="sendDropdownBtn">
                                             <h6 class="dropdown-header text-center">SEND {{TOKEN}}</h6>
                                             <form id="sendForm"
                                                 @submit.prevent="validateForm('sendForm', 'sendFormValid');tokenSend()"
                                                 class="needs-validation" novalidate>
-                                                <div class="form-group">
-                                                    <label for="sendlarynxto">To:</label>
+                                                <div class="row mb-3">
+                                                    <label class="form-label" for="sendTokenTo">To:</label>
                                                     <div class="input-group">
                                                         <div class="input-group-prepend">
                                                             <div
@@ -195,28 +195,26 @@
                                                         <input class="form-control bg-darkg border-dark text-info"
                                                             v-model="sendTo"
                                                             @blur="checkAccount('sendTo', 'sendAllowed')" required
-                                                            id="sendlarynxto" type="text" placeholder="Recipient">
+                                                            id="sendTokenTo" type="text" placeholder="Recipient">
                                                     </div>
                                                 </div>
-                                                <div class="form-group">
-                                                    <label id="sendlarynxamountlab"
-                                                        for="sendlarynxamount">Amount:</label>
+                                                <div class="row mb-3">
+                                                    <label class="form-label" for="sendTokenAmount">Amount:</label>
                                                     <div class="input-group">
                                                         <input class="form-control bg-darkg border-dark text-info"
-                                                            v-model="sendAmount" required id="sendlarynxamount"
+                                                            v-model="sendAmount" required id="sendTokenAmount"
                                                             type="number" step="0.001" min="0.001"
                                                             :max="parseFloat(bartoken)" placeholder="0.000">
                                                         <div class="input-group-append">
-                                                            <div class="input-group-text bg-darkg border-dark text-white-50"
-                                                                id="sendformunits"> {{TOKEN}} </div>
+                                                            <div class="input-group-text bg-darkg border-dark text-white-50"> {{TOKEN}} </div>
                                                         </div>
                                                     </div>
-                                                    <div class="small pt-2"><a href="#/"
+                                                    <div class="small pt-2"><a href="#"
                                                             @click="setValue('sendAmount', parseFloat(bartoken))"
                                                             class="text-warning">{{formatNumber(bartoken,3,'.',',')}}
                                                             {{TOKEN}}</a> Available</div>
                                                 </div>
-                                                <div class="form-group" id="sendlarynxmemogroup">
+                                                <div class="row mb-3" id="sendlarynxmemogroup">
                                                     <label for="sendlarynxmemo">Memo:</label>
                                                     <div class="input-group">
                                                         <input class="form-control bg-darkg border-dark text-info"
@@ -236,31 +234,32 @@
                                 <!-- power form -->
                                 <div id="userdpwr" class="mx-4" v-if="features.powup_B || features.powdn_B">
                                     <div class="dropdown show d-flex align-items-center "><a class="text-primary"
-                                            href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+                                            href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
                                             aria-expanded="false" v-cloak>{{formatNumber(barpow,3,'.',',')}}
                                             {{TOKEN}}P</a>
-                                        <div class="dropdown-menu p-4 text-white-50 text-left bg-black dropdown-menu-right"
+                                        <div class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black"
                                             style="width: 300px">
                                             <h6 class="dropdown-header text-center">{{TOKEN}} POWER</h6>
-                                            <form name="pwrlarynx" id="powForm"
+                                            <form id="powForm"
                                                 @submit.prevent="validateForm('powForm', 'powFormValid');power()"
                                                 class=" needs-validation" novalidate>
-                                                <div class="form-group text-center">
-                                                    <div class="btn-group btn-group-toggle my-2" data-toggle="buttons">
-                                                        <label class="btn btn-outline-primary active">
-                                                            <input type="radio" name="pwrpair" id="pwrup"
+                                                <div class="row mb-3 text-center">
+                                                    <div>
+                                                    <div class="btn-group">
+                                                        <input class="btn-check" type="radio" name="pwrPair" id="pwrUp"
                                                                 :checked="features.powsel_up"
                                                                 @click="setValue('features.powsel_up', true)">
-                                                            PWR UP </label>
-                                                        <label class="btn btn-outline-primary">
-                                                            <input type="radio" name="pwrpair" id="pwrdown"
+                                                            <label class="btn btn-outline-primary"> PWR UP </label>
+                                                        
+                                                            <input class="btn-check" type="radio" name="pwrPair" id="pwrDown"
                                                                 :checked="!features.powsel_up"
                                                                 @click="setValue('features.powsel_up', false)">
-                                                            PWR DOWN </label>
+                                                            <label class="btn btn-outline-primary">PWR DOWN </label>
                                                     </div>
                                                 </div>
-                                                <div class="form-group">
-                                                    <label id="govuplarynxamountlab">Amount</label>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label class="form-label" for="">Amount</label>
                                                     <div class="input-group">
                                                         <input class="form-control bg-darkg border-dark text-primary"
                                                             v-if="features.powsel_up" v-model="features.pow_val"
@@ -288,7 +287,7 @@
                                                             class="text-primary">{{formatNumber(barpow,3,'.',',')}}
                                                             {{TOKEN}}P</a> Available</div>
                                                 </div>
-                                                <div class="text-center mt-3">
+                                                <div class="row text-center">
                                                     <button id="pwruplarynxmodalsend" type="submit"
                                                         class="btn btn-primary" v-if="features.powsel_up">Power Up<i
                                                             class="fas fa-arrow-alt-circle-up ms-2"></i></button>
@@ -303,32 +302,34 @@
                                 <!-- gov form -->
                                 <div id="userdgov" class="mx-4" v-if="isnode && (features.govup_B || features.govdn_B)">
                                     <div class="dropdown show d-flex align-items-center "><a class="text-info" href="#"
-                                            role="button" data-toggle="dropdown" aria-haspopup="true"
+                                            role="button" data-bs-toggle="dropdown" aria-haspopup="true"
                                             aria-expanded="false" v-cloak>{{formatNumber(bargov,3,'.',',')}}
                                             {{TOKEN}}G</a>
-                                        <div class="dropdown-menu p-4 text-white-50 text-left bg-black dropdown-menu-right"
+                                        <div class="dropdown-menu dropdown-menu-dark p-4 text-left bg-black"
                                             style="width: 300px">
                                             <h6 class="dropdown-header text-center">{{TOKEN}} GOVERNANCE</h6>
                                             <h4 class="dropdown-header text-center">Current Threshold:
                                                 {{formatNumber(stats.gov_threshhold/1000,3,'.',',')}}</h4>
-                                            <form name="govlarynx" id="govForm"
+                                            <form id="govForm"
                                                 @submit.prevent="validateForm('govForm', 'govFormValid');gov()"
                                                 class="needs-validation" novalidate>
-                                                <div class="form-group text-center">
-                                                    <div class="btn-group btn-group-toggle my-2" data-toggle="buttons">
-                                                        <label class="btn btn-outline-info active">
-                                                            <input type="radio" name="govpair" id="govlock"
+                                                <div class="row mb-3 text-center">
+                                                    <div>
+                                                    <div class="btn-group">
+                                                        
+                                                            <input class="btn-check" type="radio" name="govPair" id="govLock"
                                                                 :checked="features.govsel_up"
                                                                 @click="setValue('features.govsel_up', true)">
-                                                            LOCK </label>
-                                                        <label class="btn btn-outline-info">
-                                                            <input type="radio" name="govpair" id="govunlock"
+                                                                <label class="btn btn-outline-info active"> LOCK </label>
+                                                        
+                                                            <input class="btn-check" type="radio" name="govPair" id="govUnlock"
                                                                 :checked="!features.govsel_up"
                                                                 @click="setValue('features.govsel_up', false)">
-                                                            UNLOCK </label>
+                                                                <label class="btn btn-outline-info"> UNLOCK </label>
                                                     </div>
                                                 </div>
-                                                <div class="form-group">
+                                                </div>
+                                                <div class="row mb-3">
                                                     <label for="govUpAmount">Amount</label>
                                                     <div class="input-group">
                                                         <input class="form-control bg-darkg border-dark text-info"
@@ -370,23 +371,23 @@
                                 <!-- send hive form -->
                                 <div id="userhive" class="mx-4">
                                     <div class="dropdown show d-flex align-items-center "><a class="text-danger"
-                                            href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+                                            href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
                                             aria-expanded="false" v-cloak> {{formatNumber(barhive,3,'.',',')}} HIVE</a>
-                                        <div class="dropdown-menu p-4 text-white-50 text-left bg-black dropdown-menu-right"
+                                        <div class="dropdown-menu dropdown-menu-dark p-4 text-left bg-black"
                                             style="width: 300px">
                                             <h6 class="dropdown-header text-center">SEND HIVE</h6>
-                                            <form name="sendhive" id="hiveForm"
+                                            <form id="hiveForm"
                                                 @submit.prevent="validateForm('hiveForm', 'hiveFormValid');sendhive()"
                                                 class=" needs-validation" novalidate>
-                                                <div class="form-group">
-                                                    <label for="sendhiveto">To:</label>
+                                                <div class="row mb-3">
+                                                    <label for="sendHiveTo">To:</label>
                                                     <div class="input-group">
                                                         <div class="input-group-prepend">
                                                             <div
                                                                 class="input-group-text bg-darkg border-dark text-white-50">
                                                                 @</div>
                                                         </div>
-                                                        <input class="form-control bg-darkg border-dark text-info"
+                                                        <input id="" class="form-control bg-darkg border-dark text-info"
                                                             @blur="checkAccount('sendHiveTo', 'sendHiveAllowed')"
                                                             required v-model="sendHiveTo" type="text"
                                                             placeholder="Recipient">
@@ -429,16 +430,16 @@
                                 <!-- send hbd form -->
                                 <div id="userhbd" class="mx-4">
                                     <div class="dropdown show d-flex align-items-center "><a class="text-success"
-                                            href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+                                            href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
                                             aria-expanded="false" v-cloak> {{formatNumber(barhbd,3,'.',',')}} HBD</a>
-                                        <div class="dropdown-menu p-4 text-white-50 text-left bg-black dropdown-menu-right"
+                                        <div class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black"
                                             style="width: 300px">
                                             <h6 class="dropdown-header text-center">SEND HBD</h6>
-                                            <form name="sendhbd" id="hbdForm"
+                                            <form id="hbdForm"
                                                 @submit.prevent="validateForm('hbdForm', 'hbdFormValid');sendhbd()"
                                                 class="needs-validation" novalidate>
-                                                <div class="form-group">
-                                                    <label for="sendhbdto">To:</label>
+                                                <div class="row mb-3">
+                                                    <label for="sendHbdto">To:</label>
                                                     <div class="input-group">
                                                         <div class="input-group-prepend">
                                                             <div
@@ -450,7 +451,7 @@
                                                             v-model="sendHBDTo" type="text" placeholder="Recipient">
                                                     </div>
                                                 </div>
-                                                <div class="form-group">
+                                                <div class="row mb-3">
                                                     <label id="sendhbdamountlab" for="sendhbdamount">Amount:</label>
                                                     <div class="input-group">
                                                         <input class="form-control bg-darkg border-dark text-info"
@@ -458,7 +459,7 @@
                                                             min="0.001" :max="parseFloat(barhbd)" placeholder="0.000">
                                                         <div class="input-group-append">
                                                             <div class="input-group-text bg-darkg border-dark text-white-50"
-                                                                id="sendhbdformunits"> HBD </div>
+                                                                > HBD </div>
                                                         </div>
                                                     </div>
                                                     <div class="small pt-2"><a href="#/"
@@ -602,8 +603,8 @@
                     <!-- current token tick -->
                     <div class="row">
                         <div class="col-4">
-                            <div class="jumbotron p-3 bg-darkg" v-if="buyhive.checked">
-                                <div class="d-flex align-items-center" id="dluxhivequote">
+                            <div class="rounded p-3 bg-darkg" v-if="buyhive.checked">
+                                <div class="d-flex align-items-center" id="tokenHiveTick">
                                     <div>
                                         <b>
                                             <h2 class="lead my-0" v-cloak>{{TOKEN}}: ${{toFixed((dexapi.markets ?
@@ -613,10 +614,10 @@
                                     <div class="ms-auto d-flex align-items-center">
                                         <div class="dropdown show d-flex align-items-center p-0 m-0"><a
                                                 class="text-white py-0 px-2 m-0" href="#" role="button"
-                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i
+                                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i
                                                     class="fas fa-info-circle mx-2"></i></a>
                                             <div
-                                                class="dropdown-menu p-4 text-white-50 text-left bg-black dropdown-menu-right">
+                                                class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
                                                 <h6 class="dropdown-header">{{TOKEN}} STATS</h6>
                                                 <div class="dropdown-divider bg-light"></div>
                                                 <p class="mb-0">Supply:</p>
@@ -635,8 +636,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="jumbotron p-3 bg-darkg" v-if="buyhbd.checked">
-                                <div class="d-flex align-items-center" id="dluxhbdquote">
+                            <div class="rounded p-3 bg-darkg" v-if="buyhbd.checked">
+                                <div class="d-flex align-items-center" id="tokenHbdTick">
                                     <div>
                                         <b>
                                             <h2 class="lead my-0" v-cloak>{{TOKEN}}: ${{toFixed((dexapi ?
@@ -646,10 +647,10 @@
                                     <div class="ms-auto d-flex align-items-center">
                                         <div class="dropdown show d-flex align-items-center p-0 m-0"><a
                                                 class="text-white py-0 px-2 m-0" href="#" role="button"
-                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i
+                                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i
                                                     class="fas fa-info-circle mx-2"></i></a>
                                             <div
-                                                class="dropdown-menu p-4 text-white-50 text-left bg-black dropdown-menu-right">
+                                                class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
                                                 <h6 class="dropdown-header">{{TOKEN}} STATS</h6>
                                                 <div class="dropdown-divider bg-light"></div>
                                                 <p class="mb-0">Supply:</p>
@@ -670,8 +671,8 @@
                             </div>
                         </div>
                         <div class="col-4">
-                            <div class="jumbotron p-3 bg-darkg">
-                                <div id="hivequote">
+                            <div class="rounded p-3 bg-darkg">
+                                <div id="hiveTick">
                                     <b>
                                         <h2 class="lead my-0" v-cloak>HIVE: ${{hiveprice.hive.usd}}</h2>
                                     </b>
@@ -679,8 +680,8 @@
                             </div>
                         </div>
                         <div class="col-4">
-                            <div class="jumbotron p-3 bg-darkg">
-                                <div id="hbdquote">
+                            <div class="rounded p-3 bg-darkg">
+                                <div id="hbdTick">
                                     <b>
                                         <h2 class="lead my-0" v-cloak>HBD: ${{hbdprice.hive_dollar.usd}}</h2>
                                     </b>
