@@ -30,8 +30,24 @@ export default {
   },
   emits: ["login", "logout"],
   methods: {
+    useHAS() {
+      this.HAS = true;
+      this.HKC = false;
+      this.HSR = false;
+    },
+    useHS() {
+      this.HAS = false;
+      this.HKC = false;
+      this.HSR = true;
+    },
+    useKC() {
+      this.HAS = false;
+      this.HKC = true;
+      this.HSR = false;
+    },
     searchRecents() {
       this.filterRecents = this.recentUsers.reduce((a, b) => {
+        console.log(b);
         if (b.toLowerCase().includes(this.filterUsers.toLowerCase())) {
           a.push(b);
         }
@@ -98,6 +114,12 @@ export default {
         return this.user ? true : false;
       },
     },
+    HKCa: {
+      //Hive Keychain Available
+      get() {
+        return !!window.hive_keychain;
+      },
+    },
   },
   template: `
 <header class="navbar navbar-expand-lg navbar-dark fixed-top" style="background-color:rgba(42, 48, 54, 0.8); -webkit-backdrop-filter: blur(10px);
@@ -117,11 +139,13 @@ export default {
 	<li class="nav-item"><a class="nav-link acct-link" href="https://signup.hive.io/">Get Account</a></li>
 	<li class="nav-item"><input id="userLogin" v-model="userField" placeholder="username" @blur="setUser()" @keyup.enter="setUser()" class="bg-darkg border-dark text-info"></li>
     <li class="nav-item"><button class="btn btn-submit" @click="setUser()">Login</button></li>
+    <!-- Off canvas button... simple toggle method -->
     <li class="nav-item"><button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" @click="toggleAccountMenu()" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
   <i class="fal fa-address-book"></i>
 </button></li>
 	</ul>
     <div>
+    <!-- Couldn't get this to work... might be styling since other things don't show -->
     <!--<bs-toast v-for="item in notifications">
         {{ item }}
     </bs-toast>-->
@@ -170,12 +194,21 @@ export default {
             <a class="dropdown-item" href="#" role="button" @click="setUser(name);toggleAccountMenu()">@{{name}}</a> | 
             <a class="dropdown-item" href="#/" role="button" @click="deleteRecentUser(name)">X</a>
         </li>
-        <li v-if="filterUsers" v-for="name in filterUsers">
+        <li v-if="filterUsers" v-for="name in filterRecents">
             <a class="dropdown-item" href="#" role="button" @click="setUser(name);toggleAccountMenu()">@{{name}}</a> | 
             <a class="dropdown-item" href="#/" role="button" @click="deleteRecentUser(name)">X</a>
         </li>
       </ul>
+      <!-- Search Method for Recent Usernames: terribly implemented above -->
       <input v-model="filterUsers" placeholder="search" @keyup="searchRecents()" class="bg-darkg border-dark text-info">
+      <!-- Select Signing Client -->
+      <ul class="dropdown-menu" aria-labelledby="dropdownMenu">
+        <li>
+            <a class="dropdown-item" href="#/" role="button" @click="useKC()" v-show="HKCa">{{HKC ? 'X ' : '  '}}Hive KeyChain</a>
+            <a class="dropdown-item" href="#/" role="button" @click="useHAS()">{{HAS ? 'X ' : '  '}}Hive Auth Service</a>
+            <a class="dropdown-item" href="#/" role="button" @click="useHS()">{{HSR ? 'X ' : '  '}}Hive Signer</a>
+        </li>
+      </ul>
     </div>
   </div>
 </div>
