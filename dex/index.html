@@ -297,7 +297,7 @@
                                         </ul>
                                 </div>
                                 <!-- gov form -->
-                                <div id="userdgov" class="mx-4" v-if="isnode && (features.govup_B || features.govdn_B)">
+                                <div id="userGov" class="mx-4" v-if="isnode && (features.govup_B || features.govdn_B)">
                                     <a class="dropdown text-info" href="#" data-bs-auto-close="outside"
                                             role="button" data-bs-toggle="dropdown" aria-haspopup="true"
                                             aria-expanded="false" v-cloak>{{formatNumber(bargov,3,'.',',')}}
@@ -365,14 +365,14 @@
                                         </ul>
                                 </div>
                                 <!-- send hive form -->
-                                <div id="userhive" class="mx-4">
-                                    <div class="dropdown show d-flex align-items-center "><a class="text-danger"
+                                <div id="userHive" class="mx-4">
+                                    <a class="dropdown text-danger" data-bs-auto-close="outside"
                                             href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
                                             aria-expanded="false" v-cloak> {{formatNumber(barhive,3,'.',',')}} HIVE</a>
-                                        <div class="dropdown-menu dropdown-menu-dark p-4 text-left bg-black"
+                                        <ul class="dropdown-menu dropdown-menu-dark p-4 text-left bg-black"
                                             style="width: 300px">
-                                            <h6 class="dropdown-header text-center">SEND HIVE</h6>
-                                            <form id="hiveForm"
+                                            <li><h6 class="dropdown-header text-center">SEND HIVE</h6></li>
+                                            <li><form id="hiveForm"
                                                 @submit.prevent="validateForm('hiveForm', 'hiveFormValid');sendhive()"
                                                 class=" needs-validation" novalidate>
                                                 <div class="row mb-3">
@@ -419,19 +419,19 @@
                                                         class="btn btn-danger">Send<i
                                                             class="fas fa-paper-plane ms-2"></i></button>
                                                 </div>
-                                            </form>
-                                        </div>
-                                    </div>
+                                            </form></li>
+                                        </ul>
+                                   
                                 </div>
                                 <!-- send hbd form -->
-                                <div id="userhbd" class="mx-4">
-                                    <div class="dropdown show d-flex align-items-center "><a class="text-success"
+                                <div id="userHbd" class="mx-4">
+                                    <a class="dropdown text-success" data-bs-auto-close="outside"
                                             href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
                                             aria-expanded="false" v-cloak> {{formatNumber(barhbd,3,'.',',')}} HBD</a>
-                                        <div class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black"
+                                        <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black"
                                             style="width: 300px">
-                                            <h6 class="dropdown-header text-center">SEND HBD</h6>
-                                            <form id="hbdForm"
+                                            <li><h6 class="dropdown-header text-center">SEND HBD</h6></li>
+                                            <li><form id="hbdForm"
                                                 @submit.prevent="validateForm('hbdForm', 'hbdFormValid');sendhbd()"
                                                 class="needs-validation" novalidate>
                                                 <div class="row mb-3">
@@ -476,9 +476,9 @@
                                                         class="btn btn-success">Send<i
                                                             class="fas fa-paper-plane ms-2"></i></button>
                                                 </div>
-                                            </form>
-                                        </div>
-                                    </div>
+                                            </form></li>
+                                        </ul>
+                                    
                                 </div>
                             </div>
                         </div>
