@@ -1228,7 +1228,7 @@ var app = new Vue({
       this.barhbd = "";
     },
     getTokenUser(user) {
-      fetch(this.lapi + "/@" + user)
+      if(user)fetch(this.lapi + "/@" + user)
         .then((response) => response.json())
         .then((data) => {
           this.balance = (data.balance / 1000).toFixed(3);
@@ -1289,19 +1289,20 @@ var app = new Vue({
         });
     },
     getHiveUser(user) {
-      fetch(hapi, {
-        body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[["${user}"]], "id":1}`,
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        method: "POST",
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          this.accountinfo = data.result[0];
-          this.barhive = this.accountinfo.balance;
-          this.barhbd = this.accountinfo.hbd_balance;
-        });
+      if (user)
+        fetch(hapi, {
+          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[["${user}"]], "id":1}`,
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          method: "POST",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            this.accountinfo = data.result[0];
+            this.barhive = this.accountinfo.balance;
+            this.barhbd = this.accountinfo.hbd_balance;
+          });
     },
     popDEX() {
       fetch(this.lapi + "/dex")
