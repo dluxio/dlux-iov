@@ -13,7 +13,7 @@ if (location.search) {
       lapi = param[1];
     }
   }
-  window.history.replaceState(null, null, "dex?api=" + lapi);
+  //window.history.replaceState(null, null, "dex?api=" + lapi);
 }
 if (location.hash && !lapi) {
   const hash = url.split("#");
@@ -32,7 +32,7 @@ if (
   lapi == "https://spkinstant.hivehoneycomb.com"
 ) {
   console.log("using defaults");
-  window.history.replaceState(null, null, "dex");
+  //window.history.replaceState(null, null, "dex");
 }
 let user = localStorage.getItem("user") || "GUEST";
 let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
@@ -333,48 +333,48 @@ var app = new Vue({
           this.features = data.features ? data.features : this.features;
           this.behind = data.behind;
           this.behindTitle = data.behind + " Blocks Behind Hive";
-          fetch(this.lapi + "/api/recent/HIVE_" + this.TOKEN + "?limit=1000")
-            .then((response) => response.json())
-            .then((data) => {
-              this.volume.hive =
-                data.recent_trades.reduce((a, b) => {
-                  if (b.trade_timestamp > this.agoTime)
-                    return a + parseInt(parseFloat(b.target_volume) * 1000);
-                  else return a;
-                }, 0) / 1000;
-              this.volume.token_hive =
-                data.recent_trades.reduce((a, b) => {
-                  if (b.trade_timestamp > this.agoTime)
-                    return a + parseInt(parseFloat(b.base_volume) * 1000);
-                  else return a;
-                }, 0) / 1000;
-              this.recenthive = data.recent_trades.sort((a, b) => {
-                return (
-                  parseInt(b.trade_timestamp) - parseInt(a.trade_timestamp)
-                );
-              });
-            });
-          fetch(this.lapi + "/api/recent/HBD_" + this.TOKEN + "?limit=1000")
-            .then((response) => response.json())
-            .then((data) => {
-              this.volume.hbd =
-                data.recent_trades.reduce((a, b) => {
-                  if (b.trade_timestamp > this.agoTime)
-                    return a + parseInt(parseFloat(b.target_volume) * 1000);
-                  else return a;
-                }, 0) / 1000;
-              this.volume.token_hbd =
-                data.recent_trades.reduce((a, b) => {
-                  if (b.trade_timestamp > this.agoTime)
-                    return a + parseInt(parseFloat(b.base_volume) * 1000);
-                  else return a;
-                }, 0) / 1000;
-              this.recenthbd = data.recent_trades.sort((a, b) => {
-                return (
-                  parseInt(b.trade_timestamp) - parseInt(a.trade_timestamp)
-                );
-              });
-            });
+        //   fetch(this.lapi + "/api/recent/HIVE_" + this.TOKEN + "?limit=1000")
+        //     .then((response) => response.json())
+        //     .then((data) => {
+        //       this.volume.hive =
+        //         data.recent_trades.reduce((a, b) => {
+        //           if (b.trade_timestamp > this.agoTime)
+        //             return a + parseInt(parseFloat(b.target_volume) * 1000);
+        //           else return a;
+        //         }, 0) / 1000;
+        //       this.volume.token_hive =
+        //         data.recent_trades.reduce((a, b) => {
+        //           if (b.trade_timestamp > this.agoTime)
+        //             return a + parseInt(parseFloat(b.base_volume) * 1000);
+        //           else return a;
+        //         }, 0) / 1000;
+        //       this.recenthive = data.recent_trades.sort((a, b) => {
+        //         return (
+        //           parseInt(b.trade_timestamp) - parseInt(a.trade_timestamp)
+        //         );
+        //       });
+        //     });
+        //   fetch(this.lapi + "/api/recent/HBD_" + this.TOKEN + "?limit=1000")
+        //     .then((response) => response.json())
+        //     .then((data) => {
+        //       this.volume.hbd =
+        //         data.recent_trades.reduce((a, b) => {
+        //           if (b.trade_timestamp > this.agoTime)
+        //             return a + parseInt(parseFloat(b.target_volume) * 1000);
+        //           else return a;
+        //         }, 0) / 1000;
+        //       this.volume.token_hbd =
+        //         data.recent_trades.reduce((a, b) => {
+        //           if (b.trade_timestamp > this.agoTime)
+        //             return a + parseInt(parseFloat(b.base_volume) * 1000);
+        //           else return a;
+        //         }, 0) / 1000;
+        //       this.recenthbd = data.recent_trades.sort((a, b) => {
+        //         return (
+        //           parseInt(b.trade_timestamp) - parseInt(a.trade_timestamp)
+        //         );
+        //       });
+        //     });
         });
     },
     removeUser() {
