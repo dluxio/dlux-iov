@@ -1,9 +1,4 @@
 export default {
-  data() {
-    return {
-      count: 0,
-    };
-  },
   template: `
   <footer class="footer mt-auto bg-dark pt-5">
 
@@ -35,7 +30,7 @@ export default {
   <!-- Footer Elements -->
 
   <!-- Copyright -->
-  <div class="footer-copyright bg-darker text-center text-white py-3">© 2020 Copyright: 
+  <div class="footer-copyright bg-darker text-center text-white py-3">© 2022 Copyright: 
     <a href="https://www.dlux.io/about/" class="">dlux.io</a>
   </div>
   <!-- Copyright -->

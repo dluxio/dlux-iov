@@ -23,11 +23,21 @@ export default {
       userField: "",
       accountMenu: false,
       recentUsers: [],
+      filterUsers: "",
+      filterRecents: [],
       notifications: ["Here I am!"],
     };
   },
   emits: ["login", "logout"],
   methods: {
+    searchRecents() {
+      this.filterRecents = this.recentUsers.reduce((a, b) => {
+        if (b.toLowerCase().includes(this.filterUsers.toLowerCase())) {
+          a.push(b);
+        }
+        return a;
+      }, []);
+    },
     getUser() {
       this.user = localStorage.getItem("user");
       this.$emit("login", this.user);
@@ -156,11 +166,16 @@ export default {
         Dropdown button
       </button>
       <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <li v-for="name in recentUsers">
+        <li v-if="!filterUsers" v-for="name in recentUsers">
+            <a class="dropdown-item" href="#" role="button" @click="setUser(name);toggleAccountMenu()">@{{name}}</a> | 
+            <a class="dropdown-item" href="#/" role="button" @click="deleteRecentUser(name)">X</a>
+        </li>
+        <li v-if="filterUsers" v-for="name in filterUsers">
             <a class="dropdown-item" href="#" role="button" @click="setUser(name);toggleAccountMenu()">@{{name}}</a> | 
             <a class="dropdown-item" href="#/" role="button" @click="deleteRecentUser(name)">X</a>
         </li>
       </ul>
+      <input v-model="filterUsers" placeholder="search" @keyup="searchRecents()" class="bg-darkg border-dark text-info">
     </div>
   </div>
 </div>
