@@ -58,15 +58,20 @@
                                 </div>
                                 <!-- node settings -->
                                 <div id="userNode" class="ms-3" v-if="isnode">
-                                    
-                                        <a class="dropdown btn btn-sm btn-dark" data-bs-auto-close="outside" href="#" role="button" id="settingsDropdownBtn"
-                                            data-bs-toggle="dropdown" aria-expanded="false"> <i
-                                                class="fas fa-cog"></i></a>
-                                        <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black dropdown-menu-left"
-                                            aria-labelledby="settingsDropdownBtn" style="width: 300px">
-                                            <li><h6 class="dropdown-header text-center">{{TOKEN}} NODE SETTINGS</h6></li>
-                                            <li><h4 class="text-center text-white-50">@{{account}}</h4></li>
-                                            <li><form name="nodeSettings" class="needs-validation" novalidate>
+
+                                    <a class="dropdown btn btn-sm btn-dark" data-bs-auto-close="outside" href="#"
+                                        role="button" id="settingsDropdownBtn" data-bs-toggle="dropdown"
+                                        aria-expanded="false"> <i class="fas fa-cog"></i></a>
+                                    <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black dropdown-menu-left"
+                                        aria-labelledby="settingsDropdownBtn" style="width: 300px">
+                                        <li>
+                                            <h6 class="dropdown-header text-center">{{TOKEN}} NODE SETTINGS</h6>
+                                        </li>
+                                        <li>
+                                            <h4 class="text-center text-white-50">@{{account}}</h4>
+                                        </li>
+                                        <li>
+                                            <form name="nodeSettings" class="needs-validation" novalidate>
                                                 <div class="row mb-3" v-for="opt in features.node.opts">
                                                     <label :for="opt.json" class="form-label">{{opt.S}}:</label>
                                                     <div class="input-group">
@@ -95,13 +100,14 @@
                           </div>
                         </div> -->
                                                 <div class="text-center mt-3">
-                                                    <button id="saveSettingsBtn" type="button"
-                                                        class="btn btn-secondary" @click="saveNodeSettings()">Save<i
+                                                    <button id="saveSettingsBtn" type="button" class="btn btn-secondary"
+                                                        @click="saveNodeSettings()">Save<i
                                                             class="far fa-save ms-2"></i></button>
                                                 </div>
-                                            </form></li>
-                                        </ul>
-                                    
+                                            </form>
+                                        </li>
+                                    </ul>
+
                                 </div>
                                 <!-- runner status  -->
                                 <div :title="behindTitle" class="d-flex align-items-center mx-3">
@@ -119,77 +125,88 @@
                             </div>
                             <div class="d-flex align-items-center">
                                 <!-- claim tokens form -->
-                                <div v-if="hasDrop || accountapi.claim" id="userdlux" class="mx-4">
-                                     <a class="dropdown btn btn-sm btn-rb" data-bs-auto-close="outside"
-                                            href="#" role="button" id="claimDropdownBtn" data-bs-toggle="dropdown"
-                                            aria-expanded="false">Claim <i class="fas fa-gift"></i></a>
-                                        <ul class="dropdown-menu p-4 text-white-50 text-left bg-black dropdown-menu-left"
-                                            aria-labelledby="claimDropdownBtn" style="width: 300px">
-                                            <li><h6 class="dropdown-header text-center">CLAIM {{TOKEN}}</h6></li>
-                                            <li v-if="hasDrop"><form>
+                                <div v-if="hasDrop || accountapi.claim" id="userToken" class="mx-4">
+                                    <a class="dropdown btn btn-sm btn-rb" data-bs-auto-close="outside" href="#"
+                                        role="button" id="claimDropdownBtn" data-bs-toggle="dropdown"
+                                        aria-expanded="false">Claim <i class="fas fa-gift"></i></a>
+                                    <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black"
+                                        aria-labelledby="claimDropdownBtn" style="width: 300px">
+                                        <li>
+                                            <h6 class="dropdown-header text-center">CLAIM {{TOKEN}}</h6>
+                                        </li>
+                                        <li v-if="hasDrop">
+                                            <form>
                                                 <div class="row mb-3">
-                                                    <label class="form-label" for="nodeDrop">Airdrop:</label>
+                                                    <label class="form-label">Airdrop:</label>
                                                     <div class="input-group">
-                                                        <div id="nodeDrop" class="form-control bg-black border-rb text-white text-center">
+                                                        <div id="nodeDrop"
+                                                            class="form-control bg-black border-rb text-white text-center">
                                                             {{dropnai}}</div>
                                                     </div>
                                                 </div>
                                                 <div class="row mb-3">
                                                     <div class="text-center mt-3">
-                                                        <button id="claimDrop" type="button"
-                                                            class="btn background-rb" @click="dropClaim()">Claim<i
+                                                        <button id="claimDrop" type="button" class="btn background-rb"
+                                                            @click="dropClaim()">Claim<i
                                                                 class="fas fa-coins ms-2"></i></button>
                                                     </div>
                                                 </div>
-                                            </form></li>
-                                            <li v-if="accountapi.claim"><form>
+                                            </form>
+                                        </li>
+                                        <li v-if="accountapi.claim">
+                                            <form>
                                                 <div class="row mb-2">
-                                                    <label class="form-label" for="nodeRewards">Rewards:</label>
+                                                    <label class="form-label">Rewards:</label>
                                                     <div class="input-group">
-                                                        <div id="nodeRewards" class="form-control bg-black border-rb text-white text-center">
+                                                        <div id="nodeRewards"
+                                                            class="form-control bg-black border-rb text-white text-center">
                                                             {{toFixed(accountapi.claim/1000,3)}} {{TOKEN}}</div>
                                                     </div>
                                                 </div>
                                                 <div class="row mb-3">
-                                                <div class="form-check form-switch d-flex justify-content-center" v-if="isnode && features.rewardSel">
-                                                    <input type="checkbox" class="form-check-input me-2"
-                                                        v-model="features.reward2Gov" role="switch" id="claimToGov">
-                                                    <label class="form-check-label" for="claimToGov">Claim 1/2 to
-                                                        Gov</label>
+                                                    <div class="form-check form-switch d-flex justify-content-center"
+                                                        v-if="isnode && features.rewardSel">
+                                                        <input type="checkbox" class="form-check-input me-2"
+                                                            v-model="features.reward2Gov" role="switch">
+                                                        <label class="form-check-label">Claim 1/2 to
+                                                            Gov</label>
+                                                    </div>
                                                 </div>
-                                            </div>
                                                 <div class="row">
                                                     <div class="text-center">
-                                                        <button id="claimRewards" type="button"
+                                                        <button type="button"
                                                             class="btn background-rb" @click="rewardClaim()">Claim<i
                                                                 class="fas fa-coins ms-2"></i></button>
                                                     </div>
                                                 </div>
-                                            </form></li>
-                                        </ul>
+                                            </form>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                             <div class="d-flex align-items-center text-white-50">
                                 <!-- send token form -->
                                 <div id="userSendToken" class="mx-4" v-if="features.send_B">
-                                    <a class="dropdown text-warning" data-bs-auto-close="outside"
-                                            href="#" role="button" id="sendDropdownBtn" data-bs-toggle="dropdown"
-                                            aria-expanded="false" v-cloak> {{formatNumber(bartoken,3,'.',',')}}
-                                            {{TOKEN}}</a>
-                                        <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black"
-                                            style="width: 300px" aria-labelledby="sendDropdownBtn">
-                                            <li><h6 class="dropdown-header text-center">SEND {{TOKEN}}</h6></li>
-                                            <li><form id="sendForm"
+                                    <a class="dropdown text-warning" data-bs-auto-close="outside" href="#" role="button"
+                                        id="sendDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false" v-cloak>
+                                        {{formatNumber(bartoken,3,'.',',')}}
+                                        {{TOKEN}}</a>
+                                    <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black"
+                                        style="width: 300px" aria-labelledby="sendDropdownBtn">
+                                        <li>
+                                            <h6 class="dropdown-header text-center">SEND {{TOKEN}}</h6>
+                                        </li>
+                                        <li>
+                                            <form id="sendForm"
                                                 @submit.prevent="validateForm('sendForm', 'sendFormValid');tokenSend()"
                                                 class="needs-validation" novalidate>
                                                 <div class="row mb-3">
-                                                    <label class="form-label" for="sendTokenTo">To:</label>
+                                                    <label class="form-label">To:</label>
                                                     <div class="input-group">
-                                                        <div class="input-group-prepend">
-                                                            <div
+                                                       
+                                                            <span
                                                                 class="input-group-text bg-darkg border-dark text-white-50">
-                                                                @</div>
-                                                        </div>
+                                                                @</span>
                                                         <input class="form-control bg-darkg border-dark text-info"
                                                             v-model="sendTo"
                                                             @blur="checkAccount('sendTo', 'sendAllowed')" required
@@ -197,84 +214,94 @@
                                                     </div>
                                                 </div>
                                                 <div class="row mb-3">
-                                                    <label class="form-label" for="sendTokenAmount">Amount:</label>
+                                                    <label class="form-label">Amount:</label>
                                                     <div class="input-group">
                                                         <input class="form-control bg-darkg border-dark text-info"
-                                                            v-model="sendAmount" required id="sendTokenAmount"
+                                                            v-model="sendAmount" required
                                                             type="number" step="0.001" min="0.001"
                                                             :max="parseFloat(bartoken)" placeholder="0.000">
-                                                        <div class="input-group-append">
-                                                            <div class="input-group-text bg-darkg border-dark text-white-50"> {{TOKEN}} </div>
-                                                        </div>
+                                                        
+                                                            <span
+                                                                class="input-group-text bg-darkg border-dark text-white-50">
+                                                                {{TOKEN}} </span>
+                                                        
                                                     </div>
-                                                    <div class="small pt-2"><a href="#"
+                                                    <div class="small pt-2"><a href="#/"
                                                             @click="setValue('sendAmount', parseFloat(bartoken))"
                                                             class="text-warning">{{formatNumber(bartoken,3,'.',',')}}
                                                             {{TOKEN}}</a> Available</div>
                                                 </div>
-                                                <div class="row mb-3" id="sendlarynxmemogroup">
-                                                    <label for="sendlarynxmemo">Memo:</label>
+                                                <div class="row mb-3">
+                                                    <label class="form-label">Memo:</label>
                                                     <div class="input-group">
                                                         <input class="form-control bg-darkg border-dark text-info"
-                                                            v-model="sendMemo" id="sendlarynxmemo" type="text"
+                                                            v-model="sendMemo" type="text"
                                                             placeholder="Include a memo (optional)">
                                                     </div>
                                                 </div>
-                                                <div class="text-center mt-3">
-                                                    <button id="sendlarynxmodalsend" type="submit"
+                                                <div class="text-center">
+                                                    <button type="submit"
                                                         class="btn btn-warning">Send<i
                                                             class="fas fa-paper-plane ms-2"></i></button>
                                                 </div>
-                                            </form></li>
-                                        </ul>
-                                    
+                                            </form>
+                                        </li>
+                                    </ul>
+
                                 </div>
                                 <!-- power form -->
                                 <div id="userPwr" class="mx-4" v-if="features.powup_B || features.powdn_B">
-                                    <a class="dropdown text-primary" data-bs-auto-close="outside"
-                                            href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                                            aria-expanded="false" v-cloak>{{formatNumber(barpow,3,'.',',')}}
-                                            {{TOKEN}}P</a>
-                                        <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black"
-                                            style="width: 300px">
-                                            <li><h6 class="dropdown-header text-center">{{TOKEN}} POWER</h6></li>
-                                            <li><form id="powForm"
+                                    <a class="dropdown text-primary" data-bs-auto-close="outside" href="#" role="button"
+                                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                        v-cloak>{{formatNumber(barpow,3,'.',',')}}
+                                        {{TOKEN}}P</a>
+                                    <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black"
+                                        style="width: 300px">
+                                        <li>
+                                            <h6 class="dropdown-header text-center">{{TOKEN}} POWER</h6>
+                                        </li>
+                                        <li>
+                                            <form id="powForm"
                                                 @submit.prevent="validateForm('powForm', 'powFormValid');power()"
-                                                class=" needs-validation" novalidate>
+                                                class="needs-validation" novalidate>
                                                 <div class="row mb-3 text-center">
                                                     <div>
-                                                    <div class="btn-group">
-                                                        <input class="btn-check" type="radio" name="pwrPair" id="pwrUp"
-                                                                :checked="features.powsel_up"
+                                                        <div class="btn-group">
+                                                            <input class="btn-check" type="radio" name="pwrPair"
+                                                                id="pwrUp" :checked="features.powsel_up"
                                                                 @click="setValue('features.powsel_up', true)">
-                                                            <label class="btn btn-outline-primary"> PWR UP </label>
-                                                        
-                                                            <input class="btn-check" type="radio" name="pwrPair" id="pwrDown"
-                                                                :checked="!features.powsel_up"
+                                                            <label for="pwrUp" class="btn btn-outline-primary"> PWR UP
+                                                            </label>
+
+                                                            <input class="btn-check" type="radio" name="pwrPair"
+                                                                id="pwrDown" :checked="!features.powsel_up"
                                                                 @click="setValue('features.powsel_up', false)">
-                                                            <label class="btn btn-outline-primary">PWR DOWN </label>
+                                                            <label for="pwrDown" class="btn btn-outline-primary">PWR
+                                                                DOWN </label>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                </div>
                                                 <div class="row mb-3">
-                                                    <label class="form-label" for="">Amount</label>
+                                                    <label class="form-label">Amount:</label>
                                                     <div class="input-group">
                                                         <input class="form-control bg-darkg border-dark text-primary"
                                                             v-if="features.powsel_up" v-model="features.pow_val"
-                                                            required id="pwruplarynxamount" type="number" step="0.001"
+                                                            required type="number" step="0.001"
                                                             min="0.001" :max="parseFloat(bartoken)" placeholder="0.000">
                                                         <input class="form-control bg-darkg border-dark text-primary"
                                                             v-if="!features.powsel_up" v-model="features.pow_val"
-                                                            required id="pwrdownlarynxamount" type="number" step="0.001"
+                                                            required type="number" step="0.001"
                                                             min="0.001" :max="parseFloat(barpow)" placeholder="0.000">
-                                                        <div class="input-group-append">
-                                                            <div class="input-group-text bg-darkg border-dark text-white-50"
-                                                                v-if="features.powsel_up" id="govupformunits"> {{TOKEN}}
-                                                            </div>
-                                                            <div class="input-group-text bg-darkg border-dark text-white-50"
-                                                                v-if="!features.powsel_up" id="govdownformunits">
-                                                                {{TOKEN}}P </div>
-                                                        </div>
+
+                                                        <span
+                                                            class="input-group-text bg-darkg border-dark text-white-50"
+                                                            v-if="features.powsel_up"> {{TOKEN}}
+                                                        </span>
+                                                        <span
+                                                            class="input-group-text bg-darkg border-dark text-white-50"
+                                                            v-if="!features.powsel_up">
+                                                            {{TOKEN}}P </span>
+
                                                     </div>
                                                     <div class="small py-2" v-if="features.powsel_up"><a href="#/"
                                                             @click="setValue('features.pow_val',balance)"
@@ -286,62 +313,70 @@
                                                             {{TOKEN}}P</a> Available</div>
                                                 </div>
                                                 <div class="text-center">
-                                                    <button id="pwruplarynxmodalsend" type="submit"
+                                                    <button type="submit"
                                                         class="btn btn-primary" v-if="features.powsel_up">Power Up<i
                                                             class="fas fa-arrow-alt-circle-up ms-2"></i></button>
-                                                    <button id="pwrdownlarynxmodalsend" type="submit"
+                                                    <button type="submit"
                                                         class="btn btn-primary" v-if="!features.powsel_up">Power Down<i
                                                             class="fas fa-arrow-alt-circle-down ms-2"></i></button>
                                                 </div>
-                                            </form></li>
-                                        </ul>
+                                            </form>
+                                        </li>
+                                    </ul>
                                 </div>
                                 <!-- gov form -->
                                 <div id="userGov" class="mx-4" v-if="isnode && (features.govup_B || features.govdn_B)">
-                                    <a class="dropdown text-info" href="#" data-bs-auto-close="outside"
-                                            role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                                            aria-expanded="false" v-cloak>{{formatNumber(bargov,3,'.',',')}}
-                                            {{TOKEN}}G</a>
-                                        <ul class="dropdown-menu dropdown-menu-dark p-4 text-left bg-black"
-                                            style="width: 300px">
-                                            <li><h6 class="dropdown-header text-center">{{TOKEN}} GOVERNANCE</h6></li>
-                                            <li><h4 class="dropdown-header text-center">Current Threshold:
-                                                {{formatNumber(stats.gov_threshhold/1000,3,'.',',')}}</h4></li>
-                                            <li><form id="govForm"
+                                    <a class="dropdown text-info" href="#" data-bs-auto-close="outside" role="button"
+                                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                        v-cloak>{{formatNumber(bargov,3,'.',',')}}
+                                        {{TOKEN}}G</a>
+                                    <ul class="dropdown-menu dropdown-menu-dark text-white-50 p-4 text-left bg-black"
+                                        style="width: 300px">
+                                        <li>
+                                            <h6 class="dropdown-header text-center">{{TOKEN}} GOVERNANCE</h6>
+                                        </li>
+                                        <li>
+                                            <h4 class="dropdown-header text-center">Current Threshold:
+                                                {{formatNumber(stats.gov_threshhold/1000,3,'.',',')}}</h4>
+                                        </li>
+                                        <li>
+                                            <form id="govForm"
                                                 @submit.prevent="validateForm('govForm', 'govFormValid');gov()"
                                                 class="needs-validation" novalidate>
                                                 <div class="row mb-3 text-center">
                                                     <div>
-                                                    <div class="btn-group">
-                                                            <input class="btn-check" type="radio" name="govPair" id="govLock"
-                                                            :checked="features.govsel_up"
+                                                        <div class="btn-group">
+                                                            <input class="btn-check" type="radio" name="govPair"
+                                                                id="govLock" :checked="features.govsel_up"
                                                                 @click="setValue('features.govsel_up', true)">
-                                                                <label for="govLock" class="btn btn-outline-info"> LOCK </label>
-                                                        
-                                                            <input class="btn-check" type="radio" name="govPair" id="govUnlock"
-                                                            :checked="!features.govsel_up"
-                                                               @click="setValue('features.govsel_up', false)">
-                                                                <label for="govUnlock" class="btn btn-outline-info"> UNLOCK </label>
+                                                            <label for="govLock" class="btn btn-outline-info"> LOCK
+                                                            </label>
+
+                                                            <input class="btn-check" type="radio" name="govPair"
+                                                                id="govUnlock" :checked="!features.govsel_up"
+                                                                @click="setValue('features.govsel_up', false)">
+                                                            <label for="govUnlock" class="btn btn-outline-info"> UNLOCK
+                                                            </label>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                </div>
                                                 <div class="row mb-3">
-                                                    <label for="govUpAmount">Amount</label>
+                                                    <label class="form-label">Amount:</label>
                                                     <div class="input-group">
                                                         <input class="form-control bg-darkg border-dark text-info"
                                                             v-if="features.govsel_up" v-model="features.gov_val"
-                                                            required id="govUpAmount" type="number" step="0.001"
+                                                            required type="number" step="0.001"
                                                             min="0.001" :max="parseFloat(bartoken)" placeholder="0.000">
                                                         <input class="form-control bg-darkg border-dark text-info"
                                                             v-if="!features.govsel_up" v-model="features.gov_val"
-                                                            required id="govDownAmount" type="number" step="0.001"
+                                                            required type="number" step="0.001"
                                                             min="0.001" :max="parseFloat(bargov)" placeholder="0.000">
-                                                        <div class="input-group-append">
-                                                            <div class="input-group-text bg-darkg border-dark text-white-50"
-                                                                v-if="features.govsel_up"> {{TOKEN}} </div>
-                                                            <div class="input-group-text bg-darkg border-dark text-white-50"
-                                                                v-if="!features.govsel_up"> {{TOKEN}}G </div>
-                                                        </div>
+                                                        
+                                                            <span class="input-group-text bg-darkg border-dark text-white-50"
+                                                                v-if="features.govsel_up"> {{TOKEN}} </span>
+                                                            <span class="input-group-text bg-darkg border-dark text-white-50"
+                                                                v-if="!features.govsel_up"> {{TOKEN}}G </span>
+                                                        
                                                     </div>
                                                     <div class="small py-2" v-if="features.govsel_up"><a href="#/"
                                                             @click="setValue('features.gov_val',balance)"
@@ -353,25 +388,29 @@
                                                             {{TOKEN}}G</a> Locked</div>
                                                 </div>
                                                 <div class="text-center">
-                                                    <button id="locklarynxmodalsend" type="submit" class="btn btn-info"
+                                                    <button type="submit" class="btn btn-info"
                                                         v-if="features.govsel_up">Lock Gov<i
                                                             class="fas fa-lock ms-2"></i></button>
-                                                    <button id="unlocklarynxmodalsend" type="submit"
-                                                        class="btn btn-info" v-if="!features.govsel_up">Unlock Gov<i
+                                                    <button type="submit" class="btn btn-info"
+                                                        v-if="!features.govsel_up">Unlock Gov<i
                                                             class="fas fa-lock-open ms-2"></i></button>
                                                 </div>
-                                            </form></li>
-                                        </ul>
+                                            </form>
+                                        </li>
+                                    </ul>
                                 </div>
                                 <!-- send hive form -->
                                 <div id="userHive" class="mx-4">
-                                    <a class="dropdown text-danger" data-bs-auto-close="outside"
-                                            href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                                            aria-expanded="false" v-cloak> {{formatNumber(barhive,3,'.',',')}} HIVE</a>
-                                        <ul class="dropdown-menu dropdown-menu-dark p-4 text-left bg-black"
-                                            style="width: 300px">
-                                            <li><h6 class="dropdown-header text-center">SEND HIVE</h6></li>
-                                            <li><form id="hiveForm"
+                                    <a class="dropdown text-danger" data-bs-auto-close="outside" href="#" role="button"
+                                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
+                                        {{formatNumber(barhive,3,'.',',')}} HIVE</a>
+                                    <ul class="dropdown-menu dropdown-menu-dark text-white-50 p-4 text-left bg-black"
+                                        style="width: 300px">
+                                        <li>
+                                            <h6 class="dropdown-header text-center">SEND HIVE</h6>
+                                        </li>
+                                        <li>
+                                            <form id="hiveForm"
                                                 @submit.prevent="validateForm('hiveForm', 'hiveFormValid');sendhive()"
                                                 class=" needs-validation" novalidate>
                                                 <div class="row mb-3">
@@ -388,96 +427,100 @@
                                                             placeholder="Recipient">
                                                     </div>
                                                 </div>
-                                                <div class="form-group">
-                                                    <label id="sendhiveamountlab" for="sendhiveamount">Amount:</label>
+                                                <div class="row mb-3">
+                                                    <label class="form-label">Amount:</label>
                                                     <div class="input-group">
                                                         <input class="form-control bg-darkg border-dark text-info"
                                                             required v-model="sendHiveAmount" type="number" step="0.001"
                                                             min="0.001" :max="parseFloat(barhive)" placeholder="0.000">
-                                                        <div class="input-group-append">
-                                                            <div
+                                                        <span
                                                                 class="input-group-text bg-darkg border-dark text-white-50">
-                                                                HIVE </div>
-                                                        </div>
+                                                                HIVE </span>
+                                                       
                                                     </div>
                                                     <div class="small pt-2"><a href="#/"
                                                             @click="setValue('sendHiveAmount',parseFloat(barhive))"
                                                             class="text-danger">{{formatNumber(barhive,3,'.',',')}}
                                                             HIVE</a> Available</div>
                                                 </div>
-                                                <div class="form-group" id="sendhivememogroup">
-                                                    <label for="sendhivememo">Memo:</label>
+                                                <div class="row mb-3">
+                                                    <label class="form-label">Memo:</label>
                                                     <div class="input-group">
-                                                        <input class="form-control bg-darkg border-dark text-info"
-                                                            id="sendhivememo" type="text" v-model="sendHiveMemo"
+                                                    <input class="form-control bg-darkg border-dark text-info"
+                                                            type="text" v-model="sendHiveMemo"
                                                             placeholder="Include a memo (optional)">
                                                     </div>
                                                 </div>
-                                                <div class="text-center mt-3">
-                                                    <button id="sendhivemodalsend" type="submit"
+                                                <div class="text-center">
+                                                    <button type="submit"
                                                         class="btn btn-danger">Send<i
                                                             class="fas fa-paper-plane ms-2"></i></button>
                                                 </div>
-                                            </form></li>
-                                        </ul>
-                                   
+                                            </form>
+                                        </li>
+                                    </ul>
+
                                 </div>
                                 <!-- send hbd form -->
                                 <div id="userHbd" class="mx-4">
-                                    <a class="dropdown text-success" data-bs-auto-close="outside"
-                                            href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                                            aria-expanded="false" v-cloak> {{formatNumber(barhbd,3,'.',',')}} HBD</a>
-                                        <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black"
-                                            style="width: 300px">
-                                            <li><h6 class="dropdown-header text-center">SEND HBD</h6></li>
-                                            <li><form id="hbdForm"
+                                    <a class="dropdown text-success" data-bs-auto-close="outside" href="#" role="button"
+                                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
+                                        {{formatNumber(barhbd,3,'.',',')}} HBD</a>
+                                    <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black"
+                                        style="width: 300px">
+                                        <li>
+                                            <h6 class="dropdown-header text-center">SEND HBD</h6>
+                                        </li>
+                                        <li>
+                                            <form id="hbdForm"
                                                 @submit.prevent="validateForm('hbdForm', 'hbdFormValid');sendhbd()"
                                                 class="needs-validation" novalidate>
                                                 <div class="row mb-3">
-                                                    <label for="sendHbdto">To:</label>
+                                                    <label class="form-label">To:</label>
                                                     <div class="input-group">
-                                                        <div class="input-group-prepend">
-                                                            <div
+                                                        
+                                                            <span
                                                                 class="input-group-text bg-darkg border-dark text-white-50">
-                                                                @</div>
-                                                        </div>
+                                                                @</span>
+                                                       
                                                         <input class="form-control bg-darkg border-dark text-info"
                                                             @blur="checkAccount('sendHBDTo', 'sendHBDAllowed')" required
                                                             v-model="sendHBDTo" type="text" placeholder="Recipient">
                                                     </div>
                                                 </div>
                                                 <div class="row mb-3">
-                                                    <label id="sendhbdamountlab" for="sendhbdamount">Amount:</label>
+                                                    <label class="form-label">Amount:</label>
                                                     <div class="input-group">
                                                         <input class="form-control bg-darkg border-dark text-info"
                                                             required v-model="sendHBDAmount" type="number" step="0.001"
                                                             min="0.001" :max="parseFloat(barhbd)" placeholder="0.000">
-                                                        <div class="input-group-append">
-                                                            <div class="input-group-text bg-darkg border-dark text-white-50"
-                                                                > HBD </div>
-                                                        </div>
+                                                        
+                                                            <span
+                                                                class="input-group-text bg-darkg border-dark text-white-50">
+                                                                HBD </span>
                                                     </div>
                                                     <div class="small pt-2"><a href="#/"
                                                             @click="setValue('sendHBDAmount',parseFloat(barhbd))"
                                                             class="text-success">{{formatNumber(barhbd,3,'.',',')}}
                                                             HBD</a> Available</div>
                                                 </div>
-                                                <div class="form-group" id="sendhbdmemogroup">
-                                                    <label for="sendhbdmemo">Memo:</label>
+                                                <div class="row mb-3">
+                                                    <label class="form-label">Memo:</label>
                                                     <div class="input-group">
                                                         <input class="form-control bg-darkg border-dark text-info"
                                                             v-model="sendHBDMemo" type="text"
                                                             placeholder="Include a memo (optional)">
                                                     </div>
                                                 </div>
-                                                <div class="text-center mt-3">
-                                                    <button id="sendhbdmodalsend" type="submit"
+                                                <div class="text-center">
+                                                    <button type="submit"
                                                         class="btn btn-success">Send<i
                                                             class="fas fa-paper-plane ms-2"></i></button>
                                                 </div>
-                                            </form></li>
-                                        </ul>
-                                    
+                                            </form>
+                                        </li>
+                                    </ul>
+
                                 </div>
                             </div>
                         </div>
@@ -487,24 +530,24 @@
                                 <div class="container">
                                     <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
                                         <div>
-                                        <div class="input-group me-2">
-                                            <span class="input-group-text bg-darkg border-dark text-secondary"
-                                                        @click="focus('filteraccount')"><i
-                                                            class="fas fa-search"></i></span>
+                                            <div class="input-group me-2">
+                                                <span class="input-group-text bg-darkg border-dark text-secondary"
+                                                    @click="focus('filteraccount')"><i class="fas fa-search"></i></span>
                                                 <input type="text" v-on:keyup="searchRunners()"
                                                     class="form-control bg-darkg border-dark text-info"
                                                     id="filteraccount" v-model="filteraccount.value" @
                                                     aria-required="true" placeholder="Search">
-                                                
-                                                    <span class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix"
-                                                        style="width: 42px"> <span v-if="filteraccount.value"> <a
-                                                                href="#" class="badge badge-secondary"
-                                                                @click="setValue('filteraccount.value','')"><i
-                                                                    class="fas fa-times"></i></a> </span>
-                                                        </span>
+
+                                                <span
+                                                    class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix"
+                                                    style="width: 42px"> <span v-if="filteraccount.value"> <a href="#"
+                                                            class="badge badge-secondary"
+                                                            @click="setValue('filteraccount.value','')"><i
+                                                                class="fas fa-times"></i></a> </span>
+                                                </span>
                                             </div>
                                         </div>
-                                    
+
                                         <div class=""> <span class="text-muted">{{lapi}} - {{behind}} block(s) behind
                                                 HIVE</span> </div>
                                     </div>
