@@ -179,9 +179,8 @@ export default {
 	<li class="nav-item"><a class="nav-link acct-link" href="https://signup.hive.io/">Get Account</a></li>
 	<li class="nav-item">
   <div class="input-group input-group-sm">
-  <input v-model="userField" placeholder="username" @blur="setUser()" @keyup.enter="setUser()" class="text-center form-control form-control-sm bg-darkg border-dark text-info">
-  <a href="#" class="input-group-text bg-dark border-dark text-white-50" @click="setUser()">Login</a>
-  <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Toggle right offcanvas</button>
+
+  <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
   </div>
   </li>
 
@@ -210,7 +209,7 @@ export default {
              <li><hr class="dropdown-divider"></li>
 			 <li><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
              <li><hr class="dropdown-divider"></li>
-             <li><a class="dropdown-item" href="#" type="button" data-bs-toggle="offcanvas" @click="toggleAccountMenu()" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample"><i class="fas fa-user-friends me-2"></i>Switch User</a></li>
+             <li><a class="dropdown-item" href="#" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers"><i class="fas fa-user-friends me-2"></i>Switch User</a></li>
 			 <li><a class="dropdown-item" href="#" @click="logout()"><i class="fas fa-power-off fa-fw me-2"></i>Logout</a></li>
 		</ul>
         </li>
@@ -256,13 +255,42 @@ export default {
   </div>
 </div>
 </header>
-<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasUsers" aria-labelledby="offcanvasRightLabel">
+<div class="offcanvas offcanvas-end bg-dark" tabindex="-1" id="offcanvasUsers" aria-labelledby="offcanvasRightLabel">
     <div class="offcanvas-header">
-      <h5 id="offcanvasRightLabel">Offcanvas Users</h5>
-      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      <h5 id="offcanvasRightLabel">User Management</h5>
+      <button type="button" class="btn-close text-reset text-white-50" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
-      ...
+    
+      <div class="d-flex flex-column">
+      <div class="row mb-3">
+      <div class="lead text-white">
+      Login via Hive Keychain. Usernames are stored locally and can be cleared.
+      </div>
+      </div>
+        <div class="row mb-3">
+        <div class="input-group">
+        <input v-model="userField" placeholder="username" @blur="setUser()" @keyup.enter="setUser()" class="text-center form-control bg-darkg border-dark text-info">
+        <span class="input-group-text bg-darkg border-dark"><a href="#" @click="setUser()"><i class="fa-solid fa-circle-plus"></i></a></span>
+      </div>
+      </div>
+      <div class="row mb-3">
+            <div class="input-group">
+              <input v-model="filterUsers" placeholder="filter" @keyup="searchRecents()" class="text-center form-control bg-darkg border-dark text-info">
+              <span class="input-group-text bg-darkg border-dark"><a href="#"><i class="fa-solid fa-xmark"></i></a></span>
+            </div>
+          </div>
+        <hr>
+        </div>
+        <div class="d-flex justify-content-between align-items-center m-3" v-if="!filterUsers" v-for="name in recentUsers">
+          <div class="flex-fill text-center"><a class="link-info" href="#" @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
+          <div class="flex-shrink"><a href="#" @click="deleteRecentUser(name)" class="ms-auto"><i class="fa-solid fa-xmark"></i></a></div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center m-3" v-if="filterUsers" v-for="name in filterRecents">
+          <div class="flex-fill text-center"><a class="link-info" href="#" @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
+          <div class="flex-shrink"><a href="#" @click="deleteRecentUser(name)" class="ms-auto"><i class="fa-solid fa-xmark"></i></a></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>`,
