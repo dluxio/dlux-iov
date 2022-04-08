@@ -11,7 +11,7 @@ export default {
             </div>
             <div class="toast-body text-white">{{msg}}</div>
         </div>
-  `,
+        </div>`,
   data() {
     return {
       msg: "Is this thing on?",
