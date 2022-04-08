@@ -57,6 +57,7 @@
                                     </div>
                                 </div>
                                 <!-- node settings -->
+                                
                                 <div id="userNode" class="ms-3" v-if="isnode">
 
                                     <a class="dropdown btn btn-sm btn-dark" data-bs-auto-close="outside" href="#"
@@ -109,6 +110,7 @@
                                     </ul>
 
                                 </div>
+                                
                                 <!-- runner status  -->
                                 <div :title="behindTitle" class="d-flex align-items-center mx-3">
                                     <a class="text-center" style="font-size: .7em;"
@@ -186,6 +188,7 @@
                             </div>
                             <div class="d-flex align-items-center text-white-50">
                                 <!-- send token form -->
+                                
                                 <div id="userSendToken" class="mx-4" v-if="features.send_B">
                                     <a class="dropdown text-warning" data-bs-auto-close="outside" href="#" role="button"
                                         id="sendDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false" v-cloak>
@@ -247,9 +250,10 @@
                                             </form>
                                         </li>
                                     </ul>
-
                                 </div>
+                                
                                 <!-- power form -->
+                                
                                 <div id="userPwr" class="mx-4" v-if="features.powup_B || features.powdn_B">
                                     <a class="dropdown text-primary" data-bs-auto-close="outside" href="#" role="button"
                                         data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
@@ -324,7 +328,9 @@
                                         </li>
                                     </ul>
                                 </div>
+                                
                                 <!-- gov form -->
+                                
                                 <div id="userGov" class="mx-4" v-if="isnode && (features.govup_B || features.govdn_B)">
                                     <a class="dropdown text-info" href="#" data-bs-auto-close="outside" role="button"
                                         data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
@@ -399,7 +405,9 @@
                                         </li>
                                     </ul>
                                 </div>
+                                
                                 <!-- send hive form -->
+                                
                                 <div id="userHive" class="mx-4">
                                     <a class="dropdown text-danger" data-bs-auto-close="outside" href="#" role="button"
                                         data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
@@ -461,7 +469,9 @@
                                     </ul>
 
                                 </div>
+                                
                                 <!-- send hbd form -->
+                                
                                 <div id="userHbd" class="mx-4">
                                     <a class="dropdown text-success" data-bs-auto-close="outside" href="#" role="button"
                                         data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
@@ -522,6 +532,7 @@
                                     </ul>
 
                                 </div>
+                                
                             </div>
                         </div>
                         <!-- node collapse region -->
@@ -1628,5 +1639,4 @@
     })
 </script>
 <!-- <script type="text/javascript" src="/js/chart.js"></script> -->
-
 </html>
