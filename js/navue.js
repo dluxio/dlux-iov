@@ -211,8 +211,10 @@ export default {
     },
     handleOp:{
       get(){
+        console.log('...')
         this.ops.push(this.op)
         if (this.op.txid){
+          console.log(this.op);
            this.$emit("ack", this.op.txid);
           if(this.op.type == 'cja'){
             this.broadcastCJA(this.op.cj, this.op.id, this.op.msg, this.ops)
