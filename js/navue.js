@@ -231,14 +231,16 @@ export default {
 	<a class="navbar-brand" href="/"><img src="/img/dlux-hive-logo-alpha.svg" alt="dlux-logo" width="40" height="40"></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span></button>
     <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
-      <ul class="navbar-nav mr-auto">
+      <ul class="navbar-nav me-auto">
         <li class="nav-item"> <a class="nav-link" href="/apps/">APPS</a></li>
         <li class="nav-item"> <a class="nav-link" href="/nfts/">NFTS</a></li>
         <li class="nav-item"> <a class="nav-link" href="/dex#dlux">DEX</a></li>
         <li class="nav-item"> <a class="nav-link" href="/docs/">DOCS</a></li>
       </ul>
+     
+
   <div v-show="!user">
-	<ul class="navbar-nav d-flex align-items-center mr-5" id="loginMenu" >
+	<ul class="navbar-nav d-flex align-items-center me-5" id="loginMenu" >
 	<li class="nav-item"><a class="nav-link acct-link" href="/about/">About</a></li>
 	<li class="nav-item"><a class="nav-link acct-link" href="https://signup.hive.io/">Get Account</a></li>
 	<li class="nav-item">
@@ -249,20 +251,15 @@ export default {
 
 	</ul>
   </div>
-    <div>
-    <!-- Couldn't get this to work... might be styling since other things don't show -->
-    <!--<bs-toast v-for="item in notifications">
-        {{ item }}
-    </bs-toast>-->
-    </div>
-    <div class="mr-5" v-show="user" id="userMenu">
+
+    <div class="me-5" v-show="user" id="userMenu">
 	  <ul class="nav navbar-nav">
 		<li class="nav-item my-auto">
 			<a class="nav-link" href="/new/" data-bs-toggle="tooltip"  title="Create a new app">
 				<i class="fas fa-fw fa-lg fa-plus me-2"></i></a></li>
 		<li class="nav-item dropdown">
 		  <a class="nav-link dropdown-toggle text-white-50" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
-			  <img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light mr-1 cover">
+			  <img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light me-1 cover">
 			  <span id="userName">{{user}}</span></a>
           <ul class="dropdown-menu dropdown-menu-dark pt-0" aria-labelledby="userDropdown">
 			 <li><a class="dropdown-item" href="/me#blog/" onClick="showTab('blog')"><i class="fas fa-user fa-fw me-2"></i>Profile</a></li>
@@ -285,13 +282,13 @@ export default {
 <div class="offcanvas offcanvas-end bg-dark" tabindex="-1" id="offcanvasUsers" aria-labelledby="offcanvasRightLabel">
     <div class="offcanvas-header">
       <h5 id="offcanvasRightLabel">User Management</h5>
-      <button type="button" class="btn-close text-reset text-white-50" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      <button type="button" class="btn-close text-white-50" data-bs-dismiss="offcanvas" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="offcanvas-body">
     
       <div class="d-flex flex-column">
       <div class="row mb-3">
-      <div class="lead text-white">
+      <div class="lead text-white-50">
       Login via Hive Keychain. Usernames are stored locally and can be cleared.
       </div>
       </div>
