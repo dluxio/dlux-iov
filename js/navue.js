@@ -13,6 +13,7 @@
 //     `
 // });
 
+import ToastVue from "/js/toastvue.js";
 export default {
   data() {
     return {
@@ -28,6 +29,9 @@ export default {
       notifications: ["Here I am!"],
       ops: [],
     };
+  },
+  components: {
+    'toast-vue': ToastVue,
   },
   emits: ["login", "logout", "ack"],
   props: ["op"],
@@ -229,6 +233,7 @@ export default {
   backdrop-filter: blur(10px);">
   <div class="container-fluid">
 	<a class="navbar-brand" href="/"><img src="/img/dlux-hive-logo-alpha.svg" alt="dlux-logo" width="40" height="40"></a>
+  <toast-vue />
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span></button>
     <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto">
