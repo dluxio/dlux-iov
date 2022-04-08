@@ -284,10 +284,10 @@ export default {
     </div>
     </div>
 </header>
-<div class="offcanvas offcanvas-end bg-dark" tabindex="-1" id="offcanvasUsers" aria-labelledby="offcanvasRightLabel">
-    <div class="offcanvas-header">
-      <h5 id="offcanvasRightLabel">User Management</h5>
-      <button type="button" class="btn-close text-white-50" data-bs-dismiss="offcanvas" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+<div class="offcanvas offcanvas-end bg-dark text-white-50" tabindex="-1" id="offcanvasUsers" aria-labelledby="offcanvasRightLabel">
+    <div class="offcanvas-header d-flex align-items-center justify-content-between">
+      <h5 id="offcanvasRightLabel" class="m-0 p-0">User Management</h5>
+      <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
     
