@@ -309,9 +309,6 @@ var app = new Vue({
       },
     }
   },
-  provide(){
-    return {op:this.toSign}
-  },
   beforeDestroy() {
     window.removeEventListener("resize", this.onResize);
   },
@@ -342,6 +339,7 @@ var app = new Vue({
         }
       }
       this.toSign = {
+        type: 'cja',
         cj: updates,
         id: `${this.prefix}${this.features.node.id}`,
         msg: `Updating ${this.TOKEN} Node...`,
@@ -351,29 +349,32 @@ var app = new Vue({
     },
     dropClaim() {
       this.toSign = {
+        type: "cja",
         cj: {
           claim: true,
         },
         id: `${this.prefix}${this.features.claim_id}`,
         msg: `Claiming ${this.TOKEN}...`,
-        ops: ['login'],
-        txid: 'claim'
-      }
+        ops: ["login"],
+        txid: "claim",
+      };
     },
     rewardClaim() {
       this.toSign = {
+        type: "cja",
         cj: {
           gov: this.features.reward2Gov,
         },
         id: `${this.prefix}${this.features.rewards_id}`,
         msg: `Claiming ${this.TOKEN}...`,
-        ops: ['login'],
-        txid: 'reward_claim'
-      }
+        ops: ["login"],
+        txid: "reward_claim",
+      };
     },
     power() {
       if (this.features.pow_val && this.powFormValid)
         this.toSign = {
+          type: "cja",
           cj: {
             amount: parseInt(this.features.pow_val * 1000),
           },
@@ -392,6 +393,7 @@ var app = new Vue({
     gov() {
       if (this.features.gov_val && this.govFormValid)
         this.toSign = {
+          type: "cja",
           cj: {
             amount: parseInt(this.features.gov_val * 1000),
           },
@@ -400,10 +402,12 @@ var app = new Vue({
               ? this.features.govup_id
               : this.features.govdn_id
           }`,
-          msg: `${this.features.govsel_up ? "" : "Un-"}Locking ${this.TOKEN}...`,
+          msg: `${this.features.govsel_up ? "" : "Un-"}Locking ${
+            this.TOKEN
+          }...`,
           ops: ["login"],
-          txid: `gov${this.features.govsel_up ? "" : "Un-"}`
-        }
+          txid: `gov${this.features.govsel_up ? "" : "Un-"}`,
+        };
     },
     checkAccount(name, key) {
       fetch("https://anyx.io", {
@@ -425,36 +429,49 @@ var app = new Vue({
       if (!this.sendFormValid) return;
       if (this.sendAllowed) {
         this.toSign = {
+          type: "cja",
           cj: {
-              to: this.sendTo,
-              amount: parseInt(this.sendAmount * 1000),
-              memo: this.sendMemo,
-            },
+            to: this.sendTo,
+            amount: parseInt(this.sendAmount * 1000),
+            memo: this.sendMemo,
+          },
           id: `${this.prefix}send`,
           msg: `Trying to send ${this.TOKEN}...`,
           ops: ["login"],
           txid: "send",
-          }
+        };
       } else alert("Username not found");
     },
     sendhive() {
       if (!this.hiveFormValid) return;
       if (this.sendHiveAllowed)
-        broadcastTransfer({
-          to: this.sendHiveTo,
-          hive: this.sendHiveAmount * 1000,
-          memo: this.sendHiveMemo,
-        });
+        this.toSign = {
+          type: "xfr",
+          cj: {
+            to: this.sendHiveTo,
+            hive: this.sendHiveAmount * 1000,
+            memo: this.sendHiveMemo,
+          },
+          txid: "sendhive",
+          msg: ``,
+          ops: ["login"],
+        }
       else alert("Account Not Found");
     },
     sendhbd() {
       if (!this.hbdFormValid) return;
       if (this.sendHBDAllowed)
-        broadcastTransfer({
+        this.toSign = {
+          type: "xfr",
+          cj: {
           to: this.sendHBDTo,
           hbd: this.sendHBDAmount * 1000,
           memo: this.sendHBDMemo,
-        });
+        },
+          txid: "sendhbd",
+          msg: ``,
+          ops: ["login"],
+        }
       else alert("Account Not Found");
     },
     bcalc(k) {
@@ -881,6 +898,7 @@ var app = new Vue({
       }
       if (this.buyhive.checked && dlux)
         this.toSign = {
+          type: "xfr",
           cj: {
             [this.TOKEN.toLocaleLowerCase()]: dlux,
             hive,
@@ -890,11 +908,12 @@ var app = new Vue({
           msg: `Selling ${parseFloat(dlux / 1000).toFixed(3)} ${
             this.TOKEN
           }${andthen}`,
-          ops: ['login'],
+          ops: ["login"],
           txid: `${this.prefix}dex_sell`,
-        }
+        };
       else if (!this.buyhive.checked && dlux)
         this.toSign = {
+          type: "xfr",
           cj: {
             [this.TOKEN.toLocaleLowerCase()]: dlux,
             hbd,
@@ -904,21 +923,22 @@ var app = new Vue({
           msg: `Selling ${parseFloat(dlux / 1000).toFixed(3)} ${
             this.TOKEN
           }${andthen}`,
-          ops: ['login'],
+          ops: ["login"],
           txid: `${this.prefix}dex_sell`,
-        }
+        };
     },
     cancelDEX(txid) {
       if (txid)
         this.toSign = {
+          type: "cja",
           cj: {
             txid,
           },
           id: `${this.prefix}dex_clear`,
           msg: `Canceling: ${txid}`,
-          ops: ['login'],
+          ops: ["login"],
           txid: `${txid}dex_clear`,
-        }
+        };
     },
     getHistorical() {
       const pair = this.buyhive.checked ? "hive" : "hbd";

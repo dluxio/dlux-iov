@@ -25,7 +25,7 @@
     <div id="app">
         <div>
             <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
-                @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" />
+                @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" :op="toSign" />
         </div>
         <main role="main" class="flex-shrink-0 text-white">
             <div class="container-fluid px-0 ">
@@ -1568,27 +1568,27 @@
         crossorigin="anonymous"></script>
     <script src="/js/session.js"></script>
     <script>
-        function hiveKeychain() {
-            let username = document.getElementById('hk-username').value
-            console.log('value: ' + username)
-            localStorage.setItem("user", username);
-            let session = new Dluxsession(hive, { hiveidip: username })
-        }
-        window.addEventListener('load', function () {
-            let use = document.getElementById("hiveKeychain");
-            let get = document.getElementById("getKeychain");
-            let count = 0;
-            let kc_interval = setInterval(function () {
-                count++
-                if (window.hive_keychain) {
-                    get.style.display = "none";
-                } else {
-                    use.style.display = "none";
-                }
-                if (count >= 8) clearInterval(kc_interval)
-            }, 250);
+        // function hiveKeychain() {
+        //     let username = document.getElementById('hk-username').value
+        //     console.log('value: ' + username)
+        //     localStorage.setItem("user", username);
+        //     let session = new Dluxsession(hive, { hiveidip: username })
+        // }
+        // window.addEventListener('load', function () {
+        //     let use = document.getElementById("hiveKeychain");
+        //     let get = document.getElementById("getKeychain");
+        //     let count = 0;
+        //     let kc_interval = setInterval(function () {
+        //         count++
+        //         // if (window.hive_keychain) {
+        //         //     get.style.display = "none";
+        //         // } else {
+        //         //     use.style.display = "none";
+        //         // }
+        //         if (count >= 8) clearInterval(kc_interval)
+        //     }, 250);
             //checkCookie()
-        })
+        // })
 
     </script>
     <!-- END FOOTER MOD -->

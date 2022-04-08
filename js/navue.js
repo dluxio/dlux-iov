@@ -30,7 +30,21 @@ export default {
     };
   },
   emits: ["login", "logout", "ack"],
-  inject: ["op"],
+  props: ["op"],
+  watch: {
+    op(op, oldOp) {
+      console.log(op, "...", oldOp);
+      if (op.txid) {
+        this.ops.push(op);
+        this.$emit("ack", op.txid);
+        if (op.type == "cja") {
+          this.broadcastCJA(op.cj, op.id, op.msg, op.ops);
+        } else if (this.op.type == "xfr") {
+          this.broadcastTransfer(op.cj, op.msg, op.ops);
+        }
+      }
+    },
+  },
   methods: {
     useHAS() {
       this.HAS = true;
@@ -47,7 +61,7 @@ export default {
       this.HKC = true;
       this.HSR = false;
     },
-    broadcastCJA(cj, id, msg, oparray){
+    broadcastCJA(cj, id, msg, oparray) {
       var op = [
         this.user,
         [
@@ -62,16 +76,17 @@ export default {
           ],
         ],
         "active",
-      ]
+      ];
+      console.log("CJA");
       this.sign(op)
-        .then(r => {
+        .then((r) => {
           // toaster with msg, refresh functions
         })
-        .catch(e => {
-          console.log(e)
-        })
+        .catch((e) => {
+          console.log(e);
+        });
     },
-    broadcastTransfer(cj, msg, oparray){
+    broadcastTransfer(cj, msg, oparray) {
       var op = [
         this.user,
         [
@@ -88,7 +103,7 @@ export default {
           ],
         ],
         "active",
-      ]
+      ];
       this.sign(op)
         .then((r) => {
           // toaster with msg, refresh functions
@@ -99,15 +114,18 @@ export default {
     },
     sign(op) {
       return new Promise((resolve, reject) => {
-        if (this.HKS) {
+        if (this.HKC) {
+          console.log("HKC");
           this.HKCsign(op)
-            .then((r) => resolve(e))
+            .then((r) => resolve(r))
             .catch((e) => reject(e));
         } else if (this.HAS) {
+          console.log("HAS");
           this.HASsign(op)
             .then((r) => resolve(r))
             .catch((e) => reject(e));
         } else {
+          console.log("HSR");
           this.HSRsign(op)
             .then((r) => resolve(r))
             .catch((e) => reject(e));
@@ -130,7 +148,7 @@ export default {
             reject(e);
           }
         } else {
-          reject({ error: "Hive Keychain is not installed." });//fallthrough?
+          reject({ error: "Hive Keychain is not installed." }); //fallthrough?
         }
       });
     },
@@ -198,36 +216,12 @@ export default {
           : "";
       },
     },
-    loggedIn: {
-      get() {
-        return this.user ? true : false;
-      },
-    },
     HKCa: {
       //Hive Keychain Available
       get() {
         return !!window.hive_keychain;
       },
     },
-    handleOp:{
-      get(){
-        console.log('...')
-        this.ops.push(this.op)
-        if (this.op.txid){
-          console.log(this.op);
-           this.$emit("ack", this.op.txid);
-          if(this.op.type == 'cja'){
-            this.broadcastCJA(this.op.cj, this.op.id, this.op.msg, this.ops)
-          } else if (this.op.type == "xfr") {
-            this.broadcastTransfer(this.op.cj, this.op.msg, this.ops)
-          }
-        //toast?
-          return this.op[0].txid
-        } else {
-          return ''
-        }
-      }
-    }
   },
   template: `
 <div>
@@ -243,24 +237,25 @@ export default {
         <li class="nav-item"> <a class="nav-link" href="/dex#dlux">DEX</a></li>
         <li class="nav-item"> <a class="nav-link" href="/docs/">DOCS</a></li>
       </ul>
-	<ul class="navbar-nav d-flex align-items-center mr-5" id="loginMenu" v-show="!loggedIn">
+  <div v-show="!user">
+	<ul class="navbar-nav d-flex align-items-center mr-5" id="loginMenu" >
 	<li class="nav-item"><a class="nav-link acct-link" href="/about/">About</a></li>
 	<li class="nav-item"><a class="nav-link acct-link" href="https://signup.hive.io/">Get Account</a></li>
 	<li class="nav-item">
   <div class="input-group input-group-sm">
-  {{handleOp}}
   <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
   </div>
   </li>
 
 	</ul>
+  </div>
     <div>
     <!-- Couldn't get this to work... might be styling since other things don't show -->
     <!--<bs-toast v-for="item in notifications">
         {{ item }}
     </bs-toast>-->
     </div>
-    <div class="mr-5" v-show="loggedIn" id="userMenu">
+    <div class="mr-5" v-show="user" id="userMenu">
 	  <ul class="nav navbar-nav">
 		<li class="nav-item my-auto">
 			<a class="nav-link" href="/new/" data-bs-toggle="tooltip"  title="Create a new app">
@@ -286,43 +281,6 @@ export default {
 	</div>
     </div>
     </div>
-    
-    <div v-show="accountMenu" class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasExampleLabel">Your Accounts</h5>
-    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close" @click="toggleAccountMenu()"></button>
-  </div>
-  <div class="offcanvas-body">
-    <div>
-      Stored locally, these are the accounts you've logged in with.
-    </div>
-    <div class="dropdown mt-3">
-      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown">
-        Dropdown button
-      </button>
-      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <li v-if="!filterUsers" v-for="name in recentUsers">
-            <a class="dropdown-item" href="#" role="button" @click="setUser(name);toggleAccountMenu()">@{{name}}</a> | 
-            <a class="dropdown-item" href="#/" role="button" @click="deleteRecentUser(name)">X</a>
-        </li>
-        <li v-if="filterUsers" v-for="name in filterRecents">
-            <a class="dropdown-item" href="#" role="button" @click="setUser(name);toggleAccountMenu()">@{{name}}</a> | 
-            <a class="dropdown-item" href="#/" role="button" @click="deleteRecentUser(name)">X</a>
-        </li>
-      </ul>
-      <!-- Search Method for Recent Usernames: terribly implemented above -->
-      <input v-model="filterUsers" placeholder="search" @keyup="searchRecents()" class="bg-darkg border-dark text-info">
-      <!-- Select Signing Client -->
-      <ul class="dropdown-menu" aria-labelledby="dropdownMenu">
-        <li>
-            <a class="dropdown-item" href="#/" role="button" @click="useKC()" v-show="HKCa">{{HKC ? 'X ' : '  '}}Hive KeyChain</a>
-            <a class="dropdown-item" href="#/" role="button" @click="useHAS()">{{HAS ? 'X ' : '  '}}Hive Auth Service</a>
-            <a class="dropdown-item" href="#/" role="button" @click="useHS()">{{HSR ? 'X ' : '  '}}Hive Signer</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</div>
 </header>
 <div class="offcanvas offcanvas-end bg-dark" tabindex="-1" id="offcanvasUsers" aria-labelledby="offcanvasRightLabel">
     <div class="offcanvas-header">
@@ -360,6 +318,13 @@ export default {
           <div class="flex-shrink"><a href="#" @click="deleteRecentUser(name)" class="ms-auto"><i class="fa-solid fa-xmark"></i></a></div>
         </div>
       </div>
+      <ul class="dropdown-menu" aria-labelledby="dropdownMenu">
+        <li>
+            <a class="dropdown-item" href="#/" role="button" @click="useKC()" v-show="HKCa">{{HKC ? 'X ' : '  '}}Hive KeyChain</a>
+            <a class="dropdown-item" href="#/" role="button" @click="useHAS()">{{HAS ? 'X ' : '  '}}Hive Auth Service</a>
+            <a class="dropdown-item" href="#/" role="button" @click="useHS()">{{HSR ? 'X ' : '  '}}Hive Signer</a>
+        </li>
+      </ul>
     </div>
   </div>
 </div>`,
