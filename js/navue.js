@@ -26,7 +26,7 @@ export default {
       filterUsers: "",
       filterRecents: [],
       notifications: ["Here I am!"],
-      op: [],
+      ops: [],
     };
   },
   emits: ["login", "logout", "ack"],
@@ -47,7 +47,57 @@ export default {
       this.HKC = true;
       this.HSR = false;
     },
-    sign(op, status) {
+    broadcastCJA(cj, id, msg, oparray){
+      var op = [
+        this.user,
+        [
+          [
+            "custom_json",
+            {
+              required_auths: [this.user],
+              required_posting_auths: [],
+              id: id,
+              json: JSON.stringify(cj),
+            },
+          ],
+        ],
+        "active",
+      ]
+      this.sign(op)
+        .then(r => {
+          // toaster with msg, refresh functions
+        })
+        .catch(e => {
+          console.log(e)
+        })
+    },
+    broadcastTransfer(cj, msg, oparray){
+      var op = [
+        this.user,
+        [
+          [
+            "transfer",
+            {
+              to: cj.to,
+              from: this.user,
+              amount: `${parseFloat(
+                (cj.hive ? cj.hive : cj.hbd) / 1000
+              ).toFixed(3)} ${cj.hive ? "HIVE" : "HBD"}`,
+              memo: cj.memo,
+            },
+          ],
+        ],
+        "active",
+      ]
+      this.sign(op)
+        .then((r) => {
+          // toaster with msg, refresh functions
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+    sign(op) {
       return new Promise((resolve, reject) => {
         if (this.HKS) {
           this.HKCsign(op)
@@ -80,7 +130,7 @@ export default {
             reject(e);
           }
         } else {
-          reject({ error: "Hive Keychain is not installed." });
+          reject({ error: "Hive Keychain is not installed." });//fallthrough?
         }
       });
     },
@@ -159,6 +209,23 @@ export default {
         return !!window.hive_keychain;
       },
     },
+    handleOp:{
+      get(){
+        this.ops.push(this.op)
+        if (this.op.txid){
+           this.$emit("ack", this.op.txid);
+          if(this.op.type == 'cja'){
+            this.broadcastCJA(this.op.cj, this.op.id, this.op.msg, this.ops)
+          } else if (this.op.type == "xfr") {
+            this.broadcastTransfer(this.op.cj, this.op.msg, this.ops)
+          }
+        //toast?
+          return this.op[0].txid
+        } else {
+          return ''
+        }
+      }
+    }
   },
   template: `
 <div>
@@ -179,7 +246,7 @@ export default {
 	<li class="nav-item"><a class="nav-link acct-link" href="https://signup.hive.io/">Get Account</a></li>
 	<li class="nav-item">
   <div class="input-group input-group-sm">
-
+  {{handleOp}}
   <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
   </div>
   </li>
