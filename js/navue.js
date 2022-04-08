@@ -173,15 +173,17 @@ export default {
         <li class="nav-item"> <a class="nav-link" href="/dex#dlux">DEX</a></li>
         <li class="nav-item"> <a class="nav-link" href="/docs/">DOCS</a></li>
       </ul>
-	<ul class="navbar-nav mr-5" id="loginMenu" v-show="!loggedIn">
+	<ul class="navbar-nav d-flex align-items-center mr-5" id="loginMenu" v-show="!loggedIn">
 	<li class="nav-item"><a class="nav-link acct-link" href="/about/">About</a></li>
 	<li class="nav-item"><a class="nav-link acct-link" href="https://signup.hive.io/">Get Account</a></li>
-	<li class="nav-item"><input id="userLogin" v-model="userField" placeholder="username" @blur="setUser()" @keyup.enter="setUser()" class="bg-darkg border-dark text-info"></li>
-    <li class="nav-item"><button class="btn btn-submit" @click="setUser()">Login</button></li>
-    <!-- Off canvas button... simple toggle method -->
-    <li class="nav-item"><button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" @click="toggleAccountMenu()" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
-  <i class="fal fa-address-book"></i>
-</button></li>
+	<li class="nav-item">
+  <div class="input-group input-group-sm">
+  <input v-model="userField" placeholder="username" @blur="setUser()" @keyup.enter="setUser()" class="text-center form-control form-control-sm bg-darkg border-dark text-info">
+  <a href="#" class="input-group-text bg-dark border-dark text-white-50" @click="setUser()">Login</a>
+  <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Toggle right offcanvas</button>
+  </div>
+  </li>
+
 	</ul>
     <div>
     <!-- Couldn't get this to work... might be styling since other things don't show -->
@@ -207,7 +209,7 @@ export default {
              <li><hr class="dropdown-divider"></li>
 			 <li><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
              <li><hr class="dropdown-divider"></li>
-             <li><a class="dropdown-item" href="#" @click="logout()"><i class="fas fa-user-friends me-2"></i>Switch User</a></li>
+             <li><a class="dropdown-item" href="#" type="button" data-bs-toggle="offcanvas" @click="toggleAccountMenu()" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample"><i class="fas fa-user-friends me-2"></i>Switch User</a></li>
 			 <li><a class="dropdown-item" href="#" @click="logout()"><i class="fas fa-power-off fa-fw me-2"></i>Logout</a></li>
 		</ul>
         </li>
@@ -215,6 +217,7 @@ export default {
 	</div>
     </div>
     </div>
+    
     <div v-show="accountMenu" class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title" id="offcanvasExampleLabel">Your Accounts</h5>
