@@ -2,7 +2,6 @@ import Vue from "https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.esm.browser.js
 import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
 
-const { TradingVue } = TradingVueJs;
 let url = location.href.replace(/\/$/, "");
 let lapi = "";
 if (location.search) {
@@ -306,22 +305,11 @@ var app = new Vue({
   provide() {
     return { op: this.toSign };
   },
-  beforeDestroy() {
-    window.removeEventListener("resize", this.onResize);
-  },
   components: {
-    TradingVue,
     "nav-vue": Navue,
     "foot-vue": FootVue,
   },
   methods: {
-    onResize(event) {
-      this.chart.width = this.$refs.chartContainer.scrollWidth - 15;
-      this.chart.height = this.chart.width / 2.5;
-      this.$refs.dumbo.style = `width: ${this.chart.width}px; height: ${
-        this.chart.height + 30
-      }px;`;
-    },
     saveNodeSettings() {
       let updates = {};
       for (var i = 0; i < this.features.node.opts.length; i++) {
@@ -1390,12 +1378,6 @@ var app = new Vue({
     },
   },
   mounted() {
-    this.chart.width = this.$refs.chartContainer.scrollWidth - 15;
-    this.chart.height = this.chart.width / 2.5;
-    this.$refs.dumbo.style = `width: ${this.chart.width}px; height: ${
-      this.chart.height + 30
-    }px;`;
-    window.addEventListener("resize", this.onResize);
     this.getQuotes();
     this.getNodes();
     this.getProtocol();
@@ -1404,76 +1386,5 @@ var app = new Vue({
     if (user != "GUEST") this.getHiveUser(user);
   },
   computed: {
-    chartTitle: {
-      get() {
-        return `${this.TOKEN}:${this.buyhive.checked ? "HIVE" : "HBD"}`;
-      },
-    },
-    minbuy: {
-      get() {
-        return parseFloat(
-          parseFloat(parseFloat(this.buyPrice / 1000).toFixed(3)) + 0.001
-        ).toFixed(3);
-      },
-    },
-    minsell: {
-      get() {
-        var a;
-        if (this.buyhive.checked) a = (0.001 / this.sellPrice).toFixed(3);
-        else a = (0.001 / this.sellPrice).toFixed(3);
-        return a;
-      },
-    },
-    maxhbuy: {
-      get() {
-        return this.buymarket.checked
-          ? "100000.000"
-          : parseFloat(
-              (this.dexapi.markets.hive.tick *
-                (this.stats.dex_max / 100) *
-                (1 -
-                  (this.buyPrice / this.dexapi.markets.hive.tick) *
-                    (this.stats.dex_slope / 100)) *
-                this.stats.safetyLimit) /
-                1000
-            ).toFixed(3);
-      },
-    },
-    maxdbuy: {
-      get() {
-        return this.buymarket.checked
-          ? "100000.000"
-          : parseFloat(
-              (this.dexapi.markets.hbd.tick *
-                (this.stats.dex_max / 100) *
-                (1 -
-                  (this.buyPrice / this.dexapi.markets.hbd.tick) *
-                    (this.stats.dex_slope / 100)) *
-                this.stats.safetyLimit) /
-                1000
-            ).toFixed(3);
-      },
-    },
-    marketCap: {
-      get() {
-        if (this.buyhive.checked)
-          return `${parseFloat(
-            (this.stats.tokenSupply / 1000) *
-              this.hiveprice.hive.usd *
-              this.dexapi.markets.hive.tick
-          ).toFixed(2)}`;
-        else
-          return `${parseFloat(
-            (this.stats.tokenSupply / 1000) *
-              this.hbdprice.hive_dollar.usd *
-              this.dexapi.markets.hbd.tick
-          ).toFixed(2)}`;
-      },
-    },
-    isnode: {
-      get() {
-        return this.nodes[this.account] ? true : false;
-      },
-    },
   },
 });

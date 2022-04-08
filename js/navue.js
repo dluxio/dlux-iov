@@ -30,7 +30,7 @@ export default {
     };
   },
   emits: ["login", "logout", "ack"],
-  inject: ['op'],
+  inject: ["op"],
   methods: {
     useHAS() {
       this.HAS = true;
@@ -47,24 +47,24 @@ export default {
       this.HKC = true;
       this.HSR = false;
     },
-    sign(op, status){
+    sign(op, status) {
       return new Promise((resolve, reject) => {
-        if(this.HKS){
+        if (this.HKS) {
           this.HKCsign(op)
-            .then(r=>resolve(e))
-            .catch(e=>reject(e));
-        } else if (this.HAS){
+            .then((r) => resolve(e))
+            .catch((e) => reject(e));
+        } else if (this.HAS) {
           this.HASsign(op)
             .then((r) => resolve(r))
             .catch((e) => reject(e));
         } else {
           this.HSRsign(op)
-            .then(r=>resolve(r))
-            .catch(e=>reject(e));
+            .then((r) => resolve(r))
+            .catch((e) => reject(e));
         }
-      })
+      });
     },
-    HKCsign(op){
+    HKCsign(op) {
       return new Promise((resolve, reject) => {
         if (window.hive_keychain) {
           try {
@@ -72,7 +72,7 @@ export default {
               op[0],
               op[1],
               op[2],
-              function (response) {;
+              function (response) {
                 resolve(response);
               }
             );
@@ -161,6 +161,7 @@ export default {
     },
   },
   template: `
+<div>
 <header class="navbar navbar-expand-lg navbar-dark fixed-top" style="background-color:rgba(42, 48, 54, 0.8); -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);">
   <div class="container-fluid">
@@ -254,5 +255,15 @@ export default {
     </div>
   </div>
 </div>
-</header>`,
+</header>
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasUsers" aria-labelledby="offcanvasRightLabel">
+    <div class="offcanvas-header">
+      <h5 id="offcanvasRightLabel">Offcanvas Users</h5>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      ...
+    </div>
+  </div>
+</div>`,
 };
