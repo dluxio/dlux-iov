@@ -26,6 +26,7 @@ export default {
         op.time = new Date().getTime();
         op.status = "Pending your approval";
         op.title = op.id ? op.id : op.cj.memo;
+        op.api = this.lapi
         this.ops.push(op);
         this.$emit("ack", op.txid);
         if (op.type == "cja") {
@@ -156,12 +157,12 @@ export default {
         obj.txid = response.result.id;
         this.ops.push(obj);
         this.cleanOps(); //also stores it in localStorage
-        this.statusPinger(response.result.id, 0);
+        this.statusPinger(response.result.id, obj.api, 0);
       }
     },
-    statusPinger(txid, r) {
+    statusPinger(txid, api, r) {
       if (r > 30) return;
-      fetch(this.lapi + "/api/status/" + txid)
+      fetch(api + "/api/status/" + txid)
         .then((r) => r.json())
         .then((json) => {
           console.log(json, json.status.slice(0, 20));
@@ -199,7 +200,7 @@ export default {
           } else {
             setTimeout(
               function () {
-                this.statusPinger(txid, r + 1);
+                this.statusPinger(txid, api, r + 1);
               }.bind(this),
               3000
             );
@@ -207,7 +208,7 @@ export default {
         })
         .catch((e) => {
           console.log(e);
-          this.statusPinger(txid, r + 1);
+          this.statusPinger(txid, api, r + 1);
         });
     },
     searchRecents() {
@@ -287,7 +288,7 @@ export default {
     this.ops = ops ? JSON.parse(ops) : [];
     this.cleanOps();
     for (var i = 0; i < this.ops.length; i++) {
-      this.statusPinger(this.ops[i].txid, 0);
+      this.statusPinger(this.ops[i].txid, this.ops[i].api, 0);
     }
   },
   computed: {
