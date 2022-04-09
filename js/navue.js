@@ -364,7 +364,7 @@ export default {
 <div class="position-fixed bottom-0 end-0 p-3 toast-container" style="z-index: 11">
   <div v-for="op in ops">  
     <toast-vue :alert="op"/>
-  </div
+  </div>
 </div>
 
 <div class="offcanvas offcanvas-end bg-dark text-white-50" tabindex="-1" id="offcanvasUsers" aria-labelledby="offcanvasRightLabel">
