@@ -10,7 +10,7 @@ export default {
   <div ref="toast" class="toast bg-dark border-info" :data-bs-delay="alert.delay" role="alert" aria-live="assertive" aria-atomic="true" >
             <div class="toast-header bg-info">
               <strong class="me-auto text-dark">{{alert.title}}</strong>
-              <small class="text-white-50">{{elaspedTime(alert.time)}}</small>
+              <small class="text-dark">{{elaspedTime(alert.time)}}</small>
               <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
             <div class="toast-body text-white">{{alert.status}}</div>
