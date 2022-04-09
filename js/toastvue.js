@@ -1,13 +1,13 @@
 const { Toast } = bootstrap;
 
 export default {
-    data() {
-        return {
-            toast: ''
-        }
-    },
+  data() {
+    return {
+      toast: "",
+    };
+  },
   template: `
-  <div ref="toast" class="toast bg-dark border-info" role="alert" aria-live="assertive" aria-atomic="true" >
+  <div ref="toast" class="toast bg-dark border-info" data-bs-delay="10000" role="alert" aria-live="assertive" aria-atomic="true" >
             <div class="toast-header bg-info">
               <strong class="me-auto text-dark">{{alert.title}}</strong>
               <small class="text-white-50">{{elaspedTime(alert.time)}}</small>
@@ -23,9 +23,9 @@ export default {
   props: ["alert"],
   watch: {
     alert(newVal, oldVal) {
-        console.log('Watcher')
-        this.toast.show();
-    }
+      console.log("Watcher");
+      this.toast.show();
+    },
   },
   mounted() {
     this.toast = new Toast(this.$refs.toast);

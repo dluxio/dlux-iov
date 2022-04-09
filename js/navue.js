@@ -11,7 +11,6 @@ export default {
       recentUsers: [],
       filterUsers: "",
       filterRecents: [],
-      notifications: ["Here I am!"],
       ops: [],
     };
   },
@@ -182,12 +181,11 @@ export default {
                   var op = this.ops[i];
                   op.status = "Confirmed.";
                   op.msg = json.status;
-                  this.cleanOps();
+                  //this.cleanOps();
                   for (var j = 0; j < op.ops.length; j++) {
                     console.log(op.ops[j]);
                     this.$emit("refresh", op.ops[j]);
                   }
-                  //this.ops.push(op)
                   break;
                 }
               }
@@ -232,6 +230,7 @@ export default {
     },
     setUser(id) {
       this.user = id ? id : this.userField;
+      this.userField = "";
       localStorage.setItem("user", this.user);
       this.$emit("login", this.user);
       this.addRecentUser(this.user);
@@ -362,9 +361,12 @@ export default {
     </div>
     </div>
 </header>
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-<toast-vue v-for="op in ops" :alert="op"/>
+<div class="position-fixed bottom-0 end-0 p-3 toast-container" style="z-index: 11">
+  <div v-for="op in ops">  
+    <toast-vue :alert="op"/>
+  </div
 </div>
+
 <div class="offcanvas offcanvas-end bg-dark text-white-50" tabindex="-1" id="offcanvasUsers" aria-labelledby="offcanvasRightLabel">
     <div class="offcanvas-header d-flex align-items-center justify-content-between">
       <h5 id="offcanvasRightLabel" class="m-0 p-0">User Management</h5>
