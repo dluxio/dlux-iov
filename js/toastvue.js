@@ -7,7 +7,7 @@ export default {
     };
   },
   template: `
-  <div ref="toast" class="toast bg-dark border-info" data-bs-delay="10000" role="alert" aria-live="assertive" aria-atomic="true" >
+  <div ref="toast" class="toast bg-dark border-info" :data-bs-delay="alert.delay" role="alert" aria-live="assertive" aria-atomic="true" >
             <div class="toast-header bg-info">
               <strong class="me-auto text-dark">{{alert.title}}</strong>
               <small class="text-white-50">{{elaspedTime(alert.time)}}</small>

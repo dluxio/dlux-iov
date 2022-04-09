@@ -25,6 +25,7 @@ export default {
       if (op.txid) {
         op.time = new Date().getTime();
         op.status = "Pending your approval";
+        op.delay = 5000;
         op.title = op.id ? op.id : op.cj.memo;
         op.api = this.lapi
         this.ops.push(op);
@@ -153,6 +154,7 @@ export default {
       }
       if (response.success == true) {
         obj.status = "Hive TX Success:\nAwaiting Layer 2 confirmation...";
+        obj.delay = 100000;
         obj.link = "https://hiveblocks.com/tx/" + response.result.id;
         obj.txid = response.result.id;
         this.ops.push(obj);
