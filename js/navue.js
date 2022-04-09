@@ -25,10 +25,10 @@ export default {
       console.log(op, "...", oldOp);
       if (op.txid) {
         op.time = new Date().getTime();
-        op.status = 'Pending your approval';
+        op.status = "Pending your approval";
         op.title = op.id ? op.id : op.cj.memo;
         this.ops.push(op);
-        this.$emit("ack", op.txid); 
+        this.$emit("ack", op.txid);
         if (op.type == "cja") {
           this.broadcastCJA(op);
         } else if (this.op.type == "xfr") {
@@ -91,7 +91,7 @@ export default {
               amount: `${parseFloat(
                 (obj.cj.hive ? obj.cj.hive : obj.cj.hbd) / 1000
               ).toFixed(3)} ${obj.cj.hive ? "HIVE" : "HBD"}`,
-              memo: `${obj.cj.memo ? obj.cj.memo : ""}`
+              memo: `${obj.cj.memo ? obj.cj.memo : ""}`,
             },
           ],
         ],
@@ -147,24 +147,24 @@ export default {
     },
     statusFinder(response, obj) {
       console.log(response, obj);
-      if (response.success == false){
-        this.cleanOps()
-        return
+      if (response.success == false) {
+        this.cleanOps();
+        return;
       }
       if (response.success == true) {
         obj.status = "Hive TX Success:\nAwaiting Layer 2 confirmation...";
         obj.link = "https://hiveblocks.com/tx/" + response.result.id;
         obj.txid = response.result.id;
-        this.ops.push(obj)
+        this.ops.push(obj);
         this.cleanOps(); //also stores it in localStorage
         this.statusPinger(response.result.id, 0);
       }
     },
-    statusPinger(txid, r){
-      if(r > 30)return
+    statusPinger(txid, r) {
+      if (r > 30) return;
       fetch(this.lapi + "/api/status/" + txid)
-        .then(r => r.json())
-        .then(json => {
+        .then((r) => r.json())
+        .then((json) => {
           console.log(json, json.status.slice(0, 20));
           if (json.status.slice(0, 20) != "This TransactionID e") {
             if (json.status.indexOf(" minted ") > -1) {
@@ -176,11 +176,11 @@ export default {
                 30000
               );
             } else {
-              for(var i = 0; i < this.ops.length; i++){
-                if(this.ops[i].txid == txid){
-                  console.log('Found Op')
-                  var op = this.ops[i]
-                  op.status = 'Confirmed.';
+              for (var i = 0; i < this.ops.length; i++) {
+                if (this.ops[i].txid == txid) {
+                  console.log("Found Op");
+                  var op = this.ops[i];
+                  op.status = "Confirmed.";
                   op.msg = json.status;
                   this.cleanOps();
                   for (var j = 0; j < op.ops.length; j++) {
@@ -207,10 +207,10 @@ export default {
             );
           }
         })
-        .catch(e => {
-          console.log(e)
-          this.statusPinger(txid, r+1)
-        })
+        .catch((e) => {
+          console.log(e);
+          this.statusPinger(txid, r + 1);
+        });
     },
     searchRecents() {
       this.filterRecents = this.recentUsers.reduce((a, b) => {
@@ -263,30 +263,32 @@ export default {
         this.setUser();
       }
     },
-    cleanOps(txid){
-      const ops = this.ops
+    cleanOps(txid) {
+      const ops = this.ops;
       for (var i = 0; i < ops.length; i++) {
         if (ops[i].status == "Pending your approval") {
-          ops.splice(i, 1);i--
+          ops.splice(i, 1);
+          i--;
         } else if (ops[i].time < new Date().getTime() - 300000) {
-          ops.splice(i, 1);i--
+          ops.splice(i, 1);
+          i--;
         } else if (ops[i].txid == txid) {
           ops.splice(i, 1);
-          break
+          break;
         }
       }
-      this.ops = ops
+      this.ops = ops;
       localStorage.setItem("pending", JSON.stringify(this.ops));
-    }
+    },
   },
   mounted() {
     this.getUser();
     this.getRecentUsers();
     const ops = localStorage.getItem("pending");
     this.ops = ops ? JSON.parse(ops) : [];
-    this.cleanOps()
-    for(var i = 0; i < this.ops.length; i++){
-      this.statusPinger(this.ops[i].txid, 0)
+    this.cleanOps();
+    for (var i = 0; i < this.ops.length; i++) {
+      this.statusPinger(this.ops[i].txid, 0);
     }
   },
   computed: {
@@ -363,10 +365,11 @@ export default {
 <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
 <toast-vue v-for="op in ops" :alert="op"/>
 </div>
-<div class="offcanvas offcanvas-end bg-dark" tabindex="-1" id="offcanvasUsers" aria-labelledby="offcanvasRightLabel">
-    <div class="offcanvas-header">
-      <h5 id="offcanvasRightLabel">User Management</h5>
-      <button type="button" class="btn-close text-white-50" data-bs-dismiss="offcanvas" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+<div class="offcanvas offcanvas-end bg-dark text-white-50" tabindex="-1" id="offcanvasUsers" aria-labelledby="offcanvasRightLabel">
+    <div class="offcanvas-header d-flex align-items-center justify-content-between">
+      <h5 id="offcanvasRightLabel" class="m-0 p-0">User Management</h5>
+      <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+
     </div>
     <div class="offcanvas-body">
     
