@@ -22,10 +22,7 @@
     <script type="module" src="/js/nftsvue.js"></script>
   </head>
 
-  <body
-    class="d-flex flex-column h-100 padme-t70 text-white"
-    id="index"
-  >
+  <body class="d-flex flex-column h-100 padme-t70 text-white" id="index">
     <style>
       .circle {
         width: 50px;
@@ -172,6 +169,8 @@
           @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
           @logout="setValue('account', '');removeUser()"
           @ack="removeOp($event)"
+          @refresh="run($event)"
+          :op="toSign" :lapi="lapi"
         />
       </div>
       <main role="main" class="flex-shrink-0">
@@ -1359,17 +1358,8 @@
                     </div>
                 </div> -->
           <!-- NFT Sales Modal -->
-          <div
-            class="modal fade"
-            id="salesModal"
-            tabindex="11"
-            role="dialog"
-            aria-hidden="true"
-          >
-            <div
-              class="modal-dialog modal-full modal-xl modal-dialog-centered"
-              role="document"
-            >
+          <div class="modal fade" id="salesModal" tabindex="11" role="dialog" aria-hidden="true" >
+            <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document" >
               <div class="modal-content bg-dark text-white">
                 <div class="card border-0 text-white bg-dark">
                   <div
@@ -1392,12 +1382,7 @@
                         >{{sales_detail.data.set}} NFT</a
                       >
                     </h3>
-                    <button
-                      type="button"
-                      class="close"
-                      data-dismiss="modal"
-                      aria-label="Close"
-                    >
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" >
                       <span aria-hidden="true">&times;</span>
                     </button>
                   </div>
@@ -1460,8 +1445,7 @@
                       <div>
                         <small><u>Seller</u></small>
                         <h6>
-                          <a
-                            :href="/@{{sales_detail.data.by}}#inventory"
+                          <a :href="/@{{sales_detail.data.by}}#inventory"
                             >{{sales_detail.data.by}}</a
                           >
                         </h6>

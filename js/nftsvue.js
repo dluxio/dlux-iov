@@ -47,6 +47,7 @@ var app = new Vue({
   data() {
     return {
       ohlcv: [],
+      toSign: {},
       chart: {
         id: "honeycomb_tv",
         width: 600,
@@ -302,78 +303,20 @@ var app = new Vue({
       },
     };
   },
-  provide() {
-    return { op: this.toSign };
-  },
   components: {
     "nav-vue": Navue,
     "foot-vue": FootVue,
   },
   methods: {
-    saveNodeSettings() {
-      let updates = {};
-      for (var i = 0; i < this.features.node.opts.length; i++) {
-        if (this.features.node.opts[i].val) {
-          updates[this.features.node.opts[i].json] =
-            this.features.node.opts[i].val;
-        }
+    removeOp(txid) {
+      if (this.toSign.txid == txid) {
+        this.toSign = {};
       }
-      broadcastCJA(
-        updates,
-        `${this.prefix}${this.features.node.id}`,
-        `Updating ${this.TOKEN} Node...`,
-        lapi.split("://")[1]
-      );
     },
-    dropClaim() {
-      broadcastCJA(
-        {
-          claim: true,
-        },
-        `${this.prefix}${this.features.claim_id}`,
-        `Claiming ${this.TOKEN}...`,
-        lapi.split("://")[1]
-      );
-    },
-    rewardClaim() {
-      broadcastCJA(
-        {
-          gov: this.features.reward2Gov,
-        },
-        `${this.prefix}${this.features.rewards_id}`,
-        `Claiming ${this.TOKEN}...`,
-        lapi.split("://")[1]
-      );
-    },
-    power() {
-      if (this.features.pow_val && this.powFormValid)
-        broadcastCJA(
-          {
-            amount: parseInt(this.features.pow_val * 1000),
-          },
-          `${this.prefix}${
-            this.features.powsel_up
-              ? this.features.powup_id
-              : this.features.powdn_id
-          }`,
-          `${this.features.powsel_up ? "" : "Down-"}Powering ${this.TOKEN}...`,
-          lapi.split("://")[1]
-        );
-    },
-    gov() {
-      if (this.features.gov_val && this.govFormValid)
-        broadcastCJA(
-          {
-            amount: parseInt(this.features.gov_val * 1000),
-          },
-          `${this.prefix}${
-            this.features.govsel_up
-              ? this.features.govup_id
-              : this.features.govdn_id
-          }`,
-          `${this.features.govsel_up ? "" : "Un-"}Locking ${this.TOKEN}...`,
-          lapi.split("://")[1]
-        );
+    run(op) {
+      if (typeof this[op] == "function" && this.account != "GUEST") {
+        this[op](this.account);
+      }
     },
     checkAccount(name, key) {
       fetch("https://anyx.io", {
@@ -394,222 +337,54 @@ var app = new Vue({
     tokenSend() {
       if (!this.sendFormValid) return;
       if (this.sendAllowed) {
-        broadcastCJA(
-          {
+        this.toSign = {
+          type: "cja",
+          cj: {
             to: this.sendTo,
             amount: parseInt(this.sendAmount * 1000),
             memo: this.sendMemo,
           },
-          `${this.prefix}send`,
-          `Trying to send ${this.TOKEN}...`,
-          lapi.split("://")[1]
-        );
+          id: `${this.prefix}send`,
+          msg: `Trying to send ${this.TOKEN}...`,
+          ops: ["getTokenUser"],
+          txid: "send",
+        };
       } else alert("Username not found");
     },
     sendhive() {
       if (!this.hiveFormValid) return;
       if (this.sendHiveAllowed)
-        broadcastTransfer({
-          to: this.sendHiveTo,
-          hive: this.sendHiveAmount * 1000,
-          memo: this.sendHiveMemo,
-        });
+        this.toSign = {
+          type: "xfr",
+          cj: {
+            to: this.sendHiveTo,
+            hive: this.sendHiveAmount * 1000,
+            memo: this.sendHiveMemo,
+          },
+          txid: "sendhive",
+          msg: ``,
+          ops: ["getHiveUser"],
+        };
       else alert("Account Not Found");
     },
     sendhbd() {
       if (!this.hbdFormValid) return;
       if (this.sendHBDAllowed)
-        broadcastTransfer({
-          to: this.sendHBDTo,
-          hbd: this.sendHBDAmount * 1000,
-          memo: this.sendHBDMemo,
-        });
+        this.toSign = {
+          type: "xfr",
+          cj: {
+            to: this.sendHBDTo,
+            hbd: this.sendHBDAmount * 1000,
+            memo: this.sendHBDMemo,
+          },
+          txid: "sendhbd",
+          msg: ``,
+          ops: ["getHiveUser"],
+        };
       else alert("Account Not Found");
-    },
-    bcalc(k) {
-      switch (k) {
-        case "t":
-          this.buyQuantity = parseFloat(this.buyQuantity);
-          if (this.bform.cl) {
-            if (this.buyhive.checked)
-              this.buyPrice = (this.buyHiveTotal / this.buyQuantity).toFixed(6);
-            else
-              this.buyPrice = (this.buyHbdTotal / this.buyQuantity).toFixed(6);
-          } else {
-            if (this.buyhive.checked)
-              this.buyHiveTotal = (this.buyPrice * this.buyQuantity).toFixed(3);
-            else
-              this.buyHbdTotal = (this.buyPrice * this.buyQuantity).toFixed(3);
-          }
-          break;
-        case "p":
-          this.buyPrice = parseFloat(this.buyPrice);
-          if (this.bform.cl) {
-            if (this.buyhive.checked)
-              this.buyQuantity = (this.buyHiveTotal / this.buyPrice).toFixed(3);
-            else
-              this.buyQuantity = (this.buyHbdTotal / this.buyPrice).toFixed(3);
-          } else {
-            if (this.buyhive.checked)
-              this.buyHiveTotal = (this.buyPrice * this.buyQuantity).toFixed(3);
-            else
-              this.buyHbdTotal = (this.buyPrice * this.buyQuantity).toFixed(3);
-          }
-          break;
-        case "c":
-          if (this.buyhive.checked)
-            this.buyHiveTotal = parseFloat(this.buyHiveTotal);
-          else this.buyHbdTotal = parseFloat(this.buyHbdTotal);
-          if (this.buylimit.checked) {
-            if (this.bform.pl) {
-              if (this.buyhive.checked)
-                this.buyQuantity = (this.buyHiveTotal / this.buyPrice).toFixed(
-                  3
-                );
-              else
-                this.buyQuantity = (this.buyHbdTotal / this.buyPrice).toFixed(
-                  3
-                );
-            } else {
-              if (this.buyhive.checked)
-                this.buyPrice = (this.buyHiveTotal / this.buyQuantity).toFixed(
-                  6
-                );
-              else
-                this.buyPrice = (this.buyHbdTotal / this.buyQuantity).toFixed(
-                  6
-                );
-            }
-          }
-          break;
-        default:
-      }
     },
     localStoreSet(k, v) {
       localStorage.setItem(k, v);
-    },
-    scalc(k) {
-      switch (k) {
-        case "t":
-          this.sellQuantity = parseFloat(this.sellQuantity);
-          if (this.sform.cl) {
-            if (this.buyhive.checked)
-              this.sellPrice = (this.sellHiveTotal / this.sellQuantity).toFixed(
-                6
-              );
-            else
-              this.sellPrice = (this.sellHbdTotal / this.sellQuantity).toFixed(
-                6
-              );
-          } else {
-            if (this.buyhive.checked)
-              this.sellHiveTotal = (this.sellPrice * this.sellQuantity).toFixed(
-                3
-              );
-            else
-              this.sellHbdTotal = (this.sellPrice * this.sellQuantity).toFixed(
-                3
-              );
-          }
-          break;
-        case "p":
-          this.sellPrice = parseFloat(this.sellPrice);
-          if (this.sform.cl) {
-            if (this.buyhive.checked)
-              this.sellQuantity = (this.sellHiveTotal / this.sellPrice).toFixed(
-                3
-              );
-            else
-              this.sellQuantity = (this.sellHbdTotal / this.sellPrice).toFixed(
-                3
-              );
-          } else {
-            if (this.buyhive.checked)
-              this.sellHiveTotal = (this.sellPrice * this.sellQuantity).toFixed(
-                3
-              );
-            else
-              this.sellHbdTotal = (this.sellPrice * this.sellQuantity).toFixed(
-                3
-              );
-          }
-          break;
-        case "c":
-          if (this.buyhive.checked)
-            this.sellHiveTotal = parseFloat(this.sellHiveTotal);
-          else this.sellHbdTotal = parseFloat(this.sellHbdTotal);
-          if (this.selllimit.checked) {
-            if (this.sform.pl) {
-              if (this.buyhive.checked)
-                this.sellQuantity = (
-                  this.sellHiveTotal / this.sellPrice
-                ).toFixed(3);
-              else
-                this.sellQuantity = (
-                  this.sellHbdTotal / this.sellPrice
-                ).toFixed(3);
-            } else {
-              if (this.buyhive.checked)
-                this.sellPrice = (
-                  this.sellHiveTotal / this.sellQuantity
-                ).toFixed(6);
-              else
-                this.sellPrice = (
-                  this.sellHbdTotal / this.sellQuantity
-                ).toFixed(6);
-            }
-          }
-          break;
-        default:
-      }
-    },
-    block(o) {
-      switch (o) {
-        case "t":
-          this.bform.tl = !this.bform.tl;
-          this.bform.cl = false;
-          this.bform.pl = !this.bform.tl;
-          break;
-        case "c":
-          this.bform.cl = !this.bform.cl;
-          this.bform.tl = false;
-          this.bform.pl = !this.bform.cl;
-          break;
-        case "p":
-          this.bform.pl = !this.bform.pl;
-          this.bform.cl = !this.bform.pl;
-          this.bform.tl = false;
-          break;
-        default:
-          this.bform.cl = false;
-          this.bform.tl = false;
-          this.bform.pl = true;
-          break;
-      }
-    },
-    slock(o) {
-      switch (o) {
-        case "t":
-          this.sform.tl = !this.sform.tl;
-          this.sform.cl = false;
-          this.sform.pl = !this.sform.tl;
-          break;
-        case "c":
-          this.sform.cl = !this.sform.cl;
-          this.sform.tl = false;
-          this.sform.pl = !this.sform.cl;
-          break;
-        case "p":
-          this.sform.pl = !this.sform.pl;
-          this.sform.cl = !this.sform.pl;
-          this.sform.tl = false;
-          break;
-        default:
-          this.sform.cl = false;
-          this.sform.tl = false;
-          this.sform.pl = true;
-          break;
-      }
     },
     toFixed(value, decimals) {
       return Number(value).toFixed(decimals);
@@ -634,47 +409,6 @@ var app = new Vue({
         for (var c = /(\d+)(\d{3})/; c.test(i); )
           i = i.replace(c, "$1" + e + "$2");
       return (u ? "-" : "") + i + o;
-    },
-    togglecoin(coin) {
-      this.buyhive.checked = coin == "hive" ? true : false;
-      this.buyhbd.checked = coin == "hbd" ? true : false;
-      if (coin == "hive") {
-        this.buyPrice = this.hivesells[0].rate;
-        this.sellPrice = this.hivebuys[0].rate;
-      } else {
-        this.buyPrice = this.hbdsells[0].rate;
-        this.sellPrice = this.hbdbuys[0].rate;
-      }
-    },
-    togglebuylimit(type) {
-      this.buylimit.checked = type == "limit" ? true : false;
-      this.buymarket.checked = type == "market" ? true : false;
-    },
-    toggleselllimit(type) {
-      this.selllimit.checked = type == "limit" ? true : false;
-      this.sellmarket.checked = type == "market" ? true : false;
-    },
-    toggleAPI(ip) {
-      this.filteraccount.usera = ip == "usera" ? true : false;
-      this.filteraccount.userd = ip == "userd" ? true : false;
-      this.filteraccount.apia = ip == "apia" ? true : false;
-      this.filteraccount.apid = ip == "apid" ? true : false;
-      this.filteraccount.gova = ip == "gova" ? true : false;
-      this.filteraccount.govd = ip == "govd" ? true : false;
-    },
-    toggleOrders(ip) {
-      this.orders.blocka = ip == "blocka" ? true : false;
-      this.orders.blockd = ip == "blockd" ? true : false;
-      this.orders.coina = ip == "coina" ? true : false;
-      this.orders.coind = ip == "coind" ? true : false;
-      this.orders.tokena = ip == "tokena" ? true : false;
-      this.orders.tokend = ip == "tokend" ? true : false;
-      this.orders.ratea = ip == "ratea" ? true : false;
-      this.orders.rated = ip == "rated" ? true : false;
-      this.orders.typea = ip == "typea" ? true : false;
-      this.orders.typed = ip == "typed" ? true : false;
-      this.orders.filleda = ip == "filleda" ? true : false;
-      this.orders.filledd = ip == "filledd" ? true : false;
     },
     setValue(key, value) {
       if (key.split(".").length > 1) {
@@ -758,360 +492,10 @@ var app = new Vue({
     focus(id) {
       document.getElementById(id).focus();
     },
-    searchRunners() {
-      const term = this.filteraccount.value;
-      if (term) {
-        this.filteraccount.checked = true;
-        this.filteraccount.value = term;
-        this.filterusers.checked = false;
-        this.filterusers.value = "";
-        this.runnersSearch = this.runners.reduce((acc, runner) => {
-          if (runner.account.toLowerCase().includes(term.toLowerCase())) {
-            acc.push(runner);
-          } else if (runner.api.toLowerCase().includes(term.toLowerCase())) {
-            acc.push(runner);
-          }
-          return acc;
-        }, []);
-      } else {
-        this.filteraccount.checked = false;
-        this.filteraccount.value = "";
-        this.filterusers.checked = true;
-        this.filterusers.value = "";
-      }
-    },
     validateForm(formKey, validKey) {
       var Container = document.getElementById(formKey);
       if (Container.querySelector("input:invalid")) this[validKey] = false;
       else this[validKey] = true;
-    },
-    buyDEX() {
-      if (!this.buyFormValid) return;
-      var allowed = false;
-      const reqs = [this.$refs.buyQty];
-      console.log(reqs[0]);
-      var andthen = " at market rate",
-        rate = undefined,
-        hours = 720;
-      if (!buymarket.checked) {
-        rate = parseFloat(
-          (this.buyhive.checked ? this.buyHiveTotal : this.buyHbdTotal) /
-            this.buyQuantity
-        ).toFixed(6);
-        andthen = ` at ${rate} ${this.buyhive.checked ? "HIVE" : "HBD"} per ${
-          this.TOKEN
-        }`;
-      }
-      if (this.buyhive.checked)
-        broadcastTransfer(
-          {
-            to: this.multisig,
-            hive: this.buyHiveTotal * 1000,
-            memo: JSON.stringify({
-              rate: this.buyPrice,
-              hours: this.buyHours,
-            }),
-          },
-          `Buying ${this.TOKEN} with ${parseFloat((hive || hbd) / 1000).toFixed(
-            3
-          )} ${hive ? "HIVE" : "HBD"} ${andthen}`,
-          lapi.split("://")[1]
-        );
-      else if (!this.buyhive.checked)
-        broadcastTransfer(
-          {
-            to: this.multisig,
-            hbd: this.buyHbdTotal * 1000,
-            memo: JSON.stringify({
-              rate: this.buyPrice,
-              hours: this.buyHours,
-            }),
-          },
-          `Buying ${this.TOKEN} with ${parseFloat((hive || hbd) / 1000).toFixed(
-            3
-          )} ${hive ? "HIVE" : "HBD"} ${andthen}`,
-          lapi.split("://")[1]
-        );
-    },
-    sellDEX() {
-      if (!this.sellFormValid) return;
-      var andthen = " at market rate",
-        dlux = parseInt(parseFloat(this.sellQuantity) * 1000),
-        hive = parseInt(parseFloat(this.sellHiveTotal) * 1000),
-        hbd = parseInt(parseFloat(this.sellHbdTotal) * 1000),
-        hours = parseInt(this.sellHours);
-      if (hive || hbd) {
-        const price = parseFloat(
-          dlux / (this.buyhive.checked ? hive : hbd)
-        ).toFixed(6);
-        andthen = ` at ${price} ${this.buyhive.checked ? "HIVE" : "HBD"} per ${
-          this.TOKEN
-        }`;
-      }
-      if (this.buyhive.checked && dlux)
-        broadcastCJA(
-          {
-            [this.TOKEN.toLocaleLowerCase()]: dlux,
-            hive,
-            hours,
-          },
-          `${this.prefix}dex_sell`,
-          `Selling ${parseFloat(dlux / 1000).toFixed(3)} ${
-            this.TOKEN
-          }${andthen}`,
-          lapi.split("://")[1]
-        );
-      else if (!this.buyhive.checked && dlux)
-        broadcastCJA(
-          {
-            [this.TOKEN.toLocaleLowerCase()]: dlux,
-            hbd,
-            hours,
-          },
-          `${this.prefix}dex_sell`,
-          `Selling ${parseFloat(dlux / 1000).toFixed(3)} ${
-            this.TOKEN
-          }${andthen}`,
-          lapi.split("://")[1]
-        );
-    },
-    cancelDEX(txid) {
-      if (txid)
-        broadcastCJA(
-          {
-            txid,
-          },
-          `${this.prefix}dex_clear`,
-          `Canceling: ${txid}`,
-          lapi.split("://")[1]
-        );
-    },
-    getHistorical() {
-      const pair = this.buyhive.checked ? "hive" : "hbd";
-      const numbars = this.barcount;
-      const period = parseInt(this.barwidth);
-      const now = this.nowtime;
-      var startdate = new Date(now - period * numbars).getTime();
-      var currentBucket = startdate;
-      const dex = this.dexapi;
-      if (!dex.markets.hive.his) return;
-      const current_block = this.stats.lastIBlock;
-      const buckets = Object.keys(dex.markets[pair].days);
-      buckets.sort(function (a, b) {
-        return parseInt(a) - parseInt(b);
-      });
-      var bars = [],
-        current = {
-          o: 0,
-          h: 0,
-          l: 0,
-          c: 0,
-          v: 0,
-        };
-      for (var i = 0; i < buckets.length; i++) {
-        if (
-          new Date(
-            now - 3000 * (current_block - parseInt(buckets[i]))
-          ).getTime() > currentBucket
-        ) {
-          if (!bars.length) {
-            while (
-              new Date(
-                now - 3000 * (current_block - parseInt(buckets[i]))
-              ).getTime() >
-              currentBucket + period
-            ) {
-              bars.push({
-                x: currentBucket,
-                o: dex.markets[pair.toLowerCase()].days[buckets[i]].o,
-                h: dex.markets[pair.toLowerCase()].days[buckets[i]].o,
-                l: dex.markets[pair.toLowerCase()].days[buckets[i]].o,
-                c: dex.markets[pair.toLowerCase()].days[buckets[i]].o,
-                v: 0,
-              });
-              currentBucket = new Date(currentBucket + period).getTime();
-            }
-          } else {
-            while (
-              new Date(
-                now - 3000 * (current_block - parseInt(buckets[i]))
-              ).getTime() >
-              currentBucket + period
-            ) {
-              bars.push({
-                x: currentBucket,
-                o: bars[bars.length - 1].c,
-                h: bars[bars.length - 1].c,
-                l: bars[bars.length - 1].c,
-                c: bars[bars.length - 1].c,
-                v: 0,
-              });
-              currentBucket = new Date(currentBucket + period).getTime();
-            }
-          }
-          if (dex.markets[pair.toLowerCase()].days[buckets[i]].t > current.h)
-            current.h = dex.markets[pair.toLowerCase()].days[buckets[i]].t;
-          if (dex.markets[pair.toLowerCase()].days[buckets[i]].b < current.l)
-            current.l = dex.markets[pair.toLowerCase()].days[buckets[i]].b;
-          current.c = dex.markets[pair.toLowerCase()].days[buckets[i]].c;
-          current.v += dex.markets[pair.toLowerCase()].days[buckets[i]].v;
-          if (
-            buckets[i + 1] &&
-            new Date(
-              now - 3000 * (current_block - parseInt(buckets[i + 1]))
-            ).getTime() >
-              currentBucket + period
-          ) {
-            bars.push({
-              x: currentBucket,
-              o: current.o,
-              h: current.h,
-              l: current.l,
-              c: current.c,
-              v: current.v,
-            });
-            currentBucket = new Date(currentBucket + period).getTime();
-            current.o = current.c;
-            current.h = current.c;
-            current.l = current.c;
-            current.c = current.c;
-            current.v = 0;
-          } else if (!buckets[i + 1]) {
-            bars.push({
-              x: currentBucket,
-              o: current.o,
-              h: current.h,
-              l: current.l,
-              c: current.c,
-              v: current.v,
-            });
-          }
-        }
-      }
-      let items = Object.keys(dex.markets[pair.toLowerCase()].his);
-      for (var i = 0; i < items.length; i++) {
-        if (
-          new Date(
-            now - 3000 * (current_block - parseInt(items[i].split(":")[0]))
-          ).getTime() > currentBucket
-        ) {
-          if (!bars.length) {
-            while (
-              new Date(
-                now - 3000 * (current_block - parseInt(items[i].split(":")[0]))
-              ).getTime() >
-              currentBucket + period
-            ) {
-              bars.push({
-                x: currentBucket,
-                o: parseFloat(
-                  dex.markets[pair.toLowerCase()].his[items[i]].price
-                ),
-                h: parseFloat(
-                  dex.markets[pair.toLowerCase()].his[items[i]].price
-                ),
-                l: parseFloat(
-                  dex.markets[pair.toLowerCase()].his[items[i]].price
-                ),
-                c: parseFloat(
-                  dex.markets[pair.toLowerCase()].his[items[i]].price
-                ),
-                v: 0,
-              });
-              currentBucket = new Date(currentBucket + period).getTime();
-            }
-          } else {
-            while (
-              new Date(
-                now - 3000 * (current_block - parseInt(items[i].split(":")[0]))
-              ).getTime() >
-              currentBucket + period
-            ) {
-              bars.push({
-                x: currentBucket,
-                o: bars[bars.length - 1].c,
-                h: bars[bars.length - 1].c,
-                l: bars[bars.length - 1].c,
-                c: bars[bars.length - 1].c,
-                v: 0,
-              });
-              currentBucket = new Date(currentBucket + period).getTime();
-            }
-          }
-          if (
-            parseFloat(dex.markets[pair.toLowerCase()].his[items[i]].price) >
-            current.h
-          )
-            current.h = parseFloat(
-              dex.markets[pair.toLowerCase()].his[items[i]].price
-            );
-          if (
-            parseFloat(dex.markets[pair.toLowerCase()].his[items[i]].price) <
-            current.l
-          )
-            current.l = parseFloat(
-              dex.markets[pair.toLowerCase()].his[items[i]].price
-            );
-          current.c = parseFloat(
-            dex.markets[pair.toLowerCase()].his[items[i]].price
-          );
-          current.v += parseFloat(
-            dex.markets[pair.toLowerCase()].his[items[i]].target_vol
-          );
-          if (
-            items[i + 1] &&
-            new Date(
-              now -
-                3000 * (current_block - parseInt(items[i + 1].split(":")[0]))
-            ).getTime() >
-              currentBucket + period
-          ) {
-            bars.push({
-              x: currentBucket,
-              o: current.o,
-              h: current.h,
-              l: current.l,
-              c: current.c,
-              v: current.v,
-            });
-            currentBucket = new Date(currentBucket + period).getTime();
-            current.o = parseFloat(
-              dex.markets[pair.toLowerCase()].his[items[i]].price
-            );
-            current.h = parseFloat(
-              dex.markets[pair.toLowerCase()].his[items[i]].price
-            );
-            current.l = parseFloat(
-              dex.markets[pair.toLowerCase()].his[items[i]].price
-            );
-            current.c = parseFloat(
-              dex.markets[pair.toLowerCase()].his[items[i]].price
-            );
-            current.v = 0;
-          } else if (!items[i + 1]) {
-            bars.push({
-              x: currentBucket,
-              o: current.o,
-              h: current.h,
-              l: current.l,
-              c: current.c,
-              v: current.v,
-            });
-          }
-        }
-      }
-      var newBars = [];
-      for (var i = 0; i < bars.length; i++) {
-        newBars.push([
-          bars[i].x,
-          bars[i].o,
-          bars[i].h,
-          bars[i].l,
-          bars[i].c,
-          bars[i].v,
-        ]);
-      }
-      this.ohlcv = newBars;
     },
     getQuotes() {
       fetch(
@@ -1292,99 +676,14 @@ var app = new Vue({
             this.barhbd = this.accountinfo.hbd_balance;
           });
     },
-    popDEX() {
-      fetch(this.lapi + "/dex")
-        .then((response) => response.json())
-        .then((data) => {
-          this.hivebuys = data.markets.hive.buys
-            .sort(function (a, b) {
-              return parseFloat(b.rate) - parseFloat(a.rate);
-            })
-            .reduce((acc, cur) => {
-              if (!acc.length || acc[acc.length - 1].rate != cur.rate) {
-                cur.total = cur.hive + (acc[acc.length - 1]?.total || 0);
-                cur.at = cur.amount + (acc[acc.length - 1]?.amount || 0);
-                acc.push(cur);
-              } else {
-                acc[acc.length - 1].total =
-                  cur.hive + acc[acc.length - 1].total;
-                acc[acc.length - 1].hive = cur.hive + acc[acc.length - 1].hive;
-                acc[acc.length - 1].amount =
-                  cur.amount + acc[acc.length - 1].amount;
-                acc[acc.length - 1].at = cur.amount + acc[acc.length - 1].at;
-              }
-              return acc;
-            }, []);
-          this.hivesells = data.markets.hive.sells
-            .sort(function (a, b) {
-              return parseFloat(a.rate) - parseFloat(b.rate);
-            })
-            .reduce((acc, cur) => {
-              if (!acc.length || acc[acc.length - 1].rate != cur.rate) {
-                cur.total = cur.hive + (acc[acc.length - 1]?.total || 0);
-                cur.at = cur.amount + (acc[acc.length - 1]?.amount || 0);
-                acc.push(cur);
-              } else {
-                acc[acc.length - 1].total =
-                  cur.hive + acc[acc.length - 1].total;
-                acc[acc.length - 1].hive = cur.hive + acc[acc.length - 1].hive;
-                acc[acc.length - 1].amount =
-                  cur.amount + acc[acc.length - 1].amount;
-                acc[acc.length - 1].at = cur.amount + acc[acc.length - 1].at;
-              }
-              return acc;
-            }, []);
-          this.hbdbuys = data.markets.hbd.buys
-            .sort(function (a, b) {
-              return parseFloat(b.rate) - parseFloat(a.rate);
-            })
-            .reduce((acc, cur) => {
-              if (!acc.length || acc[acc.length - 1].rate != cur.rate) {
-                cur.total = cur.hbd + (acc[acc.length - 1]?.total || 0);
-                cur.at = cur.amount + (acc[acc.length - 1]?.amount || 0);
-                acc.push(cur);
-              } else {
-                acc[acc.length - 1].total = cur.hbd + acc[acc.length - 1].total;
-                acc[acc.length - 1].hbd = cur.hbd + acc[acc.length - 1].hbd;
-                acc[acc.length - 1].amount =
-                  cur.amount + acc[acc.length - 1].amount;
-                acc[acc.length - 1].at = cur.amount + acc[acc.length - 1].at;
-              }
-              return acc;
-            }, []);
-          this.hbdsells = data.markets.hbd.sells
-            .sort(function (a, b) {
-              return parseFloat(a.rate) - parseFloat(b.rate);
-            })
-            .reduce((acc, cur) => {
-              if (!acc.length || acc[acc.length - 1].rate != cur.rate) {
-                cur.total = cur.hbd + (acc[acc.length - 1]?.total || 0);
-                cur.at = cur.amount + (acc[acc.length - 1]?.amount || 0);
-                acc.push(cur);
-              } else {
-                acc[acc.length - 1].total = cur.hbd + acc[acc.length - 1].total;
-                acc[acc.length - 1].hbd = cur.hbd + acc[acc.length - 1].hbd;
-                acc[acc.length - 1].amount =
-                  cur.amount + acc[acc.length - 1].amount;
-                acc[acc.length - 1].at = cur.amount + acc[acc.length - 1].at;
-              }
-              return acc;
-            }, []);
-          this.dexapi = data;
-          this.getHistorical();
-          if (this.hivesells[0]) this.buyPrice = this.hivesells[0].rate;
-          if (this.hivebuys[0]) this.sellPrice = this.hivebuys[0].rate;
-        });
-    },
+    
   },
   mounted() {
     this.getQuotes();
     this.getNodes();
     this.getProtocol();
-    this.popDEX(user);
     if (user != "GUEST") this.getTokenUser(user);
     if (user != "GUEST") this.getHiveUser(user);
   },
-  computed: {
-  },
+  computed: {},
 });
