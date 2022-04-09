@@ -1,18 +1,3 @@
-// const { Toast } = bootstrap;
-
-// const toast = Vue.component("bsToast", {
-//   template: `
-//         <div ref="el" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-//             <div class="toast-header">
-//               <strong class="me-auto">Completed</strong>
-//               <small class="text-muted">just now</small>
-//               <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-//             </div>
-//             <div class="toast-body"><slot/></div>
-//         </div>
-//     `
-// });
-
 import ToastVue from "/js/toastvue.js";
 export default {
   data() {
@@ -31,21 +16,25 @@ export default {
     };
   },
   components: {
-    'toast-vue': ToastVue,
+    "toast-vue": ToastVue,
   },
-  emits: ["login", "logout", "ack"],
-  props: ["op"],
+  emits: ["login", "logout", "refresh", "ack"],
+  props: ["op", "lapi"],
   watch: {
     op(op, oldOp) {
       console.log(op, "...", oldOp);
       if (op.txid) {
+        op.time = new Date().getTime();
+        op.status = 'Pending your approval';
+        op.title = op.id ? op.id : op.cj.memo;
         this.ops.push(op);
-        this.$emit("ack", op.txid);
+        this.$emit("ack", op.txid); 
         if (op.type == "cja") {
-          this.broadcastCJA(op.cj, op.id, op.msg, op.ops);
+          this.broadcastCJA(op);
         } else if (this.op.type == "xfr") {
-          this.broadcastTransfer(op.cj, op.msg, op.ops);
+          this.broadcastTransfer(op);
         }
+        localStorage.setItem("pending", JSON.stringify(this.ops));
       }
     },
   },
@@ -65,7 +54,7 @@ export default {
       this.HKC = true;
       this.HSR = false;
     },
-    broadcastCJA(cj, id, msg, oparray) {
+    broadcastCJA(obj) {
       var op = [
         this.user,
         [
@@ -74,8 +63,8 @@ export default {
             {
               required_auths: [this.user],
               required_posting_auths: [],
-              id: id,
-              json: JSON.stringify(cj),
+              id: obj.id,
+              json: JSON.stringify(obj.cj),
             },
           ],
         ],
@@ -84,25 +73,25 @@ export default {
       console.log("CJA");
       this.sign(op)
         .then((r) => {
-          // toaster with msg, refresh functions
+          this.statusFinder(r, obj);
         })
         .catch((e) => {
           console.log(e);
         });
     },
-    broadcastTransfer(cj, msg, oparray) {
+    broadcastTransfer(obj) {
       var op = [
         this.user,
         [
           [
             "transfer",
             {
-              to: cj.to,
+              to: obj.cj.to,
               from: this.user,
               amount: `${parseFloat(
-                (cj.hive ? cj.hive : cj.hbd) / 1000
-              ).toFixed(3)} ${cj.hive ? "HIVE" : "HBD"}`,
-              memo: cj.memo,
+                (obj.cj.hive ? obj.cj.hive : obj.cj.hbd) / 1000
+              ).toFixed(3)} ${obj.cj.hive ? "HIVE" : "HBD"}`,
+              memo: `${obj.cj.memo ? obj.cj.memo : ""}`
             },
           ],
         ],
@@ -110,7 +99,7 @@ export default {
       ];
       this.sign(op)
         .then((r) => {
-          // toaster with msg, refresh functions
+          this.statusFinder(r, obj);
         })
         .catch((e) => {
           console.log(e);
@@ -155,6 +144,73 @@ export default {
           reject({ error: "Hive Keychain is not installed." }); //fallthrough?
         }
       });
+    },
+    statusFinder(response, obj) {
+      console.log(response, obj);
+      if (response.success == false){
+        this.cleanOps()
+        return
+      }
+      if (response.success == true) {
+        obj.status = "Hive TX Success:\nAwaiting Layer 2 confirmation...";
+        obj.link = "https://hiveblocks.com/tx/" + response.result.id;
+        obj.txid = response.result.id;
+        this.ops.push(obj)
+        this.cleanOps(); //also stores it in localStorage
+        this.statusPinger(response.result.id, 0);
+      }
+    },
+    statusPinger(txid, r){
+      if(r > 30)return
+      fetch(this.lapi + "/api/status/" + txid)
+        .then(r => r.json())
+        .then(json => {
+          console.log(json, json.status.slice(0, 20));
+          if (json.status.slice(0, 20) != "This TransactionID e") {
+            if (json.status.indexOf(" minted ") > -1) {
+              //changeDiv(id, json.status, "mint"); // worry about this later
+              setTimeout(
+                function () {
+                  this.cleanOps(txid);
+                }.bind(this),
+                30000
+              );
+            } else {
+              for(var i = 0; i < this.ops.length; i++){
+                if(this.ops[i].txid == txid){
+                  console.log('Found Op')
+                  var op = this.ops[i]
+                  op.status = 'Confirmed.';
+                  op.msg = json.status;
+                  this.cleanOps();
+                  for (var j = 0; j < op.ops.length; j++) {
+                    console.log(op.ops[j]);
+                    this.$emit("refresh", op.ops[j]);
+                  }
+                  //this.ops.push(op)
+                  break;
+                }
+              }
+              setTimeout(
+                function () {
+                  this.cleanOps(txid);
+                }.bind(this),
+                30000
+              );
+            }
+          } else {
+            setTimeout(
+              function () {
+                this.statusPinger(txid, r + 1);
+              }.bind(this),
+              3000
+            );
+          }
+        })
+        .catch(e => {
+          console.log(e)
+          this.statusPinger(txid, r+1)
+        })
     },
     searchRecents() {
       this.filterRecents = this.recentUsers.reduce((a, b) => {
@@ -207,10 +263,31 @@ export default {
         this.setUser();
       }
     },
+    cleanOps(txid){
+      const ops = this.ops
+      for (var i = 0; i < ops.length; i++) {
+        if (ops[i].status == "Pending your approval") {
+          ops.splice(i, 1);i--
+        } else if (ops[i].time < new Date().getTime() - 300000) {
+          ops.splice(i, 1);i--
+        } else if (ops[i].txid == txid) {
+          ops.splice(i, 1);
+          break
+        }
+      }
+      this.ops = ops
+      localStorage.setItem("pending", JSON.stringify(this.ops));
+    }
   },
   mounted() {
     this.getUser();
     this.getRecentUsers();
+    const ops = localStorage.getItem("pending");
+    this.ops = ops ? JSON.parse(ops) : [];
+    this.cleanOps()
+    for(var i = 0; i < this.ops.length; i++){
+      this.statusPinger(this.ops[i].txid, 0)
+    }
   },
   computed: {
     avatar: {
@@ -233,7 +310,6 @@ export default {
   backdrop-filter: blur(10px);">
   <div class="container-fluid">
 	<a class="navbar-brand" href="/"><img src="/img/dlux-hive-logo-alpha.svg" alt="dlux-logo" width="40" height="40"></a>
-  <toast-vue />
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span></button>
     <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto">
@@ -284,6 +360,9 @@ export default {
     </div>
     </div>
 </header>
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+<toast-vue v-for="op in ops" :alert="op"/>
+</div>
 <div class="offcanvas offcanvas-end bg-dark" tabindex="-1" id="offcanvasUsers" aria-labelledby="offcanvasRightLabel">
     <div class="offcanvas-header">
       <h5 id="offcanvasRightLabel">User Management</h5>

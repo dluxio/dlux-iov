@@ -34,7 +34,8 @@
           @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
           @logout="setValue('account', '');removeUser()"
           @ack="removeOp($event)"
-          :op="toSign"
+          @refresh="run($event)"
+          :op="toSign" :lapi="lapi"
         />
       </div>
       <main role="main" class="flex-shrink-0 text-white">
@@ -223,10 +224,6 @@
                     </a>
                   </div>
                 </div>
-
-                <button type="button" class="btn btn-primary" id="liveToastBtn">
-                  Show live toast
-                </button>
 
                 <div
                   class="position-fixed bottom-0 end-0 p-3"

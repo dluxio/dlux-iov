@@ -165,7 +165,6 @@ var app = new Vue({
       recenthive: {},
       recenthbd: {},
       openorders: [],
-      toasts: [],
       orders: {
         filleda: false,
         filledd: false,
@@ -323,6 +322,11 @@ var app = new Vue({
         this.toSign = {};
       }
     },
+    run(op){
+      if (typeof this[op] == 'function' && this.account != 'GUEST') {
+        this[op](this.account);
+      }
+    },
     onResize(event) {
       this.chart.width = this.$refs.chartContainer.scrollWidth - 15;
       this.chart.height = this.chart.width / 2.5;
@@ -343,7 +347,7 @@ var app = new Vue({
         cj: updates,
         id: `${this.prefix}${this.features.node.id}`,
         msg: `Updating ${this.TOKEN} Node...`,
-        ops: ['login'],
+        ops: ["getTokenUser"],
         txid: 'saveNodeSettings',
       }
     },
@@ -355,7 +359,7 @@ var app = new Vue({
         },
         id: `${this.prefix}${this.features.claim_id}`,
         msg: `Claiming ${this.TOKEN}...`,
-        ops: ["login"],
+        ops: ["getTokenUser"],
         txid: "claim",
       };
     },
@@ -367,7 +371,7 @@ var app = new Vue({
         },
         id: `${this.prefix}${this.features.rewards_id}`,
         msg: `Claiming ${this.TOKEN}...`,
-        ops: ["login"],
+        ops: ["getTokenUser"],
         txid: "reward_claim",
       };
     },
@@ -386,7 +390,7 @@ var app = new Vue({
           msg: `${this.features.powsel_up ? "" : "Down-"}Powering ${
             this.TOKEN
           }...`,
-          ops: ["login"],
+          ops: ["getTokenUser"],
           txid: `power${this.features.powsel_up ? "" : "Down-"}`,
         };
     },
@@ -405,7 +409,7 @@ var app = new Vue({
           msg: `${this.features.govsel_up ? "" : "Un-"}Locking ${
             this.TOKEN
           }...`,
-          ops: ["login"],
+          ops: ["getTokenUser"],
           txid: `gov${this.features.govsel_up ? "" : "Un-"}`,
         };
     },
@@ -437,7 +441,7 @@ var app = new Vue({
           },
           id: `${this.prefix}send`,
           msg: `Trying to send ${this.TOKEN}...`,
-          ops: ["login"],
+          ops: ["getTokenUser"],
           txid: "send",
         };
       } else alert("Username not found");
@@ -454,8 +458,8 @@ var app = new Vue({
           },
           txid: "sendhive",
           msg: ``,
-          ops: ["login"],
-        }
+          ops: ["getHiveUser"],
+        };
       else alert("Account Not Found");
     },
     sendhbd() {
@@ -464,14 +468,14 @@ var app = new Vue({
         this.toSign = {
           type: "xfr",
           cj: {
-          to: this.sendHBDTo,
-          hbd: this.sendHBDAmount * 1000,
-          memo: this.sendHBDMemo,
-        },
+            to: this.sendHBDTo,
+            hbd: this.sendHBDAmount * 1000,
+            memo: this.sendHBDMemo,
+          },
           txid: "sendhbd",
           msg: ``,
-          ops: ["login"],
-        }
+          ops: ["getHiveUser"],
+        };
       else alert("Account Not Found");
     },
     bcalc(k) {
@@ -851,8 +855,9 @@ var app = new Vue({
         }`;
       }
       if (this.buyhive.checked)
-        broadcastTransfer(
-          {
+        this.toSign = {
+          type: "xfr",
+          cj: {
             to: this.multisig,
             hive: this.buyHiveTotal * 1000,
             memo: JSON.stringify({
@@ -860,14 +865,14 @@ var app = new Vue({
               hours: this.buyHours,
             }),
           },
-          `Buying ${this.TOKEN} with ${parseFloat((hive || hbd) / 1000).toFixed(
-            3
-          )} ${hive ? "HIVE" : "HBD"} ${andthen}`,
-          lapi.split("://")[1]
-        );
+          txid: "buydex",
+          msg: `Buying ${this.TOKEN} with ${parseFloat((hive || hbd) / 1000).toFixed(3)} ${hive ? "HIVE" : "HBD"} ${andthen}`,
+          ops: ["getHiveUser", "popDEX", "getTokenUser"],
+        };
       else if (!this.buyhive.checked)
-        broadcastTransfer(
-          {
+        this.toSign = {
+          type: "xfr",
+          cj: {
             to: this.multisig,
             hbd: this.buyHbdTotal * 1000,
             memo: JSON.stringify({
@@ -875,11 +880,10 @@ var app = new Vue({
               hours: this.buyHours,
             }),
           },
-          `Buying ${this.TOKEN} with ${parseFloat((hive || hbd) / 1000).toFixed(
-            3
-          )} ${hive ? "HIVE" : "HBD"} ${andthen}`,
-          lapi.split("://")[1]
-        );
+          txid: "buydex",
+          msg: `uying ${this.TOKEN} with ${parseFloat((hive || hbd) / 1000).toFixed(3)} ${hive ? "HIVE" : "HBD"} ${andthen}`,
+          ops: ["getHiveUser", "popDEX", "getTokenUser"],
+        };
     },
     sellDEX() {
       if (!this.sellFormValid) return;
@@ -898,7 +902,7 @@ var app = new Vue({
       }
       if (this.buyhive.checked && dlux)
         this.toSign = {
-          type: "xfr",
+          type: "cja",
           cj: {
             [this.TOKEN.toLocaleLowerCase()]: dlux,
             hive,
@@ -908,12 +912,12 @@ var app = new Vue({
           msg: `Selling ${parseFloat(dlux / 1000).toFixed(3)} ${
             this.TOKEN
           }${andthen}`,
-          ops: ["login"],
+          ops: ["getTokenUser", "popDEX"],
           txid: `${this.prefix}dex_sell`,
         };
       else if (!this.buyhive.checked && dlux)
         this.toSign = {
-          type: "xfr",
+          type: "cja",
           cj: {
             [this.TOKEN.toLocaleLowerCase()]: dlux,
             hbd,
@@ -923,7 +927,7 @@ var app = new Vue({
           msg: `Selling ${parseFloat(dlux / 1000).toFixed(3)} ${
             this.TOKEN
           }${andthen}`,
-          ops: ["login"],
+          ops: ["getTokenUser", "popDEX"],
           txid: `${this.prefix}dex_sell`,
         };
     },
@@ -936,7 +940,7 @@ var app = new Vue({
           },
           id: `${this.prefix}dex_clear`,
           msg: `Canceling: ${txid}`,
-          ops: ["login"],
+          ops: ["getTokenUser", "popDEX"],
           txid: `${txid}dex_clear`,
         };
     },
@@ -1198,6 +1202,46 @@ var app = new Vue({
           this.stats = data.stats;
         });
     },
+    getRecents(){
+      fetch(this.lapi + "/api/recent/HIVE_" + this.TOKEN + "?limit=1000")
+        .then((response) => response.json())
+        .then((data) => {
+          this.volume.hive =
+            data.recent_trades.reduce((a, b) => {
+              if (b.trade_timestamp > this.agoTime)
+                return a + parseInt(parseFloat(b.target_volume) * 1000);
+              else return a;
+            }, 0) / 1000;
+          this.volume.token_hive =
+            data.recent_trades.reduce((a, b) => {
+              if (b.trade_timestamp > this.agoTime)
+                return a + parseInt(parseFloat(b.base_volume) * 1000);
+              else return a;
+            }, 0) / 1000;
+          this.recenthive = data.recent_trades.sort((a, b) => {
+            return parseInt(b.trade_timestamp) - parseInt(a.trade_timestamp);
+          });
+        });
+      fetch(this.lapi + "/api/recent/HBD_" + this.TOKEN + "?limit=1000")
+        .then((response) => response.json())
+        .then((data) => {
+          this.volume.hbd =
+            data.recent_trades.reduce((a, b) => {
+              if (b.trade_timestamp > this.agoTime)
+                return a + parseInt(parseFloat(b.target_volume) * 1000);
+              else return a;
+            }, 0) / 1000;
+          this.volume.token_hbd =
+            data.recent_trades.reduce((a, b) => {
+              if (b.trade_timestamp > this.agoTime)
+                return a + parseInt(parseFloat(b.base_volume) * 1000);
+              else return a;
+            }, 0) / 1000;
+          this.recenthbd = data.recent_trades.sort((a, b) => {
+            return parseInt(b.trade_timestamp) - parseInt(a.trade_timestamp);
+          });
+        });
+    },
     getProtocol() {
       fetch(this.lapi + "/api/protocol")
         .then((response) => response.json())
@@ -1211,48 +1255,7 @@ var app = new Vue({
           this.features = data.features ? data.features : this.features;
           this.behind = data.behind;
           this.behindTitle = data.behind + " Blocks Behind Hive";
-          fetch(this.lapi + "/api/recent/HIVE_" + this.TOKEN + "?limit=1000")
-            .then((response) => response.json())
-            .then((data) => {
-              this.volume.hive =
-                data.recent_trades.reduce((a, b) => {
-                  if (b.trade_timestamp > this.agoTime)
-                    return a + parseInt(parseFloat(b.target_volume) * 1000);
-                  else return a;
-                }, 0) / 1000;
-              this.volume.token_hive =
-                data.recent_trades.reduce((a, b) => {
-                  if (b.trade_timestamp > this.agoTime)
-                    return a + parseInt(parseFloat(b.base_volume) * 1000);
-                  else return a;
-                }, 0) / 1000;
-              this.recenthive = data.recent_trades.sort((a, b) => {
-                return (
-                  parseInt(b.trade_timestamp) - parseInt(a.trade_timestamp)
-                );
-              });
-            });
-          fetch(this.lapi + "/api/recent/HBD_" + this.TOKEN + "?limit=1000")
-            .then((response) => response.json())
-            .then((data) => {
-              this.volume.hbd =
-                data.recent_trades.reduce((a, b) => {
-                  if (b.trade_timestamp > this.agoTime)
-                    return a + parseInt(parseFloat(b.target_volume) * 1000);
-                  else return a;
-                }, 0) / 1000;
-              this.volume.token_hbd =
-                data.recent_trades.reduce((a, b) => {
-                  if (b.trade_timestamp > this.agoTime)
-                    return a + parseInt(parseFloat(b.base_volume) * 1000);
-                  else return a;
-                }, 0) / 1000;
-              this.recenthbd = data.recent_trades.sort((a, b) => {
-                return (
-                  parseInt(b.trade_timestamp) - parseInt(a.trade_timestamp)
-                );
-              });
-            });
+          this.getRecents()
         });
     },
     removeUser() {

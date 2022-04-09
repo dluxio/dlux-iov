@@ -69,7 +69,6 @@ var app = new Vue({
       behind: "",
       stats: {},
       TOKEN: "LARYNX",
-      toasts: [],
       features: {
         claim_id: "claim",
         claim_S: "Airdrop",
