@@ -371,49 +371,48 @@ export default {
 </div>
 
 <div class="offcanvas offcanvas-end bg-dark text-white-50" tabindex="-1" id="offcanvasUsers" aria-labelledby="offcanvasRightLabel">
-    <div class="offcanvas-header d-flex align-items-center justify-content-between">
-      <h5 id="offcanvasRightLabel" class="m-0 p-0">User Management</h5>
-      <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-
-    </div>
-    <div class="offcanvas-body">
-    
-      <div class="d-flex flex-column">
+  <div class="offcanvas-header d-flex align-items-center justify-content-between">
+    <h5 id="offcanvasRightLabel" class="m-0 p-0">User Management</h5>
+    <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <div class="d-flex flex-column">
       <div class="row mb-3">
-      <div class="lead text-white-50">
-      Login via Hive Keychain. Usernames are stored locally and can be cleared.
+        <div>
+          <label class="form-label">Authentication Service:</label>
+          <select class="form-select bg-darker border-dark text-muted">
+            <option value="useKC" @click="useKC()" v-show="HKCa" selected> Hive KeyChain</option>
+            <option value="useHAS" @click="useHAS()"> Hive Auth Service</option>
+            <option value="useHSR" @click="useHS()"> Hive Signer</option>
+          </select>
+        </div>
       </div>
+      <div class="row mb-3">
+        <div class="lead text-white-50">
+          Usernames are stored locally and can be cleared.
+        </div>
       </div>
-        <div class="row mb-3">
+      <div class="row mb-3">
         <div class="input-group">
-        <input v-model="userField" placeholder="username" @blur="setUser()" @keyup.enter="setUser()" class="text-center form-control bg-darkg border-dark text-info">
-        <span class="input-group-text bg-darkg border-dark"><a href="#" @click="setUser()"><i class="fa-solid fa-circle-plus"></i></a></span>
+          <input v-model="userField" placeholder="username" @blur="setUser()" @keyup.enter="setUser()" class="text-center form-control bg-darkg border-dark text-info">
+          <span class="input-group-text bg-darkg border-dark"><a href="#" @click="setUser()"><i class="fa-solid fa-circle-plus"></i></a></span>
+        </div>
       </div>
-      </div>
+      <hr>
       <div class="row mb-3">
-            <div class="input-group">
-              <input v-model="filterUsers" placeholder="filter" @keyup="searchRecents()" class="text-center form-control bg-darkg border-dark text-info">
-              <span class="input-group-text bg-darkg border-dark"><a href="#"><i class="fa-solid fa-xmark"></i></a></span>
-            </div>
-          </div>
-        <hr>
-        </div>
-        <div class="d-flex justify-content-between align-items-center m-3" v-if="!filterUsers" v-for="name in recentUsers">
-          <div class="flex-fill text-center"><a class="link-info" href="#" @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
-          <div class="flex-shrink"><a href="#" @click="deleteRecentUser(name)" class="ms-auto"><i class="fa-solid fa-xmark"></i></a></div>
-        </div>
-        <div class="d-flex justify-content-between align-items-center m-3" v-if="filterUsers" v-for="name in filterRecents">
-          <div class="flex-fill text-center"><a class="link-info" href="#" @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
-          <div class="flex-shrink"><a href="#" @click="deleteRecentUser(name)" class="ms-auto"><i class="fa-solid fa-xmark"></i></a></div>
+        <div class="input-group">
+          <input v-model="filterUsers" placeholder="filter" @keyup="searchRecents()" class="text-center form-control bg-darkg border-dark text-info">
+          <span class="input-group-text bg-darkg border-dark"><a href="#"><i class="fa-solid fa-xmark"></i></a></span>
         </div>
       </div>
-      <ul class="dropdown-menu" aria-labelledby="dropdownMenu">
-        <li>
-            <a class="dropdown-item" href="#/" role="button" @click="useKC()" v-show="HKCa">{{HKC ? 'X ' : '  '}}Hive KeyChain</a>
-            <a class="dropdown-item" href="#/" role="button" @click="useHAS()">{{HAS ? 'X ' : '  '}}Hive Auth Service</a>
-            <a class="dropdown-item" href="#/" role="button" @click="useHS()">{{HSR ? 'X ' : '  '}}Hive Signer</a>
-        </li>
-      </ul>
+      <div class="d-flex justify-content-between align-items-center m-3" v-if="!filterUsers" v-for="name in recentUsers">
+        <div class="flex-fill text-center"><a class="link-info" href="#" @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
+        <div class="flex-shrink"><a href="#" @click="deleteRecentUser(name)" class="ms-auto"><i class="fa-solid fa-xmark"></i></a></div>
+      </div>
+      <div class="d-flex justify-content-between align-items-center m-3" v-if="filterUsers" v-for="name in filterRecents">
+        <div class="flex-fill text-center"><a class="link-info" href="#" @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
+        <div class="flex-shrink"><a href="#" @click="deleteRecentUser(name)" class="ms-auto"><i class="fa-solid fa-xmark"></i></a></div>
+      </div>
     </div>
   </div>
 </div>`,
