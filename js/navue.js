@@ -378,6 +378,18 @@ export default {
   <div class="offcanvas-body">
     <div class="d-flex flex-column">
       <div class="row mb-3">
+        <div class="dropdown">
+          <a class="btn btn-sm btn-dark dropdown-toggle" href="#" role="button" id="authDropdown" data-bs-toggle="dropdown" aria-expanded="false"><img src="/img/keychain.png" height="50px"></a>
+          <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="authDropdown">
+            <li class="p-2"><img src="/img/keychain.png" height="30px"></li>
+            <li><hr class="dropdown-divider"></li>
+            <li class="p-2"><img src="/img/hiveauth.svg" height="30px"></li>
+            <li><hr class="dropdown-divider"></li>
+            <li class="p-2"><img src="/img/hivesigner.svg" height="30px"></li>
+          </ul>
+        </div>
+      </div>
+      <div class="row mb-3">
         <div>
           <label class="form-label">Authentication Service:</label>
           <select class="form-select bg-darker border-dark text-muted">
