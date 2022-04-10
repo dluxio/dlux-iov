@@ -345,7 +345,7 @@ export default {
 	<li class="nav-item"><a class="nav-link acct-link" href="https://signup.hive.io/">Get Account</a></li>
 	<li class="nav-item">
   <div class="input-group input-group-sm">
-  <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
+    <button class="btn btn-primary ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
   </div>
   </li>
 
@@ -439,7 +439,7 @@ export default {
         <label class="form-label">Recent usernames:</label>
         <div class="input-group">
           <span class="input-group-text bg-darkg border-dark text-white-50">@</span>
-          <input v-model="filterUsers" placeholder="filter" @keyup="searchRecents()" class="text-center form-control bg-darkg border-dark text-info">
+          <input v-model="filterUsers" placeholder="search" @keyup="searchRecents()" class="text-center form-control bg-darkg border-dark text-info">
           <span class="input-group-text bg-darkg border-dark"><a href="#/" @click="setValue('filterUsers', '')" v-if="filterUsers"><i class="fa-solid fa-xmark"></i></a></span>
         </div>
       </div>
