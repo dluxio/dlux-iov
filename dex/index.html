@@ -209,7 +209,7 @@
               <div class="d-flex align-items-center text-white-50">
                 <!-- send token form -->
 
-                <div v-if="user" id="userSendToken" class="mx-4" v-if="features.send_B">
+                <div v-if="account" id="userSendToken" class="mx-4" v-if="features.send_B">
                   <a class="dropdown text-warning" data-bs-auto-close="outside" href="#" role="button"
                     id="sendDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false" v-cloak>
                     {{formatNumber(bartoken,3,'.',',')}} {{TOKEN}}</a>
@@ -269,7 +269,7 @@
 
                 <!-- power form -->
 
-                <div v-if="user" id="userPwr" class="mx-4" v-if="features.powup_B || features.powdn_B">
+                <div v-if="account" id="userPwr" class="mx-4" v-if="features.powup_B || features.powdn_B">
                   <a class="dropdown text-primary" data-bs-auto-close="outside" href="#" role="button"
                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
                     v-cloak>{{formatNumber(barpow,3,'.',',')}} {{TOKEN}}P</a>
@@ -345,7 +345,7 @@
 
                 <!-- gov form -->
 
-                <div v-if="user" id="userGov" class="mx-4" v-if="isnode && (features.govup_B || features.govdn_B)">
+                <div v-if="account" id="userGov" class="mx-4" v-if="isnode && (features.govup_B || features.govdn_B)">
                   <a class="dropdown text-info" href="#" data-bs-auto-close="outside" role="button"
                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
                     v-cloak>{{formatNumber(bargov,3,'.',',')}} {{TOKEN}}G</a>
@@ -428,7 +428,7 @@
 
                 <!-- send hive form -->
 
-                <div v-if="user" id="userHive" class="mx-4">
+                <div v-if="account" id="userHive" class="mx-4">
                   <a class="dropdown text-danger" data-bs-auto-close="outside" href="#" role="button"
                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
                     {{formatNumber(barhive,3,'.',',')}} HIVE</a>
@@ -487,7 +487,7 @@
 
                 <!-- send hbd form -->
 
-                <div v-if="user" id="userHbd" class="mx-4">
+                <div v-if="account" id="userHbd" class="mx-4">
                   <a class="dropdown text-success" data-bs-auto-close="outside" href="#" role="button"
                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
                     {{formatNumber(barhbd,3,'.',',')}} HBD</a>
@@ -866,7 +866,7 @@
               </div>
               <div></div>
               <div>
-                <button v-if="user" class="btn btn-outline-primary" role="button" data-bs-toggle="collapse" href="#openOrdersDrawer"
+                <button v-if="account" class="btn btn-outline-primary" role="button" data-bs-toggle="collapse" href="#openOrdersDrawer"
                   aria-expanded="false" aria-controls="openOrdersDrawer">
                   OPEN ORDERS (<span v-cloak>{{openorders.length}}</span>)
                   <i class="fas fa-book-reader ms-2"></i>
@@ -1048,7 +1048,7 @@
                         </label>
                       </div>
                     </div>
-                    <div class="col text-end" v-if="user">
+                    <div class="col text-end" v-if="account">
                       <div class="small text-muted" v-if="buyhive.checked">
                         BALANCE<br />
                         <a href="#/"
@@ -1217,7 +1217,7 @@
                       </div>
                     </div>
 
-                    <div class="col text-end" v-if="user">
+                    <div class="col text-end" v-if="account">
                       <div class="small text-muted">
                         BALANCE<br />
                         <a href="#/" @click="setValue('sellQuantity',balance)">{{formatNumber(bartoken,3,'.',',')}}
