@@ -332,10 +332,11 @@ export default {
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span></button>
     <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto">
-        <li class="nav-item"> <a class="nav-link" href="/apps/">APPS</a></li>
-        <li class="nav-item"> <a class="nav-link" href="/nfts/">NFTS</a></li>
-        <li class="nav-item"> <a class="nav-link" href="/dex#dlux">DEX</a></li>
-        <li class="nav-item"> <a class="nav-link" href="/docs/">DOCS</a></li>
+        <li class="nav-item"> <a class="nav-link" href="/hub/"><i class="fa-solid fa-mountain-sun me-2"></i>HUB</a></li>
+        <li class="nav-item"> <a class="nav-link" href="/nfts/"><i class="fa-solid fa-store me-2"></i>NFTS</a></li>
+        <li class="nav-item"> <a class="nav-link" href="/dex#dlux"><i class="fa-solid fa-building-columns me-2"></i>DEX</a></li>
+        <li class="nav-item"> <a class="nav-link" href="/apps/"><i class="fa-solid fa-globe me-2"></i>APPS</a></li>
+        <li class="nav-item d-none"> <a class="nav-link " href="/docs/">DOCS</a></li>
       </ul>
      
 
@@ -343,6 +344,7 @@ export default {
 	<ul class="navbar-nav d-flex align-items-center me-5" id="loginMenu" >
 	<li class="nav-item"><a class="nav-link acct-link" href="/about/">About</a></li>
 	<li class="nav-item"><a class="nav-link acct-link" href="https://signup.hive.io/">Get Account</a></li>
+  <li class="nav-item"><a class="nav-link acct-link" href="/docs/">Docs</a></li>
 	<li class="nav-item">
   <div class="input-group input-group-sm">
     <button class="btn btn-primary ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
@@ -354,6 +356,7 @@ export default {
 
     <div class="me-5" v-show="user" id="userMenu">
 	  <ul class="nav navbar-nav">
+    <li class="nav-item my-auto"><a class="nav-link" href="/docs/"><i class="fa-solid fa-book"></i></a></li>
 		<li class="nav-item my-auto">
 			<a class="nav-link" href="/new/" data-bs-toggle="tooltip"  title="Create a new app">
 				<i class="fas fa-fw fa-lg fa-plus me-2"></i></a></li>
