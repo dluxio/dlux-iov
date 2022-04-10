@@ -333,9 +333,9 @@ export default {
     <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto">
         <li class="nav-item"> <a class="nav-link" href="/hub/"><i class="fa-solid fa-mountain-sun me-2"></i>HUB</a></li>
-        <li class="nav-item"> <a class="nav-link" href="/nfts/"><i class="fa-solid fa-store me-2"></i>NFTS</a></li>
+        <li class="nav-item"> <a class="nav-link" href="/nfts/"><i class="fa-solid fa-store me-2"></i>NFT</a></li>
         <li class="nav-item"> <a class="nav-link" href="/dex#dlux"><i class="fa-solid fa-building-columns me-2"></i>DEX</a></li>
-        <li class="nav-item"> <a class="nav-link" href="/apps/"><i class="fa-solid fa-globe me-2"></i>APPS</a></li>
+        <li class="nav-item"> <a class="nav-link" href="/apps/"><i class="fa-solid fa-globe me-2"></i>LUX</a></li>
         <li class="nav-item d-none"> <a class="nav-link " href="/docs/">DOCS</a></li>
       </ul>
      
@@ -356,10 +356,11 @@ export default {
 
     <div class="me-5" v-show="user" id="userMenu">
 	  <ul class="nav navbar-nav">
-    <li class="nav-item my-auto"><a class="nav-link" href="/docs/"><i class="fa-solid fa-book"></i></a></li>
+    
 		<li class="nav-item my-auto">
 			<a class="nav-link" href="/new/" data-bs-toggle="tooltip"  title="Create a new app">
-				<i class="fas fa-fw fa-lg fa-plus me-2"></i></a></li>
+				<i class="fas fa-fw fa-lg fa-plus me-2"></i>NEW</a></li>
+        <li class="nav-item my-auto"><a class="nav-link" href="/docs/"><i class="fa-solid fa-book me-2"></i>DOCS</a></li>
 		<li class="nav-item dropdown">
 		  <a class="nav-link dropdown-toggle text-white-50" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
 			  <img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light me-1 cover">
