@@ -222,6 +222,21 @@ export default {
         return a;
       }, []);
     },
+    setValue(key, value) {
+      if (key.split(".").length > 1) {
+        let keys = key.split(".");
+        let obj = this[keys[0]];
+        for (let i = 1; i < keys.length; i++) {
+          if (i == keys.length - 1) {
+            obj[keys[i]] = value;
+          } else {
+            obj = obj[keys[i]];
+          }
+        }
+      } else {
+        this[key] = value;
+      }
+    },
     getUser() {
       this.user = localStorage.getItem("user");
       this.$emit("login", this.user);
@@ -423,7 +438,7 @@ export default {
         <label class="form-label">Recent usernames:</label>
         <div class="input-group">
           <input v-model="filterUsers" placeholder="filter" @keyup="searchRecents()" class="text-center form-control bg-darkg border-dark text-info">
-          <span class="input-group-text bg-darkg border-dark"><a href="#/" @click="setValue('filterUsers', '')" v-if="filterUsers"><i class="fa-solid fa-xmark"></i></a></span>
+          <span class="input-group-text bg-darkg border-dark"><button href="#/" @click="setValue('filterUsers', '')" v-if="filterUsers"><i class="fa-solid fa-xmark"></i></button></span>
         </div>
       </div>
       <div class="d-flex justify-content-between align-items-center m-3" v-if="!filterUsers" v-for="name in recentUsers">
