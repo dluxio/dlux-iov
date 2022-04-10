@@ -27,7 +27,7 @@ export default {
         op.status = "Pending your approval";
         op.delay = 5000;
         op.title = op.id ? op.id : op.cj.memo;
-        op.api = this.lapi
+        op.api = this.lapi;
         this.ops.push(op);
         this.$emit("ack", op.txid);
         if (op.type == "cja") {
@@ -423,7 +423,7 @@ export default {
         <label class="form-label">Recent usernames:</label>
         <div class="input-group">
           <input v-model="filterUsers" placeholder="filter" @keyup="searchRecents()" class="text-center form-control bg-darkg border-dark text-info">
-          <span class="input-group-text bg-darkg border-dark"><a href="#" v-if="filterUsers"><i class="fa-solid fa-xmark"></i></a></span>
+          <span class="input-group-text bg-darkg border-dark"><a href="#/" @click="setValue('filterUsers', '')" v-if="filterUsers"><i class="fa-solid fa-xmark"></i></a></span>
         </div>
       </div>
       <div class="d-flex justify-content-between align-items-center m-3" v-if="!filterUsers" v-for="name in recentUsers">
