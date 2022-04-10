@@ -415,7 +415,8 @@ export default {
       <div class="row mb-3">
         <label class="form-label d-none">Set and store username:</label>
         <div class="input-group">
-          <input v-model="userField" placeholder="username" @blur="setUser()" @keyup.enter="setUser()" class="text-center form-control bg-darkg border-dark text-info">
+          <span class="input-group-text bg-darkg border-dark text-white-50">@</span>
+          <input v-model="userField" placeholder="username" @keyup.enter="setUser()" class="text-center form-control bg-darkg border-dark text-info">
           <span class="input-group-text bg-darkg border-dark"><a href="#" @click="setUser()" v-if="userField" class="link-info"><i class="fa-solid fa-circle-plus"></i></a></span>
         </div>
         <div class="small text-muted text-center mt-2">
@@ -437,17 +438,18 @@ export default {
       <div class="row mb-3" v-if="recentUsers.length">
         <label class="form-label">Recent usernames:</label>
         <div class="input-group">
+          <span class="input-group-text bg-darkg border-dark text-white-50">@</span>
           <input v-model="filterUsers" placeholder="filter" @keyup="searchRecents()" class="text-center form-control bg-darkg border-dark text-info">
-          <span class="input-group-text bg-darkg border-dark"><button href="#/" @click="setValue('filterUsers', '')" v-if="filterUsers"><i class="fa-solid fa-xmark"></i></button></span>
+          <span class="input-group-text bg-darkg border-dark"><a href="#/" @click="setValue('filterUsers', '')" v-if="filterUsers"><i class="fa-solid fa-xmark"></i></a></span>
         </div>
       </div>
       <div class="d-flex justify-content-between align-items-center m-3" v-if="!filterUsers" v-for="name in recentUsers">
         <div class="flex-fill text-center"><a class="link-info" href="#" @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
-        <div class="flex-shrink"><a href="#" @click="deleteRecentUser(name)" class="ms-auto"><i class="fa-solid fa-xmark"></i></a></div>
+        <div class="flex-shrink"><a href="#" @click="deleteRecentUser(name)" class="ms-auto"><i class="fa-solid fa-trash-can"></i></a></div>
       </div>
       <div class="d-flex justify-content-between align-items-center m-3" v-if="filterUsers" v-for="name in filterRecents">
         <div class="flex-fill text-center"><a class="link-info" href="#" @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
-        <div class="flex-shrink"><a href="#" @click="deleteRecentUser(name)" class="ms-auto"><i class="fa-solid fa-xmark"></i></a></div>
+        <div class="flex-shrink"><a href="#" @click="deleteRecentUser(name)" class="ms-auto"><i class="fa-solid fa-trash"></i></a></div>
       </div>
     </div>
   </div>
