@@ -443,13 +443,13 @@ export default {
           <span class="input-group-text bg-darkg border-dark"><a href="#/" @click="setValue('filterUsers', '')" v-if="filterUsers"><i class="fa-solid fa-xmark"></i></a></span>
         </div>
       </div>
-      <div class="d-flex justify-content-between align-items-center m-3" v-if="!filterUsers" v-for="name in recentUsers">
+      <div class="d-flex justify-content-between align-items-center m-3 pb-3 border-dark border-bottom" v-if="!filterUsers" v-for="name in recentUsers">
         <div class="flex-fill text-center"><a class="link-info" href="#" @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
-        <div class="flex-shrink"><a href="#" @click="deleteRecentUser(name)" class="ms-auto"><i class="fa-solid fa-trash-can"></i></a></div>
+        <div class="flex-shrink"><a href="#" @click="deleteRecentUser(name)" alt="Remove username" class="ms-auto link-secondary"><i class="fa-solid fa-trash-can"></i></a></div>
       </div>
-      <div class="d-flex justify-content-between align-items-center m-3" v-if="filterUsers" v-for="name in filterRecents">
+      <div class="d-flex justify-content-between align-items-center m-3 pb-3 border-dark border-bottom" v-if="filterUsers" v-for="name in filterRecents">
         <div class="flex-fill text-center"><a class="link-info" href="#" @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
-        <div class="flex-shrink"><a href="#" @click="deleteRecentUser(name)" class="ms-auto"><i class="fa-solid fa-trash"></i></a></div>
+        <div class="flex-shrink"><a href="#" @click="deleteRecentUser(name)" alt="Remove username" class="ms-auto link-secondary"><i class="fa-solid fa-trash-can"></i></a></div>
       </div>
     </div>
   </div>
