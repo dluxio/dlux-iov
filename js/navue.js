@@ -378,43 +378,52 @@ export default {
   <div class="offcanvas-body">
     <div class="d-flex flex-column">
       <div class="row mb-3">
+        <label class="form-label d-none">Authentication service:</label>
         <div class="dropdown">
-          <a class="btn btn-sm btn-dark dropdown-toggle" href="#" role="button" id="authDropdown" data-bs-toggle="dropdown" aria-expanded="false"><img src="/img/keychain.png" height="50px"></a>
-          <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="authDropdown">
-            <li class="p-2"><img src="/img/keychain.png" height="30px"></li>
-            <li><hr class="dropdown-divider"></li>
-            <li class="p-2"><img src="/img/hiveauth.svg" height="30px"></li>
-            <li><hr class="dropdown-divider"></li>
-            <li class="p-2"><img src="/img/hivesigner.svg" height="30px"></li>
+          <button class="btn btn-secondary w-100 p-0" role="button" id="authDropdown" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false" >
+            <button v-if="HKC" class="btn btn-hivekeychain h-100 w-100 dropdown-toggle"><img src="/img/keychain.png" height="50px" class="img-responsive p-2 mx-3"></button>
+            <button v-if="HAS" class="btn btn-hiveauth h-100 w-100 dropdown-toggle"><img src="/img/hiveauth.svg" height="50px" class="img-responsive p-2 mx-3"></button>
+            <button v-if="HSR" class="btn btn-hivesigner h-100 w-100 dropdown-toggle"><img src="/img/hivesigner.svg" height="50px" class="img-responsive p-2 mx-3"></button>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-dark text-center bg-black p-2" aria-labelledby="authDropdown">
+            <li class="p-2"><button class="btn btn-hivekeychain h-100 w-100" @click="useKC()"><img src="/img/keychain.png" class="img-responsive" height="50px"></button></li>
+            <li class="p-2"><button class="btn btn-hiveauth h-100 w-100" @click="useHAS()"><img src="/img/hiveauth.svg" class="img-responsive" height="50px"></button></li>
+            <li class="p-2"><button class="btn btn-hivesigner h-100 w-100" @click="useHS()"><img src="/img/hivesigner.svg" class="img-responsive" height="50px"></button></li>
           </ul>
         </div>
-      </div>
-      <div class="row mb-3">
-        <div>
-          <label class="form-label">Authentication Service:</label>
-          <select class="form-select bg-darker border-dark text-muted">
-            <option value="useKC" @click="useKC()" v-show="HKCa" selected> Hive KeyChain</option>
-            <option value="useHAS" @click="useHAS()"> Hive Auth Service</option>
-            <option value="useHSR" @click="useHS()"> Hive Signer</option>
-          </select>
+        <div class="small text-muted text-center mt-2 d-none">
+        <span v-if="HKC">Hive Keychain requires a Firefox or Chrome extension.</span>
+        <span v-if="HAS">Hive Auth requires an iOS or Android app.</span>
+        <span v-if="HSR">Hive Signer requires a password.</span>
         </div>
       </div>
       <div class="row mb-3">
-        <div class="lead text-white-50">
-          Usernames are stored locally and can be cleared.
-        </div>
-      </div>
-      <div class="row mb-3">
+        <label class="form-label d-none">Set and store username:</label>
         <div class="input-group">
           <input v-model="userField" placeholder="username" @blur="setUser()" @keyup.enter="setUser()" class="text-center form-control bg-darkg border-dark text-info">
-          <span class="input-group-text bg-darkg border-dark"><a href="#" @click="setUser()"><i class="fa-solid fa-circle-plus"></i></a></span>
+          <span class="input-group-text bg-darkg border-dark"><a href="#" @click="setUser()" v-if="userField" class="link-info"><i class="fa-solid fa-circle-plus"></i></a></span>
+        </div>
+        <div class="small text-muted text-center mt-2">
+         Usernames are stored locally and can be cleared.
         </div>
       </div>
-      <hr>
       <div class="row mb-3">
+        <label class="form-label">Current user:</label>
+        <div v-if="!user" class="bg-darkest px-4 py-2 mx-2">
+          <img src="#" alt="" width="50" height="50" class="img-fluid rounded-circle bg-light me-1 cover">
+          <span>NONE SELECTED</span>
+        </div>
+        <div v-if="user" class="bg-darkest px-4 py-2 mx-2">
+          <img :src="avatar" id="userImage" alt="" width="50" height="50" class="img-fluid rounded-circle bg-light me-1 cover">
+          <span id="userName">{{user}}</span>
+        </div>
+      </div>
+
+      <div class="row mb-3" v-if="recentUsers.length">
+        <label class="form-label">Recent usernames:</label>
         <div class="input-group">
           <input v-model="filterUsers" placeholder="filter" @keyup="searchRecents()" class="text-center form-control bg-darkg border-dark text-info">
-          <span class="input-group-text bg-darkg border-dark"><a href="#"><i class="fa-solid fa-xmark"></i></a></span>
+          <span class="input-group-text bg-darkg border-dark"><a href="#" v-if="filterUsers"><i class="fa-solid fa-xmark"></i></a></span>
         </div>
       </div>
       <div class="d-flex justify-content-between align-items-center m-3" v-if="!filterUsers" v-for="name in recentUsers">

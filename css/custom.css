@@ -5,6 +5,23 @@ body {
 a {
   text-decoration: none;
 }
+.btn-hivekeychain {
+  color: #fff;
+  background-color: rgb(32, 36, 51);
+}
+.btn-hiveauth {
+  color: #fff;
+  border-color: #404244;
+  background: #404244;
+}
+.btn-hivesigner {
+  color: #000;
+  border-color: #d1d5da;
+  background: #d1d5da;
+}
+.bg-darkest {
+  background-color: #1a1e20;
+}
 .text-hbd {
   color: green;
 }
