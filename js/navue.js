@@ -335,7 +335,7 @@ export default {
         <li class="nav-item"> <a class="nav-link" href="/hub/"><i class="fa-solid fa-mountain-sun me-2"></i>HUB</a></li>
         <li class="nav-item"> <a class="nav-link" href="/nfts/"><i class="fa-solid fa-store me-2"></i>NFT</a></li>
         <li class="nav-item"> <a class="nav-link" href="/dex#dlux"><i class="fa-solid fa-building-columns me-2"></i>DEX</a></li>
-        <li class="nav-item"> <a class="nav-link" href="/apps/"><i class="fa-solid fa-globe me-2"></i>LUX</a></li>
+        <li class="nav-item"> <a class="nav-link" href="/apps/"><i class="fa-solid fa-globe me-2"></i>APPS</a></li>
         <li class="nav-item d-none"> <a class="nav-link " href="/docs/">DOCS</a></li>
       </ul>
      
