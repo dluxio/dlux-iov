@@ -20,7 +20,7 @@ if (location.search) {
       lapi = param[1];
     }
   }
-  window.history.replaceState(null, null, "dex?api=" + lapi);
+  window.history.replaceState(null, null, "?api=" + lapi);
 }
 if (location.hash && !lapi) {
   const hash = url.split("#");
@@ -39,7 +39,7 @@ if (
   lapi == "https://spkinstant.hivehoneycomb.com"
 ) {
   console.log("using defaults");
-  window.history.replaceState(null, null, "dex");
+  window.history.replaceState(null, null, "");
 }
 let user = localStorage.getItem("user") || "GUEST";
 let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
