@@ -310,6 +310,7 @@ var app = new Vue({
         amount: 30,
         searchTerm: "",
         searchType: "",
+        showDeleted: false,
       },
       allNFTs: [],
       itemModal: {
@@ -667,15 +668,19 @@ var app = new Vue({
     },
     selectNFTs(){
       for (var i = this.NFTselect.start; i < this.NFTselect.amount; i++) {
-        this.callScript({
-          script: this.focusSet.script,
-          uid: this.allSearchNFTs[i].uid,
-        }).then((r) => {
-          if (this.NFTselect.searchTerm) {
-          } else {
-            this.selectedNFTs.push(r);
-          }
-        });
+        if (this.NFTselect.showDeleted && this.allSearchNFTs[i].owner == 'D'){
+          //remove entry
+          this.allSearchNFTs.splice(i, 1)
+          i--
+        } else {
+          this.callScript(this.allSearchNFTs[i]).then((r) => {
+            if (this.NFTselect.searchTerm) {
+              //deep serch?
+            } else {
+              this.selectedNFTs.push(r);
+            }
+          });
+        }
       }
     },
     pullScript(id) {
@@ -691,7 +696,7 @@ var app = new Vue({
     Base64toNumber(chars) {
       const glyphs = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";    
       var result = 0;
-          chars = chars.split("");
+          chars = chars.split("") 
           for (var e = 0; e < chars.length; e++) {
               result = result * 64 + glyphs.indexOf(chars[e]);
           }
@@ -700,11 +705,15 @@ var app = new Vue({
     callScript(o) {
       return new Promise((resolve, reject) => {
         if (this.nftscripts[o.script]) {
-          console.log("script already loaded");
           const code = `(//${this.nftscripts[o.script]}\n)("${
             o.uid ? o.uid : 0
           }")`;
-          resolve(eval(code));
+          var computed = eval(code);
+          computed.uid = o.uid;
+          computed.owner = o.owner;
+          computed.script = o.script;
+          computed.set = o.set;
+          resolve(computed);
         } else {
           this.pullScript(o.script).then((empty) => {
             this.callScript(o).then((r) => {

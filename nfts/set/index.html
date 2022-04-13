@@ -52,12 +52,12 @@
 
                 <div class="card bg-dark text-white">
                     <div>
-                        <img class="banner-img w-100 img-fluid"
-                                            :src="makeLink('https://ipfs.io/ipfs/', focusSet.computed ? focusSet.computed.set.banner : '')"></img>
+                        <!-- <img class="banner-img w-100 img-fluid"
+                                            :src="makeLink('https://ipfs.io/ipfs/', focusSet.computed ? focusSet.computed.set.banner : '')"></img> -->
                             
                         <div class="center-circle rounded-circle bg-darker" style="border: solid black 3px;">
-                                <img class="rounded-circle"
-                                            :src="makeLink('https://ipfs.io/ipfs/', focusSet.computed ? focusSet.computed.set.logo : '')"></img>
+                                <!-- <img class="rounded-circle"
+                                            :src="makeLink('https://ipfs.io/ipfs/', focusSet.computed ? focusSet.computed.set.logo : '')"></img> -->
                         </div>
                     </div>
                     <div class="card-body p-0" :style="{'background': getSetDetailsColors(focusSet.computed ? focusSet.computed : '', 'body')}" style="border: none; ">
@@ -72,10 +72,10 @@
                             <div class="mb-3 d-flex align-items-center justify-content-between">
 
                                 <div class="mr-3">
-                                    <p class="text-white-50 m-0">{{focusSet.computed ? focusSet.computed.set.Description : '...'}}</p>
+                                    <!-- <p class="text-white-50 m-0">{{focusSet.computed ? focusSet.computed.set.Description : '...'}}</p> -->
                                 </div>
-                                <img class="rounded max-80"
-                                            :src="makeLink('https://ipfs.io/ipfs/', focusSet.computed ? focusSet.computed.set.wrapped : '')"></img>
+                                <!-- <img class="rounded max-80"
+                                            :src="makeLink('https://ipfs.io/ipfs/', focusSet.computed ? focusSet.computed.set.wrapped : '')"></img> -->
 
                             </div>
                             <div class="d-flex justify-content-between align-items-center">
@@ -120,13 +120,13 @@
                 <div class="row row-cols-xl-6 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
                     <div class="col mb-4" v-for="item in selectedNFTs">
                         <div class="card text-white bg-dark">
-                            <div class="card-header d-flex align-items-center" :style="{'background': getSetDetailsColors(set.computed, 'body')}">
+                            <div class="card-header d-flex align-items-center" :style="{'background': getSetDetailsColors(item.computed, 'body')}">
                                 <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
                                     <h2 class="m-0 px-2">{{item.uid}}</h2>
                                 </div>
                                 <!-- <h3 class="card-title lead border rounded border-dark p-2 ml-auto mb-0 "><a
                                         :href="makeLink('/nfts/set/',item.set)" class="lead" style="color: black">{{item.set}}
-                                        NFT</a></h3> -->
+                                        NFT</a></h3>
                             </div>
                             <a href="#itemModal" class="a-1" data-toggle="modal"
                                 @click="modalIndex('itemModal',$index)">
@@ -136,14 +136,17 @@
                                     {{focusSet.max}} </div>
                             </a>
                             <!-- user -->
-                            <div class="card-footer text-center d-flex justify-content-between align-items-center">
+                            <div class="card-footer text-center d-flex justify-content-between align-items-center" v-if="item.owner.length > 2">
                                 <span>Owner: <a :href="makeLink('/@', item.owner, ['#inventory'])">{{item.owner}}</a> </div>
                             <!-- auction -->
                             <div class="card-footer text-center d-flex justify-content-between align-items-center"
-                                v-show:> <span>Owner: <a :href="makeLink('/@', item.owner,['#inventory'])">{{item.owner}}</a> </div>
-                            <!-- sale -->
+                                v-if="item.owner == 'D'"> <span>Deleted</div>
+                            <!-- auction -->
                             <div class="card-footer text-center d-flex justify-content-between align-items-center"
-                                v-show:> <span>Owner: <a :href="makeLink('/@', item.owner,['#inventory'])">{{item.owner}}</a> </div>
+                                v-if="item.owner == 'ah'"> <span><a href="/nfts">At Auction</a> </div>
+                            <!-- sale -->
+                                    <div class="card-footer text-center d-flex justify-content-between align-items-center"
+                                v-if="item.owner == 'ls'"> <span><a href="/nfts">For Sale</a> </div>
                         </div>
                     </div>
                 </div>
