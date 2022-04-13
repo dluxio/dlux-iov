@@ -118,20 +118,20 @@
                         owner <i class="fas fa-arrow-alt-circle-down mx-2"></i></button>
                 </div>
                 <div class="row row-cols-xl-6 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
-                    <div class="col mb-4" v-for="item in selectedNFTs">
+                    <div class="col mb-4" v-for="item in selectedNFTs" :key="item.uid">
                         <div class="card text-white bg-dark">
-                            <div class="card-header d-flex align-items-center" :style="{'background': getSetDetailsColors(item.computed)}">
+                            <div class="card-header d-flex align-items-center" :style="{'background': getSetDetailsColors(item)}">
                                 <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
                                     <h2 class="m-0 px-2">{{item.uid}}</h2>
                                 </div>
                                 <h3 class="card-title lead border rounded border-dark p-2 ml-auto mb-0 "><a
-                                        :href="makeLink('/nfts/set/',item.set)" class="lead" style="color: black">{{item.set}}
+                                        :href="makeLink('/nfts/set/',item.setname)" class="lead" style="color: black">{{item.setname}}
                                         NFT</a></h3>
                             </div>
                             <a href="#itemModal" class="a-1" data-toggle="modal"
-                                @click="modalIndex('itemModal',$index)">
+                                @click="modalIndex('itemModal',item.uid);setValue('itemModal.hidden', false)">
                                 <div class="card-img-top p-1"
-                                    :alt="makeLink('image-', item.set, ['-', item.uid])" v-html="item.HTML"></div>
+                                    :alt="makeLink('image-', item.setname, ['-', item.uid])" v-html="item.HTML"></div>
                                 <div class="card-body d-flex flex-column text-center"> #{{Base64toNumber(item.uid)}} /
                                     {{focusSet.max}} </div>
                             </a>
@@ -152,19 +152,19 @@
                 </div>
                 </div>
                 <!--Item Modal-->
-                    <div class="modal fade " id="itemModal" tabindex="11" role="dialog" :aria-hidden="itemModal.hidden">
+                    <div class="modal fade " id="itemModal" tabindex="11" role="dialog" v-show="!itemModal.hidden">
                         <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
                             <div class="modal-content bg-dark text-white">
                                 <div class="card text-white bg-dark ">
                                     <div class="card-header d-flex align-items-center justify-content-between"
-                                        :style="{'background': getSetDetailsColors(focusSet.computed)}">
+                                        :style="{'background': getSetDetailsColors(focusSet)}">
                                         <div class="rounded-pill d-flex align-items-center p-2"
                                             style="background-color: black">
                                             <h2 class="m-0 px-2">{{itemModal.item.uid}}</h2>
                                         </div>
-                                        <!-- <h3 class="card-title lead border border-dark rounded mb-0 p-2"><a
-                                                :href="makeLink('/nfts/set/',itemModal.item.set)"
-                                                style="color: black">{{itemModal.item.set}} NFT</a></h3> -->
+                                        <h3 class="card-title lead border border-dark rounded mb-0 p-2"><a
+                                                :href="makeLink('/nfts/set/',itemModal.item.setname)"
+                                                style="color: black">{{itemModal.item.set}} NFT</a></h3>
                                         <button type="button" class="close" data-dismiss="modal"
                                             aria-label="Close"><span aria-hidden="true">&times;</span></button>
                                     </div>
@@ -179,9 +179,9 @@
                                                         @click="modalNext('itemModal')"><i
                                                             class="fas fa-caret-square-right"></i></a></h2>
                                             </div>
-                                            <!-- <div class="card-img-top"
+                                            <div class="card-img-top"
                                                 :alt="makeLink(itemModal.item.set, '-', ['itemModal.item.uid'])">
-                                                {{focusSet.computed ? focusSet.computed.set.Description : ''}} </div> -->
+                                                {{itemModal.item.set ? itemModal.item.set.Description : ''}} </div>
                                             <div class="text-center mt-2 text-white-50">
                                                 <p>Owner: <a :href="makeLink('/',itemModal.item.owner,['#inventory/'])"
                                                         :title="makeLink('/',itemModal.item.owner,['#inventory/'])">{{itemModal.item.owner}}</a>
@@ -189,11 +189,11 @@
                                             </div>
                                         </div>
                                         <div class="col-lg-6 px-0 px-sm-2">
-                                            <!-- <div class="d-flex flex-column">
+                                            <div class="d-flex flex-column">
                                                 <div>Set: {{focusSet.set}}</div>
                                                 <div>Link: {{focusSet.link}}</div>
-                                                <div>Fee: {{nai(focusSet.fee)}}</div>
-                                                <div>Bond: {{nai(focusSet.bond)}} </div>
+                                                <div>Fee: {{naiString(focusSet.fee)}}</div>
+                                                <div>Bond: {{naiString(focusSet.bond)}} </div>
                                                 <div>Link: {{focusSet.permlink}}</div>
                                                 <div>Author: {{focusSet.author}}</div>
                                                 <div>Script: {{focusSet.script}}</div>
@@ -203,7 +203,7 @@
                                                 <div>Name: {{focusSet.name}}</div>
                                                 <div>Minted: {{focusSet.minted}}</div>
                                                 <div>Max: {{focusSet.max}}</div>
-                                            </div> -->
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="card-footer d-flex align-items-center"></div>

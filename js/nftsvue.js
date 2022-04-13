@@ -304,7 +304,27 @@ var app = new Vue({
       nftsets: [],
       nftscripts: {},
       focusSet: {
-        computed: {}
+        computed: {},
+        link: '',
+            fee:{
+              amount: '',
+              token: '',
+              precision: 2
+            },
+            bond:{
+              amount: '',
+              token: '',
+              precision: 2
+            },
+            permlink: '',
+            author: '',
+            script: '',
+            encoding: '',
+            royalty: 1,
+            type: 1,
+            name: '',
+            minted: 0,
+            max: 0,
       },
       selectedNFTs: [],
       NFTselect: {
@@ -318,9 +338,9 @@ var app = new Vue({
       itemModal: {
         hidden: true,
         item: {
-          set: '',
+          setname: '',
           uid: '',
-          owner: ''
+          owner: '',
         },
         items: [],
         index: 0,
@@ -346,7 +366,11 @@ var app = new Vue({
       this[modal].item = this[modal].items[this[modal].index];
     },
     modalIndex(modal, index){
-      this[modal].index = index
+      var i = 0
+      for(i; i < this.selectedNFTs.length; i++){
+        if(this.selectedNFTs[i].uid == index)break
+      }
+      this[modal].index = i
       this[modal].item = this[modal].items[this[modal].index];
     },
     removeOp(txid) {
@@ -660,8 +684,6 @@ var app = new Vue({
                 data.set.computed = d
                 this.focusSet = data.set;
                 this.allNFTs = data.result
-                this.itemModal.items = data.result
-                this.itemModal.item = data.result[0]
                 this.allSearchNFTs = data.result;
                 this.selectNFTs()
               })
@@ -680,6 +702,8 @@ var app = new Vue({
               //deep serch?
             } else {
               this.selectedNFTs.push(r);
+              this.itemModal.items = this.selectedNFTs;
+              this.itemModal.item = this.selectedNFTs[0];
             }
           });
         }
@@ -714,7 +738,7 @@ var app = new Vue({
           computed.uid = o.uid;
           computed.owner = o.owner;
           computed.script = o.script;
-          computed.set = o.set;
+          computed.setname = o.set;
           resolve(computed);
         } else {
           this.pullScript(o.script).then((empty) => {
