@@ -305,26 +305,26 @@ var app = new Vue({
       nftscripts: {},
       focusSet: {
         computed: {},
-        link: '',
-            fee:{
-              amount: '',
-              token: '',
-              precision: 2
-            },
-            bond:{
-              amount: '',
-              token: '',
-              precision: 2
-            },
-            permlink: '',
-            author: '',
-            script: '',
-            encoding: '',
-            royalty: 1,
-            type: 1,
-            name: '',
-            minted: 0,
-            max: 0,
+        link: "",
+        fee: {
+          amount: "",
+          token: "",
+          precision: 2,
+        },
+        bond: {
+          amount: "",
+          token: "",
+          precision: 2,
+        },
+        permlink: "",
+        author: "",
+        script: "",
+        encoding: "",
+        royalty: 1,
+        type: 1,
+        name: "",
+        minted: 0,
+        max: 0,
       },
       selectedNFTs: [],
       NFTselect: {
@@ -338,13 +338,13 @@ var app = new Vue({
       itemModal: {
         hidden: true,
         item: {
-          setname: '',
-          uid: '',
-          owner: '',
+          setname: "",
+          uid: "",
+          owner: "",
         },
         items: [],
         index: 0,
-      }
+      },
     };
   },
   components: {
@@ -352,7 +352,7 @@ var app = new Vue({
     "foot-vue": FootVue,
   },
   methods: {
-    modalNext(modal){
+    modalNext(modal) {
       if (this[modal].index < this[modal].items.length - 1) {
         this[modal].index++;
       } else {
@@ -360,17 +360,17 @@ var app = new Vue({
       }
       this[modal].item = this[modal].items[this[modal].index];
     },
-    modalPrev(modal){
-      if(this[modal].index)this[modal].index--;
+    modalPrev(modal) {
+      if (this[modal].index) this[modal].index--;
       else this[modal].index = this[modal].items.length - 1;
       this[modal].item = this[modal].items[this[modal].index];
     },
-    modalIndex(modal, index){
-      var i = 0
-      for(i; i < this.selectedNFTs.length; i++){
-        if(this.selectedNFTs[i].uid == index)break
+    modalIndex(modal, index) {
+      var i = 0;
+      for (i; i < this.selectedNFTs.length; i++) {
+        if (this.selectedNFTs[i].uid == index) break;
       }
-      this[modal].index = i
+      this[modal].index = i;
       this[modal].item = this[modal].items[this[modal].index];
     },
     removeOp(txid) {
@@ -667,11 +667,12 @@ var app = new Vue({
         .then((response) => response.json())
         .then((data) => {
           for (let i = 0; i < data.result.length; i++) {
-            this.callScript({ script: data.result[i].script, uid: "0" })
-              .then((d) => {
-                data.result[i].computed = d
+            this.callScript({ script: data.result[i].script, uid: "0" }).then(
+              (d) => {
+                data.result[i].computed = d;
                 this.nftsets.push(data.result[i]);
-              })
+              }
+            );
           }
         });
     },
@@ -679,23 +680,26 @@ var app = new Vue({
       fetch(this.lapi + "/api/set/" + set)
         .then((response) => response.json())
         .then((data) => {
-            this.callScript({ script: data.set.script, uid: "0", set: set, owner: null })
-              .then((d) => {
-                data.set.computed = d
-                this.focusSet = data.set;
-                this.allNFTs = data.result
-                this.allSearchNFTs = data.result;
-                this.selectNFTs()
-              })
-          
+          this.callScript({
+            script: data.set.script,
+            uid: "0",
+            set: set,
+            owner: null,
+          }).then((d) => {
+            data.set.computed = d;
+            this.focusSet = data.set;
+            this.allNFTs = data.result;
+            this.allSearchNFTs = data.result;
+            this.selectNFTs();
+          });
         });
     },
-    selectNFTs(){
+    selectNFTs() {
       for (var i = this.NFTselect.start; i < this.NFTselect.amount; i++) {
-        if (this.NFTselect.showDeleted && this.allSearchNFTs[i].owner == 'D'){
+        if (this.NFTselect.showDeleted && this.allSearchNFTs[i].owner == "D") {
           //remove entry
-          this.allSearchNFTs.splice(i, 1)
-          i--
+          this.allSearchNFTs.splice(i, 1);
+          i--;
         } else {
           this.callScript(this.allSearchNFTs[i]).then((r) => {
             if (this.NFTselect.searchTerm) {
@@ -717,16 +721,17 @@ var app = new Vue({
             this.nftscripts[id] = data;
             resolve("OK");
           });
-        });
+      });
     },
     Base64toNumber(chars) {
-      const glyphs = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";    
+      const glyphs =
+        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
       var result = 0;
-          chars = chars.split("") 
-          for (var e = 0; e < chars.length; e++) {
-              result = result * 64 + glyphs.indexOf(chars[e]);
-          }
-          return result;
+      chars = chars.split("");
+      for (var e = 0; e < chars.length; e++) {
+        result = result * 64 + glyphs.indexOf(chars[e]);
+      }
+      return result;
     },
     callScript(o) {
       return new Promise((resolve, reject) => {
@@ -750,33 +755,29 @@ var app = new Vue({
       });
     },
     makeLink(a, b, c) {
-      if(c)return a + b + c.join('')
+      if (c) return a + b + c.join("");
       return a + b;
     },
-    naiString(nai){
-      return `${parseFloat(
-        nai.amount / Math.pow(10, nai.precision)
-      ).toFixed(nai.precision)} ${nai.token}`;
+    naiString(nai) {
+      return `${parseFloat(nai.amount / Math.pow(10, nai.precision)).toFixed(
+        nai.precision
+      )} ${nai.token}`;
     },
     getSetPhotos(s, c) {
-      return s.set ? `https://ipfs.io/ipfs/${s.set[c]}` : ''
+      return s.set ? `https://ipfs.io/ipfs/${s.set[c]}` : "";
     },
     getSetDetailsColors(s) {
-     let r = "chartreuse,lawngreen";
-        if (s && s.set){
-          try {
-            r = `${s.set.Color1},${
-              s.set.Color2
-                ? s.set.Color2
-                : s.set.Color1
-            }`;
-          } catch (e) {
-            console.log(e);
-            r = "chartreuse,lawngreen";
-          }
+      let r = "chartreuse,lawngreen";
+      if (s && s.set) {
+        try {
+          r = `${s.set.Color1},${s.set.Color2 ? s.set.Color2 : s.set.Color1}`;
+        } catch (e) {
+          console.log(e);
+          r = "chartreuse,lawngreen";
         }
-        return `linear-gradient(${r})`;
-      },
+      }
+      return `linear-gradient(${r})`;
+    },
     getTokenUser(user) {
       if (user)
         fetch(this.lapi + "/@" + user)
@@ -859,7 +860,7 @@ var app = new Vue({
   },
   mounted() {
     var setName = location.pathname.split("set/")[1];
-    if(setName)this.getNFTset(setName);
+    if (setName) this.getNFTset(setName);
     else this.getNFTsets();
     //this.getQuotes();
     //this.getNodes();
@@ -869,7 +870,6 @@ var app = new Vue({
   },
   computed: {},
 });
-
 
 /*
 getSetPhotos(s, i, c){
