@@ -301,6 +301,8 @@ var app = new Vue({
       govunlock: {
         checked: false,
       },
+      nftsets: [],
+      nftscripts: {},
     };
   },
   components: {
@@ -596,6 +598,74 @@ var app = new Vue({
       this.accountinfo = {};
       this.barhive = "";
       this.barhbd = "";
+    },
+    getNFTsets(){
+      fetch(this.lapi + "/api/sets")
+        .then((response) => response.json())
+        .then((data) => {
+          this.nftsets = data.results;
+        });
+    },
+    evalScript(id){
+
+    },
+    getSetPhotos(s, i, c){
+      var dummySet = {
+        script: s,
+        uid: i
+      }
+      const SVG = callScript(dummySet);
+      let r = ''
+      try{r = SVG.set[c];}catch(e){
+          r = ''
+      }
+      return `https://ipfs.io/ipfs/${r}`
+    },
+    getSetDetails(s, o){
+      var dummySet = {
+        script: s,
+        uid: "0"
+      }
+      const SVG = callScript(dummySet);
+      return SVG.set[o] || 'Not Specified'
+                
+    },
+    getSetDetailsColors (s, i, c){
+      var dummySet = {
+        script: s,
+        uid: "0"
+      }
+      const SVG = callScript(dummySet);
+      let r = ''
+      try{r=`${SVG.set.Color1},${SVG.set.Color2}`}catch(e){
+          console.log(e)
+          r = 'chartreuse,lawngreen'
+      }
+      return `linear-gradient(${r})`
+    },
+    callScript(o) {
+      if (this.nftscripts[o.script]){
+        const code = `(//${this.nftscripts[o.script]}\n)("${o.uid}")`;
+        return eval(code);
+      } else if (this.loadsscripts[o.script] > 0 && this.loadsscripts[o.script] > 10) {
+        setTimeout(
+                function () {
+                  this.loadsscripts[o.script]++; //THIS WILL GET WEIRD
+                  this.callScript(o);
+                }.bind(this),
+                1000
+              )
+      } else {
+        fetch(`https://ipfs.io/ipfs/${o.script}`)
+          .then((response) => response.text())
+          .then((data) => {
+            this.nftscripts[o.script] = data;
+            this.callScript(o);
+          });
+      }
+    },
+    makeLink(a,b){
+      return a + b
     },
     getTokenUser(user) {
       if (user)
