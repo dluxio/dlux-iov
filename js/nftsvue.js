@@ -303,6 +303,7 @@ var app = new Vue({
       },
       nftsets: [],
       nftscripts: {},
+      loadsscripts: {},
     };
   },
   components: {
@@ -603,7 +604,8 @@ var app = new Vue({
       fetch(this.lapi + "/api/sets")
         .then((response) => response.json())
         .then((data) => {
-          this.nftsets = data.results;
+          console.log(data);
+          this.nftsets = data.result;
         });
     },
     evalScript(id){
@@ -614,55 +616,69 @@ var app = new Vue({
         script: s,
         uid: i
       }
-      const SVG = callScript(dummySet);
-      let r = ''
-      try{r = SVG.set[c];}catch(e){
-          r = ''
-      }
-      return `https://ipfs.io/ipfs/${r}`
+      this.callScript(dummySet)
+      .then(SVG =>{
+        let r = ''
+        try{r = SVG.set[c];}catch(e){
+            r = ''
+        }
+        return `https://ipfs.io/ipfs/${r}`
+      })
     },
     getSetDetails(s, o){
       var dummySet = {
         script: s,
         uid: "0"
       }
-      const SVG = callScript(dummySet);
-      return SVG.set[o] || 'Not Specified'
-                
+      this.callScript(dummySet)
+      .then(SVG =>{
+        return SVG.set[o] || 'Not Specified'
+      })
     },
     getSetDetailsColors (s, i, c){
       var dummySet = {
         script: s,
         uid: "0"
       }
-      const SVG = callScript(dummySet);
-      let r = ''
-      try{r=`${SVG.set.Color1},${SVG.set.Color2}`}catch(e){
-          console.log(e)
-          r = 'chartreuse,lawngreen'
-      }
-      return `linear-gradient(${r})`
+      this.callScript(dummySet)
+      .then(SVG =>{
+        let r = ''
+        try{r=`${SVG.set.Color1},${SVG.set.Color2}`}catch(e){
+            console.log(e)
+            r = 'chartreuse,lawngreen'
+        }
+        return `linear-gradient(${r})`
+      })
     },
     callScript(o) {
-      if (this.nftscripts[o.script]){
-        const code = `(//${this.nftscripts[o.script]}\n)("${o.uid}")`;
-        return eval(code);
-      } else if (this.loadsscripts[o.script] > 0 && this.loadsscripts[o.script] > 10) {
-        setTimeout(
-                function () {
-                  this.loadsscripts[o.script]++; //THIS WILL GET WEIRD
-                  this.callScript(o);
-                }.bind(this),
-                1000
-              )
-      } else {
-        fetch(`https://ipfs.io/ipfs/${o.script}`)
-          .then((response) => response.text())
-          .then((data) => {
-            this.nftscripts[o.script] = data;
-            this.callScript(o);
-          });
-      }
+      return new Promise((resolve, reject) => {
+
+        function sanity(o){
+          if (this.nftscripts[o.script]) {
+            const code = `(//${this.nftscripts[o.script]}\n)("${o.uid}")`;
+            resolve(eval(code));
+          } else if (
+            this.loadsscripts[o.script] > 0 &&
+            this.loadsscripts[o.script] > 10
+          ) {
+            setTimeout(
+              function () {
+                this.loadsscripts[o.script]++; //THIS WILL GET WEIRD
+                sanity(o);
+              }.bind(this),
+              1000
+            );
+          } else {
+            this.loadsscripts[o.script] = 1;
+            fetch(`https://ipfs.io/ipfs/${o.script}`)
+              .then((response) => response.text())
+              .then((data) => {
+                this.nftscripts[o.script] = data;
+                sanity(o);
+              });
+          }
+        }
+      });
     },
     makeLink(a,b){
       return a + b
@@ -749,11 +765,12 @@ var app = new Vue({
     
   },
   mounted() {
-    this.getQuotes();
-    this.getNodes();
-    this.getProtocol();
-    if (user != "GUEST") this.getTokenUser(user);
-    if (user != "GUEST") this.getHiveUser(user);
+    this.getNFTsets();
+    //this.getQuotes();
+    //this.getNodes();
+    //this.getProtocol();
+    //if (user != "GUEST") this.getTokenUser(user);
+    //if (user != "GUEST") this.getHiveUser(user);
   },
   computed: {},
 });
