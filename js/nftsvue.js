@@ -303,7 +303,9 @@ var app = new Vue({
       },
       nftsets: [],
       nftscripts: {},
-      focusSet: {},
+      focusSet: {
+        computed: {}
+      },
       selectedNFTs: [],
       NFTselect: {
         start: 0,
@@ -653,7 +655,7 @@ var app = new Vue({
       fetch(this.lapi + "/api/set/" + set)
         .then((response) => response.json())
         .then((data) => {
-            this.callScript({ script: data.set.script, uid: "0" })
+            this.callScript({ script: data.set.script, uid: "0", set: set, owner: null })
               .then((d) => {
                 data.set.computed = d
                 this.focusSet = data.set;
