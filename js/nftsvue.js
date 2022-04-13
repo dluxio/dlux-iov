@@ -303,8 +303,25 @@ var app = new Vue({
       },
       nftsets: [],
       nftscripts: {},
-      loadsscripts: {},
-      computedsets: {},
+      focusSet: {},
+      selectedNFTs: [],
+      NFTselect: {
+        start: 0,
+        amount: 30,
+        searchTerm: "",
+        searchType: "",
+      },
+      allNFTs: [],
+      itemModal: {
+        hidden: true,
+        item: {
+          set: '',
+          uid: '',
+          owner: ''
+        },
+        items: [],
+        index: 0,
+      }
     };
   },
   components: {
@@ -312,6 +329,23 @@ var app = new Vue({
     "foot-vue": FootVue,
   },
   methods: {
+    modalNext(modal){
+      if (this[modal].index < this[modal].items.length - 1) {
+        this[modal].index++;
+      } else {
+        this[modal].index = 0;
+      }
+      this[modal].item = this[modal].items[this[modal].index];
+    },
+    modalPrev(modal){
+      if(this[modal].index)this[modal].index--;
+      else this[modal].index = this[modal].items.length - 1;
+      this[modal].item = this[modal].items[this[modal].index];
+    },
+    modalIndex(modal, index){
+      this[modal].index = index
+      this[modal].item = this[modal].items[this[modal].index];
+    },
     removeOp(txid) {
       if (this.toSign.txid == txid) {
         this.toSign = {};
@@ -614,17 +648,54 @@ var app = new Vue({
           }
         });
     },
+    getNFTset(set) {
+      fetch(this.lapi + "/api/set/" + set)
+        .then((response) => response.json())
+        .then((data) => {
+            this.callScript({ script: data.set.script, uid: "0" })
+              .then((d) => {
+                data.set.computed = d
+                this.focusSet = data.set;
+                this.allNFTs = data.result
+                this.itemModal.items = data.result
+                this.itemModal.item = data.result[0]
+                this.allSearchNFTs = data.result;
+                this.selectNFTs()
+              })
+          
+        });
+    },
+    selectNFTs(){
+      for (var i = this.NFTselect.start; i < this.NFTselect.amount; i++) {
+        this.callScript({
+          script: this.focusSet.script,
+          uid: this.allSearchNFTs[i].uid,
+        }).then((r) => {
+          if (this.NFTselect.searchTerm) {
+          } else {
+            this.selectedNFTs.push(r);
+          }
+        });
+      }
+    },
     pullScript(id) {
       return new Promise((resolve, reject) => {
-        if (!this.loadsscripts[id])
-          this.loadsscripts[id] = new Date().getTime();
-          fetch(`https://ipfs.io/ipfs/${id}`)
-            .then((response) => response.text())
-            .then((data) => {
-              this.nftscripts[id] = data;
-              resolve("OK");
-            });
+        fetch(`https://ipfs.io/ipfs/${id}`)
+          .then((response) => response.text())
+          .then((data) => {
+            this.nftscripts[id] = data;
+            resolve("OK");
+          });
         });
+    },
+    Base64toNumber(chars) {
+      const glyphs = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";    
+      var result = 0;
+          chars = chars.split("");
+          for (var e = 0; e < chars.length; e++) {
+              result = result * 64 + glyphs.indexOf(chars[e]);
+          }
+          return result;
     },
     callScript(o) {
       return new Promise((resolve, reject) => {
@@ -643,15 +714,21 @@ var app = new Vue({
         }
       });
     },
-    makeLink(a, b) {
+    makeLink(a, b, c) {
+      if(c)return a + b + c.join('')
       return a + b;
+    },
+    naiString(nai){
+      return `${parseFloat(
+        nai.amount / Math.pow(10, nai.precision)
+      ).toFixed(nai.precision)} ${nai.token}`;
     },
     getSetPhotos(s, c) {
       return s.set ? `https://ipfs.io/ipfs/${s.set[c]}` : ''
     },
     getSetDetailsColors(s) {
      let r = "chartreuse,lawngreen";
-        if (s.set){
+        if (s && s.set){
           try {
             r = `${s.set.Color1},${
               s.set.Color2
@@ -746,7 +823,9 @@ var app = new Vue({
     },
   },
   mounted() {
-    this.getNFTsets();
+    var setName = location.pathname.split("set/")[1];
+    if(setName)this.getNFTset(setName);
+    else this.getNFTsets();
     //this.getQuotes();
     //this.getNodes();
     //this.getProtocol();

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+
+<head>
+    <title>DLUX - Explore NFTs</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" />
+    <link href="/css/custom.css" rel="stylesheet" />
+    <style>
+        .center-circle {
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+
+        .max-80 {
+            max-width: 80px;
+        }
+
+        .img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .featured-img {
+            width: 600px;
+            height: 330px;
+            object-fit: cover;
+        }
+    </style>
+    <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
+    <script type="module" src="/js/nftsvue.js"></script>
+</head>
+
+<body class="d-flex flex-column h-100 padme-t70 text-white" id="explore">
+    <div id="app">
+        <div>
+            <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
+                @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" @refresh="run($event)"
+                :op="toSign" :lapi="lapi" />
+        </div>
+        <main role="main" class="flex-shrink-0">
+
+            <div class="container-fluid">
+
+                <div class="card bg-dark text-white">
+                    <div>
+                        <img class="banner-img w-100 img-fluid"
+                                            :src="makeLink('https://ipfs.io/ipfs/', focusSet.computed ? focusSet.computed.set.banner : '')"></img>
+                            
+                        <div class="center-circle rounded-circle bg-darker" style="border: solid black 3px;">
+                                <img class="rounded-circle"
+                                            :src="makeLink('https://ipfs.io/ipfs/', focusSet.computed ? focusSet.computed.set.logo : '')"></img>
+                        </div>
+                    </div>
+                    <div class="card-body p-0" :style="{'background': getSetDetailsColors(focusSet.computed ? focusSet.computed : '', 'body')}" style="border: none; ">
+                        
+
+                        <div class="m-3 p-3 rounded" style="background-color: rgba(0,0,0,0.7)">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h2 class="card-title">{{focusSet.set ? focusSet.set : ''}}</h2>
+                                <p class="m-0"><a
+                                        :href="makeLink('/@',focusSet.author)">@{{focusSet.author}}</a></p>
+                            </div>
+                            <div class="mb-3 d-flex align-items-center justify-content-between">
+
+                                <div class="mr-3">
+                                    <p class="text-white-50 m-0">{{focusSet.computed ? focusSet.computed.set.Description : '...'}}</p>
+                                </div>
+                                <img class="rounded max-80"
+                                            :src="makeLink('https://ipfs.io/ipfs/', focusSet.computed ? focusSet.computed.set.wrapped : '')"></img>
+
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="small bg-secondary rounded text-white px-2 py-1">ROYALTY:
+                                    {{focusSet.royalty/100}}%</span>
+                                <span class="small mx-2"><a
+                                        :href="makeLink('/blog/@',focusSet.link)">{{focusSet.permlink}}</a></span>
+                                <span class="small bg-secondary rounded text-white px-2 py-1">BOND:
+                                    {{focusSet.bond ? focusSet.bond.amount : 0 /1000}} {{focusSet.bond ? focusSet.bond.token : ''}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="flex-grow-1 mr-3">
+                                <div class="progress">
+
+                                    <div class="progress-bar" role="progressbar"
+                                        :style="{'width': ((focusSet.minted/focusSet.max)*100) + '%'}"
+                                        aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                                        {{formatNumber(((focusSet.minted/focusSet.max)*100),2,',','.')}}%
+                                        minted</div>
+                                </div>
+                            </div>
+                            <div class="">
+                                <p class="m-0">{{focusSet.minted}} of {{focusSet.max}} minted</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center my-3">
+                    <button class="btn btn-primary mx-2" id="sortuidasc" @click="sort('allSearchNFTs','uid','asc');selectNFTs()">Sort
+                        id<i class="fas fa-arrow-alt-circle-up mx-2"></i></button>
+                    <button class="btn btn-primary mx-2" id="sortuiddesc" @click="sort('allSearchNFTs','uid','desc');selectNFTs()">Sort
+                        id<i class="fas fa-arrow-alt-circle-down mx-2"></i></button>
+                    <button class="btn btn-primary mx-2" id="sortasc" @click="sort('allSearchNFTs','owner','asc');selectNFTs()">Sort
+                        owner <i class="fas fa-arrow-alt-circle-up mx-2"></i></button>
+                    <button class="btn btn-primary mx-2" id="sortasc" @click="sort('allSearchNFTs','owner','desc');selectNFTs()">Sort
+                        owner <i class="fas fa-arrow-alt-circle-down mx-2"></i></button>
+                </div>
+                <div class="row row-cols-xl-6 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
+                    <div class="col mb-4" v-for="item in selectedNFTs">
+                        <div class="card text-white bg-dark">
+                            <div class="card-header d-flex align-items-center" :style="{'background': getSetDetailsColors(set.computed, 'body')}">
+                                <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
+                                    <h2 class="m-0 px-2">{{item.uid}}</h2>
+                                </div>
+                                <!-- <h3 class="card-title lead border rounded border-dark p-2 ml-auto mb-0 "><a
+                                        :href="makeLink('/nfts/set/',item.set)" class="lead" style="color: black">{{item.set}}
+                                        NFT</a></h3> -->
+                            </div>
+                            <a href="#itemModal" class="a-1" data-toggle="modal"
+                                @click="modalIndex('itemModal',$index)">
+                                <!-- <div class="card-img-top p-1"
+                                    :alt="makeLink('image-', item.set, ['-', item.uid])">uid.nftImageWell(script, set)</div> -->
+                                <div class="card-body d-flex flex-column text-center"> #{{Base64toNumber(item.uid)}} /
+                                    {{focusSet.max}} </div>
+                            </a>
+                            <!-- user -->
+                            <div class="card-footer text-center d-flex justify-content-between align-items-center">
+                                <span>Owner: <a :href="makeLink('/@', item.owner, ['#inventory'])">{{item.owner}}</a> </div>
+                            <!-- auction -->
+                            <div class="card-footer text-center d-flex justify-content-between align-items-center"
+                                v-show:> <span>Owner: <a :href="makeLink('/@', item.owner,['#inventory'])">{{item.owner}}</a> </div>
+                            <!-- sale -->
+                            <div class="card-footer text-center d-flex justify-content-between align-items-center"
+                                v-show:> <span>Owner: <a :href="makeLink('/@', item.owner,['#inventory'])">{{item.owner}}</a> </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                <!--Item Modal-->
+                    <div class="modal fade " id="itemModal" tabindex="11" role="dialog" :aria-hidden="itemModal.hidden">
+                        <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
+                            <div class="modal-content bg-dark text-white">
+                                <div class="card text-white bg-dark ">
+                                    <div class="card-header d-flex align-items-center justify-content-between"
+                                        :style="{'background': getSetDetailsColors(focusSet.computed, 'body')}">
+                                        <div class="rounded-pill d-flex align-items-center p-2"
+                                            style="background-color: black">
+                                            <h2 class="m-0 px-2">{{itemModal.item.uid}}</h2>
+                                        </div>
+                                        <!-- <h3 class="card-title lead border border-dark rounded mb-0 p-2"><a
+                                                :href="makeLink('/nfts/set/',itemModal.item.set)"
+                                                style="color: black">{{itemModal.item.set}} NFT</a></h3> -->
+                                        <button type="button" class="close" data-dismiss="modal"
+                                            aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    </div>
+                                    <div class="card-body row d-flex ">
+                                        <div class="order-md-last col-lg-6 px-0 px-sm-2">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <h2><a class="text-muted p-3" href="#"
+                                                        @click="modalPrev('itemModal')"><i
+                                                            class="fas fa-caret-square-left"></i></a></h2>
+                                                <h3 style="color:aqua;">{{itemModal.item.uid}}</h3>
+                                                <h2><a class="text-muted p-3" href="#"
+                                                        @click="modalNext('itemModal')"><i
+                                                            class="fas fa-caret-square-right"></i></a></h2>
+                                            </div>
+                                            <!-- <div class="card-img-top"
+                                                :alt="makeLink(itemModal.item.set, '-', ['itemModal.item.uid'])">
+                                                {{focusSet.computed ? focusSet.computed.set.Description : ''}} </div> -->
+                                            <div class="text-center mt-2 text-white-50">
+                                                <p>Owner: <a :href="makeLink('/',itemModal.item.owner,['#inventory/'])"
+                                                        :title="makeLink('/',itemModal.item.owner,['#inventory/'])">{{itemModal.item.owner}}</a>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6 px-0 px-sm-2">
+                                            <!-- <div class="d-flex flex-column">
+                                                <div>Set: {{focusSet.set}}</div>
+                                                <div>Link: {{focusSet.link}}</div>
+                                                <div>Fee: {{nai(focusSet.fee)}}</div>
+                                                <div>Bond: {{nai(focusSet.bond)}} </div>
+                                                <div>Link: {{focusSet.permlink}}</div>
+                                                <div>Author: {{focusSet.author}}</div>
+                                                <div>Script: {{focusSet.script}}</div>
+                                                <div>Encoding: {{focusSet.encoding}}</div>
+                                                <div>Type: {{focusSet.type}}</div>
+                                                <div>Royalty: {{focusSet.royalty}}</div>
+                                                <div>Name: {{focusSet.name}}</div>
+                                                <div>Minted: {{focusSet.minted}}</div>
+                                                <div>Max: {{focusSet.max}}</div>
+                                            </div> -->
+                                        </div>
+                                    </div>
+                                    <div class="card-footer d-flex align-items-center"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                <!-- data table -->
+
+                <!-- <div class="tab-pane fade" id="table" role="tabpanel" aria-labelledby="table-tab">
+                    <div class="tab-pane fade" id="table" role="tabpanel" aria-labelledby="table-tab">
+                        <div class="jumbotron bg-darker my-4 p-2">
+                            <div>
+                                <table
+                                    class="table table-hover table-bordered table-dark table-striped text-white mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" dmx-class:table-primary="orderbookview1.sort.on == 'rate'">
+                                                <div class="d-flex justify-content-between align-items-end flex-wrap">
+                                                    <div class="d-flex flex-fill text-center">
+                                                        <p class="mx-2 my-0 p-0 text-center align-self-center">RATE</p>
+                                                    </div>
+                                                    <div class="d-flex">
+                                                        <button title="Sort Ascending" type="button"
+                                                            class="mx-1 btn btn-sm btn-light"
+                                                            dmx-on:click="orderbookview1.sort('rate','asc')"
+                                                            dmx-class:bg-primary="orderbookview1.sort.dir == 'asc' && orderbookview1.sort.on == 'rate'"><i
+                                                                class="fas fa-sort-amount-down-alt"></i></button>
+                                                        <button title="Sort Descending" type="button"
+                                                            class="mx-1 btn btn-sm btn-light"
+                                                            dmx-on:click="orderbookview1.sort('rate','desc')"
+                                                            dmx-class:bg-primary="orderbookview1.sort.dir == 'desc' && orderbookview1.sort.on == 'rate'"><i
+                                                                class="fas fa-sort-amount-down"></i></button>
+                                                    </div>
+                                                </div>
+                                            </th>
+                                            <th scope="col"
+                                                dmx-class:table-primary="orderbookview1.sort.on == 'amount'">
+                                                <div class="d-flex justify-content-between align-items-end flex-wrap">
+                                                    <div class="d-flex flex-fill text-center">
+                                                        <p class="mx-2 my-0 p-0 text-center align-self-center">DLUX</p>
+                                                    </div>
+                                                    <div class="d-flex">
+                                                        <button title="Sort Ascending" type="button"
+                                                            class="mx-1 btn btn-sm btn-light"
+                                                            dmx-on:click="orderbookview1.sort('amount','asc')"
+                                                            dmx-class:bg-primary="orderbookview1.sort.dir == 'asc' && orderbookview1.sort.on == 'amount'"><i
+                                                                class="fas fa-sort-amount-down-alt"></i></button>
+                                                        <button title="Sort Descending" type="button"
+                                                            class="mx-1 btn btn-sm btn-light"
+                                                            dmx-on:click="orderbookview1.sort('amount','desc')"
+                                                            dmx-class:bg-primary="orderbookview1.sort.dir == 'desc' && orderbookview1.sort.on == 'amount'"><i
+                                                                class="fas fa-sort-amount-down"></i></button>
+                                                    </div>
+                                                </div>
+                                            </th>
+                                            <th scope="col" dmx-class:table-primary="orderbookview1.sort.on == 'hive'">
+                                                <div class="d-flex justify-content-between align-items-end flex-wrap">
+                                                    <div class="d-flex flex-fill text-center">
+                                                        <p class="mx-2 my-0 p-0 text-center align-self-center">HIVE</p>
+                                                    </div>
+                                                    <div class="d-flex">
+                                                        <button title="Sort Ascending" type="button"
+                                                            class="mx-1 btn btn-sm btn-light"
+                                                            dmx-on:click="orderbookview1.sort('hive','asc')"
+                                                            dmx-class:bg-primary="orderbookview1.sort.dir == 'asc'  && orderbookview1.sort.on == 'hive'"><i
+                                                                class="fas fa-sort-amount-down-alt"></i></button>
+                                                        <button title="Sort Descending" type="button"
+                                                            class="mx-1 btn btn-sm btn-light"
+                                                            dmx-on:click="orderbookview1.sort('hive','desc')"
+                                                            dmx-class:bg-primary="orderbookview1.sort.dir == 'desc'  && orderbookview1.sort.on == 'hive'"><i
+                                                                class="fas fa-sort-amount-down"></i></button>
+                                                    </div>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dmx-repeat:hivesellsrepeat="orderbookview1.data"
+                                            @:click="modalIndex('itemModal', key); orderbookview1Detail.select(txid)"
+                                            dmx-class:table-primary="orderbookview1Detail.data.txid ==  txid"
+                                            dmx-class:table-danger="rate.toNumber().inRange(dexapi.data.markets.hive.sells[0].rate, (dexapi.data.markets.hive.sells[0].rate*1.01)) ==  false">
+                                            <td>{{rate.toNumber().formatNumber(3,'.',',')}}</td>
+                                            <td>{{amount}}</td>
+                                            <td>{{hive}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <div><a class="btn btn-light" href="javascript:void(0);"
+                                            dmx-on:click="orderbookview1.prev()" dmx-show="orderbookview1.has.prev"><i
+                                                class="fa fa-angle-left"></i></a></div>
+                                    <div class="align-self-center">
+                                        <p class="m-0 p-0">Page {{orderbookview1.page}} of {{orderbookview1.pages}}</p>
+                                    </div>
+                                    <div><a class="btn btn-light" href="javascript:void(0)"
+                                            dmx-on:click="orderbookview1.next()" dmx-show="orderbookview1.has.next"><i
+                                                class="fa fa-angle-right"></i></a></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+            </div>
+    </div>
+    </main>
+    <div>
+        <foot-vue />
+    </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
+    <script>
+        (function () {
+            "use strict";
+            window.addEventListener(
+                "load",
+                function () {
+                    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                    var forms = document.getElementsByClassName("needs-validation");
+                    // Loop over them and prevent submission
+                    var validation = Array.prototype.filter.call(
+                        forms,
+                        function (form) {
+                            form.addEventListener(
+                                "submit",
+                                function (event) {
+                                    if (form.checkValidity() === false) {
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                    }
+                                    form.classList.add("was-validated");
+                                },
+                                false
+                            );
+                        }
+                    );
+                },
+                false
+            );
+        })();
+        var disabletab = document.getElementsByClassName("disabled-input");
+        for (var i = 0; i < disabletab.length; i++) {
+            disabletab[i].setAttribute("tabindex", "-1");
+        }
+        var toastElList = [].slice.call(document.querySelectorAll(".toast"));
+        var toastList = toastElList.map(function (toastEl) {
+            return new bootstrap.Toast(toastEl, option);
+        });
+        var tooltipTriggerList = [].slice.call(
+            document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        );
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    </script>
+</html>
