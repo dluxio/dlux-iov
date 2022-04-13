@@ -105,7 +105,7 @@
                               -webkit-box-orient: vertical;
                             "
                           >
-                            {{getSetDetails(set.script,'Description')}}
+                            {{computedsets[set.script] ? computedsets[set.script].set.Description : '...'}}
                           </p>
                         </div>
                           <img class="img-fluid rounded max-80" :src="getSetPhotos(set.script, '', 'wrapped')"></img>

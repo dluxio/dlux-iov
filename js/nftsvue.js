@@ -304,6 +304,7 @@ var app = new Vue({
       nftsets: [],
       nftscripts: {},
       loadsscripts: {},
+      computedsets: {},
     };
   },
   components: {
@@ -600,89 +601,73 @@ var app = new Vue({
       this.barhive = "";
       this.barhbd = "";
     },
-    getNFTsets(){
+    getNFTsets() {
       fetch(this.lapi + "/api/sets")
         .then((response) => response.json())
         .then((data) => {
           console.log(data);
           this.nftsets = data.result;
+          for(let i = 0; i < this.nftsets.length; i++) {
+            this.callScript({script: this.nftsets[i].script, uid: "0"});
+          }
         });
     },
-    evalScript(id){
-
-    },
-    getSetPhotos(s, i, c){
-      var dummySet = {
-        script: s,
-        uid: i
-      }
-      this.callScript(dummySet)
-      .then(SVG =>{
-        let r = ''
-        try{r = SVG.set[c];}catch(e){
-            r = ''
-        }
-        return `https://ipfs.io/ipfs/${r}`
-      })
-    },
-    getSetDetails(s, o){
-      var dummySet = {
-        script: s,
-        uid: "0"
-      }
-      this.callScript(dummySet)
-      .then(SVG =>{
-        return SVG.set[o] || 'Not Specified'
-      })
-    },
-    getSetDetailsColors (s, i, c){
-      var dummySet = {
-        script: s,
-        uid: "0"
-      }
-      this.callScript(dummySet)
-      .then(SVG =>{
-        let r = ''
-        try{r=`${SVG.set.Color1},${SVG.set.Color2}`}catch(e){
-            console.log(e)
-            r = 'chartreuse,lawngreen'
-        }
-        return `linear-gradient(${r})`
-      })
+    pullScript(id) {
+      return new Promise((resolve, reject) => {
+        if (!this.loadsscripts[id])
+          this.loadsscripts[id] = new Date().getTime();
+          fetch(`https://ipfs.io/ipfs/${id}`)
+            .then((response) => response.text())
+            .then((data) => {
+              this.nftscripts[id] = data;
+              resolve("OK");
+            });
+        });
     },
     callScript(o) {
       return new Promise((resolve, reject) => {
-
-        function sanity(o){
-          if (this.nftscripts[o.script]) {
-            const code = `(//${this.nftscripts[o.script]}\n)("${o.uid}")`;
-            resolve(eval(code));
-          } else if (
-            this.loadsscripts[o.script] > 0 &&
-            this.loadsscripts[o.script] > 10
-          ) {
-            setTimeout(
-              function () {
-                this.loadsscripts[o.script]++; //THIS WILL GET WEIRD
-                sanity(o);
-              }.bind(this),
-              1000
-            );
-          } else {
-            this.loadsscripts[o.script] = 1;
-            fetch(`https://ipfs.io/ipfs/${o.script}`)
-              .then((response) => response.text())
-              .then((data) => {
-                this.nftscripts[o.script] = data;
-                sanity(o);
-              });
-          }
+        if (this.nftscripts[o.script]) {
+          console.log("script already loaded");
+          const code = `(//${this.nftscripts[o.script]}\n)("${
+            o.uid ? o.uid : 0
+          }")`;
+          this.computedsets[o.script] = eval(code);
+          resolve(this.computedsets[o.script]);
+        } else {
+          this.pullScript(o.script).then((empty) => {
+            this.callScript(o).then((r) => {
+              console.log({ r });
+              resolve(r);
+            });
+          });
         }
       });
     },
-    makeLink(a,b){
-      return a + b
+    makeLink(a, b) {
+      return a + b;
     },
+    getSetPhotos(s, c) {
+      return this.computedsets[s] ? `https://ipfs.io/ipfs/${this.computedsets[s].set[c]}` : ''
+    },
+    getSetDetails(s, o) {
+      return this.computedsets[s] ? this.computedsets[s].set[o] : "Not Specified";
+    },
+    getSetDetailsColors(s) {
+     let r = "chartreuse,lawngreen";
+        if (this.computedsets[s]){
+          try {
+            r = `${this.computedsets[s].SVG.set.Color1},${
+              this.computedsets[s].SVG.set.Color2
+                ? this.computedsets[s].SVG.set.Color2
+                : this.computedsets[s].SVG.set.Color1
+            }`;
+          } catch (e) {
+            console.log(e);
+            r = "chartreuse,lawngreen";
+          }
+        }
+        return `linear-gradient(${r})`;
+      },
     getTokenUser(user) {
       if (user)
         fetch(this.lapi + "/@" + user)
@@ -762,7 +747,6 @@ var app = new Vue({
             this.barhbd = this.accountinfo.hbd_balance;
           });
     },
-    
   },
   mounted() {
     this.getNFTsets();
@@ -774,3 +758,46 @@ var app = new Vue({
   },
   computed: {},
 });
+
+
+/*
+getSetPhotos(s, i, c){
+      var dummySet = {
+        script: s,
+        uid: i
+      }
+      this.callScript(dummySet)
+      .then(SVG =>{
+        let r = ''
+        try{r = SVG.set[c];}catch(e){
+            r = ''
+        }
+        return `https://ipfs.io/ipfs/${r}`
+      })
+    },
+    getSetDetails(s, o){
+      var dummySet = {
+        script: s,
+        uid: "0"
+      }
+      this.callScript(dummySet)
+      .then(SVG =>{
+        return SVG.set[o] || 'Not Specified'
+      })
+    },
+    getSetDetailsColors (s, i, c){
+      var dummySet = {
+        script: s,
+        uid: "0"
+      }
+      this.callScript(dummySet)
+      .then(SVG =>{
+        let r = ''
+        try{r=`${SVG.set.Color1},${SVG.set.Color2}`}catch(e){
+            console.log(e)
+            r = 'chartreuse,lawngreen'
+        }
+        return `linear-gradient(${r})`
+      })
+    },
+*/
