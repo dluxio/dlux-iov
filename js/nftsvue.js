@@ -605,10 +605,12 @@ var app = new Vue({
       fetch(this.lapi + "/api/sets")
         .then((response) => response.json())
         .then((data) => {
-          console.log(data);
-          this.nftsets = data.result;
-          for(let i = 0; i < this.nftsets.length; i++) {
-            this.callScript({script: this.nftsets[i].script, uid: "0"});
+          for (let i = 0; i < data.result.length; i++) {
+            this.callScript({ script: data.result[i].script, uid: "0" })
+              .then((d) => {
+                data.result[i].computed = d
+                this.nftsets.push(data.result[i]);
+              })
           }
         });
     },
@@ -631,12 +633,10 @@ var app = new Vue({
           const code = `(//${this.nftscripts[o.script]}\n)("${
             o.uid ? o.uid : 0
           }")`;
-          this.computedsets[o.script] = eval(code);
-          resolve(this.computedsets[o.script]);
+          resolve(eval(code));
         } else {
           this.pullScript(o.script).then((empty) => {
             this.callScript(o).then((r) => {
-              console.log({ r });
               resolve(r);
             });
           });
@@ -647,19 +647,16 @@ var app = new Vue({
       return a + b;
     },
     getSetPhotos(s, c) {
-      return this.computedsets[s] ? `https://ipfs.io/ipfs/${this.computedsets[s].set[c]}` : ''
-    },
-    getSetDetails(s, o) {
-      return this.computedsets[s] ? this.computedsets[s].set[o] : "Not Specified";
+      return s.set ? `https://ipfs.io/ipfs/${s.set[c]}` : ''
     },
     getSetDetailsColors(s) {
      let r = "chartreuse,lawngreen";
-        if (this.computedsets[s]){
+        if (s.set){
           try {
-            r = `${this.computedsets[s].SVG.set.Color1},${
-              this.computedsets[s].SVG.set.Color2
-                ? this.computedsets[s].SVG.set.Color2
-                : this.computedsets[s].SVG.set.Color1
+            r = `${s.set.Color1},${
+              s.set.Color2
+                ? s.set.Color2
+                : s.set.Color1
             }`;
           } catch (e) {
             console.log(e);

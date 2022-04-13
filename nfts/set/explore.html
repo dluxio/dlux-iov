@@ -63,11 +63,11 @@
           </div>
 
           <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3">
-            <div class="col mb-4" v-for="set in nftsets">
+            <div class="col mb-4" v-for="set in nftsets" :key="set.script">
               <a :href="makeLink('/nfts/set/', set.set)" style="text-decoration: none" >
                 <div class="card bg-dark text-white">
                   <div>
-                      <img class="img-fluid featured-img" :src="getSetPhotos(set.script, '', 'featured')"></img>
+                      <img class="img-fluid featured-img" :src="makeLink('https://ipfs.io/ipfs/', set.computed.set.featured)"></img>
                     <div
                       class="center-circle rounded-circle bg-darker"
                       style="border: solid black 3px"
@@ -76,17 +76,15 @@
                         class="rounded-circle"
                         style="width: 100px"
                       >
-                        <img class="img-fluid rounded-circle" :src="getSetPhotos(set.script, '', 'logo')"></img>
+                        <img class="img-fluid rounded-circle" :src="makeLink('https://ipfs.io/ipfs/', set.computed.set.logo)"></img>
                       </div>
                     </div>
                   </div>
                   <div
                     class="card-footer p-0"
                     style="border: none"
-                    :style="{'background': getSetDetailsColors(set.script, 'body')}"
+                    :style="{'background': getSetDetailsColors(set.computed, 'body')}"
                   >
-<!-- 
-                    :style="{'background': getSetDetailsColors(set.script, 'body')}" -->
                     <div
                       class="m-3 p-2 rounded"
                       style="background-color: rgba(0, 0, 0, 0.7)"
@@ -105,10 +103,10 @@
                               -webkit-box-orient: vertical;
                             "
                           >
-                            {{computedsets[set.script] ? computedsets[set.script].set.Description : '...'}}
+                            {{set.computed.set ? set.computed.set.Description : '...'}}
                           </p>
                         </div>
-                          <img class="img-fluid rounded max-80" :src="getSetPhotos(set.script, '', 'wrapped')"></img>
+                          <img class="img-fluid rounded max-80" :src="makeLink('https://ipfs.io/ipfs/', set.computed.set.wrapped)"></img>
                       </div>
                     </div>
                   </div>
