@@ -7,7 +7,6 @@
   "background_color": "#111222",
   "theme_color": "#111222",
   "description": "Build your future: decentralized XR/NFT platform",
-  "apple-touch-icon": "img/dlux_icon_192.png",
   "icons": [{
     "src": "img/dlux-hive-logo-alpha.svg",
     "sizes": "192x192",
