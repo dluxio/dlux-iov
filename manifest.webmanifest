@@ -18,7 +18,7 @@
     "type": "image/png",
     "purpose": "any"
   },{
-    "src": "img/dlux_icon_192.png",
+    "src": "img/dlux-icon-192.png",
     "sizes": "192x192",
     "type": "image/png",
     "purpose": "any maskable"

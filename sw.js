@@ -24,7 +24,7 @@ var urlsToCache = [
   "hub/Crater.glb",
   "hub/index.html",
   "img/dex-vr-comp.jpg",
-  "img/dlux_icon_192.png",
+  "img/dlux-icon-192.png",
   "img/dlux-hive-logo-alpha.svg",
   "img/dlux-logo-icon.png",
   "img/favicon.ico",
