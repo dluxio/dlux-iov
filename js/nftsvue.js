@@ -898,14 +898,16 @@ var app = new Vue({
               this.NFTselect.searchDeep &&
               this.NFTselect.searchTerm
             ) {
-              if (this.NFTselect.searchDeepK){
-                if(r.attributes[this.NFTselect.searchDeepKey] == this.NFTselect.searchTerm){
-                  this.selectedNFTs.push(this.allSearchNFTs[i]);
-                }
-              } else {
                 for (var j = 0; j < r.attributes.length; j++) {
                   var keys = Object.keys(r.attributes[j]);
-                  if (index ||
+                  if (
+                    this.NFTselect.searchDeepK &&
+                    r.attributes[j][this.NFTselect.searchDeepKey] ==
+                      this.NFTselect.searchTerm
+                  ) {
+                    this.selectedNFTs.push(this.allSearchNFTs[i]);
+                    break
+                  } else if (index ||
                     this.NFTselect.searchDeepKey &&
                     keys[0].includes(this.NFTselect.searchDeepKey) &&
                     r.attributes[j][keys[0]]
@@ -949,7 +951,7 @@ var app = new Vue({
                     break;
                   }
                 }
-              }
+              
             } else {
               this.selectedNFTs.push(r);
               this.itemModal.items = this.selectedNFTs;
