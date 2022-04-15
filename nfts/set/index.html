@@ -114,12 +114,22 @@
                               <span v-if="NFTselect.sort == 'owner' && NFTselect.dir == 'desc'">Owner: Z to A</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
-                              <li><a class="dropdown-item" href="#" @click="setValue('NFTselect.sort','uid');setValue('NFTselect.dir','asc');selectNFTs()">UID: Low to High</a></li>
-                              <li><a class="dropdown-item" href="#" @click="setValue('NFTselect.sort','uid');setValue('NFTselect.dir','desc');selectNFTs()">UID: High to Low</a></li>
-                              <li><a class="dropdown-item" href="#" @click="setValue('NFTselect.sort','owner');setValue('NFTselect.dir','asc');selectNFTs()">Owner: Ascending</a></li>
-                              <li><a class="dropdown-item" href="#" @click="setValue('NFTselect.sort','owner');setValue('NFTselect.dir','desc');selectNFTs()">Ownder: Descending</a></li>
+                              <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'uid' && NFTselect.dir == 'asc'}" href="#" @click="setValue('NFTselect.sort','uid');setValue('NFTselect.dir','asc');selectNFTs()">UID: Low to High</a></li>
+                              <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'uid' && NFTselect.dir == 'desc'}" href="#" @click="setValue('NFTselect.sort','uid');setValue('NFTselect.dir','desc');selectNFTs()">UID: High to Low</a></li>
+                              <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'owner' && NFTselect.dir == 'asc'}" href="#" @click="setValue('NFTselect.sort','owner');setValue('NFTselect.dir','asc');selectNFTs()">Owner: A to Z</a></li>
+                              <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'owner' && NFTselect.dir == 'desc'}" href="#" @click="setValue('NFTselect.sort','owner');setValue('NFTselect.dir','desc');selectNFTs()">Ownder: Z to A</a></li>
                             </ul>
-                          </div>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+                              <span v-if="NFTselect.sort == 'uid'">Hide Deleted</span>
+                              <span v-if="NFTselect.sort == 'owner'">Show Deleted</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
+                              <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'uid'}" href="#" @click="setValue('NFTselect.sort','uid');setValue('NFTselect.dir','asc');selectNFTs()">Hide Deleted</a></li>
+                              <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'owner'}" href="#" @click="setValue('NFTselect.sort','owner');setValue('NFTselect.dir','asc');selectNFTs()">Show Deleted</a></li>
+                            </ul>
+                        </div>
 
                 </div>
                 <div class="row row-cols-xl-6 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
