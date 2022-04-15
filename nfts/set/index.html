@@ -30,7 +30,7 @@
 
             <div class="container-fluid">
 
-                <div class="card bg-dark text-white">
+                <div class="card bg-dark text-white mb-3">
                     <div>
                         <img class="banner-img w-100 img-fluid"
                                             :src="makeLink('https://ipfs.io/ipfs/', focusSet.computed.set ? focusSet.computed.set.banner : '')"></img>
@@ -125,18 +125,18 @@
                     </div>
                 </div>
                 
-                </p>
-                <div class="collapse" id="collapseExample">
-                  <div class="card card-body">
-                    Some placeholder content for the collapse component. This panel is hidden by default but revealed when the user activates the relevant trigger.
+                
+                <div class="collapse show" id="collapseExample">
+                  <div class="card card-body bg-dark">
+                    Place Filter controls here
                   </div>
                 </div>
                 <div class="text-center my-3 d-flex align-items-center">
                     
                     <div class="d-flex w-100">
                         <div class="me-2">
-                            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-                                Filters
+                            <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                                <i class="fa-solid fa-filter me-2"></i> Filter
                               </button>
                     </div>
                                                
