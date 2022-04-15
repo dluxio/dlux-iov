@@ -723,6 +723,7 @@ var app = new Vue({
     selectNFTs() {
       console.log(1);
       this.allSearchNFTs = this.allNFTs;
+      console.log('all length:', this.allNFTs.length)
       this.NFTselect.amount = 30
       this.selectedNFTs = [];
       this.allSearchNFTs.sort((a, b) => {
@@ -743,7 +744,7 @@ var app = new Vue({
           else return this.NFTselect.dir == "asc" ? 1 : -1;
         }
       });
-      console.log(2);
+      console.log('length', this.allSearchNFTs.length);
       for (
         var i = this.NFTselect.start;
         i < this.NFTselect.amount && i < this.allSearchNFTs.length;
