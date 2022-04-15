@@ -135,9 +135,9 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownFilterButton">
                               <li><a class="dropdown-item" :class="{'active':!NFTselect.searchDeep}" href="#/" @click="setValue('NFTselect.searchDeep',false)">Search UIDs and Owners</a></li>
-                              <li><a class="dropdown-item" :class="{'active':NFTselect.searchDeep && ! searchDeepK}" href="#/" @click="setValue('NFTselect.searchDeep',true);setValue('searchDeepK', false)">Search Attributes</a></li>
+                              <li><a class="dropdown-item" :class="{'active':NFTselect.searchDeep && ! NFTselect.searchDeepK}" href="#/" @click="setValue('NFTselect.searchDeep',true);setValue('NFTselect.searchDeepK', false)">Search Attributes</a></li>
                               <li v-if="!focusSetCalc.attributeKeys.length"><a class="dropdown-item" :class="{'active':NFTselect.searching}" href="#/" @click="selectNFTs(true, true)">Index Set (Pre-Search)</a></li>
-                              <li v-if="!focusSetCalc.attributeKeys.length"><a class="dropdown-item" :class="{'active':NFTselect.searchDeepK}" href="#/" @click="setValue('searchDeepK', true)">Search in Attribute</a></li>
+                              <li v-if="!focusSetCalc.attributeKeys.length"><a class="dropdown-item" :class="{'active':NFTselect.searchDeepK}" href="#/" @click="setValue('NFTselect.searchDeepK', true)">Search in Attribute</a></li>
                             </ul>
                     <button class="btn btn-dark border-secondary text-white-50 w-100 dropdown-toggle" type="button" id="dropdownFilterButton2" data-bs-toggle="dropdown" aria-expanded="false" v-if="NFTselect.searchDeepK">
                                 <span>Attribute:</span>
@@ -149,11 +149,11 @@
                             </ul>
                     <button class="btn btn-dark border-secondary text-white-50 w-100 dropdown-toggle" type="button" id="dropdownFilterButton3" data-bs-toggle="dropdown" aria-expanded="false" v-if="NFTselect.searchDeepKey">
                                 <span>Attribute:</span>
-                              <span v-if="focusSetCalc.attributes[NFTselect.searchDeepKey].includes(NFTselect.searchTerm)">{{NFTselect.searchTerm}}</span>
+                              <span v-if="includes(focusSetCalc.attributes[NFTselect.searchDeepKey], NFTselect.searchTerm)">{{NFTselect.searchTerm}}</span>
                               <span v-else>Select</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownFilterButton3">
-                              <li v-for="l in focusSetCalc.attributes[NFTselect.searchDeepKey]"><a class="dropdown-item" :class="{'active':focusSetCalc.attributes[NFTselect.searchDeepKey].includes(NFTselect.searchTerm)}" href="#/" @click="setValue('NFTselect.searchTerm', l)">{{l}} ({{focusSetCalc.attributesC[NFTselect.searchDeepKey][l]}})</a></li>
+                              <li v-for="l in focusSetCalc.attributes[NFTselect.searchDeepKey]"><a class="dropdown-item" :class="{'active': includes(focusSetCalc.attributes[NFTselect.searchDeepKey], NFTselect.searchTerm)}" href="#/" @click="setValue('NFTselect.searchTerm', l)">{{l}} ({{focusSetCalc.attributesC[NFTselect.searchDeepKey][l]}})</a></li>
                             </ul>
                   </div>
                 </div>

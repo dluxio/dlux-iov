@@ -835,6 +835,9 @@ var app = new Vue({
     printProps(obj){
       return Object.keys(obj).map(key => key + ': ' + obj[key]).join(', ');
     },
+    includes(a,b){
+      return a.includes(b)
+    },
     selectNFTs(reset, index) {
       if(reset)this.NFTselect.amount = 30
       var lc = this.NFTselect.searchTerm.toLowerCase();
