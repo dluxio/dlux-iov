@@ -129,7 +129,7 @@
                                         :href="makeLink('/nfts/set/',item.setname)" class="lead" style="color: black">{{item.setname}}
                                         NFT</a></h3>
                             </div>
-                            <a href="#itemModal" class="a-1" data-toggle="modal"
+                            <a href="#itemModal" class="a-1" data-bs-toggle="modal"
                                 @click="modalIndex('itemModal',item.uid);setValue('itemModal.hidden', false)">
                                 <div class="card-img-top p-1"
                                     :alt="makeLink('image-', item.setname, ['-', item.uid])" v-html="item.HTML"></div>
