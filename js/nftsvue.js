@@ -763,7 +763,7 @@ var app = new Vue({
             if (this.NFTselect.searchDeep && this.NFTselect.searchTerm) {
               for(var j = 0; j < r.attributes.length; j++){
                 var keys = Object.keys(r.attributes[j]);
-                if(this.NFTselect.searchDeepKey && keys[j].includes(this.NFTselect.searchDeepKey) || r.attributes[j][keys[0]].includes(this.NFTselect.searchTerm)){
+                if(this.NFTselect.searchDeepKey && keys[0].includes(this.NFTselect.searchDeepKey) || r.attributes[j][keys[0]].includes(this.NFTselect.searchTerm)){
                   this.selectedNFTs.push(r);
                   this.itemModal.items = this.selectedNFTs;
                   this.itemModal.item = this.selectedNFTs[0];
