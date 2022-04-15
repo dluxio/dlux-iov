@@ -921,7 +921,7 @@ var app = new Vue({
                       }
                       if (
                         !this.focusSetCalc.attributes[keys[0]].includes(
-                          r.attributes[j][keys[0]].toLowerCase()
+                          r.attributes[j][keys[0]]
                         )
                       ) {
                         this.focusSetCalc.attributes[keys[0]].push(
