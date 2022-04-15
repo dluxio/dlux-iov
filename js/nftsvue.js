@@ -332,6 +332,8 @@ var app = new Vue({
         amount: 30,
         searchTerm: "",
         searchType: "",
+        dir: "asc",
+        sort: "uid",
         showDeleted: false,
       },
       allNFTs: [],
@@ -372,6 +374,9 @@ var app = new Vue({
       }
       this[modal].index = i;
       this[modal].item = this[modal].items[this[modal].index];
+    },
+    pageCtrl(controller){
+
     },
     removeOp(txid) {
       if (this.toSign.txid == txid) {
@@ -700,7 +705,23 @@ var app = new Vue({
         });
     },
     selectNFTs() {
-      for (var i = this.NFTselect.start; i < this.NFTselect.amount; i++) {
+      this.allSearchNFTs = this.allNFTs;
+      this.allSearchNFTs.sort((a, b) => {
+        if (this.NFTselect.sort == 'uid'){
+          if (this.NFTselect.dir == "asc")
+            return this.Base64toNumber(a[this.NFTselect.sort]) - this.Base64toNumber(b[this.NFTselect.sort])
+          else return this.Base64toNumber(b[this.NFTselect.sort]) - this.Base64toNumber(a[this.NFTselect.sort])
+        } else {
+          if (this.NFTselect.dir == "asc")
+            return a[this.NFTselect.sort] - b[this.NFTselect.sort];
+          else return b[this.NFTselect.sort] - a[this.NFTselect.sort];
+        }
+      })
+      for (
+        var i = this.NFTselect.start;
+        i < this.NFTselect.amount && i < this.allSearchNFTs.length;
+        i++
+      ) {
         if (this.NFTselect.showDeleted && this.allSearchNFTs[i].owner == "D") {
           //remove entry
           this.allSearchNFTs.splice(i, 1);
