@@ -837,7 +837,7 @@ var app = new Vue({
     },
     selectNFTs(reset, index) {
       if(reset)this.NFTselect.amount = 30
-      var lc = this.NFTselect.searchTerm.toLowerCase();
+      var lc = typeof this.NFTselect.searchTerm == 'string' ? this.NFTselect.searchTerm.toLowerCase() : ''
       if(index){
         this.NFTselect.searchDeep = true
         this.NFTselect.searchTerm = /.*/
@@ -877,7 +877,7 @@ var app = new Vue({
           //remove entry
           this.allSearchNFTs.splice(i, 1);
           i--;
-        } else if (
+        } else if ( !index &&
           !this.NFTselect.searchDeep &&
           this.NFTselect.searchTerm &&
           !(
@@ -907,7 +907,7 @@ var app = new Vue({
               } else {
                 for (var j = 0; j < r.attributes.length; j++) {
                   var keys = Object.keys(r.attributes[j]);
-                  if (
+                  if (index ||
                     this.NFTselect.searchDeepKey &&
                     keys[0].includes(this.NFTselect.searchDeepKey) &&
                     r.attributes[j][keys[0]]
