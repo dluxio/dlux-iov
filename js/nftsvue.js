@@ -892,7 +892,6 @@ var app = new Vue({
         } else {
           this.callScript(this.allSearchNFTs[i]).then((r) => {
             k++
-            if (k == i)this.NFTselect.searching = false;
             if (
               index ||
               this.NFTselect.searchDeep &&
@@ -905,9 +904,7 @@ var app = new Vue({
                     r.attributes[j][this.NFTselect.searchDeepKey] ==
                       this.NFTselect.searchTerm
                   ) {
-                    this.selectedNFTs.push(r);
-                    this.itemModal.items = this.selectedNFTs;
-                    this.itemModal.item = this.selectedNFTs[0];
+                    this.selectedNFTs.push(r)
                     break
                   } else if (index ||
                     this.NFTselect.searchDeepKey &&
@@ -917,9 +914,7 @@ var app = new Vue({
                       .includes(lc)
                   ) {
                     if (!index) {
-                      this.selectedNFTs.push(r);
-                      this.itemModal.items = this.selectedNFTs;
-                      this.itemModal.item = this.selectedNFTs[0];
+                      this.selectedNFTs.push(r)
                     } else {
                       if (!this.focusSetCalc.attributeKeys.includes(keys[0])) {
                         this.focusSetCalc.attributeKeys.push(keys[0]);
@@ -941,8 +936,6 @@ var app = new Vue({
                         this.focusSetCalc.attributesC[keys[0]][r.attributes[j][keys[0]]]++
                       }
                     }
-                    this.itemModal.items = this.selectedNFTs;
-                    this.itemModal.item = this.selectedNFTs[0];
                     if(!index)break;
                   } else if (
                     !this.NFTselect.searchDeepKey &&
@@ -950,17 +943,20 @@ var app = new Vue({
                       .toLowerCase()
                       .includes(lc)
                   ) {
-                    this.selectedNFTs.push(r);
-                    this.itemModal.items = this.selectedNFTs;
-                    this.itemModal.item = this.selectedNFTs[0];
+                    this.selectedNFTs.push(r)
                     break;
                   }
                 }
               
             } else {
-              this.selectedNFTs.push(r);
-              this.itemModal.items = this.selectedNFTs;
-              this.itemModal.item = this.selectedNFTs[0];
+              this.selectedNFTs.push(r)
+            }
+            if (k == i) {
+              this.NFTselect.searching = false;
+              if (this.selectedNFTs.length) {
+                this.itemModal.items = this.selectedNFTs;
+                this.itemModal.item = this.selectedNFTs[0];
+              }
             }
           });
         }
