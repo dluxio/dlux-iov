@@ -110,7 +110,8 @@
                             <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
                               <span v-if="NFTselect.sort == 'uid' && NFTselect.dir == 'asc'">UID: Low to High</span>
                               <span v-if="NFTselect.sort == 'uid' && NFTselect.dir == 'desc'">UID: High to Low</span>
-                              
+                              <span v-if="NFTselect.sort == 'owner' && NFTselect.dir == 'asc'">Owner: A to Z</span>
+                              <span v-if="NFTselect.sort == 'owner' && NFTselect.dir == 'desc'">Owner: Z to A</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
                               <li><a class="dropdown-item" href="#" @click="setValue('NFTselect.sort','uid');setValue('NFTselect.dir','asc');selectNFTs()">UID: Low to High</a></li>
