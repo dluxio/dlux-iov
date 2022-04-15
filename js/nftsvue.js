@@ -677,6 +677,7 @@ var app = new Vue({
         });
     },
     getNFTset(set) {
+      if(set != "index.html")
       fetch(this.lapi + "/api/set/" + set)
         .then((response) => response.json())
         .then((data) => {
