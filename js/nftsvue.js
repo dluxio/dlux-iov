@@ -868,7 +868,13 @@ var app = new Vue({
     //if (user != "GUEST") this.getTokenUser(user);
     //if (user != "GUEST") this.getHiveUser(user);
   },
-  computed: {},
+  computed: {
+    location: {
+      get(){
+        return location
+      }
+    }
+  },
 });
 
 /*
