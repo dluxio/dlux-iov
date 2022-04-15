@@ -721,6 +721,9 @@ var app = new Vue({
             location.reload();
           });
     },
+    printProps(obj){
+      return Object.keys(obj).map(key => key + ': ' + obj[key]).join(', ');
+    },
     selectNFTs(reset) {
       if(reset)this.NFTselect.amount = 30
       this.allSearchNFTs = [...this.allNFTs];
