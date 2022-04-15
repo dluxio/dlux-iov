@@ -343,6 +343,7 @@ var app = new Vue({
         dir: "asc",
         sort: "uid",
         showDeleted: false,
+        searching: false
       },
       allNFTs: [],
       itemModal: {
@@ -723,6 +724,9 @@ var app = new Vue({
     selectNFTs(reset) {
       if(reset)this.NFTselect.amount = 30
       this.allSearchNFTs = [...this.allNFTs];
+      if (this.NFTselect.searchDeep)
+        this.NFTselect.amount = this.allSearchNFTs.length;
+      this.allSearchNFTs.searching = true
       this.selectedNFTs = [];
       this.allSearchNFTs.sort((a, b) => {
         if (this.NFTselect.sort == "uid") {
@@ -742,6 +746,7 @@ var app = new Vue({
           else return this.NFTselect.dir == "asc" ? 1 : -1;
         }
       });
+      var k = 0
       for (
         var i = this.NFTselect.start;
         i < this.NFTselect.amount && i < this.allSearchNFTs.length;
@@ -768,6 +773,8 @@ var app = new Vue({
           i--;
         } else {
           this.callScript(this.allSearchNFTs[i]).then((r) => {
+            k++
+            if (k == i)this.allSearchNFTs.searching = false
             if (
               this.NFTselect.searchDeep &&
               this.NFTselect.searchTerm
