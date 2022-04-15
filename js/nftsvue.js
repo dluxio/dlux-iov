@@ -751,24 +751,47 @@ var app = new Vue({
           //remove entry
           this.allSearchNFTs.splice(i, 1);
           i--;
-        } else if (!this.NFTselect.searchDeep && this.NFTselect.searchTerm &&
-            !(this.allSearchNFTs[i].uid.includes(this.NFTselect.searchTerm) ||
-          this.allSearchNFTs[i].owner.includes(this.NFTselect.searchTerm))
+        } else if (
+          !this.NFTselect.searchDeep &&
+          this.NFTselect.searchTerm &&
+          !(
+            this.allSearchNFTs[i].uid.includes(
+              this.NFTselect.searchTerm
+            ) ||
+            this.allSearchNFTs[i].owner.includes(
+              this.NFTselect.searchTerm.toLowerCase()
+            )
+          )
         ) {
           //remove entry
           this.allSearchNFTs.splice(i, 1);
           i--;
         } else {
           this.callScript(this.allSearchNFTs[i]).then((r) => {
-            if (this.NFTselect.searchDeep && this.NFTselect.searchTerm) {
-              for(var j = 0; j < r.attributes.length; j++){
+            if (
+              this.NFTselect.searchDeep &&
+              this.NFTselect.searchTerm
+            ) {
+              for (var j = 0; j < r.attributes.length; j++) {
                 var keys = Object.keys(r.attributes[j]);
-                if(this.NFTselect.searchDeepKey && keys[0].includes(this.NFTselect.searchDeepKey) && r.attributes[j][keys[0]].includes(this.NFTselect.searchTerm)){
+                console.log(
+                  r.attributes[j][keys[0]],
+                  this.NFTselect.searchTerm,
+                  keys[0]
+                );
+                if (
+                  this.NFTselect.searchDeepKey &&
+                  keys[0].includes(this.NFTselect.searchDeepKey) &&
+                  r.attributes[j][keys[0]].toLowerCase().includes(this.NFTselect.searchTerm.toLowerCase())
+                ) {
                   this.selectedNFTs.push(r);
                   this.itemModal.items = this.selectedNFTs;
                   this.itemModal.item = this.selectedNFTs[0];
                   break;
-                } else if(!this.NFTselect.searchDeepKey && r.attributes[j][keys[0]].includes(this.NFTselect.searchTerm)){
+                } else if (
+                  !this.NFTselect.searchDeepKey &&
+                  r.attributes[j][keys[0]].toLowerCase().includes(this.NFTselect.searchTerm.toLowerCase())
+                ) {
                   this.selectedNFTs.push(r);
                   this.itemModal.items = this.selectedNFTs;
                   this.itemModal.item = this.selectedNFTs[0];
