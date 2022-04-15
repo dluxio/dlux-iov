@@ -752,8 +752,8 @@ var app = new Vue({
           i--;
         } else if (
           (!this.NFTselect.searchDeep && this.NFTselect.searchTerm &&
-            !(!this.allSearchNFTs[i].uid.includes(this.NFTselect.searchTerm)) ||
-          !this.allSearchNFTs[i].owner.includes(this.NFTselect.searchTerm))
+            !(this.allSearchNFTs[i].uid.includes(this.NFTselect.searchTerm)) ||
+          this.allSearchNFTs[i].owner.includes(this.NFTselect.searchTerm))
         ) {
           //remove entry
           this.allSearchNFTs.splice(i, 1);
