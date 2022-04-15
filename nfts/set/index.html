@@ -122,12 +122,12 @@
                         </div>
                         <div class="dropdown">
                             <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
-                              <span v-if="NFTselect.sort == 'uid'">Hide Deleted</span>
-                              <span v-if="NFTselect.sort == 'owner'">Show Deleted</span>
+                              <span v-if="!NFTselect.showDeleted">Hiding Deleted</span>
+                              <span v-if="NFTselect.showDeleted">Showing Deleted</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
-                              <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'uid'}" href="#" @click="setValue('NFTselect.sort','uid');setValue('NFTselect.dir','asc');selectNFTs()">Hide Deleted</a></li>
-                              <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'owner'}" href="#" @click="setValue('NFTselect.sort','owner');setValue('NFTselect.dir','asc');selectNFTs()">Show Deleted</a></li>
+                              <li><a class="dropdown-item" :class="{'active':NFTselect.showDeleted}" href="#" @click="setValue('NFTselect.showDeleted', false);selectNFTs()">Hide Deleted</a></li>
+                              <li><a class="dropdown-item" :class="{'active':!NFTselect.showDeleted}" href="#" @click="setValue('NFTselect.showDeleted', true);selectNFTs()">Show Deleted</a></li>
                             </ul>
                         </div>
 
