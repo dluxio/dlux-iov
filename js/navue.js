@@ -341,24 +341,23 @@ export default {
         <li class="nav-item"><a class="nav-link" href="/docs/"><i class="fa-solid fa-book me-2"></i>DOCS</a></li>
       </ul>
 
-      <div v-show="!user">
-	      <ul class="navbar-nav d-flex align-items-center me-5" id="loginMenu" >
-	        <li class="nav-item"><a class="nav-link acct-link" href="/about/">About</a></li>
-          <li class="nav-item"><a class="nav-link acct-link" href="/docs/">Docs</a></li>
-	        <li class="nav-item"><a class="nav-link acct-link" href="https://signup.hive.io/">Get Account</a></li>
+
+	      <ul class="navbar-nav me-5" id="loginMenu" v-show="!user">
+	        <li class="nav-item"><a class="nav-link" href="/about/">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="/docs/">Docs</a></li>
+	        <li class="nav-item"><a class="nav-link" href="https://signup.hive.io/">Get Account</a></li>
 	        <li class="nav-item">
             <div class="input-group input-group-sm">
               <button class="btn btn-primary ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
             </div>
           </li>
       	</ul>
-      </div>
 
-      <div class="me-5" v-show="user" id="userMenu">
-	      <ul class="nav navbar-nav">
+
+	      <ul class="nav navbar-nav me-5" v-show="user" id="userMenu">
           <li class="nav-item"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus me-2"></i>MAKE</a></li>
 		      <li class="nav-item dropdown">
-		        <a class="nav-link dropdown-toggle text-white-50" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
+		        <a class="nav-link dropdown-bs-toggle text-white-50" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
 			      <img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light me-1 cover">
 			      <span id="userName">{{user}}</span></a>
             <ul class="dropdown-menu dropdown-menu-dark pt-0" aria-labelledby="userDropdown">
@@ -375,7 +374,7 @@ export default {
 		        </ul>
           </li>
         </ul>
-	    </div>
+
     </div>
   </div>
 </header>
