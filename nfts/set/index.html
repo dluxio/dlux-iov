@@ -87,15 +87,39 @@
                     </div>
                 </div>
 
-                <div class="text-center my-3">
-                    <button class="btn btn-primary mx-2" id="sortuidasc" @click="setValue('NFTselect.sort','uid');setValue('NFTselect.dir','asc');selectNFTs()">Sort
-                        id<i class="fas fa-arrow-alt-circle-up mx-2"></i></button>
-                    <button class="btn btn-primary mx-2" id="sortuiddesc" @click="setValue('NFTselect.sort','uid');setValue('NFTselect.dir','desc');selectNFTs()">Sort
-                        id<i class="fas fa-arrow-alt-circle-down mx-2"></i></button>
-                    <button class="btn btn-primary mx-2" id="sortasc" @click="setValue('NFTselect.sort','owner');setValue('NFTselect.dir','asc');selectNFTs()">Sort
-                        owner <i class="fas fa-arrow-alt-circle-up mx-2"></i></button>
-                    <button class="btn btn-primary mx-2" id="sortasc" @click="setValue('NFTselect.sort','owner');setValue('NFTselect.dir','desc');selectNFTs()">Sort
-                        owner <i class="fas fa-arrow-alt-circle-down mx-2"></i></button>
+                <div class="text-center my-3 d-flex align-items-center">
+                    
+                    <div>
+                            <div class="input-group me-2">
+                              <span class="input-group-text bg-darkg border-dark text-secondary"
+                                @click="focus('filteraccount')"><i class="fas fa-search"></i></span>
+                              <input type="text" 
+                                class="form-control bg-darkg border-dark text-info" id="filteraccount"
+                                v-model="filteraccount.value" @ aria-required="true" placeholder="Search" />
+      
+                              <span class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix"
+                                style="width: 42px">
+                                <span v-if="filteraccount.value">
+                                  <a href="#" class="badge badge-secondary" @click="setValue('filteraccount.value','')"><i
+                                      class="fas fa-times"></i></a>
+                                </span>
+                              </span>
+                            </div>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+                              <span v-if="NFTselect.sort == uid && NFTselect.dir == asc">UID: Low to High</span>
+                              <span v-if="NFTselect.sort == uid && NFTselect.dir == desc">UID: High to Low</span>
+                              
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
+                              <li><a class="dropdown-item" href="#" @click="setValue('NFTselect.sort','uid');setValue('NFTselect.dir','asc');selectNFTs()">UID: Low to High</a></li>
+                              <li><a class="dropdown-item" href="#" @click="setValue('NFTselect.sort','uid');setValue('NFTselect.dir','desc');selectNFTs()">UID: High to Low</a></li>
+                              <li><a class="dropdown-item" href="#" @click="setValue('NFTselect.sort','owner');setValue('NFTselect.dir','asc');selectNFTs()">Owner: Ascending</a></li>
+                              <li><a class="dropdown-item" href="#" @click="setValue('NFTselect.sort','owner');setValue('NFTselect.dir','desc');selectNFTs()">Ownder: Descending</a></li>
+                            </ul>
+                          </div>
+
                 </div>
                 <div class="row row-cols-xl-6 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
                     <div class="col mb-4" v-for="item in selectedNFTs">
