@@ -721,6 +721,7 @@ var app = new Vue({
           });
     },
     selectNFTs() {
+      console.log(1);
       this.allSearchNFTs = this.allNFTs;
       this.NFTselect.amount = 30
       this.selectedNFTs = [];
@@ -742,6 +743,7 @@ var app = new Vue({
           else return this.NFTselect.dir == "asc" ? 1 : -1;
         }
       });
+      console.log(2);
       for (
         var i = this.NFTselect.start;
         i < this.NFTselect.amount && i < this.allSearchNFTs.length;
@@ -749,16 +751,19 @@ var app = new Vue({
       ) {
         if (!this.NFTselect.showDeleted && this.allSearchNFTs[i].owner == "D") {
           //remove entry
+          console.log('removing entry: deleted');
           this.allSearchNFTs.splice(i, 1);
           i--;
         } else if (!this.NFTselect.searchDeep && this.NFTselect.searchTerm &&
             !(this.allSearchNFTs[i].uid.includes(this.NFTselect.searchTerm) ||
           this.allSearchNFTs[i].owner.includes(this.NFTselect.searchTerm))
         ) {
+          console.log('removing entry: no match');
           //remove entry
           this.allSearchNFTs.splice(i, 1);
           i--;
         } else {
+          console.log('calling', i)
           this.callScript(this.allSearchNFTs[i]).then((r) => {
             if (this.NFTselect.searchDeep && this.NFTselect.searchTerm) {
               var keys = Object.keys(r).attributes;
@@ -776,6 +781,7 @@ var app = new Vue({
                 }
               }
             } else {
+              console.log("pushing", this.selectedNFTs.length);
               this.selectedNFTs.push(r);
               this.itemModal.items = this.selectedNFTs;
               this.itemModal.item = this.selectedNFTs[0];
