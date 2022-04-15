@@ -40,6 +40,13 @@ console.log({
   lapi,
 });
 
+Vue.directive("scroll", {
+  inserted: function (el, binding) {
+    const onScrollCallback = binding.value;
+    window.addEventListener("scroll", () => onScrollCallback());
+  },
+});
+
 // createApp({ // vue 3
 var app = new Vue({
   // vue 2
@@ -354,6 +361,17 @@ var app = new Vue({
     "foot-vue": FootVue,
   },
   methods: {
+    handleScroll: function() {
+      const bottomOfWindow =
+        document.documentElement.scrollHeight -
+          document.documentElement.scrollTop ===
+        document.documentElement.clientHeight;
+      console.log(bottomOfWindow, window.scrollY);
+      if (window.scrollY > bottomOfWindow/2){
+        this.NFTselect.amount += 30
+        this.selectNFTs()
+      }
+    },
     modalNext(modal) {
       if (this[modal].index < this[modal].items.length - 1) {
         this[modal].index++;
