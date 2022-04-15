@@ -936,7 +936,7 @@ var app = new Vue({
                     }
                     this.itemModal.items = this.selectedNFTs;
                     this.itemModal.item = this.selectedNFTs[0];
-                    break;
+                    if(!index)break;
                   } else if (
                     !this.NFTselect.searchDeepKey &&
                     r.attributes[j][keys[0]]
