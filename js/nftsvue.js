@@ -837,10 +837,12 @@ var app = new Vue({
     },
     selectNFTs(reset, index) {
       if(reset)this.NFTselect.amount = 30
+      var lc = this.NFTselect.searchTerm.toLowerCase();
       if(index){
         this.NFTselect.searchDeep = true
         this.NFTselect.searchTerm = /.*/
         this.NFTselect.searchDeepKey = /.*/
+        lc = /.*/
       }
       this.allSearchNFTs = [...this.allNFTs];
       if (this.NFTselect.searchDeep)
@@ -910,7 +912,7 @@ var app = new Vue({
                     keys[0].includes(this.NFTselect.searchDeepKey) &&
                     r.attributes[j][keys[0]]
                       .toLowerCase()
-                      .includes(this.NFTselect.searchTerm.toLowerCase())
+                      .includes(lc)
                   ) {
                     if (!index) this.selectedNFTs.push(r);
                     else {
@@ -941,7 +943,7 @@ var app = new Vue({
                     !this.NFTselect.searchDeepKey &&
                     r.attributes[j][keys[0]]
                       .toLowerCase()
-                      .includes(this.NFTselect.searchTerm.toLowerCase())
+                      .includes(lc)
                   ) {
                     this.selectedNFTs.push(r);
                     this.itemModal.items = this.selectedNFTs;
