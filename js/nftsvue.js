@@ -751,13 +751,12 @@ var app = new Vue({
               this.selectNFTs();
               var owners = [];
               for(var i = 0; i < this.allNFTs.length; i++){
-                if (this.allNFTs[i].set == set && 
-                  !owners.includes(
+                if (!owners.includes(
                     this.allNFTs[i].owner && this.allNFTs[i].owner != "D" && this.allNFTs[i].owner != "ah" && this.allNFTs[i].owner != "ls"
                   )
                 ) {
                   owners.push(this.allNFTs[i].owner);
-                } else if (this.allNFTs[i].owner != "D"){
+                } else if (this.allNFTs[i].owner == "D"){
                   this.focusSetCalc.deleted++
                 }
               }
@@ -806,26 +805,26 @@ var app = new Vue({
                 this.focusSetCalc.forSale++;
               }
             });
-            fetch(this.lapi + "/api/mintsupply")
-              .then((response) => response.json())
-              .then((data) => {
-                this.mintSales = data.result.filter((a) => a.set == set)
-                for (var i = 0; i < this.sales.length; i++) {
-                  const token =
-                    this.sales[i].price.token == "HIVE"
-                      ? "HIVE"
-                      : this.sales[i].price.token == "HBD"
-                      ? "HBD"
-                      : "TOKEN";
-                  if (
-                    this.sales[i].price.amount < this.focusSetCalc.sf[token] ||
-                    !this.focusSetCalc.sf[token]
-                  ) {
-                    this.focusSetCalc.sf[token] = this.sales[i].price.amount;
-                  }
-                  this.focusSetCalc.forSale++;
-                }
-              });
+            // fetch(this.lapi + "/api/mintsupply")
+            //   .then((response) => response.json())
+            //   .then((data) => {
+            //     this.mintSales = data.result.filter((a) => a.set == set)
+            //     for (var i = 0; i < this.sales.length; i++) {
+            //       const token =
+            //         this.sales[i].price.token == "HIVE"
+            //           ? "HIVE"
+            //           : this.sales[i].price.token == "HBD"
+            //           ? "HBD"
+            //           : "TOKEN";
+            //       if (
+            //         this.sales[i].price.amount < this.focusSetCalc.sf[token] ||
+            //         !this.focusSetCalc.sf[token]
+            //       ) {
+            //         this.focusSetCalc.sf[token] = this.sales[i].price.amount;
+            //       }
+            //       this.focusSetCalc.forSale++;
+            //     }
+            //   });
       }
     },
     printProps(obj){
