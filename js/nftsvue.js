@@ -562,6 +562,15 @@ var app = new Vue({
     focus(id) {
       document.getElementById(id).focus();
     },
+    lazy(){
+      if (
+        document.body.scrollTop > 50 ||
+        document.documentElement.scrollTop > 50
+      ) {
+        this.NFTselect.amount =+ 12
+        this.selectNFTs()
+      }
+    },
     validateForm(formKey, validKey) {
       var Container = document.getElementById(formKey);
       if (Container.querySelector("input:invalid")) this[validKey] = false;
