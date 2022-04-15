@@ -89,8 +89,10 @@
 
                 <div class="text-center my-3 d-flex align-items-center">
                     
-                    <div>
-                            <div class="input-group me-2">
+                    <div class="d-flex w-100">
+                                               
+                        <div class="col">
+                            <div class="input-group me-2 w-100">
                               <span class="input-group-text bg-darkg border-dark text-secondary"
                                 @click="focus('searchTerm')"><i class="fas fa-search"></i></span>
                               <input type="text" id="searchTerm"
@@ -106,8 +108,10 @@
                               </span>
                             </div>
                         </div>
-                        <div class="dropdown">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+                       
+                        <div class="dropdown col mx-2">
+                            <button class="btn btn-dark border-secondary text-white-50 w-100 dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span>Sort on</span>
                               <span v-if="NFTselect.sort == 'uid' && NFTselect.dir == 'asc'">UID: Low to High</span>
                               <span v-if="NFTselect.sort == 'uid' && NFTselect.dir == 'desc'">UID: High to Low</span>
                               <span v-if="NFTselect.sort == 'owner' && NFTselect.dir == 'asc'">Owner: A to Z</span>
@@ -120,17 +124,17 @@
                               <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'owner' && NFTselect.dir == 'desc'}" href="#" @click="setValue('NFTselect.sort','owner');setValue('NFTselect.dir','desc');selectNFTs()">Ownder: Z to A</a></li>
                             </ul>
                         </div>
-                        <div class="dropdown">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
-                              <span v-if="!NFTselect.showDeleted">Hiding Deleted</span>
-                              <span v-if="NFTselect.showDeleted">Showing Deleted</span>
+                        <div class="dropdown col">
+                            <button class="btn btn-dark border-secondary text-white-50 w-100 dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+                              <span v-if="!NFTselect.showDeleted">Deleted: Hiding</span>
+                              <span v-if="NFTselect.showDeleted">Deleted: Showing</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
                               <li><a class="dropdown-item" :class="{'active':NFTselect.showDeleted}" href="#" @click="setValue('NFTselect.showDeleted', false);selectNFTs()">Hide Deleted</a></li>
                               <li><a class="dropdown-item" :class="{'active':!NFTselect.showDeleted}" href="#" @click="setValue('NFTselect.showDeleted', true);selectNFTs()">Show Deleted</a></li>
                             </ul>
                         </div>
-
+                    </div>
                 </div>
                 <div class="row row-cols-xl-6 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
                     <div class="col mb-4" v-for="item in selectedNFTs">
