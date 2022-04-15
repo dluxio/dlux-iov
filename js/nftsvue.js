@@ -343,7 +343,7 @@ var app = new Vue({
         dir: "asc",
         sort: "uid",
         showDeleted: false,
-        searching: false
+        searching: false,
       },
       allNFTs: [],
       itemModal: {
@@ -356,6 +356,38 @@ var app = new Vue({
         items: [],
         index: 0,
       },
+      focusSetCalc: {
+        owners: 0,
+        deleted: 0,
+        af:{
+          HIVE: 0,
+          HBD: 0,
+          TOKEN: 0
+        },
+        sf: {
+          HIVE: 0,
+          HBD: 0,
+          TOKEN: 0
+        },
+        forSale: 0,
+        forAuction: 0,
+        forSaleMint: 0,
+        forAuctionMint: 0,
+        attributeKeys: [],
+        attributes: {},
+        amf: {
+          HIVE: 0,
+          HBD: 0,
+          TOKEN: 0
+        },
+        smf: {
+          HIVE: 0,
+          HBD: 0,
+          TOKEN: 0
+        },
+      },
+      auctions: [],
+
     };
   },
   components: {
@@ -363,6 +395,9 @@ var app = new Vue({
     "foot-vue": FootVue,
   },
   methods: {
+    precision(num, precision) {
+      return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
+    },
     handleScroll: function () {
       const bottomOfWindow =
         document.documentElement.scrollHeight -
@@ -699,7 +734,7 @@ var app = new Vue({
         });
     },
     getNFTset(set) {
-      if (set != "index.html")
+      if (set != "index.html"){
         fetch(this.lapi + "/api/set/" + set)
           .then((response) => response.json())
           .then((data) => {
@@ -714,12 +749,84 @@ var app = new Vue({
               this.allNFTs = data.result;
               this.allSearchNFTs = data.result;
               this.selectNFTs();
+              var owners = [];
+              for(var i = 0; i < this.allNFTs.length; i++){
+                if (this.allNFTs[i].set == set && 
+                  !owners.includes(
+                    this.allNFTs[i].owner && this.allNFTs[i].owner != "D" && this.allNFTs[i].owner != "ah" && this.allNFTs[i].owner != "ls"
+                  )
+                ) {
+                  owners.push(this.allNFTs[i].owner);
+                } else if (this.allNFTs[i].owner != "D"){
+                  this.focusSetCalc.deleted++
+                }
+              }
+              this.focusSetCalc.owners = owners.length
             });
           })
           .catch((e) => {
             location.hash = "dlux";
             location.reload();
           });
+          fetch(this.lapi + "/api/auctions/" + set)
+          .then((response) => response.json())
+          .then((data) => {
+            this.auctions = data.result.filter(a => a.set == set)
+            for(var i = 0; i < this.auctions.length; i++){
+              const token =
+                this.auctions[i].price.token == "HIVE"
+                  ? "HIVE"
+                  : this.auctions[i].price.token == "HBD" ? "HBD" : "TOKEN"
+                if (
+                  this.auctions[i].price.amount < this.focusSetCalc.af[token] ||
+                  !this.focusSetCalc.af[token]
+                ) {
+                  this.focusSetCalc.af[token] = this.auctions[i].price.amount;
+                }
+              this.focusSetCalc.forAuction++
+            }
+          })
+          fetch(this.lapi + "/api/sales/" + set)
+            .then((response) => response.json())
+            .then((data) => {
+              this.sales = data.result.filter((a) => a.set == set);
+              for (var i = 0; i < this.sales.length; i++) {
+                const token =
+                  this.sales[i].price.token == "HIVE"
+                    ? "HIVE"
+                    : this.sales[i].price.token == "HBD"
+                    ? "HBD"
+                    : "TOKEN";
+                if (
+                  this.sales[i].price.amount < this.focusSetCalc.sf[token] ||
+                  !this.focusSetCalc.sf[token]
+                ) {
+                  this.focusSetCalc.sf[token] = this.sales[i].price.amount;
+                }
+                this.focusSetCalc.forSale++;
+              }
+            });
+            fetch(this.lapi + "/api/mintsupply")
+              .then((response) => response.json())
+              .then((data) => {
+                this.mintSales = data.result.filter((a) => a.set == set)
+                for (var i = 0; i < this.sales.length; i++) {
+                  const token =
+                    this.sales[i].price.token == "HIVE"
+                      ? "HIVE"
+                      : this.sales[i].price.token == "HBD"
+                      ? "HBD"
+                      : "TOKEN";
+                  if (
+                    this.sales[i].price.amount < this.focusSetCalc.sf[token] ||
+                    !this.focusSetCalc.sf[token]
+                  ) {
+                    this.focusSetCalc.sf[token] = this.sales[i].price.amount;
+                  }
+                  this.focusSetCalc.forSale++;
+                }
+              });
+      }
     },
     printProps(obj){
       return Object.keys(obj).map(key => key + ': ' + obj[key]).join(', ');

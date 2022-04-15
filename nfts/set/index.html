@@ -69,21 +69,29 @@
                                         <div>Minted</div>
                                     </div>
                                     <div class="d-flex flex-column p-2">
-                                        <div>500</div>
+                                        <div>{{focusSetCalc.deleted}}</div>
                                         <div>Burned</div>
                                     </div>
                                     
                                     <div class="d-flex flex-column p-2">
-                                        <div>500</div>
+                                        <div>{{focusSet.minted - focusSetCalc.deleted}}</div>
                                         <div>Supply</div>
                                     </div>
                                     <div class="d-flex flex-column p-2">
-                                        <div>500</div>
+                                        <div>{{focusSetCalc.owners}}</div>
                                         <div>Owners</div>
                                     </div>
-                                    <div class="d-flex flex-column p-2">
-                                        <div>500</div>
-                                        <div>Floor Price</div>
+                                    <div class="d-flex flex-column p-2" v-if="focusSetCalc.sf.HIVE">
+                                        <div>{{precision(focusSetCalc.sf.HIVE, 3)}}</div>
+                                        <div>Hive Floor Price</div>
+                                    </div>
+                                    <div class="d-flex flex-column p-2" v-if="focusSetCalc.sf.HBD">
+                                        <div>{{precision(focusSetCalc.sf.HBD, 3)}}</div>
+                                        <div>HBD Floor Price</div>
+                                    </div>
+                                    <div class="d-flex flex-column p-2" v-if="focusSetCalc.sf.TOKEN">
+                                        <div>{{precision(focusSetCalc.sf.TOKEN, focusSet.fee.precision)}}</div>
+                                        <div>{{TOKEN}} Floor Price</div>
                                     </div>
                                     
                             </div>
@@ -104,7 +112,7 @@
                                         {{focusSet.royalty/100}}%</span>
                                
                                         <span class="small bg-secondary rounded text-white px-2 py-1">BOND:
-                                        {{focusSet.bond ? focusSet.bond.amount : 0 /1000}} {{focusSet.bond ? focusSet.bond.token : ''}}</span>
+                                        {{focusSet.bond ? precision(focusSet.bond.amount, focusSet.bond.precision) : 0 }} {{focusSet.bond ? focusSet.bond.token : ''}}</span>
                                     </div>
                                 </div>
                                 <div class="col-4 text-center">
