@@ -840,9 +840,6 @@ var app = new Vue({
       var lc = typeof this.NFTselect.searchTerm == 'string' ? this.NFTselect.searchTerm.toLowerCase() : ''
       if(index){
         this.NFTselect.searchDeep = true
-        this.NFTselect.searchTerm = /.*/
-        this.NFTselect.searchDeepKey = /.*/
-        lc = /.*/
       }
       this.allSearchNFTs = [...this.allNFTs];
       if (this.NFTselect.searchDeep)
