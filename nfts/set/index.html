@@ -110,7 +110,7 @@
                             </div>
                             <a href="#itemModal" class="a-1" data-bs-toggle="modal"
                                 @click="modalIndex('itemModal',item.uid);setValue('itemModal.hidden', false)">
-                                <div class="card-img-top p-1"
+                                <div class="card-img-top"
                                     :alt="makeLink('image-', item.setname, ['-', item.uid])" v-html="item.HTML"></div>
                                 <div class="card-body d-flex flex-column text-center"> #{{Base64toNumber(item.uid)}} /
                                     {{focusSet.max}} </div>
