@@ -761,7 +761,7 @@ var app = new Vue({
         } else {
           this.callScript(this.allSearchNFTs[i]).then((r) => {
             if (this.NFTselect.searchDeep && this.NFTselect.searchTerm) {
-              var keys = Object.keys(r).attributes;
+              var keys = Object.keys(r.attributes);
               for(var j = 0; j < keys.length; j++){
                 if(this.NFTselect.searchDeepKey && keys[j].includes(this.NFTselect.searchDeepKey) && r[keys[j]].includes(this.NFTselect.searchTerm)){
                   this.selectedNFTs.push(r);
