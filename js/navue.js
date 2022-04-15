@@ -335,7 +335,7 @@ export default {
 
       <ul class="navbar-nav me-auto">
         <li class="nav-item"><a class="nav-link" href="/hub/"><i class="fa-solid fa-mountain-sun me-2"></i>HUB</a></li>
-        <li class="nav-item"><a class="nav-link" href="/nfts/"><i class="fa-solid fa-store me-2"></i>NFTS</a></li>
+        <li class="nav-item"><a class="nav-link" href="/nfts/sets#dlux"><i class="fa-solid fa-store me-2"></i>NFTS</a></li>
         <li class="nav-item"><a class="nav-link" href="/dex#dlux"><i class="fa-solid fa-building-columns me-2"></i>DEX</a></li>
         <li class="nav-item"><a class="nav-link" href="/apps/"><i class="fa-solid fa-globe me-2"></i>APPS</a></li>
         <li class="nav-item"><a class="nav-link" href="/docs/"><i class="fa-solid fa-book me-2"></i>DOCS</a></li>
@@ -344,7 +344,6 @@ export default {
 
 	      <ul class="navbar-nav me-5" id="loginMenu" v-show="!user">
 	        <li class="nav-item"><a class="nav-link" href="/about/">About</a></li>
-          <li class="nav-item"><a class="nav-link" href="/docs/">Docs</a></li>
 	        <li class="nav-item"><a class="nav-link" href="https://signup.hive.io/">Get Account</a></li>
 	        <li class="nav-item">
             <div class="input-group input-group-sm">
@@ -355,7 +354,7 @@ export default {
 
 
 	      <ul class="nav navbar-nav me-5" v-show="user" id="userMenu">
-          <li class="nav-item"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus me-2"></i>MAKE</a></li>
+          <li class="nav-item"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus me-2"></i>CREATE</a></li>
 		      <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-bs-toggle text-white-50" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
 			      <img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light me-1 cover">
