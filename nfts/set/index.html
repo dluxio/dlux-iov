@@ -94,8 +94,8 @@
                               <span class="input-group-text bg-darkg border-dark text-secondary"
                                 @click="focus('filteraccount')"><i class="fas fa-search"></i></span>
                               <input type="text" 
-                                class="form-control bg-darkg border-dark text-info" id="filteraccount"
-                                v-model="filteraccount.value" @ aria-required="true" placeholder="Search" />
+                                class="form-control bg-darkg border-dark text-info"
+                                v-model="NFTselect.searchTerm" @keyup.enter="selectNFTs()"" aria-required="true" placeholder="Search" />
       
                               <span class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix"
                                 style="width: 42px">

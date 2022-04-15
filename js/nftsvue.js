@@ -338,7 +338,8 @@ var app = new Vue({
         start: 0,
         amount: 30,
         searchTerm: "",
-        searchType: "",
+        searchDeep: false,
+        searchDeepKey: "",
         dir: "asc",
         sort: "uid",
         showDeleted: false,
@@ -361,15 +362,14 @@ var app = new Vue({
     "foot-vue": FootVue,
   },
   methods: {
-    handleScroll: function() {
+    handleScroll: function () {
       const bottomOfWindow =
         document.documentElement.scrollHeight -
           document.documentElement.scrollTop ===
         document.documentElement.clientHeight;
-      console.log(bottomOfWindow, window.scrollY);
-      if (window.scrollY > bottomOfWindow/2){
-        this.NFTselect.amount += 30
-        this.selectNFTs()
+      if (window.scrollY > bottomOfWindow / 2) {
+        this.NFTselect.amount += 30;
+        this.selectNFTs;
       }
     },
     modalNext(modal) {
@@ -393,9 +393,7 @@ var app = new Vue({
       this[modal].index = i;
       this[modal].item = this[modal].items[this[modal].index];
     },
-    pageCtrl(controller){
-
-    },
+    pageCtrl(controller) {},
     removeOp(txid) {
       if (this.toSign.txid == txid) {
         this.toSign = {};
@@ -580,15 +578,6 @@ var app = new Vue({
     focus(id) {
       document.getElementById(id).focus();
     },
-    lazy(){
-      if (
-        document.body.scrollTop > 50 ||
-        document.documentElement.scrollTop > 50
-      ) {
-        this.NFTselect.amount =+ 12
-        this.selectNFTs()
-      }
-    },
     validateForm(formKey, validKey) {
       var Container = document.getElementById(formKey);
       if (Container.querySelector("input:invalid")) this[validKey] = false;
@@ -709,40 +698,49 @@ var app = new Vue({
         });
     },
     getNFTset(set) {
-      if(set != "index.html")
-      fetch(this.lapi + "/api/set/" + set)
-        .then((response) => response.json())
-        .then((data) => {
-          this.callScript({
-            script: data.set.script,
-            uid: "0",
-            set: set,
-            owner: null,
-          }).then((d) => {
-            data.set.computed = d;
-            this.focusSet = data.set;
-            this.allNFTs = data.result;
-            this.allSearchNFTs = data.result;
-            this.selectNFTs();
+      if (set != "index.html")
+        fetch(this.lapi + "/api/set/" + set)
+          .then((response) => response.json())
+          .then((data) => {
+            this.callScript({
+              script: data.set.script,
+              uid: "0",
+              set: set,
+              owner: null,
+            }).then((d) => {
+              data.set.computed = d;
+              this.focusSet = data.set;
+              this.allNFTs = data.result;
+              this.allSearchNFTs = data.result;
+              this.selectNFTs();
+            });
+          })
+          .catch((e) => {
+            location.hash = "dlux";
+            location.reload();
           });
-        })
-        .catch((e) => {
-          location.hash = "dlux";
-          location.reload();
-        });
     },
     selectNFTs() {
       this.allSearchNFTs = this.allNFTs;
-      this.selectedNFTs = []
+      this.selectedNFTs = [];
       this.allSearchNFTs.sort((a, b) => {
-        if (this.NFTselect.sort == 'uid'){
-          if (this.NFTselect.dir == "asc") return this.Base64toNumber(a[this.NFTselect.sort]) - this.Base64toNumber(b[this.NFTselect.sort])
-          else return this.Base64toNumber(b[this.NFTselect.sort]) - this.Base64toNumber(a[this.NFTselect.sort])
+        if (this.NFTselect.sort == "uid") {
+          if (this.NFTselect.dir == "asc")
+            return (
+              this.Base64toNumber(a[this.NFTselect.sort]) -
+              this.Base64toNumber(b[this.NFTselect.sort])
+            );
+          else
+            return (
+              this.Base64toNumber(b[this.NFTselect.sort]) -
+              this.Base64toNumber(a[this.NFTselect.sort])
+            );
         } else {
-          if (a[this.NFTselect.sort] < b[this.NFTselect.sort]) return this.NFTselect.dir == "asc" ? -1 : 1
-          else return this.NFTselect.dir == "asc" ? 1 : -1
+          if (a[this.NFTselect.sort] < b[this.NFTselect.sort])
+            return this.NFTselect.dir == "asc" ? -1 : 1;
+          else return this.NFTselect.dir == "asc" ? 1 : -1;
         }
-      })
+      });
       for (
         var i = this.NFTselect.start;
         i < this.NFTselect.amount && i < this.allSearchNFTs.length;
@@ -752,10 +750,31 @@ var app = new Vue({
           //remove entry
           this.allSearchNFTs.splice(i, 1);
           i--;
+        } else if (
+          (!this.NFTselect.searchDeep && this.NFTselect.searchTerm != "" &&
+            !this.allSearchNFTs[i].uid.includes(this.NFTselect.searchTerm)) ||
+          !this.allSearchNFTs[i].owner.includes(this.NFTselect.searchTerm)
+        ) {
+          //remove entry
+          this.allSearchNFTs.splice(i, 1);
+          i--;
         } else {
           this.callScript(this.allSearchNFTs[i]).then((r) => {
-            if (this.NFTselect.searchTerm) {
-              //deep serch?
+            if (this.NFTselect.searchDeep && this.NFTselect.searchTerm) {
+              var keys = Object.keys(r).attributes;
+              for(var j = 0; j < keys.length; j++){
+                if(this.NFTselect.searchDeepKey && keys[j].includes(this.NFTselect.searchDeepKey) && r[keys[j]].includes(this.NFTselect.searchTerm)){
+                  this.selectedNFTs.push(r);
+                  this.itemModal.items = this.selectedNFTs;
+                  this.itemModal.item = this.selectedNFTs[0];
+                  break;
+                } else if(!this.NFTselect.searchDeepKey && r[keys[j]].includes(this.NFTselect.searchTerm)){
+                  this.selectedNFTs.push(r);
+                  this.itemModal.items = this.selectedNFTs;
+                  this.itemModal.item = this.selectedNFTs[0];
+                  break;
+                }
+              }
             } else {
               this.selectedNFTs.push(r);
               this.itemModal.items = this.selectedNFTs;
@@ -922,51 +941,9 @@ var app = new Vue({
   },
   computed: {
     location: {
-      get(){
-        return location
-      }
-    }
+      get() {
+        return location;
+      },
+    },
   },
 });
-
-/*
-getSetPhotos(s, i, c){
-      var dummySet = {
-        script: s,
-        uid: i
-      }
-      this.callScript(dummySet)
-      .then(SVG =>{
-        let r = ''
-        try{r = SVG.set[c];}catch(e){
-            r = ''
-        }
-        return `https://ipfs.io/ipfs/${r}`
-      })
-    },
-    getSetDetails(s, o){
-      var dummySet = {
-        script: s,
-        uid: "0"
-      }
-      this.callScript(dummySet)
-      .then(SVG =>{
-        return SVG.set[o] || 'Not Specified'
-      })
-    },
-    getSetDetailsColors (s, i, c){
-      var dummySet = {
-        script: s,
-        uid: "0"
-      }
-      this.callScript(dummySet)
-      .then(SVG =>{
-        let r = ''
-        try{r=`${SVG.set.Color1},${SVG.set.Color2}`}catch(e){
-            console.log(e)
-            r = 'chartreuse,lawngreen'
-        }
-        return `linear-gradient(${r})`
-      })
-    },
-*/
