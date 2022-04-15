@@ -161,7 +161,7 @@
                             <div class="modal-content bg-dark text-white">
                                 <div class="card text-white bg-dark ">
                                     <div class="card-header d-flex align-items-center justify-content-between"
-                                        :style="{'background': getSetDetailsColors(focusSet)}">
+                                        :style="{'background': getSetDetailsColors(focusSet.computed ? focusSet.computed : '')}">
                                         <div class="rounded-pill d-flex align-items-center p-2"
                                             style="background-color: black">
                                             <h2 class="m-0 px-2">{{itemModal.item.uid}}</h2>
