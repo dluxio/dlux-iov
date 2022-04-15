@@ -709,13 +709,11 @@ var app = new Vue({
       this.selectedNFTs = []
       this.allSearchNFTs.sort((a, b) => {
         if (this.NFTselect.sort == 'uid'){
-          if (this.NFTselect.dir == "asc")
-            return this.Base64toNumber(a[this.NFTselect.sort]) - this.Base64toNumber(b[this.NFTselect.sort])
+          if (this.NFTselect.dir == "asc") return this.Base64toNumber(a[this.NFTselect.sort]) - this.Base64toNumber(b[this.NFTselect.sort])
           else return this.Base64toNumber(b[this.NFTselect.sort]) - this.Base64toNumber(a[this.NFTselect.sort])
         } else {
-          if (this.NFTselect.dir == "asc")
-            return a[this.NFTselect.sort] - b[this.NFTselect.sort];
-          else return b[this.NFTselect.sort] - a[this.NFTselect.sort];
+          if (a[this.NFTselect.sort] < b[this.NFTselect.sort]) return this.NFTselect.dir == "asc" ? -1 : 1
+          else return this.NFTselect.dir == "asc" ? 1 : -1
         }
       })
       for (
