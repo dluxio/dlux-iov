@@ -722,6 +722,7 @@ var app = new Vue({
     },
     selectNFTs() {
       this.allSearchNFTs = this.allNFTs;
+      this.NFTselect.amount = 30
       this.selectedNFTs = [];
       this.allSearchNFTs.sort((a, b) => {
         if (this.NFTselect.sort == "uid") {
