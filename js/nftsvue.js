@@ -905,7 +905,7 @@ var app = new Vue({
                     r.attributes[j][this.NFTselect.searchDeepKey] ==
                       this.NFTselect.searchTerm
                   ) {
-                    this.selectedNFTs.push(this.allSearchNFTs[i]);
+                    this.selectedNFTs.push(r);
                     this.itemModal.items = this.selectedNFTs;
                     this.itemModal.item = this.selectedNFTs[0];
                     break
