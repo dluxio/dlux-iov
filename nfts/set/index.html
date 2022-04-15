@@ -130,8 +130,8 @@
                               <span v-if="NFTselect.showDeleted">Deleted: Showing</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
-                              <li><a class="dropdown-item" :class="{'active':NFTselect.showDeleted}" href="#" @click="setValue('NFTselect.showDeleted', false);selectNFTs(true)">Hide Deleted</a></li>
-                              <li><a class="dropdown-item" :class="{'active':!NFTselect.showDeleted}" href="#" @click="setValue('NFTselect.showDeleted', true);selectNFTs(true)">Show Deleted</a></li>
+                              <li><a class="dropdown-item" :class="{'active':!NFTselect.showDeleted}" href="#" @click="setValue('NFTselect.showDeleted', false);selectNFTs(true)">Hide Deleted</a></li>
+                              <li><a class="dropdown-item" :class="{'active':NFTselect.showDeleted}" href="#" @click="setValue('NFTselect.showDeleted', true);selectNFTs(true)">Show Deleted</a></li>
                             </ul>
                         </div>
                     </div>
