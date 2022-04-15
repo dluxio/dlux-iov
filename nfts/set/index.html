@@ -123,21 +123,25 @@
                         </div>
                         </div>
                     </div>
-                    <div class="card-footer">
-                        <div class="d-flex justify-content-between align-items-center">
-                            
-                            <div class="">
-                                <p class="m-0"> of  minted</p>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-
+                
+                </p>
+                <div class="collapse" id="collapseExample">
+                  <div class="card card-body">
+                    Some placeholder content for the collapse component. This panel is hidden by default but revealed when the user activates the relevant trigger.
+                  </div>
+                </div>
                 <div class="text-center my-3 d-flex align-items-center">
                     
                     <div class="d-flex w-100">
+                        <div class="me-2">
+                            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                                Filters
+                              </button>
+                    </div>
                                                
-                        <div class="col">
+                        <div class="col me-2">
+                            
                             <div class="input-group me-2 w-100">
                               <span class="input-group-text bg-darkg border-dark text-secondary"
                                 @click="focus('searchTerm')"><i class="fas fa-search"></i></span>
@@ -154,26 +158,10 @@
                               </span>
                             </div>
                         </div>
-                        <input type="checkbox" v-model="NFTselect.searchDeep">Search Attributes</input>
-                        <div class="col mx-2" v-if="NFTselect.searchDeep">
-                            <div class="input-group me-2 w-100">
-                              <span class="input-group-text bg-darkg border-dark text-secondary"
-                                @click="focus('searchDeep')"><i class="fas fa-search"></i></span>
-                              <input type="text" id="searchDeep"
-                                class="form-control bg-darkg border-dark text-info"
-                                v-model="NFTselect.searchDeepKey" @keyup.enter="selectNFTs(true)" aria-required="true" placeholder="in Attribute (optional)" />
-      
-                              <span class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix"
-                                style="width: 42px">
-                                <span v-if="NFTselect.searchDeepKey">
-                                  <a href="#" class="badge badge-secondary" @click="setValue('NFTselect.searchDeepKey','');selectNFTs(true)"><i
-                                      class="fas fa-times"></i></a>
-                                </span>
-                              </span>
-                            </div>
-                        </div>
+                        
+
                        
-                        <div class="dropdown col mx-2">
+                        <div class="dropdown col me-2">
                             <button class="btn btn-dark border-secondary text-white-50 w-100 dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
                                 <span>Sort on</span>
                               <span v-if="NFTselect.sort == 'uid' && NFTselect.dir == 'asc'">UID: Low to High</span>
