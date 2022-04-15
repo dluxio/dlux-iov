@@ -844,7 +844,7 @@ var app = new Vue({
       this.allSearchNFTs = [...this.allNFTs];
       if (this.NFTselect.searchDeep)
         this.NFTselect.amount = this.allSearchNFTs.length;
-      this.allSearchNFTs.searching = true
+      this.NFTselect.searching = true;
       this.selectedNFTs = [];
       this.allSearchNFTs.sort((a, b) => {
         if (this.NFTselect.sort == "uid") {
@@ -892,7 +892,7 @@ var app = new Vue({
         } else {
           this.callScript(this.allSearchNFTs[i]).then((r) => {
             k++
-            if (k == i)this.allSearchNFTs.searching = false
+            if (k == i)this.NFTselect.searching = false;
             if (
               index ||
               this.NFTselect.searchDeep &&
