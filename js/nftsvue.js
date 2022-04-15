@@ -906,6 +906,8 @@ var app = new Vue({
                       this.NFTselect.searchTerm
                   ) {
                     this.selectedNFTs.push(this.allSearchNFTs[i]);
+                    this.itemModal.items = this.selectedNFTs;
+                    this.itemModal.item = this.selectedNFTs[0];
                     break
                   } else if (index ||
                     this.NFTselect.searchDeepKey &&
@@ -914,8 +916,11 @@ var app = new Vue({
                       .toLowerCase()
                       .includes(lc)
                   ) {
-                    if (!index) this.selectedNFTs.push(r);
-                    else {
+                    if (!index) {
+                      this.selectedNFTs.push(r);
+                      this.itemModal.items = this.selectedNFTs;
+                      this.itemModal.item = this.selectedNFTs[0];
+                    } else {
                       if (!this.focusSetCalc.attributeKeys.includes(keys[0])) {
                         this.focusSetCalc.attributeKeys.push(keys[0]);
                         this.focusSetCalc.attributes[keys[0]] = [];
