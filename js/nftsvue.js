@@ -752,8 +752,7 @@ var app = new Vue({
               var owners = [];
               for(var i = 0; i < this.allNFTs.length; i++){
                 if (!owners.includes(
-                    this.allNFTs[i].owner && this.allNFTs[i].owner != "D" && this.allNFTs[i].owner != "ah" && this.allNFTs[i].owner != "ls"
-                  )
+                    this.allNFTs[i].owner) && this.allNFTs[i].owner != "D" && this.allNFTs[i].owner != "ah" && this.allNFTs[i].owner != "ls"
                 ) {
                   owners.push(this.allNFTs[i].owner);
                 } else if (this.allNFTs[i].owner == "D"){
