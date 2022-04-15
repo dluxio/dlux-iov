@@ -97,7 +97,25 @@
                                 @click="focus('searchTerm')"><i class="fas fa-search"></i></span>
                               <input type="text" id="searchTerm"
                                 class="form-control bg-darkg border-dark text-info"
-                                v-model="NFTselect.searchTerm" @keyup.enter="selectNFTs(true)" aria-required="true" placeholder="Search" />
+                                v-model="NFTselect.searchTerm" @keyup.enter="selectNFTs(true)" aria-required="true" placeholder="Search UIDs and Owners" />
+      
+                              <span class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix"
+                                style="width: 42px">
+                                <span v-if="NFTselect.searchTerm">
+                                  <a href="#" class="badge badge-secondary" @click="setValue('NFTselect.searchTerm','');selectNFTs(true)"><i
+                                      class="fas fa-times"></i></a>
+                                </span>
+                              </span>
+                            </div>
+                        </div>
+
+                        <div class="col mx-2">
+                            <div class="input-group me-2 w-100">
+                              <span class="input-group-text bg-darkg border-dark text-secondary"
+                                @click="focus('searchTerm')"><i class="fas fa-search"></i></span>
+                              <input type="text" id="searchDeep"
+                                class="form-control bg-darkg border-dark text-info"
+                                v-model="NFTselect.searchTerm" @keyup.enter="selectNFTs(true)" aria-required="true" placeholder="Search Attributes" />
       
                               <span class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix"
                                 style="width: 42px">
