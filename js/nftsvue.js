@@ -894,6 +894,7 @@ var app = new Vue({
             k++
             if (k == i)this.allSearchNFTs.searching = false
             if (
+              index ||
               this.NFTselect.searchDeep &&
               this.NFTselect.searchTerm
             ) {
