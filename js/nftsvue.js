@@ -369,7 +369,7 @@ var app = new Vue({
         document.documentElement.clientHeight;
       if (window.scrollY > bottomOfWindow / 2) {
         this.NFTselect.amount += 30;
-        this.selectNFTs;
+        this.selectNFTs();
       }
     },
     modalNext(modal) {
@@ -750,10 +750,9 @@ var app = new Vue({
           //remove entry
           this.allSearchNFTs.splice(i, 1);
           i--;
-        } else if (
-          (!this.NFTselect.searchDeep && this.NFTselect.searchTerm &&
-            !(!this.allSearchNFTs[i].uid.includes(this.NFTselect.searchTerm)) ||
-          !this.allSearchNFTs[i].owner.includes(this.NFTselect.searchTerm))
+        } else if (!this.NFTselect.searchDeep && this.NFTselect.searchTerm &&
+            !(this.allSearchNFTs[i].uid.includes(this.NFTselect.searchTerm) ||
+          this.allSearchNFTs[i].owner.includes(this.NFTselect.searchTerm))
         ) {
           //remove entry
           this.allSearchNFTs.splice(i, 1);
