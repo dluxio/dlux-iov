@@ -137,7 +137,7 @@
                               <li><a class="dropdown-item" :class="{'active':!NFTselect.searchDeep}" href="#/" @click="setValue('NFTselect.searchDeep',false)">Search UIDs and Owners</a></li>
                               <li><a class="dropdown-item" :class="{'active':NFTselect.searchDeep && ! NFTselect.searchDeepK}" href="#/" @click="setValue('NFTselect.searchDeep',true);setValue('NFTselect.searchDeepK', false)">Search Attributes</a></li>
                               <li v-if="!focusSetCalc.attributeKeys.length"><a class="dropdown-item" :class="{'active':NFTselect.searching}" href="#/" @click="selectNFTs(true, true)">Index Set (Pre-Search)</a></li>
-                              <li v-if="!focusSetCalc.attributeKeys.length"><a class="dropdown-item" :class="{'active':NFTselect.searchDeepK}" href="#/" @click="setValue('NFTselect.searchDeepK', true)">Search in Attribute</a></li>
+                              <li v-if="focusSetCalc.attributeKeys.length"><a class="dropdown-item" :class="{'active':NFTselect.searchDeepK}" href="#/" @click="setValue('NFTselect.searchDeepK', true)">Search in Attribute</a></li>
                             </ul>
                     <button class="btn btn-dark border-secondary text-white-50 w-100 dropdown-toggle" type="button" id="dropdownFilterButton2" data-bs-toggle="dropdown" aria-expanded="false" v-if="NFTselect.searchDeepK">
                                 <span>Attribute:</span>
