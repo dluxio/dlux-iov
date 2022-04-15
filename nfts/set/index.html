@@ -20,7 +20,7 @@
 </head>
 
 <body class="d-flex flex-column h-100 padme-t70 text-white" id="explore">
-    <div id="app">
+    <div id="app" @scroll="lazy">
         <div>
             <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
                 @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" @refresh="run($event)"
