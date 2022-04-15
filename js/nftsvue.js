@@ -720,7 +720,8 @@ var app = new Vue({
             location.reload();
           });
     },
-    selectNFTs() {
+    selectNFTs(reset) {
+      if(reset)this.NFTselect.amount = 30
       this.allSearchNFTs = [...this.allNFTs];
       this.selectedNFTs = [];
       this.allSearchNFTs.sort((a, b) => {
