@@ -695,7 +695,7 @@ var app = new Vue({
         })
         .catch((e) => {
           location.hash = "dlux";
-          window.reload();
+          location.reload();
         });
     },
     selectNFTs() {
