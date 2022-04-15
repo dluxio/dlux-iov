@@ -74,7 +74,7 @@
                             </div>
                             <div class="mb-3 d-flex align-items-center justify-content-between">
 
-                                <div class="mr-3">
+                                <div class="me-3">
                                     <p class="text-white-50 m-0">{{focusSet.computed.set ? focusSet.computed.set.Description : '...'}}</p>
                                 </div>
                                 <img class="rounded max-80"
@@ -93,7 +93,7 @@
                     </div>
                     <div class="card-footer">
                         <div class="d-flex justify-content-between align-items-center">
-                            <div class="flex-grow-1 mr-3">
+                            <div class="flex-grow-1 me-3">
                                 <div class="progress">
 
                                     <div class="progress-bar" role="progressbar"
@@ -127,7 +127,7 @@
                                 <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
                                     <h2 class="m-0 px-2">{{item.uid}}</h2>
                                 </div>
-                                <h3 class="card-title lead border rounded border-dark p-2 ml-auto mb-0 "><a
+                                <h3 class="card-title lead border rounded border-dark p-2 ms-auto mb-0 "><a
                                         :href="makeLink('/nfts/set/',item.setname)" class="lead" style="color: black">{{item.setname}}
                                         NFT</a></h3>
                             </div>
@@ -155,6 +155,7 @@
                 </div>
                 </div>
                 <!--Item Modal-->
+                
                     <div class="modal fade " id="itemModal" tabindex="11" role="dialog" v-show="!itemModal.hidden">
                         <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
                             <div class="modal-content bg-dark text-white">
@@ -168,7 +169,7 @@
                                         <h3 class="card-title lead border border-dark rounded mb-0 p-2"><a
                                                 :href="makeLink('/nfts/set/',itemModal.item.setname)"
                                                 style="color: black">{{itemModal.item.set}} NFT</a></h3>
-                                        <button type="button" class="close" data-dismiss="modal"
+                                        <button type="button" class="close" data-bs-dismiss="modal"
                                             aria-label="Close"><span aria-hidden="true">&times;</span></button>
                                     </div>
                                     <div class="card-body row d-flex ">
