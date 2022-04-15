@@ -88,13 +88,13 @@
                 </div>
 
                 <div class="text-center my-3">
-                    <button class="btn btn-primary mx-2" id="sortuidasc" @click="sort('allSearchNFTs','uid','asc');selectNFTs()">Sort
+                    <button class="btn btn-primary mx-2" id="sortuidasc" @click="setValue('NFTselect.uid','asc');selectNFTs()">Sort
                         id<i class="fas fa-arrow-alt-circle-up mx-2"></i></button>
-                    <button class="btn btn-primary mx-2" id="sortuiddesc" @click="sort('allSearchNFTs','uid','desc');selectNFTs()">Sort
+                    <button class="btn btn-primary mx-2" id="sortuiddesc" @click="setValue('NFTselect.uid','desc');selectNFTs()">Sort
                         id<i class="fas fa-arrow-alt-circle-down mx-2"></i></button>
-                    <button class="btn btn-primary mx-2" id="sortasc" @click="sort('allSearchNFTs','owner','asc');selectNFTs()">Sort
+                    <button class="btn btn-primary mx-2" id="sortasc" @click="setValue('NFTselect.owner','asc');selectNFTs()">Sort
                         owner <i class="fas fa-arrow-alt-circle-up mx-2"></i></button>
-                    <button class="btn btn-primary mx-2" id="sortasc" @click="sort('allSearchNFTs','owner','desc');selectNFTs()">Sort
+                    <button class="btn btn-primary mx-2" id="sortasc" @click="setValue('NFTselect.owner','desc');selectNFTs()">Sort
                         owner <i class="fas fa-arrow-alt-circle-down mx-2"></i></button>
                 </div>
                 <div class="row row-cols-xl-6 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
