@@ -774,11 +774,6 @@ var app = new Vue({
             ) {
               for (var j = 0; j < r.attributes.length; j++) {
                 var keys = Object.keys(r.attributes[j]);
-                console.log(
-                  r.attributes[j][keys[0]],
-                  this.NFTselect.searchTerm,
-                  keys[0]
-                );
                 if (
                   this.NFTselect.searchDeepKey &&
                   keys[0].includes(this.NFTselect.searchDeepKey) &&
