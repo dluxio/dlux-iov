@@ -722,7 +722,7 @@ var app = new Vue({
         i < this.NFTselect.amount && i < this.allSearchNFTs.length;
         i++
       ) {
-        if (this.NFTselect.showDeleted && this.allSearchNFTs[i].owner == "D") {
+        if (!this.NFTselect.showDeleted && this.allSearchNFTs[i].owner == "D") {
           //remove entry
           this.allSearchNFTs.splice(i, 1);
           i--;
