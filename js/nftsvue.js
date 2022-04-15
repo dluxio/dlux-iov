@@ -691,11 +691,11 @@ var app = new Vue({
             this.allNFTs = data.result;
             this.allSearchNFTs = data.result;
             this.selectNFTs();
-          })
-          .catch(e => {
-            location.hash = "dlux"
-            window.reload()
-          })
+          });
+        })
+        .catch((e) => {
+          location.hash = "dlux";
+          window.reload();
         });
     },
     selectNFTs() {
