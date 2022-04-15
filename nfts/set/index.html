@@ -140,7 +140,7 @@
                               <li v-if="focusSetCalc.attributeKeys.length"><a class="dropdown-item" :class="{'active':NFTselect.searchDeepK}" href="#/" @click="setValue('NFTselect.searchDeepK', true)">Search in Attribute</a></li>
                             </ul>
                     <button class="btn btn-dark border-secondary text-white-50 w-100 dropdown-toggle" type="button" id="dropdownFilterButton2" data-bs-toggle="dropdown" aria-expanded="false" v-if="NFTselect.searchDeepK">
-                                <span>Attribute:</span>
+                                <span>{{NFTselect.searching ? 'Searching...' : 'Attribute:''}}</span>
                               <span v-if="NFTselect.searchDeepKey">{{NFTselect.searchDeepKey}}</span>
                               <span v-if="!NFTselect.searchDeepKey">Select</span>
                             </button>
