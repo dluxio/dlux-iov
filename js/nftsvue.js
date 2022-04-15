@@ -1124,10 +1124,7 @@ var app = new Vue({
     },
     includes: {
       get() {
-          return this.focusSetCalc.attributes[this.NFTselect.searchDeepKey]
-          .includes(
-            this.NFTselect.searchTerm
-          )
+          return this.focusSetCalc.attributes[this.NFTselect.searchDeepKey] ? this.focusSetCalc.attributes[this.NFTselect.searchDeepKey].includes(this.NFTselect.searchTerm) : false
       }
     }
   },
