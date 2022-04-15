@@ -92,15 +92,15 @@
                     <div>
                             <div class="input-group me-2">
                               <span class="input-group-text bg-darkg border-dark text-secondary"
-                                @click="focus('filteraccount')"><i class="fas fa-search"></i></span>
-                              <input type="text" 
+                                @click="focus('searchTerm')"><i class="fas fa-search"></i></span>
+                              <input type="text" id="searchTerm"
                                 class="form-control bg-darkg border-dark text-info"
                                 v-model="NFTselect.searchTerm" @keyup.enter="selectNFTs()"" aria-required="true" placeholder="Search" />
       
                               <span class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix"
                                 style="width: 42px">
-                                <span v-if="filteraccount.value">
-                                  <a href="#" class="badge badge-secondary" @click="setValue('filteraccount.value','')"><i
+                                <span v-if="NFTselect.searchTerm">
+                                  <a href="#" class="badge badge-secondary" @click="setValue('NFTselect.searchTerm','')"><i
                                       class="fas fa-times"></i></a>
                                 </span>
                               </span>
@@ -108,8 +108,8 @@
                         </div>
                         <div class="dropdown">
                             <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
-                              <span v-if="NFTselect.sort == uid && NFTselect.dir == asc">UID: Low to High</span>
-                              <span v-if="NFTselect.sort == uid && NFTselect.dir == desc">UID: High to Low</span>
+                              <span v-if="NFTselect.sort == 'uid' && NFTselect.dir == 'asc'">UID: Low to High</span>
+                              <span v-if="NFTselect.sort == 'uid' && NFTselect.dir == 'desc'">UID: High to Low</span>
                               
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
