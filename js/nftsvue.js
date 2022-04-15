@@ -1122,7 +1122,7 @@ var app = new Vue({
         return location;
       },
     },
-    inlcudes: {
+    includes: {
       get() {
           return this.focusSetCalc.attributes[this.NFTselect.searchDeepKey]
           .includes(
