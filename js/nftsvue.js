@@ -369,7 +369,7 @@ var app = new Vue({
         document.documentElement.clientHeight;
       if (window.scrollY > bottomOfWindow / 2) {
         this.NFTselect.amount += 30;
-        this.selectNFTs;
+        this.selectNFTs();
       }
     },
     modalNext(modal) {
