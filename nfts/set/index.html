@@ -128,7 +128,33 @@
                 
                 <div class="collapse show" id="collapseExample">
                   <div class="card card-body bg-dark">
-                    Place Filter controls here
+                    <button class="btn btn-dark border-secondary text-white-50 w-100 dropdown-toggle" type="button" id="dropdownFilterButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span>Search in:</span>
+                              <span v-if="NFTselect.searchDeep">Attributes</span>
+                              <span v-if="!NFTselect.searchDeep">UIDs and Owners</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownFilterButton">
+                              <li><a class="dropdown-item" :class="{'active':!NFTselect.searchDeep}" href="#/" @click="setValue('NFTselect.searchDeep',false)">Search UIDs and Owners</a></li>
+                              <li><a class="dropdown-item" :class="{'active':NFTselect.searchDeep && ! searchDeepK}" href="#/" @click="setValue('NFTselect.searchDeep',true);setValue('searchDeepK', false)">Search Attributes</a></li>
+                              <li v-if="!focusSetCalc.attributeKeys.length"><a class="dropdown-item" :class="{'active':NFTselect.searching}" href="#/" @click="selectNFTs(true, true)">Index Set (Pre-Search)</a></li>
+                              <li v-if="!focusSetCalc.attributeKeys.length"><a class="dropdown-item" :class="{'active':NFTselect.searchDeepK}" href="#/" @click="setValue('searchDeepK', true)">Search in Attribute</a></li>
+                            </ul>
+                    <button class="btn btn-dark border-secondary text-white-50 w-100 dropdown-toggle" type="button" id="dropdownFilterButton2" data-bs-toggle="dropdown" aria-expanded="false" v-if="NFTselect.searchDeepK">
+                                <span>Attribute:</span>
+                              <span v-if="NFTselect.searchDeepKey">{{NFTselect.searchDeepKey}}</span>
+                              <span v-if="!NFTselect.searchDeepKey">Select</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownFilterButton2">
+                              <li v-for="k in focusSetCalc.attributeKeys"><a class="dropdown-item" :class="{'active':k == NFTselect.searchDeepKey}" href="#/" @click="setValue('NFTselect.searchDeepKey',k)">{{k}}</a></li>
+                            </ul>
+                    <button class="btn btn-dark border-secondary text-white-50 w-100 dropdown-toggle" type="button" id="dropdownFilterButton3" data-bs-toggle="dropdown" aria-expanded="false" v-if="NFTselect.searchDeepKey">
+                                <span>Attribute:</span>
+                              <span v-if="focusSetCalc.attributes[NFTselect.searchDeepKey].includes(NFTselect.searchTerm)">{{NFTselect.searchTerm}}</span>
+                              <span v-else>Select</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownFilterButton3">
+                              <li v-for="l in focusSetCalc.attributes[NFTselect.searchDeepKey]"><a class="dropdown-item" :class="{'active':focusSetCalc.attributes[NFTselect.searchDeepKey].includes(NFTselect.searchTerm)}" href="#/" @click="setValue('NFTselect.searchTerm', l)">{{l}} ({{focusSetCalc.attributesC[NFTselect.searchDeepKey][l]}})</a></li>
+                            </ul>
                   </div>
                 </div>
                 <div class="text-center my-3 d-flex align-items-center">
@@ -147,7 +173,7 @@
                                 @click="focus('searchTerm')"><i class="fas fa-search"></i></span>
                               <input type="text" id="searchTerm"
                                 class="form-control bg-darkg border-dark text-info"
-                                v-model="NFTselect.searchTerm" @keyup.enter="selectNFTs(true)" aria-required="true" placeholder="Search UIDs and Owners" />
+                                v-model="NFTselect.searchTerm" @keyup.enter="selectNFTs(true)" aria-required="true" :placeholder="NFTselect.searchDefault" />
       
                               <span class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix"
                                 style="width: 42px">
