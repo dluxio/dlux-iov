@@ -59,6 +59,7 @@ self.addEventListener("fetch", function (event) {
   event.respondWith(
     caches.match(event.request).then(function (response) {
       if (response) {
+        console.log(event.request);
         return response;
       }
       var fetchRequest = event.request.clone();
@@ -100,5 +101,39 @@ self.addEventListener("activate", function (event) {
 
 self.addEventListener("message", function (e) {
   var message = e.data; // We're going to have some fun here...
+  
   console.log("SW msg:" + message);
 });
+
+function callScript (o){
+  return new Promise((resolve, reject) => {
+    if (this.nftscripts[o.script]) {
+      const code = `(//${this.nftscripts[o.script]}\n)("${o.uid ? o.uid : 0}")`;
+      var computed = eval(code);
+      computed.uid = o.uid;
+      computed.owner = o.owner;
+      computed.script = o.script;
+      computed.setname = o.set;
+      resolve(computed);
+    } else {
+      this.pullScript(o.script).then((empty) => {
+        this.callScript(o).then((r) => {
+          resolve(r);
+        });
+      });
+    }
+  });
+}
+
+function pullScript(id) {
+      return new Promise((resolve, reject) => {
+        // check if cache includes id
+        // add to cache if not...
+        fetch(`https://ipfs.io/ipfs/${id}`)
+          .then((response) => response.text())
+          .then((data) => {
+            this.nftscripts[id] = data;
+            resolve("OK");
+          });
+      });
+    }
