@@ -3,6 +3,7 @@
   "name": "Decentralized Limitless User eXperiences",
   "short_name": "DLUX",
   "start_url": "/",
+  "scope": ".",
   "display": "standalone",
   "background_color": "#111222",
   "theme_color": "#111222",
