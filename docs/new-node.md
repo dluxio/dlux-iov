@@ -4,9 +4,9 @@
 
 ### Prerequisites
 
-* [Hive account](https://signup.hive.io/) with 100 Hive Power worth of Resource Credits available
+* [Hive account](https://signup.hive.io/) with 100 Hive Power worth of Resource Credits available for each node you wish to install
 * SSH private and .pub key for your computer ([Mac/Linux](https://docs.oracle.com/en/cloud/cloud-at-customer/occ-get-started/generate-ssh-key-pair.html), [Windows](https://docs.joyent.com/public-cloud/getting-started/ssh-keys/generating-an-ssh-key-manually/manually-generating-your-ssh-key-in-windows))
-* Domain Name Registrar such as [Namecheap](https://namecheap.com/) for your API domain name
+* Domain Name Registrar such as [Namecheap](https://namecheap.com/) for your API domain names
 
 ---
 
@@ -16,6 +16,8 @@ This is like a witness key pair and is additional to your account. Since you are
 2. Type in anything for Account Name and click `Generate`
 3. Save the `Active Private` and `Active Public` keys somewhere
 
+Repeat these steps for each node you wish to install.
+
 ---
 
 ### Configure API Domain
@@ -24,6 +26,8 @@ This is like a witness key pair and is additional to your account. Since you are
 3.  Add an `A record` subdomain
    - Host: `username` or your preference
    - Value: `IP.ADD.RE.SS` of your server
+
+Repeat these steps for each node you wish to install.
 
 ---
 
@@ -35,6 +39,7 @@ Go to [Privex server](https://www.privex.io) or equivalent of your choosing:
 1. Choose a server that meets the following requirements:
    - Region: `Allowed to run IPFS` (currently USA & Sweden)
    - Min specs: `Virtual Dual-Core 1GB / 25GB` (check specific community guidelines)
+   - Recommend specs: one core per node + one core for IPFS
 2. Enter your details
    - Name: `username` or your preference
    - Email: `your@preferen.ce`
@@ -64,7 +69,7 @@ Once you have an up-to-date ubuntu server with docker, you can install Honeycomb
 - [Honeycomb:](https://github.com/disregardfiat/honeycomb.git) Type `git clone https://github.com/disregardfiat/honeycomb.git cd honeycomb`
 - [DLUX:](https://github.com/dluxio/dlux_open_token.git) Type `git clone https://github.com/dluxio/dlux_open_token.git cd dlux_open_token`
 - [SPKCC:](https://github.com/3speaknetwork/honeycomb-spkcc.git) Type `git clone https://github.com/3speaknetwork/honeycomb-spkcc.git cd honeycomb-spkcc`
-- [DUAT:]() Type `git clone https://github.com/disregardfiat/honeycomb.git && cd honeycomb && git checkout raganarok`
+- [DUAT:](https://github.com/disregardfiat/honeycomb/tree/ragnarok) Type `git clone https://github.com/disregardfiat/honeycomb.git && cd honeycomb && git checkout ragnarok`
 
 2. Type `touch .env && nano .env` to edit the node attributes
    - Type the following into the text editor: 
@@ -77,15 +82,74 @@ domain=https://api.yourdomain.com
 ```
    - Optionally you can include `discordwebhook=https://discordapp.com/api/webhooks/NUMB3RS/KeYs` to stream the feed into a discord channel
 3. Save & exit
-   - Type `ctrl-x` or equivalent
-   - Type `y` to save
-   - Filename: `.env` press `Enter`
+   - Type `ctrl-x` then `y` to save, then press enter
 4. Type `sudo docker-compose build` to build the Docker environment
-5. Type `sudo docker-compose up` to deploy the Docker environment
+5. Type `cd ~` to return to the home directory
+
+Repeat these steps for each node you wish to install.
 
 ---
 
-### nginx setup
+### Configure Multiple Nodes (optional)
+If you installed more than one node on the server, you need to configure Docker to point to each of them. If you only installed one node, this step is unneccessary.
+
+Ensure you are in the home directory by typing `cd ~` and pressing enter.
+
+1. Type `nano docker-compose.yml`
+2. Paste the following code and modify to suit your needs, here DUAT @ /honeycomb and DLUX @ /dlux_open_token are being used. Update the token and directory to whichever nodes you installed. Continue incrementing the ports as needed.
+
+```
+version: '3'
+services:
+  ipfs:
+    image: ipfs/go-ipfs:latest
+    restart: unless-stopped
+    ports:
+      - 4001:4001
+      - 8080:8080
+      - 5001:5001
+    volumes:
+      - ./staging_dir:/export
+      - ipfs:/data/ipfs
+  duat:
+    build: ./honeycomb
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - ipfshost=ipfs
+      - ipfsprotocol=http
+      - ipfsport=5001
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+    stdin_open: true
+    tty: true
+  dlux:
+    build: ./dlux_open_token
+    restart: unless-stopped
+    ports:
+      - "3002:3001"
+    environment:
+      - ipfshost=ipfs
+      - ipfsprotocol=http
+      - ipfsport=5001
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+    stdin_open: true
+    tty: true
+volumes:
+  ipfs:
+```
+3. Save & exit
+   - Type `ctrl-x` then `y` to save, then press enter
+
+---
+
+### Nginx Setup
 Finally, install certbot to manage the SSL certificate for the API domain
 
 1. Type `sudo apt install nginx certbot python3-certbot-nginx`
