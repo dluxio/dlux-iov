@@ -1283,8 +1283,11 @@ var app = new Vue({
           this.bargov = (data.gov / 1000).toFixed(3);
           this.accountapi = data;
           if (
-            new Date().getMonth() + 1 != parseInt(data.drop?.last_claim, 16) &&
-            data.drop?.availible.amount > 0
+            data.drop?.last_claim
+              ? new Date().getMonth() + 1 !=
+                  parseInt(data.drop?.last_claim, 16) &&
+                data.drop?.availible.amount > 0
+              : data.drop?.availible.amount > 0
           ) {
             this.hasDrop = true;
             this.dropnai = `${parseFloat(
