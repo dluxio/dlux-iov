@@ -334,10 +334,9 @@ export default {
     <div class="collapse navbar-collapse " id="navbarSupportedContent">
 
       <ul class="navbar-nav me-auto">
-        <li class="nav-item"><a class="nav-link" href="/hub/"><i class="fa-solid fa-mountain-sun me-2"></i>HUB</a></li>
+        <li class="nav-item"><a class="nav-link" href="/apps/"><i class="fa-solid fa-mountain-sun me-2"></i>HUB</a></li>
         <li class="nav-item"><a class="nav-link" href="/nfts/sets#dlux"><i class="fa-solid fa-store me-2"></i>NFTS</a></li>
         <li class="nav-item"><a class="nav-link" href="/dex#dlux"><i class="fa-solid fa-building-columns me-2"></i>DEX</a></li>
-        <li class="nav-item"><a class="nav-link" href="/apps/"><i class="fa-solid fa-globe me-2"></i>APPS</a></li>
         <li class="nav-item"><a class="nav-link" href="/docs/"><i class="fa-solid fa-book me-2"></i>DOCS</a></li>
       </ul>
 
@@ -346,15 +345,15 @@ export default {
 	        <li class="nav-item"><a class="nav-link" href="/about/">About</a></li>
 	        <li class="nav-item"><a class="nav-link" href="https://signup.hive.io/">Get Account</a></li>
 	        <li class="nav-item">
-            <div class="input-group input-group-sm">
+            
               <button class="btn btn-primary ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
-            </div>
+
           </li>
       	</ul>
 
 
-	      <ul class="nav navbar-nav me-5" v-show="user" id="userMenu">
-          <li class="nav-item"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus me-2"></i>CREATE</a></li>
+	      <ul class="navbar-nav me-5" v-show="user" id="userMenu">
+          <li class="nav-item d-flex align-items-center"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus me-2"></i>CREATE</a></li>
 		      <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-bs-toggle text-white-50" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
 			      <img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light me-1 cover">
@@ -368,7 +367,7 @@ export default {
               <li><hr class="dropdown-divider"></li>
 			        <li><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers"><i class="fas fa-user-friends me-2"></i>Switch User</a></li>
+              <li><a class="dropdown-item" href="#" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers"><i class="fas fa-user-friends me-2"></i>Users</a></li>
 			        <li><a class="dropdown-item" href="#" @click="logout()"><i class="fas fa-power-off fa-fw me-2"></i>Logout</a></li>
 		        </ul>
           </li>
@@ -442,11 +441,11 @@ export default {
         </div>
       </div>
       <div class="d-flex justify-content-between align-items-center m-3 pb-3 border-dark border-bottom" v-if="!filterUsers" v-for="name in recentUsers">
-        <div class="flex-fill text-center"><a class="link-info" href="#" @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
+        <div class="flex-fill text-center"><a class="link-info" href="#" @click="setUser(name);toggleAccountMenu()" data-bs-dismiss="offcanvas">@{{name}}</a></div>
         <div class="flex-shrink"><a href="#" @click="deleteRecentUser(name)" alt="Remove username" class="ms-auto link-secondary"><i class="fa-solid fa-trash-can"></i></a></div>
       </div>
       <div class="d-flex justify-content-between align-items-center m-3 pb-3 border-dark border-bottom" v-if="filterUsers" v-for="name in filterRecents">
-        <div class="flex-fill text-center"><a class="link-info" href="#" @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
+        <div class="flex-fill text-center"><a class="link-info" href="#" @click="setUser(name);toggleAccountMenu()" data-bs-dismiss="offcanvas">@{{name}}</a></div>
         <div class="flex-shrink"><a href="#" @click="deleteRecentUser(name);searchRecents()" alt="Remove username" class="ms-auto link-secondary"><i class="fa-solid fa-trash-can"></i></a></div>
       </div>
     </div>
