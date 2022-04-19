@@ -1,12 +1,17 @@
-## Running A Node
+## Start A New Node
 
 ### Prerequisites
 
 * [Hive account](https://signup.hive.io/) with 100 Hive Power
-* SSH .pub key for your computer
-* [Generate](https://hivetasks.com/account-creator) an additional Hive key pair
+* SSH private and .pub key for your computer ([Mac/Linux](https://docs.oracle.com/en/cloud/cloud-at-customer/occ-get-started/generate-ssh-key-pair.html), [Windows](https://docs.joyent.com/public-cloud/getting-started/ssh-keys/generating-an-ssh-key-manually/manually-generating-your-ssh-key-in-windows))
 
-### Get Privex Server
+### Generate Key Pair
+1. Go to [Account Creator](https://hivetasks.com/account-creator)
+2. Type in anything for Account Name
+3. Click Generate
+4. Save the Owner Private/Public and Active Priave/Public keys
+
+### Get Server (Privex)
 You may use any server of your choosing. Privex is chosen because it is Hive friendly, [IPFS](https://ipfs.io/) friendly, and can be paid in Hive or HBD.
 
 1. Go to [Privex server](https://www.privex.io) or equivalent of your choosing 
@@ -18,16 +23,27 @@ You may use any server of your choosing. Privex is chosen because it is Hive fri
    - Email: `your@preferen.ce`
    - Server Hostname: `mynodeserver` or your preference
    - Purpose: `Hive Layer 2`
-   - Operating System: `Ubuntu latest (20)`
-   - SSH Keys: `.pub`
-4. Setup API domain (optional)
+   - Operating System: `Ubuntu latest` (currently 20.xx)
+   - SSH Keys: `sshkey.pub`
+4. Setup an API domain (encouraged)
    - Login to your DNS manager
    - Add an A record subdomain
    - Host: `username` or your preference
    - Value: `IP address` of your server
-5. 
+5. Login to your server
+   - Privex will send an email with IP Address and username
+   - Open Terminal or equivalent
+   - Locate your SSH private key file
+   - Type: `ssh -i "sshkey" user@IP.ADD.RE.SS`
+   - Add this connection to the list of known hosts 
 
-### Privex Docker Deploy
+### Setup Server (Privex)
+
+1. Reboot if needed with: `sudo reboot`
+2. Wait 60-120 seconds and login again per step 5
+3. Update if updates are available
+4. 
+### Docker Deploy (Privex)
 
 * Instructions for Ubuntu follow:
 * `sudo apt install docker docker-compose` --install dependencies
