@@ -71,6 +71,8 @@ var app = new Vue({
       nowtime: new Date().getTime(),
       agoTime: new Date().getTime() - 86400000,
       account: user,
+      accountNFTs: [],
+      accountRNFTs: [],
       hasDrop: false,
       dropnai: "",
       balance: "0.000",
@@ -619,6 +621,15 @@ var app = new Vue({
         location.reload();
       }
     },
+    getMint(set, item){
+      for (let i = 0; i < this.accountRNFTs.length; i++) {
+        if (this.accountRNFTs[i].set == set) {
+          if (item) return this.accountRNFTs[i][item];
+          return this.accountRNFTs[i];
+        }
+      }
+      return null;
+    },
     sort(item, key, method) {
       switch (method) {
         case "asc":
@@ -875,6 +886,14 @@ var app = new Vue({
         //     }
         //   });
       }
+    },
+    getUserNFTs(){
+      fetch(this.lapi + '/api/nfts/' + this.account)
+      .then(r=>r.json())
+      .then(res =>{
+        this.accountNFTs = res.result
+        this.accountRNFTs = res.mint_tokens
+      })
     },
     printProps(obj) {
       return Object.keys(obj)
@@ -1156,6 +1175,7 @@ var app = new Vue({
     var setName = location.pathname.split("set/")[1];
     if (setName) this.getNFTset(setName);
     else this.getNFTsets();
+    this.getUserNFTs()
     //this.getQuotes();
     //this.getNodes();
     //this.getProtocol();
