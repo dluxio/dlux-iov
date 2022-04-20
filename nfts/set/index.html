@@ -173,23 +173,23 @@
                             <div class="card-footer" v-show="getMint(focusSet.set, 'qty')">
                                 <div class="d-flex flex-wrap justify-content-between">
                                     <button type="button" class="btn btn-outline-dark mr-auto ml-auto mt-1"
-                                        @click="">Open<i
+                                        @click="" oldclick="unwrap custom json">Open<i
                                             class="fas fa-box-open ml-3"></i></button>
                                     <button type="button" class="btn btn-outline-dark mr-auto ml-auto mt-1"
                                         data-toggle="modal" href="#mintTransferModal"
-                                        @click="" oldclick="mint_detail.select(set)">Transfer<i
+                                        @click="mint_detail.set = focusSet.set">Transfer<i
                                             class="fas fa-exchange-alt ml-3"></i></button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                        <!-- <div class="modal fade show" id="mintTransferModal" tabindex="11" role="dialog"
+                        <div class="modal fade show" id="mintTransferModal" tabindex="11" role="dialog"
                             aria-hidden="true">
                             <div class="modal-dialog modal-full modal-dialog-centered" role="document">
                                 <div class="modal-content bg-dark text-white">
                                     <div class="border border-info bg-darker mx-auto px-5 py-3 rounded col-12">
                                         <div class="container-fluid">
-                                            <h3 class="text-center">Transfer {{mint_detail.data.set}} FT</h3>
+                                            <h3 class="text-center">Transfer {{mint_detail.set}} FT</h3>
                                             <ul class="nav nav-pills bg-darker justify-content-center" role="tablist">
                                                 <li class="nav-item"> <a class="nav-link active" id="giveFTlink"
                                                         role="tab" data-toggle="tab" aria-controls="giveFT"
@@ -211,7 +211,7 @@
                                                 <div role="tabpanel" class="tab-pane fade show active" id="giveFTtab"
                                                     aria-labelledby="giveFT">
                                                     <form class="needs-validation mt-4" validate
-                                                        :action="javascript:giveFT('{{mint_detail.data.set}}','{{giveFTusername.value}}','{{giveFTqty.value}}')">
+                                                        oldaction="javascript:giveFT('{{mint_detail.data.set}}','{{giveFTusername.value}}','{{giveFTqty.value}}')">
                                                         <div class="form-row my-2">
                                                             <div class="col-12">
                                                                 <label for="giveFTusername">Username</label>
@@ -238,7 +238,7 @@
                                                                         step="1" min="1" required>
                                                                     <div class="input-group-append"> <span
                                                                             class="input-group-text r-radius-hotfix"
-                                                                            id="giveFTqtyappend">{{mint_detail.data.set}}
+                                                                            id="giveFTqtyappend">{{mint_detail.set}}
                                                                             FT</span></div>
                                                                     <div class="invalid-feedback"> Please enter the
                                                                         number of FTs to send. </div>
@@ -254,7 +254,7 @@
                                                 <div role="tabpanel" class="tab-pane fade show" id="tradeFTtab"
                                                     aria-labelledby="tradeFT">
                                                     <form class="needs-validation mt-4" validate
-                                                        :action="javascript:tradeFT('{{mint_detail.data.set}}','{{tradeFTusername.value}}','{{tradeFTamount.value}}')">
+                                                        oldaction="javascript:tradeFT('{{mint_detail.set}}','{{tradeFTusername.value}}','{{tradeFTamount.value}}')">
                                                         <div class="form-row my-2">
                                                             <div class="col-12">
                                                                 <label for="tradeFTusername">Username</label>
@@ -282,7 +282,7 @@
                                                                         readonly>
                                                                     <div class="input-group-append"> <span
                                                                             class="input-group-text r-radius-hotfix"
-                                                                            id="tradeFTqtyappend">{{mint_detail.data.set}}
+                                                                            id="tradeFTqtyappend">{{mint_detail.set}}
                                                                             FT</span></div>
                                                                     <div class="invalid-feedback"> Please enter the
                                                                         number of FTs to trade. </div>
@@ -313,7 +313,7 @@
                                                 <div role="tabpanel" class="tab-pane fade show " id="sellFTtab"
                                                     aria-labelledby="sellFT">
                                                     <form class="needs-validation mt-4" validate
-                                                        :action="javascript:sellFT('{{mint_detail.data.set}}','{{sellFTprice.value}}','{{sellFTpriceType.value}}')">
+                                                        oldaction="javascript:sellFT('{{mint_detail.set}}','{{sellFTprice.value}}','{{sellFTpriceType.value}}')">
                                                         <div class="form-row my-2">
                                                             <div class="col-6">
                                                                 <label for="sellFTqty">Quantity</label>
@@ -325,7 +325,7 @@
                                                                         readonly>
                                                                     <div class="input-group-append"> <span
                                                                             class="input-group-text r-radius-hotfix"
-                                                                            id="sellFTqtyappend">{{mint_detail.data.set}}
+                                                                            id="sellFTqtyappend">{{mint_detail.set}}
                                                                             FT</span></div>
                                                                     <div class="invalid-feedback"> Please enter the
                                                                         number of FTs to sell. </div>
@@ -383,7 +383,7 @@
                                                     <div role="tabpanel" class="tab-pane fade show " id="auctionFTtab"
                                                         aria-labelledby="auctionFT">
                                                         <form class="needs-validation mt-4" validate
-                                                            :action="javascript:auctionFT('{{mint_detail.data.set}}','{{auctionFTprice.value}}','{{Date.now()}}','{{auctionFTdays.value}}')">
+                                                            oldaction="javascript:auctionFT('{{mint_detail.set}}','{{auctionFTprice.value}}','{{Date.now()}}','{{auctionFTdays.value}}')">
                                                             <div class="form-row my-2">
                                                                 <div class="col-6">
                                                                     <label for="auctionFTqty">Quantity</label>
@@ -395,7 +395,7 @@
                                                                             readonly>
                                                                         <div class="input-group-append"> <span
                                                                                 class="input-group-text r-radius-hotfix"
-                                                                                id="auctionFTqtyappend">{{mint_detail.data.set}}
+                                                                                id="auctionFTqtyappend">{{mint_detail.set}}
                                                                                 FT</span></div>
                                                                         <div class="invalid-feedback"> Please enter the
                                                                             number of FTs to auction. </div>
@@ -474,7 +474,7 @@
                                                     <div role="tabpanel" class="tab-pane fade show " id="airdropFTtab"
                                                         aria-labelledby="airdropFT">
                                                         <form class="needs-validation mt-4" validate
-                                                            :action="javascript:airdropFT('{{mint_detail.data.set}}','{{airdropFTusers.value}}')">
+                                                            oldaction="javascript:airdropFT('{{mint_detail.set}}','{{airdropFTusers.value}}')">
                                                             <div class="form-row my-2">
                                                                 <div class="col-12">
                                                                     <label for="airdropFTusers">Airdrop to:</label>
@@ -503,7 +503,7 @@
                                                                             readonly>
                                                                         <div class="input-group-append"> <span
                                                                                 class="input-group-text r-radius-hotfix"
-                                                                                id="airdropFTqtyappend">{{mint_detail.data.set}}
+                                                                                id="airdropFTqtyappend">{{mint_detail.set}}
                                                                                 FT</span></div>
                                                                         <div class="invalid-feedback"> Please enter the
                                                                             number of FTs to send to each account.
@@ -523,7 +523,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div> -->
+                        </div>
                         <center>
                     <!-- <div class="col-md-6">
                         

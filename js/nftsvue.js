@@ -340,6 +340,9 @@ var app = new Vue({
         minted: 0,
         max: 0,
       },
+      mint_detail: {
+        set: "",
+      },
       selectedNFTs: [],
       NFTselect: {
         start: 0,
