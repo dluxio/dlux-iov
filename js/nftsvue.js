@@ -728,18 +728,39 @@ var app = new Vue({
       this.barhbd = "";
     },
     getNFTsets() {
-      fetch(this.lapi + "/api/sets")
-        .then((response) => response.json())
+      const apis = [
+        'https://token.dlux.io',
+        'https://inconceivable.hivehoneycomb.com'
+      ]
+      for(var j = 0; j < apis.length; j++) {
+        fetch(apis[j] + "/api/sets")
+          .then((response) => response.json())
+          .then((data) => {
+            for (let i = 0; i < data.result.length; i++) {
+              this.callScript({ script: data.result[i].script, uid: "0" }).then(
+                (d) => {
+                  data.result[i].computed = d;
+                  data.result[i].token = data.result[i].fee.token;
+                  this.nftsets.push(data.result[i]);
+                }
+              );
+            }
+          });
+      }
+    },
+    getNFTsales(set){
+      if(set != "index.html"){
+        fetch(this.lapi + "/api/mintsupply/" + set).then((response) =>
+          response.json()
+        )
         .then((data) => {
-          for (let i = 0; i < data.result.length; i++) {
-            this.callScript({ script: data.result[i].script, uid: "0" }).then(
-              (d) => {
-                data.result[i].computed = d;
-                this.nftsets.push(data.result[i]);
-              }
-            );
-          }
-        });
+          this.mintSales = data.result[0].sales;
+          this.mintAuctions = data.result[0].auctions;
+        })
+        .catch(e=>{
+          console.log(e)
+        })
+      }
     },
     getNFTset(set) {
       if (set != "index.html"){
