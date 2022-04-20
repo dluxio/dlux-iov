@@ -122,6 +122,7 @@ var app = new Vue({
       multisig: "",
       jsontoken: "",
       node: "",
+      showTokens: {},
       behind: "",
       stats: {},
       behindTitle: "",
@@ -742,6 +743,7 @@ var app = new Vue({
                 (d) => {
                   data.result[i].computed = d;
                   data.result[i].token = data.result[i].fee.token;
+                  this.showTokens[data.result[i].fee.token] = true
                   this.nftsets.push(data.result[i]);
                 }
               );
