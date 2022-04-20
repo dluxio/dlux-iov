@@ -176,15 +176,14 @@
                                         @click="" oldclick="unwrap custom json">Open<i
                                             class="fas fa-box-open ml-3"></i></button>
                                     <button type="button" class="btn btn-outline-dark mr-auto ml-auto mt-1"
-                                        data-toggle="modal" href="#mintTransferModal"
+                                        data-bs-toggle="modal" data-bs-target="#mintTransferModal"
                                         @click="mint_detail.set = focusSet.set">Transfer<i
                                             class="fas fa-exchange-alt ml-3"></i></button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                        <div class="modal fade show" id="mintTransferModal" tabindex="11" role="dialog"
-                            aria-hidden="true">
+                        <div class="modal fade" id="mintTransferModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                             <div class="modal-dialog modal-full modal-dialog-centered" role="document">
                                 <div class="modal-content bg-dark text-white">
                                     <div class="border border-info bg-darker mx-auto px-5 py-3 rounded col-12">
@@ -750,7 +749,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div>-->
                         </div>
                         <div class="row">
                             <div class="d-none">
