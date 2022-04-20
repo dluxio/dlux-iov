@@ -57,7 +57,7 @@
                         <div>
                         <div class="btn-group" role="group" aria-label="Chain select">
                             <div v-for="(item, key, index) in showTokens">
-                                <input type="checkbox" class="btn-check" :id="'btncheck'+key" autocomplete="off" checked :checked="!showTokens[key]">
+                                <input type="checkbox" class="btn-check" :id="'btncheck'+key" autocomplete="off" v-model="showTokens[key]">
                                 <label class="btn btn-outline-primary" :for="'btncheck'+key" @click="showToken(key)">{{key}}</label>
                             </div>
                           </div>
