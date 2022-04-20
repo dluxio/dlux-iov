@@ -147,7 +147,8 @@
                 </div>
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="card text-white border-0" :style="{'background': getSetDetailsColors(focusSet.computed ? focusSet.computed : '')}">
+                        <div class="card text-white border-0"
+                            :style="{'background': getSetDetailsColors(focusSet.computed ? focusSet.computed : '')}">
                             <div class="card-header d-flex align-items-center justify-content-between">
                                 <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
                                     <div class="pr-2"><small>QTY: </small></div>
@@ -163,7 +164,7 @@
                             <div class="card-body text-center d-flex flex-column lead">
                                 <div class="px-2 py-5 text-center rounded" style="background-color: rgba(0,0,0,0.75)">
                                     <img class="rounded max-160"
-                                            :src="makeLink('https://ipfs.io/ipfs/', focusSet.computed.set ? focusSet.computed.set.wrapped : '')"></img>
+                                        :src="makeLink('https://ipfs.io/ipfs/', focusSet.computed.set ? focusSet.computed.set.wrapped : '')"></img>
                                     <div style="-webkit-background-clip: text;color: transparent;">
                                         <h3 class="my-0 mx-2 p-0 p-2 ml-auto">sealed NFT</h3>
                                     </div>
@@ -172,9 +173,8 @@
                             </div>
                             <div class="card-footer" v-show="getMint(focusSet.set, 'qty')">
                                 <div class="d-flex flex-wrap justify-content-between">
-                                    <button type="button" class="btn btn-outline-dark me-auto ms-auto mt-1"
-                                        @click="" oldclick="unwrap custom json">Open<i
-                                            class="fas fa-box-open ms-3"></i></button>
+                                    <button type="button" class="btn btn-outline-dark me-auto ms-auto mt-1" @click=""
+                                        oldclick="unwrap custom json">Open<i class="fas fa-box-open ms-3"></i></button>
                                     <button type="button" class="btn btn-outline-dark me-auto ms-auto mt-1"
                                         data-bs-toggle="modal" data-bs-target="#mintTransferModal"
                                         @click="mint_detail.set = focusSet.set">Transfer<i
@@ -183,206 +183,318 @@
                             </div>
                         </div>
                     </div>
-                      <div class="modal fade" id="mintTransferModal" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal fade" id="mintTransferModal" tabindex="-1" role="dialog" aria-hidden="true">
                         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                          <div class="modal-content bg-dark text-white">
-                            <div class="border border-info bg-darker mx-auto px-5 py-3 rounded col-12">
-                              <div class="container-fluid">
-                                <h3 class="text-center">Transfer {{mint_detail.set}} FT</h3>
-                                <ul class="nav nav-pills bg-darker justify-content-center">
-                                  <li class="nav-item"> <a class="nav-link active" id="giveFTlink" role="tab" data-bs-toggle="tab" aria-controls="giveFT" aria-expanded="true" href="#giveFTtab">Give</a></li>
-                                  <li class="nav-item"> <a class="nav-link" id="tradeFTlink" role="tab" data-bs-toggle="tab" aria-controls="tradeFT" aria-expanded="true" href="#tradeFTtab">Trade</a></li>
-                                  <li class="nav-item"> <a class="nav-link" id="sellFTlink" role="tab" data-bs-toggle="tab" aria-controls="sellFT" aria-expanded="true" href="#sellFTtab">Sell</a></li>
-                                  <li class="nav-item"> <a class="nav-link" id="auctionFTlink" role="tab" data-bs-toggle="tab" aria-controls="auctionFT" aria-expanded="true" href="#auctionFTtab">Auction</a></li>
-                                  <li class="nav-item"> <a class="nav-link" id="airdropFTlink" role="tab" data-bs-toggle="tab" aria-controls="airdropFT" aria-expanded="true" href="#airdropFTtab">Airdrop</a></li>
-                                </ul>
-                                <div class="tab-content">
-                                  <div role="tabpanel" class="tab-pane fade show active" id="giveFTtab" aria-labelledby="giveFT">
-                                    <form class="needs-validation mt-4" novalidate > <!--:action="javascript:giveFT('{{mint_detail.data.set}}','{{giveFTusername.value}}','{{giveFTqty.value}}')"-->
-                                      <div class="row mb-3">
-                                          <label for="giveFTusername" class="form-label">Username</label>
-                                          <div class="input-group">
-                                            <span class="input-group-text bg-darkg border-dark text-white-50">@</span>
-                                            <input type="text" class="form-control bg-darkg border-dark text-info r-radius-hotfix" id="giveFTusername" aria-describedby="giveFTuserprep" required>
-                                            <div class="invalid-feedback"> Please enter the username you'd like to give to. </div>
-                                          </div>
-                                       </div>
-                                       <div class="row mb-3">
-                                          <label for="giveFTqty" class="form-label">Quantity</label>
-                                          <div class="input-group">
-                                            <input type="number" class="form-control bg-darkg border-dark text-info " id="giveFTqty" aria-describedby="giveFTqtyappend" value="1" step="1" min="1" required>
-                                            <span class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50 " id="giveFTqtyappend">{{mint_detail.set}} FT</span>
-                                            <div class="invalid-feedback"> Please enter the number of FTs to send. </div>
-                                          </div>
+                            <div class="modal-content bg-dark text-white">
+                                <div class="border border-info bg-darker mx-auto px-5 py-3 rounded col-12">
+                                    <div class="container-fluid">
+                                        <h3 class="text-center">Transfer {{mint_detail.set}} FT</h3>
+                                        <ul class="nav nav-pills bg-darker justify-content-center">
+                                            <li class="nav-item"> <a class="nav-link active" id="giveFTlink" role="tab"
+                                                    data-bs-toggle="tab" aria-controls="giveFT" aria-expanded="true"
+                                                    href="#giveFTtab">Give</a></li>
+                                            <li class="nav-item"> <a class="nav-link" id="tradeFTlink" role="tab"
+                                                    data-bs-toggle="tab" aria-controls="tradeFT" aria-expanded="true"
+                                                    href="#tradeFTtab">Trade</a></li>
+                                            <li class="nav-item"> <a class="nav-link" id="sellFTlink" role="tab"
+                                                    data-bs-toggle="tab" aria-controls="sellFT" aria-expanded="true"
+                                                    href="#sellFTtab">Sell</a></li>
+                                            <li class="nav-item"> <a class="nav-link" id="auctionFTlink" role="tab"
+                                                    data-bs-toggle="tab" aria-controls="auctionFT" aria-expanded="true"
+                                                    href="#auctionFTtab">Auction</a></li>
+                                            <li class="nav-item"> <a class="nav-link" id="airdropFTlink" role="tab"
+                                                    data-bs-toggle="tab" aria-controls="airdropFT" aria-expanded="true"
+                                                    href="#airdropFTtab">Airdrop</a></li>
+                                        </ul>
+                                        <div class="tab-content">
+                                            <div role="tabpanel" class="tab-pane fade show active" id="giveFTtab"
+                                                aria-labelledby="giveFT">
+                                                <form class="needs-validation mt-4" novalidate>
+                                                    <!--:action="javascript:giveFT('{{mint_detail.data.set}}','{{giveFTusername.value}}','{{giveFTqty.value}}')"-->
+                                                    <div class="row mb-3">
+                                                        <label for="giveFTusername" class="form-label">Username</label>
+                                                        <div class="input-group">
+                                                            <span
+                                                                class="input-group-text bg-darkg border-dark text-white-50">@</span>
+                                                            <input type="text"
+                                                                class="form-control bg-darkg border-dark text-info r-radius-hotfix"
+                                                                id="giveFTusername" aria-describedby="giveFTuserprep"
+                                                                required>
+                                                            <div class="invalid-feedback"> Please enter the username
+                                                                you'd like to give to. </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <label for="giveFTqty" class="form-label">Quantity</label>
+                                                        <div class="input-group">
+                                                            <input type="number"
+                                                                class="form-control bg-darkg border-dark text-info "
+                                                                id="giveFTqty" aria-describedby="giveFTqtyappend"
+                                                                value="1" step="1" min="1" required>
+                                                            <span
+                                                                class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50 "
+                                                                id="giveFTqtyappend">{{mint_detail.set}} FT</span>
+                                                            <div class="invalid-feedback"> Please enter the number of
+                                                                FTs to send. </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="text-center">
+                                                        <button id="giveFTbutton" class="btn btn-info"
+                                                            type="submit">Give</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <div role="tabpanel" class="tab-pane fade show " id="tradeFTtab"
+                                                aria-labelledby="tradeFT">
+                                                <form class="needs-validation mt-4" novalidate>
+                                                    <!--:action="javascript:tradeFT('{{mint_detail.data.set}}','{{tradeFTusername.value}}','{{tradeFTamount.value}}')"-->
+                                                    <div class="row mb-3">
+                                                        <label for="tradeFTusername" class="form-label">Username</label>
+                                                        <div class="input-group">
+                                                            <span
+                                                                class="input-group-text bg-darkg border-dark text-white-50"
+                                                                id="tradeFTuserprep">@</span>
+                                                            <input type="text"
+                                                                class="form-control r-radius-hotfix bg-darkg border-dark text-info "
+                                                                id="tradeFTusername" aria-describedby="tradeFTuserprep"
+                                                                required>
+                                                            <div class="invalid-feedback"> Please enter the username
+                                                                you'd like to trade with. </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <div class="col-6">
+                                                            <label for="tradeFTqty" class="form-label">Quantity</label>
+                                                            <div class="input-group">
+                                                                <input type="number"
+                                                                    class="form-control bg-darkg border-dark text-info "
+                                                                    id="tradeFTqty" aria-describedby="tradeFTqtyappend"
+                                                                    placeholder="1" step="1" min="1" required readonly>
+                                                                <span
+                                                                    class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
+                                                                    id="tradeFTqtyappend">{{mint_detail.set}} FT</span>
+                                                                <div class="invalid-feedback"> Please enter the number
+                                                                    of FTs to trade. </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <label for="tradeFTamount" class="form-label">Amount</label>
+                                                            <div class="input-group">
+                                                                <input type="number"
+                                                                    class="form-control bg-darkg border-dark text-info "
+                                                                    id="tradeFTamount"
+                                                                    aria-describedby="tradeFTamountappend"
+                                                                    placeholder="0.000" step="0.001" min="0.001"
+                                                                    required readonly>
+                                                                <span
+                                                                    class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
+                                                                    id="tradeFTamountappend">DLUX</span>
+                                                                <div class="invalid-feedback"> Please enter the amount
+                                                                    of DLUX you'd like to receive. </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-center">
+                                                        <button id="tradeFTbutton" class="btn btn-info my-2"
+                                                            type="submit">Propose Trade</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <div role="tabpanel" class="tab-pane fade show " id="sellFTtab"
+                                                aria-labelledby="sellFT">
+                                                <form class="needs-validation mt-4" novalidate>
+                                                    <!--:action="javascript:sellFT('{{mint_detail.data.set}}','{{sellFTprice.value}}')"-->
+                                                    <div class="row mb-3">
+                                                        <div class="col-6">
+                                                            <label for="sellFTqty" class="form-label">Quantity</label>
+                                                            <div class="input-group">
+                                                                <input type="number"
+                                                                    class="form-control bg-darkg border-dark text-info"
+                                                                    id="sellFTqty" aria-describedby="sellFTqtyappend"
+                                                                    placeholder="1" step="1" min="1" required readonly>
+                                                                <span
+                                                                    class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
+                                                                    id="sellFTqtyappend">{{mint_detail.set}} FT</span>
+                                                                <div class="invalid-feedback"> Please enter the number
+                                                                    of FTs to sell. </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <label for="sellFTprice" class="form-label">Sale
+                                                                Price</label>
+                                                            <div class="input-group">
+                                                                <input type="number"
+                                                                    class="form-control bg-darkg border-dark text-info"
+                                                                    id="sellFTprice"
+                                                                    aria-describedby="sellFTpriceappend"
+                                                                    placeholder="0.000" step="0.001" min="0.001"
+                                                                    required>
+                                                                <span
+                                                                    class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
+                                                                    id="sellFTpriceappend">DLUX</span>
+                                                                <div class="invalid-feedback"> Please enter the amount
+                                                                    of DLUX you'd like to receive. </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <p class="text-white-50 small">Ownership will be transferred to
+                                                            the DAO listing service and sold publicly. Cancel anytime to
+                                                            return immediately.</p>
+                                                    </div>
+                                                    <div class="text-center">
+                                                        <button id="sellFTbutton" class="btn btn-info my-2"
+                                                            type="submit">List Item</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <div role="tabpanel" class="tab-pane fade show " id="auctionFTtab"
+                                                aria-labelledby="auctionFT">
+                                                <form class="needs-validation mt-4" novalidate>
+                                                    <!--:action="javascript:auctionFT('{{mint_detail.data.set}}','{{auctionFTprice.value}}','{{Date.now()}}','{{auctionFTdays.value}}'),'{{auctionFTpriceType.value}}'"-->
+                                                    <div class="row mb-3">
+                                                        <div class="col-6">
+                                                            <label for="auctionFTqty"
+                                                                class="form-label">Quantity</label>
+                                                            <div class="input-group">
+                                                                <input type="number"
+                                                                    class="form-control bg-darkg border-dark text-info"
+                                                                    id="auctionFTqty"
+                                                                    aria-describedby="auctionFTqtyappend"
+                                                                    placeholder="1" step="1" min="1" required readonly>
+                                                                <span
+                                                                    class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
+                                                                    id="auctionFTqtyappend">{{mint_detail.set}}
+                                                                    FT</span>
+                                                                <div class="invalid-feedback"> Please enter the number
+                                                                    of FTs to auction. </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <label for="auctionFTprice" class="form-label">Starting
+                                                                Bid</label>
+                                                            <div class="input-group">
+                                                                <input type="number"
+                                                                    class="form-control bg-darkg border-dark text-info"
+                                                                    id="auctionFTprice"
+                                                                    aria-describedby="auctionFTpriceappend"
+                                                                    placeholder="0.000" step="0.001" min="0.001"
+                                                                    required>
+                                                                <span
+                                                                    class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
+                                                                    id="auctionFTqtyappend">DLUX</span>
+                                                                <div class="invalid-feedback"> Please enter the amount
+                                                                    of DLUX you'd like to start the bidding. </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex justify-content-around">
+                                                        <div class="row mb-3 d-flex align-items-center">
+                                                            <label for="auctionFTdays"
+                                                                class="form-label">Duration</label>
+                                                            <select class="mx-2 btn btn-lg btn-secondary"
+                                                                class="form-control" id="auctionFTdays" required>
+                                                                <option value="1">1 Day</option>
+                                                                <option value="2">2 Days</option>
+                                                                <option value="3">3 Days</option>
+                                                                <option value="4">4 Days</option>
+                                                                <option value="5">5 Days</option>
+                                                                <option value="6">6 Days</option>
+                                                                <option value="7" selected>7 Days</option>
+                                                                <option value="8">8 Days</option>
+                                                                <option value="9">9 Days</option>
+                                                                <option value="10">10 Days</option>
+                                                                <option value="11">11 Days</option>
+                                                                <option value="12">12 Days</option>
+                                                                <option value="13">13 Days</option>
+                                                                <option value="14">14 Days</option>
+                                                                <option value="15">15 Days</option>
+                                                                <option value="16">16 Days</option>
+                                                                <option value="17">17 Days</option>
+                                                                <option value="18">18 Days</option>
+                                                                <option value="19">19 Days</option>
+                                                                <option value="20">20 Days</option>
+                                                                <option value="21">21 Days</option>
+                                                                <option value="22">22 Days</option>
+                                                                <option value="23">23 Days</option>
+                                                                <option value="24">24 Days</option>
+                                                                <option value="25">25 Days</option>
+                                                                <option value="26">26 Days</option>
+                                                                <option value="27">27 Days</option>
+                                                                <option value="28">28 Days</option>
+                                                                <option value="29">29 Days</option>
+                                                                <option value="30">30 Days</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <p class="text-white-50 small">Ownership will be transferred to
+                                                            the DAO listing service and auctioned publicly. Once
+                                                            submitted this cannot be cancelled. If there are no bids at
+                                                            the end of the auction period, it will be returned to you
+                                                            immediately.</p>
+                                                    </div>
+                                                    <div class="text-center">
+                                                        <button class="btn btn-info my-2" type="submit">List
+                                                            Item</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <div role="tabpanel" class="tab-pane fade show " id="airdropFTtab"
+                                                aria-labelledby="airdropFT">
+                                                <form class="needs-validation mt-4" novalidate>
+                                                    <!--:action="javascript:airdropFT('{{mint_detail.data.set}}','{{airdropFTusers.value}}')"-->
+                                                    <div class="row mb-3">
+                                                        <div class="col-12">
+                                                            <label for="airdropFTusers" class="form-label">Airdrop
+                                                                to</label>
+                                                            <div class="input-group">
+                                                                <textarea name="paragraph_text" cols="50" rows="2"
+                                                                    class="form-control r-radius-hotfix bg-darkg border-dark text-info"
+                                                                    id="airdropFTusers" aria-describedby="airdropFT"
+                                                                    required placeholder="name user-name"></textarea>
+                                                                <div class="invalid-feedback"> Please enter at least one
+                                                                    user name to airdrop tokens to. </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <div class="col-12">
+                                                            <label for="airdropFTqty" class="form-label">Quantity sent
+                                                                to each</label>
+                                                            <div class="input-group">
+                                                                <input type="number"
+                                                                    class="form-control bg-darkg border-dark text-info"
+                                                                    id="airdropFTqty"
+                                                                    aria-describedby="airdropFTqtyappend"
+                                                                    placeholder="1" step="1" min="1" required readonly>
+                                                                <span
+                                                                    class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
+                                                                    id="airdropFTqtyappend">{{mint_detail.set}}
+                                                                    FT</span>
+                                                                <div class="invalid-feedback"> Please enter the number
+                                                                    of FTs to send to each account. </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-center">
+                                                        <button class="btn btn-info my-2" type="submit">Airdrop
+                                                            Tokens</button>
+                                                    </div>
+                                                </form>
+                                            </div>
                                         </div>
-                                      
-                                      <div class="text-center">
-                                        <button id="giveFTbutton" class="btn btn-info" type="submit">Give</button>
-                                      </div>
-                                    </form>
-                                  </div>
-                                  <div role="tabpanel" class="tab-pane fade show " id="tradeFTtab" aria-labelledby="tradeFT">
-                                    <form class="needs-validation mt-4" novalidate > <!--:action="javascript:tradeFT('{{mint_detail.data.set}}','{{tradeFTusername.value}}','{{tradeFTamount.value}}')"-->
-                                      <div class="row mb-3">
-                                          <label for="tradeFTusername" class="form-label">Username</label>
-                                          <div class="input-group">
-                                            <span class="input-group-text bg-darkg border-dark text-white-50" id="tradeFTuserprep">@</span>
-                                            <input type="text" class="form-control r-radius-hotfix bg-darkg border-dark text-info " id="tradeFTusername" aria-describedby="tradeFTuserprep" required>
-                                            <div class="invalid-feedback"> Please enter the username you'd like to trade with. </div>
-                                          </div>
-                                      </div>
-                                      <div class="row mb-3">
-                                        <div class="col-6">
-                                          <label for="tradeFTqty" class="form-label">Quantity</label>
-                                          <div class="input-group">
-                                            <input type="number" class="form-control bg-darkg border-dark text-info " id="tradeFTqty" aria-describedby="tradeFTqtyappend" placeholder="1" step="1" min="1" required readonly>
-                                            <span class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50" id="tradeFTqtyappend">{{mint_detail.set}} FT</span>
-                                            <div class="invalid-feedback"> Please enter the number of FTs to trade. </div>
-                                          </div>
-                                        </div>
-                                        <div class="col-6">
-                                          <label for="tradeFTamount" class="form-label">Amount</label>
-                                          <div class="input-group">
-                                            <input type="number" class="form-control bg-darkg border-dark text-info " id="tradeFTamount" aria-describedby="tradeFTamountappend" placeholder="0.000" step="0.001" min="0.001" required  readonly>
-                                            <span class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50" id="tradeFTamountappend">DLUX</span>   
-                                            <div class="invalid-feedback"> Please enter the amount of DLUX you'd like to receive. </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div class="text-center">
-                                        <button id="tradeFTbutton" class="btn btn-info my-2" type="submit">Propose Trade</button>
-                                      </div>
-                                    </form>
-                                  </div>
-                                  <div role="tabpanel" class="tab-pane fade show " id="sellFTtab" aria-labelledby="sellFT">
-                                    <form class="needs-validation mt-4" novalidate > <!--:action="javascript:sellFT('{{mint_detail.data.set}}','{{sellFTprice.value}}')"-->
-                                      <div class="row mb-3">
-                                        <div class="col-6">
-                                          <label for="sellFTqty" class="form-label">Quantity</label>
-                                          <div class="input-group">
-                                            <input type="number" class="form-control bg-darkg border-dark text-info" id="sellFTqty" aria-describedby="sellFTqtyappend" placeholder="1" step="1" min="1" required readonly>
-                                            <span class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50" id="sellFTqtyappend">{{mint_detail.set}} FT</span>
-                                            <div class="invalid-feedback"> Please enter the number of FTs to sell. </div>
-                                          </div>
-                                        </div>
-                                        <div class="col-6">
-                                          <label for="sellFTprice" class="form-label">Sale Price</label>
-                                          <div class="input-group">
-                                            <input type="number" class="form-control bg-darkg border-dark text-info" id="sellFTprice" aria-describedby="sellFTpriceappend" placeholder="0.000" step="0.001" min="0.001" required>
-                                            <span class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50" id="sellFTpriceappend">DLUX</span>
-                                            <div class="invalid-feedback"> Please enter the amount of DLUX you'd like to receive. </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div class="row mb-3">
-                                        <p class="text-white-50 small">Ownership will be transferred to the DAO listing service and sold publicly. Cancel anytime to return immediately.</p>
-                                      </div>
-                                      <div class="text-center">
-                                      <button id="sellFTbutton" class="btn btn-info my-2" type="submit" >List Item</button>
-                                      </div>
-                                    </form>
-                                  </div>
-                                  <div role="tabpanel" class="tab-pane fade show " id="auctionFTtab" aria-labelledby="auctionFT">
-                                    <form class="needs-validation mt-4" novalidate > <!--:action="javascript:auctionFT('{{mint_detail.data.set}}','{{auctionFTprice.value}}','{{Date.now()}}','{{auctionFTdays.value}}'),'{{auctionFTpriceType.value}}'"-->
-                                      <div class="row mb-3">
-                                        <div class="col-6">
-                                          <label for="auctionFTqty" class="form-label">Quantity</label>
-                                          <div class="input-group">
-                                            <input type="number" class="form-control bg-darkg border-dark text-info" id="auctionFTqty" aria-describedby="auctionFTqtyappend" placeholder="1" step="1" min="1" required readonly>
-                                            <span class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50" id="auctionFTqtyappend">{{mint_detail.set}} FT</span> 
-                                            <div class="invalid-feedback"> Please enter the number of FTs to auction. </div>
-                                          </div>
-                                        </div>
-                                        <div class="col-6">
-                                          <label for="auctionFTprice" class="form-label">Starting Bid</label>
-                                          <div class="input-group">
-                                            <input type="number" class="form-control bg-darkg border-dark text-info" id="auctionFTprice" aria-describedby="auctionFTpriceappend" placeholder="0.000" step="0.001" min="0.001" required>
-                                             <span class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50" id="auctionFTqtyappend">DLUX</span> 
-                                            <div class="invalid-feedback"> Please enter the amount of DLUX you'd like to start the bidding. </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div class="d-flex justify-content-around">
-                                        <div class="row mb-3 d-flex align-items-center">
-                                          <label for="auctionFTdays"  class="form-label">Duration</label>
-                                          <select class="mx-2 btn btn-lg btn-secondary" class="form-control" id="auctionFTdays" required >
-                                          <option value="1">1 Day</option>
-                                          <option value="2">2 Days</option>
-                                          <option value="3">3 Days</option>
-                                          <option value="4">4 Days</option>
-                                          <option value="5">5 Days</option>
-                                          <option value="6">6 Days</option>
-                                          <option value="7" selected>7 Days</option>
-                                          <option value="8">8 Days</option>
-                                          <option value="9">9 Days</option>
-                                          <option value="10">10 Days</option>
-                                          <option value="11">11 Days</option>
-                                          <option value="12">12 Days</option>
-                                          <option value="13">13 Days</option>
-                                          <option value="14">14 Days</option>
-                                          <option value="15">15 Days</option>
-                                          <option value="16">16 Days</option>
-                                          <option value="17">17 Days</option>
-                                          <option value="18">18 Days</option>
-                                          <option value="19">19 Days</option>
-                                          <option value="20">20 Days</option>
-                                          <option value="21">21 Days</option>
-                                          <option value="22">22 Days</option>
-                                          <option value="23">23 Days</option>
-                                          <option value="24">24 Days</option>
-                                          <option value="25">25 Days</option>
-                                          <option value="26">26 Days</option>
-                                          <option value="27">27 Days</option>
-                                          <option value="28">28 Days</option>
-                                          <option value="29">29 Days</option>
-                                          <option value="30">30 Days</option>
-                                          </select>
-                                        </div>
-                                      </div>
-                                      <div class="row mb-3">
-                                        <p class="text-white-50 small">Ownership will be transferred to the DAO listing service and auctioned publicly. Once submitted this cannot be cancelled. If there are no bids at the end of the auction period, it will be returned to you immediately.</p>
-                                      </div>
-                                      <div class="text-center">
-                                        <button class="btn btn-info my-2" type="submit">List Item</button>
-                                      </div>
-                                    </form>
-                                  </div>
-                                  <div role="tabpanel" class="tab-pane fade show " id="airdropFTtab" aria-labelledby="airdropFT">
-                                    <form class="needs-validation mt-4" novalidate > <!--:action="javascript:airdropFT('{{mint_detail.data.set}}','{{airdropFTusers.value}}')"-->
-                                      <div class="row mb-3">
-                                        <div class="col-12">
-                                          <label for="airdropFTusers" class="form-label">Airdrop to</label>
-                                          <div class="input-group">
-                                            <textarea name="paragraph_text" cols="50" rows="2" class="form-control r-radius-hotfix bg-darkg border-dark text-info" id="airdropFTusers" aria-describedby="airdropFT" required placeholder="name user-name"></textarea>
-                                            <div class="invalid-feedback"> Please enter at least one user name to airdrop tokens to. </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div class="row mb-3">
-                                        <div class="col-12">
-                                          <label for="airdropFTqty" class="form-label">Quantity sent to each</label>
-                                          <div class="input-group">
-                                            <input type="number" class="form-control bg-darkg border-dark text-info" id="airdropFTqty" aria-describedby="airdropFTqtyappend" placeholder="1" step="1" min="1" required readonly>
-                                           <span class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50" id="airdropFTqtyappend">{{mint_detail.set}} FT</span> 
-                                            <div class="invalid-feedback"> Please enter the number of FTs to send to each account. </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div class="text-center">
-                                        <button class="btn btn-info my-2" type="submit">Airdrop Tokens</button>
-                                      </div>
-                                    </form>
-                                  </div>
+                                    </div>
                                 </div>
-                              </div>
                             </div>
-                          </div>
                         </div>
-                      </div>
+                    </div>
 
                     <div class="col-md-6">
-                        
-                        <div class="card card-ft text-white m-2 " style="border: none;" :style="{'background': getSetDetailsColors(focusSet.computed ? focusSet.computed : '')}">
+
+                        <div class="card card-ft text-white m-2 " style="border: none;"
+                            :style="{'background': getSetDetailsColors(focusSet.computed ? focusSet.computed : '')}">
                             <div id="hidden-detail-inputs" class="d-none">
                                 <input type="text">
                                 <input type="text">
@@ -398,41 +510,42 @@
                                         </h2>
                                     </div>
                                 </div>
-                                <div> <a :href="'/nfts/set/'' + focusSet.set">
+                                <div> <a :href="'/nfts/set/' + focusSet.set">
                                         <h3 class="card-title lead shimmer rounded p-2 m-0 ml-auto"
                                             style="color: black"><b>{{focusSet.set}} NFT</b></h3>
                                     </a></div>
                             </div>
                             <div class="card-body text-center d-flex flex-column p-2">
-                                <div class="card panel-group h-100"
-                                    style="background-color: rgba(0,0,0,0.8)">
+                                <div class="card panel-group h-100" style="background-color: rgba(0,0,0,0.8)">
                                     <div class="panel panel-default">
                                         <div class="card-heading mint-panel-heading-top">
                                             <p class="card-title mb-0 p-1"> <a class="collapsed accordion-toggle"
-                                                    data-toggle="collapse" 
+                                                    data-toggle="collapse"
                                                     :href="'#' + focusSet.set + '-description-collapse'"><i
                                                         class="far fa-list-alt mr-3"></i>Description</a></p>
                                         </div>
                                         <div class="panel-collapse collapse">
                                             <div class="card-body">
                                                 <p>
-                                                    {{focusSet.computed.set.Description)}} </p>
+                                                    {{focusSet.computed.set.Description}} </p>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="panel panel-default">
                                         <div class="card-heading d-none">
                                             <h4 class="card-title"> <a class="accordion-toggle" data-toggle="collapse"
-                                                    :data-parent="#{{set}}-panel"
+                                                    :data-parent="'#' + focusSet.set + '-panel'"
                                                     :href="'#' + focusSet.set + '-info-collapse'">Info</a></h4>
                                         </div>
                                         <div class="panel-collapse collapse show" :id="focusSet.set + '-info-collapse'">
                                             <div class="card-body">
-                                                <img :src="'https://ipfs.io/ipfs/' + focusSet.computed.wrapped" style="rounded max-160">
-                                                <div style="background-image: linear-gradient(magenta,aqua);-webkit-background-clip: text;color: transparent;">
+                                                <img :src="'https://ipfs.io/ipfs/' + focusSet.computed.wrapped"
+                                                    style="rounded max-160">
+                                                <div
+                                                    style="background-image: linear-gradient(magenta,aqua);-webkit-background-clip: text;color: transparent;">
                                                     <div class="mt-3">
-                                                        <h1 class="text-center">sealed NFT<i
-                                                                icon="icon" class="ml-3"></i></h1>
+                                                        <h1 class="text-center">sealed NFT<i icon="icon"
+                                                                class="ml-3"></i></h1>
                                                     </div>
                                                 </div>
                                                 <h5>Unwrap to see what's inside</h5>
@@ -446,10 +559,12 @@
                                                     :href="'#' + focusSet.set + '-market-collapse'"><i
                                                         class="fas fa-store mr-3"></i>Market (qty)</a></p>
                                         </div>
-                                        <div class="panel-collapse collapse show" :id="focusSet.set + '-market-collapse'">
+                                        <div class="panel-collapse collapse show"
+                                            :id="focusSet.set + '-market-collapse'">
                                             <div class="card-body p-0">
                                                 <div>
-                                                    <ul :id="focusSet.set + '-mint-tabnav'" class="nav nav-tabs" role="tablist">
+                                                    <ul :id="focusSet.set + '-mint-tabnav'" class="nav nav-tabs"
+                                                        role="tablist">
                                                         <li class="nav-item p-0"> <a class="nav-link active"
                                                                 :href="'#' + focusSet.set + '-mint-salestab'"
                                                                 :id="focusSet.set + '-mint-saleslink'" role="tab"
@@ -459,13 +574,14 @@
                                                                     <div @click="">SALES</div>
                                                                     <div class="mb-3"><span
                                                                             class=" badge badge-pill badge-danger"
-                                                                            style="font-size: .7em">calc qty_sales</span>
+                                                                            style="font-size: .7em">calc
+                                                                            qty_sales</span>
                                                                     </div>
                                                                 </div>
                                                             </a></li>
                                                         <li class="nav-item p-0"> <a class="nav-link"
-                                                                :href="'#'+ focusSet.set + '-mint-auctionstab'" role="tab"
-                                                                :id="focusSet.set + '-mint-auctionslink'"
+                                                                :href="'#'+ focusSet.set + '-mint-auctionstab'"
+                                                                role="tab" :id="focusSet.set + '-mint-auctionslink'"
                                                                 data-toggle="tab" aria-controls="mintauctionstab">
                                                                 <div class="d-flex align-items-center">
                                                                     <div>AUCTIONS</div>
@@ -476,7 +592,7 @@
                                                                 </div>
                                                             </a></li>
                                                     </ul>
-                                                    
+
                                                     <div :id="focusSet.set + '-mint-tabs'" class="tab-content">
                                                         <div :id="focusSet.set + '-mint-salestab'" role="tabpanel"
                                                             class="tab-pane fade show active"
@@ -492,46 +608,44 @@
                                                                 </thead>
                                                                 <tbody>
                                                                     <div v-for="item in mintSales">
-                                                                    <tr v-show="pb.length > 0">
-                                                                        <th scope="row" class="" colspan="4">
-                                                                            <p class="my-2"><span
-                                                                                    class="small bg-warning text-dark rounded px-2 py-1">ACCOUNT
-                                                                                    COMMENT OR POST BETWEEN</span></p>
-                                                                            <p>pb?</p>
-                                                                        </th>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <form :id="item.set + item.uid + 'form'"
-                                                                            class="needs-validation" novalidate>
-                                                                            <th scope="row"
-                                                                                style="vertical-align: middle">qty
+                                                                        <tr v-show="pb.length > 0">
+                                                                            <th scope="row" class="" colspan="4">
+                                                                                <p class="my-2"><span
+                                                                                        class="small bg-warning text-dark rounded px-2 py-1">ACCOUNT
+                                                                                        COMMENT OR POST BETWEEN</span>
+                                                                                </p>
+                                                                                <p>pb?</p>
                                                                             </th>
-                                                                            <td style="vertical-align: middle">
-                                                                                {{nai(item.pricenai)}}</td>
-                                                                            <td><span
-                                                                                    v-show="true">
-                                                                                    <center>
-                                                                                        <input value="1" required
-                                                                                            :max="{{item.max}}"
-                                                                                            class="bg-none border-light rounded text-white text-center form-control"
-                                                                                            style="max-width: 50px">
-                                                                                    </center>
-                                                                                </span> <span
-                                                                                    v-show="true">calc qty
-                                                                                </span></td>
-                                                                            <td>
-                                                                                <div>
-                                                                                    <button type="submit"
-                                                                                        class="btn btn-primary"
-                                                                                        v-show="item.by != account">Buy</button>
-                                                                                    <button class="btn btn-primary"
-                                                                                        v-show="item.by != account">Buy</button>
-                                                                                    <button class="btn btn-warning"
-                                                                                        v-show="item.by == account">Cancel</button>
-                                                                                </div>
-                                                                            </td>
-                                                                        </form>
-                                                                    </tr>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <form :id="item.set + item.uid + 'form'"
+                                                                                class="needs-validation" novalidate>
+                                                                                <th scope="row"
+                                                                                    style="vertical-align: middle">qty
+                                                                                </th>
+                                                                                <td style="vertical-align: middle">
+                                                                                    {{nai(item.pricenai)}}</td>
+                                                                                <td><span v-show="true">
+                                                                                        <center>
+                                                                                            <input value="1" required
+                                                                                                class="bg-none border-light rounded text-white text-center form-control"
+                                                                                                style="max-width: 50px">
+                                                                                        </center>
+                                                                                    </span> <span v-show="true">calc qty
+                                                                                    </span></td>
+                                                                                <td>
+                                                                                    <div>
+                                                                                        <button type="submit"
+                                                                                            class="btn btn-primary"
+                                                                                            v-show="item.by != account">Buy</button>
+                                                                                        <button class="btn btn-primary"
+                                                                                            v-show="item.by != account">Buy</button>
+                                                                                        <button class="btn btn-warning"
+                                                                                            v-show="item.by == account">Cancel</button>
+                                                                                    </div>
+                                                                                </td>
+                                                                            </form>
+                                                                        </tr>
                                                                     </div>
                                                                 </tbody>
                                                             </table>
@@ -548,33 +662,33 @@
                                                                         <th scope="col" class="small">HIGH BIDDER</th>
                                                                 <tbody is="dmx-repeat" :repeat="auctions"
                                                                     id="mintauctionsorders">
-                                                                    <div v-for="item in mintAuctions"
-                                                                    <tr>
+                                                                    <div v-for="item in mintAuctions" <tr>
                                                                         <th scope="row" colspan="4"
-                                                                            style="background-color: crimson"><span>{{item.time}}</span></th>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <th scope="row">1</th>
-                                                                        <td>{{nai(item.pricenai)}}</td>
-                                                                        <td>&asymp;
-                                                                            {{item.price}}
-                                                                        </td>
-                                                                        <td>{{item.bidder}}</td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <th scope="row" colspan="2"></th>
-                                                                        <td><input class="form-control " type="number">
-                                                                        </td>
-                                                                        <td><button class="btn btn-secondary"
-                                                                                v-show="item.by == account">Bid</button>
-                                                                            <button
-                                                                                class="btn btn-primary"
-                                                                                v-show="item.by != account">Bid</button>
-                                                        </div>
-                                                        </td>
+                                                                            style="background-color: crimson">
+                                                                            <span>{{item.time}}</span></th>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th scope="row">1</th>
+                                                                            <td>{{nai(item.pricenai)}}</td>
+                                                                            <td>&asymp;
+                                                                                {{item.price}}
+                                                                            </td>
+                                                                            <td>{{item.bidder}}</td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th scope="row" colspan="2"></th>
+                                                                            <td><input class="form-control "
+                                                                                    type="number">
+                                                                            </td>
+                                                                            <td><button class="btn btn-secondary"
+                                                                                    v-show="item.by == account">Bid</button>
+                                                                                <button class="btn btn-primary"
+                                                                                    v-show="item.by != account">Bid</button>
+                                                                    </div>
+                                                                    </td>
 
-                                                        </tr>
-                                                    </div>
+                                                                    </tr>
+                                                        </div>
                                                         </tbody>
 
                                                         <th scope="col" class="small"></th>
@@ -902,7 +1016,8 @@
                                                     class="card-title lead border rounded border-dark p-2 ms-auto mb-0 ">
                                                     <a :href="makeLink('/nfts/set/',item.setname)" class="lead"
                                                         style="color: black">{{item.setname}}
-                                                        NFT</a></h3>
+                                                        NFT</a>
+                                                </h3>
                                             </div>
                                             <a href="#itemModal" class="a-1" data-bs-toggle="modal"
                                                 @click="modalIndex('itemModal',item.uid);setValue('itemModal.hidden', false)">
@@ -913,19 +1028,19 @@
                                                     #{{Base64toNumber(item.uid)}} /
                                                     {{focusSet.max}} </div>
                                             </a>
-                                            
+
                                             <div class="card-footer text-center d-flex justify-content-between align-items-center"
                                                 v-if="item.owner.length > 2">
                                                 <span><i class="fa-brands fa-hive me-2"></i><a
                                                         :href="makeLink('/@', item.owner, ['#inventory'])">{{item.owner}}</a>
                                             </div>
-                                            
+
                                             <div class="card-footer text-center d-flex justify-content-between align-items-center"
                                                 v-if="item.owner == 'D'"> <span>Deleted</div>
-                                            
+
                                             <div class="card-footer text-center d-flex justify-content-between align-items-center"
                                                 v-if="item.owner == 'ah'"> <span><a href="/nfts">At Auction</a> </div>
-                                            
+
                                             <div class="card-footer text-center d-flex justify-content-between align-items-center"
                                                 v-if="item.owner == 'ls'"> <span><a href="/nfts">For Sale</a> </div>
                                         </div>
@@ -935,7 +1050,7 @@
                         </div>
                     </div>
                     <!--Item Modal-->
-                     <div class="modal" tabindex="-1">
+                    <div class="modal" tabindex="-1">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -1014,8 +1129,8 @@
                                 <div class="modal-footer d-flex align-items-center"></div>
                             </div>
                         </div>
-                    </div> 
-                  </div>
+                    </div>
+                </div>
             </div>
     </div>
     </main>
