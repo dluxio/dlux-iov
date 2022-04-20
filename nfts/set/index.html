@@ -653,21 +653,20 @@
                                                                         <th scope="col" class="small">BID</th>
                                                                         <th scope="col" class="small">TOTAL</th>
                                                                         <th scope="col" class="small">HIGH BIDDER</th>
-                                                                <tbody is="dmx-repeat" :repeat="auctions"
-                                                                    id="mintauctionsorders">
-                                                                    <div v-for="item in mintAuctions">
+                                                                <tbody>
+                                                                    <div v-for="auc in mintAuctions">
                                                                          <tr>
                                                                         <th scope="row" colspan="4"
                                                                             style="background-color: crimson">
-                                                                            <span>{{item.time}}</span></th>
+                                                                            <span>{{auc.time}}</span></th>
                                                                         </tr>
                                                                         <tr>
                                                                             <th scope="row">1</th>
-                                                                            <td>{{naiString(item.pricenai)}}</td>
+                                                                            <td>{{naiString(auc.pricenai)}}</td>
                                                                             <td>&asymp;
-                                                                                {{item.price}}
+                                                                                {{auc.price}}
                                                                             </td>
-                                                                            <td>{{item.bidder}}</td>
+                                                                            <td>{{auc.bidder}}</td>
                                                                         </tr>
                                                                         <tr>
                                                                             <th scope="row" colspan="2"></th>
@@ -675,9 +674,9 @@
                                                                                     type="number">
                                                                             </td>
                                                                             <td><button class="btn btn-secondary"
-                                                                                    v-show="item.by == account">Bid</button>
+                                                                                    v-show="auc.by == account">Bid</button>
                                                                                 <button class="btn btn-primary"
-                                                                                    v-show="item.by != account">Bid</button>
+                                                                                    v-show="auc.by != account">Bid</button>
                                                                     
                                                                     </td>
 
