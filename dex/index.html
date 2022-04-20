@@ -123,7 +123,7 @@
 
                 <!-- runner status  -->
                 <div :title="behindTitle" class="d-flex align-items-center mx-3">
-                  <a class="text-center" style="font-size: 0.7em"
+                  <a class="text-center" style="font-size: 0.7em; text-decoration: none;"
                     :class="[{'text-success':behind < 30},{'text-warning':behind >= 30 && behind < 60},{'text-danger':behind >= 60}]"
                     data-bs-toggle="collapse" href="#nodeDrawer" role="button" aria-expanded="false"
                     aria-controls="nodeDrawer">
