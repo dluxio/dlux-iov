@@ -608,7 +608,7 @@
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
-                                                                    <div v-for="item in mintSales">
+                                                                    <div v-for="ad in mintSales">
                                                                         
                                                                         <tr>
                                                                             <form 
@@ -617,7 +617,7 @@
                                                                                     style="vertical-align: middle">qty
                                                                                 </th>
                                                                                 <td style="vertical-align: middle">
-                                                                                    {{naiString(item.pricenai)}}</td>
+                                                                                    {{naiString(ad.pricenai)}}</td>
                                                                                 <td><span v-show="true">
                                                                                         <center>
                                                                                             <input value="1" required
@@ -630,11 +630,11 @@
                                                                                     <div>
                                                                                         <button type="submit"
                                                                                             class="btn btn-primary"
-                                                                                            v-show="item.by != account">Buy</button>
+                                                                                            v-show="ad.by != account">Buy</button>
                                                                                         <button class="btn btn-primary"
-                                                                                            v-show="item.by != account">Buy</button>
+                                                                                            v-show="ad.by != account">Buy</button>
                                                                                         <button class="btn btn-warning"
-                                                                                            v-show="item.by == account">Cancel</button>
+                                                                                            v-show="ad.by == account">Cancel</button>
                                                                                     </div>
                                                                                 </td>
                                                                             </form>
