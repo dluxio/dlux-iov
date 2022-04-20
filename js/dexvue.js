@@ -837,7 +837,9 @@ var app = new Vue({
     },
     validateForm(formKey, validKey) {
       var Container = document.getElementById(formKey);
-      if (Container.querySelector("input:invalid")) this[validKey] = false;
+      if (Container.querySelector('input:invalid'))
+        this[validKey] = false;
+      //querySelector('input:invalid[name="pwd"]')
       else this[validKey] = true;
     },
     buyDEX() {
@@ -848,7 +850,7 @@ var app = new Vue({
       var andthen = " at market rate",
         rate = undefined,
         hours = 720;
-      if (!buymarket.checked) {
+      if (!this.buymarket.checked) {
         rate = parseFloat(
           (this.buyhive.checked ? this.buyHiveTotal : this.buyHbdTotal) /
             this.buyQuantity
