@@ -1,7 +1,5 @@
 ## Start A New Node
 
-<iframe width="560" height="315" src="https://3speak.tv/embed?v=disregardfiat/qemwclua" frameborder="0"  allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
 ### Prerequisites
 
 * [Hive account](https://signup.hive.io/) with 100 Hive Power worth of Resource Credits available for each node you wish to install
@@ -63,10 +61,9 @@ Go to [Privex server](https://www.privex.io) or equivalent of your choosing:
 ---
 
 ### Docker Deploy
-Once you have an up-to-date ubuntu server with docker, you can install Honeycomb nodes. Do this by cloning the repo for the community you want to run.
+Once you have an up-to-date ubuntu server with docker, you can install Honeycomb nodes. Do this by cloning the repo for the community you want to run. You can run multiple nodes on a single server, one CPU core per node is recommended (plus one core for IPFS).
 
 1. Clone the appropriate Honeycomb repo and move to its directory
-- [Honeycomb:](https://github.com/disregardfiat/honeycomb.git) Type `git clone https://github.com/disregardfiat/honeycomb.git cd honeycomb`
 - [DLUX:](https://github.com/dluxio/dlux_open_token.git) Type `git clone https://github.com/dluxio/dlux_open_token.git cd dlux_open_token`
 - [SPKCC:](https://github.com/3speaknetwork/honeycomb-spkcc.git) Type `git clone https://github.com/3speaknetwork/honeycomb-spkcc.git cd honeycomb-spkcc`
 - [DUAT:](https://github.com/disregardfiat/honeycomb/tree/ragnarok) Type `git clone https://github.com/disregardfiat/honeycomb.git && cd honeycomb && git checkout ragnarok`
@@ -82,22 +79,27 @@ domain=https://api.yourdomain.com
 ```
    - Optionally you can include `discordwebhook=https://discordapp.com/api/webhooks/NUMB3RS/KeYs` to stream the feed into a discord channel
 3. Save & exit
-   - Type `ctrl-x` then `y` to save, then press enter
+   - Type `ctrl-x` then `y` to save
 4. Type `sudo docker-compose build` to build the Docker environment
-5. Type `cd ~` to return to the home directory
-
-Repeat these steps for each node you wish to install.
+5. After the environment is built, you can either deploy the single node, or install more nodes.
+   > Do not deploy if you wish to install another node
+   - Option 1: Type `cd ~` to return home and clone another repo or configure Docker for multiple nodes
+   - Option 2: Type `sudo docker-compose up` to deploy a single node on the server
+   > If you deploy, you must halt the node before adding any others.
+   - Type `sudo docker-compose down` to halt a deployed node (necessary to deploy multiple nodes)
 
 ---
 
 ### Configure Multiple Nodes (optional)
-If you installed more than one node on the server, you need to configure Docker to point to each of them. If you only installed one node, this step is unneccessary.
+If you installed more than one node on the server, you need to configure Docker to point to each of them. If you only installed one node, this step is unneccessary as your node is already deployed.
 
-Ensure you are in the home directory by typing `cd ~` and pressing enter.
+> Ensure you are in the home directory by typing `cd ~` first
 
-1. Type `nano docker-compose.yml`
-2. Paste the following code and modify to suit your needs, here DUAT @ /honeycomb and DLUX @ /dlux_open_token are being used. Update the token and directory to whichever nodes you installed. Continue incrementing the ports as needed.
-
+1. Type `nano docker-compose.yml` to create a new Docker compose
+2. Paste the following code and modify to suit your needs
+   - Update the token and directory to whichever nodes you installed
+   - Here `duat` at `/honeycomb` and `dlux` at `/dlux_open_token` are being used
+   - Continue incrementing the ports as needed `3001:3001`, `3002:3001`, `3003:3001`, etc
 ```
 version: '3'
 services:
@@ -145,30 +147,89 @@ volumes:
   ipfs:
 ```
 3. Save & exit
-   - Type `ctrl-x` then `y` to save, then press enter
+   - Type `ctrl-x` then `y` to save
+4. Type `sudo docker-compose build` to build the Docker environment
+5. Type `sudo docker-compose up` to deploy the Docker environment
 
 ---
 
 ### Nginx Setup
-Finally, install certbot to manage the SSL certificate for the API domain
+Finally, install certbot to manage the SSL certificate(s) for the API domain(s)
+
+- If your nodes logs are running, press `ctrl-z` to move them to the background
+- They can be recalled to the foreground by typing `fg %1`
 
 1. Type `sudo apt install nginx certbot python3-certbot-nginx`
-2. Select `nginx-full`
-3.  `sudo nano /etc/nginx/sites-availible/default`
-   * Enter and save:
+   - Type `y` if prompted
+   - Select `nginx-full` if prompted
+2. Type `sudo nano /etc/nginx/sites-availible/default` to edit the config file
+   - Modify the file to have one server block per node
 ```
 server{
-server_name location.yourdomain.io;
+        listen 80;
+        listen [::]:80;
+        
+        server_name location1.yourdomain.io;
 
         location / {
-                proxy_pass http://127.0.0.1:3001;
-                proxy_http_version 1.1;
-                proxy_set_header Upgrade $http_upgrade;
-                proxy_set_header Connection 'upgrade';
-                proxy_set_header Host $host;
-        }
+                        proxy_pass http://127.0.0.1:3001;
+                        proxy_set_header Host            $host;
+                        proxy_set_header X-Forwarded-For $remote_addr;
+                   }
+}
+server{
+        listen 80;
+        listen [::]:80;
+        
+        server_name location2.yourdomain.io;
+
+        location / {
+                        proxy_pass http://127.0.0.1:3002;
+                        proxy_set_header Host            $host;
+                        proxy_set_header X-Forwarded-For $remote_addr;
+                   }
 }
 ```
-4.  `sudo systemctl reload nginx`
-5.  Ensure your DNS information points to your server and run `sudo certbot`
+3. Type `sudo nginx -t` to check the syntax and test the file 
+4. Type `sudo systemctl reload nginx`
+5.  Ensure your DNS information points to your server and type `sudo certbot`
+   - Type in your email address to receive renewal notifications
+   - Agree to terms of service
+   - Leave blank to select all nodes for certification
+   - Select option 2 redirect http to https
 
+To test, visit your subdomain in a browser and verify a secure https connection. You should see your API returning data.
+
+---
+
+### Governance And Voting
+Now that you have a functioning node running, go to [dlux.io/dex](https://vue.dlux.io/dex) and choose the token for the community node you installed. Login with the account matching the node `.env` file.
+
+If your node has successfully called out, it will bid the state unlocking some new options in the black menu bar at the top:
+   - A small gear will be visible
+   - A governance balance will be visible
+
+Clicking the gear icon opens your vote form (fields are community specific):
+   - Domain: Your API domain name `required`
+   - DEX Fee: Vote for how high the transaction fee should be up to 1%
+   - DEX Max: Vote for the max size relative to the safety limit
+   - DEX Slope: Vote for the penalty for rates under the tick
+   - DOA Claim: Vote for the relative size of tokens allocated into the SPK DAO
+
+Clicking the governance balance opens a form:
+   - Note the current threshold for becoming a node runner
+   - Choose how much of your token balance to lock in governance
+
+The DEX page also shows the token status, along with how many node runners there are. Clicking the status opens the table of runners:
+   - Node runners are listed in order of locked governance tokens
+   - There is a max of 25 runners
+   - The governance threshold is the average of the poorer half of the runners
+   - Click the API of a runner to load it as the data source for the DEX page
+
+---
+
+### Status
+The pizza team maintains dashboards for the status of Honeycomb tokens. You can see stats here, including whether your node is in concensus, a runner, how much locked governance token it has, and vote status.
+- [DLUX Monitor - https://hiveuprss.github.io/dluxmonitor/](https://hiveuprss.github.io/dluxmonitor/)
+- [SPKCC Monitor - https://hiveuprss.github.io/spkccmonitor/](https://hiveuprss.github.io/spkccmonitor/)
+- [DUAT Monitor - https://hiveuprss.github.io/duatmonitor/](https://hiveuprss.github.io/duatmonitor/)

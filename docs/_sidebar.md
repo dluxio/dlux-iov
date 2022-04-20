@@ -1,5 +1,6 @@
+<!-- docs/_sidebar.md -->
 - [HONEYCOMB](/)
-    
+
     - [DEX Guide](dex.md)
     - [New Token](new-token.md)
     - [New Node](new-node.md)
