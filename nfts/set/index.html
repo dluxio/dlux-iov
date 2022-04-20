@@ -380,50 +380,43 @@
                         </div>
                       </div>
 
-                    <!-- <div class="col-md-6">
+                    <div class="col-md-6">
                         
-                        <div :id="{{script}}-card" class="card card-ft text-white m-2 " style="border: none;">
-                            {{script.getSetDetailsColors('-card')}}
+                        <div class="card card-ft text-white m-2 " style="border: none;" :style="{'background': getSetDetailsColors(focusSet.computed ? focusSet.computed : '')}">
                             <div id="hidden-detail-inputs" class="d-none">
-                                <input :id="{{script}}-color1-text" type="text">
-                                {{script.getSetDetails('Color1', '-color1-text', 'value')}}
-                                <input :id="{{script}}-color2-text" type="text">
-                                {{script.getSetDetails('Color2', '-color2-text', 'value')}}
-                                <input :id="{{script}}-description-text" type="text">
-                                {{script.getSetDetails('Description', '-description-text', 'value')}}
-                                <input :id="{{script}}-icon-text" type="text">
-                                {{script.getSetDetails('faicon', '-icon-text', 'value')}}
+                                <input type="text">
+                                <input type="text">
+                                <input type="text">
+                                <input type="text">
                             </div>
                             <div class="card-header d-flex align-items-center justify-content-between">
                                 <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
                                     <div class="pr-2"><small>SUPPLY: </small></div>
                                     <div class="px-2">
-                                        <h2 :id="{{set}}-inventory" class="m-0">
+                                        <h2 class="m-0">
                                             <div>{{getMint(focusSet.set, 'qty')}}</div>
                                         </h2>
                                     </div>
                                 </div>
-                                <div> <a :href="/nfts/set/{{set}}">
+                                <div> <a :href="'/nfts/set/'' + focusSet.set">
                                         <h3 class="card-title lead shimmer rounded p-2 m-0 ml-auto"
-                                            style="color: black"><b>{{set}} NFT</b></h3>
+                                            style="color: black"><b>{{focusSet.set}} NFT</b></h3>
                                     </a></div>
                             </div>
                             <div class="card-body text-center d-flex flex-column p-2">
-                                <div class="card panel-group h-100" :id="{{set}}-panel"
+                                <div class="card panel-group h-100"
                                     style="background-color: rgba(0,0,0,0.8)">
                                     <div class="panel panel-default">
                                         <div class="card-heading mint-panel-heading-top">
                                             <p class="card-title mb-0 p-1"> <a class="collapsed accordion-toggle"
-                                                    data-toggle="collapse" :data-parent="#{{set}}-panel"
-                                                    :href="#{{set}}-description-collapse"
-                                                    @click="toggleMintDescription('{{set}}')"><i
+                                                    data-toggle="collapse" 
+                                                    :href="'#' + focusSet.set + '-description-collapse'"><i
                                                         class="far fa-list-alt mr-3"></i>Description</a></p>
                                         </div>
-                                        <div class="panel-collapse collapse" :id="{{set}}-description-collapse">
+                                        <div class="panel-collapse collapse">
                                             <div class="card-body">
-                                                <p :id="{{script}}-description-p">
-                                                    {{script.getSetDetails('Description', '-description-p',
-                                                    'innerText')}} </p>
+                                                <p>
+                                                    {{focusSet.computed.set.Description)}} </p>
                                             </div>
                                         </div>
                                     </div>
@@ -431,19 +424,15 @@
                                         <div class="card-heading d-none">
                                             <h4 class="card-title"> <a class="accordion-toggle" data-toggle="collapse"
                                                     :data-parent="#{{set}}-panel"
-                                                    :href="#{{set}}-info-collapse">Info</a></h4>
+                                                    :href="'#' + focusSet.set + '-info-collapse'">Info</a></h4>
                                         </div>
-                                        <div class="panel-collapse collapse show" :id="{{set}}-info-collapse">
+                                        <div class="panel-collapse collapse show" :id="focusSet.set + '-info-collapse'">
                                             <div class="card-body">
-                                                <div :id="{{script}}wrapped">
-                                                    {{script.getSetPhotos('','wrapped','rounded max-160')}}</div>
-                                                <div :id="{{script}}header"
-                                                    style="background-image: linear-gradient(magenta,aqua);-webkit-background-clip: text;color: transparent;">
-                                                    {{script.getSetDetailsColorsTxt('header')}}
+                                                <img :src="'https://ipfs.io/ipfs/' + focusSet.computed.wrapped" style="rounded max-160">
+                                                <div style="background-image: linear-gradient(magenta,aqua);-webkit-background-clip: text;color: transparent;">
                                                     <div class="mt-3">
                                                         <h1 class="text-center">sealed NFT<i
-                                                                :id="{{script}}icon" class="ml-3"></i></h1>
-                                                        {{script.getSetDetailsIcon('icon')}}
+                                                                icon="icon" class="ml-3"></i></h1>
                                                     </div>
                                                 </div>
                                                 <h5>Unwrap to see what's inside</h5>
@@ -453,44 +442,43 @@
                                     <div class="panel panel-default">
                                         <div class="card-heading mint-panel-heading-bottom d-none">
                                             <p class="card-title mb-0 p-1"> <a class="collapsed accordion-toggle"
-                                                    data-toggle="collapse" :data-parent="#{{set}}-panel"
-                                                    :href="#{{set}}-market-collapse"
-                                                    @click="toggleMintMarket('{{set}}')"><i
-                                                        class="fas fa-store mr-3"></i>Market ({{qty}})</a></p>
+                                                    data-toggle="collapse" :data-parent="'#' + focusSet.set + '-panel'"
+                                                    :href="'#' + focusSet.set + '-market-collapse'"><i
+                                                        class="fas fa-store mr-3"></i>Market (qty)</a></p>
                                         </div>
-                                        <div class="panel-collapse collapse show" :id="{{set}}-market-collapse">
+                                        <div class="panel-collapse collapse show" :id="focusSet.set + '-market-collapse'">
                                             <div class="card-body p-0">
                                                 <div>
-                                                    <ul id="{{set}}-mint-tabnav" class="nav nav-tabs" role="tablist">
+                                                    <ul :id="focusSet.set + '-mint-tabnav'" class="nav nav-tabs" role="tablist">
                                                         <li class="nav-item p-0"> <a class="nav-link active"
-                                                                :href="#{{set}}-mint-salestab"
-                                                                :id="{{set}}-mint-saleslink" role="tab"
+                                                                :href="'#' + focusSet.set + '-mint-salestab'"
+                                                                :id="focusSet.set + '-mint-saleslink'" role="tab"
                                                                 data-toggle="tab" aria-controls="mintsalestab"
                                                                 aria-expanded="true">
                                                                 <div class="d-flex align-items-center">
                                                                     <div @click="">SALES</div>
                                                                     <div class="mb-3"><span
                                                                             class=" badge badge-pill badge-danger"
-                                                                            style="font-size: .7em">{{qty_sales}}</span>
+                                                                            style="font-size: .7em">calc qty_sales</span>
                                                                     </div>
                                                                 </div>
                                                             </a></li>
                                                         <li class="nav-item p-0"> <a class="nav-link"
-                                                                :href="#{{set}}-mint-auctionstab" role="tab"
-                                                                :id="{{set}}-mint-auctionslink"
+                                                                :href="'#'+ focusSet.set + '-mint-auctionstab'" role="tab"
+                                                                :id="focusSet.set + '-mint-auctionslink'"
                                                                 data-toggle="tab" aria-controls="mintauctionstab">
                                                                 <div class="d-flex align-items-center">
                                                                     <div>AUCTIONS</div>
                                                                     <div class="mb-3"><span
                                                                             class=" badge badge-pill badge-danger"
-                                                                            style="font-size: .7em">{{qty_auctions}}</span>
+                                                                            style="font-size: .7em">qty_auctions</span>
                                                                     </div>
                                                                 </div>
                                                             </a></li>
                                                     </ul>
                                                     
-                                                    <div :id="{{set}}-mint-tabs" class="tab-content">
-                                                        <div :id="{{set}}-mint-salestab" role="tabpanel"
+                                                    <div :id="focusSet.set + '-mint-tabs'" class="tab-content">
+                                                        <div :id="focusSet.set + '-mint-salestab'" role="tabpanel"
                                                             class="tab-pane fade show active"
                                                             aria-labelledby="mintsalestab">
                                                             <table class="table table-sm table-dark bg-none">
@@ -502,60 +490,54 @@
                                                                         <th scope="col"></th>
                                                                     </tr>
                                                                 </thead>
-                                                                <tbody id="salesrepeat" is="dmx-repeat"
-                                                                    :repeat="sales.reverse()">
+                                                                <tbody>
+                                                                    <div v-for="item in mintSales">
                                                                     <tr v-show="pb.length > 0">
                                                                         <th scope="row" class="" colspan="4">
                                                                             <p class="my-2"><span
                                                                                     class="small bg-warning text-dark rounded px-2 py-1">ACCOUNT
                                                                                     COMMENT OR POST BETWEEN</span></p>
-                                                                            <p>{{pb}}</p>
+                                                                            <p>pb?</p>
                                                                         </th>
                                                                     </tr>
                                                                     <tr>
-                                                                        <form :id="{{set}}{{uid}}form"
+                                                                        <form :id="item.set + item.uid + 'form'"
                                                                             class="needs-validation" novalidate>
                                                                             <th scope="row"
-                                                                                style="vertical-align: middle">{{qty}}
+                                                                                style="vertical-align: middle">qty
                                                                             </th>
                                                                             <td style="vertical-align: middle">
-                                                                                {{pricenai.nai()}}</td>
+                                                                                {{nai(item.pricenai)}}</td>
                                                                             <td><span
-                                                                                    v-show="(pricenai.token != 'DLUX')">
+                                                                                    v-show="true">
                                                                                     <center>
                                                                                         <input value="1" required
-                                                                                            :max="{{max}}"
-                                                                                            :id="{{set}}{{uid}}buyftqty"
+                                                                                            :max="{{item.max}}"
                                                                                             class="bg-none border-light rounded text-white text-center form-control"
                                                                                             style="max-width: 50px">
                                                                                     </center>
                                                                                 </span> <span
-                                                                                    v-show="(pricenai.token == 'DLUX')">{{qty}}
+                                                                                    v-show="true">calc qty
                                                                                 </span></td>
                                                                             <td>
                                                                                 <div>
                                                                                     <button type="submit"
                                                                                         class="btn btn-primary"
-                                                                                        :id="{{set}}-{{uid}}-buyfthivebtn"
-                                                                                        v-show="(pricenai.token != 'DLUX') && (by != userCookie.value)"
-                                                                                        @click="buyFTHive('{{set}}','{{uid}}',{{price}},'{{pricenai.token}}','{{set}}{{uid}}buyftqty')">Buy</button>
+                                                                                        v-show="item.by != account">Buy</button>
                                                                                     <button class="btn btn-primary"
-                                                                                        :id="{{set}}-{{uid}}-buyftbtn"
-                                                                                        v-show="(pricenai.token == 'DLUX') && (by != userCookie.value)"
-                                                                                        @click="buyFT('{{set}}','{{uid}}',{{price}})">Buy</button>
+                                                                                        v-show="item.by != account">Buy</button>
                                                                                     <button class="btn btn-warning"
-                                                                                        :id="{{set}}-{{uid}}-sellftcancelbtn"
-                                                                                        v-show="(by == userCookie.value)"
-                                                                                        @click="sellFTcancel('{{set}}','{{uid}}','{{pricenai.token}}')">Cancel</button>
+                                                                                        v-show="item.by == account">Cancel</button>
                                                                                 </div>
                                                                             </td>
                                                                         </form>
                                                                     </tr>
+                                                                    </div>
                                                                 </tbody>
                                                             </table>
                                                         </div>
                                                         <div role="tabpanel" class="tab-pane fade show"
-                                                            :id="{{set}}-mint-auctionstab"
+                                                            :id="focusSet.set + '-mint-auctionstab'"
                                                             aria-labelledby="mintauctionstab">
                                                             <table class="table table-sm table-dark bg-none">
                                                                 <thead>
@@ -566,38 +548,33 @@
                                                                         <th scope="col" class="small">HIGH BIDDER</th>
                                                                 <tbody is="dmx-repeat" :repeat="auctions"
                                                                     id="mintauctionsorders">
+                                                                    <div v-for="item in mintAuctions"
                                                                     <tr>
                                                                         <th scope="row" colspan="4"
-                                                                            style="background-color: crimson"><span
-                                                                                :id="timer-{{set}}-{{uid}}">{{time.animateTime(set,
-                                                                                uid)}}</span></th>
+                                                                            style="background-color: crimson"><span>{{item.time}}</span></th>
                                                                     </tr>
                                                                     <tr>
                                                                         <th scope="row">1</th>
-                                                                        <td>{{pricenai.nai()}}</td>
+                                                                        <td>{{nai(item.pricenai)}}</td>
                                                                         <td>&asymp;
-                                                                            {{((price/1000)*dluxperdollar.value).formatCurrency())}}
+                                                                            {{item.price}}
                                                                         </td>
-                                                                        <td>{{bidder}}</td>
+                                                                        <td>{{item.bidder}}</td>
                                                                     </tr>
                                                                     <tr>
                                                                         <th scope="row" colspan="2"></th>
-                                                                        <td><input :id="{{set}}-{{uid}}-bid"
-                                                                                class="form-control " type="number"
-                                                                                :placeholder="{{(price/1000+1).formatNumber('3','.',',')}}">
+                                                                        <td><input class="form-control " type="number">
                                                                         </td>
                                                                         <td><button class="btn btn-secondary"
-                                                                                v-show="(by == userCookie.value)">Bid</button>
+                                                                                v-show="item.by == account">Bid</button>
                                                                             <button
-                                                                                :id="{{set}}-{{uid}}-buyFTbtn"
                                                                                 class="btn btn-primary"
-                                                                                v-show="(by != userCookie.value)"
-                                                                                @click="bidFT('{{set}}','{{uid}}')">Bid</button>
+                                                                                v-show="item.by != account">Bid</button>
                                                         </div>
                                                         </td>
 
                                                         </tr>
-
+                                                    </div>
                                                         </tbody>
 
                                                         <th scope="col" class="small"></th>
@@ -610,7 +587,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>-->
+                            </div>
                         </div>
                         <div class="row">
                             <div class="d-none">
