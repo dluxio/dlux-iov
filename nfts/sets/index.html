@@ -53,10 +53,10 @@
             <div class="container-fluid">
                 <div class="container" style="max-width: 1600px">
                     <div class="my-4 d-flex align-items-center">
-                        <div class="me-5"><h1>Explore NFTs</h1></div>
-                        <div>
+                        <div class="me-5"><h1 class="mb-0">Explore NFTs</h1></div>
+                        <div class="ms-auto">
                         <div class="btn-group" role="group" aria-label="Chain select">
-                            <div v-for="(item, key, index) in showTokens">
+                            <div v-for="(item, key, index) in showTokens" class="me-2">
                                 <input type="checkbox" class="btn-check" :id="'btncheck'+key" autocomplete="off" :checked="!showTokens[key]">
                                 <label class="btn btn-outline-primary" :for="'btncheck'+key" @click="showToken(key)">{{key}}</label>
                             </div>
