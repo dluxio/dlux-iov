@@ -628,7 +628,7 @@ var app = new Vue({
           return this.accountRNFTs[i];
         }
       }
-      return null;
+      return 0;
     },
     sort(item, key, method) {
       switch (method) {
