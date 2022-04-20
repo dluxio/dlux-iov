@@ -313,6 +313,7 @@ var app = new Vue({
         checked: false,
       },
       nftsets: [],
+      nftsetsf: [],
       nftscripts: {},
       focusSet: {
         computed: {},
