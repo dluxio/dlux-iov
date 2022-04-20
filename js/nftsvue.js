@@ -449,7 +449,7 @@ var app = new Vue({
         this[op](this.account);
       }
     },
-    isTrue(a,b){return this[a][b]},
+    isTrue(a,b){console.log(a,b,this[a][b], this[a]);return this[a][b] ? true : false},
     checkAccount(name, key) {
       fetch("https://anyx.io", {
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${this[name]}\"]], \"id\":1}`,
