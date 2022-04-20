@@ -575,6 +575,7 @@ var app = new Vue({
         location.search = "?api=" + api;
       }
     },
+    toLowerCase(v){return typeof v == 'string' ? v.toLowerCase() : v},
     suggestValue(key, value) {
       if (key.split(".").length > 1) {
         let keys = key.split(".");
