@@ -57,15 +57,15 @@
                         <div>
                         <div class="btn-group" role="group" aria-label="Chain select">
                             <div v-for="(item, key, index) in showTokens">
-                                <input type="checkbox" class="btn-check" id="btncheck1" autocomplete="off" :checked="token">
-                                <label class="btn btn-outline-primary" for="btncheck1" @click="showTokens.key = !token">{{key}}</label>
+                                <input type="checkbox" class="btn-check" :id="'btncheck'+key" autocomplete="off" :checked="showTokens[key]">
+                                <label class="btn btn-outline-primary" :for="'btncheck'+key" @click="showToken(key)">{{key}}</label>
                             </div>
                           </div>
                         </div>
                     </div>
 
                     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3">
-                        <div class="col mb-4" v-for="set in nftsets" :key="set.script">
+                        <div class="col mb-4" v-for="set in nftsetsf" :key="set.script">
                             <a :href="makeLink('/nfts/set/', set.set, ['#', toLowerCase(set.token)])" style="text-decoration: none">
                                 <div class="card bg-dark text-white">
                                     <div>
