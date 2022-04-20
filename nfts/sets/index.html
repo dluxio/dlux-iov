@@ -56,9 +56,9 @@
                         <div class="me-5"><h1>Explore NFTs</h1></div>
                         <div>
                         <div class="btn-group" role="group" aria-label="Chain select">
-                            <div v-for="token in showTokens">
+                            <div v-for="(item, key, index) in showTokens">
                                 <input type="checkbox" class="btn-check" id="btncheck1" autocomplete="off" :checked="token">
-                                <label class="btn btn-outline-primary" for="btncheck1" @click="token = !token">{{token}}</label>
+                                <label class="btn btn-outline-primary" for="btncheck1" @click="showTokens.key = !token">{{key}}</label>
                             </div>
                           </div>
                         </div>
