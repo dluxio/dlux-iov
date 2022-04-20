@@ -449,9 +449,14 @@ var app = new Vue({
         this[op](this.account);
       }
     },
-    nestedTrue(a, b) {
-      console.log(a, b, this[a][b], this[a]);
-      return this[a][b] ? true : false;
+    showToken(k){
+      this.showTokens[k] = !this.showTokens[k]
+      this.nftsetsf = this.nftsets.reduce((a,b)=>{
+        if(this.showTokens[b.token]){
+          a.push(b)
+        }
+        return a
+      }, [])
     },
     checkAccount(name, key) {
       fetch("https://anyx.io", {
@@ -751,6 +756,7 @@ var app = new Vue({
                   data.result[i].token = data.result[i].fee.token;
                   this.showTokens[data.result[i].fee.token] = true;
                   this.nftsets.push(data.result[i]);
+                  this.nftsetsf.push(data.result[i]);
                 }
               );
             }
