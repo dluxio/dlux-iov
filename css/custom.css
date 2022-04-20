@@ -3,7 +3,7 @@ body {
   background-color: #212529;
 }
 a {
-  text-decoration: none;
+
 }
 .btn-hivekeychain {
   color: #fff;
@@ -195,4 +195,19 @@ td {
   );
   color: #000;
   border: none;
+}
+.nav-pills > li > a.active {
+  background-color: #17a2b8 !important;
+  color: #ffffff !important;
+}
+.nav-pills > li > a {
+  color: #17a2b8 !important;
+}
+.r-radius-hotfix {
+border-top-right-radius: 0.25rem !important;
+border-bottom-right-radius: 0.25rem !important;
+}
+.l-radius-hotfix {
+border-top-left-radius: 0.25rem !important;
+border-bottom-left-radius: 0.25rem !important;
 }
