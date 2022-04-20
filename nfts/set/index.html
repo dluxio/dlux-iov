@@ -608,9 +608,8 @@
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
-                                                                    <!-- <div v-for="ad in mintSales">
-                                                                        
-                                                                        <tr>
+                                                                    
+                                                                        <tr v-for="ad in mintSales">
                                                                             <form 
                                                                                 class="needs-validation" novalidate>
                                                                                 <th scope="row"
@@ -639,7 +638,6 @@
                                                                                 </td>
                                                                             </form>
                                                                         </tr>
-                                                                    </div> -->
                                                                 </tbody>
                                                             </table>
                                                         </div>
@@ -654,13 +652,12 @@
                                                                         <th scope="col" class="small">TOTAL</th>
                                                                         <th scope="col" class="small">HIGH BIDDER</th>
                                                                 <tbody>
-                                                                    <div v-for="auc in mintAuctions">
-                                                                         <tr>
+                                                                         <tr v-for="auc in mintAuctions">
                                                                         <th scope="row" colspan="4"
                                                                             style="background-color: crimson">
                                                                             <span>{{auc.time}}</span></th>
                                                                         </tr>
-                                                                        <tr>
+                                                                        <tr v-for="auc in mintAuctions">
                                                                             <th scope="row">1</th>
                                                                             <td>{{naiString(auc.pricenai)}}</td>
                                                                             <td>&asymp;
@@ -668,7 +665,7 @@
                                                                             </td>
                                                                             <td>{{auc.bidder}}</td>
                                                                         </tr>
-                                                                        <tr>
+                                                                        <tr v-for="auc in mintAuctions">
                                                                             <th scope="row" colspan="2"></th>
                                                                             <td><input class="form-control "
                                                                                     type="number">
@@ -681,7 +678,6 @@
                                                                     </td>
 
                                                                     </tr>
-                                                        </div>
                                                         </tbody>
 
                                                         <th scope="col" class="small"></th>
