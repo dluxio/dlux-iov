@@ -528,8 +528,12 @@ export default {
           </li>
       	</ul>
 
+        <a href="#" class="nav-link d-flex align-items-center text-white-50 me-4" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
+          <img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light me-1 cover">
+			    <span id="userName" class="ms-2 d-none d-md-block">{{user}}</span>
+        </a>
 
-	      <ul class="navbar-nav me-5" v-show="user" id="userMenu">
+	      <ul class="navbar-nav d-none me-5" v-show="user" id="userMenu">
           <li class="nav-item d-flex align-items-center d-none"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus me-2"></i>CREATE</a></li>
 		      <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-toggle dropdown-bs-toggle text-white-50" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
