@@ -436,7 +436,7 @@ export default {
       this.user = localStorage.getItem("user");
       this.$emit("login", this.user);
       const HAS = localStorage.getItem(this.user + "HAS");
-      if (HAS) {
+      if (this.HAS && HAS) {
         const now = new Date().getTime();
         if (now < HAS.split(",")[1]) {
           this.HAS_.token = HAS.split(",")[0];
@@ -445,7 +445,10 @@ export default {
           this.useHAS();
         } else {
           localStorage.removeItem(this.user + "HAS");
+          this.HASlogin()
         }
+      } else if (this.HAS) {
+        this.HASlogin();
       }
     },
     logout() {
