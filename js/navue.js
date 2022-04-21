@@ -140,13 +140,22 @@ export default {
         } else if (this.HAS) {
           console.log({ op });
           this.HASsign(op);
+          reject("No TXID");
         } else {
           console.log("HSR");
           this.HSRsign(op)
-            .then((r) => resolve(r))
-            .catch((e) => reject(e));
+          reject('No TXID')
         }
       });
+    },
+    HSRsign(op){
+      if(op[1][0][0] == "custom_json"){
+        alert(
+          `https://hivesigner.com/sign/custom-json?authority=active&required_auths=%5B%22${this.user}%22%5D&required_posting_auths=%5B%5D&id=${op[1][0][1].id}&json=${encodeURIComponent(op[1][0][1].json)}`
+        );
+      } else if (op[1][0][0] == "transfer") {
+
+      }
     },
     HASsign(op) {
       const now = new Date().getTime();
