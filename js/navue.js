@@ -136,10 +136,8 @@ export default {
             .then((r) => resolve(r))
             .catch((e) => reject(e));
         } else if (this.HAS) {
-          console.log("HAS");
+          console.log({op});
           this.HASsign(op)
-            .then((r) => resolve(r))
-            .catch((e) => reject(e));
         } else {
           console.log("HSR");
           this.HSRsign(op)
