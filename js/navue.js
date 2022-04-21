@@ -406,7 +406,7 @@ export default {
         if (now < HAS.split(",")[1]) {
           this.HAS_.token = HAS.split(",")[0];
           this.HAS_.expire = HAS.split(",")[1];
-          this.HASsetup()
+          this.useHAS();
         } else {
           localStorage.removeItem(this.user + "HAS");
         }
