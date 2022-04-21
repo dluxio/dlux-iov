@@ -509,35 +509,23 @@ export default {
 <header class="navbar navbar-expand-lg navbar-dark fixed-top" style="background-color:rgba(42, 48, 54, 0.8); -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);">
   <div class="container-fluid">
-	  <a class="navbar-brand" href="/"><img src="/img/dlux-hive-logo-alpha.svg" alt="dlux-logo" width="40" height="40"></a>
+	  
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span></button>
     <div class="collapse navbar-collapse " id="navbarSupportedContent">
 
       <ul class="navbar-nav me-auto">
+      <a class="navbar-brand" href="/"><img src="/img/dlux-hive-logo-alpha.svg" alt="dlux-logo" width="40" height="40"></a>
         <li class="nav-item"><a class="nav-link disabled" href="/apps/"><i class="fa-solid fa-mountain-sun me-2"></i>HUB</a></li>
-        <li class="nav-item"><a class="nav-link" href="/nfts/sets#dlux"><i class="fa-solid fa-store me-2"></i>NFTS</a></li>
-        <li class="nav-item"><a class="nav-link" href="/dex#dlux"><i class="fa-solid fa-building-columns me-2"></i>DEX</a></li>
+        <li class="nav-item"><a class="nav-link" href="/nfts/sets/"><i class="fa-solid fa-store me-2"></i>NFTS</a></li>
+        <li class="nav-item"><a class="nav-link" href="/dex/"><i class="fa-solid fa-building-columns me-2"></i>DEX</a></li>
         <li class="nav-item"><a class="nav-link" href="/docs/"><i class="fa-solid fa-book me-2"></i>DOCS</a></li>
       </ul>
 
 
-	      <ul class="navbar-nav me-5" id="loginMenu" v-show="!user">
-	        <li class="nav-item"><a class="nav-link" href="/about/">About</a></li>
-	        <li class="nav-item"><a class="nav-link" href="https://signup.hive.io/">Get Account</a></li>
-	        <li class="nav-item">
-            
-              <button class="btn btn-primary ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
 
-          </li>
-      	</ul>
-
-        <a href="#" class="nav-link d-flex align-items-center text-white-50 me-4" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
-          <img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light me-1 cover">
-			    <span id="userName" class="ms-2 d-none d-md-block">{{user}}</span>
-        </a>
-
-	      <ul class="navbar-nav d-none me-5" v-show="user" id="userMenu">
+        <!--
+	      <ul class="navbar-nav d-none" v-show="user" id="userMenu">
           <li class="nav-item d-flex align-items-center d-none"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus me-2"></i>CREATE</a></li>
 		      <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-toggle dropdown-bs-toggle text-white-50" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
@@ -557,8 +545,23 @@ export default {
 		        </ul>
           </li>
         </ul>
-
+        -->
     </div>
+
+    <ul class="navbar-nav" id="loginMenu" v-show="!user">
+      <li class="nav-item d-none"><a class="nav-link" href="/about/">About</a></li>
+       <li class="nav-item"></li>
+        <li class="nav-item">
+        <button class="btn btn-primary ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
+    </li>
+  </ul>
+  <ul class="navbar-nav" v-show="user">
+  <li><a href="#" v-show="user" class="nav-link d-flex align-items-center text-white-50 me-4" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
+    <img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light me-1 cover">
+    <span id="userName" class="ms-2 d-none d-md-block">{{user}}</span>
+  </a></li>
+  </ul>
+
   </div>
 </header>
 <div class="position-fixed bottom-0 end-0 p-3 toast-container" style="z-index: 11">
@@ -608,7 +611,7 @@ export default {
           <span class="input-group-text bg-darkg border-dark"><a href="#" @click="setUser()" v-if="userField" class="link-info"><i class="fa-solid fa-circle-plus"></i></a></span>
         </div>
         <div class="small text-muted text-center mt-2">
-         Usernames are stored locally and can be cleared.
+         Usernames are only stored locally. <a class="no-decoration" target="_blank" href="https://signup.hive.io/">Get Account</a>
         </div>
       </div>
       <div class="row" v-if="HAS && haspich > 100">
