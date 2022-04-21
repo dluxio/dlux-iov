@@ -17,7 +17,7 @@ export default {
           </a>
           <!-- Hive -->
           <a href="https://peakd.com/@dlux-io" target="_blank">
-            <img src="/img/peakd_logo.svg" class="responsive pb-3" width="40px">
+          <i class="fab fa-hive fa-lg mx-md-3 mx-2 fa-2x"></i>
           </a>
           <!--Twitter -->
           <a href="https://twitter.com/dluxxr" target="_blank">

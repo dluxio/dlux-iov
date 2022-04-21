@@ -224,3 +224,8 @@ border-bottom-left-radius: 0.25rem !important;
   overflow: hidden;
   z-index: 11;
 }
+.dnav {
+background-color:rgba(42, 48, 54, 0.8); 
+-webkit-backdrop-filter: blur(10px);
+backdrop-filter: blur(10px);
+}
