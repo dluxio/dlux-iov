@@ -1,4 +1,5 @@
 import ToastVue from "/js/toastvue.js";
+
 export default {
   data() {
     return {
@@ -12,6 +13,26 @@ export default {
       filterUsers: "",
       filterRecents: [],
       ops: [],
+      HAS_: {
+        SERVER: "wss://hive-auth.arcange.eu",
+        APP_DATA: {
+          name: "dlux-io-has",
+          description: "DLUX Client",
+          // icon:"https://domain.com/logo.png",
+        },
+        app_key: "",
+        token: "",
+        expire: "",
+        auth_key: "",
+        auth_uuid: "",
+        ws: null,
+        wsa: true,
+        ws_status: "",
+        wsconn: false,
+        qrcode_url: "",
+      },
+      haspich: 50,
+      haspic: "/img/hiveauth.svg",
     };
   },
   components: {
@@ -44,6 +65,7 @@ export default {
       this.HAS = true;
       this.HKC = false;
       this.HSR = false;
+      if (this.user) this.HASsetup();
     },
     useHS() {
       this.HAS = false;
@@ -125,6 +147,144 @@ export default {
             .catch((e) => reject(e));
         }
       });
+    },
+    HASsign(op) {
+      const now = new Date().getTime();
+      if(now > this.HAS_.expire) {
+        alert(`Hive Auth Session expired. Please login again.`);
+        return
+      }
+      const sign_data = {
+        key_type: op[2],
+        ops: op[1],
+        broadcast: true,
+      };
+      const data = CryptoJS.AES.encrypt(
+        JSON.stringify(sign_data),
+        this.HAS_.auth_key
+      ).toString();
+      const payload = {
+        cmd: "sign_req",
+        account: this.user,
+        token: this.HAS_.token,
+        data: data,
+      };
+      this.HAS_.ws.send(JSON.stringify(payload));
+    },
+    HASlogin() {
+      const auth_data = {
+        app: this.HAS_.APP_DATA,
+        token: undefined,
+        challenge: undefined,
+      };
+
+      if (!this.HAS_.auth_key) this.HAS_.auth_key = uuidv4();
+      const data = CryptoJS.AES.encrypt(
+        JSON.stringify(auth_data),
+        this.HAS_.auth_key
+      ).toString();
+      const payload = { cmd: "auth_req", account: this.user, data: data };
+      this.HAS_.ws.send(JSON.stringify(payload));
+    },
+    HASlogout() {
+      this.HAS_.token = "";
+      this.HAS_.expire = "";
+      this.user = "";
+      localStorage.removeItem(this.user + "HAS");
+    },
+    HASsetup() {
+      if ("WebSocket" in window) {
+        this.HAS_.ws = new WebSocket(this.HAS_.SERVER);
+        this.HAS_.ws.onopen = function () {
+          this.HAS_.wsconn = true;
+          if (this.user) this.HASlogin();
+        }.bind(this);
+        this.HAS_.ws.onmessage = function (event) {
+          console.log(event.data);
+          const message =
+            typeof event.data == "string" ? JSON.parse(event.data) : event.data;
+          // Process HAS <-> PKSA protocol
+          if (message.cmd) {
+            switch (message.cmd) {
+              case "auth_wait":
+                this.HAS_.ws_status = "waiting";
+
+                // Update QRCode
+                const json = JSON.stringify({
+                  account: this.user,
+                  uuid: message.uuid,
+                  key: this.HAS_.auth_key,
+                  host: this.HAS_.SERVER,
+                });
+
+                const URI = `has://auth_req/${btoa(json)}`;
+                var url =
+                  "https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=" +
+                  URI;
+                this.haspic = url;
+                this.haspich = 250;
+                setTimeout(
+                  function () {
+                    this.haspic = "/img/hiveauth.svg";
+                    this.haspich = 50;
+                    this.HAS_.ws_status = "login failed";
+                  }.bind(this),
+                  60000
+                );
+                break;
+              case "auth_ack":
+                this.HAS_.ws_status = "decrypting";
+
+                try {
+                  // Try to decrypt and parse payload data
+                  message.data = JSON.parse(
+                    CryptoJS.AES.decrypt(
+                      message.data,
+                      this.HAS_.auth_key
+                    ).toString(CryptoJS.enc.Utf8)
+                  );
+                  this.HAS_.ws_status = "";
+                  this.HAS_.token = message.data.token;
+                  this.HAS_.expire = message.data.expire;
+                  localStorage.setItem(this.user + "HAS", `${message.data.token},${message.data.expire}`);
+                  this.haspic = "/img/hiveauth.svg";
+                  this.haspich = 50;
+                } catch (e) {
+                  this.haspic = "/img/hiveauth.svg";
+                  this.haspich = 50;
+                  this.HAS_.ws_status = "login failed";
+                  this.HASlogout();
+                }
+                break;
+              case "auth_nack":
+                this.HASlogout();
+                break;
+              case "sign_wait":
+                this.HAS_.ws_status = `transaction ${message.uuid} is waiting for approval`;
+                break;
+              case "sign_ack":
+                this.HAS_.ws_status = `transaction ${message.uuid} approved`;
+                console.log(message);
+                //this.statusFinder(r, obj);
+                break;
+              case "sign_nack":
+                this.HAS_.ws_status = `transaction ${message.uuid} has been declined`;
+                break;
+              case "sign_err":
+                this.HAS_.ws_status = `transaction ${message.uuid} failed: ${message.error}`;
+                break;
+            }
+          }
+        }.bind(this);
+        // websocket is closed.
+        this.HAS_.ws.onclose = function () {
+          this.HAS_.wsconn = false;
+          this.HASlogout();
+        }.bind(this);
+      } else {
+        this.HAS_.wsa = false;
+        this.HAS_.ws_status = "This Browser does not support HAS (WebSocket)";
+      }
     },
     HKCsign(op) {
       return new Promise((resolve, reject) => {
@@ -240,6 +400,17 @@ export default {
     getUser() {
       this.user = localStorage.getItem("user");
       this.$emit("login", this.user);
+      const HAS = localStorage.getItem(this.user + "HAS");
+      if (HAS) {
+        const now = new Date().getTime();
+        if (now < HAS.split(",")[1]) {
+          this.HAS_.token = HAS.split(",")[0];
+          this.HAS_.expire = HAS.split(",")[1];
+          this.HASsetup()
+        } else {
+          localStorage.removeItem(this.user + "HAS");
+        }
+      }
     },
     logout() {
       localStorage.removeItem("user");
@@ -252,6 +423,7 @@ export default {
       localStorage.setItem("user", this.user);
       this.$emit("login", this.user);
       this.addRecentUser(this.user);
+      if (this.HAS) this.HASsetup();
     },
     addRecentUser(user) {
       if (user && this.recentUsers.indexOf(user) == -1)
@@ -307,6 +479,8 @@ export default {
     for (var i = 0; i < this.ops.length; i++) {
       this.statusPinger(this.ops[i].txid, this.ops[i].api, 0);
     }
+    if ("WebSocket" in window) this.HAS_.wsa = true;
+    else this.HAS_.wsa = false;
   },
   computed: {
     avatar: {
@@ -394,18 +568,18 @@ export default {
         <div class="dropdown">
           <button class="btn btn-secondary w-100 p-0" role="button" id="authDropdown" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false" >
             <button v-if="HKC" class="btn btn-hivekeychain h-100 w-100 dropdown-toggle"><img src="/img/keychain.png" height="50px" class="img-responsive p-2 mx-3"></button>
-            <button v-if="HAS" class="btn btn-hiveauth h-100 w-100 dropdown-toggle"><img src="/img/hiveauth.svg" height="50px" class="img-responsive p-2 mx-3"></button>
+            <button v-if="HAS" class="btn btn-hiveauth h-100 w-100 dropdown-toggle" :class="{'bg-white':haspich > 100}"><img :src="haspic" :height="haspich + 'px'" class="img-responsive p-2 mx-3"><p v-show="haspich > 100" class="text-dark">Scan with PKSA App for {{user}}</p></button>
             <button v-if="HSR" class="btn btn-hivesigner h-100 w-100 dropdown-toggle"><img src="/img/hivesigner.svg" height="50px" class="img-responsive p-2 mx-3"></button>
           </button>
           <ul class="dropdown-menu dropdown-menu-dark text-center bg-black p-2" aria-labelledby="authDropdown">
             <li class="p-2"><button class="btn btn-hivekeychain h-100 w-100" @click="useKC()"><img src="/img/keychain.png" class="img-responsive" height="50px"></button></li>
-            <li class="p-2"><button class="btn btn-hiveauth h-100 w-100" @click="useHAS()"><img src="/img/hiveauth.svg" class="img-responsive" height="50px"></button></li>
+            <li class="p-2" v-if="HAS_.wsa"><button class="btn btn-hiveauth h-100 w-100" @click="useHAS()"><img src="/img/hiveauth.svg" class="img-responsive" height="50px"></button></li>
             <li class="p-2"><button class="btn btn-hivesigner h-100 w-100" @click="useHS()"><img src="/img/hivesigner.svg" class="img-responsive" height="50px"></button></li>
           </ul>
         </div>
         <div class="small text-muted text-center mt-2 d-none">
         <span v-if="HKC">Hive Keychain requires a Firefox or Chrome extension.</span>
-        <span v-if="HAS">Hive Auth requires an iOS or Android app.</span>
+        <span v-if="HAS">Hive Auth requires websockets and a PKSA Application.</span>
         <span v-if="HSR">Hive Signer requires a password.</span>
         </div>
       </div>

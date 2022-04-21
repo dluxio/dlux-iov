@@ -142,7 +142,7 @@
                       <div class="pr-2"><small>MINT MARKET: </small></div>
                       <div class="px-2">
                         <h2 class="m-0">
-                          <div>{{getMint(focusSet.set, 'qty')}}</div>
+                          <div>{{mintAvail}}</div>
                         </h2>
                       </div>
                     </div>
@@ -1338,5 +1338,6 @@
       return new bootstrap.Tooltip(tooltipTriggerEl);
     });
   </script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
 </html>
