@@ -65,6 +65,7 @@ export default {
       this.HAS = true;
       this.HKC = false;
       this.HSR = false;
+      console.log("Let's HAS")
       if (this.user) this.HASsetup();
     },
     useHS() {
