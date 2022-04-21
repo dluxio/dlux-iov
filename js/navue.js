@@ -228,7 +228,18 @@ export default {
         this.HAS_.ws.onopen = function () {
           console.log("OnOpen - WS");
           this.HAS_.wsconn = true;
-          if (this.user && !this.HAS_.token) this.HASlogin();
+          const session = localStorage.getItem(this.user + "HAS")
+          const now = new Date().getTime();
+          if (session & now < session.split(",")[1]) {
+            this.HAS_.token = session.split(",")[0];
+            this.HAS_.expire = session.split(",")[1];
+            this.HAS_.auth_key = session.split(",")[2];
+          } else if (session) {
+            localStorage.removeItem(this.user + "HAS");
+            this.HASlogin();
+          } else {
+            this.HASlogin();
+          }
         }.bind(this);
         this.HAS_.ws.onmessage = function (event) {
           console.log(event.data);
