@@ -871,7 +871,9 @@ var app = new Vue({
             }),
           },
           txid: "buydex",
-          msg: `Buying ${this.TOKEN} with ${parseFloat((hive || hbd) / 1000).toFixed(3)} ${hive ? "HIVE" : "HBD"} ${andthen}`,
+          msg: `Buying ${this.TOKEN} with ${parseFloat(
+            this.buyHiveTotal
+          ).toFixed(3)} HIVE ${andthen}`,
           ops: ["getHiveUser", "popDEX", "getTokenUser"],
         };
       else if (!this.buyhive.checked)
@@ -886,7 +888,9 @@ var app = new Vue({
             }),
           },
           txid: "buydex",
-          msg: `uying ${this.TOKEN} with ${parseFloat((hive || hbd) / 1000).toFixed(3)} ${hive ? "HIVE" : "HBD"} ${andthen}`,
+          msg: `uying ${this.TOKEN} with ${parseFloat(this.buyHbdTotal).toFixed(
+            3
+          )} HBD ${andthen}`,
           ops: ["getHiveUser", "popDEX", "getTokenUser"],
         };
     },
