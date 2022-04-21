@@ -228,7 +228,7 @@ export default {
         this.HAS_.ws.onopen = function () {
           console.log("OnOpen - WS");
           this.HAS_.wsconn = true;
-          if (this.user) this.HASlogin();
+          if (this.user && !this.HAS_.token) this.HASlogin();
         }.bind(this);
         this.HAS_.ws.onmessage = function (event) {
           console.log(event.data);
