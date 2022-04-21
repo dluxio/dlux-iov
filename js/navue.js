@@ -244,7 +244,10 @@ export default {
                   this.HAS_.ws_status = "";
                   this.HAS_.token = message.data.token;
                   this.HAS_.expire = message.data.expire;
-                  localStorage.setItem(this.user + "HAS", `${message.data.token},${message.data.expire}`);
+                  localStorage.setItem(
+                    this.user + "HAS",
+                    `${message.data.token},${message.data.expire},${this.HAS_.auth_key}`
+                  );
                   this.haspic = "/img/hiveauth.svg";
                   this.haspich = 50;
                 } catch (e) {
@@ -404,6 +407,7 @@ export default {
         if (now < HAS.split(",")[1]) {
           this.HAS_.token = HAS.split(",")[0];
           this.HAS_.expire = HAS.split(",")[1];
+          this.HAS_.auth_key = HAS.split(",")[2]
           this.useHAS();
         } else {
           localStorage.removeItem(this.user + "HAS");
