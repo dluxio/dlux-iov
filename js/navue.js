@@ -66,18 +66,20 @@ export default {
       this.HAS = true;
       this.HKC = false;
       this.HSR = false;
-      console.log("Let's HAS");
+      localStorage.setItem("signer", "HAS");
       if (this.user) this.HASsetup();
     },
     useHS() {
       this.HAS = false;
       this.HKC = false;
       this.HSR = true;
+      localStorage.setItem("signer", "HSR");
     },
     useKC() {
       this.HAS = false;
       this.HKC = true;
       this.HSR = false;
+      localStorage.setItem("signer", "HKC");
     },
     broadcastCJA(obj) {
       var op = [
@@ -230,7 +232,7 @@ export default {
           this.HAS_.wsconn = true;
           const session = localStorage.getItem(this.user + "HAS")
           const now = new Date().getTime();
-          if (session & now < session.split(",")[1]) {
+          if (session & now > session.split(",")[1]) {
             this.HAS_.token = session.split(",")[0];
             this.HAS_.expire = session.split(",")[1];
             this.HAS_.auth_key = session.split(",")[2];
@@ -449,7 +451,7 @@ export default {
       const HAS = localStorage.getItem(this.user + "HAS");
       if (this.HAS && HAS) {
         const now = new Date().getTime();
-        if (now < HAS.split(",")[1]) {
+        if (now > HAS.split(",")[1]) {
           this.HAS_.token = HAS.split(",")[0];
           this.HAS_.expire = HAS.split(",")[1];
           this.HAS_.auth_key = HAS.split(",")[2];
@@ -521,6 +523,10 @@ export default {
     },
   },
   mounted() {
+    const signer = localStorage.getItem("signer")
+    if(signer == "HSR")this.useHS()
+    else if (signer == "HAS") this.useHAS();
+    else this.useKC()
     this.getUser();
     this.getRecentUsers();
     const ops = localStorage.getItem("pending");
