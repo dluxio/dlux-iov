@@ -472,6 +472,8 @@ export default {
     },
     setUser(id) {
       this.HAS_.token = ""
+      this.haspic = "/img/hiveauth.svg";
+      this.haspich = 50;
       this.user = id ? id : this.userField;
       this.userField = "";
       localStorage.setItem("user", this.user);
