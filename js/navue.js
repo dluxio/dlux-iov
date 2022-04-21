@@ -150,9 +150,20 @@ export default {
     },
     HSRsign(op){
       if(op[1][0][0] == "custom_json"){
-        alert(
-          `<a href="https://hivesigner.com/sign/custom-json?authority=active&required_auths=%5B%22${this.user}%22%5D&required_posting_auths=%5B%5D&id=${op[1][0][1].id}&json=${encodeURIComponent(op[1][0][1].json)}" target="_blank">HiveSigner Link</a>`
-        );
+        if (
+          window.confirm(
+            'Open Hive Signer in a new tab?'
+          )
+        ) {
+          window.open(
+            `https://hivesigner.com/sign/custom-json?authority=active&required_auths=%5B%22${
+              this.user
+            }%22%5D&required_posting_auths=%5B%5D&id=${
+              op[1][0][1].id
+            }&json=${encodeURIComponent(op[1][0][1].json)}`,
+            "_blank"
+          );
+        }
       } else if (op[1][0][0] == "transfer") {
 
       }
