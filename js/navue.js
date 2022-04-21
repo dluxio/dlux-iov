@@ -266,6 +266,7 @@ export default {
               case "sign_ack":
                 this.HAS_.ws_status = `transaction ${message.uuid} approved`;
                 console.log(message);
+                console.log(message.data);
                 //this.statusFinder(r, obj);
                 break;
               case "sign_nack":
