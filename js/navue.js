@@ -175,7 +175,7 @@ export default {
         token: undefined,
         challenge: undefined,
       };
-
+      console.log('Login: ', this.user);
       if (!this.HAS_.auth_key) this.HAS_.auth_key = uuidv4();
       const data = CryptoJS.AES.encrypt(
         JSON.stringify(auth_data),
@@ -194,6 +194,7 @@ export default {
       if ("WebSocket" in window) {
         this.HAS_.ws = new WebSocket(this.HAS_.SERVER);
         this.HAS_.ws.onopen = function () {
+          console.log('OnOpen - WS')
           this.HAS_.wsconn = true;
           if (this.user) this.HASlogin();
         }.bind(this);
