@@ -126,14 +126,14 @@ var app = new Vue({
       behindTitle: "",
       TOKEN: "LARYNX",
       bform: {
-        cl: false,
+        cl: true,
         tl: false,
-        pl: true,
+        pl: false,
       },
       sform: {
-        cl: false,
+        cl: true,
         tl: false,
-        pl: true,
+        pl: false,
       },
       buyHiveTotal: 0,
       buyPrice: 0,
