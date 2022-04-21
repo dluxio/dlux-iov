@@ -30,6 +30,7 @@ export default {
         ws_status: "",
         wsconn: false,
         qrcode_url: "",
+        uri: "",
       },
       haspich: 50,
       haspic: "/img/hiveauth.svg",
@@ -65,7 +66,7 @@ export default {
       this.HAS = true;
       this.HKC = false;
       this.HSR = false;
-      console.log("Let's HAS")
+      console.log("Let's HAS");
       if (this.user) this.HASsetup();
     },
     useHS() {
@@ -137,8 +138,8 @@ export default {
             .then((r) => resolve(r))
             .catch((e) => reject(e));
         } else if (this.HAS) {
-          console.log({op});
-          this.HASsign(op)
+          console.log({ op });
+          this.HASsign(op);
         } else {
           console.log("HSR");
           this.HSRsign(op)
@@ -149,9 +150,9 @@ export default {
     },
     HASsign(op) {
       const now = new Date().getTime();
-      if(now > this.HAS_.expire) {
+      if (now > this.HAS_.expire) {
         alert(`Hive Auth Session expired. Please login again.`);
-        return
+        return;
       }
       const sign_data = {
         key_type: op[2],
@@ -176,7 +177,7 @@ export default {
         token: undefined,
         challenge: undefined,
       };
-      console.log('Login: ', this.user);
+      console.log("Login: ", this.user);
       if (!this.HAS_.auth_key) this.HAS_.auth_key = uuidv4();
       const data = CryptoJS.AES.encrypt(
         JSON.stringify(auth_data),
@@ -195,7 +196,7 @@ export default {
       if ("WebSocket" in window) {
         this.HAS_.ws = new WebSocket(this.HAS_.SERVER);
         this.HAS_.ws.onopen = function () {
-          console.log('OnOpen - WS')
+          console.log("OnOpen - WS");
           this.HAS_.wsconn = true;
           if (this.user) this.HASlogin();
         }.bind(this);
@@ -221,6 +222,7 @@ export default {
                 var url =
                   "https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=" +
                   URI;
+                this.HAS_.uri = URI;
                 this.haspic = url;
                 this.haspich = 250;
                 setTimeout(
@@ -410,7 +412,7 @@ export default {
         if (now < HAS.split(",")[1]) {
           this.HAS_.token = HAS.split(",")[0];
           this.HAS_.expire = HAS.split(",")[1];
-          this.HAS_.auth_key = HAS.split(",")[2]
+          this.HAS_.auth_key = HAS.split(",")[2];
           this.useHAS();
         } else {
           localStorage.removeItem(this.user + "HAS");
@@ -573,6 +575,7 @@ export default {
   <div class="offcanvas-body">
     <div class="d-flex flex-column">
       <div class="row mb-3">
+        <a class="btn btn-primary btn-block" v-show="haspich > 100" :href="HAS_.uri">Sign Up</a>
         <label class="form-label d-none">Authentication service:</label>
         <div class="dropdown">
           <button class="btn btn-secondary w-100 p-0" role="button" id="authDropdown" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false" >
