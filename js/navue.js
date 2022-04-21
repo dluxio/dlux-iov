@@ -199,6 +199,7 @@ export default {
         data: data,
       };
       this.HAS_.ws.send(JSON.stringify(payload));
+      alert('Review and Sign on your PKSA App')
     },
     HASlogin() {
       const auth_data = {
@@ -314,7 +315,6 @@ export default {
         // websocket is closed.
         this.HAS_.ws.onclose = function () {
           this.HAS_.wsconn = false;
-          this.HASlogout();
         }.bind(this);
       } else {
         this.HAS_.wsa = false;
