@@ -1074,7 +1074,7 @@
                     <div tabindex="-1" role="group" class="col">
                       <div role="group" class="input-group">
                         <input type="number" v-on:keyup="bcalc('t')" ref="buyQty" required  :class="{'text-info':!bform.tl}"
-                          class="form-control bg-darkg border-dark" v-model="buyQuantity" id="buyQuantity"
+                          class="form-control bg-darkg border-dark text-white-50" v-model="buyQuantity" id="buyQuantity"
                           placeholder="0" :min="minbuy" step="0.001" aria-required="true" :readonly="bform.tl" />
                         <div class="input-group-append">
                           <div class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix">
@@ -1098,7 +1098,7 @@
                       <div role="group" class="input-group">
                         <input id="buyPrice" type="number" v-on:keyup="bcalc('p')" v-model="buyPrice" placeholder="0"
                           required step="0.000001" min="0.000001" aria-required="true"  :class="{'text-info':!bform.pl}"
-                          class="form-control bg-darkg border-dark" :readonly="bform.pl" />
+                          class="form-control bg-darkg border-dark text-white-50" :readonly="bform.pl" />
                         <div class="input-group-append">
                           <div class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix">
                             <span v-if="buyhive.checked">HIVE</span>
@@ -1120,7 +1120,7 @@
                     </legend>
                     <div tabindex="-1" role="group" class="col">
                       <div role="group" class="input-group">
-                        <input type="number" class="form-control bg-darkg border-dark" :readonly="bform.cl" :class="{'text-info':!bform.cl}"
+                        <input type="number" class="form-control bg-darkg border-dark text-white-50" :readonly="bform.cl" :class="{'text-info':!bform.cl}"
                           v-model="buyHiveTotal" id="buyHiveTotal" required v-on:keyup="bcalc('c')" placeholder="0"
                           :min="minbuy" step="0.001"
                           :max="parseFloat(barhive) < parseFloat(maxhbuy) ? toFixed(parseFloat(barhive),3) : maxhbuy"
@@ -1146,7 +1146,7 @@
                       </legend>
                       <div tabindex="-1" role="group" class="col">
                         <div role="group" class="input-group">
-                          <input type="number" class="form-control bg-darkg border-dark" :readonly="bform.cl" :class="{'text-info':!bform.cl}"
+                          <input type="number" class="form-control bg-darkg border-dark text-white-50" :readonly="bform.cl" :class="{'text-info':!bform.cl}"
                             v-model="buyHbdTotal" id="buyHbdTotal" required v-on:keyup="bcalc('c')" placeholder="0"
                             :min="minbuy" step="0.001"
                             :max="parseFloat(barhbd) < parseFloat(maxdbuy) ? toFixed(parseFloat(barhbd),3) : maxdbuy"
@@ -1237,7 +1237,7 @@
                     <div tabindex="-1" role="group" class="col">
                       <div role="group" class="input-group">
                         <input type="number" v-on:keyup="scalc('t')" required
-                          class="form-control bg-darkg border-dark" v-model="sellQuantity" id="sellQuantity"
+                          class="form-control bg-darkg border-dark text-white-50" v-model="sellQuantity" id="sellQuantity"
                           placeholder="0" :min="minsell" step="0.001" :readonly="sform.tl"  :class="{'text-info':!sform.tl}" aria-required="true"
                           :max="parseFloat(bartoken)" />
                         <div class="input-group-append">
@@ -1263,7 +1263,7 @@
                       <div role="group" class="input-group">
                         <input id="sellPrice" v-on:keyup="scalc('p')" v-model="sellPrice" type="number" placeholder="0"
                           required step="0.000001" min="0.000001" aria-required="true"
-                          class="form-control bg-darkg border-dark" :readonly="sform.pl"  :class="{'text-info':!sform.pl}"/>
+                          class="form-control bg-darkg border-dark text-white-50" :readonly="sform.pl"  :class="{'text-info':!sform.pl}"/>
                         <div class="input-group-append">
                           <div class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix">
                             <span v-if="buyhive.checked">HIVE</span><span v-if="buyhbd.checked">HBD</span>/{{TOKEN}}<a
@@ -1284,7 +1284,7 @@
                     </legend>
                     <div tabindex="-1" role="group" class="col">
                       <div role="group" class="input-group">
-                        <input type="number" class="form-control bg-darkg border-dark" :readonly="sform.cl" :class="{'text-info':!sform.cl}"
+                        <input type="number" class="form-control bg-darkg border-dark text-white-50" :readonly="sform.cl" :class="{'text-info':!sform.cl}"
                           id="sellHiveTotal" required v-model="sellHiveTotal" v-on:keyup="scalc('c')" placeholder="0"
                           min="0.001" step="0.001" aria-required="true" />
                         <div class="input-group-append">
@@ -1307,7 +1307,7 @@
                     </legend>
                     <div tabindex="-1" role="group" class="col">
                       <div role="group" class="input-group">
-                        <input type="number" class="form-control bg-darkg border-dark" :readonly="sform.cl" :class="{'text-info':!sform.cl}"
+                        <input type="number" class="form-control bg-darkg border-dark text-white-50" :readonly="sform.cl" :class="{'text-info':!sform.cl}"
                           id="sellHbdTotal" v-model="sellHbdTotal" required placeholder="0" min="0.001" step="0.001"
                           aria-required="true" />
                         <div class="input-group-append">
