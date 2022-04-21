@@ -217,6 +217,7 @@ export default {
       ).toString();
       const payload = { cmd: "auth_req", account: this.user, data: data };
       if (this.HAS_.ws) this.HAS_.ws.send(JSON.stringify(payload));
+      else this.HASsetup()
     },
     HASlogout() {
       this.HAS_.token = "";
