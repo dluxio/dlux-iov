@@ -532,7 +532,7 @@ export default {
           </li>
       	</ul>
 
-        <a href="#" class="nav-link d-flex align-items-center text-white-50 me-4" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
+        <a href="#" class="nav-link d-flex align-items-center text-white-50 me-4" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
           <img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light me-1 cover">
 			    <span id="userName" class="ms-2 d-none d-md-block">{{user}}</span>
         </a>
@@ -575,46 +575,59 @@ export default {
   <div class="offcanvas-body">
     <div class="d-flex flex-column">
       <div class="row mb-3">
-        <a class="btn btn-primary btn-block" v-show="haspich > 100" :href="HAS_.uri">Sign Up</a>
+
         <label class="form-label d-none">Authentication service:</label>
         <div class="dropdown">
           <button class="btn btn-secondary w-100 p-0" role="button" id="authDropdown" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false" >
             <button v-if="HKC" class="btn btn-hivekeychain h-100 w-100 dropdown-toggle"><img src="/img/keychain.png" height="50px" class="img-responsive p-2 mx-3"></button>
-            <button v-if="HAS" class="btn btn-hiveauth h-100 w-100 dropdown-toggle" :class="{'bg-white':haspich > 100}"><img :src="haspic" :height="haspich + 'px'" class="img-responsive p-2 mx-3"><p v-show="haspich > 100" class="text-dark">Scan with PKSA App for {{user}}</p></button>
+            <button v-if="HAS" class="btn btn-hiveauth h-100 w-100 dropdown-toggle"><img src="/img/hiveauth.svg" class="img-responsive p-2 mx-3" height="50px"></button>
             <button v-if="HSR" class="btn btn-hivesigner h-100 w-100 dropdown-toggle"><img src="/img/hivesigner.svg" height="50px" class="img-responsive p-2 mx-3"></button>
           </button>
           <ul class="dropdown-menu dropdown-menu-dark text-center bg-black p-2" aria-labelledby="authDropdown">
             <li class="p-2"><button class="btn btn-hivekeychain h-100 w-100" @click="useKC()"><img src="/img/keychain.png" class="img-responsive" height="50px"></button></li>
             <li class="p-2" v-if="HAS_.wsa"><button class="btn btn-hiveauth h-100 w-100" @click="useHAS()"><img src="/img/hiveauth.svg" class="img-responsive" height="50px"></button></li>
-            <li class="p-2"><button class="btn btn-hivesigner h-100 w-100" @click="useHS()"><img src="/img/hivesigner.svg" class="img-responsive" height="50px"></button></li>
+            <li class="p-2 d-none"><button class="disabled btn btn-hivesigner h-100 w-100" @click="useHS()"><img src="/img/hivesigner.svg" class="img-responsive" height="50px"></button></li>
           </ul>
         </div>
+
+          
+
         <div class="small text-muted text-center mt-2 d-none">
         <span v-if="HKC">Hive Keychain requires a Firefox or Chrome extension.</span>
         <span v-if="HAS">Hive Auth requires websockets and a PKSA Application.</span>
         <span v-if="HSR">Hive Signer requires a password.</span>
         </div>
       </div>
+    </div>
+
       <div class="row mb-3">
         <label class="form-label d-none">Set and store username:</label>
         <div class="input-group">
           <span class="input-group-text bg-darkg border-dark text-white-50">@</span>
-          <input v-model="userField" placeholder="username" @keyup.enter="setUser()" class="text-center form-control bg-darkg border-dark text-info">
+          <input v-model="userField"  autocapitalize="off" placeholder="username" @keyup.enter="setUser()" class="text-center form-control bg-darkg border-dark text-info">
           <span class="input-group-text bg-darkg border-dark"><a href="#" @click="setUser()" v-if="userField" class="link-info"><i class="fa-solid fa-circle-plus"></i></a></span>
         </div>
         <div class="small text-muted text-center mt-2">
          Usernames are stored locally and can be cleared.
         </div>
       </div>
+      <div class="row" v-if="HAS && haspich > 100">
+      <div>
+        <div class="bg-white rounded text-center">
+              <a class="no-decoration" :href="HAS_.uri"><img :src="haspic" :height="haspich + 'px'" class="img-responsive p-2 mx-3"><p v-show="haspich > 100" class="text-dark">Tap or scan with PKSA App for {{user}}</p></a>
+            </div>
+        </div>
+        </div>
       <div class="row mb-3">
         <label class="form-label">Current user:</label>
         <div v-if="!user" class="bg-darkest px-4 py-2 mx-2">
           <img src="#" alt="" width="50" height="50" class="img-fluid rounded-circle bg-light me-1 cover">
           <span>NONE SELECTED</span>
         </div>
-        <div v-if="user" class="bg-darkest px-4 py-2 mx-2">
-          <img :src="avatar" id="userImage" alt="" width="50" height="50" class="img-fluid rounded-circle bg-light me-1 cover">
+        <div v-if="user" class="bg-darkest d-flex align-items-center px-4 py-2 mx-2">
+          <img :src="avatar" id="userImage" alt="" width="50" height="50" class="img-fluid rounded-circle bg-light me-2 cover">
           <span id="userName">{{user}}</span>
+          <a class="btn btn-outline-danger ms-auto" href="#" @click="logout()"><i class="fas fa-power-off fa-fw me-2"></i>Logout</a>
         </div>
       </div>
 
@@ -622,7 +635,7 @@ export default {
         <label class="form-label">Recent usernames:</label>
         <div class="input-group">
           <span class="input-group-text bg-darkg border-dark text-white-50">@</span>
-          <input v-model="filterUsers" placeholder="search" @keyup="searchRecents()" class="text-center form-control bg-darkg border-dark text-info">
+          <input v-model="filterUsers" autocapitalize="off" placeholder="search" @keyup="searchRecents()" class="text-center form-control bg-darkg border-dark text-info">
           <span class="input-group-text bg-darkg border-dark"><a href="#/" @click="setValue('filterUsers', '')" v-if="filterUsers"><i class="fa-solid fa-xmark"></i></a></span>
         </div>
       </div>
