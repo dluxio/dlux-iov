@@ -216,7 +216,7 @@ export default {
         this.HAS_.auth_key
       ).toString();
       const payload = { cmd: "auth_req", account: this.user, data: data };
-      this.HAS_.ws.send(JSON.stringify(payload));
+      if (this.HAS_.ws) this.HAS_.ws.send(JSON.stringify(payload));
     },
     HASlogout() {
       this.HAS_.token = "";
@@ -232,7 +232,8 @@ export default {
           this.HAS_.wsconn = true;
           const session = localStorage.getItem(this.user + "HAS")
           const now = new Date().getTime();
-          if (session & now > session.split(",")[1]) {
+          console.log({session})
+          if (session && now < session.split(",")[1]) {
             this.HAS_.token = session.split(",")[0];
             this.HAS_.expire = session.split(",")[1];
             this.HAS_.auth_key = session.split(",")[2];
@@ -451,7 +452,7 @@ export default {
       const HAS = localStorage.getItem(this.user + "HAS");
       if (this.HAS && HAS) {
         const now = new Date().getTime();
-        if (now > HAS.split(",")[1]) {
+        if (now < HAS.split(",")[1]) {
           this.HAS_.token = HAS.split(",")[0];
           this.HAS_.expire = HAS.split(",")[1];
           this.HAS_.auth_key = HAS.split(",")[2];
