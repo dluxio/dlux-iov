@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/img/dlux-icon-192.png">
-  <meta name="theme-color" content="#111222"/>
+  <meta name="theme-color" content="#111222" />
   <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -70,7 +70,7 @@
                 </div>
                 <!-- node settings -->
 
-                <div id="userNode" class="ms-3" v-if="isnode">
+                <div id="userNode" class="ms-2" v-if="isnode">
                   <a class="dropdown btn btn-sm btn-dark" data-bs-auto-close="outside" href="#" role="button"
                     id="settingsDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="fas fa-cog"></i></a>
@@ -122,40 +122,27 @@
                 </div>
 
                 <!-- runner status  -->
-                <div :title="behindTitle" class="d-flex align-items-center mx-3">
-                  <a class="text-center no-decoration" style="font-size: 0.7em;"
-                    :class="[{'text-success':behind < 30},{'text-warning':behind >= 30 && behind < 60},{'text-danger':behind >= 60}]"
+                <div :title="behindTitle" class="d-flex align-items-center ms-2">
+                  <a class="btn text-center no-decoration" style="font-size: 0.7em;"
+                    :class="[{'btn-outline-success':behind < 30},{'btn-outline-warning':behind >= 30 && behind < 60},{'btn-outline-danger':behind >= 60}]"
                     data-bs-toggle="collapse" href="#nodeDrawer" role="button" aria-expanded="false"
                     aria-controls="nodeDrawer">
+                    <!--
                     <span class="p-0 m-0"><i class="fas fa-circle me-2"></i><span class="p-0 m-0"
                         v-show="behind < 30">ONLINE</span>
                       <span class="p-0 m-0" v-show="behind >= 30 && behind <=100">LAGGING</span>
-                      <span class="p-0 m-0" v-show="behind > 100">OFFLINE</span></span>
-                    <span class="p-0 m-0 ms-1" v-cloak>({{runners.length}}
-                      <i class="fas fa-user-lock"></i>)</span>
+                      <span class="p-0 m-0" v-show="behind > 100">OFFLINE</span></span>-->
+                    <span v-cloak>{{runners.length}}
+                      <i class="fas fa-user-lock ms-1"></i></span>
                   </a>
-                </div>
-              </div>
-
-              <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-                <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                  <div class="toast-header">
-                    <img src="" class="rounded me-2" alt="..." />
-                    <strong class="me-auto">Bootstrap</strong>
-                    <small>11 mins ago</small>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                  </div>
-                  <div class="toast-body">
-                    Hello, world! This is a toast message.
-                  </div>
                 </div>
               </div>
 
               <div class="d-flex align-items-center">
                 <!-- claim tokens form -->
                 <div v-if="hasDrop || accountapi.claim" id="userToken" class="mx-4">
-                  <a class="dropdown btn btn-sm btn-rb no-decoration" data-bs-auto-close="outside" href="#" role="button"
-                    id="claimDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">Claim <i
+                  <a class="dropdown btn btn-sm btn-rb no-decoration" data-bs-auto-close="outside" href="#"
+                    role="button" id="claimDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">Claim <i
                       class="fas fa-gift"></i></a>
                   <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black"
                     aria-labelledby="claimDropdownBtn" style="width: 300px">
@@ -217,8 +204,8 @@
                 <!-- send token form -->
 
                 <div v-if="account" id="userSendToken" class="mx-4" v-if="features.send_B">
-                  <a class="dropdown-toggle text-warning no-decoration" data-bs-auto-close="outside" href="#" role="button"
-                    id="sendDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false" v-cloak>
+                  <a class="dropdown-toggle text-warning no-decoration" data-bs-auto-close="outside" href="#"
+                    role="button" id="sendDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false" v-cloak>
                     <span class="me-1" v-cloak>{{formatNumber(bartoken,3,'.',',')}} {{TOKEN}}</span></a>
                   <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black" style="width: 300px"
                     aria-labelledby="sendDropdownBtn">
@@ -277,9 +264,9 @@
                 <!-- power form -->
 
                 <div v-if="account" id="userPwr" class="mx-4" v-if="features.powup_B || features.powdn_B">
-                  <a class="dropdown-toggle text-primary no-decoration" data-bs-auto-close="outside" href="#" role="button"
-                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                    v-cloak><span class="me-1" v-cloak>{{formatNumber(barpow,3,'.',',')}} {{TOKEN}}P</span></a>
+                  <a class="dropdown-toggle text-primary no-decoration" data-bs-auto-close="outside" href="#"
+                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak><span
+                      class="me-1" v-cloak>{{formatNumber(barpow,3,'.',',')}} {{TOKEN}}P</span></a>
                   <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black"
                     style="width: 300px">
                     <li>
@@ -354,8 +341,8 @@
 
                 <div v-if="account" id="userGov" class="mx-4" v-if="isnode && (features.govup_B || features.govdn_B)">
                   <a class="dropdown-toggle text-info no-decoration" href="#" data-bs-auto-close="outside" role="button"
-                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                    v-cloak><span class="me-1" v-cloak>{{formatNumber(bargov,3,'.',',')}} {{TOKEN}}G</span></a>
+                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak><span class="me-1"
+                      v-cloak>{{formatNumber(bargov,3,'.',',')}} {{TOKEN}}G</span></a>
                   <ul class="dropdown-menu dropdown-menu-dark text-white-50 p-4 text-left bg-black"
                     style="width: 300px">
                     <li>
@@ -436,8 +423,8 @@
                 <!-- send hive form -->
 
                 <div v-if="account" id="userHive" class="mx-4">
-                  <a class="dropdown-toggle text-danger no-decoration" data-bs-auto-close="outside" href="#" role="button"
-                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
+                  <a class="dropdown-toggle text-danger no-decoration" data-bs-auto-close="outside" href="#"
+                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
                     <span class="me-1" v-cloak>{{formatNumber(barhive,3,'.',',')}} HIVE</span></a>
                   <ul class="dropdown-menu dropdown-menu-dark text-white-50 p-4 text-left bg-black"
                     style="width: 300px">
@@ -495,8 +482,8 @@
                 <!-- send hbd form -->
 
                 <div v-if="account" id="userHbd" class="mx-4">
-                  <a class="dropdown-toggle text-success no-decoration" data-bs-auto-close="outside" href="#" role="button"
-                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
+                  <a class="dropdown-toggle text-success no-decoration" data-bs-auto-close="outside" href="#"
+                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
                     <span class="me-1" v-cloak>{{formatNumber(barhbd,3,'.',',')}} HBD</span></a>
                   <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black"
                     style="width: 300px">
@@ -580,8 +567,7 @@
                   </div>
                   <div class="table-responsive">
                     <table role="table" aria-busy="false" aria-colcount="3"
-                      class="table table-dark bg-darkger text-white-50 table-striped table-hover table-borderless mb-0"
-                      >
+                      class="table table-dark bg-darkger text-white-50 table-striped table-hover table-borderless mb-0">
                       <thead role="rowgroup" class="">
                         <tr role="row" class="">
                           <th role="columnheader" v-bind:class="{'col-sort':filteraccount.usera || filteraccount.userd}"
@@ -873,8 +859,8 @@
               </div>
               <div></div>
               <div>
-                <button v-if="account" class="btn btn-outline-primary" role="button" data-bs-toggle="collapse" href="#openOrdersDrawer"
-                  aria-expanded="false" aria-controls="openOrdersDrawer">
+                <button v-if="account" class="btn btn-outline-primary" role="button" data-bs-toggle="collapse"
+                  href="#openOrdersDrawer" aria-expanded="false" aria-controls="openOrdersDrawer">
                   OPEN ORDERS (<span v-cloak>{{openorders.length}}</span>)
                   <i class="fas fa-book-reader ms-2"></i>
                 </button>
@@ -1227,7 +1213,8 @@
                     <div class="col text-end" v-if="account">
                       <div class="small text-muted">
                         BALANCE<br />
-                        <a class="no-decoration" href="#/" @click="setValue('sellQuantity',balance)">{{formatNumber(bartoken,3,'.',',')}}
+                        <a class="no-decoration" href="#/"
+                          @click="setValue('sellQuantity',balance)">{{formatNumber(bartoken,3,'.',',')}}
                           {{TOKEN}}</a>
                       </div>
                     </div>
