@@ -166,15 +166,15 @@ export default {
         }
       } else if (op[1][0][0] == "transfer") {
         window.open(
-          `https://hivesigner.com/sign/transfer?authority=active&from=${
-            op[1][0][1].from
-          }to=${op[1][0][1].to}&amount=${op[1][0][1].amount}&memo=${encodeURIComponent(
-            op[1][0][1].memo
-          )}`,
-          "_blank"
-        );
-      } else {
-        alert('Transaction Type not supported')
+            `https://hivesigner.com/sign/transfer?authority=active&from=${
+              op[1][0][1].from
+            }to=${op[1][0][1].to}&amount=${op[1][0][1].amount}&memo=${encodeURIComponent(
+              op[1][0][1].memo
+            )}`,
+            "_blank"
+          );
+        } else {
+          alert('Transaction Type not supported')
       }
     },
     HASsign(op) {
@@ -535,24 +535,19 @@ export default {
   },
   template: `
 <div>
-<header class="navbar navbar-expand-lg navbar-dark fixed-top" style="background-color:rgba(42, 48, 54, 0.8); -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);">
+<header class="navbar navbar-expand-sm navbar-dark fixed-top dnav">
   <div class="container-fluid">
-	  
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span></button>
-    <div class="collapse navbar-collapse " id="navbarSupportedContent">
-
-      <ul class="navbar-nav me-auto">
-      <a class="navbar-brand" href="/"><img src="/img/dlux-hive-logo-alpha.svg" alt="dlux-logo" width="40" height="40"></a>
-        <li class="nav-item"><a class="nav-link disabled" href="/apps/"><i class="fa-solid fa-mountain-sun me-2"></i>HUB</a></li>
-        <li class="nav-item"><a class="nav-link" href="/nfts/sets/"><i class="fa-solid fa-store me-2"></i>NFTS</a></li>
-        <li class="nav-item"><a class="nav-link" href="/dex/"><i class="fa-solid fa-building-columns me-2"></i>DEX</a></li>
-        <li class="nav-item"><a class="nav-link" href="/docs/"><i class="fa-solid fa-book me-2"></i>DOCS</a></li>
-      </ul>
-
-
-
+    <a class="text-white d-sm-none" data-bs-toggle="offcanvas" href="#offcanvasNav" role="button" aria-controls="offcanvasExample">
+      <i class="fa-solid fa-bars"></i>
+    </a>
+      <div class="collapse navbar-collapse " id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto">
+          <li><a class="navbar-brand" href="/"><img src="/img/dlux-hive-logo-alpha.svg" alt="dlux-logo" width="40" height="40"></a></li> 
+          <li class="nav-item"><a class="nav-link disabled" href="/apps/"><i class="fa-solid fa-mountain-sun me-2"></i>HUB</a></li>
+          <li class="nav-item"><a class="nav-link" href="/nfts/sets/"><i class="fa-solid fa-store me-2"></i>NFTS</a></li>
+          <li class="nav-item"><a class="nav-link" href="/dex/"><i class="fa-solid fa-building-columns me-2"></i>DEX</a></li>
+          <li class="nav-item"><a class="nav-link" href="/docs/"><i class="fa-solid fa-book me-2"></i>DOCS</a></li>
+        </ul>
         <!--
 	      <ul class="navbar-nav d-none" v-show="user" id="userMenu">
           <li class="nav-item d-flex align-items-center d-none"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus me-2"></i>CREATE</a></li>
@@ -575,21 +570,24 @@ export default {
           </li>
         </ul>
         -->
-    </div>
+      </div>
 
-    <ul class="navbar-nav" id="loginMenu" v-show="!user">
-      <li class="nav-item d-none"><a class="nav-link" href="/about/">About</a></li>
-       <li class="nav-item"></li>
-        <li class="nav-item">
-        <button class="btn btn-primary ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
-    </li>
-  </ul>
-  <ul class="navbar-nav" v-show="user">
-  <li><a href="#" v-show="user" class="nav-link d-flex align-items-center text-white-50 me-4" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
-    <img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light me-1 cover">
-    <span id="userName" class="ms-2 d-none d-md-block">{{user}}</span>
-  </a></li>
-  </ul>
+
+    <a class="navbar-brand d-sm-none" href="/"><img src="/img/dlux-hive-logo-alpha.svg" alt="dlux-logo" width="40" height="40"></a>
+
+      <ul class="navbar-nav" id="loginMenu" v-show="!user">
+        <li class="nav-item d-none"><a class="nav-link" href="/about/">About</a></li>
+        <li class="nav-item"></li>
+        <li class="nav-item"><button class="btn btn-primary ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button></li>
+      </ul>
+      <ul class="navbar-nav" v-show="user">
+        <li>
+          <a href="#" v-show="user" class="nav-link d-flex align-items-center text-white-50 me-4" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
+            <img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light me-1 cover">
+            <span id="userName" class="ms-2 d-none d-md-block">{{user}}</span>
+          </a>
+        </li>
+      </ul>
 
   </div>
 </header>
@@ -598,6 +596,28 @@ export default {
     <toast-vue :alert="op"/>
   </div>
 </div>
+
+
+
+
+
+<div class="offcanvas offcanvas-start bg-dark text-white-50" tabindex="-1" id="offcanvasNav" aria-labelledby="offcanvasLeftLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="offcanvasLeftLabel">DLUX</h5>
+    <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <div class="d-flex justify-content-center">
+      <ul class="navbar-nav">      
+        <li class="nav-item"><h4><a class="nav-link disabled" href="/apps/"><i class="fa-solid fa-mountain-sun me-3"></i>HUB</a></h4></li>
+        <li class="nav-item"><h4><a class="nav-link" href="/nfts/sets/"><i class="fa-solid fa-store me-3"></i>NFTS</a></h4></li>
+        <li class="nav-item"><h4><a class="nav-link" href="/dex/"><i class="fa-solid fa-building-columns me-3"></i>DEX</a></h4></li>
+        <li class="nav-item"><h4><a class="nav-link" href="/docs/"><i class="fa-solid fa-book me-3"></i>DOCS</a></h4></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
 
 <div class="offcanvas offcanvas-end bg-dark text-white-50" tabindex="-1" id="offcanvasUsers" aria-labelledby="offcanvasRightLabel">
   <div class="offcanvas-header d-flex align-items-center justify-content-between">
@@ -608,13 +628,6 @@ export default {
     <div class="d-flex flex-column">
       <div class="row mb-3">
 
-        <label class="form-label d-none">Authentication service:</label>
-
-        <div class="small text-muted text-center mt-2">
-          <span v-if="HKC">Hive Keychain requires a Firefox or Chrome extension.</span>
-          <span v-if="HAS">Hive Auth requires websockets and a PKSA Application.</span>
-          <span v-if="HSR">Hive Signer requires a password.</span>
-        </div>
         <div class="dropdown">
           <button class="btn btn-secondary w-100 p-0" role="button" id="authDropdown" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false" >
             <button v-if="HKC" class="btn btn-hivekeychain h-100 w-100 dropdown-toggle"><img src="/img/keychain.png" height="50px" class="img-responsive p-2 mx-3"></button>
@@ -628,6 +641,12 @@ export default {
           </ul>
         </div>
 
+
+        <div class="small text-muted text-center mt-2">
+          <span v-if="HKC">Hive Keychain requires a Firefox or Chrome extension</span>
+          <span v-if="HAS">Hive Auth requires websockets and a PKSA Application</span>
+          <span v-if="HSR">Hive Signer generates a link</span>
+        </div>
           
 
       </div>
