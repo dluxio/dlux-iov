@@ -589,6 +589,12 @@ export default {
       <div class="row mb-3">
 
         <label class="form-label d-none">Authentication service:</label>
+
+        <div class="small text-muted text-center mt-2">
+          <span v-if="HKC">Hive Keychain requires a Firefox or Chrome extension.</span>
+          <span v-if="HAS">Hive Auth requires websockets and a PKSA Application.</span>
+          <span v-if="HSR">Hive Signer requires a password.</span>
+        </div>
         <div class="dropdown">
           <button class="btn btn-secondary w-100 p-0" role="button" id="authDropdown" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false" >
             <button v-if="HKC" class="btn btn-hivekeychain h-100 w-100 dropdown-toggle"><img src="/img/keychain.png" height="50px" class="img-responsive p-2 mx-3"></button>
@@ -597,18 +603,13 @@ export default {
           </button>
           <ul class="dropdown-menu dropdown-menu-dark text-center bg-black p-2" aria-labelledby="authDropdown">
             <li class="p-2"><button class="btn btn-hivekeychain h-100 w-100" @click="useKC()"><img src="/img/keychain.png" class="img-responsive" height="50px"></button></li>
-            <li class="p-2" v-if="HAS_.wsa"><button class="btn btn-hiveauth h-100 w-100" @click="useHAS()"><img src="/img/hiveauth.svg" class="img-responsive" height="50px"></button></li>
-            <li class="p-2 d-none"><button class="disabled btn btn-hivesigner h-100 w-100" @click="useHS()"><img src="/img/hivesigner.svg" class="img-responsive" height="50px"></button></li>
+            <li class="p-2"><button class="btn btn-hiveauth h-100 w-100" @click="useHAS()"><img src="/img/hiveauth.svg" class="img-responsive" height="50px"></button></li>
+            <li class="p-2"><button class="btn btn-hivesigner h-100 w-100" @click="useHS()"><img src="/img/hivesigner.svg" class="img-responsive" height="50px"></button></li>
           </ul>
         </div>
 
           
 
-        <div class="small text-muted text-center mt-2 d-none">
-        <span v-if="HKC">Hive Keychain requires a Firefox or Chrome extension.</span>
-        <span v-if="HAS">Hive Auth requires websockets and a PKSA Application.</span>
-        <span v-if="HSR">Hive Signer requires a password.</span>
-        </div>
       </div>
     </div>
 
