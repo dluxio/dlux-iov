@@ -173,6 +173,8 @@ export default {
           )}`,
           "_blank"
         );
+      } else {
+        alert('Transaction Type not supported')
       }
     },
     HASsign(op) {
