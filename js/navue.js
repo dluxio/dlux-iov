@@ -627,7 +627,8 @@ export default {
         <div v-if="user" class="bg-darkest d-flex align-items-center px-4 py-2 mx-2">
           <img :src="avatar" id="userImage" alt="" width="50" height="50" class="img-fluid rounded-circle bg-light me-2 cover">
           <span id="userName">{{user}}</span>
-          <a class="btn btn-outline-danger ms-auto" href="#" @click="logout()"><i class="fas fa-power-off fa-fw me-2"></i>Logout</a>
+          <a class="btn btn-outline-success ms-auto" :href="HAS_.uri" v-if="!HAS_.token && HAS"><i class="fas fa-power-off fa-fw me-2"></i>Login</a>
+          <a class="btn btn-outline-danger ms-auto" href="#" @click="logout()" v-if="HAS_.token || HKC"><i class="fas fa-power-off fa-fw me-2"></i>Logout</a>
         </div>
       </div>
 
