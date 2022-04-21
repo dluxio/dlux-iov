@@ -484,7 +484,7 @@ var app = new Vue({
     bcalc(k) {
       switch (k) {
         case "t":
-          this.buyQuantity = parseFloat(this.buyQuantity);
+          //this.buyQuantity = parseFloat(this.buyQuantity);
           if (this.bform.cl) {
             if (this.buyhive.checked)
               this.buyPrice = (this.buyHiveTotal / this.buyQuantity).toFixed(6);
@@ -498,7 +498,7 @@ var app = new Vue({
           }
           break;
         case "p":
-          this.buyPrice = parseFloat(this.buyPrice);
+          //this.buyPrice = parseFloat(this.buyPrice);
           if (this.bform.cl) {
             if (this.buyhive.checked)
               this.buyQuantity = (this.buyHiveTotal / this.buyPrice).toFixed(3);
