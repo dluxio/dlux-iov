@@ -653,7 +653,7 @@
         <div class="container text-white" style="margin-top: 50px">
           <!-- current token tick -->
           <div class="row mb-3">
-            <div class="col-4">
+            <div class="col-6 col-md-4">
               <div class="rounded p-3 bg-darkg" v-if="buyhive.checked">
                 <div class="d-flex align-items-center" id="tokenHiveTick">
                   <div>
@@ -664,31 +664,6 @@
                         6)}}
                       </h2>
                     </b>
-                  </div>
-                  <div class="ms-auto d-flex align-items-center">
-                    <div class="dropdown show d-flex align-items-center p-0 m-0">
-                      <a class="text-white py-0 px-2 m-0" href="#" role="button" data-bs-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false">
-                        <i class="fas fa-info-circle mx-2"></i></a>
-                      <div
-                        class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
-                        <h6 class="dropdown-header">{{TOKEN}} STATS</h6>
-                        <div class="dropdown-divider bg-light"></div>
-                        <p class="mb-0">Supply:</p>
-                        <p>
-                          {{formatNumber(stats.tokenSupply/1000,3,'.',',')}}
-                        </p>
-                        <div class="dropdown-divider bg-light"></div>
-                        <p class="mb-0">Market Cap:</p>
-                        <p>${{formatNumber(marketCap,2,'.',',')}}</p>
-                        <div class="dropdown-divider bg-light"></div>
-                        <p class="mb-0">DEX Fee:</p>
-                        <p>{{formatNumber(stats.dex_fee*100,3,'.',',')}}%</p>
-                        <div class="dropdown-divider bg-light"></div>
-                        <p class="mb-0">Clearing Time:</p>
-                        <p class="mb-0">~10 Minutes</p>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -703,35 +678,10 @@
                       </h2>
                     </b>
                   </div>
-                  <div class="ms-auto d-flex align-items-center">
-                    <div class="dropdown show d-flex align-items-center p-0 m-0">
-                      <a class="text-white py-0 px-2 m-0" href="#" role="button" data-bs-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false">
-                        <i class="fas fa-info-circle mx-2"></i></a>
-                      <div
-                        class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
-                        <h6 class="dropdown-header">{{TOKEN}} STATS</h6>
-                        <div class="dropdown-divider bg-light"></div>
-                        <p class="mb-0">Supply:</p>
-                        <p>
-                          {{formatNumber(stats.tokenSupply/1000,3,'.',',')}}
-                        </p>
-                        <div class="dropdown-divider bg-light"></div>
-                        <p class="mb-0">Market Cap:</p>
-                        <p>${{formatNumber(marketCap,2,'.',',')}}</p>
-                        <div class="dropdown-divider bg-light"></div>
-                        <p class="mb-0">DEX Fee:</p>
-                        <p>{{formatNumber(stats.dex_fee*100,3,'.',',')}}%</p>
-                        <div class="dropdown-divider bg-light"></div>
-                        <p class="mb-0">Clearing Time:</p>
-                        <p class="mb-0">~10 Minutes</p>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
-            <div class="col-4">
+            <div class="col-4 d-none d-md-block">
               <div class="rounded p-3 bg-darkg">
                 <div id="hiveTick">
                   <b>
@@ -742,7 +692,29 @@
                 </div>
               </div>
             </div>
-            <div class="col-4">
+            <div class="col-4 d-none d-md-block">
+              <div class="rounded p-3 bg-darkg">
+                <div id="hbdTick">
+                  <b>
+                    <h2 class="lead my-0" v-cloak>
+                      HBD: ${{hbdprice.hive_dollar.usd}}
+                    </h2>
+                  </b>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 d-md-none" v-if="buyhive.checked">
+              <div class="rounded p-3 bg-darkg">
+                <div id="hiveTick">
+                  <b>
+                    <h2 class="lead my-0" v-cloak>
+                      HIVE: ${{hiveprice.hive.usd}}
+                    </h2>
+                  </b>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 d-md-none" v-if="buyhbd.checked">
               <div class="rounded p-3 bg-darkg">
                 <div id="hbdTick">
                   <b>
@@ -756,8 +728,33 @@
           </div>
           <!-- market stats -->
           <div id="market" class="row mb-3 text-center">
-            <div class="col-lg-3">
-              <h5>Market</h5>
+            <div class="col-6 col-lg-3">
+              <div class="d-flex align-items-center justify-content-center">
+              <h5 class="m-0">Market</h5>
+                <div class="dropdown show d-flex align-items-center p-0 m-0">
+                  <a class="text-white" href="#" role="button" data-bs-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+                    <h5 class="m-0"><i class="fas fa-info-circle ms-2"></i></h5></a>
+                  <div
+                    class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
+                    <h6 class="dropdown-header">{{TOKEN}} STATS</h6>
+                    <div class="dropdown-divider bg-light"></div>
+                    <p class="mb-0">Supply:</p>
+                    <p>
+                      {{formatNumber(stats.tokenSupply/1000,3,'.',',')}}
+                    </p>
+                    <div class="dropdown-divider bg-light"></div>
+                    <p class="mb-0">Market Cap:</p>
+                    <p>${{formatNumber(marketCap,2,'.',',')}}</p>
+                    <div class="dropdown-divider bg-light"></div>
+                    <p class="mb-0">DEX Fee:</p>
+                    <p>{{formatNumber(stats.dex_fee*100,3,'.',',')}}%</p>
+                    <div class="dropdown-divider bg-light"></div>
+                    <p class="mb-0">Clearing Time:</p>
+                    <p class="mb-0">~10 Minutes</p>
+                  </div>
+                </div>
+              </div>
               <div class="container-fluid mt-3">
                 <div>
                   <div class="btn-group">
@@ -770,6 +767,20 @@
                     <label class="btn btn-outline-warning" for="setHbd">HBD</label>
                   </div>
                 </div>
+              </div>
+            </div>
+            <div class="col-6 d-lg-none">
+              <div class="mt-2 col" v-if="buyhive.checked">
+                <h5>24h Volume</h5>
+                <i class="fab fa-hive me-1"></i><span v-cloak>{{volume.hive}}</span><br />
+                <i class="fas fa-dollar-sign mx-1"></i><span v-cloak>{{toFixed(volume.hive * hiveprice.hive.usd,
+                  2)}}</span>
+              </div>
+              <div class="mt-2 col" v-if="buyhbd.checked">
+                <h5>24h Volume</h5>
+                <i class="fab fa-hive me-1"></i><span v-cloak>{{volume.hbd}}</span><br />
+                <i class="fas fa-dollar-sign mx-1"></i><span v-cloak>{{toFixed(volume.hbd * hbdprice.hive_dollar.usd,
+                  2)}}</span>
               </div>
             </div>
             <div class="col-lg-9" v-if="buyhive.checked">
@@ -795,7 +806,7 @@
                     dexapi.markets.hive.tick : 0
                     ) * hiveprice.hive.usd, 6)}}</span>
                 </div>
-                <div class="mt-2 col">
+                <div class="mt-2 col d-none d-lg-block">
                   <h5>24h Volume</h5>
                   <i class="fab fa-hive me-1"></i><span v-cloak>{{volume.hive}}</span><br />
                   <i class="fas fa-dollar-sign mx-1"></i><span v-cloak>{{toFixed(volume.hive * hiveprice.hive.usd,
@@ -825,7 +836,7 @@
                     dexapi.markets.hive.tick : 0
                     ) * hbdprice.hive_dollar.usd, 6)}}</span>
                 </div>
-                <div class="mt-2 col">
+                <div class="mt-2 col d-none d-lg-block">
                   <h5>24h Volume</h5>
                   <i class="fab fa-hive me-1"></i><span v-cloak>{{volume.hbd}}</span><br />
                   <i class="fas fa-dollar-sign mx-1"></i><span v-cloak>{{toFixed(volume.hbd * hbdprice.hive_dollar.usd,
