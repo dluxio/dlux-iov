@@ -223,7 +223,6 @@ export default {
       this.HAS_.token = "";
       this.HAS_.expire = "";
       this.user = "";
-      localStorage.removeItem(this.user + "HAS");
     },
     HASsetup() {
       if ("WebSocket" in window) {
@@ -472,6 +471,7 @@ export default {
       this.$emit("logout", "");
     },
     setUser(id) {
+      this.HAS_.token = ""
       this.user = id ? id : this.userField;
       this.userField = "";
       localStorage.setItem("user", this.user);
@@ -497,6 +497,7 @@ export default {
     deleteRecentUser(user) {
       this.recentUsers.splice(this.recentUsers.indexOf(user), 1);
       localStorage.setItem("recentUsers", JSON.stringify(this.recentUsers));
+      localStorage.removeItem(this.user + "HAS");
     },
     toggleAccountMenu() {
       this.accountMenu = !this.accountMenu;
