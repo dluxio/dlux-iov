@@ -653,7 +653,7 @@
         <div class="container text-white" style="margin-top: 50px">
           <!-- current token tick -->
           <div class="row mb-3">
-            <div class="col-6 col-md-4">
+            <div class="col-4">
               <div class="rounded p-3 bg-darkg" v-if="buyhive.checked">
                 <div class="d-flex align-items-center" id="tokenHiveTick">
                   <div>
@@ -664,6 +664,31 @@
                         6)}}
                       </h2>
                     </b>
+                  </div>
+                  <div class="ms-auto d-flex align-items-center">
+                    <div class="dropdown show d-flex align-items-center p-0 m-0">
+                      <a class="text-white py-0 px-2 m-0" href="#" role="button" data-bs-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-info-circle mx-2"></i></a>
+                      <div
+                        class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
+                        <h6 class="dropdown-header">{{TOKEN}} STATS</h6>
+                        <div class="dropdown-divider bg-light"></div>
+                        <p class="mb-0">Supply:</p>
+                        <p>
+                          {{formatNumber(stats.tokenSupply/1000,3,'.',',')}}
+                        </p>
+                        <div class="dropdown-divider bg-light"></div>
+                        <p class="mb-0">Market Cap:</p>
+                        <p>${{formatNumber(marketCap,2,'.',',')}}</p>
+                        <div class="dropdown-divider bg-light"></div>
+                        <p class="mb-0">DEX Fee:</p>
+                        <p>{{formatNumber(stats.dex_fee*100,3,'.',',')}}%</p>
+                        <div class="dropdown-divider bg-light"></div>
+                        <p class="mb-0">Clearing Time:</p>
+                        <p class="mb-0">~10 Minutes</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -678,10 +703,35 @@
                       </h2>
                     </b>
                   </div>
+                  <div class="ms-auto d-flex align-items-center">
+                    <div class="dropdown show d-flex align-items-center p-0 m-0">
+                      <a class="text-white py-0 px-2 m-0" href="#" role="button" data-bs-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-info-circle mx-2"></i></a>
+                      <div
+                        class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
+                        <h6 class="dropdown-header">{{TOKEN}} STATS</h6>
+                        <div class="dropdown-divider bg-light"></div>
+                        <p class="mb-0">Supply:</p>
+                        <p>
+                          {{formatNumber(stats.tokenSupply/1000,3,'.',',')}}
+                        </p>
+                        <div class="dropdown-divider bg-light"></div>
+                        <p class="mb-0">Market Cap:</p>
+                        <p>${{formatNumber(marketCap,2,'.',',')}}</p>
+                        <div class="dropdown-divider bg-light"></div>
+                        <p class="mb-0">DEX Fee:</p>
+                        <p>{{formatNumber(stats.dex_fee*100,3,'.',',')}}%</p>
+                        <div class="dropdown-divider bg-light"></div>
+                        <p class="mb-0">Clearing Time:</p>
+                        <p class="mb-0">~10 Minutes</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="col-4 d-none d-md-block">
+            <div class="col-4">
               <div class="rounded p-3 bg-darkg">
                 <div id="hiveTick">
                   <b>
@@ -692,29 +742,7 @@
                 </div>
               </div>
             </div>
-            <div class="col-4 d-none d-md-block">
-              <div class="rounded p-3 bg-darkg">
-                <div id="hbdTick">
-                  <b>
-                    <h2 class="lead my-0" v-cloak>
-                      HBD: ${{hbdprice.hive_dollar.usd}}
-                    </h2>
-                  </b>
-                </div>
-              </div>
-            </div>
-            <div class="col-6 d-md-none" v-if="buyhive.checked">
-              <div class="rounded p-3 bg-darkg">
-                <div id="hiveTick">
-                  <b>
-                    <h2 class="lead my-0" v-cloak>
-                      HIVE: ${{hiveprice.hive.usd}}
-                    </h2>
-                  </b>
-                </div>
-              </div>
-            </div>
-            <div class="col-6 d-md-none" v-if="buyhbd.checked">
+            <div class="col-4">
               <div class="rounded p-3 bg-darkg">
                 <div id="hbdTick">
                   <b>
@@ -728,33 +756,8 @@
           </div>
           <!-- market stats -->
           <div id="market" class="row mb-3 text-center">
-            <div class="col-6 col-lg-3">
-              <div class="d-flex align-items-center justify-content-center">
-              <h5 class="m-0">Market</h5>
-                <div class="dropdown show d-flex align-items-center p-0 m-0">
-                  <a class="text-white" href="#" role="button" data-bs-toggle="dropdown"
-                    aria-haspopup="true" aria-expanded="false">
-                    <h5 class="m-0"><i class="fas fa-info-circle ms-2"></i></h5></a>
-                  <div
-                    class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
-                    <h6 class="dropdown-header">{{TOKEN}} STATS</h6>
-                    <div class="dropdown-divider bg-light"></div>
-                    <p class="mb-0">Supply:</p>
-                    <p>
-                      {{formatNumber(stats.tokenSupply/1000,3,'.',',')}}
-                    </p>
-                    <div class="dropdown-divider bg-light"></div>
-                    <p class="mb-0">Market Cap:</p>
-                    <p>${{formatNumber(marketCap,2,'.',',')}}</p>
-                    <div class="dropdown-divider bg-light"></div>
-                    <p class="mb-0">DEX Fee:</p>
-                    <p>{{formatNumber(stats.dex_fee*100,3,'.',',')}}%</p>
-                    <div class="dropdown-divider bg-light"></div>
-                    <p class="mb-0">Clearing Time:</p>
-                    <p class="mb-0">~10 Minutes</p>
-                  </div>
-                </div>
-              </div>
+            <div class="col-lg-3">
+              <h5>Market</h5>
               <div class="container-fluid mt-3">
                 <div>
                   <div class="btn-group">
@@ -767,20 +770,6 @@
                     <label class="btn btn-outline-warning" for="setHbd">HBD</label>
                   </div>
                 </div>
-              </div>
-            </div>
-            <div class="col-6 d-lg-none">
-              <div class="mt-2 col" v-if="buyhive.checked">
-                <h5>24h Volume</h5>
-                <i class="fab fa-hive me-1"></i><span v-cloak>{{volume.hive}}</span><br />
-                <i class="fas fa-dollar-sign mx-1"></i><span v-cloak>{{toFixed(volume.hive * hiveprice.hive.usd,
-                  2)}}</span>
-              </div>
-              <div class="mt-2 col" v-if="buyhbd.checked">
-                <h5>24h Volume</h5>
-                <i class="fab fa-hive me-1"></i><span v-cloak>{{volume.hbd}}</span><br />
-                <i class="fas fa-dollar-sign mx-1"></i><span v-cloak>{{toFixed(volume.hbd * hbdprice.hive_dollar.usd,
-                  2)}}</span>
               </div>
             </div>
             <div class="col-lg-9" v-if="buyhive.checked">
@@ -806,7 +795,7 @@
                     dexapi.markets.hive.tick : 0
                     ) * hiveprice.hive.usd, 6)}}</span>
                 </div>
-                <div class="mt-2 col d-none d-lg-block">
+                <div class="mt-2 col">
                   <h5>24h Volume</h5>
                   <i class="fab fa-hive me-1"></i><span v-cloak>{{volume.hive}}</span><br />
                   <i class="fas fa-dollar-sign mx-1"></i><span v-cloak>{{toFixed(volume.hive * hiveprice.hive.usd,
@@ -836,7 +825,7 @@
                     dexapi.markets.hive.tick : 0
                     ) * hbdprice.hive_dollar.usd, 6)}}</span>
                 </div>
-                <div class="mt-2 col d-none d-lg-block">
+                <div class="mt-2 col">
                   <h5>24h Volume</h5>
                   <i class="fab fa-hive me-1"></i><span v-cloak>{{volume.hbd}}</span><br />
                   <i class="fas fa-dollar-sign mx-1"></i><span v-cloak>{{toFixed(volume.hbd * hbdprice.hive_dollar.usd,
@@ -1073,8 +1062,8 @@
                     </legend>
                     <div tabindex="-1" role="group" class="col">
                       <div role="group" class="input-group">
-                        <input type="number" v-on:keyup="bcalc('t')" ref="buyQty" required  :class="{'text-info':!bform.tl}"
-                          class="form-control bg-darkg border-dark text-white-50" v-model="buyQuantity" id="buyQuantity"
+                        <input type="number" v-on:keyup="bcalc('t')" ref="buyQty" required  :class="{'text-info':!bform.tl, ' text-white-50':bform.tl}"
+                          class="form-control bg-darkg border-dark" v-model="buyQuantity" id="buyQuantity"
                           placeholder="0" :min="minbuy" step="0.001" aria-required="true" :readonly="bform.tl" />
                         <div class="input-group-append">
                           <div class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix">
@@ -1097,8 +1086,8 @@
                     <div tabindex="-1" role="group" class="col">
                       <div role="group" class="input-group">
                         <input id="buyPrice" type="number" v-on:keyup="bcalc('p')" v-model="buyPrice" placeholder="0"
-                          required step="0.000001" min="0.000001" aria-required="true"  :class="{'text-info':!bform.pl}"
-                          class="form-control bg-darkg border-dark text-white-50" :readonly="bform.pl" />
+                          required step="0.000001" min="0.000001" aria-required="true"  :class="{'text-info':!bform.pl, ' text-white-50':bform.pl}"
+                          class="form-control bg-darkg border-dark" :readonly="bform.pl" />
                         <div class="input-group-append">
                           <div class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix">
                             <span v-if="buyhive.checked">HIVE</span>
@@ -1120,7 +1109,7 @@
                     </legend>
                     <div tabindex="-1" role="group" class="col">
                       <div role="group" class="input-group">
-                        <input type="number" class="form-control bg-darkg border-dark text-white-50" :readonly="bform.cl" :class="{'text-info':!bform.cl}"
+                        <input type="number" class="form-control bg-darkg border-dark" :readonly="bform.cl" :class="{'text-info':!bform.cl, ' text-white-50':bform.cl}"
                           v-model="buyHiveTotal" id="buyHiveTotal" required v-on:keyup="bcalc('c')" placeholder="0"
                           :min="minbuy" step="0.001"
                           :max="parseFloat(barhive) < parseFloat(maxhbuy) ? toFixed(parseFloat(barhive),3) : maxhbuy"
@@ -1146,7 +1135,7 @@
                       </legend>
                       <div tabindex="-1" role="group" class="col">
                         <div role="group" class="input-group">
-                          <input type="number" class="form-control bg-darkg border-dark text-white-50" :readonly="bform.cl" :class="{'text-info':!bform.cl}"
+                          <input type="number" class="form-control bg-darkg border-dark" :readonly="bform.cl" :class="{'text-info':!bform.cl, ' text-white-50':bform.cl}"
                             v-model="buyHbdTotal" id="buyHbdTotal" required v-on:keyup="bcalc('c')" placeholder="0"
                             :min="minbuy" step="0.001"
                             :max="parseFloat(barhbd) < parseFloat(maxdbuy) ? toFixed(parseFloat(barhbd),3) : maxdbuy"
@@ -1237,8 +1226,8 @@
                     <div tabindex="-1" role="group" class="col">
                       <div role="group" class="input-group">
                         <input type="number" v-on:keyup="scalc('t')" required
-                          class="form-control bg-darkg border-dark text-white-50" v-model="sellQuantity" id="sellQuantity"
-                          placeholder="0" :min="minsell" step="0.001" :readonly="sform.tl"  :class="{'text-info':!sform.tl}" aria-required="true"
+                          class="form-control bg-darkg border-dark" v-model="sellQuantity" id="sellQuantity"
+                          placeholder="0" :min="minsell" step="0.001" :readonly="sform.tl"  :class="{'text-info':!sform.tl, ' text-white-50':sform.tl}" aria-required="true"
                           :max="parseFloat(bartoken)" />
                         <div class="input-group-append">
                           <div class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix">
@@ -1263,7 +1252,7 @@
                       <div role="group" class="input-group">
                         <input id="sellPrice" v-on:keyup="scalc('p')" v-model="sellPrice" type="number" placeholder="0"
                           required step="0.000001" min="0.000001" aria-required="true"
-                          class="form-control bg-darkg border-dark text-white-50" :readonly="sform.pl"  :class="{'text-info':!sform.pl}"/>
+                          class="form-control bg-darkg border-dark" :readonly="sform.pl"  :class="{'text-info':!sform.pl, ' text-white-50':sform.pl}"/>
                         <div class="input-group-append">
                           <div class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix">
                             <span v-if="buyhive.checked">HIVE</span><span v-if="buyhbd.checked">HBD</span>/{{TOKEN}}<a
@@ -1284,7 +1273,7 @@
                     </legend>
                     <div tabindex="-1" role="group" class="col">
                       <div role="group" class="input-group">
-                        <input type="number" class="form-control bg-darkg border-dark text-white-50" :readonly="sform.cl" :class="{'text-info':!sform.cl}"
+                        <input type="number" class="form-control bg-darkg border-dark" :readonly="sform.cl" :class="{'text-info':!sform.cl, ' text-white-50':sform.cl}"
                           id="sellHiveTotal" required v-model="sellHiveTotal" v-on:keyup="scalc('c')" placeholder="0"
                           min="0.001" step="0.001" aria-required="true" />
                         <div class="input-group-append">
@@ -1307,7 +1296,7 @@
                     </legend>
                     <div tabindex="-1" role="group" class="col">
                       <div role="group" class="input-group">
-                        <input type="number" class="form-control bg-darkg border-dark text-white-50" :readonly="sform.cl" :class="{'text-info':!sform.cl}"
+                        <input type="number" class="form-control bg-darkg border-dark" :readonly="sform.cl" :class="{'text-info':!sform.cl, ' text-white-50':sform.cl}"
                           id="sellHbdTotal" v-model="sellHbdTotal" required placeholder="0" min="0.001" step="0.001"
                           aria-required="true" />
                         <div class="input-group-append">
