@@ -151,9 +151,6 @@ var app = new Vue({
       accountinfo: {},
     };
   },
-  provide() {
-    return { op: this.toSign };
-  },
   beforeDestroy() {
   },
   components: {

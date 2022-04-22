@@ -142,7 +142,7 @@
                       <div class="pr-2"><small>MINT MARKET: </small></div>
                       <div class="px-2">
                         <h2 class="m-0">
-                          <div>{{mintAvail}}</div>
+                          <div>{{focusSetCalc.forAuctionMint + focusSetCalc.forSaleMint}}</div>
                         </h2>
                       </div>
                     </div>
@@ -153,8 +153,8 @@
                         aria-controls="mintsalestab" aria-expanded="true">
                         <div class="d-flex align-items-center">
                           <div @click="">SALES</div>
-                          <div class="mb-3"><span class=" badge rounded-pill bg-danger" style="font-size: .7em">calc
-                              qty_sales</span>
+                          <div class="mb-3"><span class=" badge rounded-pill bg-danger" style="font-size: .7em">
+                              {{mintData.qty_sales}}</span>
                           </div>
                         </div>
                       </a></li>
@@ -164,7 +164,7 @@
                         <div class="d-flex align-items-center">
                           <div>AUCTIONS</div>
                           <div class="mb-3"><span class=" badge rounded-pill bg-danger"
-                              style="font-size: .7em">qty_auctions</span>
+                              style="font-size: .7em">{{mintData.qty_auctions}}</span>
                           </div>
                         </div>
                       </a></li>
@@ -186,22 +186,22 @@
 
                           <tr v-for="ad in mintSales">
                             <form class="needs-validation" novalidate>
-                              <th scope="row" style="vertical-align: middle">qty
+                              <th scope="row" style="vertical-align: middle">{{ad.qty}}
                               </th>
                               <td style="vertical-align: middle">
                                 {{naiString(ad.pricenai)}}</td>
                               <td><span v-show="true" class="text-center">
 
-                                  <input value="1" required
-                                    class="bg-none border-light rounded text-white text-center form-control"
-                                    style="max-width: 50px">
+                                  <input value="0" required type="number" min="1" step="1" max="ad.qty"
+                                    class="bg-none border-light rounded text-center form-control"
+                                    style="max-width: 100px" v-model="ad.buyQty">
 
-                                </span> <span v-show="true">calc qty
+                                </span> <span v-show="true">{{ad.buyQty * ad.pricenai.amount / 1000}}</span>
                                 </span></td>
                               <td>
                                 <div>
                                   <button type="submit" class="btn btn-primary" v-show="ad.by != account">Buy</button>
-                                  <button class="btn btn-primary" v-show="ad.by != account">Buy</button>
+                                  <!-- <button class="btn btn-primary" v-show="ad.by != account">Buy</button> -->
                                   <button class="btn btn-warning" v-show="ad.by == account">Cancel</button>
                                 </div>
                               </td>
@@ -237,8 +237,7 @@
                             <th scope="row" colspan="2"></th>
                             <td><input class="form-control " type="number">
                             </td>
-                            <td><button class="btn btn-secondary" v-show="auc.by == account">Bid</button>
-                              <button class="btn btn-primary" v-show="auc.by != account">Bid</button>
+                            <td><button class="btn btn-secondary">Bid</button>
 
                             </td>
 
@@ -274,10 +273,10 @@
                     <div style="-webkit-background-clip: text;color: transparent;">
                       <h3 class="my-0 mx-2 p-0 p-2 ml-auto">sealed NFT</h3>
                     </div>
-                    <h5>Unwrap to see what's inside.</h5>
+                    <h5 v-if="getMint(focusSet.set, 'qty') > 0">Unwrap to see what's inside.</h5>
                   </div>
 
-                  <div class="d-flex flex-wrap justify-content-between" v-show="getMint(focusSet.set, 'qty') > 0">
+                  <div class="d-flex flex-wrap justify-content-between" v-if="getMint(focusSet.set, 'qty') > 0">
                     <button type="button" class="btn btn-outline-light me-auto ms-auto mt-1" @click=""
                       oldclick="unwrap custom json">Open<i class="fas fa-box-open ms-3"></i></button>
                     <button type="button" class="btn btn-outline-light me-auto ms-auto mt-1" data-bs-toggle="modal"

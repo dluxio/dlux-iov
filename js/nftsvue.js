@@ -403,6 +403,7 @@ var app = new Vue({
       sales: [],
       mintAuctions: [],
       mintSales: [],
+      mintData: {}
     };
   },
   components: {
@@ -830,6 +831,7 @@ var app = new Vue({
         fetch(this.lapi + "/api/auctions/" + set)
           .then((response) => response.json())
           .then((data) => {
+            console.log({data})
             this.auctions = data.result.filter((a) => a.set == set);
             console.log(this.auctions);
             for (var i = 0; i < this.auctions.length; i++) {
@@ -851,7 +853,9 @@ var app = new Vue({
         fetch(this.lapi + "/api/sales/" + set)
           .then((response) => response.json())
           .then((data) => {
+            console.log({data})
             this.sales = data.result.filter((a) => a.set == set);
+            console.log(this.sales);
             for (var i = 0; i < this.sales.length; i++) {
               const token =
                 this.sales[i].price.token == "HIVE"
@@ -868,26 +872,49 @@ var app = new Vue({
               this.focusSetCalc.forSale++;
             }
           });
-        // fetch(this.lapi + "/api/mintsupply")
-        //   .then((response) => response.json())
-        //   .then((data) => {
-        //     this.mintSales = data.result.filter((a) => a.set == set)
-        //     for (var i = 0; i < this.sales.length; i++) {
-        //       const token =
-        //         this.sales[i].price.token == "HIVE"
-        //           ? "HIVE"
-        //           : this.sales[i].price.token == "HBD"
-        //           ? "HBD"
-        //           : "TOKEN";
-        //       if (
-        //         this.sales[i].price.amount < this.focusSetCalc.sf[token] ||
-        //         !this.focusSetCalc.sf[token]
-        //       ) {
-        //         this.focusSetCalc.sf[token] = this.sales[i].price.amount;
-        //       }
-        //       this.focusSetCalc.forSale++;
-        //     }
-        //   });
+        fetch(this.lapi + "/api/mintsupply")
+          .then((response) => response.json())
+          .then((data) => {
+            this.mintData = data.result.filter((a) => a.set == set)[0];
+            this.mintSales = data.result.filter((a) => a.set == set)[0].sales || []
+            this.mintAuctions = data.result.filter(
+              (a) => a.set == set
+            )[0].auctions || []
+            for (var i = 0; i < this.mintSales.length; i++) {
+              const token =
+                this.mintSales[i].price.token == "HIVE"
+                  ? "HIVE"
+                  : this.mintSales[i].price.token == "HBD"
+                  ? "HBD"
+                  : "TOKEN";
+                this.mintSales[i].buyQty = 0
+              if (
+                this.mintSales[i].price.amount < this.focusSetCalc.smf[token] ||
+                !this.focusSetCalc.smf[token]
+              ) {
+                this.focusSetCalc.smf[token] = this.mintSales[i].price.amount;
+              }
+              this.focusSetCalc.forSaleMint += this.mintSales[i].qty;
+            }
+            for (var i = 0; i < this.mintAuctions.length; i++) {
+              const token =
+                this.mintAuctions[i].price.token == "HIVE"
+                  ? "HIVE"
+                  : this.mintAuctions[i].price.token == "HBD"
+                  ? "HBD"
+                  : "TOKEN";
+                this.mintAuctions[i].buyQty = 0
+              if (
+                this.mintAuctions[i].price.amount <
+                  this.focusSetCalc.amf[token] ||
+                !this.focusSetCalc.amf[token]
+              ) {
+                this.focusSetCalc.amf[token] =
+                  this.mintAuctions[i].price.amount;
+              }
+              this.focusSetCalc.forAuctionMint += this.mintAuctions[i].qty;
+            }
+          });
       }
     },
     getUserNFTs(){
