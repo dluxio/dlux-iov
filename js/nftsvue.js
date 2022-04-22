@@ -362,6 +362,7 @@ var app = new Vue({
         hidden: true,
         item: {
           setname: "",
+          set: {},
           uid: "",
           owner: "",
         },

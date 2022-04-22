@@ -72,7 +72,8 @@
                     <h1 class="card-title text-center">{{focusSet.name_long ? focusSet.name_long : ''}}</h1>
                   </div>
                   <div class="row mb-3">
-                    <p class="m-0 text-center small">Created by <a :href="makeLink('/@',focusSet.author)" class="no-decoration">@{{focusSet.author}}</a></p>
+                    <p class="m-0 text-center small">Created by <a :href="makeLink('/@',focusSet.author)"
+                        class="no-decoration">@{{focusSet.author}}</a></p>
                   </div>
                   <div class="row mb-3">
                     <p class="text-white-50 m-0">{{focusSet.computed.set ? focusSet.computed.set.Description
@@ -81,23 +82,26 @@
                   <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="col-6">
                       <span class="small border border-secondary rounded text-white px-2 py-1">ROYALTY:
-                      {{focusSet.royalty/100}}%</span>
+                        {{focusSet.royalty/100}}%</span>
                     </div>
                     <div class="col-6">
                       <span class="small border border-secondary rounded text-white px-2 py-1">BOND:
-                      {{focusSet.bond ? precision(focusSet.bond.amount,
-                      focusSet.bond.precision) : 0 }} {{focusSet.bond ? focusSet.bond.token :
-                      ''}}</span>
+                        {{focusSet.bond ? precision(focusSet.bond.amount,
+                        focusSet.bond.precision) : 0 }} {{focusSet.bond ? focusSet.bond.token :
+                        ''}}</span>
                     </div>
                   </div>
                   <div class="row mb-3">
                     <div class="d-flex">
-                      <div class="small">Permlink: <a :href="makeLink('/blog/@',focusSet.link)">{{focusSet.permlink}}</a></div>
+                      <div class="small">Permlink: <a
+                          :href="makeLink('/blog/@',focusSet.link)">{{focusSet.permlink}}</a></div>
                       <div class="dropdown show d-flex align-items-center p-0 m-0">
-                        <a class="text-white" href="#" role="button" data-bs-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false">
-                        <h5 class="m-0"><i class="fas fa-info-circle ms-2"></i></h5></a>
-                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
+                        <a class="text-white" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                          aria-expanded="false">
+                          <h5 class="m-0"><i class="fas fa-info-circle ms-2"></i></h5>
+                        </a>
+                        <div
+                          class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
                           <h6 class="dropdown-header text-center">{{focusSet.name}} NFT STATS</h6>
                           <div class="dropdown-divider bg-light"></div>
                           <p class="mb-0">Type: {{focusSet.type}}</p>
@@ -151,16 +155,17 @@
                     </div>
                   </div>
                   <div>
-                    <div class="text-center mb-2">Minting Progress: {{formatNumber(focusSet.minted,0,'.',',')}} of {{formatNumber(focusSet.max,0,'.',',')}} opened</div>
+                    <div class="text-center mb-2">Minting Progress: {{formatNumber(focusSet.minted,0,'.',',')}} of
+                      {{formatNumber(focusSet.max,0,'.',',')}} opened</div>
                     <div class="progress mb-3">
                       <div class="progress-bar" role="progressbar"
-                      :style="{'width': ((focusSet.minted/focusSet.max)*100) + '%'}" aria-valuenow="25"
-                      aria-valuemin="0" aria-valuemax="100">
-                      {{formatNumber(((focusSet.minted/focusSet.max)*100),2,'.',',')}}%
-                      minted</div>
+                        :style="{'width': ((focusSet.minted/focusSet.max)*100) + '%'}" aria-valuenow="25"
+                        aria-valuemin="0" aria-valuemax="100">
+                        {{formatNumber(((focusSet.minted/focusSet.max)*100),2,'.',',')}}%
+                        minted</div>
                     </div>
                   </div>
-                  
+
                 </div>
                 <!--mint market col-->
                 <div class="col-lg-5 mt-5 mt-lg-0">
@@ -169,7 +174,8 @@
                       <div class="pr-2"><small>MINT MARKET: </small></div>
                       <div class="px-2">
                         <h2 class="m-0">
-                          <div>{{formatNumber((focusSetCalc.forAuctionMint + focusSetCalc.forSaleMint),0,'.',',')}}</div>
+                          <div>{{formatNumber((focusSetCalc.forAuctionMint + focusSetCalc.forSaleMint),0,'.',',')}}
+                          </div>
                         </h2>
                       </div>
                     </div>
@@ -212,31 +218,33 @@
                         <tbody>
 
                           <tr scope="row" v-for="ad in mintSales">
-                            
-                              <td style="vertical-align: middle">
-                                {{formatNumber(ad.qty,0,'.',',')}}</td>
-                              <td style="vertical-align: middle">
-                                {{naiString(ad.pricenai)}}</td>
-                              <td><span v-show="true" class="text-center">
+
+                            <td style="vertical-align: middle">
+                              {{formatNumber(ad.qty,0,'.',',')}}</td>
+                            <td style="vertical-align: middle">
+                              {{naiString(ad.pricenai)}}</td>
+                            <td><span v-show="true" class="text-center">
                                 <form class="needs-validation" novalidate>
                                   <div class="input-group">
-                                  <input value="1" required type="number" min="1" step="1" max="ad.qty"
-                                    class="form-control bg-darkg border-dark text-info"
-                                    style="max-width: 100px" v-model="ad.buyQty">
+                                    <input value="1" required type="number" min="1" step="1" max="ad.qty"
+                                      class="form-control bg-darkg border-dark text-info" style="max-width: 100px"
+                                      v-model="ad.buyQty">
                                     <div class="invalid-feedback">Wrong</div>
                                   </div>
-                                  <button type="submit" class="btn btn-info d-none" v-show="ad.by != account" >Buy</button>
-                                  </form>
-                                </span>
-                                </span></td>
-                              <td>
-                                <div>
-                                  <button type="submit" class="btn btn-info" v-show="ad.by != account" onclick="submit()">Buy</button>
-                                  <!-- <button class="btn btn-primary" v-show="ad.by != account">Buy</button> -->
-                                  <button class="btn btn-warning" v-show="ad.by == account">Cancel</button>
-                                </div>
-                              </td>
-                            
+                                  <button type="submit" class="btn btn-info d-none"
+                                    v-show="ad.by != account">Buy</button>
+                                </form>
+                              </span>
+                              </span></td>
+                            <td>
+                              <div>
+                                <button type="submit" class="btn btn-info" v-show="ad.by != account"
+                                  onclick="submit()">Buy</button>
+                                <!-- <button class="btn btn-primary" v-show="ad.by != account">Buy</button> -->
+                                <button class="btn btn-warning" v-show="ad.by == account">Cancel</button>
+                              </div>
+                            </td>
+
                           </tr>
                         </tbody>
                       </table>
@@ -836,7 +844,8 @@
 
             <div class="col mb-4" v-for="item in selectedNFTs">
               <div class="card text-white bg-dark">
-                <div class="card-header border-0 d-flex align-items-center" :style="{'background': getSetDetailsColors(focusSet.computed ? focusSet.computed : '')}">
+                <div class="card-header border-0 d-flex align-items-center"
+                  :style="{'background': getSetDetailsColors(focusSet.computed ? focusSet.computed : '')}">
                   <div class="rounded-pill d-flex align-items-center p-2" style="background: black">
                     <h2 class="m-0 px-2">{{item.uid}}</h2>
                   </div>
@@ -872,247 +881,253 @@
             </div>
           </div>
         </div>
-      </div>
-  </div>
-  </div>
-  </div>
-  <!--new item modal-->
-  <div class="modal fade " id="itemModal" v-show="!itemModal.hidden" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
-      <div class="modal-content bg-dark text-white">
-        <div class="card text-white bg-dark ">
-          <div class="card-header border-0 d-flex align-items-center justify-content-between" :style="{'background': getSetDetailsColors(focusSet.computed ? focusSet.computed : '')}">
-            <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
-              <h2 class="m-0 px-2">{{itemModal.item.uid}}</h2>
-            </div>
-            <h3 class="card-title lead border border-dark rounded p-2 mb-0"><a
-                :href="'/nfts/set/'+ itemModal.item.setname" style="color:black;">{{itemModal.item.setname}}
-                NFT</a></h3>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                aria-hidden="true">&times;</span></button>
-          </div>
-          <div class="card-body row d-flex ">
-            <!-- NFT detail col 1 -->
-            <div class="col-lg-6 px-0 px-sm-2">
-              <div class="col-12 px-0 px-sm-2">
-                <!-- NFT img -->
-                <div class="card-img-top" :alt="makeLink(itemModal.item.set, '-', ['itemModal.item.uid'])">
-                  <div v-html="itemModal.item.HTML"></div>
-                  {{itemModal.item.set ? itemModal.item.set.Description : ''}}
+      <!-- </div> -->
+      <!--new item modal-->
+      <div class="modal fade " id="itemModal" v-show="!itemModal.hidden" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
+          <div class="modal-content bg-dark text-white">
+            <div class="card text-white bg-dark ">
+              <div class="card-header border-0 d-flex align-items-center justify-content-between"
+                :style="{'background': getSetDetailsColors(focusSet.computed ? focusSet.computed : '')}">
+                <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
+                  <h2 class="m-0 px-2">{{itemModal.item.uid}}</h2>
                 </div>
+                <h3 class="card-title lead border border-dark rounded p-2 mb-0"><a
+                    :href="'/nfts/set/'+ itemModal.item.setname" style="color:black;">{{itemModal.item.setname}}
+                    NFT</a></h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                    aria-hidden="true">&times;</span></button>
               </div>
-              <div class="text-center my-3">
-                <button class="btn btn-lg btn-outline-primary" ><i
-                    class="far fa-user-circle mr-2"></i>Set as PFP</button>
-                <button class="btn btn-lg btn-secondary"><i
-                    class="far fa-user-circle mr-2"></i>Currently set as your PFP</button>
-              </div>
-            </div>
-            <!-- NFT detail col 2 -->
-            <div class="col-lg-6 px-0 px-sm-2">
-              <!-- NFT Accordion -->
-              <div id="accordion" class="col-12 px-0 px-sm-2">
-                <!-- NFT DESCRIPTION -->
-                <div class="card bg-dark text-white">
-                  <div class="card-header" id="headingDescription">
-                    <h5 class="mb-0">
-                      <button class="btn btn-link" data-bs-toggle="collapse" data-bs-target="#collapseDescription"
-                        aria-expanded="true" aria-controls="collapseDescription"><i
-                          class="fas fa-list mr-3"></i>DESCRIPTION</button>
-                    </h5>
-                  </div>
-                  <div id="collapseDescription" class="collapse" aria-labelledby="headingDescription"
-                    data-parent="#accordion">
-                    <div class="card-body">
-                      <p >{{itemModal.item.set.Description}}</p>
-                      </p>
+              <div class="card-body row d-flex ">
+                <!-- NFT detail col 1 -->
+                <div class="col-lg-6 px-0 px-sm-2">
+                  <div class="col-12 px-0 px-sm-2">
+                    <!-- NFT img -->
+                    <div class="card-img-top" :alt="makeLink(itemModal.item.setname, '-', ['itemModal.item.uid'])">
+                      <div v-html="itemModal.item.HTML"></div>
+                      {{itemModal.item.set ? itemModal.item.set.Description : ''}}
                     </div>
                   </div>
-                </div>
-                <!-- NFT ATTRIBUTES -->
-                <div class="card bg-dark text-white">
-                  <div class="card-header" id="headingAttributes">
-                    <h5 class="mb-0">
-                      <button class="btn btn-link collapsed text-success" data-bs-toggle="collapse"
-                        data-bs-target="#collapseAttributes" aria-expanded="false" aria-controls="collapseAttributes"><i
-                          class="fas fa-star mr-3"></i>ATTRIBUTES </button>
-                    </h5>
-                  </div>
-                  <div id="collapseAttributes" class="collapse show" aria-labelledby="headingAttributes"
-                    data-parent="#accordion">
-                    <div class="card-body">
-                      <div 
-                        class="attribute-container d-flex flex-wrap">details?</div>
-                    </div>
+                  <div class="text-center my-3">
+                    <button class="btn btn-lg btn-outline-primary"><i class="far fa-user-circle mr-2"></i>Set as
+                      PFP</button>
+                    <button class="btn btn-lg btn-secondary"><i class="far fa-user-circle mr-2"></i>Currently set as
+                      your
+                      PFP</button>
                   </div>
                 </div>
-                <!-- TRANSFER NFT -->
-                <div class="card bg-dark text-white" style="width: 100">
-                  <div class="card-header" id="headingMarket">
-                    <h5 class="mb-0">
-                      <button class="btn btn-link collapsed text-info" data-bs-toggle="collapse"
-                        data-bs-target="#collapseMarket" aria-expanded="false" aria-controls="collapseMarket"><i
-                          class="fas fa-exchange-alt mr-3"></i>TRANSFER</button>
-                    </h5>
-                  </div>
-                  <div id="collapseMarket" class="collapse" aria-labelledby="headingMarket" data-parent="#accordion">
-                    <div class="card-body p-0 bg-dark text-white">
-                      <div class="border-warning border rounded p-3 my-3" >
-                        <p class="text-warning m-0">Transferring this NFT will remove it from your PFP</p>
+                <!-- NFT detail col 2 -->
+                <div class="col-lg-6 px-0 px-sm-2">
+                  <!-- NFT Accordion -->
+                  <div id="accordion" class="col-12 px-0 px-sm-2">
+                    <!-- NFT DESCRIPTION -->
+                    <div class="card bg-dark text-white">
+                      <div class="card-header" id="headingDescription">
+                        <h5 class="mb-0">
+                          <button class="btn btn-link" data-bs-toggle="collapse" data-bs-target="#collapseDescription"
+                            aria-expanded="true" aria-controls="collapseDescription"><i
+                              class="fas fa-list mr-3"></i>DESCRIPTION</button>
+                        </h5>
                       </div>
-                      <div class="border border-info bg-darker mx-auto px-5 py-3 rounded col-12">
-                        <div class="container-fluid">
-                          <ul class="nav nav-pills bg-darker justify-content-center" role="tablist">
-                            <li class="nav-item"> <a class="nav-link active" id="giveNFTlink" role="tab"
-                                data-bs-toggle="tab" aria-controls="giveNFT" aria-expanded="true"
-                                href="#giveNFTtab">Give</a></li>
-                            <li class="nav-item"> <a class="nav-link" id="tradeNFTlink" role="tab" data-bs-toggle="tab"
-                                aria-controls="tradeNFT" aria-expanded="true" href="#tradeNFTtab">Trade</a></li>
-                            <li class="nav-item"> <a class="nav-link" id="sellNFTlink" role="tab" data-bs-toggle="tab"
-                                aria-controls="sellNFT" aria-expanded="true" href="#sellNFTtab">Sell</a></li>
-                            <li class="nav-item"> <a class="nav-link" id="auctionNFTlink" role="tab"
-                                data-bs-toggle="tab" aria-controls="auctionNFT" aria-expanded="true"
-                                href="#auctionNFTtab">Auction</a></li>
-                          </ul>
-                          <div class="tab-content">
-                            <div role="tabpanel" class="tab-pane fade show active" id="giveNFTtab"
-                              aria-labelledby="giveNFT">
-                              <form class="needs-validation mt-4" validate >
-                                <div class="form-row my-2">
-                                  <div class="col-12">
-                                    <label for="giveNFTusername">Username</label>
-                                    <div class="input-group">
-                                      <div class="input-group-prepend"> <span
-                                          class="input-group-text bg-dark border-dark text-white-50"
-                                          id="giveNFTuserprep">@</span></div>
-                                      <input type="text"
-                                        class="form-control bg-dark border-dark text-info r-radius-hotfix"
-                                        id="giveNFTusername" aria-describedby="giveNFTuserprep" required>
-                                      <div class="invalid-feedback"> Please enter the username you'd like to give to.
+                      <div id="collapseDescription" class="collapse" aria-labelledby="headingDescription"
+                        data-parent="#accordion">
+                        <div class="card-body">
+                          <p>{{itemModal.item.set.Description}}</p>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- NFT ATTRIBUTES -->
+                    <div class="card bg-dark text-white">
+                      <div class="card-header" id="headingAttributes">
+                        <h5 class="mb-0">
+                          <button class="btn btn-link collapsed text-success" data-bs-toggle="collapse"
+                            data-bs-target="#collapseAttributes" aria-expanded="false"
+                            aria-controls="collapseAttributes"><i class="fas fa-star mr-3"></i>ATTRIBUTES </button>
+                        </h5>
+                      </div>
+                      <div id="collapseAttributes" class="collapse show" aria-labelledby="headingAttributes"
+                        data-parent="#accordion">
+                        <div class="card-body">
+                          <div class="attribute-container d-flex flex-wrap">details?</div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- TRANSFER NFT -->
+                    <div class="card bg-dark text-white" style="width: 100">
+                      <div class="card-header" id="headingMarket">
+                        <h5 class="mb-0">
+                          <button class="btn btn-link collapsed text-info" data-bs-toggle="collapse"
+                            data-bs-target="#collapseMarket" aria-expanded="false" aria-controls="collapseMarket"><i
+                              class="fas fa-exchange-alt mr-3"></i>TRANSFER</button>
+                        </h5>
+                      </div>
+                      <div id="collapseMarket" class="collapse" aria-labelledby="headingMarket"
+                        data-parent="#accordion">
+                        <div class="card-body p-0 bg-dark text-white">
+                          <div class="border-warning border rounded p-3 my-3">
+                            <p class="text-warning m-0">Transferring this NFT will remove it from your PFP</p>
+                          </div>
+                          <div class="border border-info bg-darker mx-auto px-5 py-3 rounded col-12">
+                            <div class="container-fluid">
+                              <ul class="nav nav-pills bg-darker justify-content-center" role="tablist">
+                                <li class="nav-item"> <a class="nav-link active" id="giveNFTlink" role="tab"
+                                    data-bs-toggle="tab" aria-controls="giveNFT" aria-expanded="true"
+                                    href="#giveNFTtab">Give</a></li>
+                                <li class="nav-item"> <a class="nav-link" id="tradeNFTlink" role="tab"
+                                    data-bs-toggle="tab" aria-controls="tradeNFT" aria-expanded="true"
+                                    href="#tradeNFTtab">Trade</a></li>
+                                <li class="nav-item"> <a class="nav-link" id="sellNFTlink" role="tab"
+                                    data-bs-toggle="tab" aria-controls="sellNFT" aria-expanded="true"
+                                    href="#sellNFTtab">Sell</a></li>
+                                <li class="nav-item"> <a class="nav-link" id="auctionNFTlink" role="tab"
+                                    data-bs-toggle="tab" aria-controls="auctionNFT" aria-expanded="true"
+                                    href="#auctionNFTtab">Auction</a></li>
+                              </ul>
+                              <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane fade show active" id="giveNFTtab"
+                                  aria-labelledby="giveNFT">
+                                  <form class="needs-validation mt-4" validate>
+                                    <div class="form-row my-2">
+                                      <div class="col-12">
+                                        <label for="giveNFTusername">Username</label>
+                                        <div class="input-group">
+                                          <div class="input-group-prepend"> <span
+                                              class="input-group-text bg-dark border-dark text-white-50"
+                                              id="giveNFTuserprep">@</span></div>
+                                          <input type="text"
+                                            class="form-control bg-dark border-dark text-info r-radius-hotfix"
+                                            id="giveNFTusername" aria-describedby="giveNFTuserprep" required>
+                                          <div class="invalid-feedback"> Please enter the username you'd like to give
+                                            to.
+                                          </div>
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
+                                    <div class="text-center">
+                                      <button id="giveNFTbutton" class="btn btn-info my-2" type="submit">Give</button>
+                                    </div>
+                                  </form>
                                 </div>
-                                <div class="text-center">
-                                  <button id="giveNFTbutton" class="btn btn-info my-2" type="submit">Give</button>
-                                </div>
-                              </form>
-                            </div>
-                            <div role="tabpanel" class="tab-pane fade show" id="tradeNFTtab" aria-labelledby="tradeNFT">
-                              <form class="needs-validation mt-4" validate >
-                                <div class="form-row my-2">
-                                  <div class="col-12">
-                                    <label for="tradeNFTusername">Username</label>
-                                    <div class="input-group">
-                                      <div class="input-group-prepend"> <span
-                                          class="input-group-text bg-dark border-dark text-white-50"
-                                          id="tradeNFTuserprep">@</span></div>
-                                      <input type="text"
-                                        class="form-control bg-dark border-dark text-info r-radius-hotfix"
-                                        id="tradeNFTusername" aria-describedby="tradeNFTuserprep" required>
-                                      <div class="invalid-feedback"> Please enter the username you'd like to trade with.
+                                <div role="tabpanel" class="tab-pane fade show" id="tradeNFTtab"
+                                  aria-labelledby="tradeNFT">
+                                  <form class="needs-validation mt-4" validate>
+                                    <div class="form-row my-2">
+                                      <div class="col-12">
+                                        <label for="tradeNFTusername">Username</label>
+                                        <div class="input-group">
+                                          <div class="input-group-prepend"> <span
+                                              class="input-group-text bg-dark border-dark text-white-50"
+                                              id="tradeNFTuserprep">@</span></div>
+                                          <input type="text"
+                                            class="form-control bg-dark border-dark text-info r-radius-hotfix"
+                                            id="tradeNFTusername" aria-describedby="tradeNFTuserprep" required>
+                                          <div class="invalid-feedback"> Please enter the username you'd like to trade
+                                            with.
+                                          </div>
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
+                                    <div class="form-group form-row my-2">
+                                      <label for="tradeNFTamount">Amount</label>
+                                      <small class="ml-auto mb-2 align-self-center text-white-50">0% FEE</small> <small
+                                        class="ml-auto mb-2 align-self-center text-white-50">1% FEE</small>
+                                      <div class="input-group">
+                                        <input type="number" class="form-control bg-dark border-dark text-info"
+                                          id="tradeNFTamount" aria-describedby="tradeNFTamountappend"
+                                          placeholder="0.000" step="0.001" min="0.001" required>
+                                        <div class="input-group-append"> <span
+                                            class="input-group-text bg-dark border-dark r-radius-hotfix m-0"
+                                            id="tradeNFTamountappend">
+                                            <select class="form-select border-0 text-white-50 bg-none w-100 h-100"
+                                              id="tradeNFTpriceType" aria-label="Trade price type select">
+                                              <option value="DLUX" selected>DLUX</option>
+                                              <option value="HIVE">HIVE</option>
+                                              <option value="HBD">HBD</option>
+                                            </select>
+                                          </span></div>
+                                        <div class="invalid-feedback"> Please enter the amount of
+                                          VALUE you'd like to receive. </div>
+                                      </div>
+                                    </div>
+                                    <div class="text-center">
+                                      <button id="tradeNFTbutton" class="btn btn-info my-2" type="submit">Propose
+                                        Trade</button>
+                                    </div>
+                                  </form>
                                 </div>
-                                <div class="form-group form-row my-2">
-                                  <label for="tradeNFTamount">Amount</label>
-                                  <small class="ml-auto mb-2 align-self-center text-white-50" >0% FEE</small> <small
-                                    class="ml-auto mb-2 align-self-center text-white-50" >1% FEE</small>
-                                  <div class="input-group">
-                                    <input type="number" class="form-control bg-dark border-dark text-info"
-                                      id="tradeNFTamount" aria-describedby="tradeNFTamountappend" placeholder="0.000"
-                                      step="0.001" min="0.001" required>
-                                    <div class="input-group-append"> <span
-                                        class="input-group-text bg-dark border-dark r-radius-hotfix m-0"
-                                        id="tradeNFTamountappend">
-                                        <select class="form-select border-0 text-white-50 bg-none w-100 h-100"
-                                          id="tradeNFTpriceType" aria-label="Trade price type select">
-                                          <option value="DLUX" selected>DLUX</option>
-                                          <option value="HIVE">HIVE</option>
-                                          <option value="HBD">HBD</option>
-                                        </select>
-                                      </span></div>
-                                    <div class="invalid-feedback"> Please enter the amount of
-                                      {{tradeNFTpriceType.value}} you'd like to receive. </div>
-                                  </div>
+                                <div role="tabpanel" class="tab-pane fade show " id="sellNFTtab"
+                                  aria-labelledby="sellNFT">
+                                  <form class="needs-validation mt-4" validate>
+                                    <div class="form-group form-row my-2">
+                                      <label for="sellNFTprice">Sale Price</label>
+                                      <small class="ml-auto mb-2 align-self-center text-white-50">0% FEE</small> <small
+                                        class="ml-auto mb-2 align-self-center text-white-50">1% FEE</small>
+                                      <div class="input-group">
+                                        <input type="number" class="form-control bg-dark border-dark text-info"
+                                          id="sellNFTprice" aria-describedby="sellNFTpriceappend" placeholder="0.000"
+                                          step="0.001" min="0.001" required>
+                                        <div class="input-group-append"> <span
+                                            class="input-group-text bg-dark border-dark r-radius-hotfix m-0"
+                                            id="sellNFTpriceappend">
+                                            <select class="form-select border-0 text-white-50 bg-none w-100 h-100"
+                                              id="sellNFTpriceType" aria-label="Sell price type select">
+                                              <option value="DLUX" selected>DLUX</option>
+                                              <option value="HIVE">HIVE</option>
+                                              <option value="HBD">HBD</option>
+                                            </select>
+                                          </span></div>
+                                        <div class="invalid-feedback"> Please enter the amount of VALUE
+                                          you'd like to receive. </div>
+                                      </div>
+                                    </div>
+                                    <div class="form-row my-2">
+                                      <p class="text-white-50 small">Ownership will be transferred to the DAO listing
+                                        service and sold publicly. Cancel anytime to return immediately.</p>
+                                    </div>
+                                    <div class="text-center">
+                                      <button id="sellNFTbutton" class="btn btn-info my-2" type="submit">List
+                                        Item</button>
+                                    </div>
+                                  </form>
                                 </div>
-                                <div class="text-center">
-                                  <button id="tradeNFTbutton" class="btn btn-info my-2" type="submit">Propose
-                                    Trade</button>
-                                </div>
-                              </form>
-                            </div>
-                            <div role="tabpanel" class="tab-pane fade show " id="sellNFTtab" aria-labelledby="sellNFT">
-                              <form class="needs-validation mt-4" validate >
-                                <div class="form-group form-row my-2">
-                                  <label for="sellNFTprice">Sale Price</label>
-                                  <small class="ml-auto mb-2 align-self-center text-white-50" >0% FEE</small> <small
-                                    class="ml-auto mb-2 align-self-center text-white-50" >1% FEE</small>
-                                  <div class="input-group">
-                                    <input type="number" class="form-control bg-dark border-dark text-info"
-                                      id="sellNFTprice" aria-describedby="sellNFTpriceappend" placeholder="0.000"
-                                      step="0.001" min="0.001" required>
-                                    <div class="input-group-append"> <span
-                                        class="input-group-text bg-dark border-dark r-radius-hotfix m-0"
-                                        id="sellNFTpriceappend">
-                                        <select class="form-select border-0 text-white-50 bg-none w-100 h-100"
-                                          id="sellNFTpriceType" aria-label="Sell price type select">
-                                          <option value="DLUX" selected>DLUX</option>
-                                          <option value="HIVE">HIVE</option>
-                                          <option value="HBD">HBD</option>
-                                        </select>
-                                      </span></div>
-                                    <div class="invalid-feedback"> Please enter the amount of VALUE
-                                      you'd like to receive. </div>
-                                  </div>
-                                </div>
-                                <div class="form-row my-2">
-                                  <p class="text-white-50 small">Ownership will be transferred to the DAO listing
-                                    service and sold publicly. Cancel anytime to return immediately.</p>
-                                </div>
-                                <div class="text-center">
-                                  <button id="sellNFTbutton" class="btn btn-info my-2" type="submit">List Item</button>
-                                </div>
-                              </form>
-                            </div>
-                            <div role="tabpanel" class="tab-pane fade show " id="auctionNFTtab"
-                              aria-labelledby="auctionNFT">
-                              <form class="needs-validation mt-4" validate >
-                                <div class="form-group form-row my-2">
-                                  <label for="auctionNFTprice">Starting Bid</label>
-                                  <small class="ml-auto mb-2 align-self-center text-white-50" >0% FEE</small> <small
-                                    class="ml-auto mb-2 align-self-center text-white-50" >1% FEE</small>
-                                  <div class="input-group">
-                                    <input type="number" class="form-control bg-dark border-dark text-info"
-                                      id="auctionNFTprice" aria-describedby="auctionNFTpriceappend" placeholder="0.000"
-                                      step="0.001" min="0.001" required>
-                                    <div class="input-group-append"> <span
-                                        class="input-group-text bg-dark border-dark r-radius-hotfix m-0"
-                                        id="auctionNFTpriceappend">
-                                        <select class="form-select border-0 text-white-50 bg-none w-100 h-100"
-                                          id="auctionNFTpriceType" aria-label="Auction price type select" >
-                                          <option value="DLUX" selected>DLUX</option>
-                                          <option value="HIVE">HIVE</option>
-                                          <option value="HBD">HBD</option>
-                                        </select>
-                                      </span></div>
-                                    <div class="invalid-feedback"> Please enter the amount of
-                                      VALUE you'd like to start the bidding. </div>
-                                  </div>
-                                </div>
-                                <div class="d-flex justify-content-around">
-                                  <div class="form-row my-2 d-flex align-items-center">
-                                    <label for="auctionNFTdays" class="m-0">Duration: </label>
-                                    <select class="mx-2 btn btn-lg btn-secondary" id="auctionNFTdays" required>
-                                      <option value="1">1 Day</option>
-                                      <option value="2">2 Days</option>
-                                      <option value="3">3 Days</option>
-                                      <option value="4">4 Days</option>
-                                      <option value="5">5 Days</option>
-                                      <option value="6">6 Days</option>
-                                      <option value="7" selected>7 Days</option>
-                                      <!-- <option value="8" dmx-hide="auctionNFTpriceType.value != 'DLUX'">8 Days</option>
+                                <div role="tabpanel" class="tab-pane fade show " id="auctionNFTtab"
+                                  aria-labelledby="auctionNFT">
+                                  <form class="needs-validation mt-4" validate>
+                                    <div class="form-group form-row my-2">
+                                      <label for="auctionNFTprice">Starting Bid</label>
+                                      <small class="ml-auto mb-2 align-self-center text-white-50">0% FEE</small> <small
+                                        class="ml-auto mb-2 align-self-center text-white-50">1% FEE</small>
+                                      <div class="input-group">
+                                        <input type="number" class="form-control bg-dark border-dark text-info"
+                                          id="auctionNFTprice" aria-describedby="auctionNFTpriceappend"
+                                          placeholder="0.000" step="0.001" min="0.001" required>
+                                        <div class="input-group-append"> <span
+                                            class="input-group-text bg-dark border-dark r-radius-hotfix m-0"
+                                            id="auctionNFTpriceappend">
+                                            <select class="form-select border-0 text-white-50 bg-none w-100 h-100"
+                                              id="auctionNFTpriceType" aria-label="Auction price type select">
+                                              <option value="DLUX" selected>DLUX</option>
+                                              <option value="HIVE">HIVE</option>
+                                              <option value="HBD">HBD</option>
+                                            </select>
+                                          </span></div>
+                                        <div class="invalid-feedback"> Please enter the amount of
+                                          VALUE you'd like to start the bidding. </div>
+                                      </div>
+                                    </div>
+                                    <div class="d-flex justify-content-around">
+                                      <div class="form-row my-2 d-flex align-items-center">
+                                        <label for="auctionNFTdays" class="m-0">Duration: </label>
+                                        <select class="mx-2 btn btn-lg btn-secondary" id="auctionNFTdays" required>
+                                          <option value="1">1 Day</option>
+                                          <option value="2">2 Days</option>
+                                          <option value="3">3 Days</option>
+                                          <option value="4">4 Days</option>
+                                          <option value="5">5 Days</option>
+                                          <option value="6">6 Days</option>
+                                          <option value="7" selected>7 Days</option>
+                                          <!-- <option value="8" dmx-hide="auctionNFTpriceType.value != 'DLUX'">8 Days</option>
                                       <option value="9" dmx-hide="auctionNFTpriceType.value != 'DLUX'">9 Days</option>
                                       <option value="10" dmx-hide="auctionNFTpriceType.value != 'DLUX'">10 Days</option>
                                       <option value="11" dmx-hide="auctionNFTpriceType.value != 'DLUX'">11 Days</option>
@@ -1135,163 +1150,164 @@
                                       <option value="28" dmx-hide="auctionNFTpriceType.value != 'DLUX'">28 Days</option>
                                       <option value="29" dmx-hide="auctionNFTpriceType.value != 'DLUX'">29 Days</option>
                                       <option value="30" dmx-hide="auctionNFTpriceType.value != 'DLUX'">30 Days</option> -->
-                                    </select>
+                                        </select>
+                                      </div>
+                                    </div>
+                                    <div class="form-row my-2">
+                                      <p class="text-white-50 small">Ownership will be transferred to the DAO listing
+                                        service and auctioned publicly. Once submitted this cannot be cancelled. If
+                                        there
+                                        are no bids at the end of the auction period, it will be returned to you
+                                        immediately.</p>
+                                    </div>
+                                    <div class="text-center">
+                                      <button class="btn btn-info my-2" type="submit">List Item</button>
+                                    </div>
+                                  </form>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- MELT NFT -->
+                    <div class="card bg-dark text-white">
+                      <div class="card-header" id="headingRedeem">
+                        <h5 class="mb-0">
+                          <button class="btn btn-link collapsed text-warning" data-bs-toggle="collapse"
+                            data-bs-target="#collapseRedeem" aria-expanded="false" aria-controls="collapseRedeem"><i
+                              class="fas fa-burn mr-3"></i>MELT</button>
+                        </h5>
+                      </div>
+                      <div id="collapseRedeem" class="collapse" aria-labelledby="headingRedeem"
+                        data-parent="#accordion">
+                        <div class="card-body p-0">
+                          <div class="d-flex align-self-end">
+                            <div class="border border-warning rounded bg-darker col-12 p-4">
+                              <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex mr-1">
+                                  <h4>Melt Value:</h4>
+                                </div>
+                                <div class="d-flex no-wrap ml-1"> <u>
+                                    <h1>
+                                      BOND DETAIL</h1>
+                                  </u></div>
+                              </div>
+                              <div class="pt-2">
+                                <p class="text-uppercase text-muted">This NFT can be traded, sold, or auctioned until
+                                  melted. Once melted it will disappear forever.</p>
+                                <div class="d-flex justify-content-around">
+                                  <div class="d-flex align-items-center my-4">
+                                    <div class="text-center p-4">
+                                      <h1 class="text-warning" style="font-size: 4em"><i
+                                          class="fas fa-exclamation-triangle"></i></h1>
+                                    </div>
+                                    <ul>
+                                      <li>This action cannot be undone</li>
+                                      <li>Your NFT will be deleted</li>
+                                      <li>You will receive the melt value</li>
+                                    </ul>
                                   </div>
                                 </div>
-                                <div class="form-row my-2">
-                                  <p class="text-white-50 small">Ownership will be transferred to the DAO listing
-                                    service and auctioned publicly. Once submitted this cannot be cancelled. If there
-                                    are no bids at the end of the auction period, it will be returned to you
-                                    immediately.</p>
+                                <div class="text-center pb-4">
+                                  <button type="button" class="btn btn-warning" data-bs-toggle="collapse"
+                                    href="#melt-confirmation">Melt </button>
                                 </div>
-                                <div class="text-center">
-                                  <button class="btn btn-info my-2" type="submit">List Item</button>
+                                <div class="collapse bg-danger rounded" id="melt-confirmation">
+                                  <div class="text-center pt-4">
+                                    <h2><b>/////// IRREVERSIBLE \\\\\\\</b></h2>
+                                    <p>Are you sure you want to proceed?</p>
+                                  </div>
+                                  <div class="d-flex justify-content-around p-3">
+                                    <button class="btn btn-secondary" data-bs-toggle="collapse"
+                                      href="#melt-confirmation">CANCEL <i class="fas fa-running"></i></button>
+                                    <button class="btn btn-danger border-white">DESTROY
+                                      <i class="fas fa-bomb"></i> <span class="spinner-border spinner-border-sm d-none"
+                                        role="status" aria-hidden="true"></span></button>
+                                  </div>
                                 </div>
-                              </form>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!-- MELT NFT -->
-                <div class="card bg-dark text-white">
-                  <div class="card-header" id="headingRedeem">
-                    <h5 class="mb-0">
-                      <button class="btn btn-link collapsed text-warning" data-bs-toggle="collapse"
-                        data-bs-target="#collapseRedeem" aria-expanded="false" aria-controls="collapseRedeem"><i
-                          class="fas fa-burn mr-3"></i>MELT</button>
-                    </h5>
-                  </div>
-                  <div id="collapseRedeem" class="collapse" aria-labelledby="headingRedeem" data-parent="#accordion">
-                    <div class="card-body p-0">
-                      <div class="d-flex align-self-end">
-                        <div class="border border-warning rounded bg-darker col-12 p-4">
-                          <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex mr-1">
-                              <h4>Melt Value:</h4>
-                            </div>
-                            <div class="d-flex no-wrap ml-1"> <u>
-                                <h1 >
-                                  BOND DETAIL</h1>
-                              </u></div>
-                          </div>
-                          <div class="pt-2">
-                            <p class="text-uppercase text-muted">This NFT can be traded, sold, or auctioned until
-                              melted. Once melted it will disappear forever.</p>
-                            <div class="d-flex justify-content-around">
-                              <div class="d-flex align-items-center my-4">
-                                <div class="text-center p-4">
-                                  <h1 class="text-warning" style="font-size: 4em"><i
-                                      class="fas fa-exclamation-triangle"></i></h1>
-                                </div>
-                                <ul>
-                                  <li>This action cannot be undone</li>
-                                  <li>Your NFT will be deleted</li>
-                                  <li>You will receive the melt value</li>
-                                </ul>
-                              </div>
-                            </div>
-                            <div class="text-center pb-4">
-                              <button type="button" class="btn btn-warning" data-bs-toggle="collapse"
-                                href="#melt-confirmation">Melt </button>
-                            </div>
-                            <div class="collapse bg-danger rounded" id="melt-confirmation">
-                              <div class="text-center pt-4">
-                                <h2><b>/////// IRREVERSIBLE \\\\\\\</b></h2>
-                                <p>Are you sure you want to proceed?</p>
-                              </div>
-                              <div class="d-flex justify-content-around p-3">
-                                <button class="btn btn-secondary" data-bs-toggle="collapse"
-                                  href="#melt-confirmation">CANCEL <i class="fas fa-running"></i></button>
-                                <button class="btn btn-danger border-white" >DESTROY
-                                  <i class="fas fa-bomb"></i> <span class="spinner-border spinner-border-sm d-none"
-                                    role="status" aria-hidden="true"></span></button>
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
+                    <!-- / NFT Accordion -->
                   </div>
                 </div>
-                <!-- / NFT Accordion -->
               </div>
             </div>
+            <!-- NFT detail footer -->
+            <div class="card-footer d-flex align-items-center">
+              <h2><a class="text-muted p-3" href="#"><i class="fas fa-caret-square-left"></i></a></h2>
+              <small class="ml-auto text-muted"><i>Item I++ of
+                  INVENTORY COUNT</i></small>
+              <h2 class="ml-auto"><a class="text-muted p-3" href="#"><i class="fas fa-caret-square-right"></i></a></h2>
+            </div>
           </div>
         </div>
-        <!-- NFT detail footer -->
-        <div class="card-footer d-flex align-items-center">
-          <h2><a class="text-muted p-3" href="#" ><i
-                class="fas fa-caret-square-left"></i></a></h2>
-          <small class="ml-auto text-muted"><i>Item {{inventory_iterator.index + 1}} of
-              {{inventorydata.data.result.count()}}</i></small>
-          <h2 class="ml-auto"><a class="text-muted p-3" href="#" ><i
-                class="fas fa-caret-square-right"></i></a></h2>
-        </div>
       </div>
-    </div>
-  </div>
-  <!--Item Modal-->
-  <div class="modal fade" id="itemModalOld" tabindex="-1" v-show="!itemModal.hidden">
-    <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
-      <div class="modal-content bg-dark text-white">
+      <!--Item Modal-->
+      <div class="modal fade" id="itemModalOld" tabindex="-1" v-show="!itemModal.hidden">
+        <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
+          <div class="modal-content bg-dark text-white">
 
-        <div class="modal-header border-0"
-          :style="{'background': getSetDetailsColors(focusSet.computed ? focusSet.computed : '')}">
-          <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
-            <h2 class="m-0 px-2">{{itemModal.item.uid}}</h2>
+            <div class="modal-header border-0"
+              :style="{'background': getSetDetailsColors(focusSet.computed ? focusSet.computed : '')}">
+              <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
+                <h2 class="m-0 px-2">{{itemModal.item.uid}}</h2>
+              </div>
+              <div class="ms-auto me-auto">
+                <h3 class="modal-title lead border border-dark rounded mb-0 p-2"><a
+                    :href="makeLink('/nfts/set/',itemModal.item.setname)"
+                    style="color: black">{{itemModal.item.setname}}
+                    NFT</a></h3>
+              </div>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body row d-flex ">
+              <div class="order-md-last col-lg-6 px-0 px-sm-2">
+                <div class="d-flex align-items-center justify-content-between">
+                  <h2><a class="text-muted p-3" href="#" @click="modalPrev('itemModal')"><i
+                        class="fas fa-caret-square-left"></i></a></h2>
+                  <h3 style="color:aqua;">{{itemModal.item.uid}}</h3>
+                  <h2><a class="text-muted p-3" href="#" @click="modalNext('itemModal')"><i
+                        class="fas fa-caret-square-right"></i></a></h2>
+                </div>
+                <div class="card-img-top" :alt="makeLink(itemModal.item.set, '-', ['itemModal.item.uid'])">
+                  <div v-html="itemModal.item.HTML"></div>
+                  {{itemModal.item.set ? itemModal.item.set.Description : ''}}
+                </div>
+                <div class="text-center mt-2 text-white-50">
+                  <p>Owner: <a :href="makeLink('/',itemModal.item.owner,['#inventory/'])"
+                      :title="makeLink('/',itemModal.item.owner,['#inventory/'])">{{itemModal.item.owner}}</a>
+                  </p>
+                </div>
+              </div>
+              <div class="col-lg-6 px-0 px-sm-2">
+                <div class="d-flex flex-column">
+                  <div v-for="atr in itemModal.item.attributes">{{printProps(atr)}}</div>
+                  <div>Set: {{focusSet.set}}</div>
+                  <div>Link: {{focusSet.link}}</div>
+                  <div>Fee: {{naiString(focusSet.fee)}}</div>
+                  <div>Bond: {{naiString(focusSet.bond)}} </div>
+                  <div>Link: {{focusSet.permlink}}</div>
+                  <div>Author: {{focusSet.author}}</div>
+                  <div>Script: {{focusSet.script}}</div>
+                  <div>Encoding: {{focusSet.encoding}}</div>
+                  <div>Type: {{focusSet.type}}</div>
+                  <div>Royalty: {{focusSet.royalty}}</div>
+                  <div>Name: {{focusSet.name}}</div>
+                  <div>Minted: {{focusSet.minted}}</div>
+                  <div>Max: {{focusSet.max}}</div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer d-flex align-items-center"></div>
           </div>
-          <div class="ms-auto me-auto">
-            <h3 class="modal-title lead border border-dark rounded mb-0 p-2"><a
-                :href="makeLink('/nfts/set/',itemModal.item.setname)" style="color: black">{{itemModal.item.setname}}
-                NFT</a></h3>
-          </div>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body row d-flex ">
-          <div class="order-md-last col-lg-6 px-0 px-sm-2">
-            <div class="d-flex align-items-center justify-content-between">
-              <h2><a class="text-muted p-3" href="#" @click="modalPrev('itemModal')"><i
-                    class="fas fa-caret-square-left"></i></a></h2>
-              <h3 style="color:aqua;">{{itemModal.item.uid}}</h3>
-              <h2><a class="text-muted p-3" href="#" @click="modalNext('itemModal')"><i
-                    class="fas fa-caret-square-right"></i></a></h2>
-            </div>
-            <div class="card-img-top" :alt="makeLink(itemModal.item.set, '-', ['itemModal.item.uid'])">
-              <div v-html="itemModal.item.HTML"></div>
-              {{itemModal.item.set ? itemModal.item.set.Description : ''}}
-            </div>
-            <div class="text-center mt-2 text-white-50">
-              <p>Owner: <a :href="makeLink('/',itemModal.item.owner,['#inventory/'])"
-                  :title="makeLink('/',itemModal.item.owner,['#inventory/'])">{{itemModal.item.owner}}</a>
-              </p>
-            </div>
-          </div>
-          <div class="col-lg-6 px-0 px-sm-2">
-            <div class="d-flex flex-column">
-              <div v-for="atr in itemModal.item.attributes">{{printProps(atr)}}</div>
-              <div>Set: {{focusSet.set}}</div>
-              <div>Link: {{focusSet.link}}</div>
-              <div>Fee: {{naiString(focusSet.fee)}}</div>
-              <div>Bond: {{naiString(focusSet.bond)}} </div>
-              <div>Link: {{focusSet.permlink}}</div>
-              <div>Author: {{focusSet.author}}</div>
-              <div>Script: {{focusSet.script}}</div>
-              <div>Encoding: {{focusSet.encoding}}</div>
-              <div>Type: {{focusSet.type}}</div>
-              <div>Royalty: {{focusSet.royalty}}</div>
-              <div>Name: {{focusSet.name}}</div>
-              <div>Minted: {{focusSet.minted}}</div>
-              <div>Max: {{focusSet.max}}</div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer d-flex align-items-center"></div>
       </div>
-    </div>
-  </div>
   </div>
   </div>
   </div>
@@ -1347,6 +1363,9 @@
       return new bootstrap.Tooltip(tooltipTriggerEl);
     });
   </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
+    integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
+
 </html>
