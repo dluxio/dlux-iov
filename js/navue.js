@@ -710,7 +710,7 @@ export default {
           <span id="userName">{{user}}</span>
           <div class="ms-auto">
             <a class="btn btn-outline-secondary me-2" :class="[{'btn-outline-success':HAS_.wsconn && HAS_.token},{'btn-outline-warning':!HAS_.wsconn && HAS_.token},{'btn-outline-secondary':!HAS_.token}]" :href="HAS_.uri" v-if="HAS"><i class="fa-solid fa-satellite-dish"></i></a>
-            <a class="btn btn-outline-danger" href="#/" @click="logout()"><i class="fa-solid fa-eject"></i></a>
+            <a class="btn btn-outline-danger" href="#/" @click="logout()"><i class="fas fa-power-off fa-fw"></i></a>
           </div>
         </div>
       </div>
