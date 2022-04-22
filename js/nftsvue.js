@@ -876,9 +876,9 @@ var app = new Vue({
           .then((response) => response.json())
           .then((data) => {
             this.mintData = data.result.filter((a) => a.set == set) || [];
-            if (this.mintData.length)this.mintData = this.mintData[0]
-              this.mintSales =
-                data.result.filter((a) => a.set == set) || []
+            if (this.mintData.length) this.mintData = this.mintData[0];
+            else this.mintSales = {};  
+            this.mintSales = data.result.filter((a) => a.set == set) || []
             if(this.mintSales.length)this.mintSales = this.mintSales[0].sales;
             this.mintAuctions = data.result.filter(
               (a) => a.set == set
