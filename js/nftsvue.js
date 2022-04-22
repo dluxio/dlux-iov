@@ -894,7 +894,7 @@ var app = new Vue({
               ) {
                 this.focusSetCalc.smf[token] = this.mintSales[i].price.amount;
               }
-              this.focusSetCalc.forSaleMint++;
+              this.focusSetCalc.forSaleMint += this.mintSales[i].qty;
             }
             for (var i = 0; i < this.mintAuctions.length; i++) {
               const token =
@@ -912,7 +912,7 @@ var app = new Vue({
                 this.focusSetCalc.amf[token] =
                   this.mintAuctions[i].price.amount;
               }
-              this.focusSetCalc.forAuctionMint++;
+              this.focusSetCalc.forAuctionMint += this.mintAuctions[i].qty;
             }
           });
       }
