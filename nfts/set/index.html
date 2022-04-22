@@ -66,22 +66,53 @@
 
               <div class="row mt-5 pt-3">
                 <!--info col-->
-                <div class="col-4">
+                <div class="col-lg-4">
                   <div class="row mb-3">
-                    <h2 class="card-title">{{focusSet.name_long ? focusSet.name_long : ''}}</h2>
+                    <h1 class="card-title text-center">{{focusSet.name_long ? focusSet.name_long : ''}}</h1>
                   </div>
                   <div class="row mb-3">
-                    <p class="m-0"><a :href="makeLink('/@',focusSet.author)">@{{focusSet.author}}</a></p>
+                    <p class="m-0 text-center small">Created by <a :href="makeLink('/@',focusSet.author)" class="no-decoration">@{{focusSet.author}}</a></p>
                   </div>
                   <div class="row mb-3">
                     <p class="text-white-50 m-0">{{focusSet.computed.set ? focusSet.computed.set.Description
                       : '...'}}</p>
                   </div>
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="col-6">
+                      <span class="small border border-secondary rounded text-white px-2 py-1">ROYALTY:
+                      {{focusSet.royalty/100}}%</span>
+                    </div>
+                    <div class="col-6">
+                      <span class="small border border-secondary rounded text-white px-2 py-1">BOND:
+                      {{focusSet.bond ? precision(focusSet.bond.amount,
+                      focusSet.bond.precision) : 0 }} {{focusSet.bond ? focusSet.bond.token :
+                      ''}}</span>
+                    </div>
+                  </div>
                   <div class="row mb-3">
-                    <span class="small"><a :href="makeLink('/blog/@',focusSet.link)">{{focusSet.permlink}}</a></span>
+                    <div class="d-flex">
+                      <div class="small">Permlink: <a :href="makeLink('/blog/@',focusSet.link)">{{focusSet.permlink}}</a></div>
+                      <div class="dropdown show d-flex align-items-center p-0 m-0">
+                        <a class="text-white" href="#" role="button" data-bs-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">
+                        <h5 class="m-0"><i class="fas fa-info-circle ms-2"></i></h5></a>
+                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
+                          <h6 class="dropdown-header text-center">{{focusSet.name}} NFT STATS</h6>
+                          <div class="dropdown-divider bg-light"></div>
+                          <p class="mb-0">Type: {{focusSet.type}}</p>
+                          <div class="dropdown-divider bg-light"></div>
+                          <p class="mb-0">Encoding: {{focusSet.encoding}}</p>
+                          <div class="dropdown-divider bg-light"></div>
+                          <p class="mb-0">Fee: {{naiString(focusSet.fee)}}</p>
+                          <div class="dropdown-divider bg-light"></div>
+                          <p class="mb-0">Script:</p>
+                          <p class="mb-0" style="max-width: 250px;">{{focusSet.script}}</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  <div class="d-flex flex-row border border-secondary rounded p-2">
+                  <div class="d-flex flex-row border border-secondary rounded p-2 mb-3">
                     <div class="d-flex flex-column p-2">
                       <div>{{focusSet.max}}</div>
                       <div>Possible</div>
@@ -117,7 +148,7 @@
                     </div>
                   </div>
 
-                  <div class="progress">
+                  <div class="progress mb-3">
                     <div class="progress-bar" role="progressbar"
                       :style="{'width': ((focusSet.minted/focusSet.max)*100) + '%'}" aria-valuenow="25"
                       aria-valuemin="0" aria-valuemax="100">
@@ -125,18 +156,10 @@
                       minted</div>
                   </div>
 
-                  <div class="d-flex justify-content-between align-items-center">
-                    <span class="small bg-secondary rounded text-white px-2 py-1">ROYALTY:
-                      {{focusSet.royalty/100}}%</span>
-
-                    <span class="small bg-secondary rounded text-white px-2 py-1">BOND:
-                      {{focusSet.bond ? precision(focusSet.bond.amount,
-                      focusSet.bond.precision) : 0 }} {{focusSet.bond ? focusSet.bond.token :
-                      ''}}</span>
-                  </div>
+                  
                 </div>
                 <!--mint market col-->
-                <div class="col-5">
+                <div class="col-lg-5 mt-5 mt-lg-0">
                   <div class="d-flex">
                     <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
                       <div class="pr-2"><small>MINT MARKET: </small></div>
@@ -253,7 +276,7 @@
                 </div>
 
                 <!--mint manager col-->
-                <div class="col-3">
+                <div class="col-lg-3 mt-5 mt-lg-0">
                   <div class="d-flex justify-content-between align-items-center">
                     <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
                       <div class="pr-2"><small>MINTS OWNED: </small></div>
@@ -856,7 +879,7 @@
               <h2 class="m-0 px-2">{{itemModal.item.uid}}</h2>
             </div>
             <h3 class="card-title lead border border-dark rounded p-2 mb-0"><a
-                href="/nfts/set/{{{{itemModal.item.setname}}}}" style="color:black;">{{{{itemModal.item.setname}}}}
+                href="/nfts/set/{{{{itemModal.item.setname}}}}" style="color:black;">{{itemModal.item.setname}}
                 NFT</a></h3>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                 aria-hidden="true">&times;</span></button>
