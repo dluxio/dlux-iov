@@ -154,7 +154,7 @@
                         <div class="d-flex align-items-center">
                           <div @click="">SALES</div>
                           <div class="mb-3"><span class=" badge rounded-pill bg-danger" style="font-size: .7em">
-                              {{mintData.qty_sales}}</span>
+                              {{mintData.qty_sales ? mintData.qty_sales : 0}}</span>
                           </div>
                         </div>
                       </a></li>
@@ -164,7 +164,7 @@
                         <div class="d-flex align-items-center">
                           <div>AUCTIONS</div>
                           <div class="mb-3"><span class=" badge rounded-pill bg-danger"
-                              style="font-size: .7em">{{mintData.qty_auctions}}</span>
+                              style="font-size: .7em">{{mintData.qty_auctions ? mintData.qty_auctions : 0}}</span>
                           </div>
                         </div>
                       </a></li>
