@@ -907,7 +907,7 @@ var app = new Vue({
                   : this.mintAuctions[i].price.token == "HBD"
                   ? "HBD"
                   : "TOKEN";
-                this.mintAuctions[i].buyQty = 0
+                this.mintAuctions[i].bidAmount = 0
               if (
                 this.mintAuctions[i].price.amount <
                   this.focusSetCalc.amf[token] ||
@@ -916,7 +916,7 @@ var app = new Vue({
                 this.focusSetCalc.amf[token] =
                   this.mintAuctions[i].price.amount;
               }
-              this.focusSetCalc.forAuctionMint += this.mintAuctions[i].qty;
+              this.focusSetCalc.forAuctionMint++;
             }
           });
       }
