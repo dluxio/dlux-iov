@@ -1240,10 +1240,10 @@
             </div>
             <!-- NFT detail footer -->
             <div class="card-footer d-flex align-items-center">
-              <h2><a class="text-muted p-3" href="#"><i class="fas fa-caret-square-left"></i></a></h2>
-              <small class="ml-auto text-muted"><i>Item I++ of
-                  INVENTORY COUNT</i></small>
-              <h2 class="ml-auto"><a class="text-muted p-3" href="#"><i class="fas fa-caret-square-right"></i></a></h2>
+              <h2><a class="text-muted p-3" href="#/" @click="modalPrev('itemModal')"><i class="fas fa-caret-square-left"></i></a></h2>
+              <small class="ml-auto text-muted"><i>Item {{itemModal.index}} of
+                  {{itemModal.items.length}}</i></small>
+              <h2 class="ml-auto"><a class="text-muted p-3" href="#/" @click="modalNext('itemModal')"><i class="fas fa-caret-square-right"></i></a></h2>
             </div>
           </div>
         </div>
