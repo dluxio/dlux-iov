@@ -886,35 +886,35 @@ var app = new Vue({
             if (this.mintAuctions.length) this.mintAuctions = this.mintAuctions[0].auctions;
             for (var i = 0; i < this.mintSales.length; i++) {
               const token =
-                this.mintSales[i].price.token == "HIVE"
+                this.mintSales[i].pricenai.token == "HIVE"
                   ? "HIVE"
-                  : this.mintSales[i].price.token == "HBD"
+                  : this.mintSales[i].pricenai.token == "HBD"
                   ? "HBD"
                   : "TOKEN";
-                this.mintSales[i].buyQty = 0
+                this.mintSales[i].buyQty = 1
               if (
-                this.mintSales[i].price.amount < this.focusSetCalc.smf[token] ||
+                this.mintSales[i].price < this.focusSetCalc.smf[token] ||
                 !this.focusSetCalc.smf[token]
               ) {
-                this.focusSetCalc.smf[token] = this.mintSales[i].price.amount;
+                this.focusSetCalc.smf[token] = this.mintSales[i].price;
               }
               this.focusSetCalc.forSaleMint += this.mintSales[i].qty;
             }
             for (var i = 0; i < this.mintAuctions.length; i++) {
               const token =
-                this.mintAuctions[i].price.token == "HIVE"
+                this.mintAuctions[i].pricenai.token == "HIVE"
                   ? "HIVE"
-                  : this.mintAuctions[i].price.token == "HBD"
+                  : this.mintAuctions[i].pricenai.token == "HBD"
                   ? "HBD"
                   : "TOKEN";
-                this.mintAuctions[i].bidAmount = 0
+                this.mintAuctions[i].bidAmount = this.mintAuctions[i].price + 1000
               if (
-                this.mintAuctions[i].price.amount <
+                this.mintAuctions[i].price <
                   this.focusSetCalc.amf[token] ||
                 !this.focusSetCalc.amf[token]
               ) {
                 this.focusSetCalc.amf[token] =
-                  this.mintAuctions[i].price.amount;
+                  this.mintAuctions[i].price;
               }
               this.focusSetCalc.forAuctionMint++;
             }
