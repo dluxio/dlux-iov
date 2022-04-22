@@ -875,11 +875,15 @@ var app = new Vue({
         fetch(this.lapi + "/api/mintsupply")
           .then((response) => response.json())
           .then((data) => {
-            this.mintData = data.result.filter((a) => a.set == set)[0];
-            this.mintSales = data.result.filter((a) => a.set == set)[0].sales || []
+            this.mintData = data.result.filter((a) => a.set == set) || [];
+            if (this.mintData.length)this.mintData = this.mintData[0]
+              this.mintSales =
+                data.result.filter((a) => a.set == set) || []
+            if(this.mintSales.length)this.mintSales = this.mintSales[0].sales;
             this.mintAuctions = data.result.filter(
               (a) => a.set == set
-            )[0].auctions || []
+            ) || []
+            if (this.mintAuctions.length) this.mintAuctions = this.mintAuctions[0].auctions;
             for (var i = 0; i < this.mintSales.length; i++) {
               const token =
                 this.mintSales[i].price.token == "HIVE"
