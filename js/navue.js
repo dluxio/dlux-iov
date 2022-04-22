@@ -170,7 +170,7 @@ export default {
         window.open(
             `https://hivesigner.com/sign/transfer?authority=active&from=${
               op[1][0][1].from
-            }to=${op[1][0][1].to}&amount=${op[1][0][1].amount}&memo=${encodeURIComponent(
+            }&to=${op[1][0][1].to}&amount=${op[1][0][1].amount}&memo=${encodeURIComponent(
               op[1][0][1].memo
             )}`,
             "_blank"
