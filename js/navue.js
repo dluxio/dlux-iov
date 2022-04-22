@@ -678,39 +678,45 @@ export default {
       </div>
     </div>
 
-      <div class="row mb-3">
-        <label class="form-label d-none">Set and store username:</label>
-        <div class="input-group">
-          <span class="input-group-text bg-darkg border-dark text-white-50">@</span>
-          <input v-model="userField"  autocapitalize="off" placeholder="username" @keyup.enter="setUser()" class="text-center form-control bg-darkg border-dark text-info">
-          <span class="input-group-text bg-darkg border-dark"><a href="#" @click="setUser()" v-if="userField" class="link-info"><i class="fa-solid fa-circle-plus"></i></a></span>
-        </div>
-        <div class="small text-muted text-center mt-2">
-         Usernames are only stored locally. <a class="no-decoration" target="_blank" href="https://signup.hive.io/">Get Account</a>
-        </div>
+    <div class="row mb-3">
+      <label class="form-label d-none">Set and store username:</label>
+      <div class="input-group">
+        <span class="input-group-text bg-darkg border-dark text-white-50">@</span>
+        <input v-model="userField"  autocapitalize="off" placeholder="username" @keyup.enter="setUser()" class="text-center form-control bg-darkg border-dark text-info">
+        <span class="input-group-text bg-darkg border-dark"><a href="#" @click="setUser()" v-if="userField" class="link-info"><i class="fa-solid fa-circle-plus"></i></a></span>
       </div>
-      <div class="row" v-if="HAS && haspich > 100">
+      <div class="small text-muted text-center mt-2">
+        Usernames are only stored locally. <a class="no-decoration" target="_blank" href="https://signup.hive.io/">Get Account</a>
+      </div>
+    </div>
+
+    <div class="row" v-if="HAS && haspich > 100">
       <div>
         <div class="bg-white rounded text-center">
-              <a class="no-decoration" :href="HAS_.uri"><img :src="haspic" :height="haspich + 'px'" class="img-responsive p-2 mx-3"><p v-show="haspich > 100" class="text-dark">Tap or scan with PKSA App for {{user}}</p></a>
-            </div>
+          <a class="no-decoration" :href="HAS_.uri"><img :src="haspic" :height="haspich + 'px'" class="img-responsive p-2 mx-3"><p v-show="haspich > 100" class="text-dark">Tap or scan with PKSA App for {{user}}</p></a>
         </div>
-        </div>
-      <div class="row mb-3">
+      </div>
+    </div>
+      
+    <div class="row mb-3">
+      <div>
         <label class="form-label">Current user:</label>
         <div v-if="!user" class="bg-darkest px-4 py-2 mx-2">
           <img src="#" alt="" width="50" height="50" class="img-fluid rounded-circle bg-light me-1 cover">
           <span>NONE SELECTED</span>
         </div>
-        <div v-if="user" class="bg-darkest d-flex align-items-center px-4 py-2 mx-2">
+        <div v-if="user" class="bg-darkest d-flex align-items-center p-2">
           <img :src="avatar" id="userImage" alt="" width="50" height="50" class="img-fluid rounded-circle bg-light me-2 cover">
           <span id="userName">{{user}}</span>
-          <a class="btn btn-outline-success ms-auto" :href="HAS_.uri" v-if="!HAS_.token && HAS"><i class="fas fa-power-off fa-fw me-2"></i>Login</a>
-          <a class="btn btn-outline-danger ms-auto" href="#/" @click="logout()" v-if="HAS_.token || HKC"><i class="fas fa-power-off fa-fw me-2"></i>Logout</a>
+          <div class="ms-auto">
+            <a class="btn btn-outline-secondary me-2" :class="[{'btn-outline-success':HAS_.wsconn && HAS_.token},{'btn-outline-warning':!HAS_.wsconn && HAS_.token},{'btn-outline-secondary':!HAS_.token}]" :href="HAS_.uri" v-if="HAS"><i class="fa-solid fa-satellite-dish"></i></a>
+            <a class="btn btn-outline-danger" href="#/" @click="logout()"><i class="fas fa-power-off fa-fw"></i></a>
+          </div>
         </div>
       </div>
+    </div>
 
-      <div class="row mb-3" v-if="recentUsers.length">
+    <div class="row mb-3" v-if="recentUsers.length">
         <label class="form-label">Recent usernames:</label>
         <div class="input-group">
           <span class="input-group-text bg-darkg border-dark text-white-50">@</span>
