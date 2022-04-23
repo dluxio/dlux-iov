@@ -163,7 +163,6 @@
                     </div>
                   </div>
                   <div>
-
                     <!--multi bar-->
                     <div class="progress bg-secondary mb-3" style="height: 40px;">
                       <!--burned-->
@@ -190,9 +189,10 @@
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center">
-                      <div v-cloak><i class="me-1 fa-solid fa-fire"></i>{{focusSetCalc.deleted}} Burned</div>
-                      <div v-cloak><i class="me-1 fa-solid fa-box-open"></i>{{formatNumber(focusSet.minted,0,'.',',')}} Opened</div>
-                      <div v-cloak><i class="me-1 fa-solid fa-box"></i>{{formatNumber(focusSet.max,0,'.',',')}} Mints</div>
+                      <div v-cloak><i class="me-2 fa-solid fa-fire"></i>Burned: {{focusSetCalc.deleted}}</div>
+                      <div v-cloak><i class="me-2 fa-solid fa-box-open"></i>Opened: {{formatNumber(focusSet.minted,0,'.',',')}}</div>
+                      <div v-cloak><i class="me-2 fa-solid fa-box"></i>Sealed: {{formatNumber((focusSet.max-focusSet.minted),0,'.',',')}}</div>
+                      <div v-cloak><i class="me-2 fa-solid fa-boxes-stacked"></i>Total: {{formatNumber(focusSet.max,0,'.',',')}}</div>
                     </div>
                   </div>
 
