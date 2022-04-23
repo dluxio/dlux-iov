@@ -1,6 +1,7 @@
 import Vue from "https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.esm.browser.js";
 import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
+import Cycler from "/js/cycler.js";
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "";
@@ -414,6 +415,7 @@ var app = new Vue({
   components: {
     "nav-vue": Navue,
     "foot-vue": FootVue,
+    "cycle-text": Cycler,
   },
   methods: {
     precision(num, precision) {

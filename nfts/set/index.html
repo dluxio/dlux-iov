@@ -144,22 +144,10 @@
                     </div>
                     <div class="d-flex text-center flex-column p-2">
                       <div>
-                        <h3 class="mb-0" v-cloak><i class="fa-brands fa-hive me-1"></i>
+                        <h3 class="mb-0" v-cloak><i class="fa-brands fa-hive me-1"></i><cycle-text :items="[focusSetCalc.sf.HIVE/1000 + ' HIVE', focusSetCalc.sf.HBD/1000 + ' HBD', focusSetCalc.sf.TOKEN/1000 + TOKEN]" :interval="15000"/>
                         </h3>
                       </div>
                       <div>Floor Price</div>
-                    </div>
-                    <div class="d-flex flex-column p-2" v-if="focusSetCalc.sf.HIVE">
-                      <div>{{precision(focusSetCalc.sf.HIVE, 3)}}</div>
-                      <div>Hive Floor Price</div>
-                    </div>
-                    <div class="d-flex flex-column p-2" v-if="focusSetCalc.sf.HBD">
-                      <div>{{precision(focusSetCalc.sf.HBD, 3)}}</div>
-                      <div>HBD Floor Price</div>
-                    </div>
-                    <div class="d-flex flex-column p-2" v-if="focusSetCalc.sf.TOKEN">
-                      <div>{{precision(focusSetCalc.sf.TOKEN, focusSet.fee.precision)}}</div>
-                      <div>{{TOKEN}} Floor Price</div>
                     </div>
                   </div>
                   <div>
