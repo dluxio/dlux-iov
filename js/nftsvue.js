@@ -870,7 +870,7 @@ var app = new Vue({
               this.focusSetCalc.forAuction++;
             }
           });
-        fetch(this.lapi + "/api/sales/" + set)
+        fetch(this.lapi + "/api/sales/") // + set) until API fix
           .then((response) => response.json())
           .then((data) => {
             console.log({data})
