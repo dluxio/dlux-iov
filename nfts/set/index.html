@@ -934,9 +934,9 @@
                       </div>
                     </div>
                     <div class="text-center my-3" v-if="itemModal.item.owner == account">
-                      <button class="btn btn-lg btn-outline-primary"><i class="far fa-user-circle me-2"></i>Set as
+                      <button class="btn btn-lg btn-outline-primary"><i class="far fa-user-circle me-2" v-if="itemModal.item.uid != pfp.uid"></i>Set as
                         PFP</button>
-                      <button class="btn btn-lg btn-secondary"><i class="far fa-user-circle me-2"></i>Currently set as
+                      <button class="btn btn-lg btn-secondary" v-if="itemModal.item.uid == pfp.uid && itemModal.item.setname == pfp.set"><i class="far fa-user-circle me-2"></i>Currently set as
                         your
                         PFP</button>
                     </div>
@@ -1001,7 +1001,7 @@
                           </div>
                           <div class="card-body p-0 bg-dark text-white" v-if="itemModal.item.owner == account">
                             <div class="border-warning border rounded p-3 my-3">
-                              <p class="text-warning m-0">Transferring this NFT will remove it from your PFP</p>
+                              <p class="text-warning m-0" v-if="itemModal.item.uid == pfp.uid  && itemModal.item.setname == pfp.set">Transferring this NFT will remove it from your PFP</p>
                             </div>
                             <div class="border border-info bg-darker mx-auto px-5 py-3 rounded col-12">
                               <div class="container-fluid">
