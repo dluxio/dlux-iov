@@ -1237,7 +1237,7 @@ var app = new Vue({
     this.getUserNFTs()
     //this.getQuotes();
     //this.getNodes();
-    //this.getProtocol();
+    this.getProtocol();
     //if (user != "GUEST") this.getTokenUser(user);
     //if (user != "GUEST") this.getHiveUser(user);
   },
