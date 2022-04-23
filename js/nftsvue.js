@@ -71,6 +71,10 @@ var app = new Vue({
       nowtime: new Date().getTime(),
       agoTime: new Date().getTime() - 86400000,
       account: user,
+      pfp:{
+        set: "",
+        uid: "",
+      },
       accountNFTs: [],
       accountRNFTs: [],
       hasDrop: false,
@@ -757,6 +761,17 @@ var app = new Vue({
       this.barhive = "";
       this.barhbd = "";
     },
+    getPFP(){
+      if(this.account){
+        fetch(this.lapi + "/api/pfp/" + this.account)
+        .then(r=>r.json())
+        .then(json=>{
+          if(json.result == "No Profile Picture Set or Owned")return
+          this.pfp.set = json.result[0].pfp.split(':')[0]
+          this.pfp.uid = json.result[0].pfp.split(":")[1];
+        })
+      }
+    },
     getNFTsets() {
       const apis = [
         "https://token.dlux.io",
@@ -929,6 +944,7 @@ var app = new Vue({
         this.accountNFTs = res.result
         this.accountRNFTs = res.mint_tokens
       })
+      this.getPFP()
     },
     printProps(obj) {
       return Object.keys(obj)
