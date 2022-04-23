@@ -974,11 +974,11 @@
                         <div id="collapseAttributes" class="collapse show" aria-labelledby="headingAttributes"
                           data-parent="#accordion">
                           <div class="card-body">
-                            <div class="attribute-container d-flex flex-wrap">
-                              <div v-for="thing in itemModal.item.attributes">
-                                <div v-for="(value, key, index) in thing">
-                                  <div>{{key}}:</div>
-                                  <div>{{value}}</div>
+                            <div class="d-flex flex-wrap">
+                              <div v-for="thing in itemModal.item.attributes" class="border border-white rounded d-flex mx-2 my-2">
+                                <div v-for="(value, key, index) in thing" class="p-2">
+                                  <div class="">{{key}}:</div>
+                                  <div class="">{{value}}</div>
                                 </div>
                               </div>
                             </div>
