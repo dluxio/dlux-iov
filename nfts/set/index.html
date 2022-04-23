@@ -93,8 +93,8 @@
                   </div>
                   <div class="row mb-3">
                     <div class="d-flex">
-                      <div class="small">Permlink: <a
-                          :href="makeLink('/blog/@',focusSet.link)" v-cloak>{{focusSet.permlink}}</a></div>
+                      <div class="small">Permlink: <a :href="makeLink('/blog/@',focusSet.link)"
+                          v-cloak>{{focusSet.permlink}}</a></div>
                       <div class="dropdown show d-flex align-items-center p-0 m-0">
                         <a class="text-white" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
                           aria-expanded="false">
@@ -129,12 +129,25 @@
                     </div>
                     -->
                     <div class="d-flex text-center flex-column p-2">
-                      <div><h3 class="mb-0" v-cloak><i class="fa-solid fa-user-astronaut me-1"></i>{{focusSetCalc.owners}}</h3></div>
+                      <div>
+                        <h3 class="mb-0" v-cloak><i class="fa-solid fa-user-astronaut me-1"></i>{{focusSetCalc.owners}}
+                        </h3>
+                      </div>
                       <div>Owners</div>
                     </div>
                     <div class="d-flex text-center flex-column p-2">
-                      <div><h3 class="mb-0" v-cloak><i class="fa-solid fa-gem me-1"></i>{{focusSet.minted - focusSetCalc.deleted}}</h3></div>
+                      <div>
+                        <h3 class="mb-0" v-cloak><i class="fa-solid fa-gem me-1"></i>{{focusSet.minted -
+                          focusSetCalc.deleted}}</h3>
+                      </div>
                       <div>Items</div>
+                    </div>
+                    <div class="d-flex text-center flex-column p-2">
+                      <div>
+                        <h3 class="mb-0" v-cloak><i class="fa-brands fa-hive me-1"></i>
+                        </h3>
+                      </div>
+                      <div>Floor Price</div>
                     </div>
                     <div class="d-flex flex-column p-2" v-if="focusSetCalc.sf.HIVE">
                       <div>{{precision(focusSetCalc.sf.HIVE, 3)}}</div>
@@ -150,28 +163,36 @@
                     </div>
                   </div>
                   <div>
-                    <div class="text-center mb-2" v-cloak>{{formatNumber(focusSet.minted,0,'.',',')}} of
-                      {{formatNumber(focusSet.max,0,'.',',')}} minted - {{focusSetCalc.deleted}} burned</div>
+
                     <!--multi bar-->
-                      <div class="progress bg-secondary mb-3" style="height: 40px;">
-                        <!--burned-->
-                        <div class="progress-bar" style="background-color: rgb(133, 64, 64);" role="progressbar"
+                    <div class="progress bg-secondary mb-3" style="height: 40px;">
+                      <!--burned-->
+                      <div class="progress-bar" style="background-color: rgb(133, 64, 64);" role="progressbar"
                         :style="{'width': ((focusSetCalc.deleted/focusSet.max)*100) + '%'}" aria-valuenow="0"
                         aria-valuemin="0" aria-valuemax="100">
-                      </span><i class="me-1 fa-solid fa-fire"></i><span v-cloak>{{formatNumber(((focusSetCalc.deleted/focusSet.max)*100),2,'.',',')}}%
-                        </span></div>
-                        <!--opened-->
-                        <div class="progress-bar" style="background-color: rgb(60, 60, 138);" role="progressbar"
-                        :style="{'width': (((focusSet.minted-focusSetCalc.deleted)/focusSet.max)*100) + '%'}" aria-valuenow="0"
-                        aria-valuemin="0" aria-valuemax="100">
-                        <span><i class="me-1 fa-solid fa-box-open"></i></span><span v-cloak>{{formatNumber(((focusSet.minted/focusSet.max)*100),2,'.',',')}}%
-                        </span></div>
-                        <!--closed-->
-                        <div class="progress-bar" style="background-color: rgb(50, 94, 50);" role="progressbar"
+                        <span><i class="me-1 fa-solid fa-fire"></i></span>
+                        <span v-cloak>{{formatNumber(((focusSetCalc.deleted/focusSet.max)*100),2,'.',',')}}%</span>
+                      </div>
+                      <!--opened-->
+                      <div class="progress-bar" style="background-color: rgb(60, 60, 138);" role="progressbar"
+                        :style="{'width': (((focusSet.minted-focusSetCalc.deleted)/focusSet.max)*100) + '%'}"
+                        aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        <span><i class="me-1 fa-solid fa-box-open"></i></span>
+                        <span v-cloak>{{formatNumber(((focusSet.minted/focusSet.max)*100),2,'.',',')}}%</span>
+                      </div>
+                      <!--closed-->
+                      <div class="progress-bar" style="background-color: rgb(50, 94, 50);" role="progressbar"
                         :style="{'width': (((focusSet.max-focusSet.minted)/focusSet.max)*100) + '%'}" aria-valuenow="0"
                         aria-valuemin="0" aria-valuemax="100">
-                        <span><i class="me-1 fa-solid fa-box"></i></span><span v-cloak>{{formatNumber((((focusSet.max-focusSet.minted)/focusSet.max)*100),2,'.',',')}}%
-                        </span></div>
+                        <span><i class="me-1 fa-solid fa-box"></i></span>
+                        <span v-cloak>{{formatNumber((((focusSet.max-focusSet.minted)/focusSet.max)*100),2,'.',',')}}%</span>
+                      </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div v-cloak><i class="me-1 fa-solid fa-fire"></i>{{focusSetCalc.deleted}} Burned</div>
+                      <div v-cloak><i class="me-1 fa-solid fa-box-open"></i>{{formatNumber(focusSet.minted,0,'.',',')}} Opened</div>
+                      <div v-cloak><i class="me-1 fa-solid fa-box"></i>{{formatNumber(focusSet.max,0,'.',',')}} Minted</div>
                     </div>
                   </div>
 
@@ -859,7 +880,8 @@
                     <h2 class="m-0 px-2">{{item.uid}}</h2>
                   </div>
                   <h3 class="card-title lead border rounded border-dark p-2 ms-auto mb-0 text-center">
-                    <a :href="makeLink('/nfts/set/',item.setname)" class="lead no-decoration" style="color: black">{{item.setname}}
+                    <a :href="makeLink('/nfts/set/',item.setname)" class="lead no-decoration"
+                      style="color: black">{{item.setname}}
                       NFT</a>
                   </h3>
                 </div>
@@ -905,7 +927,7 @@
                   <h3 class="card-title lead border border-dark rounded p-2 mb-0"><a class="no-decoration"
                       :href="'/nfts/set/'+ itemModal.item.setname" style="color:black;">{{itemModal.item.setname}}
                       NFT</a></h3>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="card-body row d-flex ">
                   <!-- NFT detail col 1 -->
@@ -915,8 +937,8 @@
                       <div class="card-img-top" :alt="makeLink(itemModal.item.setname, '-', ['itemModal.item.uid'])">
                         <div v-html="itemModal.item.HTML"></div>
                         <div class="card-footer d-flex align-items-center">
-                          <h2><a class="text-muted p-3" href="#/" @click="modalPrev('itemModal')" :class="{'invisible':!itemModal.index}"><i
-                                class="fas fa-caret-square-left"></i></a></h2>
+                          <h2><a class="text-muted p-3" href="#/" @click="modalPrev('itemModal')"
+                              :class="{'invisible':!itemModal.index}"><i class="fas fa-caret-square-left"></i></a></h2>
                           <small class="ms-auto text-muted"><i>Item {{itemModal.index + 1}} of
                               {{allNFTs.length}}</i></small>
                           <h2 class="ms-auto"><a class="text-muted p-3" href="#/" @click="modalNext('itemModal')"><i
@@ -924,16 +946,19 @@
                         </div>
                       </div>
                     </div>
-                    
+
                   </div>
                   <!-- NFT detail col 2 -->
                   <div class="col-lg-6 px-0 px-sm-2">
                     <!--pfp-->
                     <div class="text-center my-3" v-if="itemModal.item.owner == account">
-                      <button class="btn btn-lg btn-outline-primary" v-if="itemModal.item.uid != pfp.uid"><i class="far fa-user-circle me-2"></i>Set as
+                      <button class="btn btn-lg btn-outline-primary" v-if="itemModal.item.uid != pfp.uid"><i
+                          class="far fa-user-circle me-2"></i>Set as
                         PFP
                       </button>
-                      <button class="btn btn-lg btn-secondary" v-if="itemModal.item.uid == pfp.uid && itemModal.item.setname == pfp.set"><i class="far fa-user-circle me-2"></i>Currently set as
+                      <button class="btn btn-lg btn-secondary"
+                        v-if="itemModal.item.uid == pfp.uid && itemModal.item.setname == pfp.set"><i
+                          class="far fa-user-circle me-2"></i>Currently set as
                         your
                         PFP
                       </button>
@@ -970,7 +995,8 @@
                           data-parent="#accordion">
                           <div class="card-body">
                             <div class="d-flex flex-wrap">
-                              <div v-for="thing in itemModal.item.attributes" class="border border-white rounded d-flex mx-2 my-2">
+                              <div v-for="thing in itemModal.item.attributes"
+                                class="border border-white rounded d-flex mx-2 my-2">
                                 <div v-for="(value, key, index) in thing" class="p-2">
                                   <div class="">{{key}}:</div>
                                   <div class="">{{value}}</div>
@@ -991,11 +1017,13 @@
                         </div>
                         <div id="collapseMarket" class="collapse" aria-labelledby="headingMarket"
                           data-parent="#accordion">
-                          <div class="card-body bg-dark text-white-50 text-center" v-if="itemModal.item.owner != account">
+                          <div class="card-body bg-dark text-white-50 text-center"
+                            v-if="itemModal.item.owner != account">
                             <p>You don't own this NFT</p>
                           </div>
                           <div class="card-body p-0 bg-dark text-white" v-if="itemModal.item.owner == account">
-                            <div class="border-warning border rounded p-3 my-3" v-if="itemModal.item.uid == pfp.uid  && itemModal.item.setname == pfp.set">
+                            <div class="border-warning border rounded p-3 my-3"
+                              v-if="itemModal.item.uid == pfp.uid  && itemModal.item.setname == pfp.set">
                               <p class="text-warning m-0">Transferring this NFT will remove it from your PFP</p>
                             </div>
                             <div class="border border-info bg-darker mx-auto px-5 py-3 rounded col-12">
@@ -1208,13 +1236,14 @@
                             <button class="btn btn-link collapsed text-warning" data-bs-toggle="collapse"
                               data-bs-target="#collapseRedeem" aria-expanded="false" aria-controls="collapseRedeem"><i
                                 class="fas fa-burn me-3"></i>MELT ({{focusSet.bond ? precision(focusSet.bond.amount,
-                                  focusSet.bond.precision) : 0 }} {{focusSet.bond ? focusSet.bond.token :
-                                  ''}})</button>
+                              focusSet.bond.precision) : 0 }} {{focusSet.bond ? focusSet.bond.token :
+                              ''}})</button>
                           </h5>
                         </div>
                         <div id="collapseRedeem" class="collapse" aria-labelledby="headingRedeem"
                           data-parent="#accordion">
-                          <div class="card-body bg-dark text-white-50 text-center" v-if="itemModal.item.owner != account">
+                          <div class="card-body bg-dark text-white-50 text-center"
+                            v-if="itemModal.item.owner != account">
                             <p>You don't own this NFT</p>
                           </div>
                           <div class="card-body p-0" v-if="itemModal.item.owner == account">
@@ -1275,7 +1304,7 @@
                 </div>
               </div>
               <!-- NFT detail footer -->
-              
+
             </div>
           </div>
         </div>
