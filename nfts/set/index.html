@@ -155,14 +155,40 @@
                   </div>
                   <div>
                     <div class="text-center mb-2">{{formatNumber(focusSet.minted,0,'.',',')}} of
-                      {{formatNumber(focusSet.max,0,'.',',')}} opened</div>
-                    <div class="progress bg-dark mb-3">
-                      <div class="progress-bar bg-secondary" role="progressbar"
-                        :style="{'width': ((focusSet.minted/focusSet.max)*100) + '%'}" aria-valuenow="25"
+                      {{formatNumber(focusSet.max,0,'.',',')}} minted</div>
+                    <!--multi bar-->
+                      <div class="progress bg-darkg mb-3" style="height: 24px;">
+                        <!--burned-->
+                        <div class="progress-bar" style="background-color: rgb(133, 64, 64);" role="progressbar"
+                        :style="{'width': ((focusSetCalc.deleted/focusSet.max)*100) + '%'}" aria-valuenow="25"
                         aria-valuemin="0" aria-valuemax="100">
-                        {{formatNumber(((focusSet.minted/focusSet.max)*100),2,'.',',')}}%
-                        minted</div>
+                        <span><i class="me-1 fa-solid fa-fire"></i>{{formatNumber(((focusSetCalc.deleted/focusSet.max)*100),2,'.',',')}}%
+                        </span></div>
+                        <!--opened-->
+                        <div class="progress-bar" style="background-color: rgb(60, 60, 138);" role="progressbar"
+                        :style="{'width': (((focusSet.minted-focusSetCalc.deleted)/focusSet.max)*100) + '%'}" aria-valuenow="25"
+                        aria-valuemin="0" aria-valuemax="100">
+                        <span><i class="me-1 fa-solid fa-box-open"></i>{{formatNumber((((focusSet.minted)/focusSet.max)*100),2,'.',',')}}%
+                        </span></div>
                     </div>
+
+                    <!--stacked bars
+                    <div class="progress bg-darkg">
+                      
+                      <div class="progress-bar bg-primary" role="progressbar"
+                        :style="{'width': (((focusSet.minted)/focusSet.max)*100) + '%'}" aria-valuenow="25"
+                        aria-valuemin="0" aria-valuemax="100">
+                        {{formatNumber((((focusSet.minted)/focusSet.max)*100),2,'.',',')}}%
+                        opened</div>
+                    </div>
+                    <div class="progress bg-darkg mb-3">
+                        
+                        <div class="progress-bar bg-danger" role="progressbar"
+                        :style="{'width': ((focusSetCalc.deleted/focusSet.max)*100) + '%'}" aria-valuenow="25"
+                        aria-valuemin="0" aria-valuemax="100">
+                        {{formatNumber(((focusSetCalc.deleted/focusSet.max)*100),2,'.',',')}}%
+                        burned</div>
+                    </div>-->
                   </div>
 
                 </div>
