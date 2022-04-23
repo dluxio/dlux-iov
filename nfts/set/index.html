@@ -921,7 +921,7 @@
                   <h3 class="card-title lead border border-dark rounded p-2 mb-0"><a class="no-decoration"
                       :href="'/nfts/set/'+ itemModal.item.setname" style="color:black;">{{itemModal.item.setname}}
                       NFT</a></h3>
-                      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="card-body row d-flex ">
                   <!-- NFT detail col 1 -->
@@ -930,19 +930,30 @@
                       <!-- NFT img -->
                       <div class="card-img-top" :alt="makeLink(itemModal.item.setname, '-', ['itemModal.item.uid'])">
                         <div v-html="itemModal.item.HTML"></div>
-                       
+                        <div class="card-footer d-flex align-items-center">
+                          <h2><a class="text-muted p-3" href="#/" @click="modalPrev('itemModal')"><i
+                                class="fas fa-caret-square-left"></i></a></h2>
+                          <small class="ms-auto text-muted"><i>Item {{itemModal.index + 1}} of
+                              {{itemModal.items.length}}</i></small>
+                          <h2 class="ms-auto"><a class="text-muted p-3" href="#/" @click="modalNext('itemModal')"><i
+                                class="fas fa-caret-square-right"></i></a></h2>
+                        </div>
                       </div>
                     </div>
-                    <div class="text-center my-3" v-if="itemModal.item.owner == account">
-                      <button class="btn btn-lg btn-outline-primary" v-if="itemModal.item.uid != pfp.uid"><i class="far fa-user-circle me-2"></i>Set as
-                        PFP</button>
-                      <button class="btn btn-lg btn-secondary" v-if="itemModal.item.uid == pfp.uid && itemModal.item.setname == pfp.set"><i class="far fa-user-circle me-2"></i>Currently set as
-                        your
-                        PFP</button>
-                    </div>
+                    
                   </div>
                   <!-- NFT detail col 2 -->
                   <div class="col-lg-6 px-0 px-sm-2">
+                    <!--pfp-->
+                    <div class="text-center my-3" v-if="itemModal.item.owner == account">
+                      <button class="btn btn-lg btn-outline-primary" v-if="itemModal.item.uid != pfp.uid"><i class="far fa-user-circle me-2"></i>Set as
+                        PFP
+                      </button>
+                      <button class="btn btn-lg btn-secondary" v-if="itemModal.item.uid == pfp.uid && itemModal.item.setname == pfp.set"><i class="far fa-user-circle me-2"></i>Currently set as
+                        your
+                        PFP
+                      </button>
+                    </div>
                     <!-- NFT Accordion -->
                     <div id="accordion" class="col-12 px-0 px-sm-2">
                       <!-- NFT DESCRIPTION -->
@@ -971,7 +982,7 @@
                               aria-controls="collapseAttributes"><i class="fas fa-star me-3"></i>ATTRIBUTES </button>
                           </h5>
                         </div>
-                        <div id="collapseAttributes" class="collapse show" aria-labelledby="headingAttributes"
+                        <div id="collapseAttributes" class="collapse" aria-labelledby="headingAttributes"
                           data-parent="#accordion">
                           <div class="card-body">
                             <div class="d-flex flex-wrap">
@@ -1280,14 +1291,7 @@
                 </div>
               </div>
               <!-- NFT detail footer -->
-              <div class="card-footer d-flex align-items-center">
-                <h2><a class="text-muted p-3" href="#/" @click="modalPrev('itemModal')"><i
-                      class="fas fa-caret-square-left"></i></a></h2>
-                <small class="ms-auto text-muted"><i>Item {{itemModal.index + 1}} of
-                    {{itemModal.items.length}}</i></small>
-                <h2 class="ms-auto"><a class="text-muted p-3" href="#/" @click="modalNext('itemModal')"><i
-                      class="fas fa-caret-square-right"></i></a></h2>
-              </div>
+              
             </div>
           </div>
         </div>
