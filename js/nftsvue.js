@@ -420,11 +420,11 @@ var app = new Vue({
       return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
     },
     handleScroll: function () {
-      const bottomOfWindow =
+      if (
+        document.documentElement.clientHeight + window.scrollY >
         document.documentElement.scrollHeight -
-          document.documentElement.scrollTop ===
-        document.documentElement.clientHeight;
-      if (window.scrollY > bottomOfWindow / 2) {
+          (document.documentElement.clientHeight * 2)
+      ) {
         this.NFTselect.amount += 30;
         this.selectNFTs();
       }
