@@ -128,23 +128,23 @@
                       <div>Opened</div>
                     </div>
                     -->
-                    <div class="d-flex text-center flex-column p-2">
+                    <div class="col-4 d-flex text-center flex-column p-2">
                       <div>
                         <h3 class="mb-0" v-cloak><i class="fa-solid fa-user-astronaut me-1"></i>{{focusSetCalc.owners}}
                         </h3>
                       </div>
                       <div>Owners</div>
                     </div>
-                    <div class="d-flex text-center flex-column p-2">
+                    <div class="col-4 d-flex text-center flex-column p-2">
                       <div>
                         <h3 class="mb-0" v-cloak><i class="fa-solid fa-gem me-1"></i>{{focusSet.minted -
                           focusSetCalc.deleted}}</h3>
                       </div>
                       <div>Items</div>
                     </div>
-                    <div class="d-flex text-center flex-column p-2">
+                    <div class="col-4 d-flex text-center flex-column p-2">
                       <div>
-                        <h3 class="mb-0" v-cloak><i class="fa-brands fa-hive me-1"></i><cycle-text :items="[focusSetCalc.sf.HIVE/1000 + ' HIVE', focusSetCalc.sf.HBD/1000 + ' HBD', focusSetCalc.sf.TOKEN/1000 + ' ' + TOKEN]" :interval="1500"/>
+                        <h3 class="mb-0" v-cloak><cycle-text :items="[focusSetCalc.sf.HIVE/1000 + ' HIVE', focusSetCalc.sf.HBD/1000 + ' HBD', focusSetCalc.sf.TOKEN/1000 + ' ' + TOKEN]" :interval="3000"/>
                         </h3>
                       </div>
                       <div>Floor Price</div>
@@ -177,10 +177,10 @@
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center">
-                      <div v-cloak><i class="me-2 fa-solid fa-fire"></i>Burned: {{focusSetCalc.deleted}}</div>
-                      <div v-cloak><i class="me-2 fa-solid fa-box-open"></i>Opened: {{formatNumber(focusSet.minted,0,'.',',')}}</div>
-                      <div v-cloak><i class="me-2 fa-solid fa-box"></i>Sealed: {{formatNumber((focusSet.max-focusSet.minted),0,'.',',')}}</div>
-                      <div v-cloak><i class="me-2 fa-solid fa-boxes-stacked"></i>Total: {{formatNumber(focusSet.max,0,'.',',')}}</div>
+                      <div v-cloak class="col-3"><i class="me-2 fa-solid fa-fire"></i>Burned: {{focusSetCalc.deleted}}</div>
+                      <div v-cloak class="col-3"><i class="me-2 fa-solid fa-box-open"></i>Opened: {{formatNumber(focusSet.minted,0,'.',',')}}</div>
+                      <div v-cloak class="col-3"><i class="me-2 fa-solid fa-box"></i>Sealed: {{formatNumber((focusSet.max-focusSet.minted),0,'.',',')}}</div>
+                      <div v-cloak class="col-3"><i class="me-2 fa-solid fa-boxes-stacked"></i>Total: {{formatNumber(focusSet.max,0,'.',',')}}</div>
                     </div>
                   </div>
 
