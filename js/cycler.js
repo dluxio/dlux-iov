@@ -3,7 +3,6 @@ export default {
     return {
       text: "",
       index: 0,
-      interval: 1500,
     };
   },
   template: `
@@ -11,16 +10,25 @@ export default {
         `,
   props: ["items", "interval"],
   watch: {
-    items(newVal, oldVal) {
-      this.text = this.items[this.index];
-      setInterval(function() {
-        this.index = (this.index + 1) % this.items.length;
-        this.text = this.items[this.index];
-      }.bind(this), this.interval);
-    },
+    // items(newVal, oldVal) {
+    //   this.text = this.items[this.index];
+    //   this.cycle();
+    // },
   },
   mounted() {
+      this.text = this.items[this.index];
+      this.cycle();
   },
   methods: {
+    cycle() {
+      this.index = (this.index + 1) % this.items.length;
+      this.text = this.items[this.index];
+      setTimeout(
+        function () {
+          this.cycle();
+        }.bind(this),
+        this.interval
+      );
+    },
   },
 };
