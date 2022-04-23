@@ -10,13 +10,15 @@ export default {
         `,
   props: ["items", "interval"],
   watch: {
-    // items(newVal, oldVal) {
-    //   this.text = this.items[this.index];
-    //   this.cycle();
-    // },
   },
   mounted() {
       this.text = this.items[this.index];
+      for(var i = 0; i < this.items.length; i++) {
+          if(!parseInt(this.items[i])){
+              this.items.splice(i, 1);
+              i--
+          }
+      }
       this.cycle();
   },
   methods: {
