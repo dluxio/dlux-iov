@@ -335,7 +335,7 @@
                     <img class="rounded max-160"
                       :src="makeLink('https://ipfs.io/ipfs/', focusSet.computed.set ? focusSet.computed.set.wrapped : '')"></img>
                     <div style="-webkit-background-clip: text;color: transparent;">
-                      <h3 class="my-0 mx-2 p-0 p-2 ml-auto">sealed NFT</h3>
+                      <h3 class="my-0 mx-2 p-0 p-2 ms-auto">sealed NFT</h3>
                     </div>
                     <h5 v-if="getMint(focusSet.set, 'qty') > 0">Unwrap to see what's inside.</h5>
                   </div>
@@ -934,9 +934,9 @@
                       </div>
                     </div>
                     <div class="text-center my-3" v-if="itemModal.item.owner == account">
-                      <button class="btn btn-lg btn-outline-primary"><i class="far fa-user-circle mr-2"></i>Set as
+                      <button class="btn btn-lg btn-outline-primary"><i class="far fa-user-circle me-2"></i>Set as
                         PFP</button>
-                      <button class="btn btn-lg btn-secondary"><i class="far fa-user-circle mr-2"></i>Currently set as
+                      <button class="btn btn-lg btn-secondary"><i class="far fa-user-circle me-2"></i>Currently set as
                         your
                         PFP</button>
                     </div>
@@ -951,7 +951,7 @@
                           <h5 class="mb-0">
                             <button class="btn btn-link" data-bs-toggle="collapse" data-bs-target="#collapseDescription"
                               aria-expanded="true" aria-controls="collapseDescription"><i
-                                class="fas fa-list mr-3"></i>DESCRIPTION</button>
+                                class="fas fa-list me-3"></i>DESCRIPTION</button>
                           </h5>
                         </div>
                         <div id="collapseDescription" class="collapse" aria-labelledby="headingDescription"
@@ -968,7 +968,7 @@
                           <h5 class="mb-0">
                             <button class="btn btn-link collapsed text-success" data-bs-toggle="collapse"
                               data-bs-target="#collapseAttributes" aria-expanded="false"
-                              aria-controls="collapseAttributes"><i class="fas fa-star mr-3"></i>ATTRIBUTES </button>
+                              aria-controls="collapseAttributes"><i class="fas fa-star me-3"></i>ATTRIBUTES </button>
                           </h5>
                         </div>
                         <div id="collapseAttributes" class="collapse show" aria-labelledby="headingAttributes"
@@ -991,7 +991,7 @@
                           <h5 class="mb-0">
                             <button class="btn btn-link collapsed text-info" data-bs-toggle="collapse"
                               data-bs-target="#collapseMarket" aria-expanded="false" aria-controls="collapseMarket"><i
-                                class="fas fa-exchange-alt mr-3"></i>TRANSFER</button>
+                                class="fas fa-exchange-alt me-3"></i>TRANSFER</button>
                           </h5>
                         </div>
                         <div id="collapseMarket" class="collapse" aria-labelledby="headingMarket"
@@ -1065,8 +1065,8 @@
                                       </div>
                                       <div class="form-group form-row my-2">
                                         <label for="tradeNFTamount">Amount</label>
-                                        <small class="ml-auto mb-2 align-self-center text-white-50">0% FEE</small>
-                                        <small class="ml-auto mb-2 align-self-center text-white-50">1% FEE</small>
+                                        <small class="ms-auto mb-2 align-self-center text-white-50">0% FEE</small>
+                                        <small class="ms-auto mb-2 align-self-center text-white-50">1% FEE</small>
                                         <div class="input-group">
                                           <input type="number" class="form-control bg-dark border-dark text-info"
                                             id="tradeNFTamount" aria-describedby="tradeNFTamountappend"
@@ -1096,8 +1096,8 @@
                                     <form class="needs-validation mt-4" validate>
                                       <div class="form-group form-row my-2">
                                         <label for="sellNFTprice">Sale Price</label>
-                                        <small class="ml-auto mb-2 align-self-center text-white-50">0% FEE</small>
-                                        <small class="ml-auto mb-2 align-self-center text-white-50">1% FEE</small>
+                                        <small class="ms-auto mb-2 align-self-center text-white-50">0% FEE</small>
+                                        <small class="ms-auto mb-2 align-self-center text-white-50">1% FEE</small>
                                         <div class="input-group">
                                           <input type="number" class="form-control bg-dark border-dark text-info"
                                             id="sellNFTprice" aria-describedby="sellNFTpriceappend" placeholder="0.000"
@@ -1131,8 +1131,8 @@
                                     <form class="needs-validation mt-4" validate>
                                       <div class="form-group form-row my-2">
                                         <label for="auctionNFTprice">Starting Bid</label>
-                                        <small class="ml-auto mb-2 align-self-center text-white-50">0% FEE</small>
-                                        <small class="ml-auto mb-2 align-self-center text-white-50">1% FEE</small>
+                                        <small class="ms-auto mb-2 align-self-center text-white-50">0% FEE</small>
+                                        <small class="ms-auto mb-2 align-self-center text-white-50">1% FEE</small>
                                         <div class="input-group">
                                           <input type="number" class="form-control bg-dark border-dark text-info"
                                             id="auctionNFTprice" aria-describedby="auctionNFTpriceappend"
@@ -1212,19 +1212,24 @@
                           <h5 class="mb-0">
                             <button class="btn btn-link collapsed text-warning" data-bs-toggle="collapse"
                               data-bs-target="#collapseRedeem" aria-expanded="false" aria-controls="collapseRedeem"><i
-                                class="fas fa-burn mr-3"></i>MELT</button>
+                                class="fas fa-burn me-3"></i>MELT ({{focusSet.bond ? precision(focusSet.bond.amount,
+                                  focusSet.bond.precision) : 0 }} {{focusSet.bond ? focusSet.bond.token :
+                                  ''}})</button>
                           </h5>
                         </div>
                         <div id="collapseRedeem" class="collapse" aria-labelledby="headingRedeem"
                           data-parent="#accordion">
-                          <div class="card-body p-0">
+                          <div class="card-body bg-dark text-white-50 text-center" v-if="itemModal.item.owner != account">
+                            <p>You don't own this NFT</p>
+                          </div>
+                          <div class="card-body p-0" v-if="itemModal.item.owner == account">
                             <div class="d-flex align-self-end">
                               <div class="border border-warning rounded bg-darker col-12 p-4">
                                 <div class="d-flex align-items-center justify-content-between">
-                                  <div class="d-flex mr-1">
+                                  <div class="d-flex me-1">
                                     <h4>Melt Value:</h4>
                                   </div>
-                                  <div class="d-flex no-wrap ml-1"> <u>
+                                  <div class="d-flex no-wrap ms-1"> <u>
                                       <h1>
                                         BOND DETAIL</h1>
                                     </u></div>
@@ -1278,9 +1283,9 @@
               <div class="card-footer d-flex align-items-center">
                 <h2><a class="text-muted p-3" href="#/" @click="modalPrev('itemModal')"><i
                       class="fas fa-caret-square-left"></i></a></h2>
-                <small class="ml-auto text-muted"><i>Item {{itemModal.index + 1}} of
+                <small class="ms-auto text-muted"><i>Item {{itemModal.index + 1}} of
                     {{itemModal.items.length}}</i></small>
-                <h2 class="ml-auto"><a class="text-muted p-3" href="#/" @click="modalNext('itemModal')"><i
+                <h2 class="ms-auto"><a class="text-muted p-3" href="#/" @click="modalNext('itemModal')"><i
                       class="fas fa-caret-square-right"></i></a></h2>
               </div>
             </div>
