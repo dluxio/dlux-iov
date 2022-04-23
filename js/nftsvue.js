@@ -432,10 +432,14 @@ var app = new Vue({
     modalNext(modal) {
       if (this[modal].index < this[modal].items.length - 1) {
         this[modal].index++;
+        this[modal].item = this[modal].items[this[modal].index];
+      } else if (this[modal].index < this.allNFTs.length - 1) {
+        this.NFTselect.amount += 6;
+        this.selectNFTs("", "", [modal, this[modal].index + 1]);
       } else {
         this[modal].index = 0;
+        this[modal].item = this[modal].items[this[modal].index];
       }
-      this[modal].item = this[modal].items[this[modal].index];
     },
     modalPrev(modal) {
       if (this[modal].index) this[modal].index--;
@@ -951,7 +955,7 @@ var app = new Vue({
         .map((key) => key + ": " + obj[key])
         .join(", ");
     },
-    selectNFTs(reset, index) {
+    selectNFTs(reset, index, modal) {
       if (reset) this.NFTselect.amount = 30;
       var lc =
         typeof this.NFTselect.searchTerm == "string"
@@ -1065,6 +1069,10 @@ var app = new Vue({
               }
             } else {
               this.selectedNFTs.push(r);
+            }
+            if(modal){
+              this[modal[0]].index = modal[1];
+              this[modal[0]].item = this[modal[0]].items[this[modal[0]].index];
             }
             if (k == i) {
               this.NFTselect.searching = false;
