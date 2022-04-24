@@ -29,7 +29,7 @@ if (location.hash && !lapi) {
   } else if (hash[1].includes("larynx")) {
     lapi = "https://spkinstant.hivehoneycomb.com";
   } else if (hash[1].includes("duat")) {
-    lapi = "https://inconceivable.hivehoneycomb.com";
+    lapi = "https://duat.hivehoneycomb.com";
   }
 }
 if (!lapi) {
@@ -39,7 +39,7 @@ console.log(lapi);
 if (
   lapi == "https://token.dlux.io" ||
   lapi == "https://spkinstant.hivehoneycomb.com" ||
-  lapi == "https://inconceivable.hivehoneycomb.com"
+  lapi == "https://duat.hivehoneycomb.com"
 ) {
   console.log("using defaults");
   window.history.replaceState(null, null, "");

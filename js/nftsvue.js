@@ -23,7 +23,7 @@ if (location.hash && !lapi) {
   } else if (hash[1].includes("larynx")) {
     lapi = "https://spkinstant.hivehoneycomb.com";
   } else if (hash[1].includes("duat")) {
-    lapi = "https://inconceivable.hivehoneycomb.com";
+    lapi = "https://duat.hivehoneycomb.com";
   }
 }
 if (!lapi) {
@@ -33,7 +33,7 @@ console.log(lapi);
 if (
   lapi == "https://token.dlux.io" ||
   lapi == "https://spkinstant.hivehoneycomb.com" ||
-  lapi == "https://inconceivable.hivehoneycomb.com"
+  lapi == "https://duat.hivehoneycomb.com"
 ) {
   console.log("using defaults");
   //window.history.replaceState(null, null, "dex");
@@ -826,7 +826,7 @@ var app = new Vue({
     getNFTsets() {
       const apis = [
         "https://token.dlux.io",
-        "https://inconceivable.hivehoneycomb.com",
+        "https://duat.hivehoneycomb.com",
       ];
       for (var j = 0; j < apis.length; j++) {
         fetch(apis[j] + "/api/sets")
