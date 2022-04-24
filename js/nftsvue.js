@@ -479,11 +479,15 @@ var app = new Vue({
         this[modal].index = 0;
         this[modal].item = this[modal].items[this[modal].index];
       }
+      if (this[modal].item.owner == "ls") this.saleData(modal);
+      else if (this[modal].item.owner == "ah") this.auctionData(modal);
     },
     modalPrev(modal) {
       if (this[modal].index) this[modal].index--;
       else this[modal].index = this[modal].items.length - 1;
       this[modal].item = this[modal].items[this[modal].index];
+      if (this[modal].item.owner == "ls") this.saleData(modal);
+      else if (this[modal].item.owner == "ah") this.auctionData(modal);
     },
     modalIndex(modal, index) {
       var i = 0;
@@ -492,6 +496,8 @@ var app = new Vue({
       }
       this[modal].index = i;
       this[modal].item = this[modal].items[this[modal].index];
+      if(this[modal].item.owner == 'ls')this.saleData(modal)
+      else if(this[modal].item.owner == 'ah')this.auctionData(modal)
     },
     pageCtrl(controller) {},
     removeOp(txid) {
@@ -1033,24 +1039,45 @@ var app = new Vue({
         this.NFTselect.amount = this.allSearchNFTs.length;
       this.NFTselect.searching = true;
       this.selectedNFTs = [];
-      this.allSearchNFTs.sort((a, b) => {
-        if (this.NFTselect.sort == "uid") {
-          if (this.NFTselect.dir == "asc")
-            return (
-              this.Base64toNumber(a[this.NFTselect.sort]) -
-              this.Base64toNumber(b[this.NFTselect.sort])
-            );
-          else
-            return (
-              this.Base64toNumber(b[this.NFTselect.sort]) -
-              this.Base64toNumber(a[this.NFTselect.sort])
-            );
+      if (this.NFTselect.sort == "price") {
+        if (
+          (this.NFTselect.saleOnly && this.NFTselect.auctionOnly) ||
+          (!this.NFTselect.saleOnly && !this.NFTselect.auctionOnly)
+        ) {
+          this.allSearchNFTs = [...this.auctions, ...this.sales];
+        } else if (this.NFTselect.saleOnly) {
+          this.allSearchNFTs = [...this.sales];
         } else {
-          if (a[this.NFTselect.sort] < b[this.NFTselect.sort])
-            return this.NFTselect.dir == "asc" ? -1 : 1;
-          else return this.NFTselect.dir == "asc" ? 1 : -1;
+          this.allSearchNFTs = [...this.auctions];
         }
-      });
+        this.allSearchNFTs.sort((a, b) => {
+          if (a.price.amount > b.price.amount) return 1;
+          if (a.price.amount < b.price.amount) return -1;
+          return 0;
+        })
+        if(this.NFTselect.dir == "asc"){
+          this.allSearchNFTs.reverse();
+        }
+      } else {
+        this.allSearchNFTs.sort((a, b) => {
+          if (this.NFTselect.sort == "uid") {
+            if (this.NFTselect.dir == "asc")
+              return (
+                this.Base64toNumber(a[this.NFTselect.sort]) -
+                this.Base64toNumber(b[this.NFTselect.sort])
+              );
+            else
+              return (
+                this.Base64toNumber(b[this.NFTselect.sort]) -
+                this.Base64toNumber(a[this.NFTselect.sort])
+              );
+          } else {
+            if (a[this.NFTselect.sort] < b[this.NFTselect.sort])
+              return this.NFTselect.dir == "asc" ? -1 : 1;
+            else return this.NFTselect.dir == "asc" ? 1 : -1;
+          }
+        });
+      }
       var k = 0;
       for (
         var i = this.NFTselect.start;
