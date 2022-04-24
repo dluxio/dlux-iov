@@ -469,16 +469,24 @@ var app = new Vue({
       }
     },
     modalNext(modal) {
-      if (this[modal].index < this[modal].items.length - 1) {
-        this[modal].index++;
-        this[modal].item = this[modal].items[this[modal].index];
-      } else if (this[modal].index < this.allNFTs.length - 1) {
-        this.NFTselect.amount += 6;
-        this.selectNFTs("", "", [modal, this[modal].index + 1]);
-      } else {
-        this[modal].index = 0;
-        this[modal].item = this[modal].items[this[modal].index];
-      }
+    if (
+      this.NFTselect.auctionOnly ||
+      this.NFTselect.saleOnly ||
+      this.NFTselect.sort == "price" ||
+      this.NFTselect.searchTerm
+    ) {
+      this[modal].index = this[modal].index + 1 % this[modal].items.length;
+      this[modal].item = this[modal].items[this[modal].index];
+    } else if (this[modal].index < this[modal].items.length - 1) {
+      this[modal].index++;
+      this[modal].item = this[modal].items[this[modal].index];
+    } else if (this[modal].index < this.allNFTs.length - 1) {
+      this.NFTselect.amount += 6;
+      this.selectNFTs("", "", [modal, this[modal].index + 1]);
+    } else {
+      this[modal].index = 0;
+      this[modal].item = this[modal].items[this[modal].index];
+    }
       if (this[modal].item.owner == "ls") this.saleData(modal);
       else if (this[modal].item.owner == "ah") this.auctionData(modal);
     },

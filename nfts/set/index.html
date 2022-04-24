@@ -973,7 +973,7 @@
                           <h2><a class="text-muted p-3" href="#/" @click="modalPrev('itemModal')"
                               :class="{'invisible':!itemModal.index}"><i class="fas fa-caret-square-left"></i></a></h2>
                           <small class="ms-auto text-muted"><i>Item {{itemModal.index + 1}} of
-                              {{NFTselect.sort == 'price' || NFTselect.searchTerm ? allSearchNFTs.length : allNFTs.length}}</i></small>
+                              {{NFTselect.auctionOnly || NFTselect.saleOnly || NFTselect.sort == 'price' || NFTselect.searchTerm ? allSearchNFTs.length : allNFTs.length}}</i></small>
                           <h2 class="ms-auto"><a class="text-muted p-3" href="#/" @click="modalNext('itemModal')"><i
                                 class="fas fa-caret-square-right"></i></a></h2>
                         </div>
