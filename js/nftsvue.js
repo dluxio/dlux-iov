@@ -72,7 +72,7 @@ var app = new Vue({
       nowtime: new Date().getTime(),
       agoTime: new Date().getTime() - 86400000,
       account: user,
-      pfp:{
+      pfp: {
         set: "",
         uid: "",
       },
@@ -363,6 +363,8 @@ var app = new Vue({
         searching: false,
       },
       allNFTs: [],
+      saleNFTs: [],
+      auctionNFTs: [],
       itemModal: {
         hidden: true,
         item: {
@@ -373,6 +375,39 @@ var app = new Vue({
         },
         items: [],
         index: 0,
+        auction: {
+          bidder: "",
+          bids: 0,
+          buy: "",
+          by: "",
+          days: 30,
+          initial_price: {
+            amount: "",
+            token: "",
+            precision: 2,
+          },
+          name_long: "",
+          price: {
+            amount: "",
+            token: "",
+            precision: 2,
+          },
+          script: "",
+          set: "",
+          time: "",
+        },
+        sale: {
+          by: "",
+          name_long: "",
+          price: {
+            amount: "",
+            token: "",
+            precision: 2,
+          },
+          script: "",
+          set: "",
+          uid: "",
+        },
       },
       focusSetCalc: {
         owners: 0,
@@ -409,7 +444,7 @@ var app = new Vue({
       sales: [],
       mintAuctions: [],
       mintSales: [],
-      mintData: {}
+      mintData: {},
     };
   },
   components: {
@@ -425,7 +460,7 @@ var app = new Vue({
       if (
         document.documentElement.clientHeight + window.scrollY >
         document.documentElement.scrollHeight -
-          (document.documentElement.clientHeight * 2)
+          document.documentElement.clientHeight * 2
       ) {
         this.NFTselect.amount += 30;
         this.selectNFTs();
@@ -467,14 +502,24 @@ var app = new Vue({
         this[op](this.account);
       }
     },
-    showToken(k){
-      this.showTokens[k] = !this.showTokens[k]
-      this.nftsetsf = this.nftsets.reduce((a,b)=>{
-        if(this.showTokens[b.token]){
-          a.push(b)
+    auctionData(modal) {
+      const uid = this[modal].item.uid;
+      //const auction = this.auctions.filter(a => a.uid == uid)
+      this[modal].auction = this.auctions.filter((a) => a.uid == uid)[0];
+    },
+    saleData(modal) {
+      const uid = this[modal].item.uid;
+      //const auction = this.auctions.filter(a => a.uid == uid)
+      this[modal].sale = this.sales.filter((a) => a.uid == uid)[0];
+    },
+    showToken(k) {
+      this.showTokens[k] = !this.showTokens[k];
+      this.nftsetsf = this.nftsets.reduce((a, b) => {
+        if (this.showTokens[b.token]) {
+          a.push(b);
         }
-        return a
-      }, [])
+        return a;
+      }, []);
     },
     checkAccount(name, key) {
       fetch("https://anyx.io", {
@@ -636,7 +681,7 @@ var app = new Vue({
         location.reload();
       }
     },
-    getMint(set, item){
+    getMint(set, item) {
       for (let i = 0; i < this.accountRNFTs.length; i++) {
         if (this.accountRNFTs[i].set == set) {
           if (item) return this.accountRNFTs[i][item];
@@ -767,15 +812,15 @@ var app = new Vue({
       this.barhive = "";
       this.barhbd = "";
     },
-    getPFP(){
-      if(this.account){
+    getPFP() {
+      if (this.account) {
         fetch(this.lapi + "/api/pfp/" + this.account)
-        .then(r=>r.json())
-        .then(json=>{
-          if(json.result == "No Profile Picture Set or Owned")return
-          this.pfp.set = json.result[0].pfp.split(':')[0]
-          this.pfp.uid = json.result[0].pfp.split(":")[1];
-        })
+          .then((r) => r.json())
+          .then((json) => {
+            if (json.result == "No Profile Picture Set or Owned") return;
+            this.pfp.set = json.result[0].pfp.split(":")[0];
+            this.pfp.uid = json.result[0].pfp.split(":")[1];
+          });
       }
     },
     getNFTsets() {
@@ -853,9 +898,8 @@ var app = new Vue({
         fetch(this.lapi + "/api/auctions/" + set)
           .then((response) => response.json())
           .then((data) => {
-            console.log({data})
+            console.log({ data });
             this.auctions = data.result.filter((a) => a.set == set);
-            console.log(this.auctions);
             for (var i = 0; i < this.auctions.length; i++) {
               const token =
                 this.auctions[i].price.token == "HIVE"
@@ -875,7 +919,7 @@ var app = new Vue({
         fetch(this.lapi + "/api/sales/") // + set) until API fix
           .then((response) => response.json())
           .then((data) => {
-            console.log({data})
+            console.log({ data });
             this.sales = data.result.filter((a) => a.set == set);
             console.log(this.sales);
             for (var i = 0; i < this.sales.length; i++) {
@@ -899,13 +943,12 @@ var app = new Vue({
           .then((data) => {
             this.mintData = data.result.filter((a) => a.set == set) || [];
             if (this.mintData.length) this.mintData = this.mintData[0];
-            else this.mintSales = {};  
-            this.mintSales = data.result.filter((a) => a.set == set) || []
-            if(this.mintSales.length)this.mintSales = this.mintSales[0].sales;
-            this.mintAuctions = data.result.filter(
-              (a) => a.set == set
-            ) || []
-            if (this.mintAuctions.length) this.mintAuctions = this.mintAuctions[0].auctions;
+            else this.mintSales = {};
+            this.mintSales = data.result.filter((a) => a.set == set) || [];
+            if (this.mintSales.length) this.mintSales = this.mintSales[0].sales;
+            this.mintAuctions = data.result.filter((a) => a.set == set) || [];
+            if (this.mintAuctions.length)
+              this.mintAuctions = this.mintAuctions[0].auctions;
             for (var i = 0; i < this.mintSales.length; i++) {
               const token =
                 this.mintSales[i].pricenai.token == "HIVE"
@@ -913,7 +956,7 @@ var app = new Vue({
                   : this.mintSales[i].pricenai.token == "HBD"
                   ? "HBD"
                   : "TOKEN";
-                this.mintSales[i].buyQty = 1
+              this.mintSales[i].buyQty = 1;
               if (
                 this.mintSales[i].price < this.focusSetCalc.smf[token] ||
                 !this.focusSetCalc.smf[token]
@@ -929,33 +972,40 @@ var app = new Vue({
                   : this.mintAuctions[i].pricenai.token == "HBD"
                   ? "HBD"
                   : "TOKEN";
-                this.mintAuctions[i].bidAmount = this.mintAuctions[i].price + 1000
+              this.mintAuctions[i].bidAmount =
+                this.mintAuctions[i].price + 1000;
               if (
-                this.mintAuctions[i].price <
-                  this.focusSetCalc.amf[token] ||
+                this.mintAuctions[i].price < this.focusSetCalc.amf[token] ||
                 !this.focusSetCalc.amf[token]
               ) {
-                this.focusSetCalc.amf[token] =
-                  this.mintAuctions[i].price;
+                this.focusSetCalc.amf[token] = this.mintAuctions[i].price;
               }
               this.focusSetCalc.forAuctionMint++;
             }
           });
       }
     },
-    getUserNFTs(){
-      fetch(this.lapi + '/api/nfts/' + this.account)
-      .then(r=>r.json())
-      .then(res =>{
-        this.accountNFTs = res.result
-        this.accountRNFTs = res.mint_tokens
-      })
-      this.getPFP()
+    getUserNFTs() {
+      fetch(this.lapi + "/api/nfts/" + this.account)
+        .then((r) => r.json())
+        .then((res) => {
+          this.accountNFTs = res.result;
+          this.accountRNFTs = res.mint_tokens;
+        });
+      this.getPFP();
     },
     printProps(obj) {
       return Object.keys(obj)
         .map((key) => key + ": " + obj[key])
         .join(", ");
+    },
+    onlySale() {
+      this.NFTselect.searchTerm = "ls";
+      this.selectNFTs(true);
+    },
+    onlyAuction() {
+      this.NFTselect.searchTerm = "ah";
+      this.selectNFTs(true);
     },
     selectNFTs(reset, index, modal) {
       if (reset) this.NFTselect.amount = 30;
@@ -1072,7 +1122,7 @@ var app = new Vue({
             } else {
               this.selectedNFTs.push(r);
             }
-            if(modal){
+            if (modal) {
               this[modal[0]].index = modal[1];
               this[modal[0]].item = this[modal[0]].items[this[modal[0]].index];
             }
@@ -1236,7 +1286,7 @@ var app = new Vue({
     var setName = location.pathname.split("set/")[1];
     if (setName) this.getNFTset(setName);
     else this.getNFTsets();
-    this.getUserNFTs()
+    this.getUserNFTs();
     //this.getQuotes();
     //this.getNodes();
     this.getProtocol();
