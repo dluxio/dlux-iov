@@ -1044,11 +1044,26 @@ var app = new Vue({
           (this.NFTselect.saleOnly && this.NFTselect.auctionOnly) ||
           (!this.NFTselect.saleOnly && !this.NFTselect.auctionOnly)
         ) {
-          this.allSearchNFTs = [...this.auctions, ...this.sales];
+          this.allSearchNFTs = [
+            ...this.auctions.forEach((a) => {
+              a.owner = "ah";
+            }),
+            ...this.sales.forEach((a) => {
+              a.owner = "ls";
+            }),
+          ];
         } else if (this.NFTselect.saleOnly) {
-          this.allSearchNFTs = [...this.sales];
+          this.allSearchNFTs = [
+            ...this.sales.forEach((a) => {
+              a.owner = "ls";
+            }),
+          ];
         } else {
-          this.allSearchNFTs = [...this.auctions];
+          this.allSearchNFTs = [
+            ...this.auctions.forEach((a) => {
+              a.owner = "ah";
+            }),
+          ];
         }
         this.allSearchNFTs.sort((a, b) => {
           if (a.price.amount > b.price.amount) return 1;
