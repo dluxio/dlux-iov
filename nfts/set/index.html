@@ -647,11 +647,13 @@
                 <div class="accordion-body bg-darkest">
                   <ul class="list-group">
                     <li class="list-group-item">
-                      <input class="form-check-input me-1" type="checkbox" :checked="NFTselect.saleOnly" @click="NFTselect.saleOnly = !NFTselect.saleOnly;selectNFTs()" aria-label="...">
+                      <input class="form-check-input me-1" type="checkbox" :checked="NFTselect.saleOnly"
+                        @click="NFTselect.saleOnly = !NFTselect.saleOnly;selectNFTs()" aria-label="...">
                       Buy Now
                     </li>
                     <li class="list-group-item">
-                      <input class="form-check-input me-1" type="checkbox" :checked="NFTselect.auctionOnly" @click="NFTselect.auctionOnly = !NFTselect.auctionOnly;selectNFTs()" aria-label="...">
+                      <input class="form-check-input me-1" type="checkbox" :checked="NFTselect.auctionOnly"
+                        @click="NFTselect.auctionOnly = !NFTselect.auctionOnly;selectNFTs()" aria-label="...">
                       At Auction
                     </li>
                   </ul>
@@ -846,6 +848,10 @@
                     A to Z</span>
                   <span v-if="NFTselect.sort == 'owner' && NFTselect.dir == 'desc'">Owner:
                     Z to A</span>
+                  <span v-if="NFTselect.sort == 'price' && NFTselect.dir == 'asc'">Price: Low
+                    to High</span>
+                  <span v-if="NFTselect.sort == 'price' && NFTselect.dir == 'desc'">Price:
+                    High to Low</span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="sortDropdown">
                   <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'uid' && NFTselect.dir == 'asc'}"
@@ -864,7 +870,15 @@
                       href="#"
                       @click="setValue('NFTselect.sort','owner');setValue('NFTselect.dir','desc');selectNFTs(true)">Ownder:
                       Z to A</a></li>
-                </ul>
+                  <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'price' && NFTselect.dir == 'asc'}"
+                      href="#"
+                      @click="setValue('NFTselect.sort','price');setValue('NFTselect.dir','asc');selectNFTs(true)">Price:
+                      Low to High</a></li>
+                  <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'price' && NFTselect.dir == 'desc'}"
+                      href="#"
+                      @click="setValue('NFTselect.sort','price');setValue('NFTselect.dir','desc');selectNFTs(true)">Price:
+                      High to Low</a></li>
+                 </ul>
               </div>
               <div class="dropdown col">
                 <button class="btn btn-dark border-secondary text-white-50 w-100 dropdown-toggle" type="button"
@@ -918,12 +932,15 @@
 
                 <div class="card-footer text-center d-flex justify-content-between align-items-center"
                   v-if="item.owner == 'ah'"> <span><a href="#itemModal" class="a-1" data-bs-toggle="modal"
-                  @click="modalIndex('itemModal',item.uid);setValue('itemModal.hidden', false);auctionData('itemModal')">At Auction</a></span> </div>
+                      @click="modalIndex('itemModal',item.uid);setValue('itemModal.hidden', false);auctionData('itemModal')">At
+                      Auction</a></span> </div>
 
                 <div class="card-footer text-center d-flex justify-content-between align-items-center"
                   v-if="item.owner == 'ls'">
-                   <span ></span><a href="#itemModal" class="a-1" data-bs-toggle="modal"
-                  @click="modalIndex('itemModal',item.uid);setValue('itemModal.hidden', false);saleData('itemModal')">For Sale</a></span> </div>
+                  <span><a href="#itemModal" class="a-1" data-bs-toggle="modal"
+                      @click="modalIndex('itemModal',item.uid);setValue('itemModal.hidden', false);saleData('itemModal')">For
+                      Sale</a></span>
+                </div>
               </div>
             </div>
           </div>
@@ -1272,8 +1289,8 @@
                                   <div class="d-flex no-wrap ms-1"> <u>
                                       <h1>
                                         {{focusSet.bond ? precision(focusSet.bond.amount,
-                              focusSet.bond.precision) : 0 }} {{focusSet.bond ? focusSet.bond.token :
-                              ''}}</h1>
+                                        focusSet.bond.precision) : 0 }} {{focusSet.bond ? focusSet.bond.token :
+                                        ''}}</h1>
                                     </u></div>
                                 </div>
                                 <div class="pt-2">
@@ -1320,8 +1337,10 @@
                       <div class="card bg-dark text-white" v-if="itemModal.item.owner == 'ah'">
                         <div class="card-header" id="headingAuction">
                           <h5 class="mb-0">
-                            <button class="btn btn-link collapsed text-warning" data-bs-toggle="collapse" @click="auctionData('itemModal')"
-                              data-bs-target="#collapseAuction" aria-expanded="false" aria-controls="collapseAuction"><i class="fas fa-comment-dollar me-3"></i> Bid on Auction</button>
+                            <button class="btn btn-link collapsed text-warning" data-bs-toggle="collapse"
+                              @click="auctionData('itemModal')" data-bs-target="#collapseAuction" aria-expanded="false"
+                              aria-controls="collapseAuction"><i class="fas fa-comment-dollar me-3"></i> Bid on
+                              Auction</button>
                           </h5>
                         </div>
                         <div id="collapseAuction" class="collapse show" aria-labelledby="headingAuction"
@@ -1370,8 +1389,9 @@
                       <div class="card bg-dark text-white" v-if="itemModal.item.owner == 'ls'">
                         <div class="card-header" id="headingsale">
                           <h5 class="mb-0">
-                            <button class="btn btn-link collapsed text-warning" data-bs-toggle="collapse" @click="saleData('itemModal')"
-                              data-bs-target="#collapsesale" aria-expanded="false" aria-controls="collapsesale"><i class="fas fa-money-bill-wave me-3"></i> Buy</button>
+                            <button class="btn btn-link collapsed text-warning" data-bs-toggle="collapse"
+                              @click="saleData('itemModal')" data-bs-target="#collapsesale" aria-expanded="false"
+                              aria-controls="collapsesale"><i class="fas fa-money-bill-wave me-3"></i> Buy</button>
                           </h5>
                         </div>
                         <div id="collapsesale" class="collapse show" aria-labelledby="headingsale"
