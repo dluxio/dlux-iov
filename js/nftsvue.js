@@ -1074,7 +1074,7 @@ var app = new Vue({
           if (a.price.amount < b.price.amount) return -1;
           return 0;
         })
-        if(this.NFTselect.dir == "asc"){
+        if(this.NFTselect.dir == "desc"){
           this.allSearchNFTs.reverse();
         }
       } else {
