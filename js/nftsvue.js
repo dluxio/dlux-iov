@@ -475,7 +475,7 @@ var app = new Vue({
       this.NFTselect.sort == "price" ||
       this.NFTselect.searchTerm
     ) {
-      this[modal].index = this[modal].index + 1 % this[modal].items.length;
+      this[modal].index = (this[modal].index + 1) % this[modal].items.length;
       this[modal].item = this[modal].items[this[modal].index];
     } else if (this[modal].index < this[modal].items.length - 1) {
       this[modal].index++;
