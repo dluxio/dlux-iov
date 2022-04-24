@@ -357,6 +357,8 @@ var app = new Vue({
         searchDeep: false,
         searchDeepKey: "",
         searchDeepK: false,
+        saleOnly: false,
+        auctionOnly: false,
         dir: "asc",
         sort: "uid",
         showDeleted: false,
@@ -999,14 +1001,6 @@ var app = new Vue({
         .map((key) => key + ": " + obj[key])
         .join(", ");
     },
-    onlySale() {
-      this.NFTselect.searchTerm = "ls";
-      this.selectNFTs(true);
-    },
-    onlyAuction() {
-      this.NFTselect.searchTerm = "ah";
-      this.selectNFTs(true);
-    },
     selectNFTs(reset, index, modal) {
       if (reset) this.NFTselect.amount = 30;
       var lc =
@@ -1017,6 +1011,24 @@ var app = new Vue({
         this.NFTselect.searchDeep = true;
       }
       this.allSearchNFTs = [...this.allNFTs];
+      if (this.NFTselect.saleOnly || this.NFTselect.auctionOnly) {
+        for (var i = 0; i < this.allSearchNFTs.length; i++) {
+          var keep = false;
+          if (this.NFTselect.saleOnly && this.allSearchNFTs[i].owner == "ls") {
+            keep = true;
+          }
+          if (
+            this.NFTselect.auctionOnly &&
+            this.allSearchNFTs[i].owner == "ah"
+          ) {
+            keep = true;
+          }
+          if (!keep) {
+            this.allSearchNFTs.splice(i, 1);
+            i--;
+          }
+        }
+      }
       if (this.NFTselect.searchDeep)
         this.NFTselect.amount = this.allSearchNFTs.length;
       this.NFTselect.searching = true;

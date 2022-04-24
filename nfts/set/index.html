@@ -647,12 +647,12 @@
                 <div class="accordion-body bg-darkest">
                   <ul class="list-group">
                     <li class="list-group-item">
-                      <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
+                      <input class="form-check-input me-1" type="checkbox" v-model="NFTselect.saleOnly" @click="selectNFTs" aria-label="...">
                       Buy Now
                     </li>
                     <li class="list-group-item">
-                      <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
-                      On Auction
+                      <input class="form-check-input me-1" type="checkbox" v-model="NFTselect.auctionOnly" @click="selectNFTs" aria-label="...">
+                      At Auction
                     </li>
                   </ul>
                 </div>
@@ -872,8 +872,6 @@
                   <span v-if="!NFTselect.showDeleted">Deleted: Hiding</span>
                   <span v-if="NFTselect.showDeleted">Deleted: Showing</span>
                 </button>
-                <button @click="onlySale()" v-if="sales.length">Show For Sale</button>
-                <button @click="onlyAuction()" v-if="auctions.length">Show At Auction</button>
                 <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="deletedDropdown">
                   <li><a class="dropdown-item" :class="{'active':!NFTselect.showDeleted}" href="#"
                       @click="setValue('NFTselect.showDeleted', false);selectNFTs(true)">Hide
