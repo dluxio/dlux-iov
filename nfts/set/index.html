@@ -647,11 +647,11 @@
                 <div class="accordion-body bg-darkest">
                   <ul class="list-group">
                     <li class="list-group-item">
-                      <input class="form-check-input me-1" type="checkbox" v-model="NFTselect.saleOnly" @click="selectNFTs" aria-label="...">
+                      <input class="form-check-input me-1" type="checkbox" :checked="NFTselect.saleOnly" @click="NFTselect.saleOnly = !NFTselect.saleOnly;selectNFTs()" aria-label="...">
                       Buy Now
                     </li>
                     <li class="list-group-item">
-                      <input class="form-check-input me-1" type="checkbox" v-model="NFTselect.auctionOnly" @click="selectNFTs" aria-label="...">
+                      <input class="form-check-input me-1" type="checkbox" :checked="NFTselect.auctionOnly" @click="NFTselect.auctionOnly = !NFTselect.auctionOnly;selectNFTs()" aria-label="...">
                       At Auction
                     </li>
                   </ul>
