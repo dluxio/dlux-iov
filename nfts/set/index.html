@@ -633,8 +633,7 @@
           </div>
         </div>
         <!--filters hidden-->
-
-        <div class="d-none">
+        <div class="">
           <div class="accordion bg-dark" id="accordionExample">
             <div class="accordion-item bg-secondary">
               <h2 class="accordion-header" id="headingOne">
@@ -913,20 +912,19 @@
                 <div class="card-footer text-center d-flex justify-content-between align-items-center"
                   v-if="item.owner.length > 2">
                   <span><i class="fa-brands fa-hive me-2"></i><a
-                      :href="makeLink('/@', item.owner, ['#inventory'])">{{item.owner}}</a>
+                      :href="makeLink('/@', item.owner, ['#inventory'])">{{item.owner}}</a></span>
                 </div>
 
                 <div class="card-footer text-center d-flex justify-content-between align-items-center"
-                  v-if="item.owner == 'D'"> <span>Deleted</div>
+                  v-if="item.owner == 'D'"> <span>Deleted</span></div>
 
                 <div class="card-footer text-center d-flex justify-content-between align-items-center"
-                  v-if="item.owner == 'ah'"> <span data-bs-toggle="collapse"
-                              data-bs-target="#collapseAuction" aria-expanded="false" aria-controls="collapseAuction"><a href="#itemModal" class="a-1" data-bs-toggle="modal"
+                  v-if="item.owner == 'ah'"> <span><a href="#itemModal" class="a-1" data-bs-toggle="modal"
                   @click="modalIndex('itemModal',item.uid);setValue('itemModal.hidden', false);auctionData('itemModal')">At Auction</a></span> </div>
 
                 <div class="card-footer text-center d-flex justify-content-between align-items-center"
-                  v-if="item.owner == 'ls'"> <span data-bs-toggle="collapse"
-                              data-bs-target="#collapsesale" aria-expanded="false" aria-controls="collapsesale"><a href="#itemModal" class="a-1" data-bs-toggle="modal"
+                  v-if="item.owner == 'ls'">
+                   <span ></span><a href="#itemModal" class="a-1" data-bs-toggle="modal"
                   @click="modalIndex('itemModal',item.uid);setValue('itemModal.hidden', false);saleData('itemModal')">For Sale</a></span> </div>
               </div>
             </div>
@@ -1320,16 +1318,15 @@
                           </div>
                         </div>
                       </div>
-                      <!-- / NFT Accordion -->
                       <!-- Auction NFT -->
                       <div class="card bg-dark text-white" v-if="itemModal.item.owner == 'ah'">
                         <div class="card-header" id="headingAuction">
                           <h5 class="mb-0">
                             <button class="btn btn-link collapsed text-warning" data-bs-toggle="collapse" @click="auctionData('itemModal')"
-                              data-bs-target="#collapseAuction" aria-expanded="false" aria-controls="collapseAuction"><i class="fas fa-comment-dollar"></i> Bid on Auction</button>
+                              data-bs-target="#collapseAuction" aria-expanded="false" aria-controls="collapseAuction"><i class="fas fa-comment-dollar me-3"></i> Bid on Auction</button>
                           </h5>
                         </div>
-                        <div id="collapseAuction" class="collapse" aria-labelledby="headingAuction"
+                        <div id="collapseAuction" class="collapse show" aria-labelledby="headingAuction"
                           data-parent="#accordion">
                           <div class="card-body p-0">
                             <div class="d-flex align-self-end">
@@ -1376,10 +1373,10 @@
                         <div class="card-header" id="headingsale">
                           <h5 class="mb-0">
                             <button class="btn btn-link collapsed text-warning" data-bs-toggle="collapse" @click="saleData('itemModal')"
-                              data-bs-target="#collapsesale" aria-expanded="false" aria-controls="collapsesale"><i class="fas fa-money-bill-wave"></i> Buy</button>
+                              data-bs-target="#collapsesale" aria-expanded="false" aria-controls="collapsesale"><i class="fas fa-money-bill-wave me-3"></i> Buy</button>
                           </h5>
                         </div>
-                        <div id="collapsesale" class="collapse" aria-labelledby="headingsale"
+                        <div id="collapsesale" class="collapse show" aria-labelledby="headingsale"
                           data-parent="#accordion">
                           <div class="card-body p-0">
                             <div class="d-flex align-self-end">
