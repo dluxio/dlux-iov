@@ -80,6 +80,7 @@ var app = new Vue({
       accountRNFTs: [],
       iOwn:[],
       highBidder: [],
+      uids: [],
       hasDrop: false,
       dropnai: "",
       balance: "0.000",
@@ -1024,7 +1025,11 @@ var app = new Vue({
       this.selectNFTs(0, null, null, this.highBidder);
     },
     selectNFTs(reset, index, modal, uids) {
-      if (reset) this.NFTselect.amount = 30;
+      if(uids)this.uids = [...uids];
+      if (reset){
+        this.NFTselect.amount = 30;
+        this.uids = []
+      }
       var lc =
         typeof this.NFTselect.searchTerm == "string"
           ? this.NFTselect.searchTerm.toLowerCase()
@@ -1051,7 +1056,7 @@ var app = new Vue({
           }
         }
       }
-      if(uids){
+      if(this.uids){
         for (var i = 0; i < this.allSearchNFTs.length; i++) {
           var keep = false;
           for(var j = 0; j < uids.length; j++){
