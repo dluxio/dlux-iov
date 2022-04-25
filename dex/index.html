@@ -262,7 +262,7 @@
 
                 <!-- power form -->
 
-                <div v-if="account" id="userPwr" class="mx-4" v-if="features.powup_B || features.powdn_B">
+                <div id="userPwr" class="mx-4" v-if="features.powup_B || features.powdn_B">
                   <a class="dropdown-toggle text-primary no-decoration" data-bs-auto-close="outside" href="#"
                     role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak><span
                       class="me-1" v-cloak>{{formatNumber(barpow,3,'.',',')}} {{TOKEN}}P</span></a>
@@ -338,7 +338,7 @@
 
                 <!-- gov form -->
 
-                <div v-if="account" id="userGov" class="mx-4" v-if="isnode && (features.govup_B || features.govdn_B)">
+                <div id="userGov" class="mx-4" v-if="isnode && (features.govup_B || features.govdn_B)">
                   <a class="dropdown-toggle text-info no-decoration" href="#" data-bs-auto-close="outside" role="button"
                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak><span class="me-1"
                       v-cloak>{{formatNumber(bargov,3,'.',',')}} {{TOKEN}}G</span></a>
