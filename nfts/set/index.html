@@ -274,9 +274,11 @@
                                       class="form-control bg-darkg border-dark text-info" style="max-width: 100px"
                                       v-model="ad.buyQty">
                                     <div class="invalid-feedback">Wrong</div>
+
+                                    <div class="invalid-feedback">Fix Yourself</div>
                                   </div>
                                   <button type="submit" class="btn btn-info d-none"
-                                    v-show="ad.by != account">Buy</button>
+                                    v-show="ad.by != account" @click="buyMint(ad.uid)">Buy</button>{{toFixed(ad.buyQty * ad.pricenai.amount,0)}} {{ad.pricenai.tokrn}}
                                 </form>
                               </span>
                               </span></td>
