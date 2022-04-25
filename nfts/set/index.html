@@ -663,12 +663,12 @@
                   <label class="form-label mt-3 text-white-50">@{{account}}</label>
                   <ul class="list-group">
                     <li class="list-group-item bg-black border border-dark text-white-50">
-                      <input class="form-check-input me-1" type="checkbox" :checked="NFTselect.saleOnly"
+                      <input class="form-check-input me-1" type="checkbox" :checked="iOwnCheckbox"
                         @click="iOwnView()" aria-label="...">
                       Owner ({{iOwn.length}})
                     </li>
                     <li class="list-group-item bg-black border border-dark text-white-50">
-                      <input class="form-check-input me-1" type="checkbox" :checked="NFTselect.auctionOnly"
+                      <input class="form-check-input me-1" type="checkbox" :checked="highBidderCheckbox"
                         @click="highBidderView()" aria-label="...">
                       High Bidder ({{highBidder.length}})
                     </li>
