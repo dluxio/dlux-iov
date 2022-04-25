@@ -1019,16 +1019,16 @@ var app = new Vue({
         .join(", ");
     },
     iOwnView(){
-      this.selectNFTs(0, null, null, this.iOwn);
+      this.iOwnCheckbox == !this.iOwnCheckbox;
+      this.selectNFTs();
     },
     highBidderView(){
-      this.selectNFTs(0, null, null, this.highBidder);
+      this.highBidderCheckbox == !this.highBidderCheckbox;
+      this.selectNFTs()
     },
-    selectNFTs(reset, index, modal, uids) {
-      if(uids)this.uids = [...uids];
+    selectNFTs(reset, index, modal) {
       if (reset){
         this.NFTselect.amount = 30;
-        this.uids = []
       }
       var lc =
         typeof this.NFTselect.searchTerm == "string"
@@ -1056,7 +1056,10 @@ var app = new Vue({
           }
         }
       }
-      if(this.uids){
+      // add search
+      if (this.highBidderCheckbox)this.uids = [...this.highBidder, ...this.uids];
+      if (this.iOwnCheckbox)this.uids = [...this.iOwn, ...this.uids];
+      if (this.uids.length) {
         for (var i = 0; i < this.allSearchNFTs.length; i++) {
           var keep = false;
           for (var j = 0; j < this.uids.length; j++) {
