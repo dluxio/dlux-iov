@@ -1040,26 +1040,21 @@ var app = new Vue({
         this.NFTselect.searchDeep = true;
       }
       this.allSearchNFTs = [...this.allNFTs];
+      this.uids = [];
       if (this.NFTselect.saleOnly || this.NFTselect.auctionOnly) {
         for (var i = 0; i < this.allSearchNFTs.length; i++) {
-          var keep = false;
           if (this.NFTselect.saleOnly && this.allSearchNFTs[i].owner == "ls") {
-            keep = true;
+            this.uids.push(this.allSearchNFTs[i].uid);
           }
           if (
             this.NFTselect.auctionOnly &&
             this.allSearchNFTs[i].owner == "ah"
           ) {
-            keep = true;
-          }
-          if (!keep) {
-            this.allSearchNFTs.splice(i, 1);
-            i--;
+            this.uids.push(this.allSearchNFTs[i].uid);
           }
         }
       }
       // add search
-      this.uids = []
       if (this.highBidderCheckbox)this.uids = [...this.highBidder, ...this.uids];
       if (this.iOwnCheckbox)this.uids = [...this.iOwn, ...this.uids];
       if (this.uids.length) {
