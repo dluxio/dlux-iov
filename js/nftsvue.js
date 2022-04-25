@@ -78,6 +78,8 @@ var app = new Vue({
       },
       accountNFTs: [],
       accountRNFTs: [],
+      iOwn:[],
+      highBidder: [],
       hasDrop: false,
       dropnai: "",
       balance: "0.000",
@@ -520,12 +522,10 @@ var app = new Vue({
     },
     auctionData(modal) {
       const uid = this[modal].item.uid;
-      //const auction = this.auctions.filter(a => a.uid == uid)
       this[modal].auction = this.auctions.filter((a) => a.uid == uid)[0];
     },
     saleData(modal) {
       const uid = this[modal].item.uid;
-      //const auction = this.auctions.filter(a => a.uid == uid)
       this[modal].sale = this.sales.filter((a) => a.uid == uid)[0];
     },
     showToken(k) {
@@ -893,16 +893,17 @@ var app = new Vue({
               this.selectNFTs();
               var owners = [];
               for (var i = 0; i < this.allNFTs.length; i++) {
-                if (
-                  !owners.includes(this.allNFTs[i].owner) &&
-                  this.allNFTs[i].owner != "D" &&
-                  this.allNFTs[i].owner != "ah" &&
-                  this.allNFTs[i].owner != "ls"
-                ) {
-                  owners.push(this.allNFTs[i].owner);
-                } else if (this.allNFTs[i].owner == "D") {
-                  this.focusSetCalc.deleted++;
-                }
+                if (this.allNFTs[i].owner == this.account)this.iOwn.push(this.allNFTs[i].uid);
+                  if (
+                    !owners.includes(this.allNFTs[i].owner) &&
+                    this.allNFTs[i].owner != "D" &&
+                    this.allNFTs[i].owner != "ah" &&
+                    this.allNFTs[i].owner != "ls"
+                  ) {
+                    owners.push(this.allNFTs[i].owner);
+                  } else if (this.allNFTs[i].owner == "D") {
+                    this.focusSetCalc.deleted++;
+                  }
               }
               this.focusSetCalc.owners = owners.length;
             });
@@ -930,6 +931,7 @@ var app = new Vue({
                 this.focusSetCalc.af[token] = this.auctions[i].price.amount;
               }
               this.focusSetCalc.forAuction++;
+              if(this.auctions[i].bidder == this.account)this.highBidder.push(this.auctions[i].uid);
             }
           });
         fetch(this.lapi + "/api/sales/") // + set) until API fix
@@ -1015,7 +1017,13 @@ var app = new Vue({
         .map((key) => key + ": " + obj[key])
         .join(", ");
     },
-    selectNFTs(reset, index, modal) {
+    iOwnView(){
+      this.selectNFTs(0, null, null, this.iOwn);
+    },
+    highBidderView(){
+      this.selectNFTs(0, null, null, this.highBidder);
+    },
+    selectNFTs(reset, index, modal, uids) {
       if (reset) this.NFTselect.amount = 30;
       var lc =
         typeof this.NFTselect.searchTerm == "string"
@@ -1036,6 +1044,21 @@ var app = new Vue({
             this.allSearchNFTs[i].owner == "ah"
           ) {
             keep = true;
+          }
+          if (!keep) {
+            this.allSearchNFTs.splice(i, 1);
+            i--;
+          }
+        }
+      }
+      if(uids){
+        for (var i = 0; i < this.allSearchNFTs.length; i++) {
+          var keep = false;
+          for(var j = 0; j < uids.length; j++){
+            if(this.allSearchNFTs[i].uid == uids[j]){
+              keep = true;
+              break;
+            }
           }
           if (!keep) {
             this.allSearchNFTs.splice(i, 1);
@@ -1202,6 +1225,9 @@ var app = new Vue({
           });
         }
       }
+    },
+    pm(a,b){
+        return a.some((item) => b.includes(item))
     },
     pullScript(id) {
       return new Promise((resolve, reject) => {
