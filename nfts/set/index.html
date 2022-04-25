@@ -1018,7 +1018,7 @@
                       <div class="card bg-dark text-white">
                         <div class="card-header" id="headingDescription">
                           <h5 class="mb-0">
-                            <button class="btn btn-link" data-bs-toggle="collapse" data-bs-target="#collapseDescription"
+                            <button class="btn btn-link text-primary no-decoration" data-bs-toggle="collapse" data-bs-target="#collapseDescription"
                               aria-expanded="true" aria-controls="collapseDescription"><i
                                 class="fas fa-list me-3"></i>DESCRIPTION</button>
                           </h5>
@@ -1035,7 +1035,7 @@
                       <div class="card bg-dark text-white">
                         <div class="card-header" id="headingAttributes">
                           <h5 class="mb-0">
-                            <button class="btn btn-link collapsed text-success" data-bs-toggle="collapse"
+                            <button class="btn btn-link collapsed text-success no-decoration" data-bs-toggle="collapse"
                               data-bs-target="#collapseAttributes" aria-expanded="false"
                               aria-controls="collapseAttributes"><i class="fas fa-star me-3"></i>ATTRIBUTES </button>
                           </h5>
@@ -1059,7 +1059,7 @@
                       <div class="card bg-dark text-white" style="width: 100" v-if="itemModal.item.owner == account">
                         <div class="card-header" id="headingMarket">
                           <h5 class="mb-0">
-                            <button class="btn btn-link collapsed text-info" data-bs-toggle="collapse"
+                            <button class="btn btn-link collapsed text-info no-decoration" data-bs-toggle="collapse"
                               data-bs-target="#collapseMarket" aria-expanded="false" aria-controls="collapseMarket"><i
                                 class="fas fa-exchange-alt me-3"></i>TRANSFER</button>
                           </h5>
@@ -1282,11 +1282,10 @@
                       <div class="card bg-dark text-white" v-if="itemModal.item.owner == account">
                         <div class="card-header" id="headingRedeem">
                           <h5 class="mb-0">
-                            <button class="btn btn-link collapsed text-warning" data-bs-toggle="collapse"
-                              data-bs-target="#collapseRedeem" aria-expanded="false" aria-controls="collapseRedeem"><i
-                                class="fas fa-burn me-3"></i>MELT ({{focusSet.bond ? precision(focusSet.bond.amount,
+                            <button class="btn btn-link collapsed text-warning no-decoration" data-bs-toggle="collapse"
+                              data-bs-target="#collapseRedeem" aria-expanded="false" aria-controls="collapseRedeem"><i class="fa-solid fa-fire me-3"></i>MELT<span class="ms-2 small">({{focusSet.bond ? precision(focusSet.bond.amount,
                               focusSet.bond.precision) : 0 }} {{focusSet.bond ? focusSet.bond.token :
-                              ''}})</button>
+                              ''}})</span></button>
                           </h5>
                         </div>
                         <div id="collapseRedeem" class="collapse" aria-labelledby="headingRedeem"
@@ -1416,12 +1415,12 @@
                               <div class="border border-warning rounded bg-darker col-12 p-4">
                                 <div class="d-flex align-items-center justify-content-between">
                                   <div class="d-flex me-1">
-                                    <h4>price:{{naiString(itemModal.sale.price)}}</h4>
+                                    <h4>price: {{naiString(itemModal.sale.price)}}</h4>
                                   </div>
-                                  <div class="d-flex no-wrap ms-1"> <u>
+                                  <div class="d-flex no-wrap ms-1">
                                       <h4>
                                         Seller: {{itemModal.sale.by}}</h4>
-                                    </u></div>
+                                    </div>
                                 </div>
                                 <div class="pt-2">
                                   <p class="text-uppercase text-muted"></p>
@@ -1429,7 +1428,7 @@
                                     <!-- long name, script, set, uid only other buy data -->
                                   </div>
                                   <div class="text-center pb-4">
-                                    <button type="button" class="btn btn-warning" data-bs-toggle="collapse"
+                                    <button type="button" class="btn btn-warning"
                                       href="#/">Buy </button>
                                   </div>
 
