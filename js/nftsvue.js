@@ -1059,6 +1059,7 @@ var app = new Vue({
         }
       }
       // add search
+      this.uids = []
       if (this.highBidderCheckbox)this.uids = [...this.highBidder, ...this.uids];
       if (this.iOwnCheckbox)this.uids = [...this.iOwn, ...this.uids];
       if (this.uids.length) {
