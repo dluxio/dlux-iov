@@ -1059,8 +1059,8 @@ var app = new Vue({
       if(this.uids){
         for (var i = 0; i < this.allSearchNFTs.length; i++) {
           var keep = false;
-          for(var j = 0; j < uids.length; j++){
-            if(this.allSearchNFTs[i].uid == uids[j]){
+          for (var j = 0; j < this.uids.length; j++) {
+            if (this.allSearchNFTs[i].uid == this.uids[j]) {
               keep = true;
               break;
             }
