@@ -449,6 +449,7 @@ var app = new Vue({
       },
       auctions: [],
       sales: [],
+      price: {},
       mintAuctions: [],
       mintSales: [],
       mintData: {},
@@ -460,6 +461,12 @@ var app = new Vue({
     "cycle-text": Cycler,
   },
   methods: {
+    buyMint(uid, set){
+      var cja = {
+        set: set || this.focusSet.set,
+        uid: uid,
+      }
+    },
     precision(num, precision) {
       return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
     },
@@ -687,6 +694,11 @@ var app = new Vue({
     },
     atref(key) {
       return `/@${key}`;
+    },
+    getPrice(uid, set = this.focusSet.set){
+      if (!this.price[set]) return;
+      if (!this.price[set][uid]) return;
+      return this.naiString(this.price[set][uid])
     },
     setMem(key, value, reload) {
       if (value.indexOf("https://") == -1) {
@@ -920,6 +932,7 @@ var app = new Vue({
           .then((data) => {
             console.log({ data });
             this.auctions = data.result.filter((a) => a.set == set);
+            if (!this.price[set]) this.price[set] = {};
             for (var i = 0; i < this.auctions.length; i++) {
               const token =
                 this.auctions[i].price.token == "HIVE"
@@ -934,15 +947,15 @@ var app = new Vue({
                 this.focusSetCalc.af[token] = this.auctions[i].price.amount;
               }
               this.focusSetCalc.forAuction++;
+              this.price[set][this.auctions[i].uid] = this.auctions[i].price;
               if(this.auctions[i].bidder == this.account)this.highBidder.push(this.auctions[i].uid);
             }
           });
         fetch(this.lapi + "/api/sales/") // + set) until API fix
           .then((response) => response.json())
           .then((data) => {
-            console.log({ data });
             this.sales = data.result.filter((a) => a.set == set);
-            console.log(this.sales);
+            if (!this.price[set]) this.price[set] = {};
             for (var i = 0; i < this.sales.length; i++) {
               const token =
                 this.sales[i].price.token == "HIVE"
@@ -957,6 +970,7 @@ var app = new Vue({
                 this.focusSetCalc.sf[token] = this.sales[i].price.amount;
               }
               this.focusSetCalc.forSale++;
+              this.price[set][this.sales[i].uid] = this.sales[i].price;
             }
           });
         fetch(this.lapi + "/api/mintsupply")
