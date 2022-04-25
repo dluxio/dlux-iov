@@ -1021,11 +1021,11 @@ var app = new Vue({
         .join(", ");
     },
     iOwnView(){
-      this.iOwnCheckbox == !this.iOwnCheckbox;
+      this.iOwnCheckbox = !this.iOwnCheckbox;
       this.selectNFTs();
     },
     highBidderView(){
-      this.highBidderCheckbox == !this.highBidderCheckbox;
+      this.highBidderCheckbox = !this.highBidderCheckbox;
       this.selectNFTs()
     },
     selectNFTs(reset, index, modal) {
