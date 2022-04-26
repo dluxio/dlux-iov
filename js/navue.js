@@ -570,7 +570,7 @@ export default {
       <div class="collapse navbar-collapse " id="navbarSupportedContent">
         <ul class="navbar-nav me-auto">
           <li><a class="navbar-brand" href="/"><img src="/img/dlux-hive-logo-alpha.svg" alt="dlux-logo" width="40" height="40"></a></li> 
-          <li class="nav-item"><a class="nav-link disabled" href="/apps/"><i class="fa-solid fa-mountain-sun me-2"></i>HUB</a></li>
+          <li class="nav-item"><a class="nav-link" href="/hub/"><i class="fa-solid fa-mountain-sun me-2"></i>HUB</a></li>
           <li class="nav-item"><a class="nav-link" href="/nfts/sets/"><i class="fa-solid fa-store me-2"></i>NFTS</a></li>
           <li class="nav-item"><a class="nav-link" href="/dex/"><i class="fa-solid fa-building-columns me-2"></i>DEX</a></li>
           <li class="nav-item"><a class="nav-link" href="/docs/"><i class="fa-solid fa-book me-2"></i>DOCS</a></li>
