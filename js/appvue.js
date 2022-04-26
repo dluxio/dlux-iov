@@ -560,6 +560,7 @@ var app = new Vue({
                         ...this.posturls[url],
                         ...res.result
                     }
+                    this.posturls[url].json_metadata = JSON.parse(this.posturls[url].json_metadata)
                     this.displayPosts.push(this.posturls[url]);
                 })
         },
