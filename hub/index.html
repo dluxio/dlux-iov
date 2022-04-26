@@ -43,35 +43,51 @@
     <div id="app">
         <div v-scroll="handleScroll">
             <nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event)"
-                @logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)"
-                :op="toSign" :lapi="lapi" />
+                @logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
+                :lapi="lapi" />
         </div>
         <main role="main" class="flex-shrink-0">
             <div class="container-fluid">
                 <div class="row mt-3">
-                    <div class="col-md-6 text-white text-center order-md-2">
-                        <cycle-text class="display-4"
+                    <div class="text-white text-center background-rb p-4">
+                        <span class="display-4"><cycle-text
                             :items="['Virtual Reality', 'Augmented Reality', 'Extended Reality', 'Your Reality']"
-                            :interval="4000" ></cycle-text>
-                        <p class="lead">Responsive WebXR across mobile, desktop, and headset.<br>
-                            <a href="/vr" class="lead" target="_blank"><i class="fas fa-vr-cardboard mr-2"></i>Enter
-                                Metaverse</a>
+                            :interval="4000"></cycle-text></span>
+                        
+                        <p class="lead">Responsive WebXR across mobile, desktop, and headset.</p>
+                        <div>
+                            <a href="/vr" class="btn btn-lg btn-outline-light" target="_blank"><i class="fas fa-vr-cardboard me-2"></i>Enter
+                                Hubworld</a></div>
                         </p>
                     </div>
-                    <div class="col-md-4 text-center m-auto order-md-12"> <a class="btn btn-primary btn-lg m-1 btn-1"
-                            href="/docs" role="button">Learn <i class="fas fa-shapes ml-2"></i></a><a
-                            class="btn btn-primary btn-lg m-1 btn-1" href="/new" role="button">Create <i
-                                class="fas fa-plus-circle ml-2"></i></a></div>
-                    <div class="col-md-2 text-white m-auto text-center order-md-1">
-                        <a id="pairmenustatus"
-                            class="btn btn-outline-primary btn-lg dropdown-toggle dropdown-toggle-split"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">NEW
+
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="container-fluid d-flex justify-content-center">
+                    <div class="mx-3">
+                        <a class="btn btn-outline-primary btn-lg dropdown-toggle dropdown-toggle-split"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">NEW
                             <span class="sr-only">Toggle Dropdown</span>
                         </a>
-                        <div class="dropdown-menu">
-                            <a id="hivepairselect" class="dropdown-item">NEW</a>
-                            <a id="hbdpairselect" class="dropdown-item">HOT</a>
-                            <a id="hbdpairselect" class="dropdown-item">TRENDING</a>
+                        <div class="dropdown-menu dropdown-menu-dark">
+                            <a class="dropdown-item">NEW</a>
+                            <a class="dropdown-item">HOT</a>
+                            <a class="dropdown-item">TRENDING</a>
+                        </div>
+                    </div>
+                    <div class="mx-3">
+                        <a class="btn btn-outline-primary btn-lg dropdown-toggle dropdown-toggle-split"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">360
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-dark">
+                            <a class="dropdown-item">360</a>
+                            <a class="dropdown-item">VR</a>
+                            <a class="dropdown-item">AR</a>
+                            <a class="dropdown-item">APP</a>
+                            <a class="dropdown-item">BLOG</a>
                         </div>
                     </div>
                 </div>
@@ -86,19 +102,18 @@
                             <div class="float-left">
                                 <p class="mt-0 mb-0 text-muted text-semibold"><a :href="'/@' + post.author"
                                         class="a-1">{{post.author}}<span
-                                            class="ml-2 badge badge-pill badge-light">{{authors[post.author] ? rep(authors[post.author]): ''}}</span></a>
+                                            class="ml-2 badge badge-pill badge-light">{{authors[post.author] ?
+                                            rep(authors[post.author]): ''}}</span></a>
                                 </p>
                                 <small class="text-muted">post.ago</small>
                             </div>
                         </div>
-                        <div class="float-right"><span
-                                class="badge badge-secondary">App Type</span></div>
+                        <div class="float-right"><span class="badge badge-secondary">App Type</span></div>
                     </div>
                     <a href="#detailModal" class="a-1" data-bs-toggle="modal" @click="modalSelect(url)">
                         <!-- @click="window.history.pushState('{{url}}','{{dluxLoad.data.result.title}}', '/blog/@{{author}}/{{permlink}}');updateModalData('{{dluxLoad.data.result.created}}', '{{dluxLoad.data.result.json_metadata.parseJSON().toString()}}', '{{dluxLoad.data.result.title}}', '{{dluxLoad.data.result.body.encodeURI()}}', '{{dluxLoad.data.result.active_votes.toString()}}', '{{dluxLoad.data.result.children.toString()}}', '{{dluxLoad.data.result.total_payout_value}}', '{{dluxLoad.data.result.author}}', '{{dluxLoad.data.result.permlink}}');" -->
                         <h5 class="card-title mt-2 text-center text-capitalize">{{post.title}}</h5>
-                        <img src="..." alt="Card image cap" class="card-img-top"
-                            :src="post.pic" />
+                        <img src="..." alt="Card image cap" class="card-img-top" :src="post.pic" />
                         <div class="card-body">
                             <p class="preview-text">{{post.preview}}</p>
                         </div>
@@ -132,87 +147,85 @@
                             </form>
                         </div>
                         <div class="d-flex align-items-center my-2">
-                            <div><a data-toggle="collapse"
-                                    :data-target="'#vote-' + post.id"><i
+                            <div><a data-toggle="collapse" :data-target="'#vote-' + post.id"><i
                                         class="fas fa-heart fa-fw mr-1"></i></a>{{post.upVotes}}
-                                <i class="fas fa-comment fa-fw ml-2 mr-1"></i>post.children</div>
-                            <div class="ml-auto">{{post.total_payout_value}}<i
-                                    class="ml-1 fab fa-fw fa-hive"></i></div>
+                                <i class="fas fa-comment fa-fw ml-2 mr-1"></i>post.children
+                            </div>
+                            <div class="ml-auto">{{post.total_payout_value}}<i class="ml-1 fab fa-fw fa-hive"></i></div>
                         </div>
                     </div>
                 </div>
             </div>
-                <div class="modal fade" id="detailModal" tabindex="11" role="dialog" aria-hidden="true">
-                    <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
-                        <div class="modal-content bg-dark text-white">
-                            <div class="card text-white bg-dark">
-                                <div class="card-header">
-                                    <div class="d-inline-block p-2">
-                                        <div class="float-left"><a id="modal_author_href1"><img id="modal_author_img"
-                                                    alt=""
-                                                    class="rounded-circle bg-light img-fluid mr-2 cover author-img"></a>
-                                        </div>
-                                        <div class="float-left">
-                                            <p class="mt-0 mb-0 text-muted text-semibold"><a class="a-1"
-                                                    id="modal_author"><span
-                                                        class="ml-2 badge badge-pill badge-light">{{authors[displayPost.item.author] ? authors[displayPost.item.author].rep : ''}}</span></a>
-                                            </p>
-                                            <small class="text-muted" id="modal_created"></small>
-                                        </div>
+            <div class="modal fade" id="detailModal" tabindex="11" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
+                    <div class="modal-content bg-dark text-white">
+                        <div class="card text-white bg-dark">
+                            <div class="card-header">
+                                <div class="d-inline-block p-2">
+                                    <div class="float-left"><a id="modal_author_href1"><img id="modal_author_img" alt=""
+                                                class="rounded-circle bg-light img-fluid mr-2 cover author-img"></a>
                                     </div>
-                                    <div class="float-right p-2"><span class="badge badge-secondary"
-                                            id="modal_scat"></span>
-                                        <button type="button" class="close text-white ml-3" data-dismiss="modal"
-                                            aria-label="Close" onclick="window.history.back();"><span
-                                                aria-hidden="true">×</span></button>
+                                    <div class="float-left">
+                                        <p class="mt-0 mb-0 text-muted text-semibold"><a class="a-1"
+                                                id="modal_author"><span
+                                                    class="ml-2 badge badge-pill badge-light">{{authors[displayPost.item.author]
+                                                    ? authors[displayPost.item.author].rep : ''}}</span></a>
+                                        </p>
+                                        <small class="text-muted" id="modal_created"></small>
                                     </div>
                                 </div>
-                                <a id="modal_blog_link" class="text-white">
-                                    <h3 class="card-title mt-2 text-center text-capitalize p-2" id="modal_title"></h3>
-                                </a> <img src="..." alt="Card image cap" class="card-img-top" id="modal_pic" />
-                                <div class="card-body">
-                                    <p class="p-2" id="modal_body"></p>
+                                <div class="float-right p-2"><span class="badge badge-secondary" id="modal_scat"></span>
+                                    <button type="button" class="close text-white ml-3" data-dismiss="modal"
+                                        aria-label="Close" onclick="window.history.back();"><span
+                                            aria-hidden="true">×</span></button>
                                 </div>
-                                <center>
-                                    <a :href="displayPost.item.url" type="button"
-                                        class="btn btn-outline-danger mb-4 btn-launch">Launch App</a>
-                                </center>
-                                <div class="card-footer">
-                                    <div class="collapse" :data-target="'#vote-' + displayPost.item.id">
-                                        <form id="voteForm">
-                                            <div class="d-flex align-items-center text-white-50">
-                                                <div>
-                                                    <button type="button" class="btn btn-primary"
-                                                        @click="vote(displayPost.item.id)">{{displayPost.item.slider}}%</button>
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-toggle="collapse"
-                                                        :data-target="'#vote-' + displayPost.item.id"><span
-                                                            class="close text-white">×</span></button>
-                                                </div>
-                                                <div class="flex-fill mx-2">
-                                                    <p class="my-1">
-                                                        <input type="range" class="form-control-range" step="0.01"
-                                                            value="100" max="100" min="0.01" v-model="displayPost.item.slider">
-                                                    </p>
-                                                </div>
-                                                <p class="my-0"><span class="mr-1" id="commentVal">0</span><i
-                                                        class="ml-1 fab fa-fw fa-hive"></i></p>
+                            </div>
+                            <a id="modal_blog_link" class="text-white">
+                                <h3 class="card-title mt-2 text-center text-capitalize p-2" id="modal_title"></h3>
+                            </a> <img src="..." alt="Card image cap" class="card-img-top" id="modal_pic" />
+                            <div class="card-body">
+                                <p class="p-2" id="modal_body"></p>
+                            </div>
+                            <center>
+                                <a :href="displayPost.item.url" type="button"
+                                    class="btn btn-outline-danger mb-4 btn-launch">Launch App</a>
+                            </center>
+                            <div class="card-footer">
+                                <div class="collapse" :data-target="'#vote-' + displayPost.item.id">
+                                    <form id="voteForm">
+                                        <div class="d-flex align-items-center text-white-50">
+                                            <div>
+                                                <button type="button" class="btn btn-primary"
+                                                    @click="vote(displayPost.item.id)">{{displayPost.item.slider}}%</button>
+                                                <button type="button" class="btn btn-secondary" data-toggle="collapse"
+                                                    :data-target="'#vote-' + displayPost.item.id"><span
+                                                        class="close text-white">×</span></button>
                                             </div>
-                                        </form>
+                                            <div class="flex-fill mx-2">
+                                                <p class="my-1">
+                                                    <input type="range" class="form-control-range" step="0.01"
+                                                        value="100" max="100" min="0.01"
+                                                        v-model="displayPost.item.slider">
+                                                </p>
+                                            </div>
+                                            <p class="my-0"><span class="mr-1" id="commentVal">0</span><i
+                                                    class="ml-1 fab fa-fw fa-hive"></i></p>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="d-flex align-items-center my-2">
+                                    <div><a data-toggle="collapse" :data-target="'#vote-' + displayPost.item.id"><i
+                                                class="fas fa-heart mr-1"></i></a>{{displayPost.item.upVotes}}
+                                        <i class="fas fa-comment ml-2 mr-1"></i>displayPost.item.children
                                     </div>
-                                    <div class="d-flex align-items-center my-2">
-                                        <div><a data-toggle="collapse"
-                                                :data-target="'#vote-' + displayPost.item.id"><i
-                                                    class="fas fa-heart mr-1"></i></a>{{displayPost.item.upVotes}}
-                                            <i class="fas fa-comment ml-2 mr-1"></i>displayPost.item.children</div>
-                                        <div class="ml-auto" id="modal_total_payout"><i
-                                                class="ml-1 fab fa-fw fa-hive"></i></div>
+                                    <div class="ml-auto" id="modal_total_payout"><i class="ml-1 fab fa-fw fa-hive"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
         </main>
         <!-- Footer -->
         <div>
@@ -220,56 +233,56 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
-    crossorigin="anonymous"></script>
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
     <script>
-    (function () {
-      "use strict";
-      window.addEventListener(
-        "load",
-        function () {
-          // Fetch all the forms we want to apply custom Bootstrap validation styles to
-          var forms = document.getElementsByClassName("needs-validation");
-          // Loop over them and prevent submission
-          var validation = Array.prototype.filter.call(
-            forms,
-            function (form) {
-              form.addEventListener(
-                "submit",
-                function (event) {
-                  if (form.checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                  }
-                  form.classList.add("was-validated");
+        (function () {
+            "use strict";
+            window.addEventListener(
+                "load",
+                function () {
+                    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                    var forms = document.getElementsByClassName("needs-validation");
+                    // Loop over them and prevent submission
+                    var validation = Array.prototype.filter.call(
+                        forms,
+                        function (form) {
+                            form.addEventListener(
+                                "submit",
+                                function (event) {
+                                    if (form.checkValidity() === false) {
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                    }
+                                    form.classList.add("was-validated");
+                                },
+                                false
+                            );
+                        }
+                    );
                 },
                 false
-              );
-            }
-          );
-        },
-        false
-      );
-    })();
-    var disabletab = document.getElementsByClassName("disabled-input");
-    for (var i = 0; i < disabletab.length; i++) {
-      disabletab[i].setAttribute("tabindex", "-1");
-    }
-    var toastElList = [].slice.call(document.querySelectorAll(".toast"));
-    var toastList = toastElList.map(function (toastEl) {
-      return new bootstrap.Toast(toastEl, option);
-    });
-    var tooltipTriggerList = [].slice.call(
-      document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    );
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-  </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
-    integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
+            );
+        })();
+        var disabletab = document.getElementsByClassName("disabled-input");
+        for (var i = 0; i < disabletab.length; i++) {
+            disabletab[i].setAttribute("tabindex", "-1");
+        }
+        var toastElList = [].slice.call(document.querySelectorAll(".toast"));
+        var toastList = toastElList.map(function (toastEl) {
+            return new bootstrap.Toast(toastEl, option);
+        });
+        var tooltipTriggerList = [].slice.call(
+            document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        );
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
+        integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
     <!-- <script src="/js/session.js"></script>
 <script>
 function hiveKeychain () {
