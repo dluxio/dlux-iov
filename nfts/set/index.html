@@ -146,7 +146,7 @@
                       <div>
                         <h3 class="mb-0" v-cloak>
                           <cycle-text
-                            :items="[focusSetCalc.sf.HIVE/1000 + ' HIVE', focusSetCalc.sf.HBD/1000 + ' HBD', focusSetCalc.sf.TOKEN/1000 + ' ' + TOKEN]"
+                            :items="[sigFig(focusSetCalc.sf.HIVE/1000, 2) + ' HIVE', sigFig(focusSetCalc.sf.HBD/1000, 2) + ' HBD', sigFig(focusSetCalc.sf.TOKEN/1000, 2) + ' ' + TOKEN]"
                             :interval="5000" />
                         </h3>
                       </div>

@@ -20,7 +20,22 @@
     <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
 
     <script type="module" src="/js/appvue.js"></script>
-
+    <style>
+        .truncate1 {
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .truncate2 {
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
 
     <script>
         if ('serviceWorker' in navigator) {
@@ -117,21 +132,18 @@
                                                 style="width: 50px;">
                                             <h3 class="m-0 text-white">{{post.author}}</h3>
                                             <div class="ms-2 badge rounded-pill bg-light text-black">
-                                                {{authors[post.author] ?
-                                                readRep(authors[post.author].reputation): ''}}
+                                                {{post.rep}}
                                             </div>
                                         </div>
                                     </a>
-                                    <span v-if="post.type == 360" class="badge bg-primary ms-auto me-4"><i
-                                            class="fa-solid fa-globe me-2"></i>{{post.type}}</span>
-                                    <span v-if="post.type == 'VR'" class="badge bg-primary ms-auto me-4"><i
-                                            class="fa-solid fa-vr-cardboard me-2"></i>{{post.type}}</span>
+                                    <span class="badge bg-primary ms-auto me-4"><i
+                                            :class="postSelect.types[post.type].icon"></i>{{post.type}}</span>
                                 </div>
                             </div>
                             <div class="card-body bg-darkg">
                                 <a href="#/" class="no-decoration">
-                                    <h3 class="lead text-white">{{post.title}}</h3>
-                                    <div class="text-white-50">{{post.preview}}...<span
+                                    <h3 class="lead text-white truncate1">{{post.title}}</h3>
+                                    <div class="text-white-50 truncate2">{{post.preview}}<span
                                             class="small text-primary ms-2">Read
                                             More</span></div>
                                 </a>
@@ -170,7 +182,7 @@
                                     <form id="voteForm">
                                         <div class="d-flex align-items-center text-white-50">
                                             <div>
-                                                <button type="button" class="btn btn-primary" @click="vote(post.id)"
+                                                <button type="button" class="btn btn-primary" @click="vote(post.url)"   
                                                     style="width: 100px;">{{post.slider}}%</button>
                                                 <button type="button" class="btn btn-secondary"
                                                     :data-bs-target="'#vote-' + post.id" data-bs-toggle="collapse"><span
@@ -193,16 +205,16 @@
                                     <div>
                                         <a data-bs-toggle="collapse" :data-bs-target="'#vote-' + post.id">
                                             <i class="fas fa-heart fa-fw me-1"></i></a>{{post.upVotes}}
-                                        <i class="fas fa-comment fa-fw ms-2 me-1"></i>{{post.length}}
-                                        <i class="fa-solid fa-flag ms-2"></i>
+                                        <i class="fas fa-comment fa-fw ms-2 me-1"></i>{{post.children}}
+                                        <i class="fa-solid fa-flag ms-2"></i> {{post.downVotes ? post.downVotes : ''}}
                                     </div>
                                     <div class="ms-auto">
 
                                         
-                                        <pop-vue title="Hello Popover" :content="post.total_payout_value"
+                                        <pop-vue title="Post Earnings" :content="'Hive: ' + post.total_payout_value + '\n' + TOKEN + ': ...' "
                                             trigger="hover">
                                             <button class="btn btn-secondary">
-                                                $U.SD
+                                                {{sigFig(post.total_payout_value, 2)}}
                                             </button>
                                         </pop-vue>
 
@@ -222,7 +234,7 @@
 
 
 
-            <div class="row">
+            <!-- <div class="row">
 
                 <div class="col-sm-6 col-lg-4 mb-4" v-for="post in displayPosts">
                     <div class="card text-white bg-dark mt-2 mb-3">
@@ -244,7 +256,6 @@
                             <div class="float-right"><span class="badge badge-secondary">{{post.type}}</span></div>
                         </div>
                         <a href="#detailModal" class="a-1" data-bs-toggle="modal" @click="modalSelect(url)">
-                            <!-- @click="window.history.pushState('{{url}}','{{dluxLoad.data.result.title}}', '/blog/@{{author}}/{{permlink}}');updateModalData('{{dluxLoad.data.result.created}}', '{{dluxLoad.data.result.json_metadata.parseJSON().toString()}}', '{{dluxLoad.data.result.title}}', '{{dluxLoad.data.result.body.encodeURI()}}', '{{dluxLoad.data.result.active_votes.toString()}}', '{{dluxLoad.data.result.children.toString()}}', '{{dluxLoad.data.result.total_payout_value}}', '{{dluxLoad.data.result.author}}', '{{dluxLoad.data.result.permlink}}');" -->
                             <h5 class="card-title mt-2 text-center text-capitalize">{{post.title}}</h5>
                             <img src="..." alt="Card image cap" class="card-img-top" :src="post.pic" />
                             <div class="card-body">
@@ -291,7 +302,7 @@
                     </div>
                 </div>
 
-            </div>
+            </div> -->
             <div class="modal fade" id="detailModal" tabindex="11" role="dialog" aria-hidden="true">
                 <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
                     <div class="modal-content bg-dark text-white">
@@ -404,14 +415,14 @@
                 false
             );
         })();
-        var disabletab = document.getElementsByClassName("disabled-input");
-        for (var i = 0; i < disabletab.length; i++) {
-            disabletab[i].setAttribute("tabindex", "-1");
-        }
-        var toastElList = [].slice.call(document.querySelectorAll(".toast"));
-        var toastList = toastElList.map(function (toastEl) {
-            return new bootstrap.Toast(toastEl, option);
-        });
+        // var disabletab = document.getElementsByClassName("disabled-input");
+        // for (var i = 0; i < disabletab.length; i++) {
+        //     disabletab[i].setAttribute("tabindex", "-1");
+        // }
+        // var toastElList = [].slice.call(document.querySelectorAll(".toast"));
+        // var toastList = toastElList.map(function (toastEl) {
+        //     return new bootstrap.Toast(toastEl, option);
+        // });
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
         integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
