@@ -122,7 +122,10 @@
                                             </div>
                                         </div>
                                     </a>
-                                    <span class="badge bg-primary ms-auto me-4">{{post.type}}</span>
+                                    <span v-if="post.type == 360" class="badge bg-primary ms-auto me-4"><i
+                                            class="fa-solid fa-globe me-2"></i>{{post.type}}</span>
+                                    <span v-if="post.type == VR" class="badge bg-primary ms-auto me-4"><i
+                                            class="fa-solid fa-vr-cardboard me-2"></i>{{post.type}}</span>
                                 </div>
                             </div>
                             <div class="card-body bg-darkg">
@@ -143,9 +146,17 @@
                                                     :src="post.pic"
                                                     style="width: 640px; height: 360px; object-fit: cover;" />
                                                 <div class="caption text-white w-100 h-100 d-flex">
-                                                    <div class="m-auto"><button class="btn btn-lg btn-info px-4"
-                                                            style="border-radius: 5rem;">Launch App <i
-                                                                class="ml-2 fas fa-external-link-alt"></i></button>
+                                                    <div class="m-auto p-3 text-center" v-if="post.type == 360">
+                                                        <p><i class="fa-solid fa-globe me-2"></i>360 Photo Gallery</p>
+                                                        <button class="btn btn-lg btn-info px-4"
+                                                            style="border-radius: 5rem;">Launch<i
+                                                                class="ms-2 fas fa-external-link-alt"></i></button>
+                                                    </div>
+                                                    <div class="m-auto p-3 text-center" v-if="post.type == vr">
+                                                        <p><i class="fa-solid fa-globe me-2"></i>3D / VR Experience</p>
+                                                        <button class="btn btn-lg btn-info px-4"
+                                                            style="border-radius: 5rem;">Launch<i
+                                                                class="ms-2 fas fa-external-link-alt"></i></button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -185,11 +196,19 @@
                                         <i class="fas fa-comment fa-fw ms-2 me-1"></i>{{post.length}}
                                         <i class="fa-solid fa-flag ms-2"></i>
                                     </div>
-                                    <div class="ms-auto"><button type="button" class="btn btn-secondary"
-                                            data-bs-toggle="tooltip" data-bs-placement="bottom"
-                                            title="post.total_payout_value">
-                                            $U.SD
-                                        </button>
+                                    <div class="ms-auto">
+
+                                        
+                                        <pop-vue title="Hello Popover" :content="post.total_payout_value"
+                                            trigger="hover">
+                                            <button class="btn btn-secondary">
+                                                $U.SD
+                                            </button>
+                                        </pop-vue>
+
+
+
+
                                     </div>
                                 </div>
                             </div>
