@@ -69,121 +69,134 @@
 
                 </div>
             </div>
-            <div class="row mt-3">
-                <div class="container-fluid d-flex justify-content-center">
-                    <div class="mx-3">
-                        <a class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split"
-                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">NEW
-                            <span class="sr-only">Toggle Dropdown</span>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-dark">
-                            <a class="dropdown-item">NEW</a>
-                            <a class="dropdown-item">HOT</a>
-                            <a class="dropdown-item">TRENDING</a>
-                        </div>
-                    </div>
-                    <div class="mx-3">
-                        <a class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split"
-                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TYPE
-                            <span class="sr-only">Toggle Dropdown</span>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-dark">
-                            <a class="dropdown-item" v-for="(value, key, index) in postSelect.types">
-                                <div class="input-group d-flex">
-                                    <div class="input-group-text bg-darkg text-white d-flex flex-fill"><i
-                                            :class="value.icon"></i>{{key}}</div>
-                                    <div class="input-group-text bg-darkg">
-                                        <input class="form-check-input mt-0" type="checkbox" value=""
-                                            :checked="value.checked"
-                                            @click="value.checked = !value.checked;selectPosts(true)"
-                                            aria-label="Checkbox for following text input">
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <div class="row p-4">
-                <div class="col-sm-6 col-lg-4 mb-4" v-for="post in displayPosts">
-                    <div class="card text-white bg-darkest mt-2 mb-3">
-                        <div class="card-header">
-                            <div class="d-flex align-items-center ">
-                                <a :href="'/@' + post.author" class="no-decoration">
-                                    <div class="d-flex align-items-center">
-                                        <img :src="'https://images.hive.blog/u/' + post.author + '/avatar'" alt=""
-                                            class="rounded-circle bg-light img-fluid me-3 cover author-img"
-                                            style="width: 50px;">
-                                        <h3 class="m-0 text-white">{{post.author}}</h3>
-                                        <div class="ms-2"><span
-                                                class="badge rounded-pill bg-light text-black">{{authors[post.author] ?
-                                                readRep(authors[post.author].reputation): ''}}</span>
+            <div class="container-fluid">
+                <div class="row mt-3">
+                    <div class="container-fluid d-flex justify-content-center">
+                        <div class="mx-3">
+                            <a class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split"
+                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">NEW
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-dark">
+                                <a class="dropdown-item">NEW</a>
+                                <a class="dropdown-item">HOT</a>
+                                <a class="dropdown-item">TRENDING</a>
+                            </div>
+                        </div>
+                        <div class="mx-3">
+                            <a class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split"
+                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TYPE
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-dark">
+                                <a class="dropdown-item" v-for="(value, key, index) in postSelect.types">
+                                    <div class="input-group d-flex">
+                                        <div class="input-group-text bg-darkg text-white d-flex flex-fill"><i
+                                                :class="value.icon"></i>{{key}}</div>
+                                        <div class="input-group-text bg-darkg">
+                                            <input class="form-check-input mt-0" type="checkbox" value=""
+                                                :checked="value.checked"
+                                                @click="value.checked = !value.checked;selectPosts(true)"
+                                                aria-label="Checkbox for following text input">
                                         </div>
                                     </div>
                                 </a>
-                                <span class="badge bg-primary ms-auto me-4">{{post.type}}</span>
                             </div>
                         </div>
-                        <div class="card-body bg-darkg">
-                            <a href="#/" class="no-decoration">
-                                <h3 class="lead text-white">{{post.title}}</h3>
-                                <div class="text-white-50">{{post.preview}}...<span class="small text-primary ms-2">Read
-                                        More</span></div>
-                            </a>
-                        </div>
+                    </div>
+                </div>
 
-                        <div class="card bg-darkg">
-                            <div class="d-flex">
-                                <a target="_blank" class="p-0 m-0" type="button">
-                                    <div id="imagesMain">
-                                        <div class="imagebox bg-none">
-                                            <img src="..." alt="Card image cap" class="card-img-top img-fluid image"
-                                                :src="post.pic"
-                                                style="width: 640px; height: 360px; object-fit: cover;" />
-                                            <div class="caption text-white w-100 h-100 d-flex">
-                                                <div class="m-auto"><button class="btn btn-lg btn-info px-4"
-                                                        style="border-radius: 5rem;">Launch App <i
-                                                            class="ml-2 fas fa-external-link-alt"></i></button></div>
+                <div class="row">
+                    <div class="col-sm-6 col-lg-4 mb-4" v-for="post in displayPosts">
+                        <div class="card text-white bg-darkest mt-2 mb-3">
+                            <div class="card-header">
+                                <div class="d-flex align-items-center ">
+                                    <a :href="'/@' + post.author" class="no-decoration">
+                                        <div class="d-flex align-items-center">
+                                            <img :src="'https://images.hive.blog/u/' + post.author + '/avatar'" alt=""
+                                                class="rounded-circle bg-light img-fluid me-3 cover author-img"
+                                                style="width: 50px;">
+                                            <h3 class="m-0 text-white">{{post.author}}</h3>
+                                            <div class="ms-2 badge rounded-pill bg-light text-black">
+                                                {{authors[post.author] ?
+                                                readRep(authors[post.author].reputation): ''}}
                                             </div>
                                         </div>
-                                    </div>
+                                    </a>
+                                    <span class="badge bg-primary ms-auto me-4">{{post.type}}</span>
+                                </div>
+                            </div>
+                            <div class="card-body bg-darkg">
+                                <a href="#/" class="no-decoration">
+                                    <h3 class="lead text-white">{{post.title}}</h3>
+                                    <div class="text-white-50">{{post.preview}}...<span
+                                            class="small text-primary ms-2">Read
+                                            More</span></div>
                                 </a>
                             </div>
-                        </div>
-                        <div class="card-footer bg-darkg text-white-50">
-                            <div class="collapse">
-                                <form id="voteForm">
-                                    <div class="d-flex align-items-center text-white-50">
-                                        <div>
-                                            <button type="button" class="btn btn-primary">100%</button>
-                                            <button type="button" class="btn btn-secondary" data-toggle="collapse"><span
-                                                    class="close text-white">×</span></button>
+
+                            <div class="card bg-darkg">
+                                <div class="d-flex">
+                                    <a target="_blank" class="p-0 m-0" type="button">
+                                        <div id="imagesMain">
+                                            <div class="imagebox bg-none">
+                                                <img src="..." alt="Card image cap" class="card-img-top img-fluid image"
+                                                    :src="post.pic"
+                                                    style="width: 640px; height: 360px; object-fit: cover;" />
+                                                <div class="caption text-white w-100 h-100 d-flex">
+                                                    <div class="m-auto"><button class="btn btn-lg btn-info px-4"
+                                                            style="border-radius: 5rem;">Launch App <i
+                                                                class="ml-2 fas fa-external-link-alt"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="flex-fill mx-2">
-                                            <p class="my-1">
-                                                <input type="range" class="form-control-range" step="0.01" value="100">
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p class="my-0"><span class="mr-1" id="commentVal">0</span><i
-                                                    class="ml-1 fab fa-fw fa-hive"></i></p>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="d-flex align-items-center my-2">
-                                <div><a data-toggle="collapse">
-                                        <i class="fas fa-heart fa-fw me-1"></i></a>{{post.upVotes}}
-                                    <i class="fas fa-comment fa-fw ml-2 me-1"></i>{{post.length}}
+                                    </a>
                                 </div>
-                                <div class="ms-auto">{{post.total_payout_value}}<i class="ms-1 fab fa-fw fa-hive"></i>
+                            </div>
+
+                            <div class="card-footer bg-darkg text-white-50">
+                                <div class="collapse">
+                                    <form id="voteForm">
+                                        <div class="d-flex align-items-center text-white-50">
+                                            <div>
+                                                <button type="button" class="btn btn-primary">100%</button>
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-toggle="collapse"><span
+                                                        class="close text-white">×</span></button>
+                                            </div>
+                                            <div class="flex-fill mx-2">
+                                                <p class="my-1">
+                                                    <input type="range" class="form-control-range" step="0.01"
+                                                        value="100">
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p class="my-0"><span class="mr-1" id="commentVal">0</span><i
+                                                        class="ml-1 fab fa-fw fa-hive"></i></p>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="d-flex align-items-center my-2">
+                                    <div><a data-toggle="collapse">
+                                            <i class="fas fa-heart fa-fw me-1"></i></a>{{post.upVotes}}
+                                        <i class="fas fa-comment fa-fw ml-2 me-1"></i>{{post.length}}
+                                    </div>
+                                    <div class="ms-auto">{{post.total_payout_value}}<i
+                                            class="ms-1 fab fa-fw fa-hive"></i>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+
+
+
 
 
             <div class="row">
