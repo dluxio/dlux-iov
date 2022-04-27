@@ -88,48 +88,12 @@
                             <span class="sr-only">Toggle Dropdown</span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-dark">
-                            <a class="dropdown-item">
+                            <a class="dropdown-item" v-for="(value, key, index) in postSelect.types">
                                 <div class="input-group d-flex">
-                                    <div class="input-group-text bg-darkg text-white d-flex flex-fill"><i class="fa-solid fa-globe me-2"></i>360</div>
+                                    <div class="input-group-text bg-darkg text-white d-flex flex-fill"><i :class="value.icon"></i>{{key}}</div>
                                     <div class="input-group-text bg-darkg">
-                                        <input class="form-check-input mt-0" type="checkbox" value="" checked
-                                            aria-label="Checkbox for following text input">
-                                    </div>
-                                </div>
-                            </a>
-                            <a class="dropdown-item">
-                                <div class="input-group d-flex">
-                                    <div class="input-group-text bg-darkg text-white d-flex flex-fill"><i class="fa-solid fa-vr-cardboard me-2"></i>VR</div>
-                                    <div class="input-group-text bg-darkg">
-                                        <input class="form-check-input mt-0" type="checkbox" value="" checked
-                                            aria-label="Checkbox for following text input">
-                                    </div>
-                                </div>
-                            </a>
-                            <a class="dropdown-item">
-                                <div class="input-group d-flex">
-                                    <div class="input-group-text bg-darkg text-white d-flex flex-fill"><i class="fa-solid fa-glasses me-2"></i>AR</div>
-                                    <div class="input-group-text bg-darkg">
-                                        <input class="form-check-input mt-0" type="checkbox" value="" checked
-                                            aria-label="Checkbox for following text input">
-                                    </div>
-                                </div>
-                            </a>
-                            <a class="dropdown-item">
-                                <div class="input-group d-flex">
-                                    <div class="input-group-text bg-darkg text-white d-flex flex-fill"><i class="fa-solid fa-mobile-screen-button me-2"></i>APP</div>
-                                    <div class="input-group-text bg-darkg">
-                                        <input class="form-check-input mt-0" type="checkbox" value="" checked
-                                            aria-label="Checkbox for following text input">
-                                    </div>
-                                </div>
-                            </a>
-                            <a class="dropdown-item">
-                                <div class="input-group d-flex">
-                                    <div class="input-group-text bg-darkg text-white d-flex flex-fill"><i class="fa-solid fa-book me-2"></i>BLOG</div>
-                                    <div class="input-group-text bg-darkg">
-                                        <input class="form-check-input mt-0" type="checkbox" value=""
-                                            aria-label="Checkbox for following text input">
+                                        <input class="form-check-input mt-0" type="checkbox" value="" :checked="value.checked"
+                                            aria-label="Checkbox for following text input" @click="value.checked = !value.checked; selectPosts()">
                                     </div>
                                 </div>
                             </a>
