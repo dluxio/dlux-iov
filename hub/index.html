@@ -155,19 +155,19 @@
                             </div>
 
                             <div class="card-footer bg-darkg text-white-50">
-                                <div class="collapse">
+                                <div class="collapse" :id="'vote-' + post.id">
                                     <form id="voteForm">
                                         <div class="d-flex align-items-center text-white-50">
                                             <div>
-                                                <button type="button" class="btn btn-primary">100%</button>
+                                                <button type="button" class="btn btn-primary" @click="vote(post.id)" style="width: 100px;">{{post.slider}}%</button>
                                                 <button type="button" class="btn btn-secondary"
-                                                    data-toggle="collapse"><span
+                                                :data-bs-target="'#vote-' + post.id" data-bs-toggle="collapse"><span
                                                         class="close text-white">×</span></button>
                                             </div>
                                             <div class="flex-fill mx-2">
                                                 <p class="my-1">
                                                     <input type="range" class="form-control-range" step="0.01"
-                                                        value="100">
+                                                        value="100" v-model="post.slider">
                                                 </p>
                                             </div>
                                             <div>
@@ -178,7 +178,7 @@
                                     </form>
                                 </div>
                                 <div class="d-flex align-items-center my-2">
-                                    <div><a data-toggle="collapse">
+                                    <div><a data-bs-toggle="collapse" :data-bs-target="'#vote-' + post.id">
                                             <i class="fas fa-heart fa-fw me-1"></i></a>{{post.upVotes}}
                                         <i class="fas fa-comment fa-fw ml-2 me-1"></i>{{post.length}}
                                     </div>
