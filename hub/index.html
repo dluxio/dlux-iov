@@ -94,7 +94,7 @@
                                             :class="value.icon"></i>{{key}}</div>
                                     <div class="input-group-text bg-darkg">
                                         <input class="form-check-input mt-0" type="checkbox" value=""
-                                            :checked="value.checked" @click="selectPosts(true)" aria-label="Checkbox for following text input">
+                                            v-model="value.checked" @click="selectPosts(true)" aria-label="Checkbox for following text input">
                                     </div>
                                 </div>
                             </a>
@@ -225,10 +225,10 @@
                             <div class="card-body">
                                 <p class="p-2" id="modal_body"></p>
                             </div>
-                            <center>
+                            <div class="text-center">
                                 <a :href="displayPost.item.url" type="button"
                                     class="btn btn-outline-danger mb-4 btn-launch">Launch App</a>
-                            </center>
+                            </div>
                             <div class="card-footer">
                                 <div class="collapse" :data-target="'#vote-' + displayPost.item.id">
                                     <form id="voteForm">
