@@ -604,11 +604,6 @@ var app = new Vue({
                 post.author.toLowerCase().indexOf(this.postSelect.searchTerm.toLowerCase()) > -1 || 
                 post.json_metadata.tags.indexOf(this.postSelect.searchTerm.toLowerCase()) > -1)
             for(var i = 0; i < this.displayPosts.length; i++){
-                console.log(
-                  this.displayPosts[i].type,
-                  this.postSelect.types[this.displayPosts[i].type].checked,
-
-                );
                 if(!this.postSelect.types[this.displayPosts[i].type].checked){
                     this.displayPosts.splice(i, 1)
                     i--
@@ -939,9 +934,13 @@ var app = new Vue({
         //this.getQuotes();
         //this.getNodes();
         this.getPosts()
-        this.getProtocol();
-        //if (user != "GUEST") this.getTokenUser(user);
-        //if (user != "GUEST") this.getHiveUser(user);
+        this.getProtocol()
+        var tooltipTriggerList = [].slice.call(
+          document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        );
+        tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
     },
     computed: {
         location: {
