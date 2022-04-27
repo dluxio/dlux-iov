@@ -124,7 +124,7 @@
                                     </a>
                                     <span v-if="post.type == 360" class="badge bg-primary ms-auto me-4"><i
                                             class="fa-solid fa-globe me-2"></i>{{post.type}}</span>
-                                    <span v-if="post.type == VR" class="badge bg-primary ms-auto me-4"><i
+                                    <span v-if="post.type == 'VR'" class="badge bg-primary ms-auto me-4"><i
                                             class="fa-solid fa-vr-cardboard me-2"></i>{{post.type}}</span>
                                 </div>
                             </div>
@@ -152,7 +152,7 @@
                                                             style="border-radius: 5rem;">Launch<i
                                                                 class="ms-2 fas fa-external-link-alt"></i></button>
                                                     </div>
-                                                    <div class="m-auto p-3 text-center" v-if="post.type == vr">
+                                                    <div class="m-auto p-3 text-center" v-if="post.type == 'VR'">
                                                         <p><i class="fa-solid fa-globe me-2"></i>3D / VR Experience</p>
                                                         <button class="btn btn-lg btn-info px-4"
                                                             style="border-radius: 5rem;">Launch<i
