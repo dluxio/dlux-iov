@@ -587,7 +587,6 @@ var app = new Vue({
                         );
                         authors.push(this.posturls[post].author)
                     }
-                    this.selectPosts()
                     authors = [...new Set(authors)]
                     this.getHiveAuthors(authors)
                 })
@@ -619,6 +618,7 @@ var app = new Vue({
             }
         },
         getContent(a, p) {
+            if(a && p){
             fetch(this.hapi, {
                 body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content", "params":["${a}", "${p}"], "id":1}`,
                 headers: {
@@ -628,31 +628,41 @@ var app = new Vue({
             })
                 .then(r => r.json())
                 .then(res => {
-                    this.posturls[url] = {
-                        ...this.posturls[url],
-                        ...res.result
-                    }
+                    if (res.result){
+                      this.posturls[res.result.url] = {
+                        ...this.posturls[res.result.url],
+                        ...res.result,
+                      };
                     try{
-                        this.posturls[url].json_metadata = JSON.parse(this.posturls[url].json_metadata)
-                    } catch (e){console.log(url, 'no JSON?');}
+                        this.posturls[res.result.url].json_metadata =
+                          JSON.parse(
+                            this.posturls[res.result.url].json_metadata
+                          );
+                    } catch (e){console.log(res.result.url, "no JSON?");}
                     var type = 'Blog'
                     if (
                       "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
-                      this.posturls[url].json_metadata.vrHash
+                      this.posturls[res.result.url].json_metadata.vrHash
                     )
                       type = "360";
-                    else if (this.posturls[url].json_metadata.vrHash)
+                    else if (this.posturls[res.result.url].json_metadata.vrHash)
                       type = "VR";
-                    else if (this.posturls[url].json_metadata.arHash)
+                    else if (this.posturls[res.result.url].json_metadata.arHash)
                       type = "AR";
-                    else if (this.posturls[url].json_metadata.appHash)
+                    else if (this.posturls[res.result.url].json_metadata.appHash)
                       type = "APP";
-                    else if (this.posturls[url].json_metadata.audHash)
+                    else if (this.posturls[res.result.url].json_metadata.audHash)
                       type = "Audio";
-                    else if (this.posturls[url].json_metadata.vidHash)
+                    else if (this.posturls[res.result.url].json_metadata.vidHash)
                       type = "Video";
-                    this.posturls[url].type = type
+                    this.posturls[res.result.url].type = type;
+
+                    this.selectPosts();
+                    }
                 })
+            } else {
+                console.log("no author or permlink", a, p)
+            }
         },
         getQuotes() {
             fetch(
