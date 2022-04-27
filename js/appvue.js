@@ -57,244 +57,283 @@ var app = new Vue({
     el: "#app", // vue 2
     data() {
         return {
-            toSign: {},
-            account: user,
-            pfp: {
-                set: "",
-                uid: "",
+          toSign: {},
+          account: user,
+          pfp: {
+            set: "",
+            uid: "",
+          },
+          hasDrop: false,
+          dropnai: "",
+          balance: "0.000",
+          bartoken: "",
+          barhive: "",
+          barhbd: "",
+          bargov: "",
+          barpow: "",
+          toSign: {},
+          buyFormValid: false,
+          sellFormValid: false,
+          govFormValid: false,
+          powFormValid: false,
+          sendFormValid: false,
+          hiveFormValid: false,
+          hbdFormValid: false,
+          lapi: lapi,
+          hapi: hapi,
+          accountapi: {},
+          hiveprice: {
+            hive: {
+              usd: 1,
             },
-            hasDrop: false,
-            dropnai: "",
-            balance: "0.000",
-            bartoken: "",
-            barhive: "",
-            barhbd: "",
-            bargov: "",
-            barpow: "",
-            toSign: {},
-            buyFormValid: false,
-            sellFormValid: false,
-            govFormValid: false,
-            powFormValid: false,
-            sendFormValid: false,
-            hiveFormValid: false,
-            hbdFormValid: false,
-            lapi: lapi,
-            hapi: hapi,
-            accountapi: {},
-            hiveprice: {
-                hive: {
-                    usd: 1,
+          },
+          hbdprice: {
+            hive_dollar: {
+              usd: 1,
+            },
+          },
+          nodes: {},
+          runners: [],
+          runnersSearch: [],
+          marketnodes: {},
+          dexapi: {
+            markets: {
+              hive: {
+                tick: 0.001,
+              },
+              hbd: {
+                tick: 0.001,
+              },
+            },
+          },
+          prefix: "",
+          multisig: "",
+          jsontoken: "",
+          node: "",
+          showTokens: {},
+          behind: "",
+          stats: {},
+          behindTitle: "",
+          TOKEN: "LARYNX",
+          sendTo: "",
+          sendAmount: 0,
+          sendMemo: "",
+          sendAllowed: false,
+          sendHiveTo: "",
+          sendHiveAllowed: false,
+          sendHiveAmount: 0,
+          sendHiveMemo: "",
+          sendHBDTo: "",
+          sendHBDAllowed: false,
+          sendHBDAmount: 0,
+          sendHBDMemo: "",
+          recenthive: {},
+          recenthbd: {},
+          openorders: [],
+          toasts: [],
+          features: {
+            claim_id: "claim",
+            claim_S: "Airdrop",
+            claim_B: true,
+            claim_json: "drop",
+            rewards_id: "shares_claim",
+            rewards_S: "Rewards",
+            rewards_B: true,
+            rewards_json: "claim",
+            rewardSel: false,
+            reward2Gov: false,
+            send_id: "send",
+            send_S: "Send",
+            send_B: true,
+            send_json: "send",
+            powup_id: "power_up",
+            powup_B: false,
+            pow_val: "",
+            powdn_id: "power_down",
+            powdn_B: false,
+            powsel_up: true,
+            govup_id: "gov_up",
+            govup_B: true,
+            gov_val: "",
+            govsel_up: true,
+            govdn_id: "gov_down",
+            govdn_B: true,
+            node: {
+              id: "node_add",
+              opts: [
+                {
+                  S: "Domain",
+                  type: "text",
+                  info: "https://no-trailing-slash.com",
+                  json: "domain",
+                  val: "",
                 },
-            },
-            hbdprice: {
-                hive_dollar: {
-                    usd: 1,
+                {
+                  S: "DEX Fee Vote",
+                  type: "number",
+                  info: "500 = .5%",
+                  max: 1000,
+                  min: 0,
+                  json: "bidRate",
+                  val: "",
                 },
-            },
-            nodes: {},
-            runners: [],
-            runnersSearch: [],
-            marketnodes: {},
-            dexapi: {
-                markets: {
-                    hive: {
-                        tick: 0.001,
-                    },
-                    hbd: {
-                        tick: 0.001,
-                    },
+                {
+                  S: "DEX Max Vote",
+                  type: "number",
+                  info: "10000 = 100%",
+                  max: 10000,
+                  min: 0,
+                  json: "dm",
+                  val: "",
                 },
-            },
-            prefix: "",
-            multisig: "",
-            jsontoken: "",
-            node: "",
-            showTokens: {},
-            behind: "",
-            stats: {},
-            behindTitle: "",
-            TOKEN: "LARYNX",
-            sendTo: "",
-            sendAmount: 0,
-            sendMemo: "",
-            sendAllowed: false,
-            sendHiveTo: "",
-            sendHiveAllowed: false,
-            sendHiveAmount: 0,
-            sendHiveMemo: "",
-            sendHBDTo: "",
-            sendHBDAllowed: false,
-            sendHBDAmount: 0,
-            sendHBDMemo: "",
-            recenthive: {},
-            recenthbd: {},
-            openorders: [],
-            toasts: [],
-            features: {
-                claim_id: "claim",
-                claim_S: "Airdrop",
-                claim_B: true,
-                claim_json: "drop",
-                rewards_id: "shares_claim",
-                rewards_S: "Rewards",
-                rewards_B: true,
-                rewards_json: "claim",
-                rewardSel: false,
-                reward2Gov: false,
-                send_id: "send",
-                send_S: "Send",
-                send_B: true,
-                send_json: "send",
-                powup_id: "power_up",
-                powup_B: false,
-                pow_val: "",
-                powdn_id: "power_down",
-                powdn_B: false,
-                powsel_up: true,
-                govup_id: "gov_up",
-                govup_B: true,
-                gov_val: "",
-                govsel_up: true,
-                govdn_id: "gov_down",
-                govdn_B: true,
-                node: {
-                    id: "node_add",
-                    opts: [
-                        {
-                            S: "Domain",
-                            type: "text",
-                            info: "https://no-trailing-slash.com",
-                            json: "domain",
-                            val: "",
-                        },
-                        {
-                            S: "DEX Fee Vote",
-                            type: "number",
-                            info: "500 = .5%",
-                            max: 1000,
-                            min: 0,
-                            json: "bidRate",
-                            val: "",
-                        },
-                        {
-                            S: "DEX Max Vote",
-                            type: "number",
-                            info: "10000 = 100%",
-                            max: 10000,
-                            min: 0,
-                            json: "dm",
-                            val: "",
-                        },
-                        {
-                            S: "DEX Slope Vote",
-                            type: "number",
-                            info: "10000 = 100%",
-                            max: 10000,
-                            min: 0,
-                            json: "ds",
-                            val: "",
-                        },
-                        {
-                            S: "DAO Claim Vote",
-                            type: "number",
-                            info: "1500 = 15%",
-                            max: 10000,
-                            min: 0,
-                            json: "dv",
-                            val: "",
-                        },
-                    ],
+                {
+                  S: "DEX Slope Vote",
+                  type: "number",
+                  info: "10000 = 100%",
+                  max: 10000,
+                  min: 0,
+                  json: "ds",
+                  val: "",
                 },
-            },
-            accountinfo: {},
-            filterusers: {
-                checked: true,
-                value: "",
-            },
-            filteraccount: {
-                checked: false,
-                value: "",
-                usera: false,
-                userd: false,
-                gova: false,
-                govd: true,
-                apia: false,
-                apid: false,
-            },
-            lockgov: {
-                checked: true,
-            },
-            unlockgov: {
-                checked: false,
-            },
-            buyhive: {
-                checked: true,
-            },
-            buyhbd: {
-                checked: false,
-            },
-            buylimit: {
-                checked: true,
-            },
-            buymarket: {
-                checked: false,
-            },
-            selllimit: {
-                checked: true,
-            },
-            sellmarket: {
-                checked: false,
-            },
-            pwrup: {
-                checked: true,
-            },
-            pwrdown: {
-                checked: false,
-            },
-            govlock: {
-                checked: true,
-            },
-            govunlock: {
-                checked: false,
-            },
-            posturls: {},
-            POSTselect: {
-                sort: "time",
-                searchTerm: "",
-                sortDir: "desc",
-                amount: 30,
-                vrOnly: false,
-                arOnly: false,
-                xrOnly: false,
-                textOnly: false,
-            },
-            displayPosts: [],
-            displayPost: {
-                index: 0,
-                item: {
-                    author: "",
-                    permlink: "",
-                    ago: "",
-                    pic: "",
-                    preview: "",
-                    appurl: "",
-                    id: "",
-                    slider: 100,
-                    title: "",
-                    url: "",
-                    children: [],
-                    total_payout_value: 0,
-                    active_votes: [],
-                    upVotes: 0,
-                    downVotes: 0,
-                    body: "",
-                    json_metadata: {},
-                    created: "",
+                {
+                  S: "DAO Claim Vote",
+                  type: "number",
+                  info: "1500 = 15%",
+                  max: 10000,
+                  min: 0,
+                  json: "dv",
+                  val: "",
                 },
-                items: [],
+              ],
             },
-            authors: {},
+          },
+          accountinfo: {},
+          filterusers: {
+            checked: true,
+            value: "",
+          },
+          filteraccount: {
+            checked: false,
+            value: "",
+            usera: false,
+            userd: false,
+            gova: false,
+            govd: true,
+            apia: false,
+            apid: false,
+          },
+          lockgov: {
+            checked: true,
+          },
+          unlockgov: {
+            checked: false,
+          },
+          buyhive: {
+            checked: true,
+          },
+          buyhbd: {
+            checked: false,
+          },
+          buylimit: {
+            checked: true,
+          },
+          buymarket: {
+            checked: false,
+          },
+          selllimit: {
+            checked: true,
+          },
+          sellmarket: {
+            checked: false,
+          },
+          pwrup: {
+            checked: true,
+          },
+          pwrdown: {
+            checked: false,
+          },
+          govlock: {
+            checked: true,
+          },
+          govunlock: {
+            checked: false,
+          },
+          posturls: {},
+          postSelect: {
+            sort: "time",
+            searchTerm: "",
+            entry: "new",
+            sortDir: "desc",
+            amount: 30,
+            types: {
+              VR: {
+                checked: true,
+                icon: "",
+                hint: "",
+              },
+              AR: {
+                checked: true,
+                icon: "",
+                hint: "",
+              },
+              XR: {
+                checked: true,
+                icon: "",
+                hint: "",
+              },
+              APP: {
+                checked: true,
+                icon: "",
+                hint: "",
+              },
+              ["360"]: {
+                checked: true,
+                icon: "",
+                hint: "",
+              },
+              Audio: {
+                checked: true,
+                icon: "",
+                hint: "",
+              },
+              Video: {
+                checked: true,
+                icon: "",
+                hint: "",
+              },
+              Blog: {
+                checked: false,
+                icon: "",
+                hint: "",
+              },
+            },
+          },
+          displayPosts: [],
+          displayPost: {
+            index: 0,
+            item: {
+              author: "",
+              permlink: "",
+              ago: "",
+              pic: "",
+              preview: "",
+              appurl: "",
+              id: "",
+              slider: 100,
+              title: "",
+              url: "",
+              children: [],
+              total_payout_value: 0,
+              active_votes: [],
+              upVotes: 0,
+              downVotes: 0,
+              body: "",
+              json_metadata: {},
+              created: "",
+            },
+            items: [],
+          },
+          authors: {},
         };
     },
     components: {
@@ -332,7 +371,7 @@ var app = new Vue({
                 this[modal].item = this[modal].items[this[modal].index];
             } else if (this[modal].index < this.allPosts.length - 1) {
                 this.POSTselect.amount += 6;
-                this.selectPosts("", "", [modal, this[modal].index + 1]);
+                this.selectPosts("", [modal, this[modal].index + 1]);
             } else {
                 this[modal].index = 0;
                 this[modal].item = this[modal].items[this[modal].index];
@@ -541,10 +580,33 @@ var app = new Vue({
                         );
                         authors.push(this.posturls[post].author)
                     }
+                    this.selectPosts()
                     authors = [...new Set(authors)]
-                    console.log(authors)
                     this.getHiveAuthors(authors)
                 })
+        },
+        selectPosts(reset, modal){
+            if (reset) {
+                this.displayPosts = []
+            }
+            this.displayPosts = [...this.posturls];
+            if (this.postSelect.searchTerm)this.displayPosts = this.displayPosts.filter(post => 
+                post.title.toLowerCase().indexOf(this.postSelect.searchTerm.toLowerCase()) > -1  || 
+                post.author.toLowerCase().indexOf(this.postSelect.searchTerm.toLowerCase()) > -1 || 
+                post.json_metadata.tags.indexOf(this.postSelect.searchTerm.toLowerCase()) > -1)
+            for(var i = 0; i < this.displayPosts.length; i++){
+                if(!this.postSelect.types[this.displayPosts[i].type].checked){
+                    this.displayPosts.splice(i, 1)
+                    i--
+                }
+            }
+            if (this.postSelect.entry == "new")
+                this.sort("displayPosts", "created", "desc");
+            if (modal) {
+                this[modal[0]].items = this.displayPosts
+                this[modal[0]].item = this[modal[0]].items[modal[1]];
+                this[modal[0]].index = modal[1]
+            }
         },
         getContent(a, p) {
             fetch(this.hapi, {
@@ -561,22 +623,22 @@ var app = new Vue({
                         ...res.result
                     }
                     this.posturls[url].json_metadata = JSON.parse(this.posturls[url].json_metadata)
-                    var type = 'blog'
+                    var type = 'Blog'
                     if (
                       "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
                       this.posturls[url].json_metadata.vrHash
                     )
                       type = "360";
                     else if (this.posturls[url].json_metadata.vrHash)
-                      type = "vr";
+                      type = "VR";
                     else if (this.posturls[url].json_metadata.arHash)
-                      type = "ar";
+                      type = "AR";
                     else if (this.posturls[url].json_metadata.appHash)
-                      type = "app";
+                      type = "APP";
                     else if (this.posturls[url].json_metadata.audHash)
-                      type = "audio";
+                      type = "Audio";
                     else if (this.posturls[url].json_metadata.audHash)
-                      type = "video";
+                      type = "Video";
                     this.posturls[url].type = type
                       this.displayPosts.push(this.posturls[url]);
                 })
