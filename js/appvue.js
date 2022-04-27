@@ -632,7 +632,9 @@ var app = new Vue({
                         ...this.posturls[url],
                         ...res.result
                     }
-                    this.posturls[url].json_metadata = JSON.parse(this.posturls[url].json_metadata)
+                    try{
+                        this.posturls[url].json_metadata = JSON.parse(this.posturls[url].json_metadata)
+                    } catch (e){console.log(url, 'no JSON?');}
                     var type = 'Blog'
                     if (
                       "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
