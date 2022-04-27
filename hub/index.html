@@ -94,7 +94,9 @@
                                             :class="value.icon"></i>{{key}}</div>
                                     <div class="input-group-text bg-darkg">
                                         <input class="form-check-input mt-0" type="checkbox" value=""
-                                            :checked="value.checked" @click="value.checked = !value.checked;selectPosts(true)" aria-label="Checkbox for following text input">
+                                            :checked="value.checked"
+                                            @click="value.checked = !value.checked;selectPosts(true)"
+                                            aria-label="Checkbox for following text input">
                                     </div>
                                 </div>
                             </a>
@@ -103,96 +105,151 @@
                 </div>
             </div>
 
-            <!-- <div class="row d-none" data-masonry='{"percentPosition": true }'>
+            <div class="row">
+                <div class="col-sm-6 col-lg-4 mb-4" v-for="post in displayPosts">
+                    <div class="d-flex align-items-center">
+                        <a :href="'/@' + post.author" class="no-decoration">
+                            <div class="d-flex align-items-center">
+                                <img :src="'https://images.hive.blog/u/' + post.author + '/avatar'"
+                                    alt=""
+                                    class="rounded-circle bg-light img-fluid me-2 cover author-img" style="width: 50px;">
+                                <h3 class="m-0 text-primary">@{{post.author}}</h3>
+                                <div class="ms-2"><span
+                                        class="badge badge-pill badge-light">{{authors[post.author] ?
+                                            readRep(authors[post.author].reputation): ''}}</span>
+                                </div>
+                            </div>
+                        </a>
+                        <span
+                            class="badge badge-danger ms-auto me-4">{{post.type}}</span>
+                    </div>
 
-                <div class="col-sm-6 col-lg-4 mb-4">
-                    <div class="card">
-                        <svg class="bd-placeholder-img card-img-top" width="100%" height="200"
-                            xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Image cap"
-                            preserveAspectRatio="xMidYMid slice" focusable="false">
-                            <title>Placeholder</title>
-                            <rect width="100%" height="100%" fill="#868e96" /><text x="50%" y="50%" fill="#dee2e6"
-                                dy=".3em">Image cap</text>
-                        </svg>
+                    <div class="mt-2">
+                        <a href="#/" class="no-decoration">
+                            <h3 class="lead text-white">{{post.title}}</h3>
+                            <div class="text-white-50">{{post.preview}}<span class="small text-primary">Read More</span></div>
+                        </a>
+                    </div>
 
-                        <div class="card-body">
-                            <h5 class="card-title">Card title that wraps to a new line</h5>
-                            <p class="card-text">This is a longer card with supporting text below as a natural
-                                lead-in to additional content. This content is a little bit longer.</p>
+                    <div class="card bg-dark mt-2">
+                        <div class="d-flex">
+                            <a target="_blank" class="p-0 m-0" type="button">
+                                <div id="imagesMain">
+                                    <div class="imagebox bg-none">
+                                        <img src="..." alt="Card image cap" class="card-img-top img-fluid image"
+                                            :src="post.pic" style="width: 640px; height: 360px; object-fit: cover;" />
+                                        <div class="caption text-white w-100 h-100 d-flex">
+                                            <div class="m-auto"><button class="btn btn-lg btn-info px-4"
+                                                    style="border-radius: 5rem;">Launch App <i
+                                                        class="ml-2 fas fa-external-link-alt"></i></button></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-darker text-white-50">
+                        <div class="collapse">
+                            <form id="voteForm">
+                                <div class="d-flex align-items-center text-white-50">
+                                    <div>
+                                        <button type="button" class="btn btn-primary">100%</button>
+                                        <button type="button" class="btn btn-secondary" data-toggle="collapse"><span
+                                                class="close text-white">×</span></button>
+                                    </div>
+                                    <div class="flex-fill mx-2">
+                                        <p class="my-1">
+                                            <input type="range" class="form-control-range" step="0.01" value="100">
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p class="my-0"><span class="mr-1" id="commentVal">0</span><i
+                                                class="ml-1 fab fa-fw fa-hive"></i></p>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="d-flex align-items-center my-2">
+                            <div><a data-toggle="collapse">
+                                    <i class="fas fa-heart fa-fw mr-1"></i></a>upvotes
+                                <i class="fas fa-comment fa-fw ml-2 mr-1"></i>children
+                            </div>
+                            <div class="ml-auto">total payout value<i class="ml-1 fab fa-fw fa-hive"></i></div>
                         </div>
                     </div>
                 </div>
-            </div> -->
+            </div>
 
 
-            <div class="row" >
 
-                    <div class="col-sm-6 col-lg-4 mb-4"  v-for="post in displayPosts">
-                        <div class="card text-white bg-dark mt-2 mb-3">
-                            <div class="card-header">
-                                <div class="">
-                                    <div class="float-left"><a :href="'/@' + post.author"><img
-                                                :src="'https://images.hive.blog/u/' + post.author + '/avatar'" alt=""
-                                                class="rounded-circle bg-light img-fluid mr-2 cover author-img"></a>
-                                    </div>
-                                    <div class="float-left">
-                                        <p class="mt-0 mb-0 text-muted text-semibold"><a :href="'/@' + post.author"
-                                                class="a-1">{{post.author}}<span
-                                                    class="ml-2 badge badge-pill badge-light">{{authors[post.author] ?
-                                                    readRep(authors[post.author].reputation): ''}}</span></a>
-                                        </p>
-                                        <small class="text-muted">post.ago</small>
-                                    </div>
+            <div class="row">
+
+                <div class="col-sm-6 col-lg-4 mb-4" v-for="post in displayPosts">
+                    <div class="card text-white bg-dark mt-2 mb-3">
+                        <div class="card-header">
+                            <div class="">
+                                <div class="float-left"><a :href="'/@' + post.author"><img
+                                            :src="'https://images.hive.blog/u/' + post.author + '/avatar'" alt=""
+                                            class="rounded-circle bg-light img-fluid mr-2 cover author-img"></a>
                                 </div>
-                                <div class="float-right"><span class="badge badge-secondary">{{post.type}}</span></div>
-                            </div>
-                            <a href="#detailModal" class="a-1" data-bs-toggle="modal" @click="modalSelect(url)">
-                                <!-- @click="window.history.pushState('{{url}}','{{dluxLoad.data.result.title}}', '/blog/@{{author}}/{{permlink}}');updateModalData('{{dluxLoad.data.result.created}}', '{{dluxLoad.data.result.json_metadata.parseJSON().toString()}}', '{{dluxLoad.data.result.title}}', '{{dluxLoad.data.result.body.encodeURI()}}', '{{dluxLoad.data.result.active_votes.toString()}}', '{{dluxLoad.data.result.children.toString()}}', '{{dluxLoad.data.result.total_payout_value}}', '{{dluxLoad.data.result.author}}', '{{dluxLoad.data.result.permlink}}');" -->
-                                <h5 class="card-title mt-2 text-center text-capitalize">{{post.title}}</h5>
-                                <img src="..." alt="Card image cap" class="card-img-top" :src="post.pic" />
-                                <div class="card-body">
-                                    <p class="preview-text">{{post.preview}}</p>
+                                <div class="float-left">
+                                    <p class="mt-0 mb-0 text-muted text-semibold"><a :href="'/@' + post.author"
+                                            class="a-1">{{post.author}}<span
+                                                class="ml-2 badge badge-pill badge-light">{{authors[post.author] ?
+                                                readRep(authors[post.author].reputation): ''}}</span></a>
+                                    </p>
+                                    <small class="text-muted">{{post.ago}}</small>
                                 </div>
-                            </a>
-                            <div class="text-center">
-                                <a :href="post.appurl" type="button" class="btn btn-outline-danger mb-4 btn-launch"
-                                    target="_blank" v-if="'app'">Launch App</a>
                             </div>
-                            <div class="card-footer">
-                                <div class="collapse" :id="'vote-' + post.id">
-                                    <form id="voteForm">
-                                        <div class="d-flex align-items-center text-white-50">
-                                            <div>
-                                                <button type="button" class="btn btn-primary"
-                                                    @click="vote(post.id)">{{post.slider}}%</button>
-                                                <button type="button" class="btn btn-secondary" data-toggle="collapse"
-                                                    :data-target="'#vote-' + post.id"><span
-                                                        class="close text-white">×</span></button>
-                                            </div>
-                                            <div class="flex-fill mx-2">
-                                                <p class="my-1">
-                                                    <input type="range" class="form-control-range" step="0.01"
-                                                        value="100" v-model="post.slider">
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <p class="my-0"><span class="mr-1" id="commentVal">0</span><i
-                                                        class="ml-1 fab fa-fw fa-hive"></i></p>
-                                            </div>
+                            <div class="float-right"><span class="badge badge-secondary">{{post.type}}</span></div>
+                        </div>
+                        <a href="#detailModal" class="a-1" data-bs-toggle="modal" @click="modalSelect(url)">
+                            <!-- @click="window.history.pushState('{{url}}','{{dluxLoad.data.result.title}}', '/blog/@{{author}}/{{permlink}}');updateModalData('{{dluxLoad.data.result.created}}', '{{dluxLoad.data.result.json_metadata.parseJSON().toString()}}', '{{dluxLoad.data.result.title}}', '{{dluxLoad.data.result.body.encodeURI()}}', '{{dluxLoad.data.result.active_votes.toString()}}', '{{dluxLoad.data.result.children.toString()}}', '{{dluxLoad.data.result.total_payout_value}}', '{{dluxLoad.data.result.author}}', '{{dluxLoad.data.result.permlink}}');" -->
+                            <h5 class="card-title mt-2 text-center text-capitalize">{{post.title}}</h5>
+                            <img src="..." alt="Card image cap" class="card-img-top" :src="post.pic" />
+                            <div class="card-body">
+                                <p class="preview-text">{{post.preview}}</p>
+                            </div>
+                        </a>
+                        <div class="text-center">
+                            <a :href="post.appurl" type="button" class="btn btn-outline-danger rounded-pill mb-4"
+                                target="_blank" v-if="'app'">Launch</a>
+                        </div>
+                        <div class="card-footer">
+                            <div class="collapse" :id="'vote-' + post.id">
+                                <form id="voteForm">
+                                    <div class="d-flex align-items-center text-white-50">
+                                        <div>
+                                            <button type="button" class="btn btn-primary"
+                                                @click="vote(post.id)">{{post.slider}}%</button>
+                                            <button type="button" class="btn btn-secondary" data-toggle="collapse"
+                                                :data-target="'#vote-' + post.id"><span
+                                                    class="close text-white">×</span></button>
                                         </div>
-                                    </form>
-                                </div>
-                                <div class="d-flex align-items-center my-2">
-                                    <div><a data-toggle="collapse" :data-target="'#vote-' + post.id"><i
-                                                class="fas fa-heart fa-fw mr-1"></i></a>{{post.upVotes}}
-                                        <i class="fas fa-comment fa-fw ml-2 mr-1"></i>post.children
+                                        <div class="flex-fill mx-2">
+                                            <p class="my-1">
+                                                <input type="range" class="form-control-range" step="0.01" value="100"
+                                                    v-model="post.slider">
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p class="my-0"><span class="mr-1" id="commentVal">0</span><i
+                                                    class="ml-1 fab fa-fw fa-hive"></i></p>
+                                        </div>
                                     </div>
-                                    <div class="ml-auto">{{post.total_payout_value}}<i
-                                            class="ml-1 fab fa-fw fa-hive"></i></div>
+                                </form>
+                            </div>
+                            <div class="d-flex align-items-center my-2">
+                                <div><a data-toggle="collapse" :data-target="'#vote-' + post.id"><i
+                                            class="fas fa-heart fa-fw mr-1"></i></a>{{post.upVotes}}
+                                    <i class="fas fa-comment fa-fw ml-2 mr-1"></i>post.children
+                                </div>
+                                <div class="ml-auto">{{post.total_payout_value}}<i class="ml-1 fab fa-fw fa-hive"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
             </div>
             <div class="modal fade" id="detailModal" tabindex="11" role="dialog" aria-hidden="true">

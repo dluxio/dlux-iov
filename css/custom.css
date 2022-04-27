@@ -212,3 +212,33 @@ background-color:rgba(42, 48, 54, 0.8);
 -webkit-backdrop-filter: blur(10px);
 backdrop-filter: blur(10px);
 }
+#imagesMain {
+  padding: 0;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: auto;
+  text-align: center;
+}
+
+
+.caption{
+    top: 50%;
+left: 50%;
+    background:rgba(0,0,0,0.75);
+transition: .5s ease;
+    opacity:0;   
+    position: absolute;
+    transform: translate(-50%, -50%);
+-ms-transform: translate(-50%, -50%);
+text-align: center; 
+}
+.imagebox:hover .caption
+{ 
+    opacity: 1;
+    text-align:justify;
+    color:#000000;
+    font-size:20px;
+    font-weight:700;
+    
+    padding:30px;
+}
