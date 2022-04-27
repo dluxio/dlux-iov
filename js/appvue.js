@@ -264,7 +264,7 @@ var app = new Vue({
             searchTerm: "",
             entry: "new",
             sortDir: "desc",
-            amount: 30,
+            amount: 50,
             types: {
               VR: {
                 checked: true,
@@ -278,7 +278,7 @@ var app = new Vue({
               },
               XR: {
                 checked: true,
-                icon: "",
+                icon: "fa-brands fa-unity me-2",
                 hint: "",
               },
               APP: {
@@ -289,6 +289,11 @@ var app = new Vue({
               ["360"]: {
                 checked: true,
                 icon: "fa-solid fa-globe me-2",
+                hint: "",
+              },
+              ['3D']: {
+                checked: true,
+                icon: "",
                 hint: "",
               },
               Audio: {
@@ -351,30 +356,32 @@ var app = new Vue({
                 document.documentElement.scrollHeight -
                 document.documentElement.clientHeight * 2
             ) {
-                this.POSTselect.amount += 30;
+                this.postSelect.amount += 30;
                 this.selectPosts();
+                console.log('scrolling')
             }
         },
         modalNext(modal) {
             if (
-                this.POSTselect.vrOnly ||
-                this.POSTselect.arOnly ||
-                this.POSTselect.xrOnly ||
-                this.POSTselect.textOnly ||
-                this.POSTselect.sort == "payout" ||
-                this.POSTselect.searchTerm
+              this.postSelect.VR.checked ||
+              this.postSelect.AR.checked ||
+              this.postSelect.XR.checked ||
+              this.postSelect.Blog.checked ||
+              this.postSelect.sort == "payout" ||
+              this.postSelect.searchTerm
             ) {
-                this[modal].index = (this[modal].index + 1) % this[modal].items.length;
-                this[modal].item = this[modal].items[this[modal].index];
+              this[modal].index =
+                (this[modal].index + 1) % this[modal].items.length;
+              this[modal].item = this[modal].items[this[modal].index];
             } else if (this[modal].index < this[modal].items.length - 1) {
-                this[modal].index++;
-                this[modal].item = this[modal].items[this[modal].index];
+              this[modal].index++;
+              this[modal].item = this[modal].items[this[modal].index];
             } else if (this[modal].index < this.allPosts.length - 1) {
-                this.POSTselect.amount += 6;
-                this.selectPosts("", [modal, this[modal].index + 1]);
+              this.postSelect.amount += 6;
+              this.selectPosts("", [modal, this[modal].index + 1]);
             } else {
-                this[modal].index = 0;
-                this[modal].item = this[modal].items[this[modal].index];
+              this[modal].index = 0;
+              this[modal].item = this[modal].items[this[modal].index];
             }
         },
         modalPrev(modal) {
@@ -589,7 +596,10 @@ var app = new Vue({
             if (reset) {
                 this.displayPosts = []
             }
-            this.displayPosts = [...this.posturls];
+            for (var post in this.posturls){
+                if (this.posturls[post].type)
+                  this.displayPosts.push(this.posturls[post]);
+            }
             if (this.postSelect.searchTerm)this.displayPosts = this.displayPosts.filter(post => 
                 post.title.toLowerCase().indexOf(this.postSelect.searchTerm.toLowerCase()) > -1  || 
                 post.author.toLowerCase().indexOf(this.postSelect.searchTerm.toLowerCase()) > -1 || 
@@ -637,10 +647,9 @@ var app = new Vue({
                       type = "APP";
                     else if (this.posturls[url].json_metadata.audHash)
                       type = "Audio";
-                    else if (this.posturls[url].json_metadata.audHash)
+                    else if (this.posturls[url].json_metadata.vidHash)
                       type = "Video";
                     this.posturls[url].type = type
-                      this.displayPosts.push(this.posturls[url]);
                 })
         },
         getQuotes() {
@@ -758,7 +767,6 @@ var app = new Vue({
                 })
                     .then((response) => response.json())
                     .then((data) => {
-                        console.log(data)
                         this.accountinfo = data.result[0];
                         this.barhive = this.accountinfo.balance;
                         this.barhbd = this.accountinfo.hbd_balance;
@@ -780,7 +788,6 @@ var app = new Vue({
                 })
                     .then((response) => response.json())
                     .then((data) => {
-                        console.log(data);
                         for (var i = 0; i < data.result.length; i++) {
                             this.authors[data.result[i].name] = data.result[i]
                         }
