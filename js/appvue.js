@@ -607,7 +607,7 @@ var app = new Vue({
                 console.log(
                   this.displayPosts[i].type,
                   this.postSelect.types[this.displayPosts[i].type].checked,
-                  
+
                 );
                 if(!this.postSelect.types[this.displayPosts[i].type].checked){
                     this.displayPosts.splice(i, 1)
@@ -643,6 +643,9 @@ var app = new Vue({
                           JSON.parse(
                             this.posturls[res.result.url].json_metadata
                           );
+                          this.posturls[res.result.url].pic = this.picFind(
+                            this.posturls[res.result.url].json_metadata
+                          );
                     } catch (e){console.log(res.result.url, "no JSON?");}
                     var type = 'Blog'
                     if (
@@ -661,12 +664,107 @@ var app = new Vue({
                     else if (this.posturls[res.result.url].json_metadata.vidHash)
                       type = "Video";
                     this.posturls[res.result.url].type = type;
-
+                    this.posturls[res.result.url].preview = this.removeMD(
+                      this.posturls[res.result.url].body
+                    ).substr(0, 200);
+                    this.posturls[res.result.url].ago = this.timeSince(his.posturls[res.result.url].created)
                     this.selectPosts(true);
                     }
                 })
             } else {
                 console.log("no author or permlink", a, p)
+            }
+        },
+        timeSince(date) {
+            var seconds = Math.floor((new Date() - new Date(date)) / 1000);
+            var interval = Math.floor(seconds / 31536000);
+            if (interval > 1) {
+                return interval + " years";
+            }
+            interval = Math.floor(seconds / 2592000);
+            if (interval > 1) {
+                return interval + " months";
+            }
+            interval = Math.floor(seconds / 86400);
+            if (interval > 1) {
+                return interval + " days";
+            }
+            interval = Math.floor(seconds / 3600);
+            if (interval > 1) {
+                return interval + " hours";
+            }
+            interval = Math.floor(seconds / 60);
+            if (interval > 1) {
+                return interval + " minutes";
+            }
+            return Math.floor(seconds) + " seconds";
+        },
+        removeMD(md, options) {
+                options = options || {};
+                options.listUnicodeChar = options.hasOwnProperty('listUnicodeChar') ? options.listUnicodeChar : false;
+                options.stripListLeaders = options.hasOwnProperty('stripListLeaders') ? options.stripListLeaders : true;
+                options.gfm = options.hasOwnProperty('gfm') ? options.gfm : true;
+                options.useImgAltText = options.hasOwnProperty('useImgAltText') ? options.useImgAltText : false;
+                var output = md || '';
+                output = output.replace(/^(-\s*?|\*\s*?|_\s*?){3,}\s*$/gm, '');
+                try {
+                    if (options.stripListLeaders) {
+                        if (options.listUnicodeChar)
+                            output = output.replace(/^([\s\t]*)([\*\-\+]|\d+\.)\s+/gm, options.listUnicodeChar + ' $1');
+                        else
+                            output = output.replace(/^([\s\t]*)([\*\-\+]|\d+\.)\s+/gm, '$1');
+                    }
+                    if (options.gfm) {
+                        output = output
+                            .replace(/\n={2,}/g, '\n')
+                            .replace(/~{3}.*\n/g, '')
+                            .replace(/~~/g, '')
+                            .replace(/`{3}.*\n/g, '');
+                    }
+                    output = output
+                        .replace(/<[^>]*>/g, '')
+                        .replace(/^[=\-]{2,}\s*$/g, '')
+                        .replace(/\[\^.+?\](\: .*?$)?/g, '')
+                        .replace(/\s{0,2}\[.*?\]: .*?$/g, '')
+                        .replace(/\!\[(.*?)\][\[\(].*?[\]\)]/g, options.useImgAltText ? '$1' : '')
+                        .replace(/\[(.*?)\][\[\(].*?[\]\)]/g, '$1')
+                        .replace(/^\s{0,3}>\s?/g, '')
+                        .replace(/^\s{1,2}\[(.*?)\]: (\S+)( ".*?")?\s*$/g, '')
+                        .replace(/^(\n)?\s{0,}#{1,6}\s+| {0,}(\n)?\s{0,}#{0,} {0,}(\n)?\s{0,}$/gm, '$1$2$3')
+                        .replace(/([\*_]{1,3})(\S.*?\S{0,1})\1/g, '$2')
+                        .replace(/([\*_]{1,3})(\S.*?\S{0,1})\1/g, '$2')
+                        .replace(/(`{3,})(.*?)\1/gm, '$2')
+                        .replace(/`(.+?)`/g, '$1')
+                        .replace(/\n{2,}/g, '\n\n');
+                } catch (e) {
+                    console.error(e);
+                    return md;
+                }
+                return output;
+            },
+        picFind(json) {
+            var arr
+            try {
+                arr = json.image[0]
+            } catch (e) {
+
+            }
+            if (typeof json.image == 'string') {
+                return json.image
+            } else if (typeof arr == 'string') {
+                return arr
+            } else if (typeof json.Hash360 == 'string') {
+                return `https://ipfs.io/ipfs/${json.Hash360}`
+            } else {
+                /*
+                var looker
+                try {
+                    looker = body.split('![')[1]
+                    looker = looker.split('(')[1]
+                    looker = looker.split(')')[0]
+                } catch (e) {
+                    */
+                return '/img/dluxdefault.svg'
             }
         },
         readRep(rep2){
