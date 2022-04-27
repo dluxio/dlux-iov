@@ -657,7 +657,7 @@ var app = new Vue({
                       type = "Video";
                     this.posturls[res.result.url].type = type;
 
-                    this.selectPosts();
+                    this.selectPosts(true);
                     }
                 })
             } else {
