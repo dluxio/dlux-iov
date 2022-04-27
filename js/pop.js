@@ -2,8 +2,10 @@ const { Popover } = bootstrap;
 
 export default {
   template: `
+    <div>
         <slot/>
-    `,
+    </div>
+        `,
   props: {
     content: {
       required: false,
@@ -28,5 +30,5 @@ export default {
     var ele = this.$slots.default[0].elm;
     new Popover(ele, options);
   },
-}
+};
 
