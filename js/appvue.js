@@ -561,7 +561,24 @@ var app = new Vue({
                         ...res.result
                     }
                     this.posturls[url].json_metadata = JSON.parse(this.posturls[url].json_metadata)
-                    this.displayPosts.push(this.posturls[url]);
+                    var type = 'blog'
+                    if (
+                      "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
+                      this.posturls[url].json_metadata.vrHash
+                    )
+                      type = "360";
+                    else if (this.posturls[url].json_metadata.vrHash)
+                      type = "vr";
+                    else if (this.posturls[url].json_metadata.arHash)
+                      type = "ar";
+                    else if (this.posturls[url].json_metadata.appHash)
+                      type = "app";
+                    else if (this.posturls[url].json_metadata.audHash)
+                      type = "audio";
+                    else if (this.posturls[url].json_metadata.audHash)
+                      type = "video";
+                    this.posturls[url].type = type
+                      this.displayPosts.push(this.posturls[url]);
                 })
         },
         getQuotes() {
