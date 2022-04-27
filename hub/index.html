@@ -158,6 +158,7 @@
                                             <div class="imagebox bg-none">
                                                 <img src="..." alt="Card image cap" class="card-img-top img-fluid image"
                                                     :src="post.pic"
+                                                    @error="imgUrlAlt"
                                                     style="width: 640px; height: 360px; object-fit: cover;" />
                                                 <div class="caption text-white w-100 h-100 d-flex">
                                                     <div class="m-auto p-3 text-center" v-if="post.type == 360">
@@ -252,7 +253,7 @@
                             </div>
                             <a id="modal_blog_link" class="text-white">
                                 <h3 class="card-title mt-2 text-center text-capitalize p-2" id="modal_title"></h3>
-                            </a> <img src="..." alt="Card image cap" class="card-img-top" id="modal_pic" />
+                            </a> <img src="..." alt="" class="card-img-top" id="modal_pic" @error="imgUrlAlt" />
                             <div class="card-body">
                                 <p class="p-2" id="modal_body"></p>
                             </div>

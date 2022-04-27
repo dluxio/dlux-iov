@@ -753,6 +753,9 @@ var app = new Vue({
         console.log("no author or permlink", a, p);
       }
     },
+    imgUrlAlt(event) {
+        event.target.src = "/img/dlux-logo-icon.png"
+    },
     timeSince(date) {
       var seconds = Math.floor((new Date() - new Date(date)) / 1000);
       var interval = Math.floor(seconds / 31536000);
