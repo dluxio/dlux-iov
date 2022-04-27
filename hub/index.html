@@ -18,10 +18,10 @@
     <link href="/css/custom.css" rel="stylesheet" />
 
     <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
-    
+
     <script type="module" src="/js/appvue.js"></script>
 
-   
+
     <script>
         if ('serviceWorker' in navigator) {
             navigator
@@ -61,7 +61,7 @@
                         <div>
                             <a href="/vr" class="btn btn-lg btn-outline-light" target="_blank"><i
                                     class="fas fa-vr-cardboard me-2"></i>Launch overworld
-                                </a>
+                            </a>
                         </div>
                         </p>
                     </div>
@@ -88,12 +88,53 @@
                             <span class="sr-only">Toggle Dropdown</span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-dark">
-                            <a class="dropdown-item" v-for="(value, key, index) in postSelect.types">
+                            <a class="dropdown-item">
                                 <div class="input-group d-flex">
-                                    <div class="input-group-text bg-darkg text-white d-flex flex-fill"><i :class="value.icon"></i>{{key}}</div>
+                                    <div class="input-group-text bg-darkg text-white d-flex flex-fill"><i
+                                            class="fa-solid fa-globe me-2"></i>360</div>
                                     <div class="input-group-text bg-darkg">
-                                        <input class="form-check-input mt-0" type="checkbox" value="" :checked="value.checked"
-                                            aria-label="Checkbox for following text input" @click="value.checked = !value.checked; selectPosts()">
+                                        <input class="form-check-input mt-0" type="checkbox" value="" checked
+                                            aria-label="Checkbox for following text input">
+                                    </div>
+                                </div>
+                            </a>
+                            <a class="dropdown-item">
+                                <div class="input-group d-flex">
+                                    <div class="input-group-text bg-darkg text-white d-flex flex-fill"><i
+                                            class="fa-solid fa-vr-cardboard me-2"></i>VR</div>
+                                    <div class="input-group-text bg-darkg">
+                                        <input class="form-check-input mt-0" type="checkbox" value="" checked
+                                            aria-label="Checkbox for following text input">
+                                    </div>
+                                </div>
+                            </a>
+                            <a class="dropdown-item">
+                                <div class="input-group d-flex">
+                                    <div class="input-group-text bg-darkg text-white d-flex flex-fill"><i
+                                            class="fa-solid fa-glasses me-2"></i>AR</div>
+                                    <div class="input-group-text bg-darkg">
+                                        <input class="form-check-input mt-0" type="checkbox" value="" checked
+                                            aria-label="Checkbox for following text input">
+                                    </div>
+                                </div>
+                            </a>
+                            <a class="dropdown-item">
+                                <div class="input-group d-flex">
+                                    <div class="input-group-text bg-darkg text-white d-flex flex-fill"><i
+                                            class="fa-solid fa-mobile-screen-button me-2"></i>APP</div>
+                                    <div class="input-group-text bg-darkg">
+                                        <input class="form-check-input mt-0" type="checkbox" value="" checked
+                                            aria-label="Checkbox for following text input">
+                                    </div>
+                                </div>
+                            </a>
+                            <a class="dropdown-item">
+                                <div class="input-group d-flex">
+                                    <div class="input-group-text bg-darkg text-white d-flex flex-fill"><i
+                                            class="fa-solid fa-book me-2"></i>BLOG</div>
+                                    <div class="input-group-text bg-darkg">
+                                        <input class="form-check-input mt-0" type="checkbox" value=""
+                                            aria-label="Checkbox for following text input">
                                     </div>
                                 </div>
                             </a>
@@ -102,46 +143,35 @@
                 </div>
             </div>
 
-            <div class="row" data-masonry='{"percentPosition": true }'>
-                <div v-for="post in displayPosts"></div>
+            <div class="row d-none" data-masonry='{"percentPosition": true }'>
+
                 <div class="col-sm-6 col-lg-4 mb-4">
-                  <div class="card">
-                    <svg class="bd-placeholder-img card-img-top" width="100%" height="200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Image cap" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#868e96"/><text x="50%" y="50%" fill="#dee2e6" dy=".3em">Image cap</text></svg>
-            
-                    <div class="card-body">
-                      <h5 class="card-title">Card title that wraps to a new line</h5>
-                      <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+                    <div class="card">
+                        <svg class="bd-placeholder-img card-img-top" width="100%" height="200"
+                            xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Image cap"
+                            preserveAspectRatio="xMidYMid slice" focusable="false">
+                            <title>Placeholder</title>
+                            <rect width="100%" height="100%" fill="#868e96" /><text x="50%" y="50%" fill="#dee2e6"
+                                dy=".3em">Image cap</text>
+                        </svg>
+
+                        <div class="card-body">
+                            <h5 class="card-title">Card title that wraps to a new line</h5>
+                            <p class="card-text">This is a longer card with supporting text below as a natural
+                                lead-in to additional content. This content is a little bit longer.</p>
+                        </div>
                     </div>
-                  </div>
                 </div>
-                <div class="col-sm-6 col-lg-4 mb-4">
-                  <div class="card p-3 text-end">
-                    <figure class="mb-0">
-                      <blockquote class="blockquote">
-                        <p>A well-known quote, contained in a blockquote element.</p>
-                      </blockquote>
-                      <figcaption class="blockquote-footer mb-0 text-muted">
-                        Someone famous in <cite title="Source Title">Source Title</cite>
-                      </figcaption>
-                    </figure>
-                  </div>
-                </div>
-                <div class="col-sm-6 col-lg-4 mb-4">
-                  <div class="card">
-                    <div class="card-body">
-                      <h5 class="card-title">Card title</h5>
-                      <p class="card-text">This is another card with title and supporting text below. This card has some additional content to make it slightly taller overall.</p>
-                      <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            
-            
-            <div class="row"  data-masonry='{"percentPosition": true }' v-for="post in displayPosts">
+            </div>
+    </div>
+
+
+    <div class="row" data-masonry='{"percentPosition": true }'>
+        <div v-for="post in displayPosts">
+            <div class="col-sm-6 col-lg-4 mb-4">
                 <div class="card text-white bg-dark mt-2 mb-3">
                     <div class="card-header">
-                        <div class="d-inline-block">
+                        <div class="">
                             <div class="float-left"><a :href="'/@' + post.author"><img
                                         :src="'https://images.hive.blog/u/' + post.author + '/avatar'" alt=""
                                         class="rounded-circle bg-light img-fluid mr-2 cover author-img"></a></div>
@@ -202,86 +232,87 @@
                     </div>
                 </div>
             </div>
-            <div class="modal fade" id="detailModal" tabindex="11" role="dialog" aria-hidden="true">
-                <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
-                    <div class="modal-content bg-dark text-white">
-                        <div class="card text-white bg-dark">
-                            <div class="card-header">
-                                <div class="d-inline-block p-2">
-                                    <div class="float-left"><a id="modal_author_href1"><img id="modal_author_img" alt=""
-                                                class="rounded-circle bg-light img-fluid mr-2 cover author-img"></a>
+        </div>
+    </div>
+    <div class="modal fade" id="detailModal" tabindex="11" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
+            <div class="modal-content bg-dark text-white">
+                <div class="card text-white bg-dark">
+                    <div class="card-header">
+                        <div class="d-inline-block p-2">
+                            <div class="float-left"><a id="modal_author_href1"><img id="modal_author_img" alt=""
+                                        class="rounded-circle bg-light img-fluid mr-2 cover author-img"></a>
+                            </div>
+                            <div class="float-left">
+                                <p class="mt-0 mb-0 text-muted text-semibold"><a class="a-1" id="modal_author"><span
+                                            class="ml-2 badge badge-pill badge-light">{{authors[displayPost.item.author]
+                                            ? authors[displayPost.item.author].rep : ''}}</span></a>
+                                </p>
+                                <small class="text-muted" id="modal_created"></small>
+                            </div>
+                        </div>
+                        <div class="float-right p-2"><span class="badge badge-secondary" id="modal_scat"></span>
+                            <button type="button" class="close text-white ml-3" data-dismiss="modal" aria-label="Close"
+                                onclick="window.history.back();"><span aria-hidden="true">×</span></button>
+                        </div>
+                    </div>
+                    <a id="modal_blog_link" class="text-white">
+                        <h3 class="card-title mt-2 text-center text-capitalize p-2" id="modal_title"></h3>
+                    </a> <img src="..." alt="Card image cap" class="card-img-top" id="modal_pic" />
+                    <div class="card-body">
+                        <p class="p-2" id="modal_body"></p>
+                    </div>
+                    <center>
+                        <a :href="displayPost.item.url" type="button"
+                            class="btn btn-outline-danger mb-4 btn-launch">Launch App</a>
+                    </center>
+                    <div class="card-footer">
+                        <div class="collapse" :data-target="'#vote-' + displayPost.item.id">
+                            <form id="voteForm">
+                                <div class="d-flex align-items-center text-white-50">
+                                    <div>
+                                        <button type="button" class="btn btn-primary"
+                                            @click="vote(displayPost.item.id)">{{displayPost.item.slider}}%</button>
+                                        <button type="button" class="btn btn-secondary" data-toggle="collapse"
+                                            :data-target="'#vote-' + displayPost.item.id"><span
+                                                class="close text-white">×</span></button>
                                     </div>
-                                    <div class="float-left">
-                                        <p class="mt-0 mb-0 text-muted text-semibold"><a class="a-1"
-                                                id="modal_author"><span
-                                                    class="ml-2 badge badge-pill badge-light">{{authors[displayPost.item.author]
-                                                    ? authors[displayPost.item.author].rep : ''}}</span></a>
+                                    <div class="flex-fill mx-2">
+                                        <p class="my-1">
+                                            <input type="range" class="form-control-range" step="0.01" value="100"
+                                                max="100" min="0.01" v-model="displayPost.item.slider">
                                         </p>
-                                        <small class="text-muted" id="modal_created"></small>
                                     </div>
+                                    <p class="my-0"><span class="mr-1" id="commentVal">0</span><i
+                                            class="ml-1 fab fa-fw fa-hive"></i></p>
                                 </div>
-                                <div class="float-right p-2"><span class="badge badge-secondary" id="modal_scat"></span>
-                                    <button type="button" class="close text-white ml-3" data-dismiss="modal"
-                                        aria-label="Close" onclick="window.history.back();"><span
-                                            aria-hidden="true">×</span></button>
-                                </div>
+                            </form>
+                        </div>
+                        <div class="d-flex align-items-center my-2">
+                            <div><a data-toggle="collapse" :data-target="'#vote-' + displayPost.item.id"><i
+                                        class="fas fa-heart mr-1"></i></a>{{displayPost.item.upVotes}}
+                                <i class="fas fa-comment ml-2 mr-1"></i>displayPost.item.children
                             </div>
-                            <a id="modal_blog_link" class="text-white">
-                                <h3 class="card-title mt-2 text-center text-capitalize p-2" id="modal_title"></h3>
-                            </a> <img src="..." alt="Card image cap" class="card-img-top" id="modal_pic" />
-                            <div class="card-body">
-                                <p class="p-2" id="modal_body"></p>
-                            </div>
-                            <center>
-                                <a :href="displayPost.item.url" type="button"
-                                    class="btn btn-outline-danger mb-4 btn-launch">Launch App</a>
-                            </center>
-                            <div class="card-footer">
-                                <div class="collapse" :data-target="'#vote-' + displayPost.item.id">
-                                    <form id="voteForm">
-                                        <div class="d-flex align-items-center text-white-50">
-                                            <div>
-                                                <button type="button" class="btn btn-primary"
-                                                    @click="vote(displayPost.item.id)">{{displayPost.item.slider}}%</button>
-                                                <button type="button" class="btn btn-secondary" data-toggle="collapse"
-                                                    :data-target="'#vote-' + displayPost.item.id"><span
-                                                        class="close text-white">×</span></button>
-                                            </div>
-                                            <div class="flex-fill mx-2">
-                                                <p class="my-1">
-                                                    <input type="range" class="form-control-range" step="0.01"
-                                                        value="100" max="100" min="0.01"
-                                                        v-model="displayPost.item.slider">
-                                                </p>
-                                            </div>
-                                            <p class="my-0"><span class="mr-1" id="commentVal">0</span><i
-                                                    class="ml-1 fab fa-fw fa-hive"></i></p>
-                                        </div>
-                                    </form>
-                                </div>
-                                <div class="d-flex align-items-center my-2">
-                                    <div><a data-toggle="collapse" :data-target="'#vote-' + displayPost.item.id"><i
-                                                class="fas fa-heart mr-1"></i></a>{{displayPost.item.upVotes}}
-                                        <i class="fas fa-comment ml-2 mr-1"></i>displayPost.item.children
-                                    </div>
-                                    <div class="ml-auto" id="modal_total_payout"><i class="ml-1 fab fa-fw fa-hive"></i>
-                                    </div>
-                                </div>
+                            <div class="ml-auto" id="modal_total_payout"><i class="ml-1 fab fa-fw fa-hive"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
-        <!-- Footer -->
-        <div>
-            <foot-vue />
         </div>
+    </div>
+    </main>
+    <!-- Footer -->
+    <div>
+        <foot-vue />
+    </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
         crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
+    <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"
+        integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous"
+        async></script>
 
     <script>
         (function () {
@@ -562,7 +593,9 @@ function updateVoteSubmit(id,val) {
     document.getElementById(id).innerHTML = document.getElementById(val).value + '%'; 
 }
 </script> -->
-<script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
+    <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"
+        integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous"
+        async></script>
 </body>
 
 </html>
