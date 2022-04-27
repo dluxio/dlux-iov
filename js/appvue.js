@@ -268,12 +268,12 @@ var app = new Vue({
             types: {
               VR: {
                 checked: true,
-                icon: "",
+                icon: "fa-solid fa-vr-cardboard me-2",
                 hint: "",
               },
               AR: {
                 checked: true,
-                icon: "",
+                icon: "fa-solid fa-glasses me-2",
                 hint: "",
               },
               XR: {
@@ -283,12 +283,12 @@ var app = new Vue({
               },
               APP: {
                 checked: true,
-                icon: "",
+                icon: "fa-solid fa-mobile-screen-button me-2",
                 hint: "",
               },
               ["360"]: {
                 checked: true,
-                icon: "",
+                icon: "fa-solid fa-globe me-2",
                 hint: "",
               },
               Audio: {
@@ -303,7 +303,7 @@ var app = new Vue({
               },
               Blog: {
                 checked: false,
-                icon: "",
+                icon: "fa-solid fa-book me-2",
                 hint: "",
               },
             },
