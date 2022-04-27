@@ -935,12 +935,6 @@ var app = new Vue({
         //this.getNodes();
         this.getPosts()
         this.getProtocol()
-        var tooltipTriggerList = [].slice.call(
-          document.querySelectorAll('[data-bs-toggle="tooltip"]')
-        );
-        tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-          return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
     },
     computed: {
         location: {
