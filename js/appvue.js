@@ -667,7 +667,7 @@ var app = new Vue({
                     this.posturls[res.result.url].preview = this.removeMD(
                       this.posturls[res.result.url].body
                     ).substr(0, 200);
-                    this.posturls[res.result.url].ago = this.timeSince(his.posturls[res.result.url].created)
+                    this.posturls[res.result.url].ago = this.timeSince(this.posturls[res.result.url].created)
                     this.selectPosts(true);
                     }
                 })
