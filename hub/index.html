@@ -94,7 +94,7 @@
                                             :class="value.icon"></i>{{key}}</div>
                                     <div class="input-group-text bg-darkg">
                                         <input class="form-check-input mt-0" type="checkbox" value=""
-                                            v-model="value.checked" @click="selectPosts(true)" aria-label="Checkbox for following text input">
+                                            :checked="value.checked" @click="value.checked = !value.checked;selectPosts(true)" aria-label="Checkbox for following text input">
                                     </div>
                                 </div>
                             </a>
