@@ -159,9 +159,10 @@
                                     <form id="voteForm">
                                         <div class="d-flex align-items-center text-white-50">
                                             <div>
-                                                <button type="button" class="btn btn-primary" @click="vote(post.id)" style="width: 100px;">{{post.slider}}%</button>
+                                                <button type="button" class="btn btn-primary" @click="vote(post.id)"
+                                                    style="width: 100px;">{{post.slider}}%</button>
                                                 <button type="button" class="btn btn-secondary"
-                                                :data-bs-target="'#vote-' + post.id" data-bs-toggle="collapse"><span
+                                                    :data-bs-target="'#vote-' + post.id" data-bs-toggle="collapse"><span
                                                         class="close text-white">×</span></button>
                                             </div>
                                             <div class="flex-fill mx-2">
@@ -184,9 +185,11 @@
                                         <i class="fas fa-comment fa-fw ms-2 me-1"></i>{{post.length}}
                                         <i class="fa-solid fa-flag ms-2"></i>
                                     </div>
-                                    <div class="ms-auto"><button type="button" class="btn btn-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="post.total_payout_value">
-                                       $U.SD
-                                      </button>
+                                    <div class="ms-auto"><button type="button" class="btn btn-secondary"
+                                            data-bs-toggle="tooltip" data-bs-placement="bottom"
+                                            title="post.total_payout_value">
+                                            $U.SD
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -635,12 +638,12 @@ function updateVoteSubmit(id,val) {
     <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"
         integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous"
         async></script>
-        <script>
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-  return new bootstrap.Tooltip(tooltipTriggerEl)
-})
-            </script>
+    <script>
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
 </body>
 
 </html>
