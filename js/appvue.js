@@ -291,19 +291,19 @@ var app = new Vue({
                 icon: "fa-solid fa-globe me-2",
                 hint: "",
               },
-              ['3D']: {
+              ["3D"]: {
                 checked: true,
-                icon: "",
+                icon: "fa-solid fa-shapes me-2",
                 hint: "",
               },
               Audio: {
                 checked: true,
-                icon: "",
+                icon: "fa-solid fa-music me-2",
                 hint: "",
               },
               Video: {
                 checked: true,
-                icon: "",
+                icon: "fa-solid fa-film me-2",
                 hint: "",
               },
               Blog: {
