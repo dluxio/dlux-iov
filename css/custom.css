@@ -242,3 +242,187 @@ text-align: center;
     
     padding:30px;
 }
+#dapps {
+  background-image: url("/img/metaverse-vr-comp.jpg");
+  background-size: cover;
+  background-position: center;
+  min-height: 600px;
+  margin-top: -70px;
+}
+
+#defi {
+  background-image: url("/img/dex-vr-comp.jpg");
+  background-size: cover;
+  background-position: center;
+  min-height: 600px;
+}
+
+#hive {
+  background-image: url("/img/jtree-comp.jpg");
+  background-size: cover;
+  background-position: center;
+  min-height: 600px;
+}
+
+#info {
+  background-image: url("/img/gallery-vr-comp.jpg");
+  background-size: cover;
+  background-position: center;
+  min-height: 600px;
+}
+
+.dlux-header {
+  border-bottom: solid;
+  border-bottom-color: gray;
+  border-width: 2px;
+}
+
+.dlux-is {
+  text-decoration: underline;
+  text-decoration-color: white;
+}
+
+.dlux-turq {
+  color: #0ed18c;
+  border-color: #0ed18c;
+  border-style: solid;
+  border-width: 2px;
+}
+
+.border-turq {
+  border-color: #0ed18c;
+}
+
+.btn-turq {
+  color: #fff;
+  background: #0ed18c;
+}
+
+.btn-outline-turq {
+  color: #fff;
+  border-color: #14d695;
+}
+
+.dlux-blue {
+  color: #033efd;
+  border-color: #033efd;
+  border-style: solid;
+  border-width: 2px;
+}
+
+.border-blue {
+  border-color: #033efd;
+}
+
+.btn-blue {
+  color: #fff;
+  background: #033efd;
+}
+
+.btn-outline-blue {
+  color: #fff;
+  border-color: #033efd;
+}
+
+.dlux-fusch {
+  color: #fb00ff;
+  border-color: #fb00ff;
+  border-style: solid;
+  border-width: 2px;
+}
+
+.border-fusch {
+  border-color: #fb00ff;
+}
+
+.btn-fusch {
+  color: #fff;
+  background: #fb00ff;
+}
+
+.btn-outline-fusch {
+  color: #fff;
+  border-color: #fb00ff;
+}
+
+.dlux-tang {
+  color: #ffa300;
+  border-color: #ffa300;
+  border-style: solid;
+  border-width: 1.5px;
+}
+
+.border-tang {
+  border-color: #ffa300;
+}
+
+.btn-tang {
+  color: #fff;
+  background: #ffa300;
+}
+
+.btn-outline-tang {
+  color: #fff;
+  border-color: #ffa300;
+}
+
+.dlux-purp {
+  color: #9300ff;
+  border-color: #9300ff;
+  border-style: solid;
+  border-width: 2px;
+}
+
+.border-purp {
+  border-color: #9300ff;
+}
+
+.btn-purp {
+  color: #fff;
+  background: #9300ff;
+}
+
+.btn-outline-purp {
+  color: #fff;
+  border-color: #9300ff;
+}
+
+.hive {
+  color: #e31337;
+  border-color: #e31337;
+  border-style: solid;
+  border-width: 1.5px;
+}
+
+.border-hive {
+  border-color: #e31337;
+}
+
+.btn-hive {
+  color: #fff;
+  background: #e31337;
+}
+
+.btn-outline-hive {
+  color: #fff;
+  border-color: #e31337;
+}
+
+.btn-dlux {
+  min-width: 150px;
+}
+
+.btn-dlux:hover {
+  color: cornflowerblue;
+}
+
+.btn-dlux:active {
+  color: darkorange;
+}
+
+.jumbo-dlux {
+  background-color: rgba(0, 0, 0, 0.8);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  max-width: 600px;
+}
