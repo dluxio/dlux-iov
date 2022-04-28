@@ -28,6 +28,7 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+
         .truncate2 {
             text-overflow: "Read More";
             display: -webkit-box;
@@ -84,12 +85,13 @@
             </div>
 
             <div class="container-fluid">
-                <div class="row mt-3">
+                <div class="row my-3">
                     <div class="container-fluid d-flex justify-content-center">
                         <div class="mx-3">
-                            <a class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split"
-                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{postSelect.entry == 'new' ? 'NEW' : postSelect.entry == 'trending' ? 'TRENDING' : 'PROMOTED'}}</a>
-                                <span class="sr-only">Toggle Dropdown</span>
+                            <a class="btn btn-outline-primary dropdown-toggle "
+                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{postSelect.entry
+                                == 'new' ? 'NEW' : postSelect.entry == 'trending' ? 'TRENDING' : 'PROMOTED'}}
+                            <span class="sr-only">Toggle Dropdown</span>
                             </a>
                             <div class="dropdown-menu dropdown-menu-dark">
                                 <a class="dropdown-item" @click="postSelect.entry = 'new';getPosts()">NEW</a>
@@ -98,7 +100,7 @@
                             </div>
                         </div>
                         <div class="mx-3">
-                            <a class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split"
+                            <a class="btn btn-outline-primary dropdown-toggle "
                                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TYPE
                                 <span class="sr-only">Toggle Dropdown</span>
                             </a>
@@ -118,9 +120,9 @@
                             </div>
                         </div>
                         <div class="mx-3">
-                                <input type="text" class="form-control bg-darkg border-dark text-info r-radius-hotfix" placeholder="Search"
-                                    v-model="postSelect.searchTerm" @keyup.enter="selectPosts()">
-                            </div>
+                            <input type="text" class="form-control bg-darkg border-dark text-info r-radius-hotfix"
+                                placeholder="Search" v-model="postSelect.searchTerm" @keyup.enter="selectPosts()">
+                        </div>
                     </div>
                 </div>
 
@@ -134,14 +136,21 @@
                                             <img :src="'https://images.hive.blog/u/' + post.author + '/avatar'" alt=""
                                                 class="rounded-circle bg-light img-fluid me-3 cover author-img"
                                                 style="width: 50px;">
-                                            <h3 class="m-0 text-white">{{post.author}}</h3>
-                                            <div class="ms-2 badge rounded-pill text-white"
-                                            :class="{'bg-danger': post.rep < 25, 'bg-warning': post.rep >= 25 && post.rep < 50, 'bg-success': post.rep >= 50}">
-                                                {{post.rep}}
+                                            <div>
+                                                <div class="d-flex align-items-center">
+                                                    <h3 class="m-0 text-white">{{post.author}}</h3>
+                                                    <div>
+                                                        <span style="font-size: .5em;"class="ms-2 badge small rounded-pill text-white"
+                                                            :class="{'bg-danger': post.rep < 25, 'bg-warning': post.rep >= 25 && post.rep < 50, 'bg-success': post.rep >= 50}">
+                                                            {{post.rep}}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <span class="small text-muted">{{post.ago}}</span>
                                             </div>
                                         </div>
                                     </a>
-                                    <span class="badge bg-primary ms-auto me-4"><i
+                                    <span class="badge bg-primary ms-auto"><i
                                             :class="postSelect.types[post.type].icon"></i>{{post.type}}</span>
                                 </div>
                             </div>
@@ -159,8 +168,7 @@
                                         <div id="imagesMain">
                                             <div class="imagebox bg-none">
                                                 <img src="..." alt="Card image cap" class="card-img-top img-fluid image"
-                                                    :src="post.pic"
-                                                    @error="imgUrlAlt"
+                                                    :src="post.pic" @error="imgUrlAlt"
                                                     style="width: 640px; height: 360px; object-fit: cover;" />
                                                 <div class="caption text-white w-100 h-100 d-flex">
                                                     <div class="m-auto p-3 text-center" v-if="post.type == 360">
@@ -188,7 +196,7 @@
                                     <form id="voteForm">
                                         <div class="d-flex align-items-center text-white-50">
                                             <div>
-                                                <button type="button" class="btn btn-primary" @click="vote(post.url)"   
+                                                <button type="button" class="btn btn-primary" @click="vote(post.url)"
                                                     style="width: 100px;">{{post.slider}}%</button>
                                                 <button type="button" class="btn btn-secondary"
                                                     :data-bs-target="'#vote-' + post.id" data-bs-toggle="collapse"><span
@@ -209,15 +217,14 @@
                                 </div>
                                 <div class="d-flex align-items-center my-2">
                                     <div>
-
-                                                <h6 class="text-white-50">{{post.ago}}</h6>
                                         <a data-bs-toggle="collapse" :data-bs-target="'#vote-' + post.id">
                                             <i class="fas fa-heart fa-fw me-1"></i></a>{{post.upVotes}}
                                         <i class="fas fa-comment fa-fw ms-2 me-1"></i>{{post.children}}
                                         <i class="fa-solid fa-flag ms-2"></i> {{post.downVotes ? post.downVotes : ''}}
                                     </div>
                                     <div class="ms-auto">
-                                        <pop-vue title="Post Earnings" :content="'Hive: ' + post.total_payout_value + '\n' + TOKEN + ': ...' "
+                                        <pop-vue title="Post Earnings"
+                                            :content="'Hive: ' + post.total_payout_value + '\n' + TOKEN + ': ...' "
                                             trigger="hover">
                                             <button class="btn btn-secondary">
                                                 {{sigFig(post.total_payout_value, 2)}}
