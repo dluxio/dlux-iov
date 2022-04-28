@@ -145,18 +145,14 @@ export default {
           reject("No TXID");
         } else {
           console.log("HSR");
-          this.HSRsign(op)
-          reject('No TXID')
+          this.HSRsign(op);
+          reject("No TXID");
         }
       });
     },
-    HSRsign(op){
-      if(op[1][0][0] == "custom_json"){
-        if (
-          window.confirm(
-            'Open Hive Signer in a new tab?'
-          )
-        ) {
+    HSRsign(op) {
+      if (op[1][0][0] == "custom_json") {
+        if (window.confirm("Open Hive Signer in a new tab?")) {
           window.open(
             `https://hivesigner.com/sign/custom-json?authority=active&required_auths=%5B%22${
               this.user
@@ -168,15 +164,15 @@ export default {
         }
       } else if (op[1][0][0] == "transfer") {
         window.open(
-            `https://hivesigner.com/sign/transfer?authority=active&from=${
-              op[1][0][1].from
-            }&to=${op[1][0][1].to}&amount=${op[1][0][1].amount}&memo=${encodeURIComponent(
-              op[1][0][1].memo
-            )}`,
-            "_blank"
-          );
-        } else {
-          alert('Transaction Type not supported')
+          `https://hivesigner.com/sign/transfer?authority=active&from=${
+            op[1][0][1].from
+          }&to=${op[1][0][1].to}&amount=${
+            op[1][0][1].amount
+          }&memo=${encodeURIComponent(op[1][0][1].memo)}`,
+          "_blank"
+        );
+      } else {
+        alert("Transaction Type not supported");
       }
     },
     HASsign(op) {
@@ -201,7 +197,7 @@ export default {
         data: data,
       };
       this.HAS_.ws.send(JSON.stringify(payload));
-      alert('Review and Sign on your PKSA App')
+      alert("Review and Sign on your PKSA App");
     },
     HASlogin() {
       const auth_data = {
@@ -217,7 +213,7 @@ export default {
       ).toString();
       const payload = { cmd: "auth_req", account: this.user, data: data };
       if (this.HAS_.ws) this.HAS_.ws.send(JSON.stringify(payload));
-      else this.HASsetup()
+      else this.HASsetup();
     },
     HASlogout() {
       this.HAS_.token = "";
@@ -230,9 +226,9 @@ export default {
         this.HAS_.ws.onopen = function () {
           console.log("OnOpen - WS");
           this.HAS_.wsconn = true;
-          const session = localStorage.getItem(this.user + "HAS")
+          const session = localStorage.getItem(this.user + "HAS");
           const now = new Date().getTime();
-          console.log({session})
+          console.log({ session });
           if (session && now < session.split(",")[1]) {
             this.HAS_.token = session.split(",")[0];
             this.HAS_.expire = session.split(",")[1];
@@ -459,7 +455,7 @@ export default {
           this.useHAS();
         } else {
           localStorage.removeItem(this.user + "HAS");
-          this.HASlogin()
+          this.HASlogin();
         }
       } else if (this.HAS) {
         this.HASlogin();
@@ -471,7 +467,7 @@ export default {
       this.$emit("logout", "");
     },
     setUser(id) {
-      this.HAS_.token = ""
+      this.HAS_.token = "";
       this.haspic = "/img/hiveauth.svg";
       this.haspich = 50;
       this.user = id ? id : this.userField;
@@ -528,10 +524,10 @@ export default {
     },
   },
   mounted() {
-    const signer = localStorage.getItem("signer")
-    if(signer == "HSR")this.useHS()
+    const signer = localStorage.getItem("signer");
+    if (signer == "HSR") this.useHS();
     else if (signer == "HAS") this.useHAS();
-    else this.useKC()
+    else this.useKC();
     this.getUser();
     this.getRecentUsers();
     const ops = localStorage.getItem("pending");
@@ -635,7 +631,7 @@ export default {
   <div class="offcanvas-body">
     <div class="d-flex justify-content-center">
       <ul class="navbar-nav">      
-        <li class="nav-item"><h4><a class="nav-link disabled" href="/apps/"><i class="fa-solid fa-mountain-sun me-3"></i>HUB</a></h4></li>
+        <li class="nav-item"><h4><a class="nav-link text-white-50" href="/hub/"><i class="fa-solid fa-mountain-sun me-3"></i>HUB</a></h4></li>
         <li class="nav-item"><h4><a class="nav-link text-white-50" href="/nfts/sets/"><i class="fa-solid fa-store me-3"></i>NFTS</a></h4></li>
         <li class="nav-item"><h4><a class="nav-link text-white-50" href="/dex/"><i class="fa-solid fa-building-columns me-3"></i>DEX</a></h4></li>
         <li class="nav-item"><h4><a class="nav-link text-white-50" href="/docs/"><i class="fa-solid fa-book me-3"></i>DOCS</a></h4></li>
