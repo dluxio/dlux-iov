@@ -269,25 +269,24 @@ var app = new Vue({
         searchTerm: "",
         entry: "new",
         new: {
-          a: 50,
+          a: 150,
           o: 0,
           e: false,
           p: false,
         },
         trending: {
-          a: 50,
+          a: 150,
           o: 0,
           e: false,
           p: false,
         },
         promoted: {
-          a: 50,
+          a: 150,
           o: 0,
           e: false,
           p: false,
         },
         sortDir: "desc",
-        amount: 50,
         types: {
           VR: {
             checked: true,
@@ -381,9 +380,7 @@ var app = new Vue({
         document.documentElement.scrollHeight -
           document.documentElement.clientHeight * 2
       ) {
-        this.postSelect.amount += 30;
         this.getPosts();
-        console.log("scrolling");
       }
     },
     modalNext(modal) {
@@ -401,7 +398,6 @@ var app = new Vue({
         this[modal].index++;
         this[modal].item = this[modal].items[this[modal].index];
       } else if (this[modal].index < this.allPosts.length - 1) {
-        this.postSelect.amount += 6;
         this.selectPosts([modal, this[modal].index + 1]);
       } else {
         this[modal].index = 0;
