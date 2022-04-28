@@ -8,7 +8,8 @@ export default {
   template: `<div>
   <transition name="fade" mode="out-in" appear>
   <p v-show="text" transition="fade">{{ text }}</p>
-  </transition></div>`,
+  </transition>
+  </div>`,
   props: ["items", "interval"],
   watch: {},
   mounted() {
@@ -36,15 +37,15 @@ export default {
   },
   methods: {
     cycle() {
-      this.text = "";
-      this.index = (this.index + 1) % this.items.length;
-      this.text = this.items[this.index];
-      setTimeout(
-        function () {
-          this.cycle();
-        }.bind(this),
-        this.interval
-      );
+        this.index = (this.index + 1) % this.items.length;
+        this.text = this.items[this.index];
+           setTimeout(
+             function () {
+               this.cycle();
+             }.bind(this),
+             this.interval
+           );    
+      
     },
   },
 };

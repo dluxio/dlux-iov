@@ -3,6 +3,7 @@ import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
 import Popper from "/js/pop.js";
+import GlitchedWriter from "https://cdn.skypack.dev/glitched-writer";
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "";
@@ -271,16 +272,19 @@ var app = new Vue({
           a: 50,
           o: 0,
           e: false,
+          p: false,
         },
         trending: {
           a: 50,
           o: 0,
           e: false,
+          p: false,
         },
         promoted: {
           a: 50,
           o: 0,
           e: false,
+          p: false,
         },
         sortDir: "desc",
         amount: 50,
@@ -365,6 +369,7 @@ var app = new Vue({
     "foot-vue": FootVue,
     "cycle-text": Cycler,
     "pop-vue": Popper,
+    "glitched-writer": GlitchedWriter,
   },
   methods: {
     precision(num, precision) {
@@ -397,7 +402,7 @@ var app = new Vue({
         this[modal].item = this[modal].items[this[modal].index];
       } else if (this[modal].index < this.allPosts.length - 1) {
         this.postSelect.amount += 6;
-        this.selectPosts("", [modal, this[modal].index + 1]);
+        this.selectPosts([modal, this[modal].index + 1]);
       } else {
         this[modal].index = 0;
         this[modal].item = this[modal].items[this[modal].index];
@@ -620,7 +625,11 @@ var app = new Vue({
       else this[validKey] = true;
     },
     getPosts() {
-      if (!this.postSelect[this.postSelect.entry].e)
+      if (
+        !this.postSelect[this.postSelect.entry].e &&
+        !this.postSelect[this.postSelect.entry].p
+      ){
+        this.postSelect[this.postSelect.entry].p = true
         fetch(
           `https://dluxdata.herokuapp.com/${this.postSelect.entry}?a=${
             this.postSelect[this.postSelect.entry].a
@@ -628,6 +637,7 @@ var app = new Vue({
         )
           .then((r) => r.json())
           .then((res) => {
+            this.postSelect[this.postSelect.entry].p = false
             var authors = [];
             this.postSelect[this.postSelect.entry].o +=
               this.postSelect[this.postSelect.entry].a;
@@ -637,23 +647,28 @@ var app = new Vue({
               if (!this.posturls[res.result[i].url]) {
                 this.posturls[res.result[i].url] = res.result[i];
               }
+              this[this.postSelect.entry].push(res.result[i].url);
             }
+            var called = false;
             for (var post in this.posturls) {
-              if (!this.posturls[post].created)
+                
+              if (!this.posturls[post].created){
                 this.getContent(
-                  this.posturls[post].author,
-                  this.posturls[post].permlink
+                    this.posturls[post].author,
+                    this.posturls[post].permlink
                 );
+                called = true;
+              }
               authors.push(this.posturls[post].author);
             }
+            if (!called) this.selectPosts();
             authors = [...new Set(authors)];
             this.getHiveAuthors(authors);
           });
+        }
     },
-    selectPosts(reset, modal) {
-      if (reset) {
-        this.displayPosts = [];
-      }
+    selectPosts(modal) {
+      this.displayPosts = [];
       for (var post in this.posturls) {
         if (
           this.posturls[post].type &&
@@ -661,6 +676,7 @@ var app = new Vue({
         )
           this.displayPosts.push(this.posturls[post]);
       }
+
       if (this.postSelect.searchTerm)
         this.displayPosts = this.displayPosts.filter(
           (post) =>
@@ -680,13 +696,20 @@ var app = new Vue({
           i--;
         }
       }
-      if (this.postSelect.entry == "new")
-        this.sort("displayPosts", "created", "desc");
-      if (modal) {
-        this[modal[0]].items = this.displayPosts;
-        this[modal[0]].item = this[modal[0]].items[modal[1]];
-        this[modal[0]].index = modal[1];
+      for (var i = 0; i < this.displayPosts.length; i++) {
+        if (!this[this.postSelect.entry].includes(this.displayPosts[i].url)) {
+          this.displayPosts.splice(i, 1);
+          i--;
+        }
       }
+      if(this.postSelect.sort == 'time'){
+          this.sort("displayPosts", "created", "desc");
+      }
+        if (modal) {
+          this[modal[0]].items = this.displayPosts;
+          this[modal[0]].item = this[modal[0]].items[modal[1]];
+          this[modal[0]].index = modal[1];
+        }
     },
     getContent(a, p) {
       if (a && p) {
@@ -746,7 +769,7 @@ var app = new Vue({
               this.posturls[res.result.url].ago = this.timeSince(
                 this.posturls[res.result.url].created
               );
-              this.selectPosts(true);
+              this.selectPosts();
             }
           });
       } else {
