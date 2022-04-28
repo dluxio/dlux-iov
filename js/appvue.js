@@ -705,14 +705,17 @@ var app = new Vue({
           i--;
         }
       }
-      if(this.postSelect.sort == 'time'){
+      if(this.postSelect.entry == 'new'){
           this.sort("displayPosts", "created", "desc");
+      } else if (this.postSelect.entry == "new"){
+          this.sort("displayPosts", "voteweight", "desc");
       }
-      if (
-        this.postSelect.searchTerm && this.displayPosts.length <
-        this.postSelect[this.postSelect.entry].a - 2
-      )
-        this.getPosts();
+        if (
+          this.postSelect.searchTerm &&
+          this.displayPosts.length <
+            this.postSelect[this.postSelect.entry].a - 2
+        )
+          this.getPosts();
         if (modal) {
           this[modal[0]].items = this.displayPosts;
           this[modal[0]].item = this[modal[0]].items[modal[1]];
