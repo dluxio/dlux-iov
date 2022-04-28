@@ -35,6 +35,25 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+        .text {
+        position: relative;
+
+      }
+      .text-concat {
+        position: relative;
+        display: inline-block;
+        word-wrap: break-word;
+        overflow: hidden;
+        max-height: 3.6em;
+        line-height: 1.2em;
+        text-align: justify;
+      }
+      .text.ellipsis::after {
+        content: "... Read More";
+        position: absolute;
+        right: -12px;
+        bottom: 4px;
+      }
     </style>
 
     <script>
@@ -149,8 +168,11 @@
                                 <a href="#detailModal" class="no-decoration" data-bs-toggle="modal"
                                     @click="modalSelect(url)">
                                     <h3 class="lead text-white truncate1">{{post.title}}</h3>
-                                    <div class="text-white-50 truncate2">{{post.preview}}</div>
-                                    <div class="small text-primary ms-auto">Read More</div>
+                                    <div class="text ellipsis">
+                                        <span class="text-concat">
+                                            {{post.preview}} 
+                                        </span>
+                                    </div>
                                 </a>
                             </div>
 
