@@ -110,13 +110,17 @@
                                         <div class="input-group-text bg-darkg">
                                             <input class="form-check-input mt-0" type="checkbox" value=""
                                                 :checked="value.checked"
-                                                @click="value.checked = !value.checked;selectPosts(true)"
+                                                @click="value.checked = !value.checked;selectPosts()"
                                                 aria-label="Checkbox for following text input">
                                         </div>
                                     </div>
                                 </a>
                             </div>
                         </div>
+                        <div class="mx-3">
+                                <input type="text" class="form-control bg-darkg border-dark text-info r-radius-hotfix" placeholder="Search"
+                                    v-model="postSelect.searchTerm" @keyup.enter="selectPosts()">
+                            </div>
                     </div>
                 </div>
 
