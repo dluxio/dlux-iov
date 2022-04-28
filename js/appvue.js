@@ -798,17 +798,17 @@ var app = new Vue({
       }
       interval = Math.floor(seconds / 86400);
       if (interval > 1) {
-        return interval + " days";
+        return interval + " days ago";
       }
       interval = Math.floor(seconds / 3600);
       if (interval > 1) {
-        return interval + " hours";
+        return interval + " hours ago";
       }
       interval = Math.floor(seconds / 60);
       if (interval > 1) {
-        return interval + " minutes";
+        return interval + " minutes ago";
       }
-      return Math.floor(seconds) + " seconds";
+      return Math.floor(seconds) + " seconds ago";
     },
     removeMD(md, options) {
       options = options || {};
