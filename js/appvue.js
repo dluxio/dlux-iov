@@ -269,19 +269,19 @@ var app = new Vue({
         searchTerm: "",
         entry: "new",
         new: {
-          a: 150,
+          a: 100,
           o: 0,
           e: false,
           p: false,
         },
         trending: {
-          a: 150,
+          a: 100,
           o: 0,
           e: false,
           p: false,
         },
         promoted: {
-          a: 150,
+          a: 100,
           o: 0,
           e: false,
           p: false,
@@ -772,7 +772,7 @@ var app = new Vue({
               this.posturls[res.result.url].type = type;
               this.posturls[res.result.url].preview = this.removeMD(
                 this.posturls[res.result.url].body
-              ).substr(0, 250) + '<br>'
+              ).substr(0, 250)
               this.posturls[res.result.url].ago = this.timeSince(
                 this.posturls[res.result.url].created
               );
@@ -792,7 +792,6 @@ var app = new Vue({
       if (interval > 7) {
         return new Date(date).toLocaleDateString();
       }
-      interval = Math.floor(seconds / 86400);
       if (interval > 1) {
         return interval + " days ago";
       }
