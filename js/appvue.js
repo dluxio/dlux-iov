@@ -772,7 +772,7 @@ var app = new Vue({
               this.posturls[res.result.url].type = type;
               this.posturls[res.result.url].preview = this.removeMD(
                 this.posturls[res.result.url].body
-              ).substr(0, 100) + '<br>'
+              ).substr(0, 250) + '<br>'
               this.posturls[res.result.url].ago = this.timeSince(
                 this.posturls[res.result.url].created
               );
