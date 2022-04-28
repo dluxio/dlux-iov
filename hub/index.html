@@ -22,14 +22,14 @@
     <script type="module" src="/js/appvue.js"></script>
     <style>
         .truncate1 {
-            text-overflow: ellipsis;
+            text-overflow: "Read More";
             display: -webkit-box;
             -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
         .truncate2 {
-            text-overflow: ellipsis;
+            text-overflow: "Read More";
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -149,10 +149,8 @@
                                 <a href="#detailModal" class="no-decoration" data-bs-toggle="modal"
                                     @click="modalSelect(url)">
                                     <h3 class="lead text-white truncate1">{{post.title}}</h3>
-                                    <div class="text-white-50 truncate2">{{post.preview}}<span
-
-                                            class="small text-primary ms-2">Read
-                                            More</span></div>
+                                    <div class="text-white-50 truncate2">{{post.preview}}</div>
+                                    <div class="small text-primary ms-auto">Read More</div>
                                 </a>
                             </div>
 
