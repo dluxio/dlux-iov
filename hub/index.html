@@ -125,7 +125,7 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-sm-6 col-lg-4 mb-4" v-for="post in displayPosts">
+                    <div class="col-sm-6 col-lg-4 mb-4" v-for="post in displayPosts" :key="post.url">
                         <div class="card text-white bg-darkest mt-2 mb-3">
                             <div class="card-header">
                                 <div class="d-flex align-items-center ">
