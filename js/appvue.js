@@ -787,7 +787,7 @@ var app = new Vue({
         event.target.src = "/img/dlux-logo-icon.png"
     },
     timeSince(date) {
-      var seconds = Math.floor((new Date() - new Date(date + '.000')) / 1000);
+      var seconds = Math.floor((new Date() - new Date(date + ' GMT')) / 1000);
       var interval = Math.floor(seconds / 86400)
       if (interval > 7) {
         return new Date(date).toLocaleDateString();
