@@ -18,10 +18,8 @@
     <script>
         var stateObj
         var ipfsdomain
-        console.log(window.pathname)
         const author = window.location.pathname.split('/')[2].replace('@', '')
         const permlink = window.location.pathname.split('/')[3]
-        console.log({author, permlink})
         const hiveKey = `${author}/${permlink}`
         const hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         fetch(hapi, {
@@ -32,9 +30,9 @@
           method: "POST",
         })
           .then((r) => r.json())
-          .then(result => {
-            console.log(result)
-            stateObj = result
+          .then(res => {
+            stateObj = res.result
+            result = res.result
             window.title = "DLUX | " + result.title
             var metadata = result.json_metadata
             var hashy = JSON.parse(metadata).vrHash,
