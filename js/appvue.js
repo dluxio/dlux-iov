@@ -427,6 +427,10 @@ var app = new Vue({
       else this[modal].index = this[modal].items.length - 1;
       this[modal].item = this[modal].items[this[modal].index];
     },
+    modalSelect(key){
+      this.displayPost.index = key;
+      this.displayPost.item = this.posturls(key)
+    },
     modalIndex(modal, index) {
       var i = 0;
       for (i; i < this.selectedNFTs.length; i++) {
