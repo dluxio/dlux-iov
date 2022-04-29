@@ -366,6 +366,7 @@ var app = new Vue({
           id: "",
           slider: 100,
           title: "",
+          type: "360"
           url: "",
           children: [],
           total_payout_value: 0,

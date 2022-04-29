@@ -262,11 +262,11 @@
                                 <p class="p-2" id="modal_body"></p>
                             </div>
                             <div class="m-auto p-3 text-center">
-                                                        <p><i :class="postSelect.types[displayPost.item.type].icon"></i>{{postSelect.types[displayPost.item.type].launch}}</p>
-                                                        <button class="btn btn-lg btn-info px-4"
-                                                            style="border-radius: 5rem;">Launch<i
-                                                                class="ms-2 fas fa-external-link-alt"></i></button>
-                                                    </div>
+                                <p><i :class="postSelect.types[displayPost.item.type].icon"></i>{{postSelect.types[displayPost.item.type].launch}}</p>
+                                <button class="btn btn-lg btn-info px-4"
+                                    style="border-radius: 5rem;">Launch<i
+                                        class="ms-2 fas fa-external-link-alt"></i></button>
+                            </div>
                             <div class="card-footer">
                                 <div class="collapse" :data-target="'#vote-' + displayPost.item.url">
                                     <form id="voteForm">
