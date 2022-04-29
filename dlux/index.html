@@ -19,8 +19,8 @@
         var stateObj
         var ipfsdomain
         console.log(window.pathname)
-        const author = window.location.pathname.split('/')[1].replace('@', '')
-        const permlink = window.location.pathname.split('/')[2]
+        const author = window.location.pathname.split('/')[2].replace('@', '')
+        const permlink = window.location.pathname.split('/')[3]
         console.log({author, permlink})
         const hiveKey = `${author}/${permlink}`
         const hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
