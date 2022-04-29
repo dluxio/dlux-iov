@@ -238,13 +238,13 @@
                             <div class="card-header">
                                 <div class="d-inline-block p-2">
                                     <div class="float-left"><a id="modal_author_href1"><img id="modal_author_img" alt=""
+                                        :src="'https://images.hive.blog/u/' + displayPost.item.author + '/avatar'"
                                                 class="rounded-circle bg-light img-fluid mr-2 cover author-img"></a>
                                     </div>
                                     <div class="float-left">
                                         <p class="mt-0 mb-0 text-muted text-semibold"><a class="a-1"
                                                 id="modal_author"><span
-                                                    class="ml-2 badge badge-pill badge-light">{{authors[displayPost.item.author]
-                                                    ? authors[displayPost.item.author].rep : ''}}</span></a>
+                                                    class="ml-2 badge badge-pill badge-light">{{displayPost.item.rep}}</span></a>
                                         </p>
                                         <small class="text-muted" id="modal_created"></small>
                                     </div>
@@ -257,23 +257,25 @@
                             </div>
                             <a id="modal_blog_link" class="text-white">
                                 <h3 class="card-title mt-2 text-center text-capitalize p-2" id="modal_title"></h3>
-                            </a> <img src="..." alt="" class="card-img-top" id="modal_pic" @error="imgUrlAlt" />
+                            </a> <img :src="displayPost.item.pic" alt="" class="card-img-top" id="modal_pic" @error="imgUrlAlt" />
                             <div class="card-body">
                                 <p class="p-2" id="modal_body"></p>
                             </div>
-                            <div class="text-center">
-                                <a :href="displayPost.item.url" type="button"
-                                    class="btn btn-outline-danger mb-4 btn-launch">Launch App</a>
-                            </div>
+                            <div class="m-auto p-3 text-center">
+                                                        <p><i :class="postSelect.types[post.type].icon"></i>{{postSelect.types[post.type].launch}}</p>
+                                                        <button class="btn btn-lg btn-info px-4"
+                                                            style="border-radius: 5rem;">Launch<i
+                                                                class="ms-2 fas fa-external-link-alt"></i></button>
+                                                    </div>
                             <div class="card-footer">
-                                <div class="collapse" :data-target="'#vote-' + displayPost.item.id">
+                                <div class="collapse" :data-target="'#vote-' + displayPost.item.url">
                                     <form id="voteForm">
                                         <div class="d-flex align-items-center text-white-50">
                                             <div>
                                                 <button type="button" class="btn btn-primary"
-                                                    @click="vote(displayPost.item.id)">{{displayPost.item.slider}}%</button>
+                                                    @click="vote(displayPost.item.url)">{{displayPost.item.slider}}%</button>
                                                 <button type="button" class="btn btn-secondary" data-toggle="collapse"
-                                                    :data-target="'#vote-' + displayPost.item.id"><span
+                                                    :data-target="'#vote-' + displayPost.item.url"><span
                                                         class="close text-white">×</span></button>
                                             </div>
                                             <div class="flex-fill mx-2">
@@ -291,7 +293,7 @@
                                 <div class="d-flex align-items-center my-2">
                                     <div><a data-toggle="collapse" :data-target="'#vote-' + displayPost.item.id"><i
                                                 class="fas fa-heart mr-1"></i></a>{{displayPost.item.upVotes}}
-                                        <i class="fas fa-comment ml-2 mr-1"></i>displayPost.item.children
+                                        <i class="fas fa-comment ml-2 mr-1"></i>{{displayPost.item.children.length}}
                                     </div>
                                     <div class="ml-auto" id="modal_total_payout"><i class="ml-1 fab fa-fw fa-hive"></i>
                                     </div>
