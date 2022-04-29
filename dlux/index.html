@@ -21,6 +21,7 @@
         const author = window.location.pathname.split('/')[2].replace('@', '')
         const permlink = window.location.pathname.split('/')[3]
         const hiveKey = `${author}/${permlink}`
+        var user = localStorage.getItem('user') || 'Guest'
         const hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         fetch(hapi, {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content", "params":["${author}", "${permlink}"], "id":1}`,
@@ -32,9 +33,8 @@
           .then((r) => r.json())
           .then(res => {
             stateObj = res.result
-            result = res.result
-            window.title = "DLUX | " + result.title
-            var metadata = result.json_metadata
+            window.title = "DLUX | " + stateObj.title
+            var metadata = stateObj.json_metadata
             var hashy = JSON.parse(metadata).vrHash,
                 vars = `?${location.href.split('?')[1]}` || `?`
             if (!hashy) {
@@ -51,7 +51,7 @@
             }
             const subauthor = author.replace('.', '-')
             ipfsdomain = `https://${subauthor}.ipfs.dlux.io`;
-            location.href = ipfsdomain + `${vars}&hash=${hashy}&author=${author}&permlink=${permlink}&user=${localStorage.getItem('user') || 'Guest'}`
+            location.href = ipfsdomain + `${vars}&hash=${hashy}&author=${author}&permlink=${permlink}&user=${user}`
             
         });
         if (isIOS()) {
@@ -128,13 +128,12 @@
         }
 
     function iloaded(){
-        hive.api.getContent(author, permlink, function(err, result) {
       var target = document.getElementById('theIframe').contentWindow
       var un = 'Guest'
       if(localStorage.getItem('user')){un = localStorage.getItem('user')}
       target.postMessage({
       'func': 'iAm',
-      'message': un,
+      'message': user,
       }, "*");
       target.postMessage({
       'func': 'key',
@@ -142,9 +141,8 @@
       }, "*");
       target.postMessage({
       'func': 'hiveState',
-      'message': result,
+      'message': stateObj,
       }, "*");
-      })
           if(window.hive_keychain) {
             postable = true
         }
@@ -159,21 +157,19 @@
                     }, '*');
                 });
             }
-            hive.api.getContent(author, permlink, function(err, result) {
-                var target = document.getElementById('theIframe').contentWindow
-                target.postMessage({
-                    'func': 'iAm',
-                    'message': user,
-                }, "*");
-                target.postMessage({
-                    'func': 'key',
-                    'message': `${author}/${permlink}`,
-                }, "*");
-                target.postMessage({
-                    'func': 'hiveState',
-                    'message': result,
-                }, "*");
-            });
+            var target = document.getElementById('theIframe').contentWindow
+            target.postMessage({
+                'func': 'iAm',
+                'message': user,
+            }, "*");
+            target.postMessage({
+                'func': 'key',
+                'message': `${author}/${permlink}`,
+            }, "*");
+            target.postMessage({
+                'func': 'hiveState',
+                'message': stateObj,
+            }, "*");
             if (window.hive_keychain) {
                 postable = true
             }
