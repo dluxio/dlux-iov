@@ -429,7 +429,7 @@ var app = new Vue({
     },
     modalSelect(key){
       this.displayPost.index = key;
-      this.displayPost.item = this.posturls(key)
+      this.displayPost.item = this.posturls[key]
     },
     modalIndex(modal, index) {
       var i = 0;
