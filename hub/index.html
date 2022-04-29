@@ -171,15 +171,8 @@
                                                     :src="post.pic" @error="imgUrlAlt"
                                                     style="width: 640px; height: 360px; object-fit: cover;" />
                                                 <div class="caption text-white w-100 h-100 d-flex">
-                                                    <div class="m-auto p-3 text-center" v-if="post.type == 360">
-                                                        <p><i class="fa-solid fa-globe me-2"></i>360 Photo Gallery</p>
-                                                        <button class="btn btn-lg btn-info px-4"
-                                                            style="border-radius: 5rem;">Launch<i
-                                                                class="ms-2 fas fa-external-link-alt"></i></button>
-                                                    </div>
-                                                    <div class="m-auto p-3 text-center" v-if="post.type == 'VR'">
-                                                        <p><i class="fa-solid fa-vr-cardboard me-2"></i>3D / VR
-                                                            Experience</p>
+                                                    <div class="m-auto p-3 text-center">
+                                                        <p><i :class="postSelect.types[post.type].icon"></i>{{postSelect.types[post.type].launch}}</p>
                                                         <button class="btn btn-lg btn-info px-4"
                                                             style="border-radius: 5rem;">Launch<i
                                                                 class="ms-2 fas fa-external-link-alt"></i></button>
