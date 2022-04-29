@@ -30,8 +30,7 @@
           method: "POST",
         })
           .then((r) => r.json())
-          .then((res) => {
-            if(err)console.log(err)
+          .then(res => {
             stateObj = result
             window.title = "DLUX | " + result.title
             var metadata = result.json_metadata
