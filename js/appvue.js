@@ -4,6 +4,7 @@ import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
 import Popper from "/js/pop.js";
 import GlitchedWriter from "https://cdn.skypack.dev/glitched-writer";
+import Marker from "/js/marker.js";
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "";
@@ -388,6 +389,7 @@ var app = new Vue({
     "cycle-text": Cycler,
     "pop-vue": Popper,
     "glitched-writer": GlitchedWriter,
+    "vue-markdown": Marker
   },
   methods: {
     precision(num, precision) {
@@ -428,9 +430,9 @@ var app = new Vue({
       else this[modal].index = this[modal].items.length - 1;
       this[modal].item = this[modal].items[this[modal].index];
     },
-    modalSelect(key){
+    modalSelect(key) {
       this.displayPost.index = key;
-      this.displayPost.item = this.posturls[key]
+      this.displayPost.item = this.posturls[key];
     },
     modalIndex(modal, index) {
       var i = 0;
@@ -647,8 +649,8 @@ var app = new Vue({
       if (
         !this.postSelect[this.postSelect.entry].e &&
         !this.postSelect[this.postSelect.entry].p
-      ){
-        this.postSelect[this.postSelect.entry].p = true
+      ) {
+        this.postSelect[this.postSelect.entry].p = true;
         fetch(
           `https://dluxdata.herokuapp.com/${this.postSelect.entry}?a=${
             this.postSelect[this.postSelect.entry].a
@@ -656,7 +658,7 @@ var app = new Vue({
         )
           .then((r) => r.json())
           .then((res) => {
-            this.postSelect[this.postSelect.entry].p = false
+            this.postSelect[this.postSelect.entry].p = false;
             var authors = [];
             this.postSelect[this.postSelect.entry].o +=
               this.postSelect[this.postSelect.entry].a;
@@ -670,11 +672,10 @@ var app = new Vue({
             }
             var called = false;
             for (var post in this.posturls) {
-                
-              if (!this.posturls[post].created){
+              if (!this.posturls[post].created) {
                 this.getContent(
-                    this.posturls[post].author,
-                    this.posturls[post].permlink
+                  this.posturls[post].author,
+                  this.posturls[post].permlink
                 );
                 called = true;
               }
@@ -684,7 +685,7 @@ var app = new Vue({
             authors = [...new Set(authors)];
             this.getHiveAuthors(authors);
           });
-        }
+      }
     },
     selectPosts(modal) {
       this.displayPosts = [];
@@ -696,10 +697,10 @@ var app = new Vue({
           this.displayPosts.push(this.posturls[post]);
       }
 
-      if (this.postSelect.searchTerm){
-        const filter = this.displayPosts.filter(
-          post =>{
-            return post.title
+      if (this.postSelect.searchTerm) {
+        const filter = this.displayPosts.filter((post) => {
+          return (
+            post.title
               .toLowerCase()
               .indexOf(this.postSelect.searchTerm.toLowerCase()) > -1 ||
             post.author
@@ -708,8 +709,8 @@ var app = new Vue({
             post.json_metadata?.tags?.indexOf(
               this.postSelect.searchTerm.toLowerCase()
             ) > -1
-          }
-        );
+          );
+        });
         this.displayPosts = filter;
       }
       for (var i = 0; i < this.displayPosts.length; i++) {
@@ -724,22 +725,21 @@ var app = new Vue({
           i--;
         }
       }
-      if(this.postSelect.entry == 'new'){
-          this.sort("displayPosts", "created", "desc");
-      } else if (this.postSelect.entry == "new"){
-          this.sort("displayPosts", "voteweight", "desc");
+      if (this.postSelect.entry == "new") {
+        this.sort("displayPosts", "created", "desc");
+      } else if (this.postSelect.entry == "new") {
+        this.sort("displayPosts", "voteweight", "desc");
       }
-        if (
-          this.postSelect.searchTerm &&
-          this.displayPosts.length <
-            this.postSelect[this.postSelect.entry].a - 2
-        )
-          this.getPosts();
-        if (modal) {
-          this[modal[0]].items = this.displayPosts;
-          this[modal[0]].item = this[modal[0]].items[modal[1]];
-          this[modal[0]].index = modal[1];
-        }
+      if (
+        this.postSelect.searchTerm &&
+        this.displayPosts.length < this.postSelect[this.postSelect.entry].a - 2
+      )
+        this.getPosts();
+      if (modal) {
+        this[modal[0]].items = this.displayPosts;
+        this[modal[0]].item = this[modal[0]].items[modal[1]];
+        this[modal[0]].index = modal[1];
+      }
     },
     getContent(a, p) {
       if (a && p) {
@@ -760,8 +760,13 @@ var app = new Vue({
                 upVotes: 0,
                 downVotes: 0,
               };
-              for(var i = 0; i < this.posturls[res.result.url].active_votes.length; i++){
-                if(this.posturls[res.result.url].active_votes[i].percent > 0) this.posturls[res.result.url].upVotes++;
+              for (
+                var i = 0;
+                i < this.posturls[res.result.url].active_votes.length;
+                i++
+              ) {
+                if (this.posturls[res.result.url].active_votes[i].percent > 0)
+                  this.posturls[res.result.url].upVotes++;
                 else this.posturls[res.result.url].downVotes++;
               }
               try {
@@ -774,7 +779,7 @@ var app = new Vue({
               } catch (e) {
                 console.log(res.result.url, "no JSON?");
               }
-              this.posturls[res.result.url].rep = '...'
+              this.posturls[res.result.url].rep = "...";
               this.rep(res.result.url);
               var type = "Blog";
               if (
@@ -795,7 +800,7 @@ var app = new Vue({
               this.posturls[res.result.url].type = type;
               this.posturls[res.result.url].preview = this.removeMD(
                 this.posturls[res.result.url].body
-              ).substr(0, 250)
+              ).substr(0, 250);
               this.posturls[res.result.url].ago = this.timeSince(
                 this.posturls[res.result.url].created
               );
@@ -807,11 +812,11 @@ var app = new Vue({
       }
     },
     imgUrlAlt(event) {
-        event.target.src = "/img/dlux-logo-icon.png"
+      event.target.src = "/img/dlux-logo-icon.png";
     },
     timeSince(date) {
-      var seconds = Math.floor((new Date() - new Date(date + '.000Z')) / 1000);
-      var interval = Math.floor(seconds / 86400)
+      var seconds = Math.floor((new Date() - new Date(date + ".000Z")) / 1000);
+      var interval = Math.floor(seconds / 86400);
       if (interval > 7) {
         return new Date(date).toLocaleDateString();
       }
@@ -1006,19 +1011,19 @@ var app = new Vue({
         nai.precision
       )} ${nai.token}`;
     },
-    rep(a){
-        if (!this.authors[this.posturls[a].author]) {
-          setTimeout(
-            function () {
-              this.rep(a);
-            }.bind(this),
-            500
-          );
-        } else {
-          this.posturls[a].rep = this.readRep(
-            this.authors[this.posturls[a].author].reputation
-          );
-        }
+    rep(a) {
+      if (!this.authors[this.posturls[a].author]) {
+        setTimeout(
+          function () {
+            this.rep(a);
+          }.bind(this),
+          500
+        );
+      } else {
+        this.posturls[a].rep = this.readRep(
+          this.authors[this.posturls[a].author].reputation
+        );
+      }
     },
     getTokenUser(user) {
       if (user)
