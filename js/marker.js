@@ -1,22 +1,54 @@
 export default {
   data() {
     return {
-      text: '',
+      text: "",
     };
   },
-  template: `<div>
-  <textarea v-show="!md" v-model="text" class="form-control" rows="3"></textarea>
-  <div v-html="compiledMarkdown"></div>
-</div>`,
-  props: ["md", "author", "permlink" ],
-  computed: {
-    compiledMarkdown: function () {
-      return marked.parse(this.md ? this.md.replace(`[View in VR @ dlux.io](https://dlux.io/dlux/@${this.author}/${this.permlink})`, '') : this.text, { sanitize: true });
+  template: `
+  <div>
+    <div v-show="!md">
+      <textarea ref="editor" v-model="text" class="form-control" rows="3"></textarea>
+      <button @click="insertAtCursor('[Alt Text](https://goto.link)')">Insert Link</button>
+      <button >Comment</button>
+    </div>
+    <div v-html="compiledMarkdown"></div>
+  </div>`,
+  props: ["md", "author", "permlink"],
+  methods: {
+    insertAtCursor(toInsert) {
+      if (document.selection) {
+        this.$refs.editor.focus();
+        sel = document.selection.createRange();
+        sel.text = toInsert;
+      } else if (
+        this.$refs.editor.selectionStart ||
+        this.$refs.editor.selectionStart == "0"
+      ) {
+        var startPos = this.$refs.editor.selectionStart;
+        var endPos = this.$refs.editor.selectionEnd;
+        this.$refs.editor.value =
+          this.$refs.editor.value.substring(0, startPos) +
+          toInsert +
+          this.$refs.editor.value.substring(
+            endPos,
+            this.$refs.editor.value.length
+          );
+      } else {
+        this.$refs.editor.value += toInsert;
+      }
     },
   },
-  // methods: {
-  //   update: _.debounce(function (e) {
-  //     this.md = e.target.value;
-  //   }, 300),
-  // },
+  computed: {
+    compiledMarkdown: function () {
+      return marked.parse(
+        this.md
+          ? this.md.replace(
+              `[View in VR @ dlux.io](https://dlux.io/dlux/@${this.author}/${this.permlink})`,
+              ""
+            )
+          : this.text,
+        { sanitize: true }
+      );
+    },
+  },
 };

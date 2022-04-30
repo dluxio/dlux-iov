@@ -245,11 +245,11 @@
                                                 id="modal_author"><span
                                                     class="ml-2 badge badge-pill badge-light">{{displayPost.item.rep}}</span></a>
                                         </p>
-                                        <small class="text-muted" id="modal_created"></small>
                                     </div>
                                     <span>
                                         <h3 class="card-title mt-2 text-center text-capitalize p-2" id="modal_title">{{displayPost.item.title}}</h3>
-                                    
+                                        <h5>{{displayPost.item.author}}</h5>
+                                        <small class="text-muted" id="modal_created">{{displayPost.item.ago}}</small>
                                     </span>
                                     <div class="float-right">
                                         <p><i :class="postSelect.types[displayPost.item.type].icon"></i>{{postSelect.types[displayPost.item.type].launch}}</p>
@@ -258,6 +258,7 @@
                                                 class="ms-2 fas fa-external-link-alt"></i></button>
                                     </div>
                                     <!-- I'd like to build a little review module,  stars kind of thing... and comments on our front end can have a little area that users can fill out: malicious, etc etc num stars... and put it in the custom json field of the comment... easy to count later.-->
+                                    <vue-ratings stars="4.9" rating="1"></vue-ratings>
                                 </div>
                                 <div class="float-right p-2"><span class="badge badge-secondary" id="modal_scat"></span>
                                     <button type="button" class="close text-white ml-3" data-dismiss="modal"

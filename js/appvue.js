@@ -5,6 +5,7 @@ import Cycler from "/js/cycler.js";
 import Popper from "/js/pop.js";
 import GlitchedWriter from "https://cdn.skypack.dev/glitched-writer";
 import Marker from "/js/marker.js";
+import Ratings from "/js/ratings.js";
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "";
@@ -389,7 +390,8 @@ var app = new Vue({
     "cycle-text": Cycler,
     "pop-vue": Popper,
     "glitched-writer": GlitchedWriter,
-    "vue-markdown": Marker
+    "vue-markdown": Marker,
+    "vue-ratings": Ratings,
   },
   methods: {
     precision(num, precision) {
