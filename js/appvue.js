@@ -271,19 +271,19 @@ var app = new Vue({
         searchTerm: "",
         entry: "new",
         new: {
-          a: 100,
+          a: 10,
           o: 0,
           e: false,
           p: false,
         },
         trending: {
-          a: 100,
+          a: 10,
           o: 0,
           e: false,
           p: false,
         },
         promoted: {
-          a: 100,
+          a: 10,
           o: 0,
           e: false,
           p: false,
@@ -435,6 +435,13 @@ var app = new Vue({
     modalSelect(key) {
       this.displayPost.index = key;
       this.displayPost.item = this.posturls[key];
+      if (this.displayPost.item.children && !this.displayPost.item.replies.length)
+        this.getReplies(
+          this.displayPost.item.author,
+          this.displayPost.item.permlink
+        ).then((r) => {
+          this.posturls[key].replies = r.result;
+        });
     },
     modalIndex(modal, index) {
       var i = 0;
@@ -480,6 +487,24 @@ var app = new Vue({
       if (this.toSign.txid == txid) {
         this.toSign = {};
       }
+    },
+    getReplies(a,p){
+      return new Promise((resolve, reject) => {
+        fetch(this.hapi, {
+          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content_replies", "params":["${a}","${p}"], "id":1}`,
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          method: "POST",
+        })
+          .then((res) => res.json())
+          .then((r) => {
+            resolve(r);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      })
     },
     run(op) {
       if (typeof this[op] == "function" && this.account != "GUEST") {

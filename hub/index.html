@@ -65,7 +65,7 @@
                 @logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
                 :lapi="lapi" />
         </div>
-        <main role="main" class="flex-shrink-0">
+        <main role="main" class="flex-shrink-0" v-cloak>
             <div class="container-fluid mx-0 px-0">
                 <div class="row mt-3 mx-0 px-0">
                     <div class="text-white text-center background-rb p-4">
@@ -317,6 +317,32 @@
                                         <i class="fas fa-comment ml-2 mr-1"></i>{{displayPost.item.children.length}}</a>
                                     </div>
                                     <div class="ml-auto" id="modal_total_payout"><i class="ml-1 fab fa-fw fa-hive"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="replies">
+                                <div v-for="post in displayPost.item.replies">
+                                    <div class="card-header">
+                                        <div class="float-left">
+                                            <a :href="post.author_url"><img :src="post.author_img"
+                                                class="rounded-circle bg-light img-fluid mr-2 cover author-img"></a>
+                                        </div>
+                                        <div class="float-left">
+                                            <p class="mt-0 mb-0 text-muted text-semibold"><a class="a-1"
+                                                id="modal_author"><span
+                                                    class="ml-2 badge badge-pill badge-light">{{post.rep}}</span></a>
+                                            </p>
+                                        </div>
+                                        <span>
+                                            <h5>{{post.author}}</h5>
+                                            <small class="text-muted" id="modal_created">{{post.ago}}</small>
+                                        </span>
+                                    </div>
+                                    <div class="card-body">
+                                        <vue-markdown :md="post.body" :author="post.author" :permlink="post.permlink"></vue-markdown>
+                                    </div>
+                                    <div class="card-footer">
+                                        <!-- votes/value, replies load replies and reply-->
                                     </div>
                                 </div>
                             </div>
