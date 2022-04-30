@@ -46,8 +46,7 @@ export default {
               `[View in VR @ dlux.io](https://dlux.io/dlux/@${this.author}/${this.permlink})`,
               ""
             )
-          : this.text,
-        { sanitize: true }
+          : this.text
       );
     },
   },
