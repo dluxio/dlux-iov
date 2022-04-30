@@ -11,7 +11,7 @@ export default {
       <button @click="insertAtCursor('[Alt Text](https://goto.link)')">Insert Link</button>
       <button >Comment</button>
     </div>
-    <div v-html="compiledMarkdown"></div>
+    <div class="behavemark" v-html="compiledMarkdown"></div>
   </div>`,
   props: ["md", "author", "permlink"],
   methods: {
