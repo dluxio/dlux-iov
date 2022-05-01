@@ -187,7 +187,7 @@
                             </div>
 
                             <div class="card-footer bg-darkg text-white-50">
-                                <div class="collapse" :id="'vote-' + displayPost.item.author + '-' + displayPost.item.permlink">
+                                <div class="collapse" :id="'vote-modal-' + displayPost.item.author + '-' + displayPost.item.permlink">
                                     <form id="voteForm">
                                         <div class="d-flex align-items-center text-white-50">
                                             <div>
@@ -279,14 +279,14 @@
                                         class="ms-2 fas fa-external-link-alt"></i></button></a>
                             </div>
                             <div class="card-footer">
-                                <div class="collapse" :id="'#vote-modal-' + displayPost.item.author + '-' + displayPost.item.permlink>">
+                                <div class="collapse" :id="'vote-modal-' + displayPost.item.author + '-' + displayPost.item.permlink">
                                     <form id="voteForm">
                                         <div class="d-flex align-items-center text-white-50">
                                             <div>
                                                 <button type="button" class="btn btn-primary"
                                                     @click="vote(displayPost.item.url)">{{displayPost.item.slider}}%</button>
                                                 <button type="button" class="btn btn-secondary" data-bs-toggle="collapse"
-                                                    :data-bs-target="'#vote-modal-' + displayPost.item.url"><span
+                                                    :data-bs-target="'#vote-modal-' + displayPost.item.author + '-' + displayPost.item.permlink"><span
                                                         class="close text-white">×</span></button>
                                             </div>
                                             <div class="flex-fill mx-2">
