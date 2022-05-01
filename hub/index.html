@@ -187,14 +187,14 @@
                             </div>
 
                             <div class="card-footer bg-darkg text-white-50">
-                                <div class="collapse" :id="'vote-' + displayPost.item.author + '-' + displayPost.item.permlink">
+                                <div class="collapse" :id="'vote-' + post.author + '-' + post.permlink">
                                     <form id="voteForm">
                                         <div class="d-flex align-items-center text-white-50">
                                             <div>
                                                 <button type="button" class="btn btn-primary" @click="vote(post.url)"
                                                     style="width: 100px;">{{post.slider}}%</button>
                                                 <button type="button" class="btn btn-secondary"
-                                                    :data-bs-target="'#vote-' + displayPost.item.author + '-' + displayPost.item.permlink" data-bs-toggle="collapse"><span
+                                                    :data-bs-target="'#vote-' + post.author + '-' + post.permlink" data-bs-toggle="collapse"><span
                                                         class="close text-white">×</span></button>
                                             </div>
                                             <div class="flex-fill mx-2">
@@ -212,7 +212,7 @@
                                 </div>
                                 <div class="d-flex align-items-center my-2">
                                     <div>
-                                        <a data-bs-toggle="collapse" :data-bs-target="'#vote-' + displayPost.item.author + '-' + displayPost.item.permlink">
+                                        <a data-bs-toggle="collapse" :data-bs-target="'#vote-' + post.author + '-' + post.permlink">
                                             <i class="fas fa-heart fa-fw me-1"></i></a>{{post.upVotes}}
                                         <i class="fas fa-comment fa-fw ms-2 me-1"></i>{{post.children}}
                                         <i class="fa-solid fa-flag ms-2"></i> {{post.downVotes ? post.downVotes : ''}}
