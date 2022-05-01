@@ -23,6 +23,13 @@ export default {
     html: {
       default: false,
     },
+    template: {
+      default:
+        '<div class="popover" role="tooltip"><div class="popover-arrow"></div><h3 class="popover-header"></h3><div class="popover-body"></div></div>',
+    },
+    customClass: {
+      default: "",
+    }
   },
   mounted() {
     // pass bootstrap popover options from props

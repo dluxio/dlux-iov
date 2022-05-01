@@ -43,7 +43,6 @@ export default {
   props: ["op", "lapi"],
   watch: {
     op(op, oldOp) {
-      console.log(op, "...", oldOp);
       if (op.txid) {
         op.time = new Date().getTime();
         op.status = "Pending your approval";
@@ -56,6 +55,10 @@ export default {
           this.broadcastCJA(op);
         } else if (this.op.type == "xfr") {
           this.broadcastTransfer(op);
+        } else if (this.op.type == "comment") {
+          this.broadcastComment(op);
+        } else if (this.op.type == "vote") {
+          this.broadcastVote(op);
         }
         localStorage.setItem("pending", JSON.stringify(this.ops));
       }
@@ -119,6 +122,57 @@ export default {
                 (obj.cj.hive ? obj.cj.hive : obj.cj.hbd) / 1000
               ).toFixed(3)} ${obj.cj.hive ? "HIVE" : "HBD"}`,
               memo: `${obj.cj.memo ? obj.cj.memo : ""}`,
+            },
+          ],
+        ],
+        "active",
+      ];
+      this.sign(op)
+        .then((r) => {
+          this.statusFinder(r, obj);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+    broadcastVote(obj) {
+      var op = [
+        this.user,
+        [
+          [
+            "vote",
+            {
+              voter: this.user,
+              author: obj.cj.author,
+              permlink: obj.cj.permlink,
+              weight: obj.cj.weight,
+            },
+          ],
+        ],
+        "posting",
+      ];
+      this.sign(op)
+        .then((r) => {
+          this.statusFinder(r, obj);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+    broadcastComment(obj) {
+      var op = [
+        this.user,
+        [
+          [
+            "comment",
+            {
+              author: this.user,
+              title: obj.cj.title,
+              body: obj.cj.body,
+              parent_author: obj.cj.parent_author,
+              parent_permlink: obj.cj.parent_permlink,
+              permlink: obj.cj.permlink,
+              json_metadata: obj.cj.json_metadata,
             },
           ],
         ],
