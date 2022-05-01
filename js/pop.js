@@ -29,6 +29,9 @@ export default {
     },
     customClass: {
       default: "",
+    },
+    html: {
+      default: true,
     }
   },
   mounted() {
