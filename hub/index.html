@@ -187,7 +187,7 @@
                             </div>
 
                             <div class="card-footer bg-darkg text-white-50">
-                                <div class="collapse" :id="'vote-' + post.id">
+                                <div class="collapse" :id="'vote-' + displayPost.item.author + '-' + displayPost.item.permlink">
                                     <form id="voteForm">
                                         <div class="d-flex align-items-center text-white-50">
                                             <div>
@@ -279,7 +279,7 @@
                                         class="ms-2 fas fa-external-link-alt"></i></button></a>
                             </div>
                             <div class="card-footer">
-                                <div class="collapse" :data-bs-target="'#vote-modal-' + displayPost.item.url">
+                                <div class="collapse" :id="'#vote-modal-' + displayPost.item.author + '-' + displayPost.item.permlink>">
                                     <form id="voteForm">
                                         <div class="d-flex align-items-center text-white-50">
                                             <div>
