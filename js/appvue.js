@@ -864,16 +864,16 @@ var app = new Vue({
       if (interval > 7) {
         return new Date(date).toLocaleDateString();
       }
-      if (interval > 1) {
-        return interval + " days ago";
+      if (interval >= 1) {
+        return interval + ` day${interval > 1 ? 's' : ''} ago`;
       }
       interval = Math.floor(seconds / 3600);
-      if (interval > 1) {
-        return interval + " hours ago";
+      if (interval >= 1) {
+        return interval + ` hour${interval > 1 ? 's' : ''} ago`;
       }
       interval = Math.floor(seconds / 60);
-      if (interval > 1) {
-        return interval + " minutes ago";
+      if (interval >= 1) {
+        return interval + ` minute${interval > 1 ? "s" : ""} ago`;
       }
       return Math.floor(seconds) + " seconds ago";
     },
