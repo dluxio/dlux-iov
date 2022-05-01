@@ -118,7 +118,7 @@ var app = new Vue({
       behind: "",
       stats: {},
       behindTitle: "",
-      TOKEN: "LARYNX",
+      TOKEN: "DLUX",
       sendTo: "",
       sendAmount: 0,
       sendMemo: "",
