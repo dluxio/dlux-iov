@@ -409,7 +409,7 @@ var app = new Vue({
     },
     hasVoted(url){
       const vote = this.posturls[url].active_votes.filter(vote => vote.voter === this.account)
-      return vote[0].weight
+      return vote.length ? vote[0].weight : 0
     },
     precision(num, precision) {
       return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
