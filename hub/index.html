@@ -213,7 +213,7 @@
                                                 </p>
                                             </div>
                                             <div>
-                                                <p class="my-0"><span class="mr-1" id="commentVal">Vote Calc</span><i
+                                                <p class="my-0"><span class="mr-1" id="commentVal">{{toFixed(voteVal * post.slider/10000,3)}} HBD</span><i
                                                         class="ml-1 fab fa-fw fa-hive"></i></p>
                                             </div>
                                         </div>
@@ -310,7 +310,7 @@
                                         <div class="d-flex align-items-center text-white-50">
                                             <div>
                                                 <button type="button" class="btn btn-primary"
-                                                    @click="vote(displayPost.item.url)">{{displayPost.item.slider}}%</button>
+                                                    @click="vote(displayPost.item.url)">{{displayPost.item.slider/100}}%</button>
                                                 <button type="button" class="btn btn-secondary"
                                                     data-bs-toggle="collapse"
                                                     :data-bs-target="'#vote-modal-' + displayPost.item.author + '-' + displayPost.item.permlink"><span
@@ -318,12 +318,12 @@
                                             </div>
                                             <div class="flex-fill mx-2">
                                                 <p class="my-1">
-                                                    <input type="range" class="form-control-range" step="0.01"
-                                                        value="100" max="100" min="0.01"
+                                                    <input type="range" class="form-control-range" step="1"
+                                                        value="10000" max="10000" min="1"
                                                         v-model="displayPost.item.slider">
                                                 </p>
                                             </div>
-                                            <p class="my-0"><span class="mr-1" id="commentVal">0</span><i
+                                            <p class="my-0"><span class="mr-1" id="commentVal">{{toFixed(voteVal * displayPost.item.slider/10000,3)}} HBD</span><i
                                                     class="ml-1 fab fa-fw fa-hive"></i></p>
                                         </div>
                                     </form>

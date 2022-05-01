@@ -131,6 +131,8 @@ var app = new Vue({
       sendHBDAllowed: false,
       sendHBDAmount: 0,
       sendHBDMemo: "",
+      rewardFund: {},
+      feedPrice: {},
       recenthive: {},
       recenthbd: {},
       openorders: [],
@@ -440,6 +442,9 @@ var app = new Vue({
     precision(num, precision) {
       return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
     },
+    toFixed(num, dig){
+      return parseFloat(num).toFixed(dig);
+    },
     handleScroll() {
       if (
         document.documentElement.clientHeight + window.scrollY >
@@ -510,6 +515,33 @@ var app = new Vue({
               this.posturls[key].ratings += 1;
             }
           }
+        });
+    },
+    getRewardFund(){
+      fetch(this.hapi, {
+        body: `{"jsonrpc":"2.0", "method":"condenser_api.get_reward_fund", "params":["post"], "id":1}`,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        method: "POST"
+      })
+      .then(r=>r.json())
+      .then(r=>{
+        this.rewardFund = r.result;
+      })
+    },
+    getFeedPrice(){
+      fetch(this.hapi, {
+        body: `{"jsonrpc":"2.0", "method":"condenser_api.get_current_median_history_price", "params":[], "id":1}`,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        method: "POST",
+      })
+        .then((r) => r.json())
+        .then((r) => {
+          console.log(r);
+          this.feedPrice = r.result;
         });
     },
     modalIndex(modal, index) {
@@ -1175,6 +1207,13 @@ var app = new Vue({
             this.accountinfo = data.result[0];
             this.barhive = this.accountinfo.balance;
             this.barhbd = this.accountinfo.hbd_balance;
+            const total_vests =
+              parseInt(this.accountinfo.vesting_shares) +
+              parseInt(this.accountinfo.received_vesting_shares) -
+              parseInt(this.accountinfo.delegated_vesting_shares);
+            const final_vest = total_vests * 1000000;
+            const power = ((parseInt(this.accountinfo.voting_power) * 10000) / 10000) / 50;
+            this.accountinfo.rshares = (power * final_vest) / 10000;
           });
     },
     getHiveAuthors(users) {
@@ -1209,12 +1248,25 @@ var app = new Vue({
     //this.getNodes();
     this.getPosts();
     this.getProtocol();
+    this.getRewardFund();
+    this.getFeedPrice();
   },
   computed: {
     location: {
       get() {
         return location;
       },
+    },
+    voteVal(){
+      console.log(
+        this.accountinfo.rshares,
+        parseInt(this.rewardFund.recent_claims),
+        this.rewardFund.reward_balance,
+        this.feedPrice.hbd_median_price
+      );
+      return ((this.accountinfo.rshares / parseInt(this.rewardFund.recent_claims)) *
+        parseFloat(this.rewardFund.reward_balance) *
+        (1/parseFloat(this.feedPrice.base)))
     }
   },
 });
