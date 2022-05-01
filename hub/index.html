@@ -191,6 +191,7 @@
                             </div>
 
                             <div class="card-footer bg-darkg text-white-50">
+                                <!--vote collapse-->
                                 <div class="collapse" :id="'vote-' + post.author + '-' + post.permlink">
                                     <form id="voteForm">
                                         <div class="d-flex align-items-center text-white-50">
@@ -219,23 +220,28 @@
                                         </div>
                                     </form>
                                 </div>
+                                <!--footer buttons-->
                                 <div class="d-flex align-items-center my-2">
-                                    <a @click="post.flag = false" data-bs-toggle="collapse"
-                                        :class="{'text-primary': hasVoted(post.url) > 0, 'text-secondary': hasVoted(post.url) == 0, 'text-danger': hasVoted(post.url) < 0 }"
+                                    <a href="#/" class="no-decoration" @click="post.flag = false" data-bs-toggle="collapse"
+                                        :class="{'text-primary': hasVoted(post.url) > 0, 'text-white-50': hasVoted(post.url) == 0, 'text-danger': hasVoted(post.url) < 0 }"
                                         :data-bs-target="'#vote-' + post.author + '-' + post.permlink">
-                                        <i class="fas fa-heart fa-fw me-1"></i>
-                                    </a>{{post.upVotes}}
-                                    <a href="#detailModal" class="no-decoration" data-bs-toggle="modal"
+                                        <i class="fas fa-heart fa-fw me-1"></i><span class="text-white-50">{{post.upVotes}}</span>
+                                    </a>
+                                    <a href="#detailModal" class="no-decoration text-white-50" data-bs-toggle="modal"
                                         @click="modalSelect(post.url)"><i
-                                            class="fas fa-comment fa-fw ms-2 me-1"></i>{{post.children}}
-                                        <i class="fa-solid fa-star ms-2 me-1"></i></a>
-                                    <a data-bs-toggle="collapse" :class="{'text-danger': hasVoted(post.url) < 0 }"
+                                            class="fas fa-comment fa-fw ms-2 me-1"></i><span class="text-white-50">{{post.children}}</span>
+                                    </a>
+                                    <a href="#detailModal" class="no-decoration text-white-50" data-bs-toggle="modal"
+                                        @click="modalSelect(post.url)">
+                                        <i class="fa-solid fa-star ms-2 me-1"></i><span class="text-white-50">3.79</span>
+                                    </a>
+                                    <a href="#/" class="no-decoration text-white-50" data-bs-toggle="collapse" :class="{'text-danger': hasVoted(post.url) < 0 }"
                                         :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
                                         @click="post.flag = true">
-                                        <i class="fa-solid fa-flag ms-2"></i> {{post.downVotes ? post.downVotes : ''}}
+                                        <i class="fa-solid fa-flag ms-2"></i><span class="text-white-50">{{post.downVotes ? post.downVotes : ''}}</span>
                                     </a>
-                                </div>
-                                <div class="ms-auto">
+
+                                    <div class="ms-auto">
                                     <pop-vue title="Post Earnings"
                                         :content="'Hive: ' + (post.paid ? post.total_payout_value : post.pending_payout_value) + '<br>' + TOKEN + ':'"
                                         trigger="hover">
@@ -244,6 +250,7 @@
                                             sigFig(post.pending_payout_value, 2)}}
                                         </button>
                                     </pop-vue>
+                                    </div>
                                 </div>
                             </div>
                         </div>
