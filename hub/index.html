@@ -127,7 +127,7 @@
                         </div>
                     </div>
                 </div>
-
+                <!--main view-->
                 <div class="row">
                     <div class="col-sm-6 col-lg-4 mb-4" v-for="post in displayPosts" :key="post.url">
                         <div class="card text-white bg-darkest mt-2 mb-3">
@@ -232,7 +232,7 @@
                     </div>
                 </div>
             </div>
-
+            <!--detail view-->
             <div class="modal fade" id="detailModal" tabindex="11" role="dialog" aria-hidden="true">
                 <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
                     <div class="modal-content bg-dark text-white">
@@ -279,14 +279,14 @@
                                         class="ms-2 fas fa-external-link-alt"></i></button></a>
                             </div>
                             <div class="card-footer">
-                                <div class="collapse" :data-target="'#vote-modal-' + displayPost.item.url">
+                                <div class="collapse" :data-bs-target="'#vote-modal-' + displayPost.item.url">
                                     <form id="voteForm">
                                         <div class="d-flex align-items-center text-white-50">
                                             <div>
                                                 <button type="button" class="btn btn-primary"
                                                     @click="vote(displayPost.item.url)">{{displayPost.item.slider}}%</button>
-                                                <button type="button" class="btn btn-secondary" data-toggle="collapse"
-                                                    :data-target="'#vote-modal-' + displayPost.item.url"><span
+                                                <button type="button" class="btn btn-secondary" data-bs-toggle="collapse"
+                                                    :data-bs-target="'#vote-modal-' + displayPost.item.url"><span
                                                         class="close text-white">×</span></button>
                                             </div>
                                             <div class="flex-fill mx-2">
@@ -301,18 +301,18 @@
                                         </div>
                                     </form>
                                 </div>
-                                <div  :data-target="'#comment-modal-' + displayPost.item.url">
+                                <div  :data-bs-target="'#comment-modal-' + displayPost.item.url">
                                     <form id="commentForm">
                                         <vue-markdown></vue-markdown>
-                                        <button type="button" class="btn btn-secondary" data-toggle="collapse"
-                                                    :data-target="'#comment-modal-' + displayPost.item.url"><span
+                                        <button type="button" class="btn btn-secondary" data-bs-toggle="collapse"
+                                                    :data-bs-target="'#comment-modal-' + displayPost.item.url"><span
                                                         class="close text-white">×</span></button>
                                     </form>
                                 </div>
                                 <div class="d-flex align-items-center my-2">
-                                    <div><a data-toggle="collapse" :data-target="'#vote-modal-' + displayPost.item.url"><i
+                                    <div><a data-bs-toggle="collapse" :data-bs-target="'#vote-modal-' + displayPost.item.url"><i
                                                 class="fas fa-heart mr-1"></i> {{displayPost.item.upVotes}} </a>
-                                        <a data-toggle="collapse" :data-target="'#comment-modal-' + displayPost.item.url">
+                                        <a data-bs-toggle="collapse" :data-bs-target="'#comment-modal-' + displayPost.item.url">
 
                                         <i class="fas fa-comment ml-2 mr-1"></i>{{displayPost.item.children.length}}</a>
                                     </div>
