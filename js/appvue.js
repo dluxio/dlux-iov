@@ -822,7 +822,7 @@ var app = new Vue({
               this.posturls[res.result.url] = {
                 ...this.posturls[res.result.url],
                 ...res.result,
-                slider: this.hasVoted(res.result.url) || 100,
+                slider: 100,
                 upVotes: 0,
                 downVotes: 0,
               };
@@ -864,6 +864,8 @@ var app = new Vue({
               else if (this.posturls[res.result.url].json_metadata.vidHash)
                 type = "Video";
               this.posturls[res.result.url].type = type;
+              this.posturls[res.result.url].slider = this.hasVoted(res.result.url) ||
+                100;
               this.posturls[res.result.url].preview = this.removeMD(
                 this.posturls[res.result.url].body
               ).substr(0, 250);
