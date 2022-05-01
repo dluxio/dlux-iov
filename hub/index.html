@@ -35,6 +35,7 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+
         div.behavemark img {
             max-width: 100%;
         }
@@ -90,10 +91,10 @@
                 <div class="row my-3">
                     <div class="container-fluid d-flex justify-content-center">
                         <div class="mx-3">
-                            <a class="btn btn-outline-primary dropdown-toggle "
-                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{postSelect.entry
+                            <a class="btn btn-outline-primary dropdown-toggle " data-bs-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false">{{postSelect.entry
                                 == 'new' ? 'NEW' : postSelect.entry == 'trending' ? 'TRENDING' : 'PROMOTED'}}
-                            <span class="sr-only">Toggle Dropdown</span>
+                                <span class="sr-only">Toggle Dropdown</span>
                             </a>
                             <div class="dropdown-menu dropdown-menu-dark">
                                 <a class="dropdown-item" @click="postSelect.entry = 'new';getPosts()">NEW</a>
@@ -102,8 +103,8 @@
                             </div>
                         </div>
                         <div class="mx-3">
-                            <a class="btn btn-outline-primary dropdown-toggle "
-                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TYPE
+                            <a class="btn btn-outline-primary dropdown-toggle " data-bs-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false">TYPE
                                 <span class="sr-only">Toggle Dropdown</span>
                             </a>
                             <div class="dropdown-menu dropdown-menu-dark">
@@ -142,7 +143,8 @@
                                                 <div class="d-flex align-items-center">
                                                     <h3 class="m-0 text-white">{{post.author}}</h3>
                                                     <div>
-                                                        <span style="font-size: .5em;"class="ms-2 badge small rounded-pill text-white"
+                                                        <span style="font-size: .5em;"
+                                                            class="ms-2 badge small rounded-pill text-white"
                                                             :class="{'bg-danger': post.rep < 25, 'bg-warning': post.rep >= 25 && post.rep < 50, 'bg-success': post.rep >= 50}">
                                                             {{post.rep}}
                                                         </span>
@@ -174,7 +176,9 @@
                                                     style="width: 640px; height: 360px; object-fit: cover;" />
                                                 <div class="caption text-white w-100 h-100 d-flex">
                                                     <div class="m-auto p-3 text-center">
-                                                        <p><i :class="postSelect.types[post.type].icon"></i>{{postSelect.types[post.type].launch}}</p>
+                                                        <p><i
+                                                                :class="postSelect.types[post.type].icon"></i>{{postSelect.types[post.type].launch}}
+                                                        </p>
                                                         <button class="btn btn-lg btn-info px-4"
                                                             style="border-radius: 5rem;">Launch<i
                                                                 class="ms-2 fas fa-external-link-alt"></i></button>
@@ -191,43 +195,55 @@
                                     <form id="voteForm">
                                         <div class="d-flex align-items-center text-white-50">
                                             <div>
-                                                <button type="button" class="btn btn-primary" @click="vote(post.url)"
-                                                    style="width: 100px;">{{post.slider / 100}}%</button>
-                                                <button type="button" class="btn btn-secondary"
-                                                    :data-bs-target="'#vote-' + post.author + '-' + post.permlink" data-bs-toggle="collapse"><span
+                                                <button type="button"
+                                                    :class="{'btn btn-secondary': !post.flag, 'btn btn-danger': post.flag}"
+                                                    @click="vote(post.url)" style="width: 100px;">{{post.flag ? '-' :
+                                                    ''}}{{post.slider / 100}}%</button>
+                                                <button type="button"
+                                                    :class="{'btn btn-secondary': post.slider > 0, 'btn btn-danger': post.slider < 0}"
+                                                    :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
+                                                    data-bs-toggle="collapse"><span
                                                         class="close text-white">×</span></button>
                                             </div>
                                             <div class="flex-fill mx-2">
-                                                <p class="my-1">
+                                                <p class="my-1"
+                                                    :class="{'btn btn-secondary': !post.flag, 'btn btn-danger': post.flag}">
                                                     <input type="range" class="form-control-range" step="1"
                                                         value="10000" max="10000" v-model="post.slider">
                                                 </p>
                                             </div>
                                             <div>
-                                                <p class="my-0"><span class="mr-1" id="commentVal">0</span><i
+                                                <p class="my-0"><span class="mr-1" id="commentVal">Vote Calc</span><i
                                                         class="ml-1 fab fa-fw fa-hive"></i></p>
                                             </div>
                                         </div>
                                     </form>
                                 </div>
                                 <div class="d-flex align-items-center my-2">
-                                    <div>
-                                        <a data-bs-toggle="collapse" :class="{'text-primary': hasVoted(post.url) > 0, 'text-secondary': hasVoted(post.url) == 0, 'text-danger': hasVoted(post.url) < 0 }" :data-bs-target="'#vote-' + post.author + '-' + post.permlink">
-                                            <i class="fas fa-heart fa-fw me-1"></i>
-                                        </a>{{post.upVotes}}
-                                        <i class="fas fa-comment fa-fw ms-2 me-1"></i>{{post.children}}
-                                        <i class="fa-solid fa-star ms-2 me-1"></i>3.79
+                                    <a @click="post.flag = false" data-bs-toggle="collapse"
+                                        :class="{'text-primary': hasVoted(post.url) > 0, 'text-secondary': hasVoted(post.url) == 0, 'text-danger': hasVoted(post.url) < 0 }"
+                                        :data-bs-target="'#vote-' + post.author + '-' + post.permlink">
+                                        <i class="fas fa-heart fa-fw me-1"></i>
+                                    </a>{{post.upVotes}}
+                                    <a href="#detailModal" class="no-decoration" data-bs-toggle="modal"
+                                        @click="modalSelect(post.url)"><i
+                                            class="fas fa-comment fa-fw ms-2 me-1"></i>{{post.children}}
+                                        <i class="fa-solid fa-star ms-2 me-1"></i></a>
+                                    <a data-bs-toggle="collapse" :class="{'text-danger': hasVoted(post.url) < 0 }"
+                                        :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
+                                        @click="post.flag = true">
                                         <i class="fa-solid fa-flag ms-2"></i> {{post.downVotes ? post.downVotes : ''}}
-                                    </div>
-                                    <div class="ms-auto">
-                                        <pop-vue title="Post Earnings"
-                                            :content="'Hive: ' + (post.paid ? post.total_payout_value : post.pending_payout_value) + '<br>' + TOKEN + ':'"
-                                            trigger="hover">
-                                            <button class="btn btn-secondary">
-                                                {{post.paid ? sigFig(post.total_payout_value, 2) : sigFig(post.pending_payout_value, 2)}}
-                                            </button>
-                                        </pop-vue>
-                                    </div>
+                                    </a>
+                                </div>
+                                <div class="ms-auto">
+                                    <pop-vue title="Post Earnings"
+                                        :content="'Hive: ' + (post.paid ? post.total_payout_value : post.pending_payout_value) + '<br>' + TOKEN + ':'"
+                                        trigger="hover">
+                                        <button class="btn btn-secondary">
+                                            {{post.paid ? sigFig(post.total_payout_value, 2) :
+                                            sigFig(post.pending_payout_value, 2)}}
+                                        </button>
+                                    </pop-vue>
                                 </div>
                             </div>
                         </div>
@@ -242,7 +258,7 @@
                             <div class="card-header">
                                 <div class="d-flex align-items-center ">
                                     <div class="float-left"><a id="modal_author_href1"><img id="modal_author_img" alt=""
-                                        :src="'https://images.hive.blog/u/' + displayPost.item.author + '/avatar'"
+                                                :src="'https://images.hive.blog/u/' + displayPost.item.author + '/avatar'"
                                                 class="rounded-circle bg-light img-fluid mr-2 cover author-img"></a>
                                     </div>
                                     <div class="float-left">
@@ -252,18 +268,22 @@
                                         </p>
                                     </div>
                                     <span>
-                                        <h3 class="card-title mt-2 text-center text-capitalize p-2" id="modal_title">{{displayPost.item.title}}</h3>
+                                        <h3 class="card-title mt-2 text-center text-capitalize p-2" id="modal_title">
+                                            {{displayPost.item.title}}</h3>
                                         <h5>{{displayPost.item.author}}</h5>
                                         <small class="text-muted" id="modal_created">{{displayPost.item.ago}}</small>
                                     </span>
                                     <div class="float-right">
-                                        <p><i :class="postSelect.types[displayPost.item.type].icon"></i>{{postSelect.types[displayPost.item.type].launch}}</p>
+                                        <p><i
+                                                :class="postSelect.types[displayPost.item.type].icon"></i>{{postSelect.types[displayPost.item.type].launch}}
+                                        </p>
                                         <a :href="displayPost.item.url"><button class="btn btn-lg btn-info px-4"
-                                            style="border-radius: 5rem;">Launch<i
-                                                class="ms-2 fas fa-external-link-alt"></i></button></a>
+                                                style="border-radius: 5rem;">Launch<i
+                                                    class="ms-2 fas fa-external-link-alt"></i></button></a>
                                     </div>
                                     <!-- I'd like to build a little review module,  stars kind of thing... and comments on our front end can have a little area that users can fill out: malicious, etc etc num stars... and put it in the custom json field of the comment... easy to count later.-->
-                                    <vue-ratings :stars="displayPost.item.stars" :ratings="displayPost.item.ratings"></vue-ratings>
+                                    <vue-ratings :stars="displayPost.item.stars" :ratings="displayPost.item.ratings">
+                                    </vue-ratings>
                                 </div>
                                 <div class="float-right p-2"><span class="badge badge-secondary" id="modal_scat"></span>
                                     <button type="button" class="close text-white ml-3" data-dismiss="modal"
@@ -272,22 +292,27 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                <vue-markdown :md="displayPost.item.body" :author="displayPost.item.author" :permlink="displayPost.item.permlink"></vue-markdown>
+                                <vue-markdown :md="displayPost.item.body" :author="displayPost.item.author"
+                                    :permlink="displayPost.item.permlink"></vue-markdown>
                             </div>
                             <div class="m-auto p-3 text-center">
-                                <p><i :class="postSelect.types[displayPost.item.type].icon"></i>{{postSelect.types[displayPost.item.type].launch}}</p>
+                                <p><i
+                                        :class="postSelect.types[displayPost.item.type].icon"></i>{{postSelect.types[displayPost.item.type].launch}}
+                                </p>
                                 <a :href="displayPost.item.url"><button class="btn btn-lg btn-info px-4"
-                                    style="border-radius: 5rem;">Launch<i
-                                        class="ms-2 fas fa-external-link-alt"></i></button></a>
+                                        style="border-radius: 5rem;">Launch<i
+                                            class="ms-2 fas fa-external-link-alt"></i></button></a>
                             </div>
                             <div class="card-footer">
-                                <div class="collapse" :id="'vote-modal-' + displayPost.item.author + '-' + displayPost.item.permlink">
+                                <div class="collapse"
+                                    :id="'vote-modal-' + displayPost.item.author + '-' + displayPost.item.permlink">
                                     <form id="voteForm">
                                         <div class="d-flex align-items-center text-white-50">
                                             <div>
                                                 <button type="button" class="btn btn-primary"
                                                     @click="vote(displayPost.item.url)">{{displayPost.item.slider}}%</button>
-                                                <button type="button" class="btn btn-secondary" data-bs-toggle="collapse"
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-bs-toggle="collapse"
                                                     :data-bs-target="'#vote-modal-' + displayPost.item.author + '-' + displayPost.item.permlink"><span
                                                         class="close text-white">×</span></button>
                                             </div>
@@ -303,20 +328,26 @@
                                         </div>
                                     </form>
                                 </div>
-                                <div  :data-bs-target="'#comment-modal-' + displayPost.item.author + '-' + displayPost.item.permlink">
+                                <div
+                                    :data-bs-target="'#comment-modal-' + displayPost.item.author + '-' + displayPost.item.permlink">
                                     <form id="commentForm">
-                                        <vue-markdown></vue-markdown>
+                                        <vue-markdown @settext="pending(displayPost.item.url, $event)"></vue-markdown>
+                                        <vue-ratings vote="true" @rating="setRating(displayPost.item.url, $event)">
+                                    </vue-ratings>
                                         <button type="button" class="btn btn-secondary" data-bs-toggle="collapse"
-                                                    :data-bs-target="'#comment-modal-' + displayPost.item.author + '-' + displayPost.item.permlink"><span
-                                                        class="close text-white">×</span></button>
+                                            :data-bs-target="'#comment-modal-' + displayPost.item.author + '-' + displayPost.item.permlink"><span
+                                                class="close text-white">×</span></button>
                                     </form>
                                 </div>
                                 <div class="d-flex align-items-center my-2">
-                                    <div><a data-bs-toggle="collapse" :data-bs-target="'#vote-modal-' + displayPost.item.author + '-' + displayPost.item.permlink"><i
+                                    <div><a data-bs-toggle="collapse"
+                                            :data-bs-target="'#vote-modal-' + displayPost.item.author + '-' + displayPost.item.permlink"><i
                                                 class="fas fa-heart mr-1"></i> {{displayPost.item.upVotes}} </a>
-                                        <a data-bs-toggle="collapse" :data-bs-target="'#comment-modal-' + displayPost.item.author + '-' + displayPost.item.permlink">
+                                        <a data-bs-toggle="collapse"
+                                            :data-bs-target="'#comment-modal-' + displayPost.item.author + '-' + displayPost.item.permlink">
 
-                                        <i class="fas fa-comment ml-2 mr-1"></i>{{displayPost.item.children.length}}</a>
+                                            <i
+                                                class="fas fa-comment ml-2 mr-1"></i>{{displayPost.item.children}}</a>
                                     </div>
                                     <div class="ml-auto" id="modal_total_payout"><i class="ml-1 fab fa-fw fa-hive"></i>
                                     </div>
@@ -327,12 +358,12 @@
                                     <div class="card-header">
                                         <div class="float-left">
                                             <a :href="post.author_url"><img :src="post.author_img"
-                                                class="rounded-circle bg-light img-fluid mr-2 cover author-img"></a>
+                                                    class="rounded-circle bg-light img-fluid mr-2 cover author-img"></a>
                                         </div>
                                         <div class="float-left">
                                             <p class="mt-0 mb-0 text-muted text-semibold"><a class="a-1"
-                                                id="modal_author"><span
-                                                    class="ml-2 badge badge-pill badge-light">{{post.rep}}</span></a>
+                                                    id="modal_author"><span
+                                                        class="ml-2 badge badge-pill badge-light">{{post.rep}}</span></a>
                                             </p>
                                         </div>
                                         <span>
@@ -341,7 +372,8 @@
                                         </span>
                                     </div>
                                     <div class="card-body">
-                                        <vue-markdown :md="post.body" :author="post.author" :permlink="post.permlink"></vue-markdown>
+                                        <vue-markdown :md="post.body" :author="post.author" :permlink="post.permlink">
+                                        </vue-markdown>
                                     </div>
                                     <div class="card-footer">
                                         <!-- votes/value, replies load replies and reply-->

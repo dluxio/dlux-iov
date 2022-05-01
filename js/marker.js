@@ -9,12 +9,16 @@ export default {
     <div v-show="!md">
       <textarea ref="editor" v-model="text" class="form-control" rows="3"></textarea>
       <button @click="insertAtCursor('[Alt Text](https://goto.link)')">Insert Link</button>
-      <button >Comment</button>
+      <button @click="edit()">Comment</button>
     </div>
     <div class="behavemark" v-html="compiledMarkdown"></div>
   </div>`,
   props: ["md", "author", "permlink"],
+  emits: ["settext"],
   methods: {
+    edit(){
+      this.$emit("settext", this.text);
+    },
     insertAtCursor(toInsert) {
       if (document.selection) {
         this.$refs.editor.focus();

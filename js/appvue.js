@@ -367,6 +367,7 @@ var app = new Vue({
           appurl: "",
           id: "",
           slider: 10000,
+          flag: false,
           title: "",
           type: "360",
           url: "",
@@ -400,11 +401,36 @@ var app = new Vue({
         cj: {
           author: url.split('/')[2].replace('@', ''),
           permlink: url.split('/')[3],
-          weight: this.posturls[url].slider,
+          weight: this.posturls[url].slider * (this.posturls[url].flag ? -1 : 1),
         },
         msg: `Voting ...`,
         ops: [""],
         txid: "vote",
+      };
+    },
+    pending(url, text){
+      this.posturls[url].comment = text;
+      this.comment(url)
+    },
+    comment(url){
+      var meta = {
+            tags: this.posturls[url].json_metadata.tags,
+          }
+      if(this.posturls[url].rating)meta.review = {rating:this.posturls[url].rating }
+      this.toSign = {
+        type: "comment",
+        cj: {
+          author: this.account,
+          title: "",
+          body: this.posturls[url].comment,
+          parent_author: this.posturls[url].author,
+          parent_permlink: this.posturls[url].permlink,
+          permlink: 're-' + this.posturls[url].permlink + this.posturls[url].children,
+          json_metadata: JSON.stringify(meta),
+        },
+        msg: `Commenting ...`,
+        ops: [""],
+        txid: "comment",
       };
     },
     hasVoted(url){
@@ -472,6 +498,11 @@ var app = new Vue({
               this.posturls[key].replies[i]
             this.posturls[key].replies[i].slider =
               this.hasVoted(this.posturls[key].replies[i].url) || 10000;
+            if(this.posturls[key].replies[i].slider < 0){
+              this.posturls[key].replies[i].flag = true;
+              this.posturls[key].replies[i].slider =
+                this.posturls[key].replies[i].slider * -1;
+            }
             if (this.posturls[key].replies[i].json_metadata.review){
               this.posturls[key].stars =
                 this.posturls[key].replies[i].json_metadata.review.rating >= 0 && this.posturls[key].replies[i].json_metadata.review.rating <= 5 ? this.posturls[key].replies[i].json_metadata.review.rating : 5 +
@@ -807,6 +838,9 @@ var app = new Vue({
         this[modal[0]].index = modal[1];
       }
     },
+    setRating(url, rating){
+      this.posturls[url].rating = rating;
+    },
     getContent(a, p) {
       if (a && p) {
         fetch(this.hapi, {
@@ -823,6 +857,7 @@ var app = new Vue({
                 ...this.posturls[res.result.url],
                 ...res.result,
                 slider: 10000,
+                flag: false,
                 upVotes: 0,
                 downVotes: 0,
               };
@@ -866,6 +901,11 @@ var app = new Vue({
               this.posturls[res.result.url].type = type;
               this.posturls[res.result.url].slider = this.hasVoted(res.result.url) ||
                 10000;
+              if (this.posturls[res.result.url].slider < 0){
+                this.posturls[res.result.url].slider =
+                  this.posturls[res.result.url].slider * -1;
+                this.posturls[res.result.url].flag = true
+              }
               this.posturls[res.result.url].preview = this.removeMD(
                 this.posturls[res.result.url].body
               ).substr(0, 250);
