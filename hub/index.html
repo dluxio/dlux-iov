@@ -192,15 +192,15 @@
                                         <div class="d-flex align-items-center text-white-50">
                                             <div>
                                                 <button type="button" class="btn btn-primary" @click="vote(post.url)"
-                                                    style="width: 100px;">{{post.slider}}%</button>
+                                                    style="width: 100px;">{{post.slider / 100}}%</button>
                                                 <button type="button" class="btn btn-secondary"
                                                     :data-bs-target="'#vote-' + post.author + '-' + post.permlink" data-bs-toggle="collapse"><span
                                                         class="close text-white">×</span></button>
                                             </div>
                                             <div class="flex-fill mx-2">
                                                 <p class="my-1">
-                                                    <input type="range" class="form-control-range" step="0.01"
-                                                        value="100" v-model="post.slider">
+                                                    <input type="range" class="form-control-range" step="1"
+                                                        value="10000" v-model="post.slider">
                                                 </p>
                                             </div>
                                             <div>

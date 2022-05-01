@@ -366,7 +366,7 @@ var app = new Vue({
           preview: "",
           appurl: "",
           id: "",
-          slider: 100,
+          slider: 10000,
           title: "",
           type: "360",
           url: "",
@@ -409,7 +409,7 @@ var app = new Vue({
     },
     hasVoted(url){
       const vote = this.posturls[url].active_votes.filter(vote => vote.voter === this.account)
-      return vote.length ? vote[0].weight : 0
+      return vote.length ? vote[0].percent : 0
     },
     precision(num, precision) {
       return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
@@ -471,7 +471,7 @@ var app = new Vue({
             this.posturls[this.posturls[key].replies[i].url] =
               this.posturls[key].replies[i]
             this.posturls[key].replies[i].slider =
-              this.hasVoted(this.posturls[key].replies[i].url) || 100;
+              this.hasVoted(this.posturls[key].replies[i].url) || 10000;
             if (this.posturls[key].replies[i].json_metadata.review){
               this.posturls[key].stars =
                 this.posturls[key].replies[i].json_metadata.review.rating >= 0 && this.posturls[key].replies[i].json_metadata.review.rating <= 5 ? this.posturls[key].replies[i].json_metadata.review.rating : 5 +
@@ -822,7 +822,7 @@ var app = new Vue({
               this.posturls[res.result.url] = {
                 ...this.posturls[res.result.url],
                 ...res.result,
-                slider: 100,
+                slider: 10000,
                 upVotes: 0,
                 downVotes: 0,
               };
@@ -865,7 +865,7 @@ var app = new Vue({
                 type = "Video";
               this.posturls[res.result.url].type = type;
               this.posturls[res.result.url].slider = this.hasVoted(res.result.url) ||
-                100;
+                10000;
               this.posturls[res.result.url].preview = this.removeMD(
                 this.posturls[res.result.url].body
               ).substr(0, 250);
