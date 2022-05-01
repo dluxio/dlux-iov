@@ -219,7 +219,7 @@
                                     </div>
                                     <div class="ms-auto">
                                         <pop-vue title="Post Earnings"
-                                            :content="'Hive: ' + post.total_payout_value + '\n' + TOKEN + ': ...' "
+                                            :content="'Hive: ' + post.total_payout_value + '<br>' + TOKEN + ': ...' "
                                             trigger="hover">
                                             <button class="btn btn-secondary">
                                                 {{post.paid ? sigFig(post.total_payout_value, 2) : sigFig(post.pending_payout_value, 2)}}
