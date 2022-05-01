@@ -212,8 +212,8 @@
                                 </div>
                                 <div class="d-flex align-items-center my-2">
                                     <div>
-                                        <a data-bs-toggle="collapse" :data-bs-target="'#vote-' + post.author + '-' + post.permlink">
-                                            <i class="fas fa-heart fa-fw me-1"></i></a>{{post.upVotes}}
+                                        <button data-bs-toggle="collapse" :class="{'text-primary': hasVoted(post.url) == 0, 'text-secondary': hasVoted(post.url) > 0, 'text-danger': hasVoted(post.url) < 0 }" :data-bs-target="'#vote-' + post.author + '-' + post.permlink">
+                                            <i class="fas fa-heart fa-fw me-1"></i></button>{{post.upVotes}}
                                         <i class="fas fa-comment fa-fw ms-2 me-1"></i>{{post.children}}
                                         <i class="fa-solid fa-flag ms-2"></i> {{post.downVotes ? post.downVotes : ''}}
                                     </div>

@@ -394,6 +394,23 @@ var app = new Vue({
     "vue-ratings": Ratings,
   },
   methods: {
+    vote(url){
+      this.toSign = {
+        type: "vote",
+        cj: {
+          author: url.split('/')[2].replace('@', ''),
+          permlink: url.split('/')[3],
+          weight: this.posturls[url].slider,
+        },
+        msg: `Voting ...`,
+        ops: [""],
+        txid: "vote",
+      };
+    },
+    hasVoted(url){
+      const vote = this.posturls[url].active_votes.filter(vote => vote.voter === this.account)
+      return vote[0].weight
+    },
     precision(num, precision) {
       return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
     },
