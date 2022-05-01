@@ -434,6 +434,8 @@ var app = new Vue({
     },
     modalSelect(key) {
       this.displayPost.index = key;
+      this.posturls[key].stars = this.posturls[key].stars || 0;
+      this.posturls[key].ratings = this.posturls[key].ratings || 0;
       this.displayPost.item = this.posturls[key];
       if (this.displayPost.item.children && !this.displayPost.item.replies.length)
         this.getReplies(
@@ -441,6 +443,21 @@ var app = new Vue({
           this.displayPost.item.permlink
         ).then((r) => {
           this.posturls[key].replies = r.result;
+          this.posturls[key].stars = 0;
+          this.posturls[key].ratings = 0;
+          for(let i = 0; i < this.posturls[key].replies.length; i++) {
+            if(this.posturls[key].replies[i].json_metadata) {
+              try{
+                this.posturls[key].replies[i].json_metadata = JSON.parse(this.posturls[key].replies[i].json_metadata);
+              } catch(e) {}
+            }
+            if (this.posturls[key].replies[i].json_metadata.review){
+              this.posturls[key].stars =
+                this.posturls[key].replies[i].json_metadata.review.rating >= 0 && this.posturls[key].replies[i].json_metadata.review.rating <= 5 ? this.posturls[key].replies[i].json_metadata.review.rating : 5 +
+                ((this.posturls[key].stars * this.posturls[key].ratings)/(this.posturls[key].ratings + 1));
+              this.posturls[key].ratings += 1;
+            }
+          }
         });
     },
     modalIndex(modal, index) {
