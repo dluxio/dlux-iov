@@ -414,7 +414,7 @@ var app = new Vue({
     precision(num, precision) {
       return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
     },
-    handleScroll: function () {
+    handleScroll() {
       if (
         document.documentElement.clientHeight + window.scrollY >
         document.documentElement.scrollHeight -
@@ -468,6 +468,10 @@ var app = new Vue({
                 this.posturls[key].replies[i].json_metadata = JSON.parse(this.posturls[key].replies[i].json_metadata);
               } catch(e) {}
             }
+            this.posturls[this.posturls[key].replies[i].url] =
+              this.posturls[key].replies[i]
+            this.posturls[key].replies[i].slider =
+              this.hasVoted(this.posturls[key].replies[i].url) || 100;
             if (this.posturls[key].replies[i].json_metadata.review){
               this.posturls[key].stars =
                 this.posturls[key].replies[i].json_metadata.review.rating >= 0 && this.posturls[key].replies[i].json_metadata.review.rating <= 5 ? this.posturls[key].replies[i].json_metadata.review.rating : 5 +
@@ -818,7 +822,7 @@ var app = new Vue({
               this.posturls[res.result.url] = {
                 ...this.posturls[res.result.url],
                 ...res.result,
-                slider: 100,
+                slider: this.hasVoted(res.result.url) || 100,
                 upVotes: 0,
                 downVotes: 0,
               };
