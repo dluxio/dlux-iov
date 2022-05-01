@@ -321,7 +321,7 @@
                                 </div>
                             </div>
                             <div class="replies">
-                                <div v-for="post in displayPost.item.replies">
+                                <div v-for="post in displayPost.item.replies" :key="post.url">
                                     <div class="card-header">
                                         <div class="float-left">
                                             <a :href="post.author_url"><img :src="post.author_img"

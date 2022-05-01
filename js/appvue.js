@@ -505,7 +505,7 @@ var app = new Vue({
         this.toSign = {};
       }
     },
-    getReplies(a,p){
+    getReplies(a,p,k){
       return new Promise((resolve, reject) => {
         fetch(this.hapi, {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content_replies", "params":["${a}","${p}"], "id":1}`,
@@ -516,6 +516,7 @@ var app = new Vue({
         })
           .then((res) => res.json())
           .then((r) => {
+            if(k)r.key = k;
             resolve(r);
           })
           .catch((err) => {
@@ -873,7 +874,7 @@ var app = new Vue({
       }
       interval = Math.floor(seconds / 60);
       if (interval >= 1) {
-        return interval + ` minute${interval > 1 ? "s" : ""} ago`;
+        return `${interval} minute${interval > 1 ? "s" : ""} ago`;
       }
       return Math.floor(seconds) + " seconds ago";
     },
