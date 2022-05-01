@@ -31,7 +31,7 @@ let lapi = "";
 //     }
 // }
 // if (!lapi) {
-    lapi = localStorage.getItem("lapi") || "https://token.dlux.io";
+    lapi = "https://token.dlux.io";
 // }
 console.log(lapi);
 if (
