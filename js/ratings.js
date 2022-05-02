@@ -19,7 +19,7 @@ export default {
       <i v-show="stars < 1.4" class="far fa-star"></i>
       <i v-show="stars < 0.4" class="far fa-star"></i>
     </div>
-    <div v-show="!stars && !vote" class="text-white">
+    <div v-show="!stars && !vote" class="me-2">
     <i class="fas fa-ghost"></i>
     </div>
     <p v-show="!vote">{{ratings}} Reviews</p>
