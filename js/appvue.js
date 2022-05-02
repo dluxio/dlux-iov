@@ -3,7 +3,6 @@ import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
 import Popper from "/js/pop.js";
-import GlitchedWriter from "https://cdn.skypack.dev/glitched-writer";
 import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
 
@@ -392,7 +391,6 @@ var app = new Vue({
     "foot-vue": FootVue,
     "cycle-text": Cycler,
     "pop-vue": Popper,
-    "glitched-writer": GlitchedWriter,
     "vue-markdown": Marker,
     "vue-ratings": Ratings,
   },
@@ -1258,12 +1256,6 @@ var app = new Vue({
       },
     },
     voteVal(){
-      console.log(
-        this.accountinfo.rshares,
-        parseInt(this.rewardFund.recent_claims),
-        this.rewardFund.reward_balance,
-        this.feedPrice.hbd_median_price
-      );
       return ((this.accountinfo.rshares / parseInt(this.rewardFund.recent_claims)) *
         parseFloat(this.rewardFund.reward_balance) *
         (1/parseFloat(this.feedPrice.base)))
