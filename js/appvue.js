@@ -890,6 +890,7 @@ var app = new Vue({
                 flag: false,
                 upVotes: 0,
                 downVotes: 0,
+                edit: false,
               };
               for (
                 var i = 0;

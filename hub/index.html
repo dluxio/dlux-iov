@@ -411,13 +411,20 @@
                                         </div>
                                         <span>
                                             <h5>{{post.author}}</h5>
-                                            <vue-ratings class="d-flex" :stars="post?.json_metadata?.review?.rating">
+                                            <vue-ratings v-show="!post.edit" class="d-flex" :stars="post?.json_metadata?.review?.rating">
+                                            </vue-ratings>
+                                            <vue-ratings v-show="post.edit" class="d-flex" vote="true" @rating="setRating(post.url, $event)">
                                             </vue-ratings>
                                             <small class="text-muted" id="modal_created">{{post.ago}}</small>
+                                            <a href="#/" v-show="post.author == account" @click="post.edit = !post.edit">Edit Post</a>
                                         </span>
                                     </div>
-                                    <div class="card-body">
-                                        <vue-markdown :md="post.body" :author="post.author" :permlink="post.permlink">
+                                    <div class="card-body" v-show="!post.edit">
+                                        <vue-markdown :md="post.body">
+                                        </vue-markdown>
+                                    </div>
+                                    <div class="card-body" v-show="post.edit">
+                                        <vue-markdown :toEdit="post.body" @settext="pending(post.url, $event)">
                                         </vue-markdown>
                                     </div>
                                     <div class="card-footer">

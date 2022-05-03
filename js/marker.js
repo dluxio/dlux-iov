@@ -13,8 +13,13 @@ export default {
     </div>
     <div class="behavemark" v-html="compiledMarkdown"></div>
   </div>`,
-  props: ["md", "author", "permlink"],
+  props: ["md", "author", "permlink", "toEdit"],
   emits: ["settext"],
+  mounted() {
+    if (this.toEdit) {
+      this.text = this.toEdit;
+    }
+  },
   methods: {
     edit(){
       this.$emit("settext", this.text);
