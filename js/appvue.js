@@ -779,7 +779,7 @@ var app = new Vue({
       ) {
         this.postSelect[this.postSelect.entry].p = true;
         fetch(
-          `https://dluxdata.herokuapp.com/${this.postSelect.entry}?a=${
+          `https://data.dlux.io/${this.postSelect.entry}?a=${
             this.postSelect[this.postSelect.entry].a
           }&o=${this.postSelect[this.postSelect.entry].o}`
         )
