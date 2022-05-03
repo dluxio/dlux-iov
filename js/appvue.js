@@ -495,6 +495,7 @@ var app = new Vue({
             if(this.posturls[key].replies[i].json_metadata) {
               try{
                 this.posturls[key].replies[i].json_metadata = JSON.parse(this.posturls[key].replies[i].json_metadata);
+                this.posturls[key].replies[i].edit = false
               } catch(e) {}
             }
             this.posturls[this.posturls[key].replies[i].url] =
