@@ -411,11 +411,11 @@
                                         </div>
                                         <span>
                                             <h5>{{post.author}}</h5>
-                                            <div v-show="!post.edit">
+                                            <div v-if="!post.edit">
                                                 <vue-ratings class="d-flex" :stars="post?.json_metadata?.review?.rating">
                                                 </vue-ratings>
                                             </div>
-                                            <div v-show="post.edit">
+                                            <div v-if="post.edit">
                                                 <vue-ratings class="d-flex" vote="true" @rating="setRating(post.url, $event)">
                                                 </vue-ratings>
                                             </div>
@@ -423,11 +423,11 @@
                                             <a href="#/" v-show="post.author == account" @click="post.edit = !post.edit">Edit Post</a>
                                         </span>
                                     </div>
-                                    <div class="card-body" v-show="!post.edit">
+                                    <div class="card-body" v-if="!post.edit">
                                         <vue-markdown :md="post.body">
                                         </vue-markdown>
                                     </div>
-                                    <div class="card-body" v-show="post.edit">
+                                    <div class="card-body" v-if="post.edit">
                                         <vue-markdown :toEdit="post.body" @settext="pending(post.url, $event)">
                                         </vue-markdown>
                                     </div>

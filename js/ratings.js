@@ -19,9 +19,6 @@ export default {
       <i v-show="stars < 1.4" class="far fa-star"></i>
       <i v-show="stars < 0.4" class="far fa-star"></i>
     </div>
-    <div v-show="!stars && !vote" class="me-2">
-    <i class="fas fa-ghost"></i>
-    </div>
     <p v-show="ratings">{{ratings}} Reviews</p>
     <div v-show="vote" class="text-warning">
     <a @click="rating(1)">
