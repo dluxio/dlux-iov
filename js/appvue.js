@@ -842,7 +842,7 @@ var app = new Vue({
         if (this.postSelect.searchTerm && !this.search.includes(this.displayPosts[i].url)){
           this.displayPosts.splice(i, 1);
           i--;
-        } else if (!this[this.postSelect.entry].includes(this.displayPosts[i].url)) {
+        } else if (!this.postSelect.searchTerm && !this[this.postSelect.entry].includes(this.displayPosts[i].url)) {
             this.displayPosts.splice(i, 1);
             i--;
           }
