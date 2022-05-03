@@ -267,6 +267,7 @@ var app = new Vue({
       new: [],
       trending: [],
       promoted: [],
+      search: [],
       postSelect: {
         sort: "time",
         searchTerm: "",
@@ -775,16 +776,20 @@ var app = new Vue({
       else this[validKey] = true;
     },
     getPosts() {
+      this.search = []
       if (
         !this.postSelect[this.postSelect.entry].e &&
         !this.postSelect[this.postSelect.entry].p
       ) {
         this.postSelect[this.postSelect.entry].p = true;
-        fetch(
-          `https://data.dlux.io/${this.postSelect.entry}?a=${
-            this.postSelect[this.postSelect.entry].a
-          }&o=${this.postSelect[this.postSelect.entry].o}`
-        )
+        var APIQ = this.postSelect.searchTerm ? 
+        `https://data.dlux.io/search/${this.postSelect.searchTerm.toLowerCase()}?a=${this.postSelect[this.postSelect.entry].a}&o=${
+          this.postSelect[this.postSelect.entry].o}` : `https://data.dlux.io/${
+          this.postSelect.entry
+        }?a=${this.postSelect[this.postSelect.entry].a}&o=${
+          this.postSelect[this.postSelect.entry].o
+        }`;
+        fetch(APIQ)
           .then((r) => r.json())
           .then((res) => {
             this.postSelect[this.postSelect.entry].p = false;
@@ -797,7 +802,11 @@ var app = new Vue({
               if (!this.posturls[res.result[i].url]) {
                 this.posturls[res.result[i].url] = res.result[i];
               }
-              this[this.postSelect.entry].push(res.result[i].url);
+              if (!this.postSelect.searchTerm){
+                this[this.postSelect.entry].push(res.result[i].url);
+              } else {
+                this.search.push(res.result[i].url);
+              }
             }
             var called = false;
             for (var post in this.posturls) {
