@@ -789,6 +789,7 @@ var app = new Vue({
         }?a=${this.postSelect[this.postSelect.entry].a}&o=${
           this.postSelect[this.postSelect.entry].o
         }`;
+        console.log({APIQ})
         fetch(APIQ)
           .then((r) => r.json())
           .then((res) => {
