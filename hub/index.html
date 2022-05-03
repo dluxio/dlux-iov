@@ -411,6 +411,8 @@
                                         </div>
                                         <span>
                                             <h5>{{post.author}}</h5>
+                                            <vue-ratings class="d-flex" :stars="post?.json_metadata?.review?.rating">
+                                            </vue-ratings>
                                             <small class="text-muted" id="modal_created">{{post.ago}}</small>
                                         </span>
                                     </div>
