@@ -413,7 +413,7 @@ var app = new Vue({
       this.comment(url)
     },
     comment(url){
-      var meta = {
+      var meta = this.posturls[url].edit ? this.posturls[url].json_metadata : {
             tags: this.posturls[url].json_metadata.tags,
           }
       if(this.posturls[url].rating)meta.review = {rating:this.posturls[url].rating }
@@ -421,11 +421,12 @@ var app = new Vue({
         type: "comment",
         cj: {
           author: this.account,
-          title: "",
+          title: this.posturls[url].edit ? this.posturls[url].title : "",
           body: this.posturls[url].comment,
-          parent_author: this.posturls[url].author,
-          parent_permlink: this.posturls[url].permlink,
-          permlink: 're-' + this.posturls[url].permlink + this.posturls[url].children,
+          parent_author: this.posturls[url].edit ? this.posturls[url].parent_author : this.posturls[url].author,
+          parent_permlink: this.posturls[url].edit ? this.posturls[url].parent_permlink : this.posturls[url].permlink,
+          permlink: this.posturls[url].edit ? this.posturls[url].permlink : 
+            "re-" + this.posturls[url].permlink + this.posturls[url].children,
           json_metadata: JSON.stringify(meta),
         },
         msg: `Commenting ...`,
