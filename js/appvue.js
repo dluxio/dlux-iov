@@ -776,7 +776,6 @@ var app = new Vue({
       else this[validKey] = true;
     },
     getPosts() {
-      this.search = []
       if (
         !this.postSelect[this.postSelect.entry].e &&
         !this.postSelect[this.postSelect.entry].p
@@ -788,7 +787,6 @@ var app = new Vue({
         }?a=${this.postSelect[this.postSelect.entry].a}&o=${
           this.postSelect[this.postSelect.entry].o
         }`;
-        console.log({APIQ})
         fetch(APIQ)
           .then((r) => r.json())
           .then((res) => {
@@ -1263,6 +1261,13 @@ var app = new Vue({
     this.getProtocol();
     this.getRewardFund();
     this.getFeedPrice();
+  },
+  watch: {
+    postSelect(a, b){
+      if(a.searchTerm != b.searchTerm){
+        this.search = []
+      }
+    }
   },
   computed: {
     location: {
