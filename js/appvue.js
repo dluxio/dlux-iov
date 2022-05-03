@@ -832,23 +832,6 @@ var app = new Vue({
         )
           this.displayPosts.push(this.posturls[post]);
       }
-
-      if (this.postSelect.searchTerm) {
-        const filter = this.displayPosts.filter((post) => {
-          return (
-            post.title
-              .toLowerCase()
-              .indexOf(this.postSelect.searchTerm.toLowerCase()) > -1 ||
-            post.author
-              .toLowerCase()
-              .indexOf(this.postSelect.searchTerm.toLowerCase()) > -1 ||
-            post.json_metadata?.tags?.indexOf(
-              this.postSelect.searchTerm.toLowerCase()
-            ) > -1
-          );
-        });
-        this.displayPosts = filter;
-      }
       for (var i = 0; i < this.displayPosts.length; i++) {
         if (!this.postSelect.types[this.displayPosts[i].type].checked) {
           this.displayPosts.splice(i, 1);
