@@ -436,7 +436,7 @@
                                             </vue-markdown>
                                         </div>
                                         <div class="card-body" v-show="posturls[post.url].edit">
-                                            <vue-markdown :toEdit="post.body" @settext="pending(post.url, $event)">
+                                            <vue-markdown :toedit="post.body" @settext="pending(post.url, $event)">
                                             </vue-markdown>
                                         </div>
                                         <div class="card-footer">
