@@ -783,8 +783,7 @@ var app = new Vue({
       ) {
         this.postSelect[this.postSelect.entry].p = true;
         var APIQ = this.postSelect.searchTerm ? 
-        `https://data.dlux.io/search/${this.postSelect.searchTerm.toLowerCase()}?a=${this.postSelect[this.postSelect.entry].a}&o=${
-          this.postSelect[this.postSelect.entry].o}` : `https://data.dlux.io/${
+        `https://data.dlux.io/search/${this.postSelect.searchTerm.toLowerCase()}` : `https://data.dlux.io/${
           this.postSelect.entry
         }?a=${this.postSelect[this.postSelect.entry].a}&o=${
           this.postSelect[this.postSelect.entry].o
@@ -859,10 +858,13 @@ var app = new Vue({
         }
       }
       for (var i = 0; i < this.displayPosts.length; i++) {
-        if (!this[this.postSelect.entry].includes(this.displayPosts[i].url)) {
+        if (this.postSelect.searchTerm && !this[this.postSelect.entry].includes(this.displayPosts[i].url)){
           this.displayPosts.splice(i, 1);
           i--;
-        }
+        } else if (!this[this.postSelect.entry].includes(this.displayPosts[i].url)) {
+            this.displayPosts.splice(i, 1);
+            i--;
+          }
       }
       if (this.postSelect.entry == "new") {
         this.sort("displayPosts", "created", "desc");
