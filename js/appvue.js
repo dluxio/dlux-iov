@@ -482,8 +482,6 @@ var app = new Vue({
     },
     modalSelect(key) {
       this.displayPost.index = key;
-      this.posturls[key].stars = this.posturls[key].stars || 0;
-      this.posturls[key].ratings = this.posturls[key].ratings || 0;
       this.displayPost.item = this.posturls[key];
       if (this.displayPost.item.children && !this.displayPost.item.replies.length)
         this.getReplies(
@@ -491,8 +489,6 @@ var app = new Vue({
           this.displayPost.item.permlink
         ).then((r) => {
           this.posturls[key].replies = r.result;
-          this.posturls[key].stars = 0;
-          this.posturls[key].ratings = 0;
           for(let i = 0; i < this.posturls[key].replies.length; i++) {
             if(this.posturls[key].replies[i].json_metadata) {
               try{
@@ -502,18 +498,10 @@ var app = new Vue({
             }
             this.posturls[this.posturls[key].replies[i].url] =
               this.posturls[key].replies[i]
-            this.posturls[key].replies[i].slider =
-              this.hasVoted(this.posturls[key].replies[i].url) || 10000;
             if(this.posturls[key].replies[i].slider < 0){
               this.posturls[key].replies[i].flag = true;
               this.posturls[key].replies[i].slider =
                 this.posturls[key].replies[i].slider * -1;
-            }
-            if (this.posturls[key].replies[i].json_metadata.review){
-              this.posturls[key].stars =
-                this.posturls[key].replies[i].json_metadata.review.rating >= 0 && this.posturls[key].replies[i].json_metadata.review.rating <= 5 ? this.posturls[key].replies[i].json_metadata.review.rating : 5 +
-                ((this.posturls[key].stars * this.posturls[key].ratings)/(this.posturls[key].ratings + 1));
-              this.posturls[key].ratings += 1;
             }
           }
         });
@@ -557,6 +545,7 @@ var app = new Vue({
     },
     sigFig(num, sig) {
       // return a number in K or M or B format
+      if(num){
       var post = typeof num.split == "function" ? num.split(" ")[1] : "";
       num = parseFloat(num);
       var out;
@@ -584,6 +573,7 @@ var app = new Vue({
       //remove trailing zeros
       out = out.replace(/\.?0+$/, "");
       return out + post;
+    }
     },
     removeOp(txid) {
       if (this.toSign.txid == txid) {
@@ -863,9 +853,6 @@ var app = new Vue({
         this[modal[0]].index = modal[1];
       }
     },
-    setRating(url, rating){
-      this.posturls[url].rating = rating;
-    },
     getContent(a, p) {
       if (a && p) {
         fetch(this.hapi, {
@@ -886,6 +873,7 @@ var app = new Vue({
                 upVotes: 0,
                 downVotes: 0,
                 edit: false,
+                hasVoted: false,
               };
               for (
                 var i = 0;
@@ -895,6 +883,10 @@ var app = new Vue({
                 if (this.posturls[res.result.url].active_votes[i].percent > 0)
                   this.posturls[res.result.url].upVotes++;
                 else this.posturls[res.result.url].downVotes++;
+                if(this.posturls[res.result.url].active_votes[i].voter == this.account){
+                  this.posturls[res.result.url].slider = this.posturls[res.result.url].active_votes[i].percent
+                  this.posturls[res.result.url].hasVoted = true
+                }
               }
               try {
                 this.posturls[res.result.url].json_metadata = JSON.parse(
@@ -908,8 +900,6 @@ var app = new Vue({
               }
               this.posturls[res.result.url].rep = "...";
               this.rep(res.result.url);
-              this.posturls[res.result.url].slider = this.hasVoted(res.result.url) ||
-                10000;
               if (this.posturls[res.result.url].slider < 0){
                 this.posturls[res.result.url].slider =
                   this.posturls[res.result.url].slider * -1;

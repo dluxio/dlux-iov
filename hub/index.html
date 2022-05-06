@@ -228,7 +228,7 @@
                                 <div class="d-flex align-items-center my-2">
                                     <a href="#/" class="no-decoration" @click="post.flag = false"
                                         data-bs-toggle="collapse"
-                                        :class="{'text-primary': hasVoted(post.url) > 0, 'text-white-50': hasVoted(post.url) == 0, 'text-danger': hasVoted(post.url) < 0 }"
+                                        :class="{'text-primary': post.hasVoted, 'text-white-50': !post.hasVoted, 'text-danger': post.slider < 0 }"
                                         :data-bs-target="'#vote-' + post.author + '-' + post.permlink">
                                         <i class="fas fa-heart fa-fw me-1"></i><span
                                             class="text-white-50">{{post.upVotes}}</span>
