@@ -271,12 +271,19 @@ var app = new Vue({
       postSelect: {
         sort: "time",
         searchTerm: "",
+        bitMask: 0,
         entry: "new",
-        new: {
+        search: {
           a: 10,
           o: 0,
           e: false,
           p: false,
+        },
+        new: {
+          a: 10, //amount
+          o: 0, //offset
+          e: false, //end
+          p: false, //pending - One pending request
         },
         trending: {
           a: 10,
@@ -298,6 +305,7 @@ var app = new Vue({
             launch: "3D / VR Experience",
             location: "/dlux/@",
             hint: "",
+            bitFlag: 1,
           },
           AR: {
             checked: true,
@@ -305,6 +313,7 @@ var app = new Vue({
             launch: "AR Experience",
             location: "/dlux/@",
             hint: "",
+            bitFlag: 2,
           },
           XR: {
             checked: true,
@@ -312,6 +321,7 @@ var app = new Vue({
             launch: "Extended Reality Experience",
             location: "/dlux/@",
             hint: "",
+            bitFlag: 4,
           },
           APP: {
             checked: true,
@@ -319,6 +329,7 @@ var app = new Vue({
             launch: "Unstoppable App",
             location: "/dlux/@",
             hint: "",
+            bitFlag: 8,
           },
           ["360"]: {
             checked: true,
@@ -326,6 +337,7 @@ var app = new Vue({
             launch: "360 Photo Gallery",
             location: "/dlux/@",
             hint: "",
+            bitFlag: 16,
           },
           ["3D"]: {
             checked: true,
@@ -333,6 +345,7 @@ var app = new Vue({
             launch: "3D / VR Experience",
             location: "/dlux/@",
             hint: "",
+            bitFlag: 32,
           },
           Audio: {
             checked: true,
@@ -340,6 +353,7 @@ var app = new Vue({
             launch: "Unstoppable Audio",
             location: "/dlux/@",
             hint: "",
+            bitFlag: 64,
           },
           Video: {
             checked: true,
@@ -347,6 +361,7 @@ var app = new Vue({
             launch: "Unstoppable Video",
             location: "/dlux/@",
             hint: "",
+            bitFlag: 128,
           },
           Blog: {
             checked: false,
@@ -354,6 +369,7 @@ var app = new Vue({
             launch: "Visit Full Blog",
             location: "/blog/@",
             hint: "",
+            bitFlag: 256,
           },
         },
       },
@@ -529,7 +545,6 @@ var app = new Vue({
       })
         .then((r) => r.json())
         .then((r) => {
-          console.log(r);
           this.feedPrice = r.result;
         });
     },
@@ -771,12 +786,19 @@ var app = new Vue({
         !this.postSelect[this.postSelect.entry].p
       ) {
         this.postSelect[this.postSelect.entry].p = true;
-        var APIQ = this.postSelect.searchTerm ? 
-        `https://data.dlux.io/search/${this.postSelect.searchTerm.toLowerCase()}` : `https://data.dlux.io/${
-          this.postSelect.entry
-        }?a=${this.postSelect[this.postSelect.entry].a}&o=${
-          this.postSelect[this.postSelect.entry].o
-        }`;
+        var bitMask = 0
+        for (var type in this.postSelect.types){
+          if (this.postSelect.types[type].checked)
+            bitMask += this.postSelect.types[type].bitFlag;
+        }
+        this.postSelect.bitMask = bitMask
+        var APIQ = this.postSelect.searchTerm
+          ? `https://data.dlux.io/search/${this.postSelect.searchTerm.toLowerCase()}?a=${
+              this.postSelect[this.postSelect.entry].a
+            }&o=${this.postSelect[this.postSelect.entry].o}&b=${bitMask}`
+          : `https://data.dlux.io/${this.postSelect.entry}?a=${
+              this.postSelect[this.postSelect.entry].a
+            }&o=${this.postSelect[this.postSelect.entry].o}&b=${bitMask}`;
         fetch(APIQ)
           .then((r) => r.json())
           .then((res) => {
@@ -790,11 +812,7 @@ var app = new Vue({
               if (!this.posturls[res.result[i].url]) {
                 this.posturls[res.result[i].url] = res.result[i];
               }
-              if (!this.postSelect.searchTerm){
-                this[this.postSelect.entry].push(res.result[i].url);
-              } else {
-                this.search.push(res.result[i].url);
-              }
+              this[this.postSelect.entry].push(res.result[i].url);
             }
             var called = false;
             for (var post in this.posturls) {
@@ -815,19 +833,6 @@ var app = new Vue({
     },
     selectPosts(modal) {
       this.displayPosts = [];
-      for (var post in this.posturls) {
-        if (
-          this.posturls[post].type &&
-          !this.displayPosts.includes(this.posturls[post])
-        )
-          this.displayPosts.push(this.posturls[post]);
-      }
-      for (var i = 0; i < this.displayPosts.length; i++) {
-        if (!this.postSelect.types[this.displayPosts[i].type].checked) {
-          this.displayPosts.splice(i, 1);
-          i--;
-        }
-      }
       for (var i = 0; i < this.displayPosts.length; i++) {
         if (this.postSelect.searchTerm && !this.search.includes(this.displayPosts[i].url)){
           this.displayPosts.splice(i, 1);
@@ -1220,7 +1225,7 @@ var app = new Vue({
   },
   watch: {
     postSelect(a, b){
-      if(a.searchTerm != b.searchTerm){
+      if(a.searchTerm != b.searchTerm || a.bitMask != b.bitMask){
         this.search = []
       }
     }
