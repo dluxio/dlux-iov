@@ -908,23 +908,6 @@ var app = new Vue({
               }
               this.posturls[res.result.url].rep = "...";
               this.rep(res.result.url);
-              var type = "Blog";
-              if (
-                "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
-                this.posturls[res.result.url].json_metadata.vrHash
-              )
-                type = "360";
-              else if (this.posturls[res.result.url].json_metadata.vrHash)
-                type = "VR";
-              else if (this.posturls[res.result.url].json_metadata.arHash)
-                type = "AR";
-              else if (this.posturls[res.result.url].json_metadata.appHash)
-                type = "APP";
-              else if (this.posturls[res.result.url].json_metadata.audHash)
-                type = "Audio";
-              else if (this.posturls[res.result.url].json_metadata.vidHash)
-                type = "Video";
-              this.posturls[res.result.url].type = type;
               this.posturls[res.result.url].slider = this.hasVoted(res.result.url) ||
                 10000;
               if (this.posturls[res.result.url].slider < 0){
