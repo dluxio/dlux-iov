@@ -833,25 +833,10 @@ var app = new Vue({
     },
     selectPosts(modal) {
       this.displayPosts = [];
-      for (var i = 0; i < this.displayPosts.length; i++) {
-        if (this.postSelect.searchTerm && !this.search.includes(this.displayPosts[i].url)){
-          this.displayPosts.splice(i, 1);
-          i--;
-        } else if (!this.postSelect.searchTerm && !this[this.postSelect.entry].includes(this.displayPosts[i].url)) {
-            this.displayPosts.splice(i, 1);
-            i--;
-          }
+      for (var i = 0; i < this[this.postSelect.entry].length; i++) {
+        this.displayPosts.push(this.posturls[this[this.postSelect.entry[i]]]);
       }
-      if (this.postSelect.entry == "new") {
-        this.sort("displayPosts", "created", "desc");
-      } else if (this.postSelect.entry == "new") {
-        this.sort("displayPosts", "voteweight", "desc");
-      }
-      if (
-        this.postSelect.searchTerm &&
-        this.displayPosts.length < this.postSelect[this.postSelect.entry].a - 2
-      )
-        this.getPosts();
+      
       if (modal) {
         this[modal[0]].items = this.displayPosts;
         this[modal[0]].item = this[modal[0]].items[modal[1]];
