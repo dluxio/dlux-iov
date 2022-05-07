@@ -781,17 +781,23 @@ var app = new Vue({
       else this[validKey] = true;
     },
     getPosts() {
+      var bitMask = 0;
+      for (var type in this.postSelect.types) {
+        if (this.postSelect.types[type].checked)
+          bitMask += this.postSelect.types[type].bitFlag;
+      }
+      if (this.postSelect.bitMask != bitMask) {
+        this.postSelect.bitMask = bitMask;
+        this.displayPosts = [];
+        this[this.postSelect.entry] = [];
+        this.postSelect[this.postSelect.entry].o = 0;
+        this.postSelect[this.postSelect.entry].e = false;
+      }
       if (
         !this.postSelect[this.postSelect.entry].e &&
         !this.postSelect[this.postSelect.entry].p
       ) {
         this.postSelect[this.postSelect.entry].p = true;
-        var bitMask = 0
-        for (var type in this.postSelect.types){
-          if (this.postSelect.types[type].checked)
-            bitMask += this.postSelect.types[type].bitFlag;
-        }
-        this.postSelect.bitMask = bitMask
         var APIQ = this.postSelect.searchTerm
           ? `https://data.dlux.io/search/${this.postSelect.searchTerm.toLowerCase()}?a=${
               this.postSelect[this.postSelect.entry].a
@@ -832,11 +838,11 @@ var app = new Vue({
       }
     },
     selectPosts(modal) {
-      this.displayPosts = [];
+      var arr = [];
       for (var i = 0; i < this[this.postSelect.entry].length; i++) {
-        this.displayPosts.push(this.posturls[this[this.postSelect.entry[i]]]);
+        if(this.posturls[this[this.postSelect.entry][i]])arr.push(this.posturls[this[this.postSelect.entry][i]]);
       }
-      
+      this.displayPosts = arr
       if (modal) {
         this[modal[0]].items = this.displayPosts;
         this[modal[0]].item = this[modal[0]].items[modal[1]];
@@ -1211,7 +1217,11 @@ var app = new Vue({
   watch: {
     postSelect(a, b){
       if(a.searchTerm != b.searchTerm || a.bitMask != b.bitMask){
-        this.search = []
+        console.log('Watched')
+        this.displayPosts = []
+        this[this.postSelect.entry] = []
+        this.postSelect[this.postSelect.entry].o = 0
+        this.postSelect[this.postSelect.entry].e = false;
       }
     }
   },

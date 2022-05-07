@@ -97,9 +97,9 @@
                                 <span class="sr-only">Toggle Dropdown</span>
                             </a>
                             <div class="dropdown-menu dropdown-menu-dark">
-                                <a class="dropdown-item" @click="postSelect.entry = 'new';getPosts()">NEW</a>
-                                <a class="dropdown-item" @click="postSelect.entry = 'trending';getPosts()">TRENDING</a>
-                                <a class="dropdown-item" @click="postSelect.entry = 'promoted';getPosts()">PROMOTED</a>
+                                <a class="dropdown-item" @click="postSelect.searchTerm = '';postSelect.entry = 'new';getPosts()">NEW</a>
+                                <a class="dropdown-item" @click="postSelect.searchTerm = '';postSelect.entry = 'trending';getPosts()">TRENDING</a>
+                                <a class="dropdown-item" @click="postSelect.searchTerm = '';postSelect.entry = 'promoted';getPosts()">PROMOTED</a>
                             </div>
                         </div>
                         <div class="mx-3">
@@ -115,7 +115,7 @@
                                         <div class="input-group-text bg-darkg">
                                             <input class="form-check-input mt-0" type="checkbox" value=""
                                                 :checked="value.checked"
-                                                @click="value.checked = !value.checked;getPosts()"
+                                                @click="value.checked = !value.checked;displayPosts=[];getPosts()"
                                                 aria-label="Checkbox for following text input">
                                         </div>
                                     </div>
