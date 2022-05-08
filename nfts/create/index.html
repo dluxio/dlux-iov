@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+
+<head>
+    <title>DLUX - Create NFT</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/img/dlux-icon-192.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="DLUX">
+    <meta name="theme-color" content="#111222" />
+    <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" />
+    <link href="/css/custom.css" rel="stylesheet" />
+
+    <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
+    <script type="module" src="/js/nftsvue.js"></script>
+
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator
+                .serviceWorker
+                .register(
+                    // path to the service worker file
+                    '/sw.js'
+                )
+                // the registration is async and it returns a promise
+                .then(function (reg) {
+                    console.log('Registration Successful');
+                });
+        }
+
+    </script>
+</head>
+
+<body class="d-flex flex-column h-100 padme-t70 text-white" id="explore">
+    <div id="app">
+        <div v-scroll="handleScroll">
+            <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event);getUserNFTs()"
+                @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" @refresh="run($event)"
+                :op="toSign" :lapi="lapi" />
+        </div>
+        <main role="main" class="flex-shrink-0">
+            <div class="container" style="max-width: 1600px;">
+                <nav>
+                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                        <button class="nav-link d-flex active" id="nav-generate-tab" data-bs-toggle="tab"
+                            data-bs-target="#nav-generate" type="button" role="tab" aria-controls="nav-generate"
+                            aria-selected="true">1. Generate <span class="d-none d-sm-block ms-1">Script</span></button>
+                        <button class="nav-link d-flex" id="nav-proof-tab" data-bs-toggle="tab"
+                            data-bs-target="#nav-proof" type="button" role="tab" aria-controls="nav-proof"
+                            aria-selected="false">2. Proof<span class="d-none d-sm-block ms-1">Script</span></button>
+                        <button class="nav-link d-flex" id="nav-mint-tab" data-bs-toggle="tab"
+                            data-bs-target="#nav-mint" type="button" role="tab" aria-controls="nav-mint"
+                            aria-selected="false">3. Mint<span class="d-none d-sm-block ms-1">Wrapped
+                                NFTs</span></button>
+                    </div>
+                </nav>
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade show active" id="nav-generate" role="tabpanel"
+                        aria-labelledby="nav-generate-tab">
+                        <div class="container-fluid my-4">
+                            <form class="bg-darker p-4 border border-primary">
+                                <h2>NFT Script Creator</h2>
+                                <p class="lead">Generate the script needed to mint your new NFT set</p>
+                                <h5>Logo image</h5>
+                                <p class="text-muted">This image will also be used for navigation. 350 x 350
+                                    recommended.</p>
+                                <div class="d-flex col-4 my-3 mx-0 p-1 rounded-circle cover"
+                                    style="--aspect-ratio:350/350; border: .3em dashed grey; max-width: 350px">
+                                    <div class="d-flex align-items-center text-center rounded-circle bg-dark px-3 py-4">
+                                        <h1 class="ms-auto me-auto" style="font-size:5em"><i class="fas fa-image"></i>
+                                        </h1>
+                                    </div>
+                                </div>
+                                <h5>Featured image</h5>
+                                <p class="text-muted">This image will be used for featuring your collection on the
+                                    homepage, category pages, or other promotional areas of DLUX. 600 x 400
+                                    recommended.
+                                </p>
+                                <div class="d-flex img-fluid my-3 mx-0 p-1"
+                                    style="--aspect-ratio:600/400; border: .3em dashed grey; max-width: 600px;">
+                                    <div class="d-flex align-items-center text-center m-0 bg-dark px-3 py-4">
+                                        <h1 class="ms-auto me-auto" style="font-size:5em"><i class="fas fa-image"></i>
+                                        </h1>
+                                    </div>
+                                </div>
+                                <h5>Banner image</h5>
+                                <p class="text-muted">This image will appear at the top of your collection page.
+                                    Avoid
+                                    including too much text in this banner image, as the dimensions change on
+                                    different
+                                    devices. 1400 x 400 recommended.</p>
+                                <div class="d-flex img-fluid my-3 mx-0 p-1"
+                                    style="--aspect-ratio:1400/400; border: .3em dashed grey">
+                                    <div class="d-flex align-items-center text-center m-0 bg-dark px-3 py-4">
+                                        <h1 class="ms-auto me-auto" style="font-size:5em"><i class="fas fa-image"></i>
+                                        </h1>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <h5>Name</h5>
+                                    <input type="text" class="form-control" id=""
+                                        placeholder="Example: Treasure of the multiverse">
+                                </div>
+                                <div class="form-group">
+                                    <h5>URL</h5>
+                                    <p id="emailHelp1" class="form-text text-muted my-2">Customize your URL on DLUX.
+                                        Must only contain lowercase letters, numbers, and hyphens.</p>
+                                    <input type="text" class="form-control" id=""
+                                        placeholder="https://dlux.io/assets/treasure-of-the-multiverse">
+                                </div>
+                                <div class="form-group">
+                                    <h5>Description</h5>
+                                    <p class="form-text text-muted">Markdown syntax is supported. 0 of 1000
+                                        characters
+                                        used.</p>
+                                    <textarea class="form-control" rows="2" id="validationCustomDescription"
+                                        placeholder="Provide a detailed description of your collection."
+                                        required></textarea>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-4">
+                                        <h5>Color 1</h5>
+                                        <p class="form-text text-muted">Enter color 1 of your gradient</p>
+                                        <input type="text" class="form-control" id="" placeholder="#000000">
+                                    </div>
+                                    <div class="form-group col-4">
+                                        <h5>Color 2</h5>
+                                        <p class="form-text text-muted">Enter color 2 of your gradient</p>
+                                        <input type="text" class="form-control" id="" placeholder="#ffffff">
+                                    </div>
+                                    <div class="form-group col-4">
+                                        <h5>Font Awesome Icon</h5>
+                                        <p class="form-text text-muted">Enter your fa icon free only (list here)</p>
+                                        <input type="text" class="form-control" id="" placeholder="fa fa-gem">
+                                    </div>
+
+                                </div>
+                                <div class="form-group">
+                                    <h5>Category</h5>
+                                    <p id="emailHelp1" class="form-text text-muted my-2">Adding a category will help
+                                        make your item discoverable on DLUX.</p>
+                                    <div class="dropdown show"> <a class="btn btn-lg btn-primary dropdown-toggle"
+                                            href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false"> Add category </a>
+                                        <div class="dropdown-menu"> <a class="dropdown-item" href="#">Art</a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="#">Trading Cards</a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="#">Collectibles</a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="#">Sports</a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="#">Utility</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <h5>Links</h5>
+                                    <p id="emailHelp1" class="form-text text-muted my-2">Customize your URL on DLUX.
+                                        Must only contain lowercase letters, numbers, and hyphens.</p>
+                                    <input type="text" class="form-control" id=""
+                                        placeholder="https://dlux.io/assets/treasure-of-the-multiverse">
+                                </div>
+
+                                <div class="form-group d-flex">
+                                    <div class="flex-fill">
+                                        <h5>Explicit &amp; sensitive content</h5>
+                                        <p id="emailHelp1" class="form-text text-muted my-2">Set this collection as
+                                            explicit and sensitive content.</p>
+                                    </div>
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="nsfwset">
+                                        <label class="custom-control-label" for="nsfwset"></label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Create</button>
+                            </form>
+
+                            <form class="bg-darker p-4 border border-info">
+                                <h2>Create new item</h2>
+                                <h5>Image, Video, Audio, or 3D Model</h5>
+                                <p class="text-muted">File types supported: JPG, PNG, GIF, SVG, MP4, WEBM, MP3, WAV,
+                                    OGG, GLB, GLTF. Max size: 100 MB</p>
+                                <div class="d-flex my-3 mx-0 p-1" style="border: .3em dashed grey">
+                                    <div class="flex-fill text-center m-0 bg-dark px-3 py-4">
+                                        <h1 class="m-0" style="font-size:5em"><i class="fas fa-image"></i></h1>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="exampleInputEmail1">Name</label>
+                                    <input type="text" class="form-control" id="exampleInputEmail1"
+                                        placeholder="Item name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="exampleInputPassword1">External Link</label>
+                                    <p id="emailHelp1" class="form-text text-muted">DLUX will include a link to this
+                                        URL
+                                        on this item's detail page, so that users can click to learn more about it.
+                                        You
+                                        are welcome to link to your own webpage with more details.</p>
+                                    <input type="text" class="form-control" id="exampleInputPassword1"
+                                        placeholder="https://yoursite.io/item/123">
+                                </div>
+                                <div class="form-group">
+                                    <label for="description">Description</label>
+                                    <p class="form-text text-muted">The description will be included on the item's
+                                        detail page underneath its image. Markdown syntax is supported.</p>
+                                    <textarea class="form-control" rows="2" id="validationCustomDescription"
+                                        placeholder="Provide a detailed description of your item." required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <h5>Collection</h5>
+                                    <p id="emailHelp1" class="form-text text-muted my-2">This is the collection
+                                        where
+                                        your item will appear. </p>
+                                    <div class="d-flex">
+                                        <select class="btn btn-lg btn-secondary d-flex flex-fill">
+                                            <option>Collection 1</option>
+                                            <option>Collection 2</option>
+                                            <option>Collection 3</option>
+                                            <option>Collection 4</option>
+                                        </select>
+                                    </div>
+                                    <ul class="p-0">
+                                        <li class="d-flex justify-content-between border-bottom py-2">
+                                            <div class="d-flex">
+                                                <h4 class="me-2"><i class="fas fa-list"></i></h4>
+                                                <div class="d-flex flex-column">
+                                                    <h4> Properties</h4>
+                                                    <span class="small text-muted">Textual traits that show up as
+                                                        rectangles</span>
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-outline-info"><span style="font-size: 2em"><i
+                                                        class="fas fa-plus"></i></span></button>
+                                        </li>
+                                        <li class="d-flex justify-content-between border-bottom py-2">
+                                            <div class="d-flex">
+                                                <h4 class="me-2"><i class="fas fa-star"></i></h4>
+                                                <div class="d-flex flex-column">
+                                                    <h4> Levels</h4>
+                                                    <span class="small text-muted">Numerical traits that show as a
+                                                        progress bar</span>
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-outline-info"><span style="font-size: 2em"><i
+                                                        class="fas fa-plus"></i></span></button>
+                                        </li>
+                                        <li class="d-flex justify-content-between border-bottom py-2">
+                                            <div class="d-flex">
+                                                <h4 class="me-2"><i class="fas fa-rotate-270 fa-align-left"></i>
+                                                </h4>
+                                                <div class="d-flex flex-column">
+                                                    <h4> Stats</h4>
+                                                    <span class="small text-muted">Numerical traits that just show
+                                                        as
+                                                        numbers</span>
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-outline-info"><span style="font-size: 2em"><i
+                                                        class="fas fa-plus"></i></span></button>
+                                        </li>
+                                        <li class="d-flex flex-column">
+                                            <div class="d-flex">
+                                                <div class="d-flex">
+                                                    <h4 class="me-2"><i class="fas fa-lock-open"></i></h4>
+                                                    <div class="d-flex flex-column">
+                                                        <h4> Unlockable Content</h4>
+                                                        <span class="small text-muted">Include unlockable content
+                                                            that
+                                                            can only be revealed by the owner of the item.</span>
+                                                    </div>
+                                                </div>
+                                                <div class="custom-control custom-switch ms-auto">
+                                                    <input type="checkbox" class="custom-control-input" id="unlockable">
+                                                    <label class="custom-control-label" for="unlockable"></label>
+                                                </div>
+                                            </div>
+                                            <textarea class="form-control my-2" rows="2"
+                                                id="validationCustomDescription"
+                                                placeholder="Enter content like access key, redemption code, link to a file, etc"
+                                                required></textarea>
+                                            <p class="form-text text-muted">Markdown syntax is supported. 0 of 1000
+                                                characters used.</p>
+                                        </li>
+                                        <li class="d-flex justify-content-between py-2">
+                                            <div class="d-flex">
+                                                <h4 class="me-2"><i class="fas fa-exclamation-triangle"></i></h4>
+                                                <div class="d-flex flex-column">
+                                                    <h4> Explicit &amp; Sensitive Content</h4>
+                                                    <span class="small text-muted">Set this item as explicit and
+                                                        sensitive content</span>
+                                                </div>
+                                            </div>
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" class="custom-control-input" id="nsfwitem">
+                                                <label class="custom-control-label" for="nsfwitem"></label>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                    <div class="form-group">
+                                        <h5>Supply</h5>
+                                        <p id="emailHelp1" class="form-text text-muted my-2">The number of copies
+                                            that
+                                            can be minted. </p>
+                                        <input type="number" class="form-control" id="" placeholder="1">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Create</button>
+                            </form>
+
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="nav-proof" role="tabpanel" aria-labelledby="nav-proof-tab">
+                        <div class="container-fluid bg-dark rounded my-5 py-3">
+                            <h1>PROOF NFT SET</h1>
+                            <h4>ALPHA v0.2</h4>
+                            <p class="lead">Proof your set before publishing</p>
+                            <div id="preview">
+                                <!-- name -->
+                                <div class="form-group row">
+                                    <label for="testname" class="col-sm-2 col-form-label">Set</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" id="testset" value="Hive Folks">
+                                    </div>
+                                </div>
+                                <!-- script -->
+                                <div class="form-group row">
+                                    <label for="testscript" class="col-sm-2 col-form-label">Script</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" id="testscript"
+                                            value="QmSPm13knazJsN4C8b7mWqT8tG2CeFCRvbW1PifYZV9dVN">
+                                    </div>
+                                </div>
+                                <!--
+                                <div dmx-bind:id="{{testscript.value}}banner" class="my-3">
+                                    {{testscript.value.getSetPhotos('','banner','rounded')}}</div>
+                                <div>
+                                    <div dmx-bind:id="{{testscript.value}}featured">
+                                        {{testscript.value.getSetPhotos('','featured')}}</div>
+                                    <div class="center-circle rounded-circle bg-darker"
+                                        style="border: solid black 3px;">
+                                        <div dmx-bind:id="{{testscript.value}}logo" class="rounded-circle"
+                                            style="width: 100px">
+                                            {{testscript.value.getSetPhotos('','logo','rounded-circle')}}</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div dmx-bind:id="{{testscript.value}}wrapped">
+                                            {{testscript.value.getSetPhotos('','wrapped')}}</div>
+                                        <p dmx-bind:id="{{testscript.value}}descriptionp">
+                                            {{testscript.value.getSetDetails('Description', 'descriptionp',
+                                            'innerText')}} </p>
+                                        <input id="testuid" value="7S">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="cc-3 pt-5" id="testftcards">
+                                            <div dmx-bind:id="{{testscript.value}}testcard" class="card text-white"
+                                                style="border: none;">
+                                                {{testscript.value.getSetDetailsColors('testcard')}}
+                                                <div
+                                                    class="card-header d-flex align-items-center justify-content-between">
+                                                    <div class="rounded-pill d-flex align-items-center p-2"
+                                                        style="background-color: black">
+                                                        <h2 class="m-0 px-2">{{testuid.value}}</h2>
+                                                    </div>
+                                                    <h3 class="card-title lead shimmer rounded p-2 m-0 ml-auto"
+                                                        style="color: black"><b>{{testset.value}} NFT</b></h3>
+                                                </div>
+                                                <div>
+                                                    <div class="card-img-top"
+                                                        dmx-bind:id="image-{{testset.value}}-{{testuid.value}}"
+                                                        dmx-bind:alt="{{testscript.value}}">
+                                                        {{testuid.value.nftImageWell(testscript.value, testset.value)}}
+                                                    </div>
+                                                </div>
+                                                <div class="card-body text-center d-flex flex-column lead">
+                                                    <div class="px-2 py-5 text-center rounded"
+                                                        style="background-color: rgba(0,0,0,0.75)">
+                                                        {{testscript.value.getSetDetailsIcon('testicon')}}
+                                                        <h1 class="text-center rainbow-text"><i
+                                                                dmx-bind:id="{{testscript.value}}testicon"></i></h1>
+                                                        <div dmx-bind:id="{{testscript.value}}-{{testuid.value}}-attributes"
+                                                            class="attribute-container">
+                                                            {{testscript.value.getNFTDetails(testuid.value)}} </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>-->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="nav-mint" role="tabpanel" aria-labelledby="nav-mint-tab">
+                        <div class="container-fluid bg-dark rounded my-5 py-3">
+                            <h1>CREATE NFT SET</h1>
+                            <h4>ALPHA v0.2</h4>
+                            <div class="form-row">
+                                <select id="newNFTtype" class="btn btn-secondary btn-lg my-3">
+                                    <option value="1" selected>Type 1: LAYERS+COLORS</option>
+                                </select>
+                            </div>
+                            <p class="lead">Turn a layered SVG into a set of unique, tradeable tokens
+                            </p>
+                            <p>Non Fungible Tokens are now available on DLUX, each one unique, all based
+                                on a set
+                                definition.</p>
+                            <p>SVG (Scaleable Vector Graphic) files have layers, and output as HTML
+                                code, so it's
+                                possible to set up layers that contain multiple possible item options
+                                (such as
+                                different
+                                types of glasses), each with their own color options.</p>
+                            <p>At this time there are several manual steps that must have been done
+                                prior to using
+                                this
+                                form:
+                            <ul>
+                                <li>Already created an SVG file</li>
+                                <li>Already preppared the HTML file with SVG description data</li>
+                                <li>Already uploaded the HTML file to IPFS, and pinned the IPFS file
+                                </li>
+                            </ul>
+                            To proceed, you must have the IPFS hash of your file, and know the Base64
+                            limits of your
+                            set.
+                            </p>
+                            <b>You must also be logged in as @disregardfiat </b>
+                            </p>
+
+                            <p>
+                            <form class="needs-validation mt-4" validate>
+                                <!--action="javascript:defineNFT('{{newNFTsetname.value}}','{{newNFTtype.value}}','{{newNFTscript.value}}','{{newNFTpermlink.value}}','{{newNFTstart.value}}','{{newNFTend.value}}','{{newNFTqty.value}}','{{newNFTroyalty.value}}','{{newNFThandling.value}}','{{newNFTmaxfee.value}}','{{newNFTbond.value}}')"-->
+                                <div class="my-4 rounded p-2 border border-primary">
+                                    <div class="form-row">
+                                        <div class="form-group col-6">
+                                            <label for="newNFTsetname">Set Name*</label>
+                                            <input type="text" class="form-control" id="newNFTsetname"
+                                                placeholder="Set Name" required>
+                                            <div class="invalid-feedback"> Please enter the set name
+                                            </div>
+                                            <small class="form-text text-muted">This will be the main
+                                                name of your
+                                                set</small>
+                                        </div>
+                                        <div class="form-group col-6">
+                                            <label for="newNFTpermlink">Set Permlink</label>
+                                            <input type="text" class="form-control" id="newNFTpermlink"
+                                                placeholder="/user/set-name" required>
+                                            <div class="invalid-feedback"> Please enter the set permlink
+                                            </div>
+                                            <small class="form-text text-muted">This should be your
+                                                announcment
+                                                post</small>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-4">
+                                            <label for="newNFTstart">Mint Range Start</label>
+                                            <input type="text" class="form-control" id="newNFTstart"
+                                                placeholder="Base64 number" required>
+                                            <div class="invalid-feedback">Please enter the start of the
+                                                possible
+                                                minting
+                                                range</div>
+                                            <small class="form-text text-muted">What is the start of the
+                                                range to
+                                                issue
+                                                mints from?<br>
+                                                <b>Must be in Base64</b></small>
+                                        </div>
+                                        <div class="form-group col-4">
+                                            <label for="newNFTend">Mint Range End**</label>
+                                            <input type="text" class="form-control" id="newNFTend"
+                                                placeholder="Base64 number" required>
+                                            <div class="invalid-feedback">Please enter the end of the
+                                                possible
+                                                minting
+                                                range</div>
+                                            <small class="form-text text-muted">What is the end of the
+                                                range to
+                                                issue
+                                                mints from?<br>
+                                                <b>Must be in Base64</b></small>
+                                        </div>
+                                        <div class="form-group col-4">
+                                            <label for="newNFThandling">Handling</label>
+                                            <input type="text" class="form-control" id="newNFThandling" value="svg"
+                                                required readonly>
+                                            <div class="invalid-feedback">Only SVG is available at this
+                                                time.</div>
+                                            <small class="form-text text-muted">What type of asset are
+                                                you using to
+                                                create this set?</small>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-12">
+                                            <label for="newNFTroyalty">Script</label>
+                                            <input type="text" class="form-control" id="newNFTscript" required
+                                                placeholder="QmIPFShash">
+                                            <small class="form-text text-muted">The IPFS hash of the
+                                                HTML file
+                                                containing the SVG information and attribute options,
+                                                the range is
+                                                the
+                                                combination of all potential attributes in
+                                                Base64</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="my-4 rounded p-2 border border-info">
+                                    <div class="form-row">
+                                        <div class="form-group col-4">
+                                            <label for="newNFTroyalty">Royalty (0-50%)</label>
+                                            <input type="number" class="form-control" id="newNFTroyalty" step="0.01"
+                                                min="0" max="50" value="10">
+                                            <small class="form-text text-muted">The percent paid back to
+                                                you from
+                                                each
+                                                future DLUX contract containing any asset from the
+                                                set</small>
+                                        </div>
+                                        <div class="form-group col-4">
+                                            <label for="newNFTbond">Bond Value (>=0)</label>
+                                            <input type="number" class="form-control" id="newNFTbond" step="0.001"
+                                                min="0" value="0">
+                                            <small class="form-text text-muted">Enter any amount of DLUX
+                                                you would
+                                                like
+                                                to bond into each asset - melting destroys it and
+                                                deposits the
+                                                value</small>
+                                        </div>
+                                        <div class="form-group col-4">
+                                            <label for="newNFTqty">Mint Quantity (>=1)</label>
+                                            <input type="number" class="form-control" id="newNFTqty" step="1" min="1"
+                                                value="1" required>
+                                            <div class="invalid-feedback"> Please enter the number of
+                                                mints you'd
+                                                like
+                                                to purchase now.</div>
+                                            <small class="form-text text-muted">How many mints are you
+                                                issuing at
+                                                this
+                                                time?</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col-6">
+                                        <div class="card bg-darker text-white-50">
+                                            <div class="card-header">
+                                                <div class="text-center small"><span
+                                                        class="ml-0 mr-1">MARGIN</span><span
+                                                        class="ml-1 mr-1">DEFINITION</span><span
+                                                        class="ml-1 mr-1">QTY</span><span
+                                                        class="ml-1 mr-1">BOND</span><span
+                                                        class="ml-5 mr-5">FEE</span><span class="ml-3 mr-5">BYTES
+                                                </div>
+                                                <!--<div class="text-center">1.1 x ( {{setfee.value}} + (
+                                                    {{newNFTqty.value.toNumber().formatNumber('','.',',')}} x (
+                                                    {{newNFTbond.value.toNumber().formatNumber('3','.',',')}} + (
+                                                    {{bytecost.value}} x ( {{39}} +
+                                                    {{newNFTsetname.value.split("").length}} +
+                                                    {{(2*(newNFTend.value.split("").length))}} )))))</div>
+                                                <input id="setfee" type="number" class="d-none"
+                                                    value="{{(statsapi.data.result.nft_fee_1/1000).formatNumber('3','.',',')}}">
+                                                <input id="bytecost" type="number" class="d-none"
+                                                    value="{{(statsapi.data.result.nft_byte_cost/1000).formatNumber('3','.',',')}}">
+
+                                            </div>
+                                            <div class="card-body">
+                                                <ul>
+                                                    <li>Bytes: <span
+                                                            class="float-right">{{(39+(newNFTsetname.value.split("").length)+((newNFTend.value.split("").length)*2)).formatNumber('','.',',')}}</span>
+                                                    </li>
+                                                    <li>Minting Fee (each byte): <span
+                                                            class="float-right">{{(statsapi.data.result.nft_byte_cost/1000).formatNumber('3','.',',')}}
+                                                            DLUX</span></li>
+                                                    <li>Minting Fee (each): <span
+                                                            class="float-right">{{(bytecost.value*(39+(newNFTsetname.value.split("").length)+((newNFTend.value.split("").length)*2))).formatNumber('3','.',',')}}
+                                                            DLUX</span></li>
+                                                    <li>Bond Value (each): <span
+                                                            class="float-right">{{newNFTbond.value.toNumber().formatNumber('3','.',',')}}
+                                                            DLUX</span></li>
+                                                    <li>Total Cost (each): <span
+                                                            class="float-right">{{((bytecost.value*(39+(newNFTsetname.value.split("").length)+((newNFTend.value.split("").length)*2)))+newNFTbond.value.toNumber()).formatNumber('3','.',',')}}
+                                                            DLUX</span></li>
+                                                    <li>Issue Qty: <span
+                                                            class="float-right">{{newNFTqty.value.toNumber().formatNumber('','.',',')}}</span>
+                                                    </li>
+                                                    <hr>
+                                                    <li>Set Definition: <span
+                                                            class="float-right">{{(statsapi.data.result.nft_fee_1/1000).formatNumber('3','.',',')}}
+                                                            DLUX</span></li>
+                                                    <li>Minting Fee: <span
+                                                            class="float-right">{{(newNFTqty.value*(bytecost.value*(39+(newNFTsetname.value.split("").length)+((newNFTend.value.split("").length)*2)))).formatNumber('3','.',',')}}
+                                                            DLUX</span></li>
+                                                    <li>Bond Value: <span
+                                                            class="float-right">{{(newNFTbond.value*newNFTqty.value).formatNumber('3','.',',')}}
+                                                            DLUX</span></li>
+                                                    <li>Grand Total: <span
+                                                            class="float-right">{{(setfee.value.toNumber()+(newNFTqty.value*((bytecost.value*(39+(newNFTsetname.value.split("").length)+((newNFTend.value.split("").length)*2)))+newNFTbond.value.toNumber()))).formatNumber('3','.',',')}}
+                                                            DLUX</span></li>
+                                                    <li>+10% Margin: <span
+                                                            class="float-right">{{((setfee.value.toNumber()+(newNFTqty.value*((bytecost.value*(39+(newNFTsetname.value.split("").length)+((newNFTend.value.split("").length)*2)))+newNFTbond.value.toNumber())))*1.1).formatNumber('3','.',',')}}
+                                                            DLUX</span></li>-->
+                                                </ul>
+                                            </div>
+                                            <div class="card-footer">
+                                                <small>* Characters in set name are single weighted for
+                                                    byte-cost
+                                                    evaluation (x1)</small><br>
+                                                <small>** Characters in range end are double weighted
+                                                    for byte-cost
+                                                    evaluation (x2)</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 text-center">
+                                        <div class="d-flex h-100">
+                                            <div class="m-auto flex-column rounded border border-warning p-3">
+                                                <div class="form-group my-2">
+                                                    <label for="newNFTmaxfee">ENTER THIS LAST<br>Max
+                                                        Cost Safety
+                                                        Measure</label>
+                                                    <input class="form-control" id="newNFTmaxfee" type="number"
+                                                        placeholder="Total + 10% Margin" required step="0.001">
+                                                    <div class="invalid-feedback">Enter the +10% Margin
+                                                        Total
+                                                        calculated
+                                                        on the left</div>
+                                                    <small class="form-text text-muted">This value is
+                                                        calculated on
+                                                        the
+                                                        left (+10% Margin)</small>
+                                                </div>
+                                                <div class="my-2"><button type="submit" class="btn btn-warning btn-lg"
+                                                        id="newNFTsubmit">Define
+                                                        Set
+                                                        and Issue Mints</button></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <div>
+            <foot-vue />
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
+    <script>
+        (function () {
+            "use strict";
+            window.addEventListener(
+                "load",
+                function () {
+                    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                    var forms = document.getElementsByClassName("needs-validation");
+                    // Loop over them and prevent submission
+                    var validation = Array.prototype.filter.call(
+                        forms,
+                        function (form) {
+                            form.addEventListener(
+                                "submit",
+                                function (event) {
+                                    if (form.checkValidity() === false) {
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                    }
+                                    form.classList.add("was-validated");
+                                },
+                                false
+                            );
+                        }
+                    );
+                },
+                false
+            );
+        })();
+        var disabletab = document.getElementsByClassName("disabled-input");
+        for (var i = 0; i < disabletab.length; i++) {
+            disabletab[i].setAttribute("tabindex", "-1");
+        }
+        var toastElList = [].slice.call(document.querySelectorAll(".toast"));
+        var toastList = toastElList.map(function (toastEl) {
+            return new bootstrap.Toast(toastEl, option);
+        });
+        var tooltipTriggerList = [].slice.call(
+            document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        );
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
+        integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
+
+</html>
