@@ -453,6 +453,31 @@ var app = new Vue({
       mintAuctions: [],
       mintSales: [],
       mintData: {},
+      compiledScript: "",
+      baseScript: `<!DOCTYPE html>
+//<html><head><script>
+function compile(m,y){const L=$L,Y=$Y,Base64={R:"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=",toFlags:function(r){var t=[];r=r.split('');for(var j=0;j<r.length;j++){for(var i=32;i>=1;i=i/2){if(this.R.indexOf(r[j])>=i){t.unshift(1);r[j]=this.R[this.R.indexOf(r[j])-i]}else{t.unshift(0)}}}return t}};if(y){document.getElementById('body').innerHTML = S}else{return{ HTML:S,attributes:Y,set:{Color1:$c2,Color2:$c1,Description:$D,faicon:$i,banner:$b,featured:$f,logo:$go,wrapped:$w,category:$c,links:$l}}}}
+//</script>
+/*
+//<script>
+if(window.addEventListener){window.addEventListener("message",onMessage,false);}else if(window.attachEvent){window.attachEvent("onmessage",onMessage,false)};function onMessage(event){var data=event.data;if(typeof(window[data.func])=="function"){const got=window[data.func].call(null,data.message);window.parent.postMessage({'func':'compiled','message':got},"*");}};function onLoad(id){window.parent.postMessage({'func': 'loaded','message': id},"*");}
+//</script>
+*/
+//</head><body id="body">Append ?NFT_UID to the address bar to see that NFT. "...html?A6"<script>const u=location.href.split('?')[1];if(u){compile(u,1)}else{onLoad(u)}</script></body></html>`,
+      SL: [],
+      SA: {
+        logo: "Qma1aE2ntCwMw5pAZo3cCYCmMZ4byVvyGDbK22HiH92WN7",
+        banner: "QmdSXLw1qwQ51MtkS3SjUd8qryLWadAYvMWngFfDPCsb9Y",
+        featured: "QmVndpFfjDXtSt2v26G7tiM6mZJGcj3Ya4KzepM8c6Pu7u",
+        wrapped: "QmV4WZ7sKzvaPG85C2rYNhDS3nVhk3Bv5U9o5Gr9KWx7ir",
+        color1: "#ffffff",
+        color2: "#000000",
+        links: [],
+        categories: [],
+        faicon: "fa fa-gem",
+        description: "Provide a detailed description of your collection.",
+      },
+      SLN: [],
     };
   },
   components: {
@@ -461,6 +486,88 @@ var app = new Vue({
     "cycle-text": Cycler,
   },
   methods: {
+    compileScript(){
+      return this.baseScript
+        .replace("$L", this.scriptify(this.SL))
+        .replace("$Y", this.scriptify(this.SLN))
+        .replace("$go", this.SA.logo)
+        .replace("$b", this.SA.banner)
+        .replace("$f", this.SA.featured)
+        .replace("$w", this.SA.wrapped)
+        .replace("$c1", this.SA.color1)
+        .replace("$c2", this.SA.color2)
+        .replace("$i", this.SA.faicon)
+        .replace("$D", this.SA.description)
+        .replace("$l", this.scriptify(this.SA.links))
+        .replace('$c', this.scriptify(this.SA.categories))
+    },
+    scriptify(obj){
+      var s = ''
+      if(obj.length){
+        s = '['
+        for(var i = 0; i < obj.length; i++){
+          if(typeof obj[i] == 'string')s += `"${obj[i]}"`
+          else if(typeof obj[i] == 'number')s += `${obj[i]}`
+          else s+= this.scriptify(obj[i])
+          if(i != obj.length - 1)s+=","
+        }
+        s+=']'
+      } else if (Object.keys(obj).length) {
+        var keys = Object.keys(obj)
+        s = '{'
+        for(var i = 0; i < keys.length; i++){
+          s += `"${keys[i]}":`
+          if (typeof obj[keys[i]] == "string") s += `"${obj[keys[i]]}"`;
+          else if (typeof obj[keys[i]] == "number") s += `${obj[keys[i]]}`;
+          else s += this.scriptify(obj[keys[i]]);
+          if (i != keys.length - 1) s += ",";
+        }
+        s += '}'
+      }
+      return s
+    },
+    ipfsUpload(event){
+      console.log('1', event)
+      if (window.IpfsHttpClient) {
+        const ipfs = window.IpfsHttpClient({
+          host: "ipfs.infura.io",
+          port: "5001",
+          protocol: "https",
+        });
+        var ipfsIP = [];
+        var info = [];
+        for (var name in ar) {
+          ipfsIP.push({ path: `${ar[name][1]}`, content: ar[name][0] });
+          info.push([name, ar[name][1]]);
+        }
+        ipfs.add(ipfsIP, (err, ipfsReturn) => {
+          if (!err) {
+            
+            fetch(`/img/${pass}`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                // "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: JSON.stringify({
+                refs: ipfsReturn,
+                info,
+                pin,
+                is360,
+                new: newAsset,
+              }),
+            })
+              .then((response) => response.text())
+              .then((response) =>
+                console.log("IPFS Complete, glitches turn...", response)
+              )
+              .catch((error) => console.error("Error:", error));
+          } else {
+            console.log("IPFS Upload Failed", err);
+          }
+        });
+      }
+    },
     buyMint(uid, set) {
       var cja = {
         set: set || this.focusSet.set,
