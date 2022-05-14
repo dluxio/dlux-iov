@@ -67,6 +67,8 @@ Once you have an up-to-date ubuntu server with docker, you can install Honeycomb
 - [DLUX:](https://github.com/dluxio/dlux_open_token.git) Type `git clone https://github.com/dluxio/dlux_open_token.git cd dlux_open_token`
 - [SPKCC:](https://github.com/3speaknetwork/honeycomb-spkcc.git) Type `git clone https://github.com/3speaknetwork/honeycomb-spkcc.git cd honeycomb-spkcc`
 - [DUAT:](https://github.com/disregardfiat/honeycomb/tree/ragnarok) Type `git clone https://github.com/disregardfiat/honeycomb.git && cd honeycomb && git checkout ragnarok`
+    - To rename the folder (optional), move back to the home directory and type `mv old_folder_name new_folder_name`
+    - Move back into the directory after you rename it, type `cd new_folder_name`
 
 2. Type `touch .env && nano .env` to edit the node attributes
    - Type the following into the text editor: 
@@ -81,12 +83,27 @@ domain=https://api.yourdomain.com
 3. Save & exit
    - Type `ctrl-x` then `y` to save
 4. Type `sudo docker-compose build` to build the Docker environment
-5. After the environment is built, you can either deploy the single node, or install more nodes.
+5. Setup a cron to auto update
+```
+cd /home/user/new_folder_name/
+     
+update=`git pull`
+if [ "$update" == "Already up to date." ]
+then
+    exit 0
+    return
+fi
+    
+docker-compose down
+docker-compose build
+docker-compose --compatibility up -d
+```
+#### Once the environment is built, you can either deploy the single node, or install more nodes.
    > Do not deploy if you wish to install another node
    - Option 1: Type `cd ~` to return home and clone another repo or configure Docker for multiple nodes
    - Option 2: Type `sudo docker-compose up` to deploy a single node on the server
-   > If you deploy, you must halt the node before adding any others.
-   - Type `sudo docker-compose down` to halt a deployed node (necessary to deploy multiple nodes)
+       > If you deploy, you must halt the node before adding any others.
+       - Type `sudo docker-compose down` to halt a deployed node (necessary to deploy multiple nodes)
 
 ---
 
@@ -98,53 +115,68 @@ If you installed more than one node on the server, you need to configure Docker 
 1. Type `nano docker-compose.yml` to create a new Docker compose
 2. Paste the following code and modify to suit your needs
    - Update the token and directory to whichever nodes you installed
-   - Here `duat` at `/honeycomb` and `dlux` at `/dlux_open_token` are being used
+   - Here `dlux` at `./dlux`, `spkcc` at `./spkcc` and `duat` at `./duat` and are being used
    - Continue incrementing the ports as needed `3001:3001`, `3002:3001`, `3003:3001`, etc
 ```
 version: '3'
 services:
-  ipfs:
-    image: ipfs/go-ipfs:latest
-    restart: unless-stopped
-    ports:
-      - 4001:4001
-      - 8080:8080
-      - 5001:5001
-    volumes:
-      - ./staging_dir:/export
-      - ipfs:/data/ipfs
-  duat:
-    build: ./honeycomb
-    restart: unless-stopped
-    ports:
-      - "3001:3001"
-    environment:
-      - ipfshost=ipfs
-      - ipfsprotocol=http
-      - ipfsport=5001
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "3"
-    stdin_open: true
-    tty: true
-  dlux:
-    build: ./dlux_open_token
-    restart: unless-stopped
-    ports:
-      - "3002:3001"
-    environment:
-      - ipfshost=ipfs
-      - ipfsprotocol=http
-      - ipfsport=5001
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "3"
-    stdin_open: true
-    tty: true
+       ipfs:
+         image: ipfs/go-ipfs:latest
+         restart: unless-stopped
+         ports:
+           - 4001:4001
+           - 8080:8080
+           - 5001:5001
+         volumes:
+           - ./staging_dir:/export
+           - ipfs:/data/ipfs
+       dlux:
+         build: ./dlux
+         restart: unless-stopped
+         ports:
+           - "3001:3001"
+         environment:
+           - ipfshost=ipfs
+           - ipfsprotocol=http
+           - ipfsport=5001
+         logging:
+           options:
+             max-size: "10m"
+             max-file: "3"
+         stdin_open: true
+         tty: true
+       spkcc:
+         build: ./spkcc
+         restart: unless-stopped
+         ports:
+           - "3002:3001"
+         environment:
+           - ipfshost=ipfs
+           - ipfsprotocol=http
+           - ipfsport=5001
+         logging:
+           options:
+             max-size: "10m"
+             max-file: "3"
+         stdin_open: true
+         tty: true
+       duat:
+         build: ./duat
+         restart: unless-stopped
+         ports:
+           - "3003:3001"
+         environment:
+           - ipfshost=ipfs
+           - ipfsprotocol=http
+           - ipfsport=5001
+         logging:
+           options:
+             max-size: "10m"
+             max-file: "3"
+         stdin_open: true
+         tty: true
 volumes:
-  ipfs:
+       ipfs:
 ```
 3. Save & exit
    - Type `ctrl-x` then `y` to save
@@ -185,6 +217,18 @@ server{
 
         location / {
                         proxy_pass http://127.0.0.1:3002;
+                        proxy_set_header Host            $host;
+                        proxy_set_header X-Forwarded-For $remote_addr;
+                   }
+}
+server{
+        listen 80;
+        listen [::]:80;
+        
+        server_name location3.yourdomain.io;
+
+        location / {
+                        proxy_pass http://127.0.0.1:3003;
                         proxy_set_header Host            $host;
                         proxy_set_header X-Forwarded-For $remote_addr;
                    }
