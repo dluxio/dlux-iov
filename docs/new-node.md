@@ -83,21 +83,7 @@ domain=https://api.yourdomain.com
 3. Save & exit
    - Type `ctrl-x` then `y` to save
 4. Type `sudo docker-compose build` to build the Docker environment
-5. Setup a cron to auto update
-```
-cd /home/user/new_folder_name/
-     
-update=`git pull`
-if [ "$update" == "Already up to date." ]
-then
-    exit 0
-    return
-fi
-    
-docker-compose down
-docker-compose build
-docker-compose --compatibility up -d
-```
+5. Deploy OR install another node
 #### Once the environment is built, you can either deploy the single node, or install more nodes.
    > Do not deploy if you wish to install another node
    - Option 1: Type `cd ~` to return home and clone another repo or configure Docker for multiple nodes
