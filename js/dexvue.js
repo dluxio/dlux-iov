@@ -1486,12 +1486,12 @@ var app = new Vue({
           : parseFloat(
               (this.dexapi.markets.hive.tick *
                 (this.stats.dex_max / 100) *
-                this.buyPrice <=
+                (this.buyPrice <=
               this.dexapi.markets.hive.tick
                 ? 1 -
                   (this.buyPrice / this.dexapi.markets.hive.tick) *
                     (this.stats.dex_slope / 100)
-                : 1 - (this.stats.dex_slope / 100) * this.stats.safetyLimit) / 1000
+                : 1 - (this.stats.dex_slope / 100)) * this.stats.safetyLimit) / 1000
             ).toFixed(3);
       },
     },
@@ -1502,12 +1502,12 @@ var app = new Vue({
           : parseFloat(
               (this.dexapi.markets.hbd.tick *
                 (this.stats.dex_max / 100) *
-                this.buyPrice <=
+                (this.buyPrice <=
               this.dexapi.markets.hbd.tick
                 ? 1 -
                   (this.buyPrice / this.dexapi.markets.hbd.tick) *
                     (this.stats.dex_slope / 100)
-                : 1 - (this.stats.dex_slope / 100) * this.stats.safetyLimit) / 1000
+                : 1 - (this.stats.dex_slope / 100)) * this.stats.safetyLimit) / 1000
             ).toFixed(3);
       },
     },
