@@ -465,6 +465,8 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
 */
 //</head><body id="body">Append ?NFT_UID to the address bar to see that NFT. "...html?A6"<script>const u=location.href.split('?')[1];if(u){compile(u,1)}else{onLoad(u)}</script></body></html>`,
       SL: [],
+      svgTag: '',
+      svgTagClose: '',
       SA: {
         logo: "Qma1aE2ntCwMw5pAZo3cCYCmMZ4byVvyGDbK22HiH92WN7",
         banner: "QmdSXLw1qwQ51MtkS3SjUd8qryLWadAYvMWngFfDPCsb9Y",
@@ -486,6 +488,35 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
     "cycle-text": Cycler,
   },
   methods: {
+    breakIt(it, reset){
+      if(reset){
+        this.SL = []
+        this.SLN = []
+      }
+      var svgStart = it.indexOf('<svg')
+      var svgEnd = it.indexOf('</svg>')
+      var gStart = it.indexOf('<g')
+      var el = document.createElement('svg')
+      el.innerHTML = it.substring(gStart, svgEnd)
+      var layers = el.childNodes
+      for (var i = 0; i < layers.length; i++){
+        var offset = this.SL.length
+        this.SL.push([])
+        this.SLN.push([layers[i].id || `layer${i + offset}`, []])
+        var items = layers[i].childNodes
+        for(var j = 0; j < items.length; j++){
+          this.SL[i + offset].push(items[j].innerHTML)
+          this.SLN[i + offset][1].push(items[j].id || `item${j}`)
+        }
+      }
+      this.svgTag = it.substring(svgStart, gStart)
+      if (
+        this.svgTag.search("style") > -1 &&
+        this.svgTag.search("scoped") == -1
+      )
+        this.svgTag.replace("<style", "<style scoped");
+        this.svgTagClose = it.substring(svgEnd);
+    },
     compileScript(){
       return this.baseScript
         .replace("$L", this.scriptify(this.SL))
@@ -542,26 +573,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
         }
         ipfs.add(ipfsIP, (err, ipfsReturn) => {
           if (!err) {
-            
-            fetch(`/img/${pass}`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                // "Content-Type": "application/x-www-form-urlencoded",
-              },
-              body: JSON.stringify({
-                refs: ipfsReturn,
-                info,
-                pin,
-                is360,
-                new: newAsset,
-              }),
-            })
-              .then((response) => response.text())
-              .then((response) =>
-                console.log("IPFS Complete, glitches turn...", response)
-              )
-              .catch((error) => console.error("Error:", error));
+            //store imagehash somewhere
           } else {
             console.log("IPFS Upload Failed", err);
           }
