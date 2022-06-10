@@ -625,28 +625,27 @@ export default {
           <li class="nav-item"><a class="nav-link" href="/dex/"><i class="fa-solid fa-building-columns me-2"></i>DEX</a></li>
           <li class="nav-item"><a class="nav-link" href="/docs/"><i class="fa-solid fa-book me-2"></i>DOCS</a></li>
         </ul>
-        <!--user dropdown
-	      <ul class="navbar-nav d-none" v-show="user" id="userMenu">
-          <li class="nav-item d-flex align-items-center d-none"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus me-2"></i>CREATE</a></li>
+        <!--user dropdown-->
+	      <ul class="navbar-nav" v-show="user" id="userMenu">
+          <li class="nav-item d-flex align-items-center"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus me-2"></i></a></li>
 		      <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-toggle dropdown-bs-toggle text-white-50" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
 			      <img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light me-1 cover">
 			      <span id="userName" class="me-1">{{user}}</span></a>
             <ul class="dropdown-menu dropdown-menu-dark pt-0" aria-labelledby="userDropdown">
-			        <li class="d-none"><a class="dropdown-item disabled" href="/me#blog/" onClick="showTab('blog')"><i class="fas fa-user fa-fw me-2"></i>Profile</a></li>
-			        <li class="d-none"><a class="dropdown-item disabled" href="/me#wallet/" onClick="showTab('wallet')"><i class="fas fa-wallet fa-fw me-2"></i>Wallet</a></li>
-			        <li class="d-none"><a class="dropdown-item disabled" href="/me#inventory/" onClick="showTab('inventory')"><i class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
-			        <li class="d-none"><a class="dropdown-item disabled" href="/me#node/" onClick="showTab('node')"><i class="fas fa-robot fa-fw me-2"></i>Node</a></li>
-			        <li class="d-none"><a class="dropdown-item disabled" href="/me#settings/" onClick="showTab('settings')"><i class="fas fa-cog fa-fw me-2"></i>Settings</a></li>
-              <li class="d-none"><hr class="dropdown-divider"></li>
-			        <li class="d-none"><a class="dropdown-item disabled" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
-              <li class="d-none"><hr class="dropdown-divider"></li>
+			        <li class=""><a class="dropdown-item" :href="'/@' + user + '#blog/'" onClick="showTab('blog')"><i class="fas fa-user fa-fw me-2"></i>Profile</a></li>
+			        <li class=""><a class="dropdown-item" href="/me#wallet/" onClick="showTab('wallet')"><i class="fas fa-wallet fa-fw me-2"></i>Wallet</a></li>
+			        <li class=""><a class="dropdown-item" href="/me#inventory/" onClick="showTab('inventory')"><i class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
+			        <li class=""><a class="dropdown-item" href="/me#node/" onClick="showTab('node')"><i class="fas fa-robot fa-fw me-2"></i>Node</a></li>
+			        <li class=""><a class="dropdown-item" href="/me#settings/" onClick="showTab('settings')"><i class="fas fa-cog fa-fw me-2"></i>Settings</a></li>
+              <li class=""><hr class="dropdown-divider"></li>
+			        <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
+              <li class=""><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="#" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers"><i class="fas fa-user-friends me-2"></i>Users</a></li>
 			        <li><a class="dropdown-item" href="#" @click="logout()"><i class="fas fa-power-off fa-fw me-2"></i>Logout</a></li>
 		        </ul>
           </li>
         </ul>
-        -->
       </div>
       <!--pwa brand-->
       <a class="navbar-brand d-sm-none d-flex align-items-center" href="/"><img src="/img/dlux-hive-logo-alpha.svg" alt="dlux-logo" width="40" height="40" class="me-2"><h1 class="m-0">DLUX</h1></a>
