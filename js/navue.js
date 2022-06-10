@@ -655,7 +655,7 @@ export default {
           <li class="nav-item"></li>
           <li class="nav-item"><button class="btn btn-primary ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button></li>
         </ul>
-        <ul class="navbar-nav" v-show="user">
+        <ul class="navbar-nav d-none" v-show="user">
           <li>
             <a href="#" v-show="user" class="nav-link d-flex align-items-center text-white-50" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
             <img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light me-1 cover">
