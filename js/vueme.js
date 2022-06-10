@@ -1280,7 +1280,7 @@ var app = new Vue({
   },
   mounted() {
     this.pageAccount = location.pathname.split("/@")[1] || 'markegiles'
-    this.checkAccount(this.pageAccount, 'focus')
+    this.checkAccount('pageAccount', 'focus')
     this.getHiveStats();
     this.getPosts();
     this.getProtocol();
