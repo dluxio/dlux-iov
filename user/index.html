@@ -699,7 +699,7 @@
                                                     content.</p>
                                             </div>
                                             <div id="hiveactions" class="float-right text-right">
-                                                <h5 id="hivebalance">{{accountapi.data.result[0].balance}}</h5>
+                                                <h5 id="hivebalance">{{focus.balance}}</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info mr-half"
                                                         data-toggle="modal" id="sendhivemodalbutton"
@@ -741,7 +741,7 @@
                                             </div>
                                             <div id="hivepactions" class="float-right text-right">
                                                 <h5 id="hpbal">
-                                                    {{((hivestatsapi.data.result.total_vesting_fund_hive.parseFloat()*accountapi.data.result[0].vesting_shares.parseFloat())/hivestatsapi.data.result.total_vesting_shares.parseFloat()).formatNumber('3','.',',')}}
+                                                    {{((hivestatsapi.data.result.total_vesting_fund_hive.parseFloat()*focus.vesting_shares.parseFloat())/hivestatsapi.data.result.total_vesting_shares.parseFloat()).formatNumber('3','.',',')}}
                                                     HP</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info mr-half"
@@ -773,7 +773,7 @@
                                                     to the US Dollar</p>
                                             </div>
                                             <div id="hbdactions" class="float-right text-right">
-                                                <h5 id="hbdbalance">{{accountapi.data.result[0].hbd_balance}}</h5>
+                                                <h5 id="hbdbalance">{{focus.hbd_balance}}</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info mr-half"
                                                         data-toggle="modal" id="sendhbdmodalbutton"
@@ -806,7 +806,7 @@
                                                     withdrawl</p>
                                             </div>
                                             <div id="savingsactions" class="float-right text-right">
-                                                <h5 id="savbal">{{accountapi.data.result[0].savings_hbd_balance}}</h5>
+                                                <h5 id="savbal">{{focus.savings_hbd_balance}}</h5>
                                             </div>
                                         </div>
                                         <hr class="my-4 bg-light">
@@ -818,7 +818,7 @@
                                             </div>
                                             <div id="hiveval" class="float-right text-right">
                                                 <h5 id="totalhivebalance">
-                                                    {{(((((hivestatsapi.data.result.total_vesting_fund_hive.parseFloat()*accountapi.data.result[0].vesting_shares.parseFloat())/hivestatsapi.data.result.total_vesting_shares.parseFloat())+accountapi.data.result[0].balance.parseFloat())*hiveprice.data.hive.usd)+((accountapi.data.result[0].hbd_balance.parseFloat()+accountapi.data.result[0].savings_hbd_balance.parseFloat())*hbdprice.data.hive_dollar.usd)).formatCurrency()}}
+                                                    {{(((((hivestatsapi.data.result.total_vesting_fund_hive.parseFloat()*focus.vesting_shares.parseFloat())/hivestatsapi.data.result.total_vesting_shares.parseFloat())+focus.balance.parseFloat())*hiveprice.data.hive.usd)+((focus.hbd_balance.parseFloat()+focus.savings_hbd_balance.parseFloat())*hbdprice.data.hive_dollar.usd)).formatCurrency()}}
                                                 </h5>
                                             </div>
                                         </div>
@@ -1781,7 +1781,7 @@
                             </div>
                             <div class="form-group">
                                 <label id="sendhiveamountlab" for="sendhiveamount">Amount (Balance <a href="#"
-                                        @click="insertBal('{{accountapi.data.result[0].balance.parseFloat()}}', 'sendhiveamount')">{{((accountapi.data.result[0].balance.parseFloat()))}}</a>):</label>
+                                        @click="insertBal('{{focus.balance.parseFloat()}}', 'sendhiveamount')">{{((focus.balance.parseFloat()))}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="sendhiveamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -1839,7 +1839,7 @@
                             </div>
                             <div class="form-group">
                                 <label id="sendhbdamountlab" for="sendhbdamount">Amount (Balance <a href="#"
-                                        @click="insertBal('{{accountapi.data.result[0].hbd_balance.parseFloat()}}', 'sendhbdamount')">{{((accountapi.data.result[0].hbd_balance.parseFloat()))}}</a>):</label>
+                                        @click="insertBal('{{focus.hbd_balance.parseFloat()}}', 'sendhbdamount')">{{((focus.hbd_balance.parseFloat()))}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="sendhbdamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
