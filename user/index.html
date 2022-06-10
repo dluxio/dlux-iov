@@ -17,6 +17,7 @@
         integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" />
     <link href="/css/custom.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
     <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
     <script type="module" src="/js/vueme.js"></script>
 </head>
@@ -84,6 +85,163 @@
                     <!-- blog tab -->
                     <div role="tabpanel" class="tab-pane fade show active" id="blog" aria-labelledby="blogtab">
                         <!-- blog repeat -->
+                        <!--main view-->
+                        <div class="container text-dark">
+                            <div class="row" data-masonry='{"percentPosition": true }'>
+                                <div class="col-md-3" v-for="post in displayPosts" :key="post.url">
+                                    <div class="card my-3">
+                                        <img :src="post.pic" class="img-fluid" alt="thumbnail">
+                                        <div class="card-body">
+                                            <h3 class="card-title">What Lorem Ipsum?</h3>
+                                            <p class="card-text">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy toscrambled</p>                            
+                                            <a href="#" class="btn btn-primary">Read More</a>
+                                        </div>
+                                    </div>
+                                </div>
+                    
+ 
+                                
+                            </div>
+                        </div>
+                    
+
+                <div class="row d-none" data-masonry='{"percentPosition": true , "itemSelector": ".col"}'>
+                    <div class="col-sm-6 col-lg-4 mb-4" v-for="post in displayPosts" :key="post.url">
+                        <div class="card text-white bg-darkest mt-2 mb-3">
+                            <div class="card-header">
+                                <div class="d-flex align-items-center ">
+                                    <a :href="'/@' + post.author" class="no-decoration">
+                                        <div class="d-flex align-items-center">
+                                            <img :src="'https://images.hive.blog/u/' + post.author + '/avatar'" alt=""
+                                                class="rounded-circle bg-light img-fluid me-3 cover author-img"
+                                                style="width: 50px;">
+                                            <div>
+                                                <div class="d-flex align-items-center">
+                                                    <h3 class="m-0 text-white">{{post.author}}</h3>
+                                                    <div>
+                                                        <span style="font-size: .5em;"
+                                                            class="ms-2 badge small rounded-pill text-white"
+                                                            :class="{'bg-danger': post.rep < 25, 'bg-warning': post.rep >= 25 && post.rep < 50, 'bg-success': post.rep >= 50}">
+                                                            {{post.rep}}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <span class="small text-muted">{{post.ago}}</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    <span class="badge bg-primary ms-auto"><i
+                                            :class="postSelect.types[post.type].icon"></i>{{post.type}}</span>
+                                </div>
+                            </div>
+                            <div class="card-body bg-darkg">
+                                <a href="#detailModal" class="no-decoration" data-bs-toggle="modal"
+                                    @click="modalSelect(post.url)">
+                                    <h3 class="lead text-white truncate1">{{post.title}}</h3>
+                                    <p class="text-white-50 mb-1 truncate2">{{post.preview}}</p>
+                                </a>
+                            </div>
+
+                            <!--featured image with mouseover launch btn-->
+                            <div class="card bg-darker">
+                                <div class="d-flex">
+                                    <a target="_blank" :href="post.url" class="p-0 m-0" type="button">
+                                        <div id="imagesMain">
+                                            <div class="imagebox bg-none">
+                                                <img src="..." alt="Card image cap" class="card-img-top img-fluid image"
+                                                    :src="post.pic" @error="imgUrlAlt"
+                                                    style="width: 1500px; height: 360px; object-fit: cover;" />
+                                                <div class="caption text-white w-100 h-100 d-flex">
+                                                    <div class="m-auto p-3 text-center">
+                                                        <p><i
+                                                                :class="postSelect.types[post.type].icon"></i>{{postSelect.types[post.type].launch}}
+                                                        </p>
+                                                        <button class="btn btn-lg btn-info px-4"
+                                                            style="border-radius: 5rem;">Launch<i
+                                                                class="ms-2 fas fa-external-link-alt"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!--vote collapse-->
+                            <div class="collapse bg-darker" :id="'vote-' + post.author + '-' + post.permlink">
+                                <form id="voteForm">
+                                    <div class="p-2 d-flex align-items-center text-white-50">
+
+                                        <button type="button" class="btn me-2"
+                                            :class="{'btn-success': !post.flag, ' btn-danger': post.flag}"
+                                            @click="vote(post.url)" style="width: 100px;">{{post.flag ? '-' :
+                                            ''}}{{post.slider / 100}}%</button>
+
+                                        <button type="button" class="btn btn-secondary me-2"
+                                            :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
+                                            data-bs-toggle="collapse"><span class="close text-white">×</span></button>
+
+                                        <div class="d-flex align-items-center px-3 border rounded" style="height: 38px;"
+                                            :class="{'border-success': !post.flag, 'border-danger': post.flag}">
+                                            <input type="range" class="form-range mx-auto p-0" step="1" value="10000"
+                                                max="10000" v-model="post.slider">
+                                        </div>
+
+                                        <div class="ms-auto">
+                                            <p class="me-1 my-0" id="commentVal"
+                                                :class="{'text-success': !post.flag, 'text-danger': post.flag}">
+                                                {{toFixed(voteVal *
+                                                post.slider/10000,3)}}
+                                                <i class="me-1 fab fa-fw fa-hive"></i>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="card-footer bg-darkg text-white-50">
+                                <!--footer buttons-->
+                                <div class="d-flex align-items-center my-2">
+                                    <a href="#/" class="no-decoration" @click="post.flag = false"
+                                        data-bs-toggle="collapse"
+                                        :class="{'text-primary': post.hasVoted, 'text-white-50': !post.hasVoted, 'text-danger': post.slider < 0 }"
+                                        :data-bs-target="'#vote-' + post.author + '-' + post.permlink">
+                                        <i class="fas fa-heart fa-fw me-1"></i><span
+                                            class="text-white-50">{{post.upVotes}}</span>
+                                    </a>
+                                    <a href="#detailModal" class="no-decoration text-white-50" data-bs-toggle="modal"
+                                        @click="modalSelect(post.url)"><i
+                                            class="fas fa-comment fa-fw ms-2 me-1"></i><span
+                                            class="text-white-50">{{post.children}}</span>
+                                    </a>
+                                    <a v-show="post.rating" href="#detailModal" class="no-decoration text-white-50"
+                                        data-bs-toggle="modal" @click="modalSelect(post.url)">
+                                        <i class="fa-solid fa-star ms-2 me-1"></i><span
+                                            class="text-white-50">{{post.rating}}</span>
+                                    </a>
+                                    <a href="#/" class="no-decoration text-white-50" data-bs-toggle="collapse"
+                                        :class="{'text-primary': post.flag > 0}"
+                                        :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
+                                        @click="post.flag = true">
+                                        <i class="fa-solid fa-flag ms-2 me-1"></i><span
+                                            class="text-white-50">{{post.downVotes ? post.downVotes : ''}}</span>
+                                    </a>
+
+                                    <div class="ms-auto">
+                                        <pop-vue title="Post Earnings"
+                                            :content="(post.paid ? post.total_payout_value : post.pending_payout_value) + '<br>' + (post.paid ? precision(post.payout, 3) : 0) + ' ' + TOKEN"
+                                            trigger="hover">
+                                            <button class="btn btn-secondary">
+                                                {{post.paid ? sigFig(post.total_payout_value, 2) :
+                                                sigFig(post.pending_payout_value, 2)}}
+                                            </button>
+                                        </pop-vue>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                         <!-- <div class="card-columns p-3" id="blogResult" is="dmx-repeat"
                             :repeat="dluxGetBlog.data.result">
                             <div class="card text-white bg-dark mt-2 mb-3">
@@ -1317,8 +1475,7 @@
                                 loop="true"></dmx-data-iterator> -->
                             <!-- NFT detail modal -->
 
-                            </center>
-                            </center>
+
                         </div>
                     </div>
                     <!-- nodes tab -->
@@ -1687,10 +1844,10 @@
                                                 </div>
                                             </div>
                                             <div class="form-group"> <br>
-                                                <center>
+                                                
                                                     <button id="updateNode" type="submit" class="btn btn-primary">Update
                                                         Node</button>
-                                                </center>
+                                                
                                             </div>
                                         </form>
                                     </div>
@@ -2201,7 +2358,7 @@
 <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"
  integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous"
  async></script>
-
+ <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
 </body>
 
 </html>
