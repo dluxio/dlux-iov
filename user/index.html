@@ -86,26 +86,7 @@
                     <div role="tabpanel" class="tab-pane fade show active" id="blog" aria-labelledby="blogtab">
                         <!-- blog repeat -->
                         <!--main view-->
-                        <div class="container text-dark">
-                            <div class="row" data-masonry='{"percentPosition": true }'>
-                                <div class="col-md-3" v-for="post in displayPosts" :key="post.url">
-                                    <div class="card my-3">
-                                        <img :src="post.pic" class="img-fluid" alt="thumbnail">
-                                        <div class="card-body">
-                                            <h3 class="card-title">What Lorem Ipsum?</h3>
-                                            <p class="card-text">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy toscrambled</p>                            
-                                            <a href="#" class="btn btn-primary">Read More</a>
-                                        </div>
-                                    </div>
-                                </div>
-                    
- 
-                                
-                            </div>
-                        </div>
-                    
-
-                <div class="row d-none" data-masonry='{"percentPosition": true , "itemSelector": ".col"}'>
+                    <div class="row" data-masonry='{"percentPosition": true , "itemSelector": ".col"}'>
                     <div class="col-sm-6 col-lg-4 mb-4" v-for="post in displayPosts" :key="post.url">
                         <div class="card text-white bg-darkest mt-2 mb-3">
                             <div class="card-header">
