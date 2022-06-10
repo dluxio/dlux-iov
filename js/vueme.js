@@ -970,6 +970,8 @@ var app = new Vue({
               this.posturls[res.result.url].type = type;
               if(type != 'Blog')this.posturls[res.result.url].url =
                 '/dlux' + this.posturls[res.result.url].url
+              else this.posturls[res.result.url].url =
+                "/blog" + this.posturls[res.result.url].url;
               this.posturls[res.result.url].rep = "...";
               this.rep(res.result.url);
               if (this.posturls[res.result.url].slider < 0) {
