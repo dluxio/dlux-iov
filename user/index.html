@@ -57,7 +57,7 @@
                                         class="fas fa-vr-cardboard mx-2 fa-lg"></i></a>
                                 <button type="button"
                                     class="btn btn-outline-primary dropdown-toggle drop-no-arrow btn-lg"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions<i
+                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions<i
                                         class="fas fa-ellipsis-h ms-2"></i></button>
                                 <div class="dropdown-menu nav-item dropdown-menu-right"> <a class="dropdown-item"
                                         type="button">Follow</a> <a class="dropdown-item" type="button">Unfollow</a> <a
@@ -254,14 +254,14 @@
                                     <div class="float-right"><span
                                             class="badge badge-secondary">{{json_metadata.scat()}}</span></div>
                                 </div>
-                                <a href="#detailModal" class="a-1" data-toggle="modal"
+                                <a href="#detailModal" class="a-1" data-bs-toggle="modal"
                                     @click="data_detail.select(url)"
                                     :onclick="window.history.pushState('{{url}}','{{title}}', '/blog/@{{author}}/{{permlink}}');">
                                     <h5 class="card-title mt-2 text-center text-capitalize">{{title}}</h5>
                                     <img src="..." alt="Card image cap" class="card-img-top"
                                         :src="{{json_metadata.parseJSON().picFind()}}" />
                                 </a>
-                                <div class="card-body"><a href="#detailModal" class="a-1" data-toggle="modal"
+                                <div class="card-body"><a href="#detailModal" class="a-1" data-bs-toggle="modal"
                                         @click="data_detail.select(url)"
                                         :onclick="window.history.pushState('{{url}}','{{title}}', '/blog/@{{author}}/{{permlink}}');">
                                         <p class="preview-text">{{body.removeMD().trunc(100,true,"...")}}</p>
@@ -279,7 +279,7 @@
                                                         :id="voteBtn{{post_id}}"
                                                         :onclick="vote('{{author}}','{{permlink}}','slider{{post_id}}')">100%</button>
                                                     <button type="button" class="btn btn-secondary"
-                                                        data-toggle="collapse"
+                                                        data-bs-toggle="collapse"
                                                         :data-target="{{&quot;#&quot;}}vote{{post_id}}"><span
                                                             class="close text-white">×</span></button>
                                                 </div>
@@ -298,7 +298,7 @@
                                         </form>
                                     </div>
                                     <div class="d-flex align-items-center my-2">
-                                        <div><a data-toggle="collapse"
+                                        <div><a data-bs-toggle="collapse"
                                                 :data-target="{{&quot;#&quot;}}vote{{post_id}}"><i
                                                     class="fas fa-heart fa-fw me-1"
                                                     style="color: {{active_votes.hasVoted('disregardfiat')}}"></i></a>{{active_votes.countUpVotes()}}<i
@@ -363,7 +363,7 @@
                                                                     :id="voteBtn{{post_id}}"
                                                                     :onclick="vote('{{comment.author}}','{{data_detail.data.comment.permlink}}','slider{{post_id}}')">100%</button>
                                                                 <button type="button" class="btn btn-secondary"
-                                                                    data-toggle="collapse"
+                                                                    data-bs-toggle="collapse"
                                                                     :data-target="{{&quot;#&quot;}}vote{{post_id}}"><span
                                                                         class="close text-white">×</span></button>
                                                             </div>
@@ -382,7 +382,7 @@
                                                     </form>
                                                 </div>
                                                 <div class="d-flex align-items-center my-2">
-                                                    <div><a data-toggle="collapse"
+                                                    <div><a data-bs-toggle="collapse"
                                                             :data-target="{{&quot;#&quot;}}vote{{post_id}}"><i
                                                                 class="fas fa-heart me-1"></i></a>{{data_detail.data.active_votes.countUpVotes()}}<i
                                                             class="fas fa-fw fa-comment ms-2 me-1"></i>{{data_detail.data.children}}
@@ -475,28 +475,28 @@
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info me-half"
-                                                        data-toggle="modal" id="senddluxmodalbutton"
+                                                        data-bs-toggle="modal" id="senddluxmodalbutton"
                                                         data-target="#sendDluxModal"><i
                                                             class="fas fa-paper-plane me-2"></i>Send</button>
                                                     <div class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
-                                                            class="btn btn-info dropdown-toggle" data-toggle="dropdown"
+                                                            class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
                                                             aria-haspopup="true" aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-right text-white"
                                                             aria-labelledby="btnGroupDrop1"> <a class="dropdown-item"
-                                                                href="#" id="powerupdluxbutton" data-toggle="modal"
+                                                                href="#" id="powerupdluxbutton" data-bs-toggle="modal"
                                                                 data-target="#powerupDluxModal"><i
                                                                     class="fas fa-angle-double-up fa-fw me-2"></i>Power
                                                                 Up</a> <a class="dropdown-item" href="#"
-                                                                id="freezedluxbutton" data-toggle="modal"
+                                                                id="freezedluxbutton" data-bs-toggle="modal"
                                                                 data-target="#lockgovDluxModal"><i
                                                                     class="fas fa-lock fa-fw me-2"></i>Lock GOV</a>
                                                             <div class="dropdown-divider"></div>
                                                             <a class="dropdown-item" href="#" id="buylink"
-                                                                data-toggle="modal" data-target="#buyDluxModal"><i
+                                                                data-bs-toggle="modal" data-target="#buyDluxModal"><i
                                                                     class="fas fa-cart-arrow-down fa-fw me-2"></i>Buy
                                                                 DLUX</a> <a class="dropdown-item" href="#" id="selllink"
-                                                                data-toggle="modal" data-target="#buyDluxModal"><i
+                                                                data-bs-toggle="modal" data-target="#buyDluxModal"><i
                                                                     class="fas fa-coins fa-fw me-2"></i>Sell DLUX</a>
                                                         </div>
                                                     </div>
@@ -521,28 +521,28 @@
                                                 <h5 id="pwrbalance">
                                                     {{((focusdata.poweredUp)/1000)}} DLUX
                                                 </h5>
-                                                <a data-toggle="collapse" id="delegationsbtn" href="#delegations"
+                                                <a data-bs-toggle="collapse" id="delegationsbtn" href="#delegations"
                                                     role="button" aria-expanded="false" aria-controls="Show delegations"
                                                     class="text-white d-none" style="text-decoration: none">
                                                     <h6 id="delegatebal">(-0 G)<i class="fas fa-search ms-2"></i></h6>
                                                 </a>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info me-half disabled"
-                                                        data-toggle="modal" title="Delegate DLUX" id="delegatedluxbtn"
+                                                        data-bs-toggle="modal" title="Delegate DLUX" id="delegatedluxbtn"
                                                         data-target="#sendDluxModal" style="pointer-events: none"><i
                                                             class="fas fa-user-friends fa-fw me-2"></i>Delegate</button>
                                                     <div class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
-                                                            class="btn btn-info dropdown-toggle" data-toggle="dropdown"
+                                                            class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
                                                             aria-haspopup="true" aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-right text-white"
                                                             aria-labelledby="btnGroupDrop1"> <a class="dropdown-item"
-                                                                href="#" data-toggle="modal"
+                                                                href="#" data-bs-toggle="modal"
                                                                 id="dluxpowerdownModalButton"
                                                                 data-target="#powerdownDluxModal"><i
                                                                     class="fas fa-angle-double-down fa-fw me-2"></i>Power
                                                                 Down</a> <a class="dropdown-item disabled" href="#"
-                                                                data-toggle="modal" id="powertogovbutton"
+                                                                data-bs-toggle="modal" id="powertogovbutton"
                                                                 data-target="#sendDluxModal"><i
                                                                     class="fas fa-random fa-fw me-2"></i>Convert to
                                                                 GOV</a></div>
@@ -580,7 +580,7 @@
                                             <div id="dluxgactions" class="float-right text-right">
                                                 <h5 id="govbalance">
                                                     {{((focusdata.gov)/1000)}} DLUX</h5>
-                                                <a data-toggle="collapse" id="escrowtxbutton" href="#escrowtx"
+                                                <a data-bs-toggle="collapse" id="escrowtxbutton" href="#escrowtx"
                                                     role="button" aria-expanded="false"
                                                     aria-controls="Show escrow transactions" class="text-white"
                                                     style="text-decoration: none">
@@ -592,15 +592,15 @@
                                                             class="fas fa-balance-scale fa-fw me-2"></i>Measures</button>
                                                     <div class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
-                                                            class="btn btn-info dropdown-toggle" data-toggle="dropdown"
+                                                            class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
                                                             aria-haspopup="true" aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-right text-white"
                                                             aria-labelledby="btnGroupDrop1"> <a class="dropdown-item"
-                                                                href="#" data-toggle="modal" id="dluxgovdownModalButton"
+                                                                href="#" data-bs-toggle="modal" id="dluxgovdownModalButton"
                                                                 data-target="#unlockgovDluxModal"><i
                                                                     class="fas fa-lock-open fa-fw me-2"></i>Unlock
                                                                 GOV</a> <a class="dropdown-item disabled" href="#"
-                                                                data-toggle="modal" id="govtopowerbutton"
+                                                                data-bs-toggle="modal" id="govtopowerbutton"
                                                                 data-target="#sendDluxModal"><i
                                                                     class="fas fa-random fa-fw me-2"></i>Convert to
                                                                 PWR</a></div>
@@ -695,21 +695,21 @@
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Actions">
                                                     <button type="button" class="btn btn-info me-half"
-                                                        data-toggle="modal" id="sendlarynxmodalbutton"
+                                                        data-bs-toggle="modal" id="sendlarynxmodalbutton"
                                                         data-target="#sendLarynxModal"><i
                                                             class="fas fa-paper-plane me-2"></i>Send</button>
                                                     <div class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
-                                                            class="btn btn-info dropdown-toggle" data-toggle="dropdown"
+                                                            class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
                                                             aria-haspopup="true" aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-right text-white"
                                                             aria-labelledby="btnGroupDrop1"> <a
                                                                 class="dropdown-item disabled d-none" href="#"
-                                                                id="poweruplarynxbutton" data-toggle="modal"
+                                                                id="poweruplarynxbutton" data-bs-toggle="modal"
                                                                 data-target="#powerupLarynxModal"><i
                                                                     class="fas fa-angle-double-up fa-fw me-2"></i>Power
                                                                 Up</a> <a class="dropdown-item" href="#"
-                                                                id="locklarynxbutton" data-toggle="modal"
+                                                                id="locklarynxbutton" data-bs-toggle="modal"
                                                                 data-target="#lockgovLarynxModal"><i
                                                                     class="fas fa-lock fa-fw me-2"></i>Lock GOV</a>
                                                             <div class="dropdown-divider"></div>
@@ -747,16 +747,16 @@
                                                             class="fas fa-balance-scale fa-fw me-2"></i>Measures</button>
                                                     <div class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
-                                                            class="btn btn-info dropdown-toggle" data-toggle="dropdown"
+                                                            class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
                                                             aria-haspopup="true" aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-right text-white"
                                                             aria-labelledby="btnGroupDrop1"> <a class="dropdown-item"
-                                                                href="#" data-toggle="modal"
+                                                                href="#" data-bs-toggle="modal"
                                                                 id="larynxgovdownModalButton"
                                                                 data-target="#unlockgovLarynxModal"><i
                                                                     class="fas fa-lock-open fa-fw me-2"></i>Unlock
                                                                 GOV</a> <a class="dropdown-item disabled d-none"
-                                                                href="#" data-toggle="modal" id="govtopowerbutton"
+                                                                href="#" data-bs-toggle="modal" id="govtopowerbutton"
                                                                 data-target="#sendDluxModal"><i
                                                                     class="fas fa-random fa-fw me-2"></i>Convert to
                                                                 PWR</a></div>
@@ -804,17 +804,17 @@
                                                 <h5 id="hivebalance">{{focus.balance}}</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info me-half"
-                                                        data-toggle="modal" id="sendhivemodalbutton"
+                                                        data-bs-toggle="modal" id="sendhivemodalbutton"
                                                         data-target="#sendHiveModal"><i
                                                             class="fas fa-paper-plane me-2"></i>Send</button>
                                                     <div class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
-                                                            class="btn btn-info dropdown-toggle" data-toggle="dropdown"
+                                                            class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
                                                             aria-haspopup="true" aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-right text-white"
                                                             aria-labelledby="btnGroupDrop1"> <a
                                                                 class="dropdown-item disabled" href="#"
-                                                                id="poweruphivebutton" data-toggle="modal"
+                                                                id="poweruphivebutton" data-bs-toggle="modal"
                                                                 data-target="#powerupDluxModal"><i
                                                                     class="fas fa-angle-double-up fa-fw me-2"></i>Power
                                                                 Up</a> <a class="dropdown-item disabled" href="#"><i
@@ -851,7 +851,7 @@
                                                             class="fas fa-user-friends me-2"></i>Delegate</button>
                                                     <div class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
-                                                            class="btn btn-info dropdown-toggle" data-toggle="dropdown"
+                                                            class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
                                                             aria-haspopup="true" aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-right text-white"
                                                             aria-labelledby="btnGroupDrop1"> <a
@@ -878,12 +878,12 @@
                                                 <h5 id="hbdbalance">{{focus.hbd_balance}}</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info me-half"
-                                                        data-toggle="modal" id="sendhbdmodalbutton"
+                                                        data-bs-toggle="modal" id="sendhbdmodalbutton"
                                                         data-target="#sendHbdModal"><i
                                                             class="fas fa-paper-plane me-2"></i>Send</button>
                                                     <div class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
-                                                            class="btn btn-info dropdown-toggle" data-toggle="dropdown"
+                                                            class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
                                                             aria-haspopup="true" aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-right text-white"
                                                             aria-labelledby="btnGroupDrop1"> <a
@@ -1063,7 +1063,7 @@
                                                 @click="openFT('{{set}}')">Open<i
                                                     class="fas fa-box-open ms-3"></i></button>
                                             <button type="button" class="btn btn-outline-dark me-auto ms-auto mt-1"
-                                                data-toggle="modal" href="#mintTransferModal"
+                                                data-bs-toggle="modal" href="#mintTransferModal"
                                                 @click="mint_detail.select(set)">Transfer<i
                                                     class="fas fa-exchange-alt ms-3"></i></button>
                                         </div>
@@ -1082,20 +1082,20 @@
                                                     <ul class="nav nav-pills bg-darker justify-content-center"
                                                         role="tablist">
                                                         <li class="nav-item"> <a class="nav-link active" id="giveFTlink"
-                                                                role="tab" data-toggle="tab" aria-controls="giveFT"
+                                                                role="tab" data-bs-toggle="tab" aria-controls="giveFT"
                                                                 aria-expanded="true" href="#giveFTtab">Give</a></li>
                                                         <li class="nav-item"> <a class="nav-link" id="tradeFTlink"
-                                                                role="tab" data-toggle="tab" aria-controls="tradeFT"
+                                                                role="tab" data-bs-toggle="tab" aria-controls="tradeFT"
                                                                 aria-expanded="true" href="#tradeFTtab">Trade</a></li>
                                                         <li class="nav-item"> <a class="nav-link" id="sellFTlink"
-                                                                role="tab" data-toggle="tab" aria-controls="sellFT"
+                                                                role="tab" data-bs-toggle="tab" aria-controls="sellFT"
                                                                 aria-expanded="true" href="#sellFTtab">Sell</a></li>
                                                         <li class="nav-item"> <a class="nav-link" id="auctionFTlink"
-                                                                role="tab" data-toggle="tab" aria-controls="auctionFT"
+                                                                role="tab" data-bs-toggle="tab" aria-controls="auctionFT"
                                                                 aria-expanded="true" href="#auctionFTtab">Auction</a>
                                                         </li>
                                                         <li class="nav-item"> <a class="nav-link" id="airdropFTlink"
-                                                                role="tab" data-toggle="tab" aria-controls="airdropFT"
+                                                                role="tab" data-bs-toggle="tab" aria-controls="airdropFT"
                                                                 aria-expanded="true" href="#airdropFTtab">Airdrop</a>
                                                         </li>
                                                     </ul>
@@ -1453,7 +1453,7 @@
                                                 :href="/nfts/set/{{set}}" class="lead"
                                                 style="color: black">{{set}} NFT</a></h3>
                                     </div>
-                                    <a href="#inventoryModal" class="a-1" data-toggle="modal"
+                                    <a href="#inventoryModal" class="a-1" data-bs-toggle="modal"
                                         @click="inventory_iterator.select($index);inventory_detail.select(uid)">
                                         <div class="card-img-top" :id="image-{{set}}-{{uid}}"
                                             :alt="{{script}}">{{uid.nftImageWell(script, set)}}</div>
@@ -1533,13 +1533,13 @@
                                 <div class="p-3">
                                     <ul class="nav nav-pills justify-content-center" role="tablist">
                                         <li class="nav-item"> <a class="nav-link active" id="generalSettingsTab"
-                                                role="tab" data-toggle="tab" aria-controls="generalsettings"
+                                                role="tab" data-bs-toggle="tab" aria-controls="generalsettings"
                                                 aria-expanded="true" href="#generalsettings">General</a></li>
                                         <li class="nav-item"> <a class="nav-link" id="contentSettingsTab" role="tab"
-                                                data-toggle="tab" aria-controls="contentsettings" aria-expanded="true"
+                                                data-bs-toggle="tab" aria-controls="contentsettings" aria-expanded="true"
                                                 href="#contentsettings">Content</a></li>
                                         <li class="nav-item"> <a class="nav-link" id="nodeSettingsTab" role="tab"
-                                                data-toggle="tab" aria-controls="nodesettings" aria-expanded="true"
+                                                data-bs-toggle="tab" aria-controls="nodesettings" aria-expanded="true"
                                                 href="#nodesettings">Node</a></li>
                                     </ul>
                                 </div>
