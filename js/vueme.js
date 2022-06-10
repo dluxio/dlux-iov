@@ -434,8 +434,8 @@ var app = new Vue({
       this.toSign = {
         type: "vote",
         cj: {
-          author: url.split("/")[1].replace("@", ""),
-          permlink: url.split("/")[2],
+          author: url.split("/@")[1].split("/")[0],
+          permlink: url.split("/@")[1].split("/")[1],
           weight:
             this.posturls[url].slider * (this.posturls[url].flag ? -1 : 1),
         },
@@ -968,6 +968,10 @@ var app = new Vue({
                 console.log(res.result.url, e, "no JSON?");
               }
               this.posturls[res.result.url].type = type;
+              if(type != 'Blog')this.posturls[res.result.url].url =
+                '/dlux' + this.posturls[res.result.url].url
+              else this.posturls[res.result.url].url =
+                "/blog" + this.posturls[res.result.url].url;
               this.posturls[res.result.url].rep = "...";
               this.rep(res.result.url);
               if (this.posturls[res.result.url].slider < 0) {
