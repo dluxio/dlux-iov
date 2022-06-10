@@ -36,8 +36,9 @@ $(function () {
 
     
     <script>
+        var hiveAccount = location.pathname.split("/@")[1] || 'robotolux'
         function popData () {
-            setDiscussionsByBlog('robotolux')
+            setDiscussionsByBlog(hiveAccount)
             doOnLoad()
         }
     </script>
