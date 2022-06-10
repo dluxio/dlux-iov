@@ -68,6 +68,13 @@ var app = new Vue({
         uid: "",
       },
       hasDrop: false,
+      focus: {
+        posting_json_metadata: {
+            profile: {
+                about: ''
+            }
+        }
+      },
       dropnai: "",
       balance: "0.000",
       bartoken: "",
