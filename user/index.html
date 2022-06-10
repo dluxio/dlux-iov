@@ -1759,8 +1759,7 @@
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span
                                 class="close text-white">×</span></button>
                     </div>
-                    <form name="sendhive"
-                        :action="javascript:hivesend('{{sendhiveto.value}}','{{sendhiveamount.value}}','{{sendhivememo.value}}')">
+                    <form name="sendhive">
                         <div class="modal-body">
                             <div class="form-group">
                                 <label for="sendhivefrom">From:</label>
@@ -1818,8 +1817,7 @@
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span
                                 class="close text-white">×</span></button>
                     </div>
-                    <form name="sendhbd"
-                        :action="javascript:hbdsend('{{sendhbdto.value}}','{{sendhbdamount.value}}','{{sendhbdmemo.value}}')">
+                    <form name="sendhbd">
                         <div class="modal-body">
                             <div class="form-group">
                                 <label for="sendhbdfrom">From:</label>
@@ -1877,8 +1875,7 @@
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span
                                 class="close text-white">×</span></button>
                     </div>
-                    <form name="senddlux"
-                        :action="javascript:dluxsend('{{senddluxto.value}}','{{senddluxamount.value}}','{{senddluxmemo.value}}')">
+                    <form name="senddlux">
                         <div class="modal-body">
                             <div class="form-group">
                                 <label for="senddluxfrom">From:</label>
@@ -1936,8 +1933,7 @@
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span
                                 class="close text-white">×</span></button>
                     </div>
-                    <form name="sendlarynx"
-                        :action="javascript:dluxsend('{{sendlarynxto.value}}','{{sendlarynxamount.value}}','{{sendlarynxmemo.value}}','spkcc_')">
+                    <form name="sendlarynx">
                         <div class="modal-body">
                             <div class="form-group">
                                 <label for="senddluxfrom">From:</label>
@@ -1995,7 +1991,7 @@
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span
                                 class="close text-white">×</span></button>
                     </div>
-                    <form name="powerupdlux" :action="javascript:powerUp('{{powerupdluxamount.value}}')">
+                    <form name="powerupdlux">
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="powerdluxamountlab" for="powerupdluxamount">Amount (Balance <a href="#"
@@ -2027,7 +2023,7 @@
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span
                                 class="close text-white">×</span></button>
                     </div>
-                    <form name="powerdowndlux" :action="javascript:powerDown('{{powerdowndluxamount.value}}')">
+                    <form name="powerdowndlux">
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="dluxamountlab" for="powerdowndluxamount">Amount (Balance <a href="#"
@@ -2059,7 +2055,7 @@
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span
                                 class="close text-white">×</span></button>
                     </div>
-                    <form name="lockdlux" :action="javascript:dluxgovup('{{lockgovdluxamount.value}}')">
+                    <form name="lockdlux">
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="lockgovdluxamountlab" for="lockgovdluxamount">Amount (Balance <a href="#"
@@ -2091,8 +2087,7 @@
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span
                                 class="close text-white">×</span></button>
                     </div>
-                    <form name="locklarynx"
-                        :action="javascript:dluxgovup('{{lockgovlarynxamount.value}}','spkcc_')">
+                    <form name="locklarynx">
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="lockgovlarynxamountlab" for="lockgovlarynxamount">Amount (Balance <a href="#"
@@ -2125,7 +2120,7 @@
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span
                                 class="close text-white">×</span></button>
                     </div>
-                    <form name="unlockdlux" :action="javascript:govDown('{{unlockgovdluxamount.value}}')">
+                    <form name="unlockdlux">
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="unlockgovdluxamountlab" for="unlockgovdluxamount">Amount (Balance <a href="#"
@@ -2157,8 +2152,7 @@
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span
                                 class="close text-white">×</span></button>
                     </div>
-                    <form name="unlocklarynx"
-                        :action="javascript:govDown('{{unlockgovlarynxamount.value}}','spkcc_')">
+                    <form name="unlocklarynx">
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="unlockgovlarynxamountlab" for="unlockgovlarynxamount">Amount (Balance <a
