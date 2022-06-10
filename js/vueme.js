@@ -872,7 +872,7 @@ var app = new Vue({
                 ] = res.result[i];
               }
               this[this.postSelect.entry].push(
-                `${res.result[i].author}/${res.result[i].permlink}`
+                `/@${res.result[i].author}/${res.result[i].permlink}`
               );
             }
             var called = false;
