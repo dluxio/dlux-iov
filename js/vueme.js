@@ -670,9 +670,11 @@ var app = new Vue({
             try{
             rez.posting_json_metadata = JSON.parse(rez.posting_json_metadata);
             } catch (e){
+                try {
                 rez.posting_json_metadata = JSON.parse(
                   rez.json_metadata
                 );
+                } catch(e){}
             }
           if (re.result.length) this[key] = re.result[0]
           else this[key] = false;
