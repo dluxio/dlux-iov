@@ -845,14 +845,17 @@ var app = new Vue({
         !this.postSelect[this.postSelect.entry].p
       ) {
         this.postSelect[this.postSelect.entry].p = true;
-        var APIQ = this.postSelect.searchTerm
-          ? `https://data.dlux.io/search/${this.postSelect.searchTerm.toLowerCase()}?a=${
-              this.postSelect[this.postSelect.entry].a
-            }&o=${this.postSelect[this.postSelect.entry].o}&b=${bitMask}`
-          : `https://data.dlux.io/${this.postSelect.entry}?a=${
-              this.postSelect[this.postSelect.entry].a
-            }&o=${this.postSelect[this.postSelect.entry].o}&b=${bitMask}`;
-        fetch(APIQ)
+        fetch("https://api.hive.blog", {
+          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_blog_entries", "params":["${
+            this.pageAccount
+          }",${this.postSelect[this.postSelect.entry].o},${
+            this.postSelect[this.postSelect.entry].a
+          }], "id":1}`,
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          method: "POST",
+        })
           .then((r) => r.json())
           .then((res) => {
             this.postSelect[this.postSelect.entry].p = false;
