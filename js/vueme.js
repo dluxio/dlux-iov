@@ -955,9 +955,8 @@ var app = new Vue({
                 );
                 
                 if (
-                  ["QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16"].includes(
+                  "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
                     a.meta.vrHash
-                  )
                 )
                   type = "360";
                 else if (a.meta.vrHash) type = "VR";
