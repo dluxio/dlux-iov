@@ -434,8 +434,8 @@ var app = new Vue({
       this.toSign = {
         type: "vote",
         cj: {
-          author: url.split("/")[2].replace("@", ""),
-          permlink: url.split("/")[3],
+          author: url.split("/")[1].replace("@", ""),
+          permlink: url.split("/")[2],
           weight:
             this.posturls[url].slider * (this.posturls[url].flag ? -1 : 1),
         },
