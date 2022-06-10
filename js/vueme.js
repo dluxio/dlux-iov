@@ -79,7 +79,7 @@ var app = new Vue({
         balance: 0,
         gov: 0,
         claim: 0,
-        poweredUp: 0
+        poweredUp: 0,
       },
       dropnai: "",
       balance: "0.000",
@@ -131,7 +131,8 @@ var app = new Vue({
       behind: "",
       stats: {},
       hivestats: {
-
+        total_vesting_fund_hive: 0,
+        total_vesting_shares: 0
       },
       behindTitle: "",
       TOKEN: "DLUX",
