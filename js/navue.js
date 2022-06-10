@@ -637,8 +637,8 @@ export default {
 			        <li class=""><a class="dropdown-item" :href="'/@' + user + '#blog/'" onClick="showTab('blog')"><i class="fas fa-user fa-fw me-2"></i>Profile</a></li>
 			        <li class=""><a class="dropdown-item" :href="'/@' + user + '#wallet/'" onClick="showTab('wallet')"><i class="fas fa-wallet fa-fw me-2"></i>Wallet</a></li>
 			        <li class=""><a class="dropdown-item" :href="'/@' + user + '#inventory/'" onClick="showTab('inventory')"><i class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
-			        <li class=""><a class="dropdown-item" :href="'/@' + user + '#node/'" onClick="showTab('node')"><i class="fas fa-robot fa-fw me-2"></i>Node</a></li>
-			        <li class=""><a class="dropdown-item" :href="'/@' + user + '#settings/'" onClick="showTab('settings')"><i class="fas fa-cog fa-fw me-2"></i>Settings</a></li>
+			        <li class="d-none"><a class="dropdown-item" :href="'/@' + user + '#node/'" onClick="showTab('node')"><i class="fas fa-robot fa-fw me-2"></i>Node</a></li>
+			        <li class="d-none"><a class="dropdown-item" :href="'/@' + user + '#settings/'" onClick="showTab('settings')"><i class="fas fa-cog fa-fw me-2"></i>Settings</a></li>
               <li class=""><hr class="dropdown-divider"></li>
 			        <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
               <li class=""><hr class="dropdown-divider"></li>
