@@ -866,7 +866,7 @@ var app = new Vue({
               this.postSelect[this.postSelect.entry].e = true;
             for (var i = 0; i < res.result.length; i++) {
                 res.result[i].type = "Blog";
-              if (!this.posturls[`${res.result[i].author}/${res.result[i].permlink}`]) {
+              if (!this.posturls[`/blog/@${res.result[i].author}/${res.result[i].permlink}`]) {
                 this.posturls[
                   `${res.result[i].author}/${res.result[i].permlink}`
                 ] = res.result[i];
