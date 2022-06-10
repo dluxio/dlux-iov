@@ -648,7 +648,9 @@ var app = new Vue({
           return r.json();
         })
         .then((re) => {
-          if (re.result.length) this[key] = true;
+            var rez = re.result[0]
+            rez.posting_json_metadata = rez.posting_json_metadata.parseJSON();
+          if (re.result.length) this[key] = re.result[0]
           else this[key] = false;
         });
     },
@@ -1227,11 +1229,7 @@ var app = new Vue({
   },
   mounted() {
     this.pageAccount = location.pathname.split("/@")[1];
-    // if (setName) this.getNFTset(setName);
-    // else this.getNFTsets();
-    // this.getUserNFTs();
-    //this.getQuotes();
-    //this.getNodes();
+    this.checkAccount(this.pageAccount, 'focus')
     this.getPosts();
     this.getProtocol();
     this.getRewardFund();
