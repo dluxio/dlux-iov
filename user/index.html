@@ -1002,7 +1002,7 @@
                                                         <div role="tabpanel" class="tab-pane fade show active"
                                                             id="giveFTtab" aria-labelledby="giveFT">
                                                             <form class="needs-validation mt-4" validate
-                                                                :action="javascript:giveFT('{{mint_detail.data.set}}','{{giveFTusername.value}}','{{giveFTqty.value}}')">
+                                                                :action="giveFT('{{mint_detail.data.set}}','{{giveFTusername.value}}','{{giveFTqty.value}}')">
                                                                 <div class="form-row my-2">
                                                                     <div class="col-12">
                                                                         <label for="giveFTusername">Username</label>
@@ -1047,7 +1047,7 @@
                                                         <div role="tabpanel" class="tab-pane fade show" id="tradeFTtab"
                                                             aria-labelledby="tradeFT">
                                                             <form class="needs-validation mt-4" validate
-                                                                :action="javascript:tradeFT('{{mint_detail.data.set}}','{{tradeFTusername.value}}','{{tradeFTamount.value}}')">
+                                                                :action="tradeFT('{{mint_detail.data.set}}','{{tradeFTusername.value}}','{{tradeFTamount.value}}')">
                                                                 <div class="form-row my-2">
                                                                     <div class="col-12">
                                                                         <label for="tradeFTusername">Username</label>
@@ -1110,7 +1110,7 @@
                                                         <div role="tabpanel" class="tab-pane fade show " id="sellFTtab"
                                                             aria-labelledby="sellFT">
                                                             <form class="needs-validation mt-4" validate
-                                                                :action="javascript:sellFT('{{mint_detail.data.set}}','{{sellFTprice.value}}','{{sellFTpriceType.value}}')">
+                                                                :action="sellFT('{{mint_detail.data.set}}','{{sellFTprice.value}}','{{sellFTpriceType.value}}')">
                                                                 <div class="form-row my-2">
                                                                     <div class="col-6">
                                                                         <label for="sellFTqty">Quantity</label>
@@ -1182,7 +1182,7 @@
                                                             <div role="tabpanel" class="tab-pane fade show "
                                                                 id="auctionFTtab" aria-labelledby="auctionFT">
                                                                 <form class="needs-validation mt-4" validate
-                                                                    :action="javascript:auctionFT('{{mint_detail.data.set}}','{{auctionFTprice.value}}','{{Date.now()}}','{{auctionFTdays.value}}')">
+                                                                    :action="auctionFT('{{mint_detail.data.set}}','{{auctionFTprice.value}}','{{Date.now()}}','{{auctionFTdays.value}}')">
                                                                     <div class="form-row my-2">
                                                                         <div class="col-6">
                                                                             <label for="auctionFTqty">Quantity</label>
@@ -1282,7 +1282,7 @@
                                                             <div role="tabpanel" class="tab-pane fade show "
                                                                 id="airdropFTtab" aria-labelledby="airdropFT">
                                                                 <form class="needs-validation mt-4" validate
-                                                                    :action="javascript:airdropFT('{{mint_detail.data.set}}','{{airdropFTusers.value}}')">
+                                                                    :action="airdropFT('{{mint_detail.data.set}}','{{airdropFTusers.value}}')">
                                                                     <div class="form-row my-2">
                                                                         <div class="col-12">
                                                                             <label for="airdropFTusers">Airdrop
@@ -1782,7 +1782,7 @@
                             </div>
                             <div class="form-group">
                                 <label id="sendhiveamountlab" for="sendhiveamount">Amount (Balance <a href="#"
-                                        @click="javascript:insertBal('{{accountapi.data.result[0].balance.parseFloat()}}', 'sendhiveamount')">{{((accountapi.data.result[0].balance.parseFloat())).formatNumber(3,'.',',')}}</a>):</label>
+                                        @click="insertBal('{{accountapi.data.result[0].balance.parseFloat()}}', 'sendhiveamount')">{{((accountapi.data.result[0].balance.parseFloat())).formatNumber(3,'.',',')}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="sendhiveamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -1840,7 +1840,7 @@
                             </div>
                             <div class="form-group">
                                 <label id="sendhbdamountlab" for="sendhbdamount">Amount (Balance <a href="#"
-                                        @click="javascript:insertBal('{{accountapi.data.result[0].hbd_balance.parseFloat()}}', 'sendhbdamount')">{{((accountapi.data.result[0].hbd_balance.parseFloat())).formatNumber(3,'.',',')}}</a>):</label>
+                                        @click="insertBal('{{accountapi.data.result[0].hbd_balance.parseFloat()}}', 'sendhbdamount')">{{((accountapi.data.result[0].hbd_balance.parseFloat())).formatNumber(3,'.',',')}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="sendhbdamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -1898,7 +1898,7 @@
                             </div>
                             <div class="form-group">
                                 <label id="senddluxamountlab" for="senddluxamount">Amount (Balance <a href="#"
-                                        @click="javascript:insertBal('{{usertoken.data.balance/1000}}', 'senddluxamount')">{{((usertoken.data.balance)/1000).formatNumber(3,'.',',')}}</a>):</label>
+                                        @click="insertBal('{{usertoken.data.balance/1000}}', 'senddluxamount')">{{((usertoken.data.balance)/1000).formatNumber(3,'.',',')}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="senddluxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -1956,7 +1956,7 @@
                             </div>
                             <div class="form-group">
                                 <label id="sendlarynxamountlab" for="sendlarynxamount">Amount (Balance <a href="#"
-                                        @click="javascript:insertBal('{{larynxtoken.data.balance/1000}}', 'sendlarynxamount')">{{((larynxtoken.data.balance)/1000).formatNumber(3,'.',',')}}</a>):</label>
+                                        @click="insertBal('{{larynxtoken.data.balance/1000}}', 'sendlarynxamount')">{{((larynxtoken.data.balance)/1000).formatNumber(3,'.',',')}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="sendlarynxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -1995,7 +1995,7 @@
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="powerdluxamountlab" for="powerupdluxamount">Amount (Balance <a href="#"
-                                        @click="javascript:insertBal('{{usertoken.data.balance/1000}}','powerupdluxamount')">{{((usertoken.data.balance)/1000).formatNumber(3,'.',',')}}</a>):</label>
+                                        @click="insertBal('{{usertoken.data.balance/1000}}','powerupdluxamount')">{{((usertoken.data.balance)/1000).formatNumber(3,'.',',')}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="powerupdluxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -2027,7 +2027,7 @@
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="dluxamountlab" for="powerdowndluxamount">Amount (Balance <a href="#"
-                                        @click="javascript:insertBal('{{usertoken.data.poweredUp/1000}}','powerdowndluxamount')">{{((usertoken.data.poweredUp)/1000).formatNumber(3,'.',',')}}</a>):</label>
+                                        @click="insertBal('{{usertoken.data.poweredUp/1000}}','powerdowndluxamount')">{{((usertoken.data.poweredUp)/1000).formatNumber(3,'.',',')}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="powerdowndluxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -2059,7 +2059,7 @@
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="lockgovdluxamountlab" for="lockgovdluxamount">Amount (Balance <a href="#"
-                                        @click="javascript:insertBal('{{usertoken.data.balance/1000}}','lockgovdluxamount')">{{((usertoken.data.balance)/1000).formatNumber(3,'.',',')}}</a>):</label>
+                                        @click="insertBal('{{usertoken.data.balance/1000}}','lockgovdluxamount')">{{((usertoken.data.balance)/1000).formatNumber(3,'.',',')}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="lockgovdluxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -2091,7 +2091,7 @@
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="lockgovlarynxamountlab" for="lockgovlarynxamount">Amount (Balance <a href="#"
-                                        @click="javascript:insertBal('{{larynxtoken.data.balance/1000}}', 'lockgovlarynxamount')">{{((larynxtoken.data.balance)/1000).formatNumber(3,'.',',')}}
+                                        @click="insertBal('{{larynxtoken.data.balance/1000}}', 'lockgovlarynxamount')">{{((larynxtoken.data.balance)/1000).formatNumber(3,'.',',')}}
                                         LARYNX</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="lockgovlarynxamount" type="number" step="0.001"
@@ -2124,7 +2124,7 @@
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="unlockgovdluxamountlab" for="unlockgovdluxamount">Amount (Balance <a href="#"
-                                        @click="javascript:insertBal('{{usertoken.data.gov/1000}}','unlockgovdluxamount')">{{((usertoken.data.gov)/1000).formatNumber(3,'.',',')}}</a>):</label>
+                                        @click="insertBal('{{usertoken.data.gov/1000}}','unlockgovdluxamount')">{{((usertoken.data.gov)/1000).formatNumber(3,'.',',')}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="unlockgovdluxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -2157,7 +2157,7 @@
                             <div class="form-group">
                                 <label id="unlockgovlarynxamountlab" for="unlockgovlarynxamount">Amount (Balance <a
                                         href="#"
-                                        @click="javascript:insertBal('{{larynxtoken.data.gov/1000}}','unlockgovlarynxamount')">{{((larynxtoken.data.gov)/1000).formatNumber(3,'.',',')}}</a>):</label>
+                                        @click="insertBal('{{larynxtoken.data.gov/1000}}','unlockgovlarynxamount')">{{((larynxtoken.data.gov)/1000).formatNumber(3,'.',',')}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="unlockgovlarynxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
