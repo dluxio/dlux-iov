@@ -434,8 +434,8 @@ var app = new Vue({
       this.toSign = {
         type: "vote",
         cj: {
-          author: url.split("/")[2].replace("@", ""),
-          permlink: url.split("/")[3],
+          author: url.split("/")[1].replace("@", ""),
+          permlink: url.split("/")[2],
           weight:
             this.posturls[url].slider * (this.posturls[url].flag ? -1 : 1),
         },
@@ -872,7 +872,7 @@ var app = new Vue({
                 ] = res.result[i];
               }
               this[this.postSelect.entry].push(
-                `${res.result[i].author}/${res.result[i].permlink}`
+                `/@${res.result[i].author}/${res.result[i].permlink}`
               );
             }
             var called = false;
@@ -945,6 +945,7 @@ var app = new Vue({
                   this.posturls[res.result.url].hasVoted = true;
                 }
               }
+              var type = "Blog";
               try {
                 this.posturls[res.result.url].json_metadata = JSON.parse(
                   this.posturls[res.result.url].json_metadata
@@ -952,9 +953,21 @@ var app = new Vue({
                 this.posturls[res.result.url].pic = this.picFind(
                   this.posturls[res.result.url].json_metadata
                 );
+                
+                if (
+                  "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
+                    this.posturls[res.result.url].json_metadata.vrHash
+                )
+                  type = "360";
+                else if (this.posturls[res.result.url].json_metadata.vrHash) type = "VR";
+                else if (this.posturls[res.result.url].json_metadata.arHash) type = "AR";
+                else if (this.posturls[res.result.url].json_metadata.appHash) type = "APP";
+                else if (this.posturls[res.result.url].json_metadata.audHash) type = "Audio";
+                else if (this.posturls[res.result.url].json_metadata.vidHash) type = "Video";
               } catch (e) {
-                console.log(res.result.url, "no JSON?");
+                console.log(res.result.url, e, "no JSON?");
               }
+              this.posturls[res.result.url].type = type;
               this.posturls[res.result.url].rep = "...";
               this.rep(res.result.url);
               if (this.posturls[res.result.url].slider < 0) {
