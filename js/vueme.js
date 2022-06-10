@@ -965,7 +965,7 @@ var app = new Vue({
                 else if (a.meta.audHash) type = "Audio";
                 else if (a.meta.vidHash) type = "Video";
               } catch (e) {
-                console.log(res.result.url, "no JSON?");
+                console.log(res.result.url, e, "no JSON?");
               }
               this.posturls[res.result.url].type = type;
               this.posturls[res.result.url].rep = "...";
