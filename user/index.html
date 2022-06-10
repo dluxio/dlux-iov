@@ -317,13 +317,13 @@
                                         <div class="d-flex align-items-center pb-2">
                                             <h1 class="display-5 p-0 m-0">DLUX</h1>
                                             <div class="text-center small p-0 m-0 ml-4"
-                                                v-bind:class="{'text-success': dexapi.data.behind < 30,
-                                                    'text-warning': dexapi.data.behind >= 30,
-                                                    'text-danger': dexapi.data.behind > 100}"> <span
-                                                    v-show="dexapi.data.behind < 30">ONLINE - </span> <span
-                                                    v-show="dexapi.data.behind >= 30 && dexapi.data.behind <=100">LAGGING
-                                                    - </span> <span v-show="dexapi.data.behind > 100">OFFLINE -
-                                                </span> <span>{{dexapi.data.behind}} BBH</span></div>
+                                                v-bind:class="{'text-success': behind < 30,
+                                                    'text-warning': behind >= 30,
+                                                    'text-danger': behind > 100}"> <span
+                                                    v-show="behind < 30">ONLINE - </span> <span
+                                                    v-show="behind >= 30 && behind <=100">LAGGING
+                                                    - </span> <span v-show="behind > 100">OFFLINE -
+                                                </span> <span>{{behind}} BBH</span></div>
                                         </div>
                                         <p class="lead ">An open source platform for p2p games, apps, and experiences.
                                         </p>
@@ -532,14 +532,14 @@
                                     <div class="jumbotron pt-4 bg-darker">
                                         <div class="d-flex align-items-center pb-2">
                                             <h1 class="display-5 m-0 p-0">SPK</h1>
-                                            <div class="text-center small m-0 p-2 ml-2"
-                                                v-bind:class="{'text-success': larynxdexapi.data.behind < 30,
-                                                    'text-warning': larynxdexapi.data.behind >= 30,
-                                                    'text-danger': larynxdexapi.data.behind > 100}"> <span
-                                                    v-show="larynxdexapi.data.behind < 30">ONLINE - </span> <span
-                                                    v-show="larynxdexapi.data.behind >= 30 && larynxdexapi.data.behind <=100">LAGGING
-                                                    - </span> <span v-show="larynxdexapi.data.behind > 100">OFFLINE -
-                                                </span> <span>{{larynxdexapi.data.behind}} BBH</span></div>
+                                            <!-- <div class="text-center small m-0 p-2 ml-2"
+                                                v-bind:class="{'text-success': larynxbehind < 30,
+                                                    'text-warning': larynxbehind >= 30,
+                                                    'text-danger': larynxbehind > 100}"> <span
+                                                    v-show="larynxbehind < 30">ONLINE - </span> <span
+                                                    v-show="larynxbehind >= 30 && larynxbehind <=100">LAGGING
+                                                    - </span> <span v-show="larynxbehind > 100">OFFLINE -
+                                                </span> <span>{{larynxbehind}} BBH</span></div> -->
                                         </div>
                                         <p class="lead">Decentralized and incentivized network infrastructure, rewarding
                                             providers with SPK governance and BROCA gas tokens.</p>
