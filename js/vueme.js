@@ -666,8 +666,14 @@ var app = new Vue({
         })
         .then((re) => {
             var rez = re.result[0]
-            console.log(rez, rez.posting_json_metadata);
+            console.log(name, rez, rez.posting_json_metadata);
+            try{
             rez.posting_json_metadata = JSON.parse(rez.posting_json_metadata);
+            } catch (e){
+                rez.posting_json_metadata = JSON.parse(
+                  rez.json_metadata
+                );
+            }
           if (re.result.length) this[key] = re.result[0]
           else this[key] = false;
         });
