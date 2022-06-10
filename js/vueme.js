@@ -866,9 +866,9 @@ var app = new Vue({
               this.postSelect[this.postSelect.entry].e = true;
             for (var i = 0; i < res.result.length; i++) {
                 res.result[i].type = "Blog";
-              if (!this.posturls[`/blog/@${res.result[i].author}/${res.result[i].permlink}`]) {
+              if (!this.posturls[`/@${res.result[i].author}/${res.result[i].permlink}`]) {
                 this.posturls[
-                  `${res.result[i].author}/${res.result[i].permlink}`
+                  `/@${res.result[i].author}/${res.result[i].permlink}`
                 ] = res.result[i];
               }
               this[this.postSelect.entry].push(
@@ -917,6 +917,7 @@ var app = new Vue({
           .then((r) => r.json())
           .then((res) => {
             if (res.result) {
+                res.result.url = `/@${res.result.author}/${res.result.permlink}`
               this.posturls[res.result.url] = {
                 ...this.posturls[res.result.url],
                 ...res.result,
