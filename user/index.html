@@ -327,7 +327,7 @@
                                         </div>
                                         <p class="lead ">An open source platform for p2p games, apps, and experiences.
                                         </p>
-                                        <div class="clearfix" v-show="usertoken.data.claim > 0">
+                                        <div class="clearfix" v-show="focusdata.claim > 0 && focus == account">
                                             <hr class="my-4 bg-light">
                                             <div class="float-left">
                                                 <h4>Claim DLUX</h4>
@@ -336,7 +336,7 @@
                                             </div>
                                             <div id="claimdluxbtn" class="float-right text-right d-column">
                                                 <h5 id="dluxclaim">
-                                                    {{((usertoken.data.claim)/1000).formatNumber(3,'.',',')}} DLUX</h5>
+                                                    {{((focusdata.claim)/1000)}} DLUX</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Claim">
                                                     <button type="submit" class="btn btn-info mr-half"
                                                         @click="claim('{{govcheck.checked}}')"><i
@@ -346,7 +346,7 @@
                                                 <div> <span class="small" v-show="!govcheck.checked">50% Liquid | 50%
                                                         Power</span> <span class="small" v-show="govcheck.checked">50%
                                                         Liquid | 50% Gov</span></div>
-                                                <div v-show="usertoken.data.gov > 0" class="bg-dark text-white">
+                                                <div v-show="focusdata.gov > 0" class="bg-dark text-white">
                                                     <div class="input-group mb-3">
                                                         <div class="input-group-prepend">
                                                             <div class="input-group-text">
@@ -369,7 +369,7 @@
                                             </div>
                                             <div id="dluxactions" class="float-right text-right">
                                                 <h5 id="dluxbalance">
-                                                    {{((usertoken.data.balance)/1000).formatNumber(3,'.',',')}} DLUX
+                                                    {{((focusdata.balance)/1000)}} DLUX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info mr-half"
@@ -417,7 +417,7 @@
                                             </div>
                                             <div id="dluxpactions" class="float-right text-right">
                                                 <h5 id="pwrbalance">
-                                                    {{((usertoken.data.poweredUp)/1000).formatNumber(3,'.',',')}} DLUX
+                                                    {{((focusdata.poweredUp)/1000)}} DLUX
                                                 </h5>
                                                 <a data-toggle="collapse" id="delegationsbtn" href="#delegations"
                                                     role="button" aria-expanded="false" aria-controls="Show delegations"
@@ -477,7 +477,7 @@
                                             </div>
                                             <div id="dluxgactions" class="float-right text-right">
                                                 <h5 id="govbalance">
-                                                    {{((usertoken.data.gov)/1000).formatNumber(3,'.',',')}} DLUX</h5>
+                                                    {{((focusdata.gov)/1000)}} DLUX</h5>
                                                 <a data-toggle="collapse" id="escrowtxbutton" href="#escrowtx"
                                                     role="button" aria-expanded="false"
                                                     aria-controls="Show escrow transactions" class="text-white"
@@ -518,7 +518,7 @@
                                             </div>
                                             <div id="dluxval" class="float-right text-right">
                                                 <h5 id="totaldbal">
-                                                    {{(((usertoken.data.balance+usertoken.data.poweredUp+usertoken.data.gov)/1000)*(dexapi.data.markets.hive.tick*hiveprice.data.hive.usd)).formatCurrency()}}
+                                                    {{(((focusdata.balance+focusdata.poweredUp+focusdata.gov)/1000)*(dexapi.data.markets.hive.tick*hiveprice.data.hive.usd)).formatCurrency()}}
                                                 </h5>
                                             </div>
                                         </div>
@@ -555,7 +555,7 @@
                                                     class="d-none">
                                             </div>
                                             <div id="claimlarynxbtn" class="float-right text-right d-column">
-                                                <h5>{{((larynxtoken.data.drop.availible.amount)/1000).formatNumber(3,'.',',')}}
+                                                <h5>{{((larynxtoken.data.drop.availible.amount)/1000)}}
                                                     LARYNX</h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Claim">
                                                     <button type="submit" class="btn btn-info mr-half"
@@ -573,7 +573,7 @@
                                                     compiled daily.</p>
                                             </div>
                                             <div id="claimlarynxrewardbtn" class="float-right text-right d-column">
-                                                <h5>{{((larynxtoken.data.claim)/1000).formatNumber(3,'.',',')}} LARYNX
+                                                <h5>{{((larynxtoken.data.claim)/1000)}} LARYNX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Claim">
                                                     <button type="submit" class="btn btn-info mr-half"
@@ -590,7 +590,7 @@
                                             </div>
                                             <div id="larynxactions" class="float-right text-right">
                                                 <h5 id="larynxbalance">
-                                                    {{((larynxtoken.data.balance)/1000).formatNumber(3,'.',',')}} LARYNX
+                                                    {{((larynxtoken.data.balance)/1000)}} LARYNX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Actions">
                                                     <button type="button" class="btn btn-info mr-half"
@@ -638,7 +638,7 @@
                                             </div>
                                             <div id="larynxgactions" class="float-right text-right">
                                                 <h5 id="govbalance">
-                                                    {{((larynxtoken.data.gov)/1000).formatNumber(3,'.',',')}} LARYNX
+                                                    {{((larynxtoken.data.gov)/1000)}} LARYNX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Actions">
                                                     <button type="button" class="btn btn-info mr-half" disabled
@@ -1782,7 +1782,7 @@
                             </div>
                             <div class="form-group">
                                 <label id="sendhiveamountlab" for="sendhiveamount">Amount (Balance <a href="#"
-                                        @click="insertBal('{{accountapi.data.result[0].balance.parseFloat()}}', 'sendhiveamount')">{{((accountapi.data.result[0].balance.parseFloat())).formatNumber(3,'.',',')}}</a>):</label>
+                                        @click="insertBal('{{accountapi.data.result[0].balance.parseFloat()}}', 'sendhiveamount')">{{((accountapi.data.result[0].balance.parseFloat()))}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="sendhiveamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -1840,7 +1840,7 @@
                             </div>
                             <div class="form-group">
                                 <label id="sendhbdamountlab" for="sendhbdamount">Amount (Balance <a href="#"
-                                        @click="insertBal('{{accountapi.data.result[0].hbd_balance.parseFloat()}}', 'sendhbdamount')">{{((accountapi.data.result[0].hbd_balance.parseFloat())).formatNumber(3,'.',',')}}</a>):</label>
+                                        @click="insertBal('{{accountapi.data.result[0].hbd_balance.parseFloat()}}', 'sendhbdamount')">{{((accountapi.data.result[0].hbd_balance.parseFloat()))}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="sendhbdamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -1898,7 +1898,7 @@
                             </div>
                             <div class="form-group">
                                 <label id="senddluxamountlab" for="senddluxamount">Amount (Balance <a href="#"
-                                        @click="insertBal('{{usertoken.data.balance/1000}}', 'senddluxamount')">{{((usertoken.data.balance)/1000).formatNumber(3,'.',',')}}</a>):</label>
+                                        @click="insertBal('{{focusdata.balance/1000}}', 'senddluxamount')">{{((focusdata.balance)/1000)}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="senddluxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -1956,7 +1956,7 @@
                             </div>
                             <div class="form-group">
                                 <label id="sendlarynxamountlab" for="sendlarynxamount">Amount (Balance <a href="#"
-                                        @click="insertBal('{{larynxtoken.data.balance/1000}}', 'sendlarynxamount')">{{((larynxtoken.data.balance)/1000).formatNumber(3,'.',',')}}</a>):</label>
+                                        @click="insertBal('{{larynxtoken.data.balance/1000}}', 'sendlarynxamount')">{{((larynxtoken.data.balance)/1000)}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="sendlarynxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -1995,7 +1995,7 @@
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="powerdluxamountlab" for="powerupdluxamount">Amount (Balance <a href="#"
-                                        @click="insertBal('{{usertoken.data.balance/1000}}','powerupdluxamount')">{{((usertoken.data.balance)/1000).formatNumber(3,'.',',')}}</a>):</label>
+                                        @click="insertBal('{{focusdata.balance/1000}}','powerupdluxamount')">{{((focusdata.balance)/1000)}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="powerupdluxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -2027,7 +2027,7 @@
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="dluxamountlab" for="powerdowndluxamount">Amount (Balance <a href="#"
-                                        @click="insertBal('{{usertoken.data.poweredUp/1000}}','powerdowndluxamount')">{{((usertoken.data.poweredUp)/1000).formatNumber(3,'.',',')}}</a>):</label>
+                                        @click="insertBal('{{focusdata.poweredUp/1000}}','powerdowndluxamount')">{{((focusdata.poweredUp)/1000)}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="powerdowndluxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -2059,7 +2059,7 @@
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="lockgovdluxamountlab" for="lockgovdluxamount">Amount (Balance <a href="#"
-                                        @click="insertBal('{{usertoken.data.balance/1000}}','lockgovdluxamount')">{{((usertoken.data.balance)/1000).formatNumber(3,'.',',')}}</a>):</label>
+                                        @click="insertBal('{{focusdata.balance/1000}}','lockgovdluxamount')">{{((focusdata.balance)/1000)}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="lockgovdluxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -2091,7 +2091,7 @@
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="lockgovlarynxamountlab" for="lockgovlarynxamount">Amount (Balance <a href="#"
-                                        @click="insertBal('{{larynxtoken.data.balance/1000}}', 'lockgovlarynxamount')">{{((larynxtoken.data.balance)/1000).formatNumber(3,'.',',')}}
+                                        @click="insertBal('{{larynxtoken.data.balance/1000}}', 'lockgovlarynxamount')">{{((larynxtoken.data.balance)/1000)}}
                                         LARYNX</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="lockgovlarynxamount" type="number" step="0.001"
@@ -2124,7 +2124,7 @@
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="unlockgovdluxamountlab" for="unlockgovdluxamount">Amount (Balance <a href="#"
-                                        @click="insertBal('{{usertoken.data.gov/1000}}','unlockgovdluxamount')">{{((usertoken.data.gov)/1000).formatNumber(3,'.',',')}}</a>):</label>
+                                        @click="insertBal('{{focusdata.gov/1000}}','unlockgovdluxamount')">{{((focusdata.gov)/1000)}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="unlockgovdluxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -2157,7 +2157,7 @@
                             <div class="form-group">
                                 <label id="unlockgovlarynxamountlab" for="unlockgovlarynxamount">Amount (Balance <a
                                         href="#"
-                                        @click="insertBal('{{larynxtoken.data.gov/1000}}','unlockgovlarynxamount')">{{((larynxtoken.data.gov)/1000).formatNumber(3,'.',',')}}</a>):</label>
+                                        @click="insertBal('{{larynxtoken.data.gov/1000}}','unlockgovlarynxamount')">{{((larynxtoken.data.gov)/1000)}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="unlockgovlarynxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">

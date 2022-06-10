@@ -62,7 +62,7 @@ var app = new Vue({
     return {
       toSign: {},
       account: user,
-      pageAccount: '',
+      pageAccount: "",
       pfp: {
         set: "",
         uid: "",
@@ -70,10 +70,16 @@ var app = new Vue({
       hasDrop: false,
       focus: {
         posting_json_metadata: {
-            profile: {
-                about: ''
-            }
-        }
+          profile: {
+            about: "",
+          },
+        },
+      },
+      focusdata: {
+        balance: 0,
+        gov: 0,
+        claim: 0,
+        poweredUp: 0
       },
       dropnai: "",
       balance: "0.000",
@@ -1159,32 +1165,42 @@ var app = new Vue({
         );
       }
     },
-    getTokenUser(user) {
+    getTokenUser(user, fu) {
       if (user)
         fetch(this.lapi + "/@" + user)
           .then((response) => response.json())
           .then((data) => {
-            this.balance = (data.balance / 1000).toFixed(3);
-            this.bartoken = this.balance;
-            this.barpow = (
-              (data.poweredUp + data.granted - data.granting) /
-              1000
-            ).toFixed(3);
-            this.bargov = (data.gov / 1000).toFixed(3);
-            this.accountapi = data;
-            if (
-              new Date().getMonth() + 1 !=
-                parseInt(data.drop?.last_claim, 16) &&
-              data.drop?.availible.amount > 0
-            ) {
-              this.hasDrop = true;
-              this.dropnai = `${parseFloat(
-                data.drop.availible.amount /
-                  Math.pow(10, data.drop.availible.precision)
-              ).toFixed(data.drop.availible.precision)} ${
-                data.drop.availible.token
-              }`;
-            }
+              if(!fu){
+                this.balance = (data.balance / 1000).toFixed(3);
+                this.bartoken = this.balance;
+                this.barpow = (
+                  (data.poweredUp + data.granted - data.granting) /
+                  1000
+                ).toFixed(3);
+                this.bargov = (data.gov / 1000).toFixed(3);
+                this.accountapi = data;
+                if (
+                  new Date().getMonth() + 1 !=
+                    parseInt(data.drop?.last_claim, 16) &&
+                  data.drop?.availible.amount > 0
+                ) {
+                  this.hasDrop = true;
+                  this.dropnai = `${parseFloat(
+                    data.drop.availible.amount /
+                      Math.pow(10, data.drop.availible.precision)
+                  ).toFixed(data.drop.availible.precision)} ${
+                    data.drop.availible.token
+                  }`;
+                }
+              } else {
+                  this.focusdata.balance = (data.balance / 1000).toFixed(3);
+                  this.focusdata.gov = (data.gov / 1000).toFixed(3);
+                  this.focusdata.poweredUp = (
+                    (data.poweredUp + data.granted - data.granting) /
+                    1000
+                  ).toFixed(3);
+                  this.focusdata.claim = false
+              }
           });
     },
     getHiveUser(user) {
@@ -1237,6 +1253,7 @@ var app = new Vue({
   mounted() {
     this.pageAccount = location.pathname.split("/@")[1];
     this.checkAccount(this.pageAccount, 'focus')
+
     this.getPosts();
     this.getProtocol();
     this.getRewardFund();
