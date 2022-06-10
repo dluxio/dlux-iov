@@ -2354,6 +2354,40 @@
             },
         };
     </script>
+    <script>
+        // Deep link usertabs (blog wallet inventory nodes settings)
+            $(document).ready(() => {
+          let url = location.href.replace(/\/$/, "");
+         
+          if (location.hash) {
+            const hash = url.split("#");
+            if(hash[1] == 'hive' || hash[1] == 'dlux' || hash[1] == 'spk'){
+              $('#usertabs a[href="#wallet"]').tab("show");
+              $('#wallettabs a[href="#'+hash[1]+'"]').tab("show");
+            } else {
+              $('#usertabs a[href="#'+hash[1]+'"]').tab("show");
+            }
+            url = location.href.replace(/\/#/, "#");
+            history.replaceState(null, null, url);
+            setTimeout(() => {
+              $(window).scrollTop(0);
+            }, 400);
+          } 
+           
+          $('a[data-toggle="tab"]').on("click", function() {
+            let newUrl;
+            const hash = $(this).attr("href");
+            if(hash == "#blog") {
+              newUrl = url.split("#")[0];
+            } else {
+              newUrl = url.split("#")[0] + hash;
+            }
+            newUrl += "/";
+            history.replaceState(null, null, newUrl);
+          });
+        });
+            
+        </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
         integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
