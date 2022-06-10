@@ -675,7 +675,7 @@ var app = new Vue({
                   rez.json_metadata
                 );
                 } catch(e){
-                    rez.posting_json_metadata.profile.about = ''
+                    rez.posting_json_metadata = {profile:{about:""}}
                 }
             }
           if (re.result.length) this[key] = rez
