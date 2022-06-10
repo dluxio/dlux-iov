@@ -542,7 +542,7 @@
                                         </div>
                                         <p class="lead">Decentralized and incentivized network infrastructure, rewarding
                                             providers with SPK governance and BROCA gas tokens.</p>
-                                        <div class="clearfix" id="larynxclaimdiv"
+                                        <!-- <div class="clearfix" id="larynxclaimdiv"
                                             v-show="larynxtoken.data.drop.last_claim.parseInt(16) != frmDate.value && larynxtoken.data.drop.availible.amount > 0">
                                             <hr class="my-4 bg-light">
                                             <div class="float-left">
@@ -562,8 +562,8 @@
                                                             class="fas fa-money-bill-wave-alt mr-2"></i>Claim</button>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="clearfix" id="larynxclaimrewards"
+                                        </div> -->
+                                        <!-- <div class="clearfix" id="larynxclaimrewards"
                                             v-show="larynxtoken.data.claim > 0">
                                             <hr class="my-4 bg-light">
                                             <div class="float-left">
@@ -580,14 +580,14 @@
                                                             class="fas fa-money-bill-wave-alt mr-2"></i>Claim</button>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </div> -->
                                         <hr class="my-4 bg-light">
                                         <div class="clearfix">
                                             <div class="float-left">
                                                 <h4>LARYNX Token</h4>
                                                 <p class="text-white-50">The mining token for the spk network.</p>
                                             </div>
-                                            <div id="larynxactions" class="float-right text-right">
+                                            <!-- <div id="larynxactions" class="float-right text-right">
                                                 <h5 id="larynxbalance">
                                                     {{((larynxtoken.data.balance)/1000)}} LARYNX
                                                 </h5>
@@ -619,10 +619,10 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </div> -->
                                         </div>
                                         <hr class="my-4 bg-light">
-                                        <div class="clearfix">
+                                        <!-- <div class="clearfix">
                                             <div class="float-left">
                                                 <h4>LARYNX Governance</h4>
                                                 <p class="text-white-50">Locked tokens used to determine concensus and
@@ -661,7 +661,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </div> -->
 
                                         <hr class="my-4 bg-light">
                                         <div class="clearfix">
@@ -1953,7 +1953,7 @@
                                     <input class="form-control" id="sendlarynxto" type="text" placeholder="Recipient">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <!-- <div class="form-group">
                                 <label id="sendlarynxamountlab" for="sendlarynxamount">Amount (Balance <a href="#"
                                         @click="insertBal('{{larynxtoken.data.balance/1000}}', 'sendlarynxamount')">{{((larynxtoken.data.balance)/1000)}}</a>):</label>
                                 <div class="input-group">
@@ -1963,19 +1963,19 @@
                                         <div class="input-group-text" id="sendformunits">LARYNX</div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="form-group" id="sendlarynxmemogroup">
+                            </div> -->
+                            <!-- <div class="form-group" id="sendlarynxmemogroup">
                                 <label for="sendlarynxmemo">Memo:</label>
                                 <div class="input-group">
                                     <input class="form-control" id="sendlarynxmemo" type="text"
                                         placeholder="Include a memo (optional)">
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
-                        <div class="modal-footer">
+                        <!-- <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                             <button id="sendlarynxmodalsend" type="submit" class="btn btn-primary">Continue</button>
-                        </div>
+                        </div> -->
                     </form>
                 </div>
             </div>
@@ -2077,7 +2077,7 @@
             </div>
         </div>
         <!-- Lock Gov LARYNX Modal -->
-        <div class="modal fade" id="lockgovLarynxModal" tabindex="-1" role="dialog"
+        <!-- <div class="modal fade" id="lockgovLarynxModal" tabindex="-1" role="dialog"
             aria-labelledby="lockgovLarynxModalTitle" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content bg-darker text-white">
@@ -2108,7 +2108,7 @@
                     </form>
                 </div>
             </div>
-        </div>
+        </div> -->
         <!-- Unlock Gov DLUX Modal -->
         <div class="modal fade" id="unlockgovDluxModal" tabindex="-1" role="dialog"
             aria-labelledby="unlockgovDluxModalTitle" aria-hidden="true">
@@ -2142,7 +2142,7 @@
             </div>
         </div>
         <!-- Unlock Gov LARYNX Modal -->
-        <div class="modal fade" id="unlockgovLarynxModal" tabindex="-1" role="dialog"
+        <!-- <div class="modal fade" id="unlockgovLarynxModal" tabindex="-1" role="dialog"
             aria-labelledby="unlockgovLarynxModalTitle" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content bg-darker text-white">
@@ -2173,7 +2173,7 @@
                     </form>
                 </div>
             </div>
-        </div>
+        </div> -->
         <!-- Footer -->
         <div>
             <foot-vue />
