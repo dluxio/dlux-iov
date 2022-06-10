@@ -666,6 +666,7 @@ var app = new Vue({
         })
         .then((re) => {
             var rez = re.result[0]
+            console.log(rez, rez.posting_json_metadata);
             rez.posting_json_metadata = JSON.parse(rez.posting_json_metadata);
           if (re.result.length) this[key] = re.result[0]
           else this[key] = false;
