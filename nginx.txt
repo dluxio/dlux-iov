@@ -11,7 +11,7 @@ server {
     location /nfts/set/ {
             try_files $uri $uri/ /nfts/set/index.html?args;
     }
-    location /user/@ {
+    location /@ {
             try_files $uri $uri/ /user/index.html?args;
     }
     location /dlux/ {
