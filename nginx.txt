@@ -1,0 +1,21 @@
+# Server Block to serve project with nginx
+
+server {
+    root /var/www/dlux-iov/;
+
+    index index.html;
+    server_name dlux.io;
+    location / {
+            try_files $uri $uri/ index.html?$args;
+    }
+    location /nfts/set/ {
+            try_files $uri $uri/ /nfts/set/index.html?args;
+    }
+    location /@ {
+            try_files $uri $uri/ /user/index.html?args;
+    }
+    location /dlux/ {
+            try_files $uri $uri/ /dlux/index.html?args;
+    }
+    listen 80;
+}
