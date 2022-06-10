@@ -865,10 +865,15 @@ var app = new Vue({
             if (res.result.length < this.postSelect[this.postSelect.entry].a)
               this.postSelect[this.postSelect.entry].e = true;
             for (var i = 0; i < res.result.length; i++) {
-              if (!this.posturls[res.result[i].url]) {
-                this.posturls[res.result[i].url] = res.result[i];
+                res.result[i].type = 'blog'
+              if (!this.posturls[`${res.result[i].author}/${res.result[i].permlink}`]) {
+                this.posturls[
+                  `${res.result[i].author}/${res.result[i].permlink}`
+                ] = res.result[i];
               }
-              this[this.postSelect.entry].push(res.result[i].url);
+              this[this.postSelect.entry].push(
+                `${res.result[i].author}/${res.result[i].permlink}`
+              );
             }
             var called = false;
             for (var post in this.posturls) {
