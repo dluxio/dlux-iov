@@ -674,9 +674,11 @@ var app = new Vue({
                 rez.posting_json_metadata = JSON.parse(
                   rez.json_metadata
                 );
-                } catch(e){}
+                } catch(e){
+                    rez.posting_json_metadata.profile.about = ''
+                }
             }
-          if (re.result.length) this[key] = re.result[0]
+          if (re.result.length) this[key] = rez
           else this[key] = false;
         });
     },
