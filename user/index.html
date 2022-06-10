@@ -1483,7 +1483,7 @@
                             </div>
                         </div>
                         <div class="container"> <br>
-                            <!-- <div dmx-repeat:spkrepeat=""></div>
+                            <!-- <div dmx-repeat:spkrepeat="">
                             <form>
                                 <div class="form-row">
                                     <div class="form-group col-lg-6 p-2">
@@ -1532,345 +1532,344 @@
                             </form>
                         </div> -->
                         </div>
-                        <!-- settings tab -->
-                        <div role="tabpanel" class="tab-pane fade show" id="settings" aria-labelledby="settingstab">
-                            <div class="container">
-                                <div class="alert alert-warning mt-5" role="alert"> Settings is under development and
-                                    coming
-                                    soon. </div>
-                                <div class="p-3">
-                                    <ul class="nav nav-pills justify-content-center" role="tablist">
-                                        <li class="nav-item"> <a class="nav-link active" id="generalSettingsTab"
-                                                role="tab" data-bs-toggle="tab" aria-controls="generalsettings"
-                                                aria-expanded="true" href="#generalsettings">General</a></li>
-                                        <li class="nav-item"> <a class="nav-link" id="contentSettingsTab" role="tab"
-                                                data-bs-toggle="tab" aria-controls="contentsettings"
-                                                aria-expanded="true" href="#contentsettings">Content</a></li>
-                                        <li class="nav-item"> <a class="nav-link" id="nodeSettingsTab" role="tab"
-                                                data-bs-toggle="tab" aria-controls="nodesettings" aria-expanded="true"
-                                                href="#nodesettings">Node</a></li>
-                                    </ul>
-                                </div>
-                                <div class="tab-content">
-                                    <div role="tabpanel" class="tab-pane fade show active" id="generalsettings"
-                                        aria-labelledby="generalSettingsTab">
-                                        <div class="container">
-                                            <form>
-                                                <div class="jumbotron pt-4 bg-darker">
-                                                    <h1 class="display-5">DLUX Settings</h1>
-                                                    <p class="lead ">Control your voting and rewards settings</p>
-                                                    <hr class="my-4 bg-light">
-                                                    <div class="clearfix">
-                                                        <div class="float-left">
-                                                            <h4>Default DLUX Weight For Posts</h4>
-                                                            <p class="text-white-50">Adjust the default DLUX weight you
-                                                                vote
-                                                                on posts, 1-100</p>
-                                                        </div>
-                                                        <div class="float-right">
-                                                            <div class="input-group">
-                                                                <input type="number" class="form-control input-75"
-                                                                    id="dluxweightposts" placeholder="100">
-                                                                <div class="input-group-append">
-                                                                    <div class="input-group-text">%</div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
+                    </div>
+                    <!-- settings tab -->
+                    <div role="tabpanel" class="tab-pane fade show" id="settings" aria-labelledby="settingstab">
+                        <div class="container">
+                            <div class="alert alert-warning mt-5" role="alert"> Settings is under development and
+                                coming
+                                soon. </div>
+                            <div class="p-3">
+                                <ul class="nav nav-pills justify-content-center" role="tablist">
+                                    <li class="nav-item"> <a class="nav-link active" id="generalSettingsTab" role="tab"
+                                            data-bs-toggle="tab" aria-controls="generalsettings" aria-expanded="true"
+                                            href="#generalsettings">General</a></li>
+                                    <li class="nav-item"> <a class="nav-link" id="contentSettingsTab" role="tab"
+                                            data-bs-toggle="tab" aria-controls="contentsettings" aria-expanded="true"
+                                            href="#contentsettings">Content</a></li>
+                                    <li class="nav-item"> <a class="nav-link" id="nodeSettingsTab" role="tab"
+                                            data-bs-toggle="tab" aria-controls="nodesettings" aria-expanded="true"
+                                            href="#nodesettings">Node</a></li>
+                                </ul>
+                            </div>
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane fade show active" id="generalsettings"
+                                    aria-labelledby="generalSettingsTab">
+                                    <div class="container">
+                                        <form>
+                                            <div class="jumbotron pt-4 bg-darker">
+                                                <h1 class="display-5">DLUX Settings</h1>
+                                                <p class="lead ">Control your voting and rewards settings</p>
+                                                <hr class="my-4 bg-light">
+                                                <div class="clearfix">
+                                                    <div class="float-left">
+                                                        <h4>Default DLUX Weight For Posts</h4>
+                                                        <p class="text-white-50">Adjust the default DLUX weight you
+                                                            vote
+                                                            on posts, 1-100</p>
                                                     </div>
-                                                    <hr class="my-4 bg-light">
-                                                    <div class="clearfix">
-                                                        <div class="float-left">
-                                                            <h4>Default DLUX Weight For Comments</h4>
-                                                            <p class="text-white-50">Adjust the default DLUX weight you
-                                                                vote
-                                                                on comments, 1-100</p>
-                                                        </div>
-                                                        <div class="float-right">
-                                                            <div class="input-group">
-                                                                <input type="number" class="form-control input-75"
-                                                                    id="dluxweightcomments" placeholder="100">
-                                                                <div class="input-group-append">
-                                                                    <div class="input-group-text">%</div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <hr class="my-4 bg-light">
-                                                    <div class="clearfix">
-                                                        <div class="float-left">
-                                                            <h4>Default DLUX Payout</h4>
-                                                            <p class="text-white-50">Adjust the default DLUX reward for
-                                                                new
-                                                                posts</p>
-                                                        </div>
-                                                        <div class="float-right">
-                                                            <select class="form-control" id="dluxreward">
-                                                                <option value="1">50% DLUX and 50% DP</option>
-                                                                <option value="2">100% DLUX Power</option>
-                                                                <option value="3">Decline Rewards</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <hr class="my-4 bg-light">
-                                                    <div class="clearfix">
-                                                        <div class="float-left">
-                                                            <h4>DLUX Beneficiary Amount</h4>
-                                                            <p class="text-white-50">Adjust the beneficiary amount paid
-                                                                to
-                                                                dlux on new posts, 10-100</p>
-                                                        </div>
-                                                        <div class="float-right">
-                                                            <div class="input-group">
-                                                                <input type="number" class="form-control input-75"
-                                                                    id="dluxbeneficiary" placeholder="10">
-                                                                <div class="input-group-append">
-                                                                    <div class="input-group-text">%</div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <hr class="my-4 bg-light">
-                                                    <div class="clearfix">
-                                                        <div class="float-left">
-                                                            <h4>Default DLUX Escrow Agent</h4>
-                                                            <p class="text-white-50">Choose your preffered 3rd party
-                                                                node
-                                                                for handling DEX transactions</p>
-                                                        </div>
-                                                        <div class="float-right">
-                                                            <div class="input-group">
-                                                                <div class="input-group-prepend">
-                                                                    <div class="input-group-text">@</div>
-                                                                </div>
-                                                                <input type="text" class="form-control"
-                                                                    id="dluxbeneficiary" placeholder="disregardfiat">
+                                                    <div class="float-right">
+                                                        <div class="input-group">
+                                                            <input type="number" class="form-control input-75"
+                                                                id="dluxweightposts" placeholder="100">
+                                                            <div class="input-group-append">
+                                                                <div class="input-group-text">%</div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="jumbotron pt-4 bg-darker">
-                                                    <h1 class="display-5">HIVE Settings</h1>
-                                                    <p class="lead ">Control your voting and rewards settings</p>
-                                                    <hr class="my-4 bg-light">
-                                                    <div class="clearfix">
-                                                        <div class="float-left">
-                                                            <h4>Default HIVE Weight For Posts</h4>
-                                                            <p class="text-white-50">Adjust the default HIVE weight you
-                                                                vote
-                                                                on posts, 1-100</p>
-                                                        </div>
-                                                        <div class="float-right">
-                                                            <div class="input-group">
-                                                                <input type="number" class="form-control input-75"
-                                                                    id="hiveweightposts" placeholder="100">
-                                                                <div class="input-group-append">
-                                                                    <div class="input-group-text">%</div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
+                                                <hr class="my-4 bg-light">
+                                                <div class="clearfix">
+                                                    <div class="float-left">
+                                                        <h4>Default DLUX Weight For Comments</h4>
+                                                        <p class="text-white-50">Adjust the default DLUX weight you
+                                                            vote
+                                                            on comments, 1-100</p>
                                                     </div>
-                                                    <hr class="my-4 bg-light">
-                                                    <div class="clearfix">
-                                                        <div class="float-left">
-                                                            <h4>Default HIVE Weight For Comments</h4>
-                                                            <p class="text-white-50">Adjust the default HIVE weight you
-                                                                vote
-                                                                on comments, 1-100</p>
-                                                        </div>
-                                                        <div class="float-right">
-                                                            <div class="input-group">
-                                                                <input type="number" class="form-control input-75"
-                                                                    id="hiveweightcomments" placeholder="100">
-                                                                <div class="input-group-append">
-                                                                    <div class="input-group-text">%</div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <hr class="my-4 bg-light">
-                                                    <div class="clearfix">
-                                                        <div class="float-left">
-                                                            <h4>Default HIVE Payout</h4>
-                                                            <p class="text-white-50">Adjust the default HIVE rewards for
-                                                                new
-                                                                posts</p>
-                                                        </div>
-                                                        <div class="float-right">
-                                                            <select class="form-control" id="hivereward">
-                                                                <option value="1">50% HBD and 50% HP</option>
-                                                                <option value="2">100% HIVE Power</option>
-                                                                <option value="3">Decline Rewards</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <hr class="my-4 bg-light">
-                                                    <div class="clearfix">
-                                                        <div class="float-left">
-                                                            <h4>Default HIVE API Node</h4>
-                                                            <p class="text-white-50">Select the API node with which to
-                                                                retrieve data from the HIVE blockchain</p>
-                                                        </div>
-                                                        <div class="float-right">
-                                                            <select class="form-control" id="hivereward">
-                                                                <option value="1">anyx.io</option>
-                                                                <option value="2">api.hive.blog</option>
-                                                                <option value="3">api.hivekings.com</option>
-                                                                <option value="3">api.openhive.network</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="text-center mb-4">
-                                                    <button type="submit" class="btn btn-primary btn-lg">Save</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                    <div role="tabpanel" class="tab-pane fade show" id="contentsettings"
-                                        aria-labelledby="contentSettingsTab">
-                                        <div class="container">
-                                            <form>
-                                                <div class="jumbotron pt-4 bg-darker">
-                                                    <h1 class="display-5">Content Settings</h1>
-                                                    <p class="lead ">Control what you see</p>
-                                                    <hr class="my-4 bg-light">
-                                                    <div class="clearfix">
-                                                        <div class="float-left">
-                                                            <h4>NSFW Posts</h4>
-                                                            <p class="text-white-50">Configure how NSFW (Not Safe For
-                                                                Work)
-                                                                posts appear</p>
-                                                        </div>
-                                                        <div class="float-right">
-                                                            <select class="form-control" id="nsfwselect">
-                                                                <option value="1">Hide</option>
-                                                                <option value="2">Click to show</option>
-                                                                <option value="3">Show</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <hr class="my-4 bg-light">
-                                                    <div class="clearfix">
-                                                        <div class="float-left">
-                                                            <h4>Author Muting</h4>
-                                                            <p class="text-white-50">Use author's list of ignored
-                                                                accounts
-                                                                when viewing comments</p>
-                                                        </div>
-                                                        <div class="float-right my-3">
-                                                            <div class="custom-control custom-switch py-2">
-                                                                <input type="checkbox" class="custom-control-input"
-                                                                    id="muteswitch">
-                                                                <label class="custom-control-label"
-                                                                    for="muteswitch"></label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <hr class="my-4 bg-light">
-                                                    <div class="clearfix">
-                                                        <div class="float-left">
-                                                            <h4>Global Blacklist</h4>
-                                                            <p class="text-white-50">Display a warning on accounts found
-                                                                in
-                                                                <a href="https://peakd.com/utopian-io/@themarkymark/global-blacklist-api-2-0-released"
-                                                                    target="_blank">The Global Blacklist</a> maintained
-                                                                by
-                                                                @themarkymark
-                                                            </p>
-                                                        </div>
-                                                        <div class="float-right my-3">
-                                                            <div class="custom-control custom-switch py-2">
-                                                                <input type="checkbox" class="custom-control-input"
-                                                                    id="bkacklistswitch" checked>
-                                                                <label class="custom-control-label"
-                                                                    for="blacklistswitch"></label>
+                                                    <div class="float-right">
+                                                        <div class="input-group">
+                                                            <input type="number" class="form-control input-75"
+                                                                id="dluxweightcomments" placeholder="100">
+                                                            <div class="input-group-append">
+                                                                <div class="input-group-text">%</div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="text-center mb-4">
-                                                    <button type="submit" class="btn btn-primary btn-lg">Save</button>
+                                                <hr class="my-4 bg-light">
+                                                <div class="clearfix">
+                                                    <div class="float-left">
+                                                        <h4>Default DLUX Payout</h4>
+                                                        <p class="text-white-50">Adjust the default DLUX reward for
+                                                            new
+                                                            posts</p>
+                                                    </div>
+                                                    <div class="float-right">
+                                                        <select class="form-control" id="dluxreward">
+                                                            <option value="1">50% DLUX and 50% DP</option>
+                                                            <option value="2">100% DLUX Power</option>
+                                                            <option value="3">Decline Rewards</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                    <div role="tabpanel" class="tab-pane fade show" id="nodesettings"
-                                        aria-labelledby="nodeSettingsTab">
-                                        <div class="container">
-                                            <form>
-                                                <div class="form-row">
-                                                    <div class="form-group col-lg-6 p-2">
-                                                        <label for="nodeDomainSet">Domain</label>
-                                                        <div class="input-group mb-2">
+                                                <hr class="my-4 bg-light">
+                                                <div class="clearfix">
+                                                    <div class="float-left">
+                                                        <h4>DLUX Beneficiary Amount</h4>
+                                                        <p class="text-white-50">Adjust the beneficiary amount paid
+                                                            to
+                                                            dlux on new posts, 10-100</p>
+                                                    </div>
+                                                    <div class="float-right">
+                                                        <div class="input-group">
+                                                            <input type="number" class="form-control input-75"
+                                                                id="dluxbeneficiary" placeholder="10">
+                                                            <div class="input-group-append">
+                                                                <div class="input-group-text">%</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr class="my-4 bg-light">
+                                                <div class="clearfix">
+                                                    <div class="float-left">
+                                                        <h4>Default DLUX Escrow Agent</h4>
+                                                        <p class="text-white-50">Choose your preffered 3rd party
+                                                            node
+                                                            for handling DEX transactions</p>
+                                                    </div>
+                                                    <div class="float-right">
+                                                        <div class="input-group">
                                                             <div class="input-group-prepend">
-                                                                <div class="input-group-text">https://</div>
+                                                                <div class="input-group-text">@</div>
                                                             </div>
-                                                            <input type="text" class="form-control" id="nodeDomainSet"
-                                                                placeholder="yourname-dluxtoken.herokuapp.com">
+                                                            <input type="text" class="form-control" id="dluxbeneficiary"
+                                                                placeholder="disregardfiat">
                                                         </div>
                                                     </div>
-                                                    <div class="form-group col-lg-2 p-2">
-                                                        <label for="nodeBidRateSet">Node Inflation Vote</label>
-                                                        <div class="input-group mb-2">
-                                                            <input type="number" class="form-control"
-                                                                id="nodeBidRateSet" placeholder="0.0 - 20.0">
+                                                </div>
+                                            </div>
+                                            <div class="jumbotron pt-4 bg-darker">
+                                                <h1 class="display-5">HIVE Settings</h1>
+                                                <p class="lead ">Control your voting and rewards settings</p>
+                                                <hr class="my-4 bg-light">
+                                                <div class="clearfix">
+                                                    <div class="float-left">
+                                                        <h4>Default HIVE Weight For Posts</h4>
+                                                        <p class="text-white-50">Adjust the default HIVE weight you
+                                                            vote
+                                                            on posts, 1-100</p>
+                                                    </div>
+                                                    <div class="float-right">
+                                                        <div class="input-group">
+                                                            <input type="number" class="form-control input-75"
+                                                                id="hiveweightposts" placeholder="100">
                                                             <div class="input-group-append">
                                                                 <div class="input-group-text">%</div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="form-group col-lg-2 p-2">
-                                                        <label for="nodeDaoRateSet">DAO Inflation Vote</label>
-                                                        <div class="input-group mb-2">
-                                                            <input type="number" class="form-control"
-                                                                id="nodeDaoRateSet" placeholder="0.0 - 20.0">
+                                                </div>
+                                                <hr class="my-4 bg-light">
+                                                <div class="clearfix">
+                                                    <div class="float-left">
+                                                        <h4>Default HIVE Weight For Comments</h4>
+                                                        <p class="text-white-50">Adjust the default HIVE weight you
+                                                            vote
+                                                            on comments, 1-100</p>
+                                                    </div>
+                                                    <div class="float-right">
+                                                        <div class="input-group">
+                                                            <input type="number" class="form-control input-75"
+                                                                id="hiveweightcomments" placeholder="100">
                                                             <div class="input-group-append">
                                                                 <div class="input-group-text">%</div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="form-group col-lg-2 p-2"> <br>
-                                                        <div class="custom-control custom-switch">
+                                                </div>
+                                                <hr class="my-4 bg-light">
+                                                <div class="clearfix">
+                                                    <div class="float-left">
+                                                        <h4>Default HIVE Payout</h4>
+                                                        <p class="text-white-50">Adjust the default HIVE rewards for
+                                                            new
+                                                            posts</p>
+                                                    </div>
+                                                    <div class="float-right">
+                                                        <select class="form-control" id="hivereward">
+                                                            <option value="1">50% HBD and 50% HP</option>
+                                                            <option value="2">100% HIVE Power</option>
+                                                            <option value="3">Decline Rewards</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <hr class="my-4 bg-light">
+                                                <div class="clearfix">
+                                                    <div class="float-left">
+                                                        <h4>Default HIVE API Node</h4>
+                                                        <p class="text-white-50">Select the API node with which to
+                                                            retrieve data from the HIVE blockchain</p>
+                                                    </div>
+                                                    <div class="float-right">
+                                                        <select class="form-control" id="hivereward">
+                                                            <option value="1">anyx.io</option>
+                                                            <option value="2">api.hive.blog</option>
+                                                            <option value="3">api.hivekings.com</option>
+                                                            <option value="3">api.openhive.network</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="text-center mb-4">
+                                                <button type="submit" class="btn btn-primary btn-lg">Save</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div role="tabpanel" class="tab-pane fade show" id="contentsettings"
+                                    aria-labelledby="contentSettingsTab">
+                                    <div class="container">
+                                        <form>
+                                            <div class="jumbotron pt-4 bg-darker">
+                                                <h1 class="display-5">Content Settings</h1>
+                                                <p class="lead ">Control what you see</p>
+                                                <hr class="my-4 bg-light">
+                                                <div class="clearfix">
+                                                    <div class="float-left">
+                                                        <h4>NSFW Posts</h4>
+                                                        <p class="text-white-50">Configure how NSFW (Not Safe For
+                                                            Work)
+                                                            posts appear</p>
+                                                    </div>
+                                                    <div class="float-right">
+                                                        <select class="form-control" id="nsfwselect">
+                                                            <option value="1">Hide</option>
+                                                            <option value="2">Click to show</option>
+                                                            <option value="3">Show</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <hr class="my-4 bg-light">
+                                                <div class="clearfix">
+                                                    <div class="float-left">
+                                                        <h4>Author Muting</h4>
+                                                        <p class="text-white-50">Use author's list of ignored
+                                                            accounts
+                                                            when viewing comments</p>
+                                                    </div>
+                                                    <div class="float-right my-3">
+                                                        <div class="custom-control custom-switch py-2">
                                                             <input type="checkbox" class="custom-control-input"
-                                                                id="escrowCheckSet" checked>
+                                                                id="muteswitch">
                                                             <label class="custom-control-label"
-                                                                for="escrowCheckSet">Escrow
-                                                                Agent</label>
+                                                                for="muteswitch"></label>
                                                         </div>
-                                                        <div class="custom-control custom-switch">
+                                                    </div>
+                                                </div>
+                                                <hr class="my-4 bg-light">
+                                                <div class="clearfix">
+                                                    <div class="float-left">
+                                                        <h4>Global Blacklist</h4>
+                                                        <p class="text-white-50">Display a warning on accounts found
+                                                            in
+                                                            <a href="https://peakd.com/utopian-io/@themarkymark/global-blacklist-api-2-0-released"
+                                                                target="_blank">The Global Blacklist</a> maintained
+                                                            by
+                                                            @themarkymark
+                                                        </p>
+                                                    </div>
+                                                    <div class="float-right my-3">
+                                                        <div class="custom-control custom-switch py-2">
                                                             <input type="checkbox" class="custom-control-input"
-                                                                id="mirrorCheckSet">
+                                                                id="bkacklistswitch" checked>
                                                             <label class="custom-control-label"
-                                                                for="mirrorCheckSet">Mirror
-                                                                Leader</label>
+                                                                for="blacklistswitch"></label>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="form-row">
-                                                    <div class="form-group col-4">
-                                                        <label for="mswitpubkey">Dlux MS Witness Pub Key</label>
-                                                        <input type="text" class="form-control" id="mswitpubkey">
-                                                    </div>
-                                                    <div class="form-group col-4">
-                                                        <label for="bytecost">byte cost</label>
-                                                        <input type="number" class="form-control" id="bytecost"
-                                                            min=".001" step=".001">
+                                            </div>
+                                            <div class="text-center mb-4">
+                                                <button type="submit" class="btn btn-primary btn-lg">Save</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div role="tabpanel" class="tab-pane fade show" id="nodesettings"
+                                    aria-labelledby="nodeSettingsTab">
+                                    <div class="container">
+                                        <form>
+                                            <div class="form-row">
+                                                <div class="form-group col-lg-6 p-2">
+                                                    <label for="nodeDomainSet">Domain</label>
+                                                    <div class="input-group mb-2">
+                                                        <div class="input-group-prepend">
+                                                            <div class="input-group-text">https://</div>
+                                                        </div>
+                                                        <input type="text" class="form-control" id="nodeDomainSet"
+                                                            placeholder="yourname-dluxtoken.herokuapp.com">
                                                     </div>
                                                 </div>
-                                                <div class="form-group"> <br>
-
-                                                    <button id="updateNode" type="submit" class="btn btn-primary">Update
-                                                        Node</button>
-
+                                                <div class="form-group col-lg-2 p-2">
+                                                    <label for="nodeBidRateSet">Node Inflation Vote</label>
+                                                    <div class="input-group mb-2">
+                                                        <input type="number" class="form-control" id="nodeBidRateSet"
+                                                            placeholder="0.0 - 20.0">
+                                                        <div class="input-group-append">
+                                                            <div class="input-group-text">%</div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </form>
-                                        </div>
+                                                <div class="form-group col-lg-2 p-2">
+                                                    <label for="nodeDaoRateSet">DAO Inflation Vote</label>
+                                                    <div class="input-group mb-2">
+                                                        <input type="number" class="form-control" id="nodeDaoRateSet"
+                                                            placeholder="0.0 - 20.0">
+                                                        <div class="input-group-append">
+                                                            <div class="input-group-text">%</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-lg-2 p-2"> <br>
+                                                    <div class="custom-control custom-switch">
+                                                        <input type="checkbox" class="custom-control-input"
+                                                            id="escrowCheckSet" checked>
+                                                        <label class="custom-control-label" for="escrowCheckSet">Escrow
+                                                            Agent</label>
+                                                    </div>
+                                                    <div class="custom-control custom-switch">
+                                                        <input type="checkbox" class="custom-control-input"
+                                                            id="mirrorCheckSet">
+                                                        <label class="custom-control-label" for="mirrorCheckSet">Mirror
+                                                            Leader</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-group col-4">
+                                                    <label for="mswitpubkey">Dlux MS Witness Pub Key</label>
+                                                    <input type="text" class="form-control" id="mswitpubkey">
+                                                </div>
+                                                <div class="form-group col-4">
+                                                    <label for="bytecost">byte cost</label>
+                                                    <input type="number" class="form-control" id="bytecost" min=".001"
+                                                        step=".001">
+                                                </div>
+                                            </div>
+                                            <div class="form-group"> <br>
+
+                                                <button id="updateNode" type="submit" class="btn btn-primary">Update
+                                                    Node</button>
+
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
         </main>
 
         <!-- Send HIVE Modal -->
