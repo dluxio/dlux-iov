@@ -741,7 +741,7 @@
                                             </div>
                                             <div id="hivepactions" class="float-right text-right">
                                                 <h5 id="hpbal">
-                                                    {{((hivestatsapi.data.result.total_vesting_fund_hive.parseFloat()*focus.vesting_shares.parseFloat())/hivestatsapi.data.result.total_vesting_shares.parseFloat()).formatNumber('3','.',',')}}
+                                                    {{((hivestats.total_vesting_fund_hive.parseFloat()*focus.vesting_shares.parseFloat())/hivestats.total_vesting_shares.parseFloat()).formatNumber('3','.',',')}}
                                                     HP</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info mr-half"
@@ -818,7 +818,7 @@
                                             </div>
                                             <div id="hiveval" class="float-right text-right">
                                                 <h5 id="totalhivebalance">
-                                                    {{(((((hivestatsapi.data.result.total_vesting_fund_hive.parseFloat()*focus.vesting_shares.parseFloat())/hivestatsapi.data.result.total_vesting_shares.parseFloat())+focus.balance.parseFloat())*hiveprice.data.hive.usd)+((focus.hbd_balance.parseFloat()+focus.savings_hbd_balance.parseFloat())*hbdprice.data.hive_dollar.usd)).formatCurrency()}}
+                                                    {{(((((hivestats.total_vesting_fund_hive.parseFloat()*focus.vesting_shares.parseFloat())/hivestats.total_vesting_shares.parseFloat())+focus.balance.parseFloat())*hiveprice.data.hive.usd)+((focus.hbd_balance.parseFloat()+focus.savings_hbd_balance.parseFloat())*hbdprice.data.hive_dollar.usd)).formatCurrency()}}
                                                 </h5>
                                             </div>
                                         </div>

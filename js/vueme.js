@@ -130,6 +130,9 @@ var app = new Vue({
       showTokens: {},
       behind: "",
       stats: {},
+      hivestats: {
+
+      },
       behindTitle: "",
       TOKEN: "DLUX",
       sendTo: "",
@@ -1227,6 +1230,19 @@ var app = new Vue({
             this.accountinfo.rshares = (power * final_vest) / 10000;
           });
     },
+    getHiveStats(){
+      fetch(this.hapi, {
+        body: `{"jsonrpc":"2.0", "method":"condenser_api.get_dynamic_global_properties", "params":[], "id":1}`,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        method: "POST",
+      })
+        .then((r) => r.json())
+        .then((r) => {
+          this.hivestats = r.result;
+        });
+    },
     getHiveAuthors(users) {
       var q = "";
       for (var i = 0; i < users.length; i++) {
@@ -1253,7 +1269,7 @@ var app = new Vue({
   mounted() {
     this.pageAccount = location.pathname.split("/@")[1];
     this.checkAccount(this.pageAccount, 'focus')
-
+    this.getHiveStats();
     this.getPosts();
     this.getProtocol();
     this.getRewardFund();
