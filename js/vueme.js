@@ -945,6 +945,7 @@ var app = new Vue({
                   this.posturls[res.result.url].hasVoted = true;
                 }
               }
+              var type = "Blog";
               try {
                 this.posturls[res.result.url].json_metadata = JSON.parse(
                   this.posturls[res.result.url].json_metadata
@@ -952,9 +953,22 @@ var app = new Vue({
                 this.posturls[res.result.url].pic = this.picFind(
                   this.posturls[res.result.url].json_metadata
                 );
+                
+                if (
+                  ["QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16"].includes(
+                    a.meta.vrHash
+                  )
+                )
+                  type = "360";
+                else if (a.meta.vrHash) type = "VR";
+                else if (a.meta.arHash) type = "AR";
+                else if (a.meta.appHash) type = "APP";
+                else if (a.meta.audHash) type = "Audio";
+                else if (a.meta.vidHash) type = "Video";
               } catch (e) {
                 console.log(res.result.url, "no JSON?");
               }
+              this.posturls[res.result.url].type = type;
               this.posturls[res.result.url].rep = "...";
               this.rep(res.result.url);
               if (this.posturls[res.result.url].slider < 0) {
