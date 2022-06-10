@@ -956,14 +956,14 @@ var app = new Vue({
                 
                 if (
                   "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
-                    a.meta.vrHash
+                    this.posturls[res.result.url].json_metadata.vrHash
                 )
                   type = "360";
-                else if (a.meta.vrHash) type = "VR";
-                else if (a.meta.arHash) type = "AR";
-                else if (a.meta.appHash) type = "APP";
-                else if (a.meta.audHash) type = "Audio";
-                else if (a.meta.vidHash) type = "Video";
+                else if (this.posturls[res.result.url].json_metadata.vrHash) type = "VR";
+                else if (this.posturls[res.result.url].json_metadata.arHash) type = "AR";
+                else if (this.posturls[res.result.url].json_metadata.appHash) type = "APP";
+                else if (this.posturls[res.result.url].json_metadata.audHash) type = "Audio";
+                else if (this.posturls[res.result.url].json_metadata.vidHash) type = "Video";
               } catch (e) {
                 console.log(res.result.url, e, "no JSON?");
               }
