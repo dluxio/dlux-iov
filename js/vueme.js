@@ -1279,7 +1279,7 @@ var app = new Vue({
     },
   },
   mounted() {
-    this.pageAccount = location.pathname.split("/@")[1] || markegiles
+    this.pageAccount = location.pathname.split("/@")[1] || 'markegiles'
     this.checkAccount(this.pageAccount, 'focus')
     this.getHiveStats();
     this.getPosts();
