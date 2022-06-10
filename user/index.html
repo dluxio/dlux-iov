@@ -84,11 +84,11 @@
                             <div class="col-md-8 text-white">
                                 <div class="d-flex flex-wrap">
                                     <div class="d-flex"><img
-                                            :src="https://images.hive.blog/u/{{dluxGetAccount.data.result[0].name}}/avatar"
+                                            :src="'https://images.hive.blog/u/' + pageAccount + '/avatar'"
                                             alt="" class="rounded-circle bg-light mr-4 cover profile-img"></div>
                                     <div class="d-flex flex-column">
                                         <div class="d-flex">
-                                            <p class="display-4 mb-0">{{dluxGetAccount.data.result[0].name}}</p>
+                                            <p class="display-4 mb-0">{{pageAccount}}</p>
                                         </div>
                                         <div class="d-flex"><small
                                                 class="lead p-2">{{dluxGetAccount.data.result[0].posting_json_metadata.parseJSON().profile.about}}</small>
@@ -98,7 +98,7 @@
                             </div>
                             <div class="col-md-4 text-center m-auto"> <a target="_blank"
                                     class="btn btn-outline-primary btn-lg m-1" role="button"
-                                    :href="/vr/@{{dluxGetAccount.data.result[0].name}}">VR Page<i
+                                    :href="'/vr/@' + pageAccount">VR Page<i
                                         class="fas fa-vr-cardboard mx-2 fa-lg"></i></a>
                                 <button type="button"
                                     class="btn btn-outline-primary dropdown-toggle drop-no-arrow btn-lg"
@@ -1769,7 +1769,7 @@
                                         <div class="input-group-text">@</div>
                                     </div>
                                     <input class="form-control" id="sendhivefrom" type="text"
-                                        :placeholder="{{dluxGetAccount.data.result[0].name}}" readonly>
+                                        :placeholder="pageAccount" readonly>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -1828,7 +1828,7 @@
                                         <div class="input-group-text">@</div>
                                     </div>
                                     <input class="form-control" id="sendhbdfrom" type="text"
-                                        :placeholder="{{dluxGetAccount.data.result[0].name}}" readonly>
+                                        :placeholder="pageAccount" readonly>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -1887,7 +1887,7 @@
                                         <div class="input-group-text">@</div>
                                     </div>
                                     <input class="form-control" id="senddluxfrom" type="text"
-                                        :placeholder="{{dluxGetAccount.data.result[0].name}}" readonly>
+                                        :placeholder="pageAccount" readonly>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -1946,7 +1946,7 @@
                                         <div class="input-group-text">@</div>
                                     </div>
                                     <input class="form-control" id="sendlarynxfrom" type="text"
-                                        :placeholder="{{dluxGetAccount.data.result[0].name}}" readonly>
+                                        :placeholder="pageAccount" readonly>
                                 </div>
                             </div>
                             <div class="form-group">

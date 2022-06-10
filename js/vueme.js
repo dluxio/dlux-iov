@@ -62,6 +62,7 @@ var app = new Vue({
     return {
       toSign: {},
       account: user,
+      pageAccount: '',
       pfp: {
         set: "",
         uid: "",
@@ -1225,7 +1226,7 @@ var app = new Vue({
     },
   },
   mounted() {
-    // var setName = location.pathname.split("set/")[1];
+    this.pageAccount = location.pathname.split("/@")[1];
     // if (setName) this.getNFTset(setName);
     // else this.getNFTsets();
     // this.getUserNFTs();
