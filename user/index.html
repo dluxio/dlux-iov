@@ -339,12 +339,12 @@
                                                     {{((focusdata.claim)/1000)}} DLUX</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Claim">
                                                     <button type="submit" class="btn btn-info mr-half"
-                                                        @click="claim('{{govcheck.checked}}')"><i
+                                                        ><i
                                                             class="fas fa-coin"></i><i
                                                             class="fas fa-money-bill-wave-alt mr-2"></i>Claim</button>
                                                 </div>
-                                                <div> <span class="small" v-show="!govcheck.checked">50% Liquid | 50%
-                                                        Power</span> <span class="small" v-show="govcheck.checked">50%
+                                                <div> <span class="small" v-show="!features.reward2Gov">50% Liquid | 50%
+                                                        Power</span> <span class="small" v-show="features.reward2Gov">50%
                                                         Liquid | 50% Gov</span></div>
                                                 <div v-show="focusdata.gov > 0" class="bg-dark text-white">
                                                     <div class="input-group mb-3">
