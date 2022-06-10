@@ -2400,7 +2400,7 @@
         let url = location.href.replace(/\/$/, '');
         if (location.hash) {
             const hash = url.split('#');
-            const currentTab = hash[1] == 'dlux' || hash[1] == 'hive' || hash[1] == 'spk' ? document.querySelector('#wallet a[href="#' + hash[1] + '"]') : document.querySelector('#' + hash[1])
+            const currentTab = hash[1] == 'dlux' || hash[1] == 'hive' || hash[1] == 'spk' ? document.querySelector('#wallettabs a[href="#' + hash[1] + '"]') : document.querySelector('#usertabs a[href="#' + hash[1] + '"]')
             const curTab = new bootstrap.Tab(currentTab);
             curTab.show();
             url = location.href.replace(/\/#/, '#');
