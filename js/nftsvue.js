@@ -465,8 +465,8 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
 */
 //</head><body id="body">Append ?NFT_UID to the address bar to see that NFT. "...html?A6"<script>const u=location.href.split('?')[1];if(u){compile(u,1)}else{onLoad(u)}</script></body></html>`,
       SL: [],
-      svgTag: '',
-      svgTagClose: '',
+      svgTag: "",
+      svgTagClose: "",
       SA: {
         logo: "Qma1aE2ntCwMw5pAZo3cCYCmMZ4byVvyGDbK22HiH92WN7",
         banner: "QmdSXLw1qwQ51MtkS3SjUd8qryLWadAYvMWngFfDPCsb9Y",
@@ -488,36 +488,36 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
     "cycle-text": Cycler,
   },
   methods: {
-    breakIt(it, reset){
-      if(reset){
-        this.SL = []
-        this.SLN = []
+    breakIt(it, reset) {
+      if (reset) {
+        this.SL = [];
+        this.SLN = [];
       }
-      var svgStart = it.indexOf('<svg')
-      var svgEnd = it.indexOf('</svg>')
-      var gStart = it.indexOf('<g')
-      var el = document.createElement('svg')
-      el.innerHTML = it.substring(gStart, svgEnd)
-      var layers = el.childNodes
-      for (var i = 0; i < layers.length; i++){
-        var offset = this.SL.length
-        this.SL.push([])
-        this.SLN.push([layers[i].id || `layer${i + offset}`, []])
-        var items = layers[i].childNodes
-        for(var j = 0; j < items.length; j++){
-          this.SL[i + offset].push(items[j].innerHTML)
-          this.SLN[i + offset][1].push(items[j].id || `item${j}`)
+      var svgStart = it.indexOf("<svg");
+      var svgEnd = it.indexOf("</svg>");
+      var gStart = it.indexOf("<g");
+      var el = document.createElement("svg");
+      el.innerHTML = it.substring(gStart, svgEnd);
+      var layers = el.childNodes;
+      for (var i = 0; i < layers.length; i++) {
+        var offset = this.SL.length;
+        this.SL.push([]);
+        this.SLN.push([layers[i].id || `layer${i + offset}`, []]);
+        var items = layers[i].childNodes;
+        for (var j = 0; j < items.length; j++) {
+          this.SL[i + offset].push(items[j].innerHTML);
+          this.SLN[i + offset][1].push(items[j].id || `item${j}`);
         }
       }
-      this.svgTag = it.substring(svgStart, gStart)
+      this.svgTag = it.substring(svgStart, gStart);
       if (
         this.svgTag.search("style") > -1 &&
         this.svgTag.search("scoped") == -1
       )
         this.svgTag.replace("<style", "<style scoped");
-        this.svgTagClose = it.substring(svgEnd);
+      this.svgTagClose = it.substring(svgEnd);
     },
-    compileScript(){
+    compileScript() {
       return this.baseScript
         .replace("$L", this.scriptify(this.SL))
         .replace("$Y", this.scriptify(this.SLN))
@@ -530,35 +530,35 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
         .replace("$i", this.SA.faicon)
         .replace("$D", this.SA.description)
         .replace("$l", this.scriptify(this.SA.links))
-        .replace('$c', this.scriptify(this.SA.categories))
+        .replace("$c", this.scriptify(this.SA.categories));
     },
-    scriptify(obj){
-      var s = ''
-      if(obj.length){
-        s = '['
-        for(var i = 0; i < obj.length; i++){
-          if(typeof obj[i] == 'string')s += `"${obj[i]}"`
-          else if(typeof obj[i] == 'number')s += `${obj[i]}`
-          else s+= this.scriptify(obj[i])
-          if(i != obj.length - 1)s+=","
+    scriptify(obj) {
+      var s = "";
+      if (obj.length) {
+        s = "[";
+        for (var i = 0; i < obj.length; i++) {
+          if (typeof obj[i] == "string") s += `"${obj[i]}"`;
+          else if (typeof obj[i] == "number") s += `${obj[i]}`;
+          else s += this.scriptify(obj[i]);
+          if (i != obj.length - 1) s += ",";
         }
-        s+=']'
+        s += "]";
       } else if (Object.keys(obj).length) {
-        var keys = Object.keys(obj)
-        s = '{'
-        for(var i = 0; i < keys.length; i++){
-          s += `"${keys[i]}":`
+        var keys = Object.keys(obj);
+        s = "{";
+        for (var i = 0; i < keys.length; i++) {
+          s += `"${keys[i]}":`;
           if (typeof obj[keys[i]] == "string") s += `"${obj[keys[i]]}"`;
           else if (typeof obj[keys[i]] == "number") s += `${obj[keys[i]]}`;
           else s += this.scriptify(obj[keys[i]]);
           if (i != keys.length - 1) s += ",";
         }
-        s += '}'
+        s += "}";
       }
-      return s
+      return s;
     },
-    ipfsUpload(event){
-      console.log('1', event)
+    ipfsUpload(event) {
+      console.log("1", event);
       if (window.IpfsHttpClient) {
         const ipfs = window.IpfsHttpClient({
           host: "ipfs.infura.io",
@@ -580,39 +580,310 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
         });
       }
     },
-    buyMint(uid, set) {
+    /*
+function buyFT(setname, uid, price, type,  callback){
+     price = parseInt(price * 1000)
+     if(type == 'HIVE')broadcastTransfer({ to: 'dlux-cc', hive: bid_amount, memo:`NFTbuy ${setname}:${uid}`}, `Buying on ${setname}:${uid}`)
+     else if(type == 'HBD')broadcastTransfer({ to: 'dlux-cc', hbd: bid_amount, memo:`NFTbuy ${setname}:${uid}`}, `Buying ${setname}:${uid}`)
+     else broadcastCJA({set: setname, uid, price}, 'dlux_ft_buy', `Trying to buy ${setname} mint token`)
+ }
+
+    */
+    buyFT(uid, set) {
       var cja = {
         set: set || this.focusSet.set,
         uid: uid,
       };
+      this.toSign = {
+        type: "cja",
+        cj: cja,
+        id: `${this.prefix}ft_buy`,
+        msg: `Purchasing: ${set}:${uid}`,
+        ops: ["getTokenUser", "getUserNFTs"],
+        txid: `${set}:${uid}_ft_buy`,
+      };
     },
+    /*
+function bidFT(setname, uid, callback){
+    var bid_amount = document.getElementById(`${setname}-${uid}-bid`).value
+    bid_amount = parseInt(bid_amount * 1000)
+    broadcastCJA({set: setname, uid, bid_amount}, 'dlux_ft_bid', `Trying to bid on ${setname} mint token.`) 
+ }
+    */
+    bidFT(uid, set, price, type) {
+      price = parseInt(price * 1000);
+      var cja = {
+        set: set || this.focusSet.set,
+        uid: uid,
+      };
+      this.toSign = {
+        type: "cja",
+        cj: cja,
+        id: `${this.prefix}ft_buy`,
+        msg: `Purchasing: ${set}:${uid}`,
+        ops: ["getTokenUser", "getUserNFTs"],
+        txid: `${set}:${uid}_ft_buy`,
+      };
+    },
+    /*
+function giveFT(setname, to, qty, callback){
+    checkAccount(to)
+    .then(r => {
+        broadcastCJA({set: setname, to, qty}, "dlux_ft_transfer", `Trying to give ${setname} mint token to ${to}`) 
+    })
+    .catch(e=>alert(`${to} is not a valid hive account`))
+ }
+
+function tradeFT(setname, to, price, callback){
+    price = parseInt(price * 1000)
+    checkAccount(to)
+    .then(r => {
+        broadcastCJA({ set: setname, to, price}, "dlux_ft_escrow", `Trying to trade ${setname}: Mint Token`)
+    })
+    .catch(e=>alert(`${to} is not a valid hive account`))
+ }
+// {
+//     hive:1000, //1.000 Hive || hbd: 1000 // 1.000 HBD
+//     quantity: 4096, //4096 NFTs
+//     set: 'dlux', //set tokens to sell
+//     distro: 'account1_5000,acc2_5000' //must add to 10000
+// }
+function sellFT(setname, price, type, quantity = 1, distro,  callback){
+    price = parseInt(price * 1000)
+    if(type.toUpperCase() == 'HIVE')type = 'hive'
+    else if (type.toUpperCase() == 'HBD') type = 'hbd'
+    else type = 0
+    if(!type)broadcastCJA({set: setname, price}, 'dlux_ft_sell', `Trying to sell ${setname} mint token`)
+    else broadcastCJA({set: setname, [type]:price, quantity, distro}, 'dlux_fts_sell_h', `Trying to sell ${setname} mint token`)
+ }
+
+ function auctionFT(setname, price, now, time, callback){
+    time = parseInt(time)
+    price = parseInt(price * 1000)
+    broadcastCJA({set:setname, price, now, time}, 'dlux_ft_auction', `Trying to auction ${setname} mint tokens`)
+ }
+
+function airdropFT(setname, to_str,  callback){
+    let to_array = to_str.split(' ')
+    to_array = [... new Set(to_array)]
+    var promises = []
+    for (item in to_array){ promises.push(checkAccount(to_array[item]))}
+    Promise.all(promises)
+    .then(r=>{
+        broadcastCJA({set:setname, to: to_array}, 'dlux_ft_airdrop', `Trying to airdrop ${setname} mint tokens`)
+    })
+    .catch(e=>alert(`At least one hive account doesn't exist: ${e}`))
+ }
+
+// FT Actions //
+
+function openFT(setname, callback){
+    broadcastCJA({set:setname}, 'dlux_nft_mint', `Minting ${setname} token...`)
+ }
+
+function sellFTcancel(setname, uid, token,  callback){
+     broadcastCJA({set: setname, uid}, token == 'DLUX' ? 'dlux_ft_cancel_sell' : 'dlux_fts_sell_hcancel', `Trying to cancel ${setname} mint token sell`)
+ }
+function tradeFTaccept(setname, uid, callback){
+     broadcastCJA({ set: setname, uid}, "dlux_ft_escrow_complete", `Trying to complete ${setname} mint tokentrade`)
+ }
+
+function tradeFTreject(setname, uid, callback){
+    broadcastCJA({ set: setname, uid }, "dlux_ft_escrow_cancel", `Trying to cancel ${setname} mint token trade`)
+ }
+
+function tradeFTcancel(setname, uid, callback){
+    broadcastCJA({ set: setname, uid }, "dlux_ft_escrow_cancel", `Trying to cancel ${setname} mint token trade`)
+ }
+
+    */
+
+    //NFT's
+
+    /*
+function giveNFT(setname, uid, to, callback){
+    checkAccount(to)
+    .then(r => {
+        broadcastCJA({set: setname, uid, to}, "dlux_nft_transfer", `Trying to give ${setname}:${uid} to ${to}`) 
+    })
+    .catch(e=>alert(`${to} is not a valid hive account`))
+ }
+
+function tradeNFT(setname, uid, to, price, type, callback){
+    price = parseInt(price * 1000)
+    checkAccount(to)
+    .then(r => {
+        broadcastCJA({ set: setname, uid, to, price, type}, "dlux_nft_reserve_transfer", `Trying to trade ${setname}:${uid}`)
+    })
+    .catch(e=>alert(`${to} is not a valid hive account`))
+ }
+
+function sellNFT(setname, uid, price, type, callback){
+    price = parseInt(price * 1000)
+    broadcastCJA({ set: setname, uid, price, type}, "dlux_nft_sell", `Trying to list ${setname}:${uid} for sell`)
+ }
+
+function auctionNFT(setname, uid, price, now, time, type, callback){
+     time = parseInt(time)
+    price = parseInt(price * 1000)
+    if(type.toUpperCase() == 'HIVE'){
+        type = 'HIVE'
+    } else if(type.toUpperCase() == 'HBD'){
+        type = 'HBD'
+    } else {
+        type = 0
+    }
+    if(!type)broadcastCJA({ set: setname, uid, price, now, time}, "dlux_nft_auction", `Trying to auction ${setname}:${uid} for DLUX`)
+    else broadcastCJA({ set: setname, uid, price, type, now, time}, "dlux_nft_hauction", `Trying to auction ${setname}:${uid} for ${type}`)
+ }
+
+function deleteNFT(setname, uid, callback){
+    broadcastCJA({ set: setname, uid }, "dlux_nft_delete", `Trying to melt ${setname}:${uid}`) 
+ }
+
+
+// NFT Actions //
+
+ function defineNFT(setname, type, script, permlink, start, end, total, royalty, handling, max_fee, bond, callback){
+    max_fee = parseInt(max_fee * 1000)
+    royalty = parseInt(royalty * 100)
+    type = parseInt(type)
+    bond = parseInt(bond * 1000)
+    //more validation
+    broadcastCJA({ name: setname, type, script, permlink, start, end, total, royalty, handling, max_fee, bond}, "dlux_nft_define", `Trying to define ${setname}`)
+ }
+
+function tradeNFTaccept(setname, uid, price, type, callback){
+    if(type.toUpperCase() == 'HIVE'){
+        broadcastTransfer({ to: 'dlux-cc', hive: price, memo:`NFTtrade ${setname}:${uid}`}, `Completing Trade ${setname}:${uid}`)
+    } else if (type.toUpperCase() == 'HBD'){
+        broadcastTransfer({ to: 'dlux-cc', hbd: price, memo:`NFTtrade ${setname}:${uid}`}, `Completing Trade ${setname}:${uid}`)
+    } else {
+        broadcastCJA({ set: setname, uid, price}, "dlux_nft_reserve_complete", `Trying to complete ${setname}:${uid} trade`)
+    }
+ }
+function tradeNFTreject(setname, uid, callback){
+    broadcastCJA({ set: setname, uid }, "dlux_nft_transfer_cancel", `Trying to cancel ${setname}:${uid} trade`)
+ }
+function tradeNFTcancel(setname, uid, callback){
+    broadcastCJA({ set: setname, uid }, "dlux_nft_transfer_cancel", `Trying to cancel ${setname}:${uid} trade`)
+ }
+ function sellNFTcancel(setname, uid, callback){
+     broadcastCJA({ set: setname, uid}, "dlux_nft_sell_cancel", `Trying to cancel ${setname}:${uid} sell`)
+ }
+function buyNFT(setname, uid, price, type, callback){
+    if (type.toUpperCase() == 'HIVE') broadcastTransfer({ to: 'dlux-cc', hive: price, memo:`NFTbuy ${setname}:${uid}`}, `Buying ${setname}:${uid}`)
+    else if (type.toUpperCase() == 'HBD') broadcastTransfer({ to: 'dlux-cc', hbd: price, memo:`NFTbuy ${setname}:${uid}`}, `Buying ${setname}:${uid}`)
+    else broadcastCJA({ set: setname, uid, price}, "dlux_nft_buy", `Trying to buy ${setname}:${uid}`)
+ }
+ function bidNFT(setname, uid, bid_amount, type, callback){
+    console.log({bid_amount, type})
+    bid_amount = parseInt(bid_amount * 1000)
+    if(type == 'HIVE') broadcastTransfer({ to: 'dlux-cc', hive: bid_amount, memo:`NFTbid ${setname}:${uid}`}, `Bidding on ${setname}:${uid}`)
+    else if (type == 'HBD') broadcastTransfer({ to: 'dlux-cc', hbd: bid_amount, memo:`NFTbid ${setname}:${uid}`}, `Bidding on ${setname}:${uid}`)
+    else broadcastCJA({ set: setname, uid, bid_amount}, "dlux_nft_bid", `Bidding on ${setname}:${uid} for ${parseFloat(bid_amount/1000).toFixed(3)} DLUX`)
+ }
+
+function setPFP(setname, uid, callback){
+    fetch("https://api.hive.blog", {
+        body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[["${user}"]], "id":1}`,
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        method: "POST"
+        })
+        .then(r=>r.json())
+        .then(json=>{
+            if(JSON.parse(json.result[0].posting_json_metadata).profile.profile_image !== `https://data.dlux.io/pfp/${user}?${setname}-${uid}`){
+                var pjm = JSON.parse(json.result[0].posting_json_metadata)
+                pjm.profile.profile_image = `https://data.dlux.io/pfp/${user}?${setname}-${uid}`
+                const op = 
+                    [
+                        ['custom_json', {
+                            "required_auths": [],
+                            "required_posting_auths": [user],
+                            "id": "dlux_nft_pfp",
+                            "json": JSON.stringify({
+                                set: setname,
+                                uid
+                            })
+                        }],
+                        ["account_update2",{
+                            "account": user,
+                            "json_metadata": "",
+                            "posting_json_metadata": JSON.stringify(pjm)}
+                        ]
+                    ]
+                Dluxsession.hive_sign([user, op, 'posting'])
+                     .then(r => {
+                         statusWaiter (r, `Trying to set ${setname}:${uid} as PFP`)
+                     })
+                     .catch(e => { console.log(e) })
+            } else {
+                Dluxsession.hive_sign([user, [
+                    ['custom_json', {
+                        "required_auths": [],
+                        "required_posting_auths": [user],
+                        "id": "dlux_nft_pfp",
+                        "json": JSON.stringify({
+                            set: setname,
+                            uid
+                            })
+                        }]
+                     ], 'posting'])
+                .then(r => {
+                    statusWaiter (r, `Trying to set ${setname}:${uid} as PFP`)
+                })
+                .catch(e => { console.log(e) })
+            }
+        })
+        .catch(e=>{
+            console.log(e)
+            Dluxsession.hive_sign([user, [
+                ['custom_json', {
+                    "required_auths": [user],
+                    "required_posting_auths": [],
+                    "id": "dlux_nft_pfp",
+                    "json": JSON.stringify({
+                        set: setname,
+                        uid
+                        })
+                    }]
+                ], 'posting'])
+            .then(r => {
+                statusWaiter (r, `Trying to set ${setname}:${uid} as PFP`)
+            })
+            .catch(e => { console.log(e) })
+        })
+ }
+ */
     precision(num, precision) {
       return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
     },
     sigFig(num, sig) {
       // return a number in K or M or B format
-      var post = typeof num.split == 'function' ? num.split(" ")[1] : "";
+      var post = typeof num.split == "function" ? num.split(" ")[1] : "";
       num = parseFloat(num);
-      var out
-      if (num < 1){
+      var out;
+      if (num < 1) {
         out = (num * 1000).toFixed(sig);
-        post = "m" + post
-      } else if (num < 1000){
+        post = "m" + post;
+      } else if (num < 1000) {
         out = num.toFixed(sig);
-      } else if (num < 1000000){
-        out = (num / 1000).toFixed(sig)
+      } else if (num < 1000000) {
+        out = (num / 1000).toFixed(sig);
         post = "K" + post;
-      } else if (num < 1000000000){
-        out = (num / 1000000).toFixed(sig)
+      } else if (num < 1000000000) {
+        out = (num / 1000000).toFixed(sig);
         post = "M" + post;
-      } else if (num < 1000000000000){
-        out = (num / 1000000000).toFixed(sig)
+      } else if (num < 1000000000000) {
+        out = (num / 1000000000).toFixed(sig);
         post = "B" + post;
-      } else if (num < 1000000000000000){
-        out = (num / 1000000000000).toFixed(sig)
+      } else if (num < 1000000000000000) {
+        out = (num / 1000000000000).toFixed(sig);
         post = "T" + post;
-      } else if (num < 1000000000000000000){
-        out = (num / 1000000000000000).toFixed(sig)
+      } else if (num < 1000000000000000000) {
+        out = (num / 1000000000000000).toFixed(sig);
         post = "Q" + post;
       }
       //remove trailing zeros
