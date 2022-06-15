@@ -736,10 +736,6 @@ function auctionNFT(setname, uid, price, now, time, type, callback){
     else broadcastCJA({ set: setname, uid, price, type, now, time}, "dlux_nft_hauction", `Trying to auction ${setname}:${uid} for ${type}`)
  }
 
-function deleteNFT(setname, uid, callback){
-    broadcastCJA({ set: setname, uid }, "dlux_nft_delete", `Trying to melt ${setname}:${uid}`) 
- }
-
 
 // NFT Actions //
 
@@ -849,6 +845,28 @@ function setPFP(setname, uid, callback){
         })
  }
  */
+
+    /*
+
+ function deleteNFT(setname, uid, callback){
+    broadcastCJA({ set: setname, uid }, "dlux_nft_delete", `Trying to melt ${setname}:${uid}`) 
+ }
+*/
+    meltNFT(item) {
+      var cja = {
+          set: item.setname,
+          uid: item.uid,
+        },
+        type = "cja";
+      this.toSign = {
+        type,
+        cj: cja,
+        id: `${this.prefix}nft_delete`,
+        msg: `Melting: ${item.setname}:${item.uid}`,
+        ops: ["getUserNFTs"],
+        txid: `${item.setname}:${item.uid}_nft_delete`,
+      };
+    },
     /*
 function sellNFT(setname, uid, price, type, callback){
     price = parseInt(price * 1000)
@@ -860,8 +878,8 @@ function sellNFT(setname, uid, price, type, callback){
           set: item.setname,
           uid: item.uid,
           price: parseInt(this.nftSellTabPrice * 1000),
-          type:this.nftSellTabToken
-      },
+          type: this.nftSellTabToken,
+        },
         type = "cja";
       this.toSign = {
         type,
@@ -887,7 +905,7 @@ function sellNFTcancel(setname, uid, callback){
         type,
         cj: cja,
         id: `${this.prefix}nft_sell_cancel`,
-        msg: `Cancelinging: ${item.set}:${item.uid}`,
+        msg: `Canceling: ${item.set}:${item.uid}`,
         ops: ["getUserNFTs"],
         txid: `${item.set}:${item.uid}_nft_sell_cancel`,
       };
