@@ -416,6 +416,10 @@ var app = new Vue({
           uid: "",
         },
       },
+      nftTradeTabToken: "",
+      nftTradeAllowed: false,
+      nftTradeTabTo: "",
+      nftTradeTabPrice: 100,
       nftSellTabToken: "",
       nftSellTabPrice: 100,
       nftAuctionTabToken: "",
@@ -706,24 +710,6 @@ function tradeFTcancel(setname, uid, callback){
     //NFT's
 
     /*
-function giveNFT(setname, uid, to, callback){
-    checkAccount(to)
-    .then(r => {
-        broadcastCJA({set: setname, uid, to}, "dlux_nft_transfer", `Trying to give ${setname}:${uid} to ${to}`) 
-    })
-    .catch(e=>alert(`${to} is not a valid hive account`))
- }
-
-function tradeNFT(setname, uid, to, price, type, callback){
-    price = parseInt(price * 1000)
-    checkAccount(to)
-    .then(r => {
-        broadcastCJA({ set: setname, uid, to, price, type}, "dlux_nft_reserve_transfer", `Trying to trade ${setname}:${uid}`)
-    })
-    .catch(e=>alert(`${to} is not a valid hive account`))
- }
-
-
 // NFT Actions //
 
  function defineNFT(setname, type, script, permlink, start, end, total, royalty, handling, max_fee, bond, callback){
@@ -853,6 +839,63 @@ function setPFP(setname, uid, callback){
         ops: ["getUserNFTs"],
         txid: `${item.setname}:${item.uid}_nft_delete`,
       };
+    },
+    /*
+function giveNFT(setname, uid, to, callback){
+    checkAccount(to)
+    .then(r => {
+        broadcastCJA({set: setname, uid, to}, "dlux_nft_transfer", `Trying to give ${setname}:${uid} to ${to}`) 
+    })
+    .catch(e=>alert(`${to} is not a valid hive account`))
+ }
+*/
+    giveNFT(item) {
+      if (this.nftTradeAllowed){
+        var cja = {
+            set: item.setname,
+            uid: item.uid,
+            to: this.nftTradeTabTo,
+          },
+          type = "cja";
+        this.toSign = {
+          type,
+          cj: cja,
+          id: `${this.prefix}nft_transfer`,
+          msg: `Giving: ${item.setname}:${item.uid}`,
+          ops: ["getUserNFTs"],
+          txid: `${item.setname}:${item.uid}_nft_transfer`,
+        };
+      }
+    },
+    /*
+function tradeNFT(setname, uid, to, price, type, callback){
+    price = parseInt(price * 1000)
+    checkAccount(to)
+    .then(r => {
+        broadcastCJA({ set: setname, uid, to, price, type}, "dlux_nft_reserve_transfer", `Trying to trade ${setname}:${uid}`)
+    })
+    .catch(e=>alert(`${to} is not a valid hive account`))
+ }
+*/
+    tradeNFT(item) {
+      if (this.nftTradeAllowed){
+        var cja = {
+            set: item.setname,
+            uid: item.uid,
+            price: parseInt(this.nftTradeTabPrice * 1000),
+            type: this.nftTradeTabToken,
+            to: this.nftTradeTabTo,
+          },
+          type = "cja";
+        this.toSign = {
+          type,
+          cj: cja,
+          id: `${this.prefix}nft_reserve_transfer`,
+          msg: `Proposing Trade: ${item.setname}:${item.uid}`,
+          ops: ["getUserNFTs"],
+          txid: `${item.setname}:${item.uid}_nft_reserve_transfer`,
+        };
+      }
     },
     /*
 function sellNFT(setname, uid, price, type, callback){
@@ -1308,6 +1351,7 @@ function auctionNFT(setname, uid, price, now, time, type, callback){
           this.TOKEN = data.jsontoken.toUpperCase();
           this.nftSellTabToken = this.TOKEN;
           this.nftAuctionTabToken = this.TOKEN;
+          this.nftTradeTabToken = this.TOKEN;
           location.hash = data.jsontoken;
           this.node = data.node;
           this.features = data.features ? data.features : this.features;
