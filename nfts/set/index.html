@@ -1430,8 +1430,10 @@
                                     <!-- long name, script, set, uid only other buy data -->
                                   </div>
                                   <div class="text-center pb-4">
-                                    <button type="button" class="btn btn-warning" @click="buyNFT(itemModal.sale)"
+                                    <button v-if="itemModal.sale.by != account" type="button" class="btn btn-warning" @click="buyNFT(itemModal.sale)"
                                       href="#/">Buy </button>
+                                    <button v-else type="button" class="btn btn-warning" @click="cancelNFT(itemModal.sale)"
+                                      href="#/">Cancel </button>
                                   </div>
 
                                 </div>

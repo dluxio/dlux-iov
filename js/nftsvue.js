@@ -768,9 +768,6 @@ function tradeNFTreject(setname, uid, callback){
 function tradeNFTcancel(setname, uid, callback){
     broadcastCJA({ set: setname, uid }, "dlux_nft_transfer_cancel", `Trying to cancel ${setname}:${uid} trade`)
  }
- function sellNFTcancel(setname, uid, callback){
-     broadcastCJA({ set: setname, uid}, "dlux_nft_sell_cancel", `Trying to cancel ${setname}:${uid} sell`)
- }
 
  function bidNFT(setname, uid, bid_amount, type, callback){
     console.log({bid_amount, type})
@@ -853,6 +850,25 @@ function setPFP(setname, uid, callback){
         })
  }
  */
+/*
+function sellNFTcancel(setname, uid, callback){
+     broadcastCJA({ set: setname, uid}, "dlux_nft_sell_cancel", `Trying to cancel ${setname}:${uid} sell`)
+ }
+*/
+    cancelNFT(item) {
+      var cja = {
+        set: item.set,
+        uid: item.uid
+      }, type = "cja"
+        this.toSign = {
+          type,
+          cj: cja,
+          id: `${this.prefix}nft_sell_cancel`,
+          msg: `Cancelinging: ${item.set}:${item.uid}`,
+          ops: ["getUserNFTs"],
+          txid: `${item.set}:${item.uid}_nft_sell_cancel`,
+        };
+    },
     /*
 function buyNFT(setname, uid, price, type, callback){
     if (type.toUpperCase() == 'HIVE') broadcastTransfer({ to: 'dlux-cc', hive: price, memo:`NFTbuy ${setname}:${uid}`}, `Buying ${setname}:${uid}`)
