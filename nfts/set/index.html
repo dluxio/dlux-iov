@@ -1327,7 +1327,7 @@
                                     </div>
                                   </div>
                                   <div class="text-center pb-4">
-                                    <button @click="meltNFT(itemModal.item)" type="button" class="btn btn-warning" data-bs-toggle="collapse"
+                                    <button type="button" class="btn btn-warning" data-bs-toggle="collapse"
                                       href="#melt-confirmation">Melt </button>
                                   </div>
                                   <div class="collapse bg-danger rounded" id="melt-confirmation">
@@ -1338,7 +1338,7 @@
                                     <div class="d-flex justify-content-around p-3">
                                       <button class="btn btn-secondary" data-bs-toggle="collapse"
                                         href="#melt-confirmation">CANCEL <i class="fas fa-running"></i></button>
-                                      <button class="btn btn-danger border-white">DESTROY
+                                      <button @click="meltNFT(itemModal.item)" class="btn btn-danger border-white">DESTROY
                                         <i class="fas fa-bomb"></i> <span
                                           class="spinner-border spinner-border-sm d-none" role="status"
                                           aria-hidden="true"></span></button>
