@@ -418,6 +418,9 @@ var app = new Vue({
       },
       nftSellTabToken: "",
       nftSellTabPrice: 100,
+      nftAuctionTabToken: "",
+      nftAuctionTabPrice: 100,
+      nftAuctionTabTime: 720,
       focusSetCalc: {
         owners: 0,
         deleted: 0,
@@ -721,22 +724,6 @@ function tradeNFT(setname, uid, to, price, type, callback){
  }
 
 
-
-function auctionNFT(setname, uid, price, now, time, type, callback){
-     time = parseInt(time)
-    price = parseInt(price * 1000)
-    if(type.toUpperCase() == 'HIVE'){
-        type = 'HIVE'
-    } else if(type.toUpperCase() == 'HBD'){
-        type = 'HBD'
-    } else {
-        type = 0
-    }
-    if(!type)broadcastCJA({ set: setname, uid, price, now, time}, "dlux_nft_auction", `Trying to auction ${setname}:${uid} for DLUX`)
-    else broadcastCJA({ set: setname, uid, price, type, now, time}, "dlux_nft_hauction", `Trying to auction ${setname}:${uid} for ${type}`)
- }
-
-
 // NFT Actions //
 
  function defineNFT(setname, type, script, permlink, start, end, total, royalty, handling, max_fee, bond, callback){
@@ -936,6 +923,42 @@ function buyNFT(setname, uid, price, type, callback){
         msg: `Purchasing: ${item.set}:${item.uid}`,
         ops: ["getTokenUser", "getUserNFTs", "getHiveUser"],
         txid: `${item.set}:${item.uid}_nft_buy`,
+      };
+    },
+    /*
+function auctionNFT(setname, uid, price, now, time, type, callback){
+     time = parseInt(time)
+    price = parseInt(price * 1000)
+    if(type.toUpperCase() == 'HIVE'){
+        type = 'HIVE'
+    } else if(type.toUpperCase() == 'HBD'){
+        type = 'HBD'
+    } else {
+        type = 0
+    }
+    if(!type)broadcastCJA({ set: setname, uid, price, now, time}, "dlux_nft_auction", `Trying to auction ${setname}:${uid} for DLUX`)
+    else broadcastCJA({ set: setname, uid, price, type, now, time}, "dlux_nft_hauction", `Trying to auction ${setname}:${uid} for ${type}`)
+ }
+
+*/
+    auctionNFT(item) {
+      var cja = {
+          set: item.setname,
+          uid: item.uid,
+          price: parseInt(this.nftAuctionTabPrice * 1000),
+          type:
+            this.nftAuctionTabToken != this.TOKEN ? this.nftAuctionTabToken : 0,
+          now: false,
+          time: this.nftAuctionTabTime,
+        },
+        type = "cja";
+      this.toSign = {
+        type,
+        cj: cja,
+        id: `${this.prefix}nft_${cja.type ? "h" : ""}auction`,
+        msg: `Auctioning: ${item.setname}:${item.uid}`,
+        ops: ["getUserNFTs"],
+        txid: `${item.setname}:${item.uid}_nft_${cja.type ? "h" : ""}auction`,
       };
     },
     precision(num, precision) {
