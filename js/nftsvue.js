@@ -416,6 +416,8 @@ var app = new Vue({
           uid: "",
         },
       },
+      nftSellTabToken: "",
+      nftSellTabPrice: 100,
       focusSetCalc: {
         owners: 0,
         deleted: 0,
@@ -718,10 +720,7 @@ function tradeNFT(setname, uid, to, price, type, callback){
     .catch(e=>alert(`${to} is not a valid hive account`))
  }
 
-function sellNFT(setname, uid, price, type, callback){
-    price = parseInt(price * 1000)
-    broadcastCJA({ set: setname, uid, price, type}, "dlux_nft_sell", `Trying to list ${setname}:${uid} for sell`)
- }
+
 
 function auctionNFT(setname, uid, price, now, time, type, callback){
      time = parseInt(time)
@@ -850,24 +849,48 @@ function setPFP(setname, uid, callback){
         })
  }
  */
-/*
+    /*
+function sellNFT(setname, uid, price, type, callback){
+    price = parseInt(price * 1000)
+    broadcastCJA({ set: setname, uid, price, type}, "dlux_nft_sell", `Trying to list ${setname}:${uid} for sell`)
+ }
+*/
+    sellNFT(item) {
+      var cja = {
+          set: item.set,
+          uid: item.uid,
+          price: parseInt(this.nftSellTabPrice * 1000),
+          type:this.nftSellTabToken
+      },
+        type = "cja";
+      this.toSign = {
+        type,
+        cj: cja,
+        id: `${this.prefix}nft_sell`,
+        msg: `Selling: ${item.set}:${item.uid}`,
+        ops: ["getUserNFTs"],
+        txid: `${item.set}:${item.uid}_nft_sell`,
+      };
+    },
+    /*
 function sellNFTcancel(setname, uid, callback){
      broadcastCJA({ set: setname, uid}, "dlux_nft_sell_cancel", `Trying to cancel ${setname}:${uid} sell`)
  }
 */
     cancelNFT(item) {
       var cja = {
-        set: item.set,
-        uid: item.uid
-      }, type = "cja"
-        this.toSign = {
-          type,
-          cj: cja,
-          id: `${this.prefix}nft_sell_cancel`,
-          msg: `Cancelinging: ${item.set}:${item.uid}`,
-          ops: ["getUserNFTs"],
-          txid: `${item.set}:${item.uid}_nft_sell_cancel`,
-        };
+          set: item.set,
+          uid: item.uid,
+        },
+        type = "cja";
+      this.toSign = {
+        type,
+        cj: cja,
+        id: `${this.prefix}nft_sell_cancel`,
+        msg: `Cancelinging: ${item.set}:${item.uid}`,
+        ops: ["getUserNFTs"],
+        txid: `${item.set}:${item.uid}_nft_sell_cancel`,
+      };
     },
     /*
 function buyNFT(setname, uid, price, type, callback){
@@ -878,23 +901,24 @@ function buyNFT(setname, uid, price, type, callback){
 */
     buyNFT(item) {
       var cja = {
-        set: item.set,
-        uid: item.uid,
-        price: item.price.amount
-      }, type = "cja"
-      if (item.price.token == "HIVE" || item.price.token == "HBD"){
-        type = "xfr"
+          set: item.set,
+          uid: item.uid,
+          price: item.price.amount,
+        },
+        type = "cja";
+      if (item.price.token == "HIVE" || item.price.token == "HBD") {
+        type = "xfr";
         cja.memo = `NFTbuy ${item.set}:${item.uid}`;
         cja[`${item.price.token.toLowerCase()}`] = item.price.amount;
       }
-        this.toSign = {
-          type,
-          cj: cja,
-          id: `${this.prefix}ft_buy`,
-          msg: `Purchasing: ${item.set}:${item.uid}`,
-          ops: ["getTokenUser", "getUserNFTs", "getHiveUser"],
-          txid: `${item.set}:${item.uid}_nft_buy`,
-        };
+      this.toSign = {
+        type,
+        cj: cja,
+        id: `${this.prefix}nft_buy`,
+        msg: `Purchasing: ${item.set}:${item.uid}`,
+        ops: ["getTokenUser", "getUserNFTs", "getHiveUser"],
+        txid: `${item.set}:${item.uid}_nft_buy`,
+      };
     },
     precision(num, precision) {
       return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
@@ -1241,6 +1265,7 @@ function buyNFT(setname, uid, price, type, callback){
           this.multisig = data.multisig;
           this.jsontoken = data.jsontoken;
           this.TOKEN = data.jsontoken.toUpperCase();
+          this.nftSellTabToken = this.TOKEN;
           location.hash = data.jsontoken;
           this.node = data.node;
           this.features = data.features ? data.features : this.features;
