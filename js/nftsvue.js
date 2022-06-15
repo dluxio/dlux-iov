@@ -868,7 +868,7 @@ function buyNFT(setname, uid, price, type, callback){
       }, type = "cja"
       if (item.price.token == "HIVE" || item.price.token == "HBD"){
         type = "xfr"
-        cja.memo = cja
+        cja.memo = `NFTbuy ${item.set}:${item.uid}`;
         cja[`${item.price.token.toLowerCase()}`] = item.price.amount;
       }
         this.toSign = {
