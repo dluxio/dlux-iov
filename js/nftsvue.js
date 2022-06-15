@@ -867,9 +867,9 @@ function sellNFT(setname, uid, price, type, callback){
         type,
         cj: cja,
         id: `${this.prefix}nft_sell`,
-        msg: `Selling: ${item.set}:${item.uid}`,
+        msg: `Selling: ${item.setname}:${item.uid}`,
         ops: ["getUserNFTs"],
-        txid: `${item.set}:${item.uid}_nft_sell`,
+        txid: `${item.setname}:${item.uid}_nft_sell`,
       };
     },
     /*
