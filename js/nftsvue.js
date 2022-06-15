@@ -420,7 +420,7 @@ var app = new Vue({
       nftSellTabPrice: 100,
       nftAuctionTabToken: "",
       nftAuctionTabPrice: 100,
-      nftAuctionTabTime: 720,
+      nftAuctionTabTime: 7,
       focusSetCalc: {
         owners: 0,
         deleted: 0,
@@ -1307,6 +1307,7 @@ function auctionNFT(setname, uid, price, now, time, type, callback){
           this.jsontoken = data.jsontoken;
           this.TOKEN = data.jsontoken.toUpperCase();
           this.nftSellTabToken = this.TOKEN;
+          this.nftAuctionTabToken = this.TOKEN;
           location.hash = data.jsontoken;
           this.node = data.node;
           this.features = data.features ? data.features : this.features;
