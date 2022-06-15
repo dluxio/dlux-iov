@@ -1102,6 +1102,7 @@ function auctionNFT(setname, uid, price, now, time, type, callback){
     auctionData(modal) {
       const uid = this[modal].item.uid;
       this[modal].auction = this.auctions.filter((a) => a.uid == uid)[0];
+      this.nftAuctionTabPrice = this[modal].auction.price.amount / 1000
     },
     saleData(modal) {
       const uid = this[modal].item.uid;
