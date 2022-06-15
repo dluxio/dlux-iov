@@ -277,8 +277,9 @@
 
                                     <div class="invalid-feedback">Fix Yourself</div>
                                   </div>
-                                  <button type="submit" class="btn btn-info d-none"
-                                    v-show="ad.by != account" @click="buyMint(ad.uid)">Buy</button>{{toFixed(ad.buyQty * ad.pricenai.amount,0)}} {{ad.pricenai.tokrn}}
+                                  <button type="submit" class="btn btn-info d-none" v-show="ad.by != account"
+                                    @click="buyMint(ad.uid)">Buy</button>{{toFixed(ad.buyQty * ad.pricenai.amount,0)}}
+                                  {{ad.pricenai.tokrn}}
                                 </form>
                               </span>
                               </span></td>
@@ -636,333 +637,337 @@
         </div>
 
         <div class="row">
-        <!--filters-->
-        <div class="col" style="max-width: 300px;">
-          <div class="accordion bg-dark" id="accordionFilter">
-            <div class="accordion-item bg-secondary">
-              <h2 class="accordion-header" id="headingOne">
-                <button class="accordion-button bg-darkg text-white" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                  Status
-                </button>
-              </h2>
-              <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
-                data-bs-parent="#accordionFilter">
-                <div class="accordion-body bg-darkest">
-                  <label class="form-label text-white-50">market</label>
-                  <ul class="list-group">
-                    <li class="list-group-item bg-black border border-dark text-white-50">
-                      <input class="form-check-input me-1" type="checkbox" :checked="NFTselect.saleOnly"
-                        @click="NFTselect.saleOnly = !NFTselect.saleOnly;selectNFTs()" aria-label="...">
-                      Buy Now ({{sales.length}})
-                    </li>
-                    <li class="list-group-item bg-black border border-dark text-white-50">
-                      <input class="form-check-input me-1" type="checkbox" :checked="NFTselect.auctionOnly"
-                        @click="NFTselect.auctionOnly = !NFTselect.auctionOnly;selectNFTs()" aria-label="...">
-                      At Auction ({{auctions.length}})
-                    </li>
-                  </ul>
-                  <label class="form-label mt-3 text-white-50">@{{account}}</label>
-                  <ul class="list-group">
-                    <li class="list-group-item bg-black border border-dark text-white-50">
-                      <input class="form-check-input me-1" type="checkbox" :checked="iOwnCheckbox"
-                        @click="iOwnView()" aria-label="...">
-                      Owner ({{iOwn.length}})
-                    </li>
-                    <li class="list-group-item bg-black border border-dark text-white-50">
-                      <input class="form-check-input me-1" type="checkbox" :checked="highBidderCheckbox"
-                        @click="highBidderView()" aria-label="...">
-                      High Bidder ({{highBidder.length}})
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <div class="accordion-item bg-secondary bg-secondary text-white">
-              <h2 class="accordion-header" id="headingThree">
-                <button class="accordion-button bg-darkg text-white collapsed" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                  Currency
-                </button>
-              </h2>
-              <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
-                data-bs-parent="#accordionExample">
-                <div class="accordion-body bg-darkest">
-                  <ul class="list-group">
-                    <li class="list-group-item bg-black border border-dark text-white-50">
-                      <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
-                      {{TOKEN}}
-                    </li>
-                    <li class="list-group-item bg-black border border-dark text-white-50">
-                      <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
-                      HIVE
-                    </li>
-                    <li class="list-group-item bg-black border border-dark text-white-50">
-                      <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
-                      HBD
-                    </li>
-                  </ul>
-
-                </div>
-              </div>
-            </div>
-            <div class="accordion-item bg-secondary">
-              <h2 class="accordion-header" id="headingTwo">
-                <button class="accordion-button bg-darkg text-white collapsed" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                  Price
-                </button>
-              </h2>
-              <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
-                data-bs-parent="#accordionExample">
-                <div class="accordion-body bg-darkest">
-                  Currency selector (USD / DLUX / HIVE) MIN to MAX
-
-                </div>
-              </div>
-            </div>
-            <div class="accordion-item bg-secondary">
-              <h2 class="accordion-header" id="headingFour">
-                <button class="accordion-button bg-darkg text-white collapsed" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
-                  Attribute 1
-                </button>
-              </h2>
-              <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour"
-                data-bs-parent="#accordionExample">
-                <div class="accordion-body bg-darkest">
-                  <ul class="list-group">
-                    <li class="list-group-item bg-black border border-dark text-white-50">
-                      <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
-                      Value 1 (#)
-                    </li>
-                    <li class="list-group-item bg-black border border-dark text-white-50">
-                      <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
-                      Value 2 (#)
-                    </li>
-                    <li class="list-group-item bg-black border border-dark text-white-50">
-                      <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
-                      Value 3 (#)
-                    </li>
-                    <li class="list-group-item bg-black border border-dark text-white-50">
-                      <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
-                      Value 4 (#)
-                    </li>
-                    <li class="list-group-item bg-black border border-dark text-white-50">
-                      <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
-                      Value 5 (#)
-                    </li>
-                  </ul>
-
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-
-        <!--set items-->
-        <div class="col">
-          <div class="text-center my-3 d-flex align-items-center">
-            <div class="d-flex flex-wrap">
-              <!--filter-->
-              <div class="me-2">
-                <div class="dropdown">
-                  <button class="btn btn-secondary dropdown-toggle" data-bs-auto-close="outside" type="button"
-                    id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fa-solid fa-filter me-2"></i> Filter
+          <!--filters-->
+          <div class="col" style="max-width: 300px;">
+            <div class="accordion bg-dark" id="accordionFilter">
+              <div class="accordion-item bg-secondary">
+                <h2 class="accordion-header" id="headingOne">
+                  <button class="accordion-button bg-darkg text-white" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                    Status
                   </button>
-                  <ul class="dropdown-menu dropdown-menu-dark p-2" aria-labelledby="filterDropdown">
-                    <li class="mt-3"> <button class="btn btn-dark border-secondary text-white-50 w-100 dropdown-toggle"
-                        type="button" id="dropdownFilterButton" data-bs-toggle="dropdown" aria-expanded="false">
-                        <span>Search in:</span>
-                        <span v-if="NFTselect.searchDeep">Attributes</span>
-                        <span v-if="!NFTselect.searchDeep">UIDs and Owners</span>
-                      </button>
-                      <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownFilterButton">
-                        <li><a class="dropdown-item" :class="{'active':!NFTselect.searchDeep}" href="#/"
-                            @click="setValue('NFTselect.searchDeep',false)">Search
-                            UIDs and Owners</a></li>
-                        <li><a class="dropdown-item" :class="{'active':NFTselect.searchDeep && ! NFTselect.searchDeepK}"
-                            href="#/"
-                            @click="setValue('NFTselect.searchDeep',true);setValue('NFTselect.searchDeepK', false)">Search
-                            Attributes</a></li>
-                        <li v-if="!focusSetCalc.attributeKeys.length"><a class="dropdown-item"
-                            :class="{'active':NFTselect.searching}" href="#/"
-                            @click="selectNFTs(true, true);setValue('NFTselect.searchDeepK', true)">Index
-                            Set (Pre-Search)</a></li>
-                        <li v-if="focusSetCalc.attributeKeys.length"><a class="dropdown-item"
-                            :class="{'active':NFTselect.searchDeepK}" href="#/"
-                            @click="setValue('NFTselect.searchDeepK', true)">Search
-                            in Attribute</a></li>
-                      </ul>
-                    </li>
-                    <li class="mt-3"><button
-                        class="form-control btn btn-dark border-danger text-white-50 w-100 dropdown-toggle"
-                        type="button" id="dropdownFilterButton2" data-bs-toggle="dropdown" aria-expanded="false"
-                        v-if="NFTselect.searchDeepK">
-                        <span>{{NFTselect.searching ? 'Searching...' :
-                          'Attribute:'}}</span>
-                        <span v-if="NFTselect.searchDeepKey">{{NFTselect.searchDeepKey}}</span>
-                        <span v-if="!NFTselect.searchDeepKey">Select</span>
-                      </button>
-                      <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownFilterButton2">
-                        <li v-for="k in focusSetCalc.attributeKeys"><a class="dropdown-item"
-                            :class="{'active':k == NFTselect.searchDeepKey}" href="#/"
-                            @click="setValue('NFTselect.searchDeepKey',k)">{{k}}</a>
-                        </li>
-                      </ul>
-                    </li>
-                    <li class="my-3"><button class="btn btn-dark border-danger text-white-50 w-100 dropdown-toggle"
-                        type="button" id="dropdownFilterButton3" data-bs-toggle="dropdown" aria-expanded="false"
-                        v-if="NFTselect.searchDeepKey">
-                        <span>Value:</span>
-                        <span v-if="includes">{{NFTselect.searchTerm}}</span>
-                        <span v-else>Select</span>
-                      </button>
-                      <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownFilterButton3">
-                        <li v-for="l in focusSetCalc.attributes[NFTselect.searchDeepKey]">
-                          <a class="dropdown-item" :class="{'active': includes}" href="#/"
-                            @click="setValue('NFTselect.searchTerm', l);selectNFTs()">{{l}}
-                            ({{focusSetCalc.attributesC[NFTselect.searchDeepKey][l]}})</a>
-                        </li>
-                      </ul>
-                    </li>
-                  </ul>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                  data-bs-parent="#accordionFilter">
+                  <div class="accordion-body bg-darkest">
+                    <label class="form-label text-white-50">market</label>
+                    <ul class="list-group">
+                      <li class="list-group-item bg-black border border-dark text-white-50">
+                        <input class="form-check-input me-1" type="checkbox" :checked="NFTselect.saleOnly"
+                          @click="NFTselect.saleOnly = !NFTselect.saleOnly;selectNFTs()" aria-label="...">
+                        Buy Now ({{sales.length}})
+                      </li>
+                      <li class="list-group-item bg-black border border-dark text-white-50">
+                        <input class="form-check-input me-1" type="checkbox" :checked="NFTselect.auctionOnly"
+                          @click="NFTselect.auctionOnly = !NFTselect.auctionOnly;selectNFTs()" aria-label="...">
+                        At Auction ({{auctions.length}})
+                      </li>
+                    </ul>
+                    <label class="form-label mt-3 text-white-50">@{{account}}</label>
+                    <ul class="list-group">
+                      <li class="list-group-item bg-black border border-dark text-white-50">
+                        <input class="form-check-input me-1" type="checkbox" :checked="iOwnCheckbox" @click="iOwnView()"
+                          aria-label="...">
+                        Owner ({{iOwn.length}})
+                      </li>
+                      <li class="list-group-item bg-black border border-dark text-white-50">
+                        <input class="form-check-input me-1" type="checkbox" :checked="highBidderCheckbox"
+                          @click="highBidderView()" aria-label="...">
+                        High Bidder ({{highBidder.length}})
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
-              <!--search-->
-              <div class="col me-2">
+              <div class="accordion-item bg-secondary bg-secondary text-white">
+                <h2 class="accordion-header" id="headingThree">
+                  <button class="accordion-button bg-darkg text-white collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                    Currency
+                  </button>
+                </h2>
+                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
+                  data-bs-parent="#accordionExample">
+                  <div class="accordion-body bg-darkest">
+                    <ul class="list-group">
+                      <li class="list-group-item bg-black border border-dark text-white-50">
+                        <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
+                        {{TOKEN}}
+                      </li>
+                      <li class="list-group-item bg-black border border-dark text-white-50">
+                        <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
+                        HIVE
+                      </li>
+                      <li class="list-group-item bg-black border border-dark text-white-50">
+                        <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
+                        HBD
+                      </li>
+                    </ul>
 
-                <div class="input-group me-2 w-100">
-                  <span class="input-group-text bg-darkg border-dark text-secondary" @click="focus('searchTerm')"><i
-                      class="fas fa-search"></i></span>
-                  <input type="text" id="searchTerm" class="form-control bg-darkg border-dark text-info"
-                    v-model="NFTselect.searchTerm" @keyup.enter="selectNFTs(true)" aria-required="true"
-                    :placeholder="NFTselect.searchDefault" />
-
-                  <span class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix" style="width: 42px">
-                    <span v-if="NFTselect.searchTerm">
-                      <a href="#/" class="badge badge-secondary"
-                        @click="setValue('NFTselect.searchTerm','');selectNFTs(true)"><i class="fas fa-times"></i></a>
-                    </span>
-                  </span>
+                  </div>
                 </div>
               </div>
+              <div class="accordion-item bg-secondary">
+                <h2 class="accordion-header" id="headingTwo">
+                  <button class="accordion-button bg-darkg text-white collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    Price
+                  </button>
+                </h2>
+                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                  data-bs-parent="#accordionExample">
+                  <div class="accordion-body bg-darkest">
+                    Currency selector (USD / DLUX / HIVE) MIN to MAX
 
-
-              <!--sort-->
-              <div class="dropdown col me-2">
-                <button class="btn btn-dark border-secondary text-white-50 w-100 dropdown-toggle" type="button"
-                  id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                  <span>Sort on</span>
-                  <span v-if="NFTselect.sort == 'uid' && NFTselect.dir == 'asc'">UID: Low
-                    to High</span>
-                  <span v-if="NFTselect.sort == 'uid' && NFTselect.dir == 'desc'">UID:
-                    High to Low</span>
-                  <span v-if="NFTselect.sort == 'owner' && NFTselect.dir == 'asc'">Owner:
-                    A to Z</span>
-                  <span v-if="NFTselect.sort == 'owner' && NFTselect.dir == 'desc'">Owner:
-                    Z to A</span>
-                  <span v-if="NFTselect.sort == 'price' && NFTselect.dir == 'asc'">Price: Low
-                    to High</span>
-                  <span v-if="NFTselect.sort == 'price' && NFTselect.dir == 'desc'">Price:
-                    High to Low</span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="sortDropdown">
-                  <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'uid' && NFTselect.dir == 'asc'}"
-                      href="#/"
-                      @click="setValue('NFTselect.sort','uid');setValue('NFTselect.dir','asc');selectNFTs(true)">UID:
-                      Low to High</a></li>
-                  <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'uid' && NFTselect.dir == 'desc'}"
-                      href="#/"
-                      @click="setValue('NFTselect.sort','uid');setValue('NFTselect.dir','desc');selectNFTs(true)">UID:
-                      High to Low</a></li>
-                  <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'owner' && NFTselect.dir == 'asc'}"
-                      href="#/"
-                      @click="setValue('NFTselect.sort','owner');setValue('NFTselect.dir','asc');selectNFTs(true)">Owner:
-                      A to Z</a></li>
-                  <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'owner' && NFTselect.dir == 'desc'}"
-                      href="#/"
-                      @click="setValue('NFTselect.sort','owner');setValue('NFTselect.dir','desc');selectNFTs(true)">Ownder:
-                      Z to A</a></li>
-                  <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'price' && NFTselect.dir == 'asc'}"
-                      href="#/"
-                      @click="setValue('NFTselect.sort','price');setValue('NFTselect.dir','asc');selectNFTs(true)">Price:
-                      Low to High</a></li>
-                  <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'price' && NFTselect.dir == 'desc'}"
-                      href="#/"
-                      @click="setValue('NFTselect.sort','price');setValue('NFTselect.dir','desc');selectNFTs(true)">Price:
-                      High to Low</a></li>
-                 </ul>
+                  </div>
+                </div>
               </div>
-              <!--deleted show / hide-->
-              <div class="dropdown col">
-                <button class="btn btn-dark border-secondary text-white-50 w-100 dropdown-toggle" type="button"
-                  id="deletedDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                  <span v-if="!NFTselect.showDeleted">Deleted: Hiding</span>
-                  <span v-if="NFTselect.showDeleted">Deleted: Showing</span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="deletedDropdown">
-                  <li><a class="dropdown-item" :class="{'active':!NFTselect.showDeleted}" href="#/"
-                      @click="setValue('NFTselect.showDeleted', false);selectNFTs(true)">Hide
-                      Deleted</a></li>
-                  <li><a class="dropdown-item" :class="{'active':NFTselect.showDeleted}" href="#/"
-                      @click="setValue('NFTselect.showDeleted', true);selectNFTs(true)">Show
-                      Deleted</a></li>
-                </ul>
+              <div class="accordion-item bg-secondary">
+                <h2 class="accordion-header" id="headingFour">
+                  <button class="accordion-button bg-darkg text-white collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                    Attribute 1
+                  </button>
+                </h2>
+                <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour"
+                  data-bs-parent="#accordionExample">
+                  <div class="accordion-body bg-darkest">
+                    <ul class="list-group">
+                      <li class="list-group-item bg-black border border-dark text-white-50">
+                        <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
+                        Value 1 (#)
+                      </li>
+                      <li class="list-group-item bg-black border border-dark text-white-50">
+                        <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
+                        Value 2 (#)
+                      </li>
+                      <li class="list-group-item bg-black border border-dark text-white-50">
+                        <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
+                        Value 3 (#)
+                      </li>
+                      <li class="list-group-item bg-black border border-dark text-white-50">
+                        <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
+                        Value 4 (#)
+                      </li>
+                      <li class="list-group-item bg-black border border-dark text-white-50">
+                        <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
+                        Value 5 (#)
+                      </li>
+                    </ul>
+
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-          <div class="row row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
 
-            <div class="col mb-4" v-for="item in selectedNFTs">
-              <div class="card text-white bg-dark">
-                <div class="card-header border-0 d-flex align-items-center"
-                  :style="{'background': getSetDetailsColors(focusSet.computed ? focusSet.computed : '')}">
-                  <div class="rounded-pill d-flex align-items-center p-2 me-2" style="background: black">
-                    <h2 class="m-0 px-2">{{item.uid}}</h2>
+
+          <!--set items-->
+          <div class="col">
+            <div class="text-center my-3 d-flex align-items-center">
+              <div class="d-flex flex-wrap">
+                <!--filter-->
+                <div class="me-2">
+                  <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" data-bs-auto-close="outside" type="button"
+                      id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="fa-solid fa-filter me-2"></i> Filter
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark p-2" aria-labelledby="filterDropdown">
+                      <li class="mt-3"> <button
+                          class="btn btn-dark border-secondary text-white-50 w-100 dropdown-toggle" type="button"
+                          id="dropdownFilterButton" data-bs-toggle="dropdown" aria-expanded="false">
+                          <span>Search in:</span>
+                          <span v-if="NFTselect.searchDeep">Attributes</span>
+                          <span v-if="!NFTselect.searchDeep">UIDs and Owners</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownFilterButton">
+                          <li><a class="dropdown-item" :class="{'active':!NFTselect.searchDeep}" href="#/"
+                              @click="setValue('NFTselect.searchDeep',false)">Search
+                              UIDs and Owners</a></li>
+                          <li><a class="dropdown-item"
+                              :class="{'active':NFTselect.searchDeep && ! NFTselect.searchDeepK}" href="#/"
+                              @click="setValue('NFTselect.searchDeep',true);setValue('NFTselect.searchDeepK', false)">Search
+                              Attributes</a></li>
+                          <li v-if="!focusSetCalc.attributeKeys.length"><a class="dropdown-item"
+                              :class="{'active':NFTselect.searching}" href="#/"
+                              @click="selectNFTs(true, true);setValue('NFTselect.searchDeepK', true)">Index
+                              Set (Pre-Search)</a></li>
+                          <li v-if="focusSetCalc.attributeKeys.length"><a class="dropdown-item"
+                              :class="{'active':NFTselect.searchDeepK}" href="#/"
+                              @click="setValue('NFTselect.searchDeepK', true)">Search
+                              in Attribute</a></li>
+                        </ul>
+                      </li>
+                      <li class="mt-3"><button
+                          class="form-control btn btn-dark border-danger text-white-50 w-100 dropdown-toggle"
+                          type="button" id="dropdownFilterButton2" data-bs-toggle="dropdown" aria-expanded="false"
+                          v-if="NFTselect.searchDeepK">
+                          <span>{{NFTselect.searching ? 'Searching...' :
+                            'Attribute:'}}</span>
+                          <span v-if="NFTselect.searchDeepKey">{{NFTselect.searchDeepKey}}</span>
+                          <span v-if="!NFTselect.searchDeepKey">Select</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownFilterButton2">
+                          <li v-for="k in focusSetCalc.attributeKeys"><a class="dropdown-item"
+                              :class="{'active':k == NFTselect.searchDeepKey}" href="#/"
+                              @click="setValue('NFTselect.searchDeepKey',k)">{{k}}</a>
+                          </li>
+                        </ul>
+                      </li>
+                      <li class="my-3"><button class="btn btn-dark border-danger text-white-50 w-100 dropdown-toggle"
+                          type="button" id="dropdownFilterButton3" data-bs-toggle="dropdown" aria-expanded="false"
+                          v-if="NFTselect.searchDeepKey">
+                          <span>Value:</span>
+                          <span v-if="includes">{{NFTselect.searchTerm}}</span>
+                          <span v-else>Select</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownFilterButton3">
+                          <li v-for="l in focusSetCalc.attributes[NFTselect.searchDeepKey]">
+                            <a class="dropdown-item" :class="{'active': includes}" href="#/"
+                              @click="setValue('NFTselect.searchTerm', l);selectNFTs()">{{l}}
+                              ({{focusSetCalc.attributesC[NFTselect.searchDeepKey][l]}})</a>
+                          </li>
+                        </ul>
+                      </li>
+                    </ul>
                   </div>
-                  <h3 class="card-title lead border rounded border-dark p-2 ms-auto mb-0 text-center">
-                    <a :href="makeLink('/nfts/set/',item.setname)" class="lead no-decoration"
-                      style="color: black">{{item.setname}}
-                      NFT</a>
-                  </h3>
                 </div>
-                <a href="#itemModal" class="a-1" data-bs-toggle="modal"
-                  @click="modalIndex('itemModal',item.uid);setValue('itemModal.hidden', false)">
-                  <div class="card-img-top" :alt="makeLink('image-', item.setname, ['-', item.uid])" v-html="item.HTML">
+                <!--search-->
+                <div class="col me-2">
+
+                  <div class="input-group me-2 w-100">
+                    <span class="input-group-text bg-darkg border-dark text-secondary" @click="focus('searchTerm')"><i
+                        class="fas fa-search"></i></span>
+                    <input type="text" id="searchTerm" class="form-control bg-darkg border-dark text-info"
+                      v-model="NFTselect.searchTerm" @keyup.enter="selectNFTs(true)" aria-required="true"
+                      :placeholder="NFTselect.searchDefault" />
+
+                    <span class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix"
+                      style="width: 42px">
+                      <span v-if="NFTselect.searchTerm">
+                        <a href="#/" class="badge badge-secondary"
+                          @click="setValue('NFTselect.searchTerm','');selectNFTs(true)"><i class="fas fa-times"></i></a>
+                      </span>
+                    </span>
                   </div>
-                  <div class="card-body d-flex flex-column text-center">
-                    #{{Base64toNumber(item.uid)}} /
-                    {{focusSet.max}} </div>
-                </a>
-
-                <div class="card-footer text-center d-flex justify-content-between align-items-center"
-                  v-if="item.owner.length > 2">
-                  <span><i class="fa-brands fa-hive me-2"></i><a
-                      :href="makeLink('/@', item.owner, ['#inventory'])">{{item.owner}}</a></span>
                 </div>
 
-                <div class="card-footer text-center d-flex justify-content-between align-items-center"
-                  v-if="item.owner == 'D'"> <span>Deleted</span></div>
 
-                <div class="card-footer text-center d-flex justify-content-between align-items-center"
-                  v-if="item.owner == 'ah' || item.owner == 'hh'"> <span><a href="#itemModal" class="a-1" data-bs-toggle="modal"
-                      @click="modalIndex('itemModal',item.uid);setValue('itemModal.hidden', false);auctionData('itemModal')">At
-                      Auction: {{getPrice(item.uid)}}</a></span> </div>
+                <!--sort-->
+                <div class="dropdown col me-2">
+                  <button class="btn btn-dark border-secondary text-white-50 w-100 dropdown-toggle" type="button"
+                    id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span>Sort on</span>
+                    <span v-if="NFTselect.sort == 'uid' && NFTselect.dir == 'asc'">UID: Low
+                      to High</span>
+                    <span v-if="NFTselect.sort == 'uid' && NFTselect.dir == 'desc'">UID:
+                      High to Low</span>
+                    <span v-if="NFTselect.sort == 'owner' && NFTselect.dir == 'asc'">Owner:
+                      A to Z</span>
+                    <span v-if="NFTselect.sort == 'owner' && NFTselect.dir == 'desc'">Owner:
+                      Z to A</span>
+                    <span v-if="NFTselect.sort == 'price' && NFTselect.dir == 'asc'">Price: Low
+                      to High</span>
+                    <span v-if="NFTselect.sort == 'price' && NFTselect.dir == 'desc'">Price:
+                      High to Low</span>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="sortDropdown">
+                    <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'uid' && NFTselect.dir == 'asc'}"
+                        href="#/"
+                        @click="setValue('NFTselect.sort','uid');setValue('NFTselect.dir','asc');selectNFTs(true)">UID:
+                        Low to High</a></li>
+                    <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'uid' && NFTselect.dir == 'desc'}"
+                        href="#/"
+                        @click="setValue('NFTselect.sort','uid');setValue('NFTselect.dir','desc');selectNFTs(true)">UID:
+                        High to Low</a></li>
+                    <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'owner' && NFTselect.dir == 'asc'}"
+                        href="#/"
+                        @click="setValue('NFTselect.sort','owner');setValue('NFTselect.dir','asc');selectNFTs(true)">Owner:
+                        A to Z</a></li>
+                    <li><a class="dropdown-item"
+                        :class="{'active':NFTselect.sort == 'owner' && NFTselect.dir == 'desc'}" href="#/"
+                        @click="setValue('NFTselect.sort','owner');setValue('NFTselect.dir','desc');selectNFTs(true)">Ownder:
+                        Z to A</a></li>
+                    <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'price' && NFTselect.dir == 'asc'}"
+                        href="#/"
+                        @click="setValue('NFTselect.sort','price');setValue('NFTselect.dir','asc');selectNFTs(true)">Price:
+                        Low to High</a></li>
+                    <li><a class="dropdown-item"
+                        :class="{'active':NFTselect.sort == 'price' && NFTselect.dir == 'desc'}" href="#/"
+                        @click="setValue('NFTselect.sort','price');setValue('NFTselect.dir','desc');selectNFTs(true)">Price:
+                        High to Low</a></li>
+                  </ul>
+                </div>
+                <!--deleted show / hide-->
+                <div class="dropdown col">
+                  <button class="btn btn-dark border-secondary text-white-50 w-100 dropdown-toggle" type="button"
+                    id="deletedDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span v-if="!NFTselect.showDeleted">Deleted: Hiding</span>
+                    <span v-if="NFTselect.showDeleted">Deleted: Showing</span>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="deletedDropdown">
+                    <li><a class="dropdown-item" :class="{'active':!NFTselect.showDeleted}" href="#/"
+                        @click="setValue('NFTselect.showDeleted', false);selectNFTs(true)">Hide
+                        Deleted</a></li>
+                    <li><a class="dropdown-item" :class="{'active':NFTselect.showDeleted}" href="#/"
+                        @click="setValue('NFTselect.showDeleted', true);selectNFTs(true)">Show
+                        Deleted</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="row row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
 
-                <div class="card-footer text-center d-flex justify-content-between align-items-center"
-                  v-if="item.owner == 'ls'">
-                  <span><a href="#itemModal" class="a-1" data-bs-toggle="modal"
-                      @click="modalIndex('itemModal',item.uid);setValue('itemModal.hidden', false);saleData('itemModal')">For
-                      Sale: {{getPrice(item.uid)}}</a></span>
+              <div class="col mb-4" v-for="item in selectedNFTs">
+                <div class="card text-white bg-dark">
+                  <div class="card-header border-0 d-flex align-items-center"
+                    :style="{'background': getSetDetailsColors(focusSet.computed ? focusSet.computed : '')}">
+                    <div class="rounded-pill d-flex align-items-center p-2 me-2" style="background: black">
+                      <h2 class="m-0 px-2">{{item.uid}}</h2>
+                    </div>
+                    <h3 class="card-title lead border rounded border-dark p-2 ms-auto mb-0 text-center">
+                      <a :href="makeLink('/nfts/set/',item.setname)" class="lead no-decoration"
+                        style="color: black">{{item.setname}}
+                        NFT</a>
+                    </h3>
+                  </div>
+                  <a href="#itemModal" class="a-1" data-bs-toggle="modal"
+                    @click="modalIndex('itemModal',item.uid);setValue('itemModal.hidden', false)">
+                    <div class="card-img-top" :alt="makeLink('image-', item.setname, ['-', item.uid])"
+                      v-html="item.HTML">
+                    </div>
+                    <div class="card-body d-flex flex-column text-center">
+                      #{{Base64toNumber(item.uid)}} /
+                      {{focusSet.max}} </div>
+                  </a>
+
+                  <div class="card-footer text-center d-flex justify-content-between align-items-center"
+                    v-if="item.owner.length > 2">
+                    <span><i class="fa-brands fa-hive me-2"></i><a
+                        :href="makeLink('/@', item.owner, ['#inventory'])">{{item.owner}}</a></span>
+                  </div>
+
+                  <div class="card-footer text-center d-flex justify-content-between align-items-center"
+                    v-if="item.owner == 'D'"> <span>Deleted</span></div>
+
+                  <div class="card-footer text-center d-flex justify-content-between align-items-center"
+                    v-if="item.owner == 'ah' || item.owner == 'hh'"> <span><a href="#itemModal" class="a-1"
+                        data-bs-toggle="modal"
+                        @click="modalIndex('itemModal',item.uid);setValue('itemModal.hidden', false);auctionData('itemModal')">At
+                        Auction: {{getPrice(item.uid)}}</a></span> </div>
+
+                  <div class="card-footer text-center d-flex justify-content-between align-items-center"
+                    v-if="item.owner == 'ls'">
+                    <span><a href="#itemModal" class="a-1" data-bs-toggle="modal"
+                        @click="modalIndex('itemModal',item.uid);setValue('itemModal.hidden', false);saleData('itemModal')">For
+                        Sale: {{getPrice(item.uid)}}</a></span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
         <!--new item modal-->
         <div class="modal fade " id="itemModal" v-show="!itemModal.hidden" tabindex="-1" role="dialog"
           aria-hidden="true">
@@ -991,7 +996,8 @@
                           <h2><a class="text-muted p-3" href="#/" @click="modalPrev('itemModal')"
                               :class="{'invisible':!itemModal.index}"><i class="fas fa-caret-square-left"></i></a></h2>
                           <small class="ms-auto text-muted"><i>Item {{itemModal.index + 1}} of
-                              {{NFTselect.auctionOnly || NFTselect.saleOnly || NFTselect.sort == 'price' || NFTselect.searchTerm ? allSearchNFTs.length : allNFTs.length}}</i></small>
+                              {{NFTselect.auctionOnly || NFTselect.saleOnly || NFTselect.sort == 'price' ||
+                              NFTselect.searchTerm ? allSearchNFTs.length : allNFTs.length}}</i></small>
                           <h2 class="ms-auto"><a class="text-muted p-3" href="#/" @click="modalNext('itemModal')"><i
                                 class="fas fa-caret-square-right"></i></a></h2>
                         </div>
@@ -1020,9 +1026,9 @@
                       <div class="card bg-dark text-white">
                         <div class="card-header" id="headingDescription">
                           <h5 class="mb-0">
-                            <button class="btn btn-link text-primary no-decoration" data-bs-toggle="collapse" data-bs-target="#collapseDescription"
-                              aria-expanded="true" aria-controls="collapseDescription"><i
-                                class="fas fa-list me-3"></i>DESCRIPTION</button>
+                            <button class="btn btn-link text-primary no-decoration" data-bs-toggle="collapse"
+                              data-bs-target="#collapseDescription" aria-expanded="true"
+                              aria-controls="collapseDescription"><i class="fas fa-list me-3"></i>DESCRIPTION</button>
                           </h5>
                         </div>
                         <div id="collapseDescription" class="collapse" aria-labelledby="headingDescription"
@@ -1104,7 +1110,8 @@
                                             <div class="input-group-prepend"> <span
                                                 class="input-group-text bg-dark border-dark text-white-50"
                                                 id="giveNFTuserprep">@</span></div>
-                                            <input v-model="nftTradeTabTo" @blur="checkAccount(nftTradeTabTo, 'nftTradeAllowed')" type="text"
+                                            <input v-model="nftTradeTabTo"
+                                              @blur="checkAccount(nftTradeTabTo, 'nftTradeAllowed')" type="text"
                                               class="form-control bg-dark border-dark text-info r-radius-hotfix"
                                               id="giveNFTusername" aria-describedby="giveNFTuserprep" required>
                                             <div class="invalid-feedback"> Please enter the username you'd like to give
@@ -1114,7 +1121,8 @@
                                         </div>
                                       </div>
                                       <div class="text-center">
-                                        <button @click="giveNFT(itemModal.item)" id="giveNFTbutton" class="btn btn-info my-2" type="submit">Give</button>
+                                        <button @click="giveNFT(itemModal.item)" id="giveNFTbutton"
+                                          class="btn btn-info my-2" type="submit">Give</button>
                                       </div>
                                     </form>
                                   </div>
@@ -1128,7 +1136,8 @@
                                             <div class="input-group-prepend"> <span
                                                 class="input-group-text bg-dark border-dark text-white-50"
                                                 id="tradeNFTuserprep">@</span></div>
-                                            <input type="text" v-model="nftTradeTabTo" @blur="checkAccount(nftTradeTabTo, 'nftTradeAllowed')"
+                                            <input type="text" v-model="nftTradeTabTo"
+                                              @blur="checkAccount(nftTradeTabTo, 'nftTradeAllowed')"
                                               class="form-control bg-dark border-dark text-info r-radius-hotfix"
                                               id="tradeNFTusername" aria-describedby="tradeNFTuserprep" required>
                                             <div class="invalid-feedback"> Please enter the username you'd like to trade
@@ -1139,16 +1148,20 @@
                                       </div>
                                       <div class="form-group form-row my-2">
                                         <label for="tradeNFTamount">Amount</label>
-                                        <small v-if="nftTradeTabToken == TOKEN"class="ms-auto mb-2 align-self-center text-white-50">0% FEE</small>
-                                        <small v-else class="ms-auto mb-2 align-self-center text-white-50">1% FEE</small>
+                                        <small v-if="nftTradeTabToken == TOKEN"
+                                          class="ms-auto mb-2 align-self-center text-white-50">0% FEE</small>
+                                        <small v-else class="ms-auto mb-2 align-self-center text-white-50">1%
+                                          FEE</small>
                                         <div class="input-group">
-                                          <input v-model="nftTradeTabPrice" type="number" class="form-control bg-dark border-dark text-info"
-                                            id="tradeNFTamount" aria-describedby="tradeNFTamountappend"
-                                            placeholder="0.000" step="0.001" min="0.001" required>
+                                          <input v-model="nftTradeTabPrice" type="number"
+                                            class="form-control bg-dark border-dark text-info" id="tradeNFTamount"
+                                            aria-describedby="tradeNFTamountappend" placeholder="0.000" step="0.001"
+                                            min="0.001" required>
                                           <div class="input-group-append"> <span
                                               class="input-group-text bg-dark border-dark r-radius-hotfix m-0"
                                               id="tradeNFTamountappend">
-                                              <select v-model="nftTradeTabToken" class="form-select border-0 text-white-50 bg-dark w-100 h-100"
+                                              <select v-model="nftTradeTabToken"
+                                                class="form-select border-0 text-white-50 bg-dark w-100 h-100"
                                                 id="tradeNFTpriceType" aria-label="Trade price type select">
                                                 <option :value="TOKEN" selected>{{TOKEN}}</option>
                                                 <option value="HIVE">HIVE</option>
@@ -1160,7 +1173,8 @@
                                         </div>
                                       </div>
                                       <div class="text-center">
-                                        <button @click="tradeNFT(itemModal.item)" id="tradeNFTbutton" class="btn btn-info my-2" type="submit">Propose
+                                        <button @click="tradeNFT(itemModal.item)" id="tradeNFTbutton"
+                                          class="btn btn-info my-2" type="submit">Propose
                                           Trade</button>
                                       </div>
                                     </form>
@@ -1170,16 +1184,20 @@
                                     <form class="needs-validation mt-4" validate>
                                       <div class="form-group form-row my-2">
                                         <label for="sellNFTprice">Sale Price</label>
-                                        <small v-if="nftSellTabToken == TOKEN" class="ms-auto mb-2 align-self-center text-white-50">0% FEE</small>
-                                        <small v-else class="ms-auto mb-2 align-self-center text-white-50">1% FEE</small>
+                                        <small v-if="nftSellTabToken == TOKEN"
+                                          class="ms-auto mb-2 align-self-center text-white-50">0% FEE</small>
+                                        <small v-else class="ms-auto mb-2 align-self-center text-white-50">1%
+                                          FEE</small>
                                         <div class="input-group">
-                                          <input v-model="nftSellTabPrice" type="number" class="form-control bg-dark border-dark text-info"
-                                            id="sellNFTprice" aria-describedby="sellNFTpriceappend" placeholder="0.000"
-                                            step="0.001" min="0.001" required>
+                                          <input v-model="nftSellTabPrice" type="number"
+                                            class="form-control bg-dark border-dark text-info" id="sellNFTprice"
+                                            aria-describedby="sellNFTpriceappend" placeholder="0.000" step="0.001"
+                                            min="0.001" required>
                                           <div class="input-group-append"> <span
                                               class="input-group-text bg-dark border-dark r-radius-hotfix m-0"
                                               id="sellNFTpriceappend">
-                                              <select v-model="nftSellTabToken" class="form-select border-0 text-white-50 bg-dark w-100 h-100"
+                                              <select v-model="nftSellTabToken"
+                                                class="form-select border-0 text-white-50 bg-dark w-100 h-100"
                                                 id="sellNFTpriceType" aria-label="Sell price type select">
                                                 <option :value="TOKEN">{{TOKEN}}</option>
                                                 <option value="HIVE">HIVE</option>
@@ -1195,26 +1213,31 @@
                                           service and sold publicly. Cancel anytime to return immediately.</p>
                                       </div>
                                       <div class="text-center">
-                                        <button @click="sellNFT(itemModal.item)" id="sellNFTbutton" class="btn btn-info my-2" type="submit">List
+                                        <button @click="sellNFT(itemModal.item)" id="sellNFTbutton"
+                                          class="btn btn-info my-2" type="submit">List
                                           Item</button>
                                       </div>
                                     </form>
                                   </div>
                                   <div role="tabpanel" class="tab-pane fade show " id="auctionNFTtab"
                                     aria-labelledby="auctionNFT">
-                                    <form class="needs-validation mt-4" validate>
+                                    <form class="needs-validation mt-4" novalidate>
                                       <div class="form-group form-row my-2">
                                         <label for="auctionNFTprice">Starting Bid</label>
-                                        <small v-if="nftAuctionTabToken == TOKEN" class="ms-auto mb-2 align-self-center text-white-50">0% FEE</small>
-                                        <small v-else class="ms-auto mb-2 align-self-center text-white-50">1% FEE</small>
+                                        <small v-if="nftAuctionTabToken == TOKEN"
+                                          class="ms-auto mb-2 align-self-center text-white-50">0% FEE</small>
+                                        <small v-else class="ms-auto mb-2 align-self-center text-white-50">1%
+                                          FEE</small>
                                         <div class="input-group">
-                                          <input v-model="nftAuctionTabPrice"type="number" class="form-control bg-dark border-dark text-info"
-                                            id="auctionNFTprice" aria-describedby="auctionNFTpriceappend"
-                                            placeholder="0.000" step="0.001" min="0.001" required>
+                                          <input v-model="nftAuctionTabPrice" type="number"
+                                            class="form-control bg-dark border-dark text-info" id="auctionNFTprice"
+                                            aria-describedby="auctionNFTpriceappend" placeholder="0.000" step="0.001"
+                                            min="0.001" required>
                                           <div class="input-group-append"> <span
                                               class="input-group-text bg-dark border-dark r-radius-hotfix m-0"
                                               id="auctionNFTpriceappend">
-                                              <select v-model="nftAuctionTabToken" class="form-select border-0 text-white-50 bg-dark w-100 h-100"
+                                              <select v-model="nftAuctionTabToken"
+                                                class="form-select border-0 text-white-50 bg-dark w-100 h-100"
                                                 id="auctionNFTpriceType" aria-label="Auction price type select">
                                                 <option :value="TOKEN" selected>{{TOKEN}}</option>
                                                 <option value="HIVE">HIVE</option>
@@ -1228,7 +1251,8 @@
                                       <div class="d-flex justify-content-around">
                                         <div class="form-row my-2 d-flex align-items-center">
                                           <label for="auctionNFTdays" class="m-0">Duration: </label>
-                                          <select v-model="nftAuctionTabTime" class="mx-2 btn btn-lg btn-secondary" id="auctionNFTdays" required>
+                                          <select v-model="nftAuctionTabTime" class="mx-2 btn btn-lg btn-secondary"
+                                            id="auctionNFTdays" required>
                                             <option value="1">1 Day</option>
                                             <option value="2">2 Days</option>
                                             <option value="3">3 Days</option>
@@ -1236,7 +1260,7 @@
                                             <option value="5">5 Days</option>
                                             <option value="6">6 Days</option>
                                             <option value="7" selected>7 Days</option>
-                                            
+
                                           </select>
                                         </div>
                                       </div>
@@ -1248,7 +1272,8 @@
                                           immediately.</p>
                                       </div>
                                       <div class="text-center">
-                                        <button @click="auctionNFT(itemModal.item)" class="btn btn-info my-2" type="submit">List Item</button>
+                                        <button @click="auctionNFT(itemModal.item)" class="btn btn-info my-2"
+                                          type="submit">List Item</button>
                                       </div>
                                     </form>
                                   </div>
@@ -1263,9 +1288,11 @@
                         <div class="card-header" id="headingRedeem">
                           <h5 class="mb-0">
                             <button class="btn btn-link collapsed text-warning no-decoration" data-bs-toggle="collapse"
-                              data-bs-target="#collapseRedeem" aria-expanded="false" aria-controls="collapseRedeem"><i class="fa-solid fa-fire me-3"></i>MELT<span class="ms-2 small">({{focusSet.bond ? precision(focusSet.bond.amount,
-                              focusSet.bond.precision) : 0 }} {{focusSet.bond ? focusSet.bond.token :
-                              ''}})</span></button>
+                              data-bs-target="#collapseRedeem" aria-expanded="false" aria-controls="collapseRedeem"><i
+                                class="fa-solid fa-fire me-3"></i>MELT<span class="ms-2 small">({{focusSet.bond ?
+                                precision(focusSet.bond.amount,
+                                focusSet.bond.precision) : 0 }} {{focusSet.bond ? focusSet.bond.token :
+                                ''}})</span></button>
                           </h5>
                         </div>
                         <div id="collapseRedeem" class="collapse" aria-labelledby="headingRedeem"
@@ -1316,7 +1343,8 @@
                                     <div class="d-flex justify-content-around p-3">
                                       <button class="btn btn-secondary" data-bs-toggle="collapse"
                                         href="#melt-confirmation">CANCEL <i class="fas fa-running"></i></button>
-                                      <button @click="meltNFT(itemModal.item)" class="btn btn-danger border-white">DESTROY
+                                      <button @click="meltNFT(itemModal.item)"
+                                        class="btn btn-danger border-white">DESTROY
                                         <i class="fas fa-bomb"></i> <span
                                           class="spinner-border spinner-border-sm d-none" role="status"
                                           aria-hidden="true"></span></button>
@@ -1328,13 +1356,16 @@
                           </div>
                         </div>
                       </div>
-                      <!-- Auction NFT -->
-                      <div class="card bg-dark text-white" v-if="itemModal.item.owner == 'ah' || itemModal.item.owner == 'hh'">
+                      <!-- Bid NFT -->
+                      <div class="card bg-dark text-white"
+                        v-if="itemModal.item.owner == 'ah' || itemModal.item.owner == 'hh'">
                         <div class="card-header" id="headingAuction">
                           <h5 class="mb-0">
-                            <button class="btn btn-link collapsed text-warning" data-bs-toggle="collapse"
-                              @click="auctionData('itemModal')" data-bs-target="#collapseAuction" aria-expanded="false"
-                              aria-controls="collapseAuction"><i class="fas fa-comment-dollar me-3"></i>BID NOW<span class="small ms-2">{{naiString(itemModal.auction.price)}}</span></button>
+                            <button class="btn btn-link collapsed text-warning no-decoration d-flex align-items-center"
+                              data-bs-toggle="collapse" @click="auctionData('itemModal')"
+                              data-bs-target="#collapseAuction" aria-expanded="false" aria-controls="collapseAuction"><i
+                                class="fas fa-comment-dollar me-3"></i><span>BID NOW</span><span
+                                class="small ms-2">({{naiString(itemModal.auction.price)}})</span></button>
                           </h5>
                         </div>
                         <div id="collapseAuction" class="collapse show" aria-labelledby="headingAuction"
@@ -1369,8 +1400,27 @@
                                     </div>
                                   </div>
                                   <div class="text-center pb-4">
-                                    <button type="button" class="btn btn-warning" data-bs-toggle="collapse"
-                                      href="#/">Bid </button>
+                                    <form class="needs-validation mt-4" novalidate>
+                                      <label for="bidNFTprice">Starting Bid</label>
+                                      <div class="input-group">
+                                        <input v-model="nftAuctionTabPrice" type="number"
+                                          class="form-control bg-dark border-dark text-info" id="auctionNFTprice"
+                                          aria-describedby="bidNFTpriceappend" placeholder="0.000" step="0.001"
+                                          min="0.001" required>
+                                        <div class="input-group-append">
+                                          <span class="input-group-text bg-dark border-dark text-white-50 r-radius-hotfix m-0"
+                                            id="bidNFTpriceappend">
+                                            DLUX
+                                          </span>
+                                          <div>
+                                            <div class="invalid-feedback"> Please enter the amount of
+                                              VALUE you'd like to start the bidding. </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <button type="button" class="btn btn-warning" data-bs-toggle="collapse"
+                                        href="#/">Bid </button>
+                                    </form>
                                   </div>
 
                                 </div>
@@ -1383,9 +1433,11 @@
                       <div class="card bg-dark text-white" v-if="itemModal.item.owner == 'ls'">
                         <div class="card-header" id="headingsale">
                           <h5 class="mb-0">
-                            <button class="btn btn-link collapsed text-warning no-decoration" data-bs-toggle="collapse"
-                              @click="saleData('itemModal')" data-bs-target="#collapsesale" aria-expanded="false"
-                              aria-controls="collapsesale"><i class="fas fa-money-bill-wave me-3"></i>BUY NOW<span class="small ms-2">({{naiString(itemModal.sale.price)}})</span></button>
+                            <button class="btn btn-link collapsed text-warning no-decoration d-flex align-items-center"
+                              data-bs-toggle="collapse" @click="saleData('itemModal')" data-bs-target="#collapsesale"
+                              aria-expanded="false" aria-controls="collapsesale"><i
+                                class="fas fa-money-bill-wave me-3"></i><span>BUY NOW</span><span
+                                class="small ms-2">({{naiString(itemModal.sale.price)}})</span></button>
                           </h5>
                         </div>
                         <div id="collapsesale" class="collapse show" aria-labelledby="headingsale"
@@ -1398,9 +1450,9 @@
                                     <h4>Price: {{naiString(itemModal.sale.price)}}</h4>
                                   </div>
                                   <div class="d-flex no-wrap ms-1">
-                                      <h4>
-                                        Seller: @{{itemModal.sale.by}}</h4>
-                                    </div>
+                                    <h4>
+                                      Seller: @{{itemModal.sale.by}}</h4>
+                                  </div>
                                 </div>
                                 <div class="pt-2">
                                   <p class="text-uppercase text-muted"></p>
@@ -1408,10 +1460,10 @@
                                     <!-- long name, script, set, uid only other buy data -->
                                   </div>
                                   <div class="text-center pb-4">
-                                    <button v-if="itemModal.sale.by != account" type="button" class="btn btn-warning" @click="buyNFT(itemModal.sale)"
-                                      href="#/">Buy </button>
-                                    <button v-else type="button" class="btn btn-warning" @click="cancelNFT(itemModal.sale)"
-                                      href="#/">Cancel </button>
+                                    <button v-if="itemModal.sale.by != account" type="button" class="btn btn-warning"
+                                      @click="buyNFT(itemModal.sale)" href="#/">Buy </button>
+                                    <button v-else type="button" class="btn btn-warning"
+                                      @click="cancelNFT(itemModal.sale)" href="#/">Cancel </button>
                                   </div>
 
                                 </div>
@@ -1472,11 +1524,7 @@
                     <div v-for="atr in itemModal.item.attributes">{{printProps(atr)}}</div>
                     <div>Set: {{focusSet.set}}</div>
                     <div>Link: {{focusSet.link}}</div>
-
-
-                    <div>Link: {{focusSet.permlink}}</div>
-
-
+                    <div>Permlink: {{focusSet.permlink}}</div>
                     <div>Name: {{focusSet.name}}</div>
                   </div>
                 </div>
@@ -1486,10 +1534,10 @@
           </div>
         </div>
       </div>
-  </main>
-  <div>
-    <foot-vue />
-  </div>
+    </main>
+    <div>
+      <foot-vue />
+    </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
