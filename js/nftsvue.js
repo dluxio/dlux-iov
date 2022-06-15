@@ -857,7 +857,7 @@ function sellNFT(setname, uid, price, type, callback){
 */
     sellNFT(item) {
       var cja = {
-          set: item.set,
+          set: item.setname,
           uid: item.uid,
           price: parseInt(this.nftSellTabPrice * 1000),
           type:this.nftSellTabToken
