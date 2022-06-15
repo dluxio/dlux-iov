@@ -875,7 +875,7 @@ function buyNFT(setname, uid, price, type, callback){
           type,
           cj: cja,
           id: `${this.prefix}ft_buy`,
-          msg: `Purchasing: ${set}:${uid}`,
+          msg: `Purchasing: ${item.set}:${item.uid}`,
           ops: ["getTokenUser", "getUserNFTs", "getHiveUser"],
           txid: `${item.set}:${item.uid}_nft_buy`,
         };
