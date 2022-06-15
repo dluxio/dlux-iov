@@ -1067,14 +1067,16 @@ function auctionNFT(setname, uid, price, now, time, type, callback){
         this[modal].item = this[modal].items[this[modal].index];
       }
       if (this[modal].item.owner == "ls") this.saleData(modal);
-      else if (this[modal].item.owner == "ah") this.auctionData(modal);
+      else if (this[modal].item.owner == "ah" || this[modal].item.owner == "hh")
+        this.auctionData(modal);
     },
     modalPrev(modal) {
       if (this[modal].index) this[modal].index--;
       else this[modal].index = this[modal].items.length - 1;
       this[modal].item = this[modal].items[this[modal].index];
       if (this[modal].item.owner == "ls") this.saleData(modal);
-      else if (this[modal].item.owner == "ah") this.auctionData(modal);
+      else if (this[modal].item.owner == "ah" || this[modal].item.owner == "hh")
+        this.auctionData(modal);
     },
     modalIndex(modal, index) {
       var i = 0;
@@ -1084,7 +1086,7 @@ function auctionNFT(setname, uid, price, now, time, type, callback){
       this[modal].index = i;
       this[modal].item = this[modal].items[this[modal].index];
       if (this[modal].item.owner == "ls") this.saleData(modal);
-      else if (this[modal].item.owner == "ah") this.auctionData(modal);
+      else if (this[modal].item.owner == "ah" || this[modal].item.owner == "hh") this.auctionData(modal);
     },
     pageCtrl(controller) {},
     removeOp(txid) {
@@ -1481,6 +1483,7 @@ function auctionNFT(setname, uid, price, now, time, type, callback){
                   !owners.includes(this.allNFTs[i].owner) &&
                   this.allNFTs[i].owner != "D" &&
                   this.allNFTs[i].owner != "ah" &&
+                  this.allNFTs[i].owner != "hh" &&
                   this.allNFTs[i].owner != "ls"
                 ) {
                   owners.push(this.allNFTs[i].owner);
@@ -1631,7 +1634,7 @@ function auctionNFT(setname, uid, price, now, time, type, callback){
           }
           if (
             this.NFTselect.auctionOnly &&
-            this.allSearchNFTs[i].owner == "ah"
+            ( this.allSearchNFTs[i].owner == "ah" || this.allSearchNFTs[i].owner == "hh" )
           ) {
             this.uids.push(this.allSearchNFTs[i].uid);
           }
