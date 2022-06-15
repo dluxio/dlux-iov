@@ -771,11 +771,7 @@ function tradeNFTcancel(setname, uid, callback){
  function sellNFTcancel(setname, uid, callback){
      broadcastCJA({ set: setname, uid}, "dlux_nft_sell_cancel", `Trying to cancel ${setname}:${uid} sell`)
  }
-function buyNFT(setname, uid, price, type, callback){
-    if (type.toUpperCase() == 'HIVE') broadcastTransfer({ to: 'dlux-cc', hive: price, memo:`NFTbuy ${setname}:${uid}`}, `Buying ${setname}:${uid}`)
-    else if (type.toUpperCase() == 'HBD') broadcastTransfer({ to: 'dlux-cc', hbd: price, memo:`NFTbuy ${setname}:${uid}`}, `Buying ${setname}:${uid}`)
-    else broadcastCJA({ set: setname, uid, price}, "dlux_nft_buy", `Trying to buy ${setname}:${uid}`)
- }
+
  function bidNFT(setname, uid, bid_amount, type, callback){
     console.log({bid_amount, type})
     bid_amount = parseInt(bid_amount * 1000)
@@ -857,6 +853,28 @@ function setPFP(setname, uid, callback){
         })
  }
  */
+    /*
+function buyNFT(setname, uid, price, type, callback){
+    if (type.toUpperCase() == 'HIVE') broadcastTransfer({ to: 'dlux-cc', hive: price, memo:`NFTbuy ${setname}:${uid}`}, `Buying ${setname}:${uid}`)
+    else if (type.toUpperCase() == 'HBD') broadcastTransfer({ to: 'dlux-cc', hbd: price, memo:`NFTbuy ${setname}:${uid}`}, `Buying ${setname}:${uid}`)
+    else broadcastCJA({ set: setname, uid, price}, "dlux_nft_buy", `Trying to buy ${setname}:${uid}`)
+ }
+*/
+    buyNFT(ip) {
+      console.log(ip)
+      // var cja = {
+      //   set: set || this.focusSet.set,
+      //   uid: uid,
+      // };
+      // this.toSign = {
+      //   type: "cja",
+      //   cj: cja,
+      //   id: `${this.prefix}ft_buy`,
+      //   msg: `Purchasing: ${set}:${uid}`,
+      //   ops: ["getTokenUser", "getUserNFTs", "getHiveUser"],
+      //   txid: `${set}:${uid}_nft_buy`,
+      // };
+    },
     precision(num, precision) {
       return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
     },
@@ -1822,8 +1840,8 @@ function setPFP(setname, uid, callback){
     //this.getQuotes();
     //this.getNodes();
     this.getProtocol();
-    //if (user != "GUEST") this.getTokenUser(user);
-    //if (user != "GUEST") this.getHiveUser(user);
+    if (user != "GUEST") this.getTokenUser(user);
+    if (user != "GUEST") this.getHiveUser(user);
   },
   computed: {
     location: {

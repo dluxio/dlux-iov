@@ -1417,11 +1417,11 @@
                               <div class="border border-warning rounded bg-darker col-12 p-4">
                                 <div class="d-flex align-items-center justify-content-between">
                                   <div class="d-flex me-1">
-                                    <h4>price: {{naiString(itemModal.sale.price)}}</h4>
+                                    <h4>Price: {{naiString(itemModal.sale.price)}}</h4>
                                   </div>
                                   <div class="d-flex no-wrap ms-1">
                                       <h4>
-                                        Seller: {{itemModal.sale.by}}</h4>
+                                        Seller: @{{itemModal.sale.by}}</h4>
                                     </div>
                                 </div>
                                 <div class="pt-2">
@@ -1430,7 +1430,7 @@
                                     <!-- long name, script, set, uid only other buy data -->
                                   </div>
                                   <div class="text-center pb-4">
-                                    <button type="button" class="btn btn-warning"
+                                    <button type="button" class="btn btn-warning" @click="buyNFT(itemModal.sale)"
                                       href="#/">Buy </button>
                                   </div>
 
