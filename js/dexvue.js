@@ -951,7 +951,7 @@ var app = new Vue({
           msg: `Canceling: ${txid}`,
           ops: ["getTokenUser", "popDEX"],
           txid: `${txid}dex_clear`,
-        };
+        }
     },
     getHistorical() {
       const pair = this.buyhive.checked ? "hive" : "hbd";

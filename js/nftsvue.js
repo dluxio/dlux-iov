@@ -860,20 +860,25 @@ function buyNFT(setname, uid, price, type, callback){
     else broadcastCJA({ set: setname, uid, price}, "dlux_nft_buy", `Trying to buy ${setname}:${uid}`)
  }
 */
-    buyNFT(ip) {
-      console.log(ip)
-      // var cja = {
-      //   set: set || this.focusSet.set,
-      //   uid: uid,
-      // };
-      // this.toSign = {
-      //   type: "cja",
-      //   cj: cja,
-      //   id: `${this.prefix}ft_buy`,
-      //   msg: `Purchasing: ${set}:${uid}`,
-      //   ops: ["getTokenUser", "getUserNFTs", "getHiveUser"],
-      //   txid: `${set}:${uid}_nft_buy`,
-      // };
+    buyNFT(item) {
+      var cja = {
+        set: item.set,
+        uid: item.uid,
+        price: item.price.amount
+      }, type = "cja"
+      if (item.price.token == "HIVE" || item.price.token == "HBD"){
+        type = "xfr"
+        cja.memo = cja
+        cja[`${item.price.token.toLowerCase()}`] = item.price.amount;
+      }
+        this.toSign = {
+          type,
+          cj: cja,
+          id: `${this.prefix}ft_buy`,
+          msg: `Purchasing: ${set}:${uid}`,
+          ops: ["getTokenUser", "getUserNFTs", "getHiveUser"],
+          txid: `${item.set}:${item.uid}_nft_buy`,
+        };
     },
     precision(num, precision) {
       return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
