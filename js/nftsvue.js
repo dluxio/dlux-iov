@@ -950,6 +950,7 @@ function buyNFT(setname, uid, price, type, callback){
         type = "xfr";
         cja.memo = `NFTbuy ${item.set}:${item.uid}`;
         cja[`${item.price.token.toLowerCase()}`] = item.price.amount;
+        cja.to = this.multisig
       }
       this.toSign = {
         type,
@@ -1017,10 +1018,12 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         type = "xfr";
         cja.memo = `NFTbid ${item.setname}:${item.uid}`;
         cja.hive = cja.bid_amount;
+        cja.to = this.multisig
       } else if (this.itemModal.auction.price.token == "HBD") {
         type = "xfr";
         cja.memo = `NFTbid ${item.setname}:${item.uid}`;
         cja.hive = cja.bid_amount;
+        cja.to = this.multisig;
       }
         this.toSign = {
           type,
