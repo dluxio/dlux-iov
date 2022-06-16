@@ -737,14 +737,6 @@ function tradeNFTcancel(setname, uid, callback){
     broadcastCJA({ set: setname, uid }, "dlux_nft_transfer_cancel", `Trying to cancel ${setname}:${uid} trade`)
  }
 
- function bidNFT(setname, uid, bid_amount, type, callback){
-    console.log({bid_amount, type})
-    bid_amount = parseInt(bid_amount * 1000)
-    if(type == 'HIVE') broadcastTransfer({ to: 'dlux-cc', hive: bid_amount, memo:`NFTbid ${setname}:${uid}`}, `Bidding on ${setname}:${uid}`)
-    else if (type == 'HBD') broadcastTransfer({ to: 'dlux-cc', hbd: bid_amount, memo:`NFTbid ${setname}:${uid}`}, `Bidding on ${setname}:${uid}`)
-    else broadcastCJA({ set: setname, uid, bid_amount}, "dlux_nft_bid", `Bidding on ${setname}:${uid} for ${parseFloat(bid_amount/1000).toFixed(3)} DLUX`)
- }
-
 function setPFP(setname, uid, callback){
     fetch("https://api.hive.blog", {
         body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[["${user}"]], "id":1}`,
@@ -850,7 +842,7 @@ function giveNFT(setname, uid, to, callback){
  }
 */
     giveNFT(item) {
-      if (this.nftTradeAllowed){
+      if (this.nftTradeAllowed) {
         var cja = {
             set: item.setname,
             uid: item.uid,
@@ -878,7 +870,7 @@ function tradeNFT(setname, uid, to, price, type, callback){
  }
 */
     tradeNFT(item) {
-      if (this.nftTradeAllowed){
+      if (this.nftTradeAllowed) {
         var cja = {
             set: item.setname,
             uid: item.uid,
@@ -1004,6 +996,45 @@ function auctionNFT(setname, uid, price, now, time, type, callback){
         txid: `${item.setname}:${item.uid}_nft_${cja.type ? "h" : ""}auction`,
       };
     },
+    /*
+function bidNFT(setname, uid, bid_amount, type, callback){
+    console.log({bid_amount, type})
+    bid_amount = parseInt(bid_amount * 1000)
+    if(type == 'HIVE') broadcastTransfer({ to: 'dlux-cc', hive: bid_amount, memo:`NFTbid ${setname}:${uid}`}, `Bidding on ${setname}:${uid}`)
+    else if (type == 'HBD') broadcastTransfer({ to: 'dlux-cc', hbd: bid_amount, memo:`NFTbid ${setname}:${uid}`}, `Bidding on ${setname}:${uid}`)
+    else broadcastCJA({ set: setname, uid, bid_amount}, "dlux_nft_bid", `Bidding on ${setname}:${uid} for ${parseFloat(bid_amount/1000).toFixed(3)} DLUX`)
+ }
+
+*/
+    bidNFT(item) {
+      var cja = {
+          set: item.setname,
+          uid: item.uid,
+          bid_amount: parseInt(this.nftAuctionTabPrice * 1000),
+          type:
+            this.nftAuctionTabToken != this.TOKEN ? this.nftAuctionTabToken : 0,
+          now: false,
+          time: this.nftAuctionTabTime,
+        },
+        type = "cja"
+      if (this.nftAuctionTabToken == 'HIVE'){
+        type = "xfr"
+        cja.memo = `NFTbid ${item.setname}:${item.uid}`
+        cja.hive = cja.bid_amount
+      } else if (this.nftAuctionTabToken == "HBD") {
+        type = "xfr"
+        cja.memo = `NFTbid ${item.setname}:${item.uid}`
+        cja.hive = cja.bid_amount
+      }
+        this.toSign = {
+          type,
+          cj: cja,
+          id: `${this.prefix}nft_bid`,
+          msg: `Bidding on: ${item.setname}:${item.uid}`,
+          ops: ["getUserNFTs"],
+          txid: `${item.setname}:${item.uid}_nft_bid`,
+        };
+    },
     precision(num, precision) {
       return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
     },
@@ -1086,7 +1117,8 @@ function auctionNFT(setname, uid, price, now, time, type, callback){
       this[modal].index = i;
       this[modal].item = this[modal].items[this[modal].index];
       if (this[modal].item.owner == "ls") this.saleData(modal);
-      else if (this[modal].item.owner == "ah" || this[modal].item.owner == "hh") this.auctionData(modal);
+      else if (this[modal].item.owner == "ah" || this[modal].item.owner == "hh")
+        this.auctionData(modal);
     },
     pageCtrl(controller) {},
     removeOp(txid) {
@@ -1102,7 +1134,7 @@ function auctionNFT(setname, uid, price, now, time, type, callback){
     auctionData(modal) {
       const uid = this[modal].item.uid;
       this[modal].auction = this.auctions.filter((a) => a.uid == uid)[0];
-      this.nftAuctionTabPrice = this[modal].auction.price.amount / 1000
+      this.nftAuctionTabPrice = this[modal].auction.price.amount / 1000;
     },
     saleData(modal) {
       const uid = this[modal].item.uid;
@@ -1635,7 +1667,8 @@ function auctionNFT(setname, uid, price, now, time, type, callback){
           }
           if (
             this.NFTselect.auctionOnly &&
-            ( this.allSearchNFTs[i].owner == "ah" || this.allSearchNFTs[i].owner == "hh" )
+            (this.allSearchNFTs[i].owner == "ah" ||
+              this.allSearchNFTs[i].owner == "hh")
           ) {
             this.uids.push(this.allSearchNFTs[i].uid);
           }
