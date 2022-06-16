@@ -705,11 +705,6 @@ function tradeFTcancel(setname, uid, callback){
     broadcastCJA({ set: setname, uid }, "dlux_ft_escrow_cancel", `Trying to cancel ${setname} mint token trade`)
  }
 
-    */
-
-    //NFT's
-
-    /*
 // NFT Actions //
 
  function defineNFT(setname, type, script, permlink, start, end, total, royalty, handling, max_fee, bond, callback){
@@ -1133,7 +1128,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     auctionData(modal) {
       const uid = this[modal].item.uid;
       this[modal].auction = this.auctions.filter((a) => a.uid == uid)[0];
-      this.nftAuctionTabPrice = this[modal].auction.price.amount / 1000;
+      this.nftAuctionTabPrice = (this[modal].auction.price.amount (this[modal].auction.bids ? 1 : 0))/ 1000;
     },
     saleData(modal) {
       const uid = this[modal].item.uid;
