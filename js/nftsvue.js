@@ -1010,21 +1010,17 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       var cja = {
           set: item.setname,
           uid: item.uid,
-          bid_amount: parseInt(this.nftAuctionTabPrice * 1000),
-          type:
-            this.nftAuctionTabToken != this.TOKEN ? this.nftAuctionTabToken : 0,
-          now: false,
-          time: this.nftAuctionTabTime,
+          bid_amount: parseInt(this.nftAuctionTabPrice * 1000)
         },
         type = "cja"
-      if (this.nftAuctionTabToken == 'HIVE'){
-        type = "xfr"
-        cja.memo = `NFTbid ${item.setname}:${item.uid}`
-        cja.hive = cja.bid_amount
-      } else if (this.nftAuctionTabToken == "HBD") {
-        type = "xfr"
-        cja.memo = `NFTbid ${item.setname}:${item.uid}`
-        cja.hive = cja.bid_amount
+      if (this.itemModal.auction.price.token == "HIVE") {
+        type = "xfr";
+        cja.memo = `NFTbid ${item.setname}:${item.uid}`;
+        cja.hive = cja.bid_amount;
+      } else if (this.itemModal.auction.price.token == "HBD") {
+        type = "xfr";
+        cja.memo = `NFTbid ${item.setname}:${item.uid}`;
+        cja.hive = cja.bid_amount;
       }
         this.toSign = {
           type,
