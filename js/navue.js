@@ -59,6 +59,8 @@ export default {
           this.broadcastComment(op);
         } else if (this.op.type == "vote") {
           this.broadcastVote(op);
+        } else if (this.op.type == "arr") {
+          this.broadcastArray(op);
         }
         localStorage.setItem("pending", JSON.stringify(this.ops));
       }
@@ -126,6 +128,20 @@ export default {
           ],
         ],
         "active",
+      ];
+      this.sign(op)
+        .then((r) => {
+          this.statusFinder(r, obj);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+    broadcastArray(obj) {
+      var op = [
+        this.user,
+        obj.ops,
+        obj.key || 'active',
       ];
       this.sign(op)
         .then((r) => {

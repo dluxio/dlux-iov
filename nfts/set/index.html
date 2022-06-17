@@ -1009,7 +1009,7 @@
                   <div class="col-lg-6 px-0 px-sm-2">
                     <!--pfp-->
                     <div class="text-center my-3" v-if="itemModal.item.owner == account">
-                      <button class="btn btn-lg btn-outline-primary" v-if="itemModal.item.uid != pfp.uid"><i
+                      <button @click="setPFP(itemModal.item)" class="btn btn-lg btn-outline-primary" v-if="dataAPI && itemModal.item.uid != pfp.uid"><i
                           class="far fa-user-circle me-2"></i>Set as
                         PFP
                       </button>
@@ -1401,7 +1401,7 @@
                                   </div>
                                   <div class="text-center pb-4">
                                     <form class="needs-validation mt-4" novalidate>
-                                      <label for="bidNFTprice">Starting Bid</label>
+                                      <label for="bidNFTprice">Bid</label>
                                       <div class="input-group">
                                         <input v-model="nftAuctionTabPrice" type="number"
                                           class="form-control bg-dark border-dark text-info" id="auctionNFTprice"
@@ -1418,7 +1418,7 @@
                                           </div>
                                         </div>
                                       </div>
-                                      <button @click="bidNFT(itemModal.item)" type="button" class="btn btn-warning" data-bs-toggle="collapse"
+                                      <button @click="bidNFT(itemModal.item)" :disabled=""type="button" class="btn btn-warning" data-bs-toggle="collapse"
                                         href="#/">Bid </button>
                                     </form>
                                   </div>
