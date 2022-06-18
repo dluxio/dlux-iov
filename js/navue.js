@@ -59,8 +59,8 @@ export default {
           this.broadcastComment(op);
         } else if (this.op.type == "vote") {
           this.broadcastVote(op);
-        } else if (this.op.type == "arr") {
-          this.broadcastArray(op);
+        } else if (this.op.type == "raw") {
+          this.broadcastRaw(op);
         }
         localStorage.setItem("pending", JSON.stringify(this.ops));
       }
@@ -137,10 +137,10 @@ export default {
           console.log(e);
         });
     },
-    broadcastArray(obj) {
+    broadcastRaw(obj) {
       var op = [
         this.user,
-        obj.ops,
+        obj.op,
         obj.key || 'active',
       ];
       this.sign(op)
