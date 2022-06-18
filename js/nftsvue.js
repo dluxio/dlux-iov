@@ -827,7 +827,7 @@ function setPFP(setname, uid, callback){
             "posting_json_metadata": JSON.stringify(pjm)}
         ]
       ],
-        type = "arr";
+        type = "raw";
       this.toSign = {
         type,
         op: cja,
