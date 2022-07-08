@@ -171,6 +171,10 @@ volumes:
 
 ---
 
+### Deploy with Pm2 (Alternative to Docker)
+
+https://hive.blog/hive-163521/@balaz/step-by-step-guide-to-deploy-and-run-honeycomb-node-without-using-docker
+
 ### Nginx Setup
 Finally, install certbot to manage the SSL certificate(s) for the API domain(s)
 
@@ -231,6 +235,12 @@ server{
 To test, visit your subdomain in a browser and verify a secure https connection. You should see your API returning data.
 
 ---
+
+### Caddy Setup (Alternative to NGINX)
+
+This is not a mandatory step for running your node. If your Docker or Pm2 is already running your node, you are done. This step covers hosting your node using Caddy and associating a domain or sub domain to your node. 
+
+https://stemgeeks.net/hive-163521/@balaz/step-by-step-guide-to-associate-a-domain-or-sub-domain-to-your-honeycomb-spkcc-node-using-caddy
 
 ### Governance And Voting
 Now that you have a functioning node running, go to [dlux.io/dex](https://vue.dlux.io/dex) and choose the token for the community node you installed. Login with the account matching the node `.env` file.
