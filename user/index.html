@@ -425,7 +425,7 @@
                                         </div>
                                         <p class="lead ">An open source platform for p2p games, apps, and experiences.
                                         </p>
-                                        <div class="d-flex" v-show="focusdata.claim > 0 && focus == account">
+                                        <div class="d-flex" v-show="accountapi.claim > 0 && focus.account == account">
                                             <hr class="my-4 bg-light">
                                             <div class="me-auto">
                                                 <h4 class="">Claim DLUX</h4>
@@ -434,7 +434,7 @@
                                             </div>
                                             <div id="claimdluxbtn" class="text-end d-column">
                                                 <h5 id="dluxclaim" class="text-end">
-                                                    {{((focusdata.claim)/1000)}} DLUX</h5>
+                                                    {{((accountapi.claim)/1000)}} DLUX</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Claim">
                                                     <button type="submit" class="btn btn-info me-half"><i
                                                             class="fas fa-coin"></i><i
@@ -444,7 +444,7 @@
                                                         Power</span> <span class="small"
                                                         v-show="features.reward2Gov">50%
                                                         Liquid | 50% Gov</span></div>
-                                                <div v-show="focusdata.gov > 0" class="bg-dark text-white">
+                                                <div v-show="accountapi.gov > 0" class="bg-dark text-white">
                                                     <div class="input-group mb-3">
                                                         <div class="input-group-prepend">
                                                             <div class="input-group-text">
@@ -467,7 +467,7 @@
                                             </div>
                                             <div id="dluxactions" class="float-right text-end">
                                                 <h5 id="dluxbalance">
-                                                    {{((focusdata.balance)/1000)}} DLUX
+                                                    {{((accountapi.balance)/1000)}} DLUX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info me-half"
@@ -513,7 +513,7 @@
                                             </div>
                                             <div id="dluxpactions" class="float-right text-end">
                                                 <h5 id="pwrbalance">
-                                                    {{((focusdata.poweredUp)/1000)}} DLUX
+                                                    {{((accountapi.poweredUp)/1000)}} DLUX
                                                 </h5>
                                                 <a data-bs-toggle="collapse" id="delegationsbtn" href="#delegations"
                                                     role="button" aria-expanded="false" aria-controls="Show delegations"
@@ -574,7 +574,7 @@
                                             </div>
                                             <div id="dluxgactions" class="float-right text-end">
                                                 <h5 id="govbalance">
-                                                    {{((focusdata.gov)/1000)}} DLUX</h5>
+                                                    {{((accountapi.gov)/1000)}} DLUX</h5>
                                                 <a data-bs-toggle="collapse" id="escrowtxbutton" href="#escrowtx"
                                                     role="button" aria-expanded="false"
                                                     aria-controls="Show escrow transactions" class="text-white d-none"
@@ -2008,7 +2008,7 @@
                             </div>
                             <div class="form-group">
                                 <label id="senddluxamountlab" for="senddluxamount">Amount (Balance <a href="#"
-                                        @click="insertBal('{{focusdata.balance/1000}}', 'senddluxamount')">{{((focusdata.balance)/1000)}}</a>):</label>
+                                        @click="insertBal('{{accountapi.balance/1000}}', 'senddluxamount')">{{((accountapi.balance)/1000)}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="senddluxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -2105,7 +2105,7 @@
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="powerdluxamountlab" for="powerupdluxamount">Amount (Balance <a href="#"
-                                        @click="insertBal('{{focusdata.balance/1000}}','powerupdluxamount')">{{((focusdata.balance)/1000)}}</a>):</label>
+                                        @click="insertBal('{{accountapi.balance/1000}}','powerupdluxamount')">{{((accountapi.balance)/1000)}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="powerupdluxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -2137,7 +2137,7 @@
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="dluxamountlab" for="powerdowndluxamount">Amount (Balance <a href="#"
-                                        @click="insertBal('{{focusdata.poweredUp/1000}}','powerdowndluxamount')">{{((focusdata.poweredUp)/1000)}}</a>):</label>
+                                        @click="insertBal('{{accountapi.poweredUp/1000}}','powerdowndluxamount')">{{((accountapi.poweredUp)/1000)}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="powerdowndluxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -2169,7 +2169,7 @@
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="lockgovdluxamountlab" for="lockgovdluxamount">Amount (Balance <a href="#"
-                                        @click="insertBal('{{focusdata.balance/1000}}','lockgovdluxamount')">{{((focusdata.balance)/1000)}}</a>):</label>
+                                        @click="insertBal('{{accountapi.balance/1000}}','lockgovdluxamount')">{{((accountapi.balance)/1000)}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="lockgovdluxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -2234,7 +2234,7 @@
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="unlockgovdluxamountlab" for="unlockgovdluxamount">Amount (Balance <a href="#"
-                                        @click="insertBal('{{focusdata.gov/1000}}','unlockgovdluxamount')">{{((focusdata.gov)/1000)}}</a>):</label>
+                                        @click="insertBal('{{accountapi.gov/1000}}','unlockgovdluxamount')">{{((accountapi.gov)/1000)}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="unlockgovdluxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">

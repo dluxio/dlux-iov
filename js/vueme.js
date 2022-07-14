@@ -81,6 +81,7 @@ var app = new Vue({
       },
       hasDrop: false,
       focus: {
+        account: '',
         posting_json_metadata: {
           profile: {
             about: "",
@@ -1333,6 +1334,7 @@ var app = new Vue({
   },
   mounted() {
     this.pageAccount = location.pathname.split("/@")[1] || "markegiles";
+    this.focus.account = this.pageAccount
     this.sapi = sapi
     this.checkAccount("pageAccount", "focus");
     this.getHiveStats();
