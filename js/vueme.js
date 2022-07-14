@@ -81,7 +81,7 @@ var app = new Vue({
       },
       hasDrop: false,
       focus: {
-        account: '',
+        account: "",
         posting_json_metadata: {
           profile: {
             about: "",
@@ -93,6 +93,15 @@ var app = new Vue({
         gov: 0,
         claim: 0,
         poweredUp: 0,
+      },
+      saccountapi: {
+        balance: 0,
+        gov: 0,
+        claim: 0,
+        poweredUp: 0,
+        drop: {
+          last_claim: 0,
+        }
       },
       dropnai: "",
       balance: "0.000",
@@ -710,6 +719,12 @@ var app = new Vue({
           txid: "send",
         };
       } else alert("Username not found");
+    },
+    parseInt(a,b = 10) {
+      return parseInt(a, b)
+    },
+    frmDate(){
+      return new Date().getMonth()
     },
     sendhive() {
       if (!this.hiveFormValid) return;

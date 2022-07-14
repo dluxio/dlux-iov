@@ -640,8 +640,8 @@
                                         </div>
                                         <p class="lead">Decentralized and incentivized network infrastructure, rewarding
                                             providers with SPK governance and BROCA gas tokens.</p>
-                                        <!-- <div class="clearfix" id="larynxclaimdiv"
-                                            v-show="larynxtoken.data.drop.last_claim.parseInt(16) != frmDate.value && larynxtoken.data.drop.availible.amount > 0">
+                                        <div class="clearfix" id="larynxclaimdiv"
+                                            v-show="parseInt(saccountapi.drop.last_claim, 16) != frmDate() && saccountapi.drop.availible.amount > 0">
                                             <hr class="my-4 bg-light">
                                             <div class="float-left">
                                                 <h4>Claim LARYNX AirDrop</h4>
@@ -652,7 +652,7 @@
                                                     class="d-none">
                                             </div>
                                             <div id="claimlarynxbtn" class="float-right text-end d-column">
-                                                <h5>{{((larynxtoken.data.drop.availible.amount)/1000)}}
+                                                <h5>{{((saccountapi.drop.availible.amount)/1000)}}
                                                     LARYNX</h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Claim">
                                                     <button type="submit" class="btn btn-info me-half"
@@ -661,8 +661,8 @@
                                                 </div>
                                             </div>
                                         </div> -->
-                                        <!-- <div class="clearfix" id="larynxclaimrewards"
-                                            v-show="larynxtoken.data.claim > 0">
+                                        <div class="clearfix" id="larynxclaimrewards"
+                                            v-show="saccountapi.claim > 0">
                                             <hr class="my-4 bg-light">
                                             <div class="float-left">
                                                 <h4>Claim LARYNX Rewards</h4>
@@ -670,7 +670,7 @@
                                                     compiled daily.</p>
                                             </div>
                                             <div id="claimlarynxrewardbtn" class="float-right text-end d-column">
-                                                <h5>{{((larynxtoken.data.claim)/1000)}} LARYNX
+                                                <h5>{{((saccountapi.claim)/1000)}} LARYNX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Claim">
                                                     <button type="submit" class="btn btn-info me-half"
@@ -678,16 +678,16 @@
                                                             class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
                                                 </div>
                                             </div>
-                                        </div> -->
+                                        </div>
                                         <hr class="my-4 bg-light">
                                         <div class="clearfix">
                                             <div class="float-left">
                                                 <h4>LARYNX Token</h4>
                                                 <p class="text-white-50">The mining token for the spk network.</p>
                                             </div>
-                                            <!-- <div id="larynxactions" class="float-right text-end">
+                                            <div id="larynxactions" class="float-right text-end">
                                                 <h5 id="larynxbalance">
-                                                    {{((larynxtoken.data.balance)/1000)}} LARYNX
+                                                    {{((saccountapi.balance)/1000)}} LARYNX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Actions">
                                                     <button type="button" class="btn btn-info me-half"
@@ -717,10 +717,10 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div> -->
+                                            </div>
                                         </div>
                                         <hr class="my-4 bg-light">
-                                        <!-- <div class="clearfix">
+                                        <div class="clearfix">
                                             <div class="float-left">
                                                 <h4>LARYNX Governance</h4>
                                                 <p class="text-white-50">Locked tokens used to determine concensus and
@@ -735,7 +735,7 @@
                                             </div>
                                             <div id="larynxgactions" class="float-right text-end">
                                                 <h5 id="govbalance">
-                                                    {{((larynxtoken.data.gov)/1000)}} LARYNX
+                                                    {{((saccountapi.gov)/1000)}} LARYNX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Actions">
                                                     <button type="button" class="btn btn-info me-half" disabled
@@ -759,7 +759,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div> -->
+                                        </div>
 
                                         <hr class="my-4 bg-light">
                                         <div class="clearfix">
@@ -2066,7 +2066,7 @@
                             </div>
                             <!-- <div class="form-group">
                                 <label id="sendlarynxamountlab" for="sendlarynxamount">Amount (Balance <a href="#"
-                                        @click="insertBal('{{larynxtoken.data.balance/1000}}', 'sendlarynxamount')">{{((larynxtoken.data.balance)/1000)}}</a>):</label>
+                                        @click="insertBal('{{saccountapi.balance/1000}}', 'sendlarynxamount')">{{((saccountapi.balance)/1000)}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="sendlarynxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
@@ -2201,7 +2201,7 @@
                         <div class="modal-body">
                             <div class="form-group">
                                 <label id="lockgovlarynxamountlab" for="lockgovlarynxamount">Amount (Balance <a href="#"
-                                        @click="insertBal('{{larynxtoken.data.balance/1000}}', 'lockgovlarynxamount')">{{((larynxtoken.data.balance)/1000)}}
+                                        @click="insertBal('{{saccountapi.balance/1000}}', 'lockgovlarynxamount')">{{((saccountapi.balance)/1000)}}
                                         LARYNX</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="lockgovlarynxamount" type="number" step="0.001"
@@ -2267,7 +2267,7 @@
                             <div class="form-group">
                                 <label id="unlockgovlarynxamountlab" for="unlockgovlarynxamount">Amount (Balance <a
                                         href="#"
-                                        @click="insertBal('{{larynxtoken.data.gov/1000}}','unlockgovlarynxamount')">{{((larynxtoken.data.gov)/1000)}}</a>):</label>
+                                        @click="insertBal('{{saccountapi.gov/1000}}','unlockgovlarynxamount')">{{((saccountapi.gov)/1000)}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="unlockgovlarynxamount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000">
