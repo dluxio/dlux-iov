@@ -13,11 +13,22 @@ if (location.search) {
     let params = string.split("&");
     for (let i = 0; i < params.length; i++) {
         let param = params[i].split("=");
-        if (param[0] == "api") {
-            lapi = param[1];
+        if (param[0] == "sapi") {
+            sapi = param[1];
         }
     }
     //window.history.replaceState(null, null, "?api=" + lapi);
+}
+if (location.search) {
+  const string = location.search.replace("?", "");
+  let params = string.split("&");
+  for (let i = 0; i < params.length; i++) {
+    let param = params[i].split("=");
+    if (param[0] == "lapi") {
+      lapi = param[1];
+    }
+  }
+  //window.history.replaceState(null, null, "?api=" + lapi);
 }
 // if (location.hash && !lapi) {
 //     const hash = url.split("#");
@@ -97,6 +108,7 @@ var app = new Vue({
       hiveFormValid: false,
       hbdFormValid: false,
       lapi: lapi,
+      larynxbehind: -1,
       hapi: hapi,
       accountapi: {},
       hiveprice: {
@@ -132,7 +144,7 @@ var app = new Vue({
       stats: {},
       hivestats: {
         total_vesting_fund_hive: 0,
-        total_vesting_shares: 0
+        total_vesting_shares: 0,
       },
       behindTitle: "",
       TOKEN: "DLUX",
@@ -665,20 +677,18 @@ var app = new Vue({
           return r.json();
         })
         .then((re) => {
-            var rez = re.result[0]
-            console.log(name, rez, rez.posting_json_metadata);
-            try{
+          var rez = re.result[0];
+          console.log(name, rez, rez.posting_json_metadata);
+          try {
             rez.posting_json_metadata = JSON.parse(rez.posting_json_metadata);
-            } catch (e){
-                try {
-                rez.posting_json_metadata = JSON.parse(
-                  rez.json_metadata
-                );
-                } catch(e){
-                    rez.posting_json_metadata = {profile:{about:""}}
-                }
+          } catch (e) {
+            try {
+              rez.posting_json_metadata = JSON.parse(rez.json_metadata);
+            } catch (e) {
+              rez.posting_json_metadata = { profile: { about: "" } };
             }
-          if (re.result.length) this[key] = rez
+          }
+          if (re.result.length) this[key] = rez;
           else this[key] = false;
         });
     },
@@ -865,8 +875,12 @@ var app = new Vue({
             if (res.result.length < this.postSelect[this.postSelect.entry].a)
               this.postSelect[this.postSelect.entry].e = true;
             for (var i = 0; i < res.result.length; i++) {
-                res.result[i].type = "Blog";
-              if (!this.posturls[`/@${res.result[i].author}/${res.result[i].permlink}`]) {
+              res.result[i].type = "Blog";
+              if (
+                !this.posturls[
+                  `/@${res.result[i].author}/${res.result[i].permlink}`
+                ]
+              ) {
                 this.posturls[
                   `/@${res.result[i].author}/${res.result[i].permlink}`
                 ] = res.result[i];
@@ -917,7 +931,7 @@ var app = new Vue({
           .then((r) => r.json())
           .then((res) => {
             if (res.result) {
-                res.result.url = `/@${res.result.author}/${res.result.permlink}`
+              res.result.url = `/@${res.result.author}/${res.result.permlink}`;
               this.posturls[res.result.url] = {
                 ...this.posturls[res.result.url],
                 ...res.result,
@@ -953,25 +967,32 @@ var app = new Vue({
                 this.posturls[res.result.url].pic = this.picFind(
                   this.posturls[res.result.url].json_metadata
                 );
-                
+
                 if (
                   "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
-                    this.posturls[res.result.url].json_metadata.vrHash
+                  this.posturls[res.result.url].json_metadata.vrHash
                 )
                   type = "360";
-                else if (this.posturls[res.result.url].json_metadata.vrHash) type = "VR";
-                else if (this.posturls[res.result.url].json_metadata.arHash) type = "AR";
-                else if (this.posturls[res.result.url].json_metadata.appHash) type = "APP";
-                else if (this.posturls[res.result.url].json_metadata.audHash) type = "Audio";
-                else if (this.posturls[res.result.url].json_metadata.vidHash) type = "Video";
+                else if (this.posturls[res.result.url].json_metadata.vrHash)
+                  type = "VR";
+                else if (this.posturls[res.result.url].json_metadata.arHash)
+                  type = "AR";
+                else if (this.posturls[res.result.url].json_metadata.appHash)
+                  type = "APP";
+                else if (this.posturls[res.result.url].json_metadata.audHash)
+                  type = "Audio";
+                else if (this.posturls[res.result.url].json_metadata.vidHash)
+                  type = "Video";
               } catch (e) {
                 console.log(res.result.url, e, "no JSON?");
               }
               this.posturls[res.result.url].type = type;
-              if(type != 'Blog')this.posturls[res.result.url].url =
-                '/dlux' + this.posturls[res.result.url].url
-              else this.posturls[res.result.url].url =
-                "/blog" + this.posturls[res.result.url].url;
+              if (type != "Blog")
+                this.posturls[res.result.url].url =
+                  "/dlux" + this.posturls[res.result.url].url;
+              else
+                this.posturls[res.result.url].url =
+                  "/blog" + this.posturls[res.result.url].url;
               this.posturls[res.result.url].rep = "...";
               this.rep(res.result.url);
               if (this.posturls[res.result.url].slider < 0) {
@@ -1211,37 +1232,61 @@ var app = new Vue({
         fetch(this.lapi + "/@" + user)
           .then((response) => response.json())
           .then((data) => {
-              if(!fu){
-                this.balance = (data.balance / 1000).toFixed(3);
-                this.bartoken = this.balance;
-                this.barpow = (
-                  (data.poweredUp + data.granted - data.granting) /
-                  1000
-                ).toFixed(3);
-                this.bargov = (data.gov / 1000).toFixed(3);
-                this.accountapi = data;
-                if (
-                  new Date().getMonth() + 1 !=
-                    parseInt(data.drop?.last_claim, 16) &&
-                  data.drop?.availible.amount > 0
-                ) {
-                  this.hasDrop = true;
-                  this.dropnai = `${parseFloat(
-                    data.drop.availible.amount /
-                      Math.pow(10, data.drop.availible.precision)
-                  ).toFixed(data.drop.availible.precision)} ${
-                    data.drop.availible.token
-                  }`;
-                }
-              } else {
-                  this.focusdata.balance = (data.balance / 1000).toFixed(3);
-                  this.focusdata.gov = (data.gov / 1000).toFixed(3);
-                  this.focusdata.poweredUp = (
-                    (data.poweredUp + data.granted - data.granting) /
-                    1000
-                  ).toFixed(3);
-                  this.focusdata.claim = false
+            if (!fu) {
+              this.balance = (data.balance / 1000).toFixed(3);
+              this.bartoken = this.balance;
+              this.barpow = (
+                (data.poweredUp + data.granted - data.granting) /
+                1000
+              ).toFixed(3);
+              this.bargov = (data.gov / 1000).toFixed(3);
+              this.accountapi = data;
+              if (
+                new Date().getMonth() + 1 !=
+                  parseInt(data.drop?.last_claim, 16) &&
+                data.drop?.availible.amount > 0
+              ) {
+                this.hasDrop = true;
+                this.dropnai = `${parseFloat(
+                  data.drop.availible.amount /
+                    Math.pow(10, data.drop.availible.precision)
+                ).toFixed(data.drop.availible.precision)} ${
+                  data.drop.availible.token
+                }`;
               }
+            } else {
+              this.focusdata.balance = (data.balance / 1000).toFixed(3);
+              this.focusdata.gov = (data.gov / 1000).toFixed(3);
+              this.focusdata.poweredUp = (
+                (data.poweredUp + data.granted - data.granting) /
+                1000
+              ).toFixed(3);
+              this.focusdata.claim = false;
+            }
+          });
+    },
+    getSapi(user) {
+      if (user)
+        fetch(this.sapi + "/@" + user)
+          .then((response) => response.json())
+          .then((data) => {
+              this.lbalance = (data.balance / 1000).toFixed(3);
+              this.lbargov = (data.gov / 1000).toFixed(3);
+              this.saccountapi = data;
+              this.larynxbehind = data.behind
+              // if (
+              //   new Date().getMonth() + 1 !=
+              //     parseInt(data.drop?.last_claim, 16) &&
+              //   data.drop?.availible.amount > 0
+              // ) {
+              //   this.hasDrop = true;
+              //   this.dropnai = `${parseFloat(
+              //     data.drop.availible.amount /
+              //       Math.pow(10, data.drop.availible.precision)
+              //   ).toFixed(data.drop.availible.precision)} ${
+              //     data.drop.availible.token
+              //   }`;
+              // }
           });
     },
     getHiveUser(user) {
@@ -1268,7 +1313,7 @@ var app = new Vue({
             this.accountinfo.rshares = (power * final_vest) / 10000;
           });
     },
-    getHiveStats(){
+    getHiveStats() {
       fetch(this.hapi, {
         body: `{"jsonrpc":"2.0", "method":"condenser_api.get_dynamic_global_properties", "params":[], "id":1}`,
         headers: {
@@ -1305,13 +1350,15 @@ var app = new Vue({
     },
   },
   mounted() {
-    this.pageAccount = location.pathname.split("/@")[1] || 'markegiles'
-    this.checkAccount('pageAccount', 'focus')
+    this.pageAccount = location.pathname.split("/@")[1] || "markegiles";
+    this.sapi = sapi
+    this.checkAccount("pageAccount", "focus");
     this.getHiveStats();
     this.getPosts();
     this.getProtocol();
     this.getRewardFund();
     this.getFeedPrice();
+    this.getSapi(this.pageAccount);
   },
   watch: {
     postSelect(a, b) {
