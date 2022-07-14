@@ -59,10 +59,10 @@
                                     class="btn btn-outline-primary dropdown-toggle drop-no-arrow btn-lg"
                                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions<i
                                         class="fas fa-ellipsis-h ms-2"></i></button>
-                                <div class="dropdown-menu nav-item dropdown-menu-right"> <a class="dropdown-item"
-                                        type="button">Follow</a> <a class="dropdown-item" type="button">Unfollow</a> <a
-                                        class="dropdown-item" type="button">Send DLUX</a> <a class="dropdown-item"
-                                        type="button" href="#settings">Settings</a></div>
+                                <div class="dropdown-menu dropdown-menu-dark nav-item dropdown-menu-right"> <a
+                                        class="dropdown-item" type="button">Follow</a> <a class="dropdown-item"
+                                        type="button">Unfollow</a> <a class="dropdown-item" type="button">Send DLUX</a>
+                                    <a class="dropdown-item" type="button" href="#settings">Settings</a></div>
                             </div>
                         </div>
                         <!-- nav tabs -->
@@ -280,7 +280,7 @@
                                                         :onclick="vote('{{author}}','{{permlink}}','slider{{post_id}}')">100%</button>
                                                     <button type="button" class="btn btn-secondary"
                                                         data-bs-toggle="collapse"
-                                                        :data-target="{{&quot;#&quot;}}vote{{post_id}}"><span
+                                                        :data-bs-target="{{&quot;#&quot;}}vote{{post_id}}"><span
                                                             class="close text-white">×</span></button>
                                                 </div>
                                                 <div class="flex-fill mx-2">
@@ -299,7 +299,7 @@
                                     </div>
                                     <div class="d-flex align-items-center my-2">
                                         <div><a data-bs-toggle="collapse"
-                                                :data-target="{{&quot;#&quot;}}vote{{post_id}}"><i
+                                                :data-bs-target="{{&quot;#&quot;}}vote{{post_id}}"><i
                                                     class="fas fa-heart fa-fw me-1"
                                                     style="color: {{active_votes.hasVoted('disregardfiat')}}"></i></a>{{active_votes.countUpVotes()}}<i
                                                 class="fas fa-comment fa-fw ms-2 me-1"></i>{{children}}</div>
@@ -364,7 +364,7 @@
                                                                     :onclick="vote('{{comment.author}}','{{data_detail.data.comment.permlink}}','slider{{post_id}}')">100%</button>
                                                                 <button type="button" class="btn btn-secondary"
                                                                     data-bs-toggle="collapse"
-                                                                    :data-target="{{&quot;#&quot;}}vote{{post_id}}"><span
+                                                                    :data-bs-target="{{&quot;#&quot;}}vote{{post_id}}"><span
                                                                         class="close text-white">×</span></button>
                                                             </div>
                                                             <div class="flex-fill mx-2">
@@ -383,7 +383,7 @@
                                                 </div>
                                                 <div class="d-flex align-items-center my-2">
                                                     <div><a data-bs-toggle="collapse"
-                                                            :data-target="{{&quot;#&quot;}}vote{{post_id}}"><i
+                                                            :data-bs-target="{{&quot;#&quot;}}vote{{post_id}}"><i
                                                                 class="fas fa-heart me-1"></i></a>{{data_detail.data.active_votes.countUpVotes()}}<i
                                                             class="fas fa-fw fa-comment ms-2 me-1"></i>{{data_detail.data.children}}
                                                     </div>
@@ -429,15 +429,15 @@
                                         </div>
                                         <p class="lead ">An open source platform for p2p games, apps, and experiences.
                                         </p>
-                                        <div class="clearfix" v-show="focusdata.claim > 0 && focus == account">
+                                        <div class="d-flex" v-show="focusdata.claim > 0 && focus == account">
                                             <hr class="my-4 bg-light">
-                                            <div class="float-left">
-                                                <h4>Claim DLUX</h4>
+                                            <div class="me-auto">
+                                                <h4 class="">Claim DLUX</h4>
                                                 <p class="text-white-50">Tokens from earnings, delegation, PoB, node
                                                     rewards, etc.</p>
                                             </div>
-                                            <div id="claimdluxbtn" class="float-right text-right d-column">
-                                                <h5 id="dluxclaim">
+                                            <div id="claimdluxbtn" class="text-end d-column">
+                                                <h5 id="dluxclaim" class="text-end">
                                                     {{((focusdata.claim)/1000)}} DLUX</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Claim">
                                                     <button type="submit" class="btn btn-info me-half"><i
@@ -469,36 +469,33 @@
                                                 <p class="text-white-50">The utility token for content distribution and
                                                     smart contracts, also called a smart media token (SMT)</p>
                                             </div>
-                                            <div id="dluxactions" class="float-right text-right">
+                                            <div id="dluxactions" class="float-right text-end">
                                                 <h5 id="dluxbalance">
                                                     {{((focusdata.balance)/1000)}} DLUX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info me-half"
                                                         data-bs-toggle="modal" id="senddluxmodalbutton"
-                                                        data-target="#sendDluxModal"><i
+                                                        data-bs-target="#sendDluxModal"><i
                                                             class="fas fa-paper-plane me-2"></i>Send</button>
                                                     <div class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-right text-white"
+                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
                                                             aria-labelledby="btnGroupDrop1"> <a class="dropdown-item"
                                                                 href="#" id="powerupdluxbutton" data-bs-toggle="modal"
-                                                                data-target="#powerupDluxModal"><i
+                                                                data-bs-target="#powerupDluxModal"><i
                                                                     class="fas fa-angle-double-up fa-fw me-2"></i>Power
                                                                 Up</a> <a class="dropdown-item" href="#"
                                                                 id="freezedluxbutton" data-bs-toggle="modal"
-                                                                data-target="#lockgovDluxModal"><i
+                                                                data-bs-target="#lockgovDluxModal"><i
                                                                     class="fas fa-lock fa-fw me-2"></i>Lock GOV</a>
                                                             <div class="dropdown-divider"></div>
-                                                            <a class="dropdown-item" href="#" id="buylink"
-                                                                data-bs-toggle="modal" data-target="#buyDluxModal"><i
-                                                                    class="fas fa-cart-arrow-down fa-fw me-2"></i>Buy
-                                                                DLUX</a> <a class="dropdown-item" href="#" id="selllink"
-                                                                data-bs-toggle="modal" data-target="#buyDluxModal"><i
-                                                                    class="fas fa-coins fa-fw me-2"></i>Sell DLUX</a>
+                                                            <a class="dropdown-item" href="/dex/#dlux" id="buylink"><i
+                                                                    class="fas fa-coins fa-fw me-2"></i>Buy / Sell
+                                                            </a>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -518,35 +515,34 @@
                                                     <li>Instant Power Up | 4 Week Power Down | 1 Week Convert</li>
                                                 </ul>
                                             </div>
-                                            <div id="dluxpactions" class="float-right text-right">
+                                            <div id="dluxpactions" class="float-right text-end">
                                                 <h5 id="pwrbalance">
                                                     {{((focusdata.poweredUp)/1000)}} DLUX
                                                 </h5>
                                                 <a data-bs-toggle="collapse" id="delegationsbtn" href="#delegations"
                                                     role="button" aria-expanded="false" aria-controls="Show delegations"
-                                                    class="text-white d-none" style="text-decoration: none">
+                                                    class="text-white" style="text-decoration: none">
                                                     <h6 id="delegatebal">(-0 G)<i class="fas fa-search ms-2"></i></h6>
                                                 </a>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
-                                                    <button type="button" class="btn btn-info me-half disabled"
+                                                    <button type="button" class="btn btn-info me-half"
                                                         data-bs-toggle="modal" title="Delegate DLUX"
-                                                        id="delegatedluxbtn" data-target="#sendDluxModal"
-                                                        style="pointer-events: none"><i
+                                                        id="delegatedluxbtn" data-bs-target="#sendDluxModal"><i
                                                             class="fas fa-user-friends fa-fw me-2"></i>Delegate</button>
                                                     <div class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-right text-white"
+                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
                                                             aria-labelledby="btnGroupDrop1"> <a class="dropdown-item"
                                                                 href="#" data-bs-toggle="modal"
                                                                 id="dluxpowerdownModalButton"
-                                                                data-target="#powerdownDluxModal"><i
+                                                                data-bs-target="#powerdownDluxModal"><i
                                                                     class="fas fa-angle-double-down fa-fw me-2"></i>Power
                                                                 Down</a> <a class="dropdown-item disabled" href="#"
                                                                 data-bs-toggle="modal" id="powertogovbutton"
-                                                                data-target="#sendDluxModal"><i
+                                                                data-bs-target="#sendDluxModal"><i
                                                                     class="fas fa-random fa-fw me-2"></i>Convert to
                                                                 GOV</a></div>
                                                     </div>
@@ -580,12 +576,12 @@
                                                     <li>1 Week Lock | 4 Week Unlock | 1 Week Convert</li>
                                                 </ul>
                                             </div>
-                                            <div id="dluxgactions" class="float-right text-right">
+                                            <div id="dluxgactions" class="float-right text-end">
                                                 <h5 id="govbalance">
                                                     {{((focusdata.gov)/1000)}} DLUX</h5>
                                                 <a data-bs-toggle="collapse" id="escrowtxbutton" href="#escrowtx"
                                                     role="button" aria-expanded="false"
-                                                    aria-controls="Show escrow transactions" class="text-white"
+                                                    aria-controls="Show escrow transactions" class="text-white d-none"
                                                     style="text-decoration: none">
                                                     <h6 id="escrowbal">(-0 DG)<i class="fas fa-search ms-2"></i></h6>
                                                 </a>
@@ -598,15 +594,15 @@
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-right text-white"
+                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
                                                             aria-labelledby="btnGroupDrop1"> <a class="dropdown-item"
                                                                 href="#" data-bs-toggle="modal"
                                                                 id="dluxgovdownModalButton"
-                                                                data-target="#unlockgovDluxModal"><i
+                                                                data-bs-target="#unlockgovDluxModal"><i
                                                                     class="fas fa-lock-open fa-fw me-2"></i>Unlock
                                                                 GOV</a> <a class="dropdown-item disabled" href="#"
                                                                 data-bs-toggle="modal" id="govtopowerbutton"
-                                                                data-target="#sendDluxModal"><i
+                                                                data-bs-target="#sendDluxModal"><i
                                                                     class="fas fa-random fa-fw me-2"></i>Convert to
                                                                 PWR</a></div>
                                                     </div>
@@ -623,7 +619,7 @@
                                                 <p class="text-white-50">The approximate US Dollar value for all DLUX in
                                                     your account</p>
                                             </div>
-                                            <div id="dluxval" class="float-right text-right">
+                                            <div id="dluxval" class="float-right text-end">
                                                 <h5 id="totaldbal"> CALC
                                                 </h5>
                                             </div>
@@ -638,14 +634,13 @@
                                     <div class="jumbotron pt-4 bg-darker">
                                         <div class="d-flex align-items-center pb-2">
                                             <h1 class="display-5 m-0 p-0">SPK</h1>
-                                            <!-- <div class="text-center small m-0 p-2 ms-2"
-                                                v-bind:class="{'text-success': larynxbehind < 30,
+                                            <div class="text-center small m-0 p-2 ms-2" v-bind:class="{'text-success': larynxbehind < 30,
                                                     'text-warning': larynxbehind >= 30,
                                                     'text-danger': larynxbehind > 100}"> <span
                                                     v-show="larynxbehind < 30">ONLINE - </span> <span
                                                     v-show="larynxbehind >= 30 && larynxbehind <=100">LAGGING
                                                     - </span> <span v-show="larynxbehind > 100">OFFLINE -
-                                                </span> <span>{{larynxbehind}} BBH</span></div> -->
+                                                </span> <span>{{larynxbehind}} BBH</span></div>
                                         </div>
                                         <p class="lead">Decentralized and incentivized network infrastructure, rewarding
                                             providers with SPK governance and BROCA gas tokens.</p>
@@ -660,7 +655,7 @@
                                                 <input type="text" name="frmDateReg" required id="frmDate" value=""
                                                     class="d-none">
                                             </div>
-                                            <div id="claimlarynxbtn" class="float-right text-right d-column">
+                                            <div id="claimlarynxbtn" class="float-right text-end d-column">
                                                 <h5>{{((larynxtoken.data.drop.availible.amount)/1000)}}
                                                     LARYNX</h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Claim">
@@ -678,7 +673,7 @@
                                                 <p class="text-white-50">Claimable rewards for running a spkcc node,
                                                     compiled daily.</p>
                                             </div>
-                                            <div id="claimlarynxrewardbtn" class="float-right text-right d-column">
+                                            <div id="claimlarynxrewardbtn" class="float-right text-end d-column">
                                                 <h5>{{((larynxtoken.data.claim)/1000)}} LARYNX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Claim">
@@ -694,14 +689,14 @@
                                                 <h4>LARYNX Token</h4>
                                                 <p class="text-white-50">The mining token for the spk network.</p>
                                             </div>
-                                            <!-- <div id="larynxactions" class="float-right text-right">
+                                            <!-- <div id="larynxactions" class="float-right text-end">
                                                 <h5 id="larynxbalance">
                                                     {{((larynxtoken.data.balance)/1000)}} LARYNX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Actions">
                                                     <button type="button" class="btn btn-info me-half"
                                                         data-bs-toggle="modal" id="sendlarynxmodalbutton"
-                                                        data-target="#sendLarynxModal"><i
+                                                        data-bs-target="#sendLarynxModal"><i
                                                             class="fas fa-paper-plane me-2"></i>Send</button>
                                                     <div class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
@@ -711,11 +706,11 @@
                                                             aria-labelledby="btnGroupDrop1"> <a
                                                                 class="dropdown-item disabled d-none" href="#"
                                                                 id="poweruplarynxbutton" data-bs-toggle="modal"
-                                                                data-target="#powerupLarynxModal"><i
+                                                                data-bs-target="#powerupLarynxModal"><i
                                                                     class="fas fa-angle-double-up fa-fw me-2"></i>Power
                                                                 Up</a> <a class="dropdown-item" href="#"
                                                                 id="locklarynxbutton" data-bs-toggle="modal"
-                                                                data-target="#lockgovLarynxModal"><i
+                                                                data-bs-target="#lockgovLarynxModal"><i
                                                                     class="fas fa-lock fa-fw me-2"></i>Lock GOV</a>
                                                             <div class="dropdown-divider"></div>
                                                             <a class="dropdown-item" href="/dex/larynx" id="buylink"><i
@@ -742,7 +737,7 @@
                                                     <li>1 Week Lock | 4 Week Unlock | 1 Week Convert</li>
                                                 </ul>
                                             </div>
-                                            <div id="larynxgactions" class="float-right text-right">
+                                            <div id="larynxgactions" class="float-right text-end">
                                                 <h5 id="govbalance">
                                                     {{((larynxtoken.data.gov)/1000)}} LARYNX
                                                 </h5>
@@ -758,11 +753,11 @@
                                                             aria-labelledby="btnGroupDrop1"> <a class="dropdown-item"
                                                                 href="#" data-bs-toggle="modal"
                                                                 id="larynxgovdownModalButton"
-                                                                data-target="#unlockgovLarynxModal"><i
+                                                                data-bs-target="#unlockgovLarynxModal"><i
                                                                     class="fas fa-lock-open fa-fw me-2"></i>Unlock
                                                                 GOV</a> <a class="dropdown-item disabled d-none"
                                                                 href="#" data-bs-toggle="modal" id="govtopowerbutton"
-                                                                data-target="#sendDluxModal"><i
+                                                                data-bs-target="#sendDluxModal"><i
                                                                     class="fas fa-random fa-fw me-2"></i>Convert to
                                                                 PWR</a></div>
                                                     </div>
@@ -777,7 +772,7 @@
                                                 <p class="text-white-50">The approximate US Dollar value for all LARYNX
                                                     in your account</p>
                                             </div>
-                                            <div class="float-right text-right">
+                                            <div class="float-right text-end">
                                                 <h5 id="totallarynx">
                                                     CALC
                                                 </h5>
@@ -805,23 +800,23 @@
                                                 <p class="text-white-50">The main token of the chain, often rewarded for
                                                     content.</p>
                                             </div>
-                                            <div id="hiveactions" class="float-right text-right">
+                                            <div id="hiveactions" class="float-right text-end">
                                                 <h5 id="hivebalance">{{focus.balance}}</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info me-half"
                                                         data-bs-toggle="modal" id="sendhivemodalbutton"
-                                                        data-target="#sendHiveModal"><i
+                                                        data-bs-target="#sendHiveModal"><i
                                                             class="fas fa-paper-plane me-2"></i>Send</button>
                                                     <div class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-right text-white"
+                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
                                                             aria-labelledby="btnGroupDrop1"> <a
                                                                 class="dropdown-item disabled" href="#"
                                                                 id="poweruphivebutton" data-bs-toggle="modal"
-                                                                data-target="#powerupDluxModal"><i
+                                                                data-bs-target="#powerupDluxModal"><i
                                                                     class="fas fa-angle-double-up fa-fw me-2"></i>Power
                                                                 Up</a> <a class="dropdown-item disabled" href="#"><i
                                                                     class="fas fa-random fa-fw me-2"></i>Convert to
@@ -847,7 +842,7 @@
                                                     <li>Increased resource credits</li>
                                                 </ul>
                                             </div>
-                                            <div id="hivepactions" class="float-right text-right">
+                                            <div id="hivepactions" class="float-right text-end">
                                                 <h5 id="hpbal">
                                                     {{((hivestats.total_vesting_fund_hive*focus.vesting_shares)/hivestats.total_vesting_shares)}}
                                                     HP</h5>
@@ -860,7 +855,7 @@
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-right text-white"
+                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
                                                             aria-labelledby="btnGroupDrop1"> <a
                                                                 class="dropdown-item disabled" href="#"><i
                                                                     class="fas fa-angle-double-down fa-fw me-2"></i>Power
@@ -881,19 +876,19 @@
                                                 <p class="text-white-50">Also a reward for content, this token is pegged
                                                     to the US Dollar</p>
                                             </div>
-                                            <div id="hbdactions" class="float-right text-right">
+                                            <div id="hbdactions" class="float-right text-end">
                                                 <h5 id="hbdbalance">{{focus.hbd_balance}}</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info me-half"
                                                         data-bs-toggle="modal" id="sendhbdmodalbutton"
-                                                        data-target="#sendHbdModal"><i
+                                                        data-bs-target="#sendHbdModal"><i
                                                             class="fas fa-paper-plane me-2"></i>Send</button>
                                                     <div class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-right text-white"
+                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
                                                             aria-labelledby="btnGroupDrop1"> <a
                                                                 class="dropdown-item disabled" href="#"><i
                                                                     class="fas fa-random fa-fw me-2"></i>Convert to
@@ -915,7 +910,7 @@
                                                 <p class="text-white-50 mb-0">A 3 day waiting period is imposed on
                                                     withdrawl</p>
                                             </div>
-                                            <div id="savingsactions" class="float-right text-right">
+                                            <div id="savingsactions" class="float-right text-end">
                                                 <h5 id="savbal">{{focus.savings_hbd_balance}}</h5>
                                             </div>
                                         </div>
@@ -926,7 +921,7 @@
                                                 <p class="text-white-50">The approximate US Dollar value for all HIVE in
                                                     your account</p>
                                             </div>
-                                            <div id="hiveval" class="float-right text-right">
+                                            <div id="hiveval" class="float-right text-end">
                                                 <h5 id="totalhivebalance">
                                                     {{(((((hivestats.total_vesting_fund_hive*focus.vesting_shares)/hivestats.total_vesting_shares)+focus.balance)*hiveprice.hive.usd)+((focus.hbd_balance+focus.savings_hbd_balance)*hbdprice.hive_dollar.usd))}}
                                                 </h5>

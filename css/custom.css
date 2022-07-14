@@ -447,3 +447,22 @@ text-align: center;
     left: 0;
     height: 100%;
   }	
+  .truncate1 {
+    text-overflow: "Read More";
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.truncate2 {
+    text-overflow: "Read More";
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+div.behavemark img {
+    max-width: 100%;
+}
