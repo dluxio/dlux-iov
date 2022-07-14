@@ -8,17 +8,17 @@ import Ratings from "/js/ratings.js";
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "";
-// if (location.search) {
-//     const string = location.search.replace("?", "");
-//     let params = string.split("&");
-//     for (let i = 0; i < params.length; i++) {
-//         let param = params[i].split("=");
-//         if (param[0] == "api") {
-//             lapi = param[1];
-//         }
-//     }
-//     //window.history.replaceState(null, null, "dex?api=" + lapi);
-// }
+if (location.search) {
+    const string = location.search.replace("?", "");
+    let params = string.split("&");
+    for (let i = 0; i < params.length; i++) {
+        let param = params[i].split("=");
+        if (param[0] == "api") {
+            lapi = param[1];
+        }
+    }
+    //window.history.replaceState(null, null, "?api=" + lapi);
+}
 // if (location.hash && !lapi) {
 //     const hash = url.split("#");
 //     if (hash[1].includes("dlux")) {
@@ -29,9 +29,9 @@ let lapi = "";
 //         lapi = "https://duat.hivehoneycomb.com";
 //     }
 // }
-// if (!lapi) {
+if (!lapi) {
 lapi = "https://token.dlux.io";
-// }
+}
 console.log(lapi);
 if (
   lapi == "https://token.dlux.io" ||
