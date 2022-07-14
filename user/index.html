@@ -641,7 +641,7 @@
                                         <p class="lead">Decentralized and incentivized network infrastructure, rewarding
                                             providers with SPK governance and BROCA gas tokens.</p>
                                         <div class="clearfix" id="larynxclaimdiv"
-                                            v-show="parseInt(saccountapi.drop.last_claim, 16) != frmDate() && saccountapi.drop.availible.amount > 0">
+                                            v-show="parseInt(saccountapi.drop.last_claim, 16) != frmDate() && saccountapi.drop.available.amount > 0">
                                             <hr class="my-4 bg-light">
                                             <div class="float-left">
                                                 <h4>Claim LARYNX AirDrop</h4>
@@ -652,7 +652,7 @@
                                                     class="d-none">
                                             </div>
                                             <div id="claimlarynxbtn" class="float-right text-end d-column">
-                                                <h5>{{((saccountapi.drop.availible.amount)/1000)}}
+                                                <h5>{{((saccountapi.drop.available.amount)/1000)}}
                                                     LARYNX</h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Claim">
                                                     <button type="submit" class="btn btn-info me-half"
