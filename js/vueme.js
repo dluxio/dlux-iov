@@ -7,7 +7,8 @@ import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
 
 let url = location.href.replace(/\/$/, "");
-let lapi = "", sapi = "https://spkinstant.hivehoneycomb.com" 
+let lapi = "",
+  sapi = "https://testspk.hivehoneycomb.com"; 
 if (location.search) {
     const string = location.search.replace("?", "");
     let params = string.split("&");
