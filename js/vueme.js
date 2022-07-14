@@ -101,6 +101,9 @@ var app = new Vue({
         poweredUp: 0,
         drop: {
           last_claim: 0,
+          available:{
+            amount: 0
+          }
         }
       },
       dropnai: "",
