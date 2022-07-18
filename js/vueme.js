@@ -1396,7 +1396,7 @@ var app = new Vue({
   },
   mounted() {
     this.pageAccount = location.pathname.split("/@")[1]
-      ? this.pageAccount || "markegiles"
+      ? this.pageAccount
       : this.account;
     this.focus.account = this.pageAccount;
     this.sapi = sapi;
