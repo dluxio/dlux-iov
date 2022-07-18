@@ -1395,6 +1395,7 @@ var app = new Vue({
     },
   },
   mounted() {
+    console.log(location.pathname.split("/@")[1]);
     this.pageAccount = location.pathname.split("/@")[1]
       ? this.pageAccount
       : this.account;
