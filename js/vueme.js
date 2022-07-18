@@ -1384,7 +1384,7 @@ var app = new Vue({
     newme(user) {
       if (!location.pathname.split("/@")[1] && this.prefix) {
         this.pageAccount = location.pathname.split("/@")[1]
-          ? this.pageAccount || "markegiles"
+          ? location.pathname.split("/@")[1]
           : this.account;
         this.focus.account = this.pageAccount;
         this.checkAccount("pageAccount", "focus");
@@ -1397,7 +1397,7 @@ var app = new Vue({
   mounted() {
     console.log(location.pathname.split("/@")[1]);
     this.pageAccount = location.pathname.split("/@")[1]
-      ? this.pageAccount
+      ? location.pathname.split("/@")[1]
       : this.account;
     this.focus.account = this.pageAccount;
     this.sapi = sapi;
