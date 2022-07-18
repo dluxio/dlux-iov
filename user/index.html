@@ -25,7 +25,7 @@
 <body class="d-flex flex-column h-100 padme-t70 text-white" id="explore">
     <div id="app">
         <div v-scroll="handleScroll">
-            <nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event)"
+            <nav-vue @login="account = $event;newme($event)"
                 @logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
                 :lapi="lapi" />
         </div>
@@ -616,7 +616,7 @@
                                                     your account</p>
                                             </div>
                                             <div id="dluxval" class="float-right text-end">
-                                                <h5 id="totaldbal"> CALC
+                                                <h5 id="totaldbal">${{toFixed(dluxval * accountapi.tick * hiveprice.hive.usd,2)}}
                                                 </h5>
                                             </div>
                                         </div>
@@ -640,8 +640,19 @@
                                         </div>
                                         <p class="lead">Decentralized and incentivized network infrastructure, rewarding
                                             providers with SPK governance and BROCA gas tokens.</p>
+                                        <div class="clearfix">
+                                            <div class="float-left">
+                                                <h4>SPK Token</h4>
+                                                <p class="text-white-50">The governance token for the SPK network.</p>
+                                            </div>
+                                            <div class="float-right text-end">
+                                                <h5 >
+                                                    {{((saccountapi.spk)/1000)}} SPK
+                                                </h5>
+                                            </div>
+                                        </div>
                                         <div class="clearfix" id="larynxclaimdiv"
-                                            v-show="parseInt(saccountapi.drop.last_claim, 16) != frmDate() && saccountapi.drop.available.amount > 0">
+                                            v-show="parseInt(saccountapi.drop.last_claim, 16) != frmDate() && saccountapi.drop.availible.amount > 0">
                                             <hr class="my-4 bg-light">
                                             <div class="float-left">
                                                 <h4>Claim LARYNX AirDrop</h4>
@@ -652,7 +663,7 @@
                                                     class="d-none">
                                             </div>
                                             <div id="claimlarynxbtn" class="float-right text-end d-column">
-                                                <h5>{{((saccountapi.drop.available.amount)/1000)}}
+                                                <h5>{{((saccountapi.drop.availible.amount)/1000)}}
                                                     LARYNX</h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Claim">
                                                     <button type="submit" class="btn btn-info me-half"
@@ -660,7 +671,7 @@
                                                             class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
                                                 </div>
                                             </div>
-                                        </div> -->
+                                        </div>
                                         <div class="clearfix" id="larynxclaimrewards"
                                             v-show="saccountapi.claim > 0">
                                             <hr class="my-4 bg-light">
@@ -683,7 +694,7 @@
                                         <div class="clearfix">
                                             <div class="float-left">
                                                 <h4>LARYNX Token</h4>
-                                                <p class="text-white-50">The mining token for the spk network.</p>
+                                                <p class="text-white-50">The mining token for the SPK network.</p>
                                             </div>
                                             <div id="larynxactions" class="float-right text-end">
                                                 <h5 id="larynxbalance">
@@ -765,12 +776,12 @@
                                         <div class="clearfix">
                                             <div class="float-left">
                                                 <h4>Estimated Account Value</h4>
-                                                <p class="text-white-50">The approximate US Dollar value for all LARYNX
+                                                <p class="text-white-50">The approximate US Dollar value for all SPK assets
                                                     in your account</p>
                                             </div>
                                             <div class="float-right text-end">
                                                 <h5 id="totallarynx">
-                                                    CALC
+                                                    ${{toFixed(spkval * saccountapi.tick * hiveprice.hive.usd,2)}}
                                                 </h5>
                                             </div>
                                         </div>
@@ -840,7 +851,7 @@
                                             </div>
                                             <div id="hivepactions" class="float-right text-end">
                                                 <h5 id="hpbal">
-                                                    {{((hivestats.total_vesting_fund_hive*focus.vesting_shares)/hivestats.total_vesting_shares)}}
+                                                    {{toFixed(((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares)),3)}}
                                                     HP</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info me-half"
@@ -919,7 +930,7 @@
                                             </div>
                                             <div id="hiveval" class="float-right text-end">
                                                 <h5 id="totalhivebalance">
-                                                    {{(((((hivestats.total_vesting_fund_hive*focus.vesting_shares)/hivestats.total_vesting_shares)+focus.balance)*hiveprice.hive.usd)+((focus.hbd_balance+focus.savings_hbd_balance)*hbdprice.hive_dollar.usd))}}
+                                                    ${{toFixed((((((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares))+parseFloat(focus.balance))*hiveprice.hive.usd)+((parseFloat(focus.hbd_balance)+parseFloat(focus.savings_hbd_balance))*hbdprice.hive_dollar.usd)),2)}}
                                                 </h5>
                                             </div>
                                         </div>

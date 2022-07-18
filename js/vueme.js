@@ -96,16 +96,21 @@ var app = new Vue({
       },
       saccountapi: {
         balance: 0,
+        spk: 0,
         gov: 0,
+        tick: 0.01,
         claim: 0,
         poweredUp: 0,
         drop: {
           last_claim: 0,
-          available:{
-            amount: 0
-          }
-        }
+          availible: {
+            amount: 0,
+          },
+        },
       },
+      dluxval: 0,
+      spkval: 0,
+      focusval: 0,
       dropnai: "",
       balance: "0.000",
       bartoken: "",
@@ -124,7 +129,19 @@ var app = new Vue({
       lapi: lapi,
       larynxbehind: -1,
       hapi: hapi,
-      accountapi: {},
+      accountapi: {
+        balance: 0,
+        gov: 0,
+        tick: 0.01,
+        claim: 0,
+        poweredUp: 0,
+        drop: {
+          last_claim: 0,
+          availible: {
+            amount: 0,
+          },
+        },
+      },
       hiveprice: {
         hive: {
           usd: 1,
@@ -723,11 +740,11 @@ var app = new Vue({
         };
       } else alert("Username not found");
     },
-    parseInt(a,b = 10) {
-      return parseInt(a, b)
+    parseInt(a, b = 10) {
+      return parseInt(a, b);
     },
-    frmDate(){
-      return new Date().getMonth()
+    frmDate() {
+      return new Date().getMonth();
     },
     sendhive() {
       if (!this.hiveFormValid) return;
@@ -857,13 +874,16 @@ var app = new Vue({
       if (Container.querySelector("input:invalid")) this[validKey] = false;
       else this[validKey] = true;
     },
-    getPosts() {
+    getPosts(reset) {
       var bitMask = 0;
       for (var type in this.postSelect.types) {
         if (this.postSelect.types[type].checked)
           bitMask += this.postSelect.types[type].bitFlag;
       }
-      if (this.postSelect.bitMask != bitMask) {
+      if(reset){
+        this.posturls = {}
+      }
+      if (this.postSelect.bitMask != bitMask || reset) {
         this.postSelect.bitMask = bitMask;
         this.displayPosts = [];
         this[this.postSelect.entry] = [];
@@ -1208,6 +1228,7 @@ var app = new Vue({
       this.barpow = "";
       this.bargov = "";
       this.accountapi = "";
+      this.saccountapi = "";
       this.hasDrop = false;
       this.openorders = [];
       this.accountinfo = {};
@@ -1252,11 +1273,14 @@ var app = new Vue({
         fetch(this.lapi + "/@" + user)
           .then((response) => response.json())
           .then((data) => {
+            data.tick = data.tick || 0.01;
             this.behind = data.behind;
-            if(!fu){
+            if (!fu) {
               this.balance = (data.balance / 1000).toFixed(3);
               this.bargov = (data.gov / 1000).toFixed(3);
               this.accountapi = data;
+              this.dluxval =
+                (data.balance + data.gov + data.poweredUp + data.claim) / 1000;
             } else {
               this.focusaccountapi = data;
             }
@@ -1267,27 +1291,35 @@ var app = new Vue({
         fetch(this.sapi + "/@" + user)
           .then((response) => response.json())
           .then((data) => {
+            data.tick = data.tick || 0.01;
             this.larynxbehind = data.behind;
-            if(!fu){
+            if (!fu) {
               this.lbalance = (data.balance / 1000).toFixed(3);
               this.lbargov = (data.gov / 1000).toFixed(3);
-              this.saccountapi = data
+              this.saccountapi = data;
+              this.spkval =
+                (data.balance +
+                  data.gov +
+                  data.poweredUp +
+                  data.claim +
+                  data.spk) /
+                1000;
             } else {
-              this.focussaccountapi = data
+              this.focussaccountapi = data;
             }
-              // if (
-              //   new Date().getMonth() + 1 !=
-              //     parseInt(data.drop?.last_claim, 16) &&
-              //   data.drop?.availible.amount > 0
-              // ) {
-              //   this.hasDrop = true;
-              //   this.dropnai = `${parseFloat(
-              //     data.drop.availible.amount /
-              //       Math.pow(10, data.drop.availible.precision)
-              //   ).toFixed(data.drop.availible.precision)} ${
-              //     data.drop.availible.token
-              //   }`;
-              // }
+            // if (
+            //   new Date().getMonth() + 1 !=
+            //     parseInt(data.drop?.last_claim, 16) &&
+            //   data.drop?.availible.amount > 0
+            // ) {
+            //   this.hasDrop = true;
+            //   this.dropnai = `${parseFloat(
+            //     data.drop.availible.amount /
+            //       Math.pow(10, data.drop.availible.precision)
+            //   ).toFixed(data.drop.availible.precision)} ${
+            //     data.drop.availible.token
+            //   }`;
+            // }
           });
     },
     getHiveUser(user) {
@@ -1349,19 +1381,34 @@ var app = new Vue({
           });
       }
     },
+    newme(user) {
+      if (!location.pathname.split("/@")[1] && this.prefix) {
+        this.pageAccount = location.pathname.split("/@")[1]
+          ? this.pageAccount || "markegiles"
+          : this.account;
+        this.focus.account = this.pageAccount;
+        this.checkAccount("pageAccount", "focus");
+        this.getPosts(true);
+        this.getSapi(this.pageAccount, false);
+        this.getTokenUser(this.pageAccount, false);
+      }
+    },
   },
   mounted() {
-    this.pageAccount = location.pathname.split("/@")[1] || "markegiles";
-    this.focus.account = this.pageAccount
-    this.sapi = sapi
+    this.pageAccount = location.pathname.split("/@")[1]
+      ? this.pageAccount || "markegiles"
+      : this.account;
+    this.focus.account = this.pageAccount;
+    this.sapi = sapi;
     this.checkAccount("pageAccount", "focus");
     this.getHiveStats();
+    this.getQuotes();
     this.getPosts();
     this.getProtocol();
     this.getRewardFund();
     this.getFeedPrice();
     this.getSapi(this.pageAccount, false);
-    this.getTokenUser(this.pageAccount, false)
+    this.getTokenUser(this.pageAccount, false);
   },
   watch: {
     postSelect(a, b) {
