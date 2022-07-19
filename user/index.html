@@ -652,10 +652,38 @@
                                                 <h5 >
                                                     {{((saccountapi.spk)/1000)}} SPK
                                                 </h5>
+                                                <div class="btn-group" role="group" aria-label="SPK Actions">
+                                                    <button type="button" class="btn btn-info me-half"
+                                                        data-bs-toggle="modal" id="sendlarynxmodalbutton"
+                                                        data-bs-target="#sendLarynxModal"><i
+                                                            class="fas fa-paper-plane me-2"></i>Send</button>
+                                                    <div class="btn-group" role="group" v-if="false">
+                                                        <button id="btnGroupDrop1" type="button"
+                                                            class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false"></button>
+                                                        <div class="dropdown-menu dropdown-menu-right text-white"
+                                                            aria-labelledby="btnGroupDrop1"> <a
+                                                                class="dropdown-item disabled d-none" href="#"
+                                                                id="poweruplarynxbutton" data-bs-toggle="modal"
+                                                                data-bs-target="#powerupLarynxModal"><i
+                                                                    class="fas fa-angle-double-up fa-fw me-2"></i>Power
+                                                                Up</a> <a class="dropdown-item" href="#"
+                                                                id="locklarynxbutton" data-bs-toggle="modal"
+                                                                data-bs-target="#lockgovLarynxModal"><i
+                                                                    class="fas fa-lock fa-fw me-2"></i>Lock GOV</a>
+                                                            <div class="dropdown-divider"></div>
+                                                            <a class="dropdown-item" href="/dex/larynx" id="buylink"><i
+                                                                    class="fas fa-cart-arrow-down fa-fw me-2"></i>Buy
+                                                                LARYNX</a> <a class="dropdown-item" href="/dex/larynx"
+                                                                id="selllink"><i
+                                                                    class="fas fa-coins fa-fw me-2"></i>Sell LARYNX</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="clearfix" id="larynxclaimdiv"
-                                            v-show="parseInt(saccountapi.drop.last_claim, 16) != frmDate() && saccountapi.drop.availible.amount > 0">
+                                            v-show="parseInt(saccountapi.drop.last_claim, 16) != frmDate() && saccountapi.drop.availible.amount > 0 && me">
                                             <hr class="my-4 bg-light">
                                             <div class="float-left">
                                                 <h4>Claim LARYNX AirDrop</h4>
@@ -676,7 +704,7 @@
                                             </div>
                                         </div>
                                         <div class="clearfix" id="larynxclaimrewards"
-                                            v-show="saccountapi.claim > 0">
+                                            v-show="saccountapi.claim > 0 && me">
                                             <hr class="my-4 bg-light">
                                             <div class="float-left">
                                                 <h4>Claim LARYNX Rewards</h4>
@@ -708,7 +736,7 @@
                                                         data-bs-toggle="modal" id="sendlarynxmodalbutton"
                                                         data-bs-target="#sendLarynxModal"><i
                                                             class="fas fa-paper-plane me-2"></i>Send</button>
-                                                    <div class="btn-group" role="group">
+                                                    <div class="btn-group" role="group" v-if="me">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
                                                             aria-haspopup="true" aria-expanded="false"></button>
@@ -751,7 +779,7 @@
                                                 <h5 id="govbalance">
                                                     {{((saccountapi.gov)/1000)}} LARYNX
                                                 </h5>
-                                                <div class="btn-group" role="group" aria-label="LARYNX Actions">
+                                                <div class="btn-group" role="group" aria-label="LARYNX Actions" v-if="me">
                                                     <button type="button" class="btn btn-info me-half" disabled
                                                         title="Coming soon!" style="pointer-events: none;"><i
                                                             class="fas fa-balance-scale fa-fw me-2"></i>Measures</button>
@@ -817,7 +845,7 @@
                                                         data-bs-toggle="modal" id="sendhivemodalbutton"
                                                         data-bs-target="#sendHiveModal"><i
                                                             class="fas fa-paper-plane me-2"></i>Send</button>
-                                                    <div class="btn-group" role="group">
+                                                    <div class="btn-group" role="group" v-if="me">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
@@ -860,7 +888,7 @@
                                                     <button type="button" class="btn btn-info me-half"
                                                         style="pointer-events: none;" disabled><i
                                                             class="fas fa-user-friends me-2"></i>Delegate</button>
-                                                    <div class="btn-group" role="group">
+                                                    <div class="btn-group" role="group" v-if="me">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
@@ -893,7 +921,7 @@
                                                         data-bs-toggle="modal" id="sendhbdmodalbutton"
                                                         data-bs-target="#sendHbdModal"><i
                                                             class="fas fa-paper-plane me-2"></i>Send</button>
-                                                    <div class="btn-group" role="group">
+                                                    <div class="btn-group" role="group" v-if="me">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
