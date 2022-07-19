@@ -111,6 +111,7 @@ var app = new Vue({
       dluxval: 0,
       spkval: 0,
       focusval: 0,
+      me: false,
       dropnai: "",
       balance: "0.000",
       bartoken: "",
@@ -1396,9 +1397,12 @@ var app = new Vue({
   },
   mounted() {
     console.log(location.pathname.split("/@")[1]);
-    this.pageAccount = location.pathname.split("/@")[1]
-      ? location.pathname.split("/@")[1]
-      : this.account;
+    if (location.pathname.split("/@")[1]){
+      this.pageAccount = location.pathname.split("/@")[1]
+    } else {
+      this.pageAccount = this.account;
+      this.me = true
+    }
     this.focus.account = this.pageAccount;
     this.sapi = sapi;
     this.checkAccount("pageAccount", "focus");
