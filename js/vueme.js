@@ -1403,6 +1403,7 @@ var app = new Vue({
       this.pageAccount = this.account;
       this.me = true
     }
+    if (this.pageAccount == this.account)this.me = true;
     this.focus.account = this.pageAccount;
     this.sapi = sapi;
     this.checkAccount("pageAccount", "focus");
