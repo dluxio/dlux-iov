@@ -708,8 +708,7 @@
                                             <hr class="my-4 bg-light">
                                             <div class="float-left">
                                                 <h4>Claim LARYNX Rewards</h4>
-                                                <p class="text-white-50">Claimable rewards for running a spkcc node,
-                                                    compiled daily.</p>
+                                                <p class="text-white-50">Claimable rewards for running a SPK service node.</p>
                                             </div>
                                             <div id="claimlarynxrewardbtn" class="float-right text-end d-column">
                                                 <h5>{{((saccountapi.claim)/1000)}} LARYNX
@@ -749,7 +748,7 @@
                                                                 Up</a> <a class="dropdown-item" href="#"
                                                                 id="locklarynxbutton" data-bs-toggle="modal"
                                                                 data-bs-target="#lockgovLarynxModal"><i
-                                                                    class="fas fa-lock fa-fw me-2"></i>Lock GOV</a>
+                                                                    class="fas fa-lock fa-fw me-2"></i>Lock Liquidity</a>
                                                             <div class="dropdown-divider"></div>
                                                             <a class="dropdown-item" href="/dex/larynx" id="buylink"><i
                                                                     class="fas fa-cart-arrow-down fa-fw me-2"></i>Buy
@@ -764,13 +763,13 @@
                                         <hr class="my-4 bg-light">
                                         <div class="clearfix">
                                             <div class="float-left">
-                                                <h4>LARYNX Governance</h4>
-                                                <p class="text-white-50">Locked tokens used to determine concensus and
+                                                <h4>LARYNX Liquidity</h4>
+                                                <p class="text-white-50">Locked tokens used to determine consensus and
                                                     earn rewards for running a node</p>
-                                                <p class="text-white-50">Benefits of LARYNX Governance:</p>
+                                                <p class="text-white-50">Benefits of LARYNX Liquidity:</p>
                                                 <ul class="text-white-50">
-                                                    <li>Provides liquid funds to DAO multi-sig wallet</li>
-                                                    <li>Ensures collateral for DEX escrow transactions</li>
+                                                    <li>Proof of Stake Consensus</li>
+                                                    <li>Collateral for DEX transactions</li>
                                                     <li>Instant Lock | 4 Week Unlock | Must run a node service</li>
                                                 </ul>
                                             </div>
@@ -793,7 +792,7 @@
                                                                 id="larynxgovdownModalButton"
                                                                 data-bs-target="#unlockgovLarynxModal"><i
                                                                     class="fas fa-lock-open fa-fw me-2"></i>Unlock
-                                                                GOV</a> <a class="dropdown-item disabled d-none"
+                                                                Liquidity</a> <a class="dropdown-item disabled d-none"
                                                                 href="#" data-bs-toggle="modal" id="govtopowerbutton"
                                                                 data-bs-target="#sendDluxModal"><i
                                                                     class="fas fa-random fa-fw me-2"></i>Convert to
@@ -810,9 +809,10 @@
                                                 <p class="text-white-50">Benefits of LARYNX Power:</p>
                                                 <ul class="text-white-50">
                                                     <li>Earns SPK governance tokens!</li>
-                                                    <li>Simply locking tokens earns at a {{spkStats.spk_rate_lpow}}%</li>
-                                                    <li>Delegate locked tokens to earn both accounts {{spkStats.spk_rate_ldel}}%</li>
-                                                    <li>Run node services to earn {{spkStats.spk_rate_lgov}}% and be eligible to recieve delegations</li>
+                                                    <li>Delegate to node service accounts to build consensus. (DPoS)</li>
+                                                    <li>Simply locking tokens earns SPK at {{toFixed(parseFloat(spkStats.spk_rate_lpow),3)}}%</li>
+                                                    <li>Delegate locked tokens to earn both accounts {{toFixed(parseFloat(spkStats.spk_rate_ldel),3)}}%</li>
+                                                    <li>Run node services to earn {{toFixed(parseFloat(spkStats.spk_rate_lgov),3)}}% and be eligible to receive delegations</li>
                                                 </ul>
                                             </div>
                                             <div id="larynxgactions" class="float-right text-end">
