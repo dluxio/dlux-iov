@@ -58,14 +58,14 @@
                                     class="btn btn-outline-primary btn-lg m-1" role="button"
                                     :href="'/vr/@' + pageAccount">VR Page<i
                                         class="fas fa-vr-cardboard mx-2 fa-lg"></i></a>
-                                <button type="button"
+                                <button type="button" v-show="!me"
                                     class="btn btn-outline-primary dropdown-toggle drop-no-arrow btn-lg"
                                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions<i
                                         class="fas fa-ellipsis-h ms-2"></i></button>
                                 <div class="dropdown-menu dropdown-menu-dark nav-item dropdown-menu-right"> <a
                                         class="dropdown-item" type="button">Follow</a> <a class="dropdown-item"
                                         type="button">Unfollow</a> <a class="dropdown-item" type="button">Send DLUX</a>
-                                    <a class="dropdown-item" type="button" href="#settings">Settings</a></div>
+                                </div>
                             </div>
                         </div>
                         <!-- nav tabs -->
