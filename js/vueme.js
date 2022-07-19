@@ -94,6 +94,11 @@ var app = new Vue({
         claim: 0,
         poweredUp: 0,
       },
+      spkStats: {
+        spk_rate_ldel: "0.00015",
+        spk_rate_lgov: "0.001",
+        spk_rate_lpow: "0.0001",
+      },
       saccountapi: {
         balance: 0,
         spk: 0,
@@ -1287,6 +1292,13 @@ var app = new Vue({
             }
           });
     },
+    getSpkStats(){
+      fetch(this.sapi + "/@" + user)
+          .then((response) => response.json())
+          .then((data) => {
+            this.spkStats = data.result
+          })
+    },
     getSapi(user, fu) {
       if (user)
         fetch(this.sapi + "/@" + user)
@@ -1412,6 +1424,7 @@ var app = new Vue({
     this.getQuotes();
     this.getPosts();
     this.getProtocol();
+    this.getSpkStats();
     this.getRewardFund();
     this.getFeedPrice();
     this.getSapi(this.pageAccount, false);
