@@ -26,7 +26,7 @@
 </head>
 
 <body class="d-flex flex-column h-100 padme-t70 text-white" id="explore">
-    <div id="app">
+    <div id="app" v-cloak>
         <div v-scroll="handleScroll">
             <nav-vue @login="account = $event;newme($event)"
                 @logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
