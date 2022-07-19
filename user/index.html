@@ -26,13 +26,13 @@
 </head>
 
 <body class="d-flex flex-column h-100 padme-t70 text-white" id="explore">
-    <div id="app" v-cloak>
+    <div id="app">
         <div v-scroll="handleScroll">
             <nav-vue @login="account = $event;newme($event)"
                 @logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
                 :lapi="lapi" />
         </div>
-        <main role="main" class="flex-shrink-0 text-white">
+        <main role="main" class="flex-shrink-0 text-white" v-cloak>
             <div class="container-fluid px-0 ">
                 <!-- Page header area -->
                 <div class="container-fluid bg-darker border-bottom">
@@ -428,7 +428,7 @@
                                         </div>
                                         <p class="lead ">An open source platform for p2p games, apps, and experiences.
                                         </p>
-                                        <div class="d-flex" v-show="accountapi.claim > 0 && focus.account == account">
+                                        <div class="d-flex" v-show="accountapi.claim > 0 && me">
                                             <hr class="my-4 bg-light">
                                             <div class="me-auto">
                                                 <h4 class="">Claim DLUX</h4>
@@ -485,7 +485,7 @@
                                                         <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
                                                             aria-labelledby="btnGroupDrop1"> <a class="dropdown-item"
                                                                 href="#" id="powerupdluxbutton" data-bs-toggle="modal"
-                                                                data-bs-target="#powerupDluxModal"><i
+                                                                data-bs-target="#powerupDluxModal" v-if="me"><i
                                                                     class="fas fa-angle-double-up fa-fw me-2"></i>Power
                                                                 Up</a> <a class="dropdown-item" href="#"
                                                                 id="freezedluxbutton" data-bs-toggle="modal"
@@ -528,7 +528,7 @@
                                                         data-bs-toggle="modal" title="Delegate DLUX"
                                                         id="delegatedluxbtn" data-bs-target="#sendDluxModal"><i
                                                             class="fas fa-user-friends fa-fw me-2"></i>Delegate</button>
-                                                    <div class="btn-group" role="group">
+                                                    <div v-if="me" class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
@@ -588,7 +588,7 @@
                                                     <button type="button" class="btn btn-info me-half" disabled
                                                         title="Coming soon!" style="pointer-events: none;"><i
                                                             class="fas fa-balance-scale fa-fw me-2"></i>Measures</button>
-                                                    <div class="btn-group" role="group">
+                                                    <div v-if="me" class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
