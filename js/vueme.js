@@ -1388,6 +1388,7 @@ var app = new Vue({
           ? location.pathname.split("/@")[1]
           : this.account;
         this.focus.account = this.pageAccount;
+        if (this.pageAccount == this.account) this.me = true;
         this.checkAccount("pageAccount", "focus");
         this.getPosts(true);
         this.getSapi(this.pageAccount, false);
