@@ -65,7 +65,7 @@
                                 <div class="dropdown-menu dropdown-menu-dark nav-item dropdown-menu-right"> <a
                                         class="dropdown-item" type="button">Follow</a> <a class="dropdown-item"
                                         type="button">Unfollow</a> <modal-vue type="send" token="DLUX" :balance="accountapi.balance" :account="account" @modalsign="sendIt($event)">
-                                                        <a class="dropdown-item" type="button">Send DLUX</a>
+                                                        <a slot="trigger" class="dropdown-item" type="button">Send DLUX</a>
                                                     </modal-vue>
                                 </div>
                             </div>
@@ -494,7 +494,7 @@
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="SPK Actions">
                                                     <modal-vue type="send" token="SPK" :balance="saccountapi.spk" :account="account" @modalsign="sendIt($event)">
-                                                        <button type="button" class="btn btn-info me-half"><i
+                                                        <button slot="trigger" type="button" class="btn btn-info me-half"><i
                                                             class="fas fa-paper-plane me-2"></i>Send</button>
                                                     </modal-vue>
                                                     <div class="btn-group" role="group" v-if="false">
@@ -572,7 +572,7 @@
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Actions">
                                                     <modal-vue type="send" token="LARYNX" :balance="saccountapi.balance" :account="account" @modalsign="sendIt($event)">
-                                                        <button type="button" class="btn btn-info me-half"><i
+                                                        <button slot="trigger" type="button" class="btn btn-info me-half"><i
                                                             class="fas fa-paper-plane me-2"></i>Send</button>
                                                     </modal-vue>
                                                     <div class="btn-group" role="group" v-if="me">
@@ -722,7 +722,7 @@
                                                 <h5 id="hivebalance">{{focus.balance}}</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <modal-vue type="send" token="HIVE" :balance="focus.balance" :account="account" @modalsign="sendIt($event)">
-                                                        <button type="button" class="btn btn-info me-half"><i
+                                                        <button slot="trigger" type="button" class="btn btn-info me-half"><i
                                                             class="fas fa-paper-plane me-2"></i>Send</button>
                                                     </modal-vue>
                                                     <div class="btn-group" role="group" v-if="me">
@@ -798,7 +798,7 @@
                                                 <h5 id="hbdbalance">{{focus.hbd_balance}}</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <modal-vue type="send" token="HBD" :balance="focus.hbd_balance" :account="account" @modalsign="sendIt($event)">
-                                                        <button type="button" class="btn btn-info me-half"><i
+                                                        <button slot="trigger" type="button" class="btn btn-info me-half"><i
                                                             class="fas fa-paper-plane me-2"></i>Send</button>
                                                     </modal-vue>
                                                     <div class="btn-group" role="group" v-if="me">
@@ -1780,65 +1780,6 @@
                 </div>
             </div>
         </main>
-
-        <!-- Send Modal -->
-        <!-- <div class="modal fade" id="sendModal" tabindex="-1" role="dialog" aria-labelledby="sendModalTitle"
-            aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content bg-darker text-white">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="sendTitle"> Send {{sendModal.TOKEN}}</h5>
-                        <button type="button" class="close" data-dismiss="sendModal" aria-label="Close"> <span
-                                class="close text-white">×</span></button>
-                    </div>
-                    <form name="sendhive">
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label for="sendhivefrom">From:</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <div class="input-group-text">@</div>
-                                    </div>
-                                    <input class="form-control" id="sendhivefrom" type="text" :placeholder="account"
-                                        readonly>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="sendhiveto">To:</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <div class="input-group-text">@</div>
-                                    </div>
-                                    <input class="form-control" id="sendhiveto" type="text" placeholder="Recipient" v-model="sendModal.to">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label id="sendhiveamountlab" for="sendhiveamount">Amount (Balance <a href="#"
-                                        @click="insertBal('{{focus.balance}}', 'sendhiveamount')">{{((focus.balance))}}</a>):</label>
-                                <div class="input-group">
-                                    <input class="form-control" id="sendhiveamount" type="number" step="0.001"
-                                        min="0.001" placeholder="1.000">
-                                    <div class="input-group-append">
-                                        <div class="input-group-text" id="sendformunits">{{sendModal.TOKEN}}</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group" id="sendhivememogroup">
-                                <label for="sendhivememo">Memo:</label>
-                                <div class="input-group">
-                                    <input class="form-control" id="sendhivememo" type="text"
-                                        placeholder="Include a memo (optional)">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                            <button id="sendhivemodalsend" type="submit" class="btn btn-primary">Continue</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div> -->
         <!-- Power Up DLUX Modal -->
         <div class="modal fade" id="powerupDluxModal" tabindex="-1" role="dialog"
             aria-labelledby="powerupDluxModalTitle" aria-hidden="true">
