@@ -118,7 +118,7 @@ var app = new Vue({
       spkval: 0,
       focusval: 0,
       me: false,
-      sendModal:{
+      sendModal: {
         amount: 0,
         to: "",
         TOKEN: "DLUX",
@@ -1302,9 +1302,10 @@ var app = new Vue({
           });
     },
     getSpkStats(){
-      fetch(this.sapi + "/@" + user)
+      fetch(this.sapi + "/stats")
           .then((response) => response.json())
           .then((data) => {
+            console.log(data)
             this.spkStats = data.result
           })
     },
