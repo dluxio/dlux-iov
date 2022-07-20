@@ -3,6 +3,7 @@ import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
 import Popper from "/js/pop.js";
+import Modals from "/js/modalvue.js";
 import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
 
@@ -117,6 +118,11 @@ var app = new Vue({
       spkval: 0,
       focusval: 0,
       me: false,
+      sendModal:{
+        amount: 0,
+        to: "",
+        TOKEN: "DLUX",
+      },
       dropnai: "",
       balance: "0.000",
       bartoken: "",
@@ -124,7 +130,6 @@ var app = new Vue({
       barhbd: "",
       bargov: "",
       barpow: "",
-      toSign: {},
       buyFormValid: false,
       sellFormValid: false,
       govFormValid: false,
@@ -475,6 +480,7 @@ var app = new Vue({
     "foot-vue": FootVue,
     "cycle-text": Cycler,
     "pop-vue": Popper,
+    "modal-vue": Modals,
     "vue-markdown": Marker,
     "vue-ratings": Ratings,
   },
@@ -745,6 +751,10 @@ var app = new Vue({
           txid: "send",
         };
       } else alert("Username not found");
+    },
+    sendIt(op){
+      console.log(op)
+      this.toSign = op
     },
     parseInt(a, b = 10) {
       return parseInt(a, b);
@@ -1274,8 +1284,7 @@ var app = new Vue({
         );
       }
     },
-    getTokenUser(user, fu) {
-      if (user)
+    getTokenUser(user = this.account, fu) {
         fetch(this.lapi + "/@" + user)
           .then((response) => response.json())
           .then((data) => {
@@ -1299,8 +1308,7 @@ var app = new Vue({
             this.spkStats = data.result
           })
     },
-    getSapi(user, fu) {
-      if (user)
+    getSapi(user = this.account, fu) {
         fetch(this.sapi + "/@" + user)
           .then((response) => response.json())
           .then((data) => {
