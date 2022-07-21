@@ -318,20 +318,20 @@
                                                             class="fas fa-paper-plane me-2"></i>Send</button>
                                                     </modal-vue>
                                                     <div class="btn-group" role="group" v-if="me">
-                                                        <button id="btnGroupDrop1" type="button"
+                                                        <button type="button"
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
                                                             aria-labelledby="btnGroupDrop1">
                                                             <modal-vue type="send" token="DLUX" func="Power Up" :balance="accountapi.balance" :account="account" @modalsign="sendIt($event)">
-                                                                <button class="dropdown-item" slot="trigger">
-                                                                    <i class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
+                                                                <a class="dropdown-item" slot="trigger" href="#/">
+                                                                    <i class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</a>
                                                             </modal-vue>
-                                                             <a class="dropdown-item" href="#"
-                                                                id="freezedluxbutton" data-bs-toggle="modal"
-                                                                data-bs-target="#lockgovDluxModal"><i
+                                                            <modal-vue type="send" token="DLUX" func="Lock" :balance="accountapi.balance" :account="account" @modalsign="sendIt($event)">
+                                                                <a class="dropdown-item" slot="trigger" href="#/"><i
                                                                     class="fas fa-lock fa-fw me-2"></i>Lock GOV</a>
+                                                            </modal-vue>
                                                             <div class="dropdown-divider"></div>
                                                             <a class="dropdown-item" href="/dex/#dlux" id="buylink"><i
                                                                     class="fas fa-coins fa-fw me-2"></i>Buy / Sell

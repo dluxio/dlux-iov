@@ -70,9 +70,9 @@ export default {
                     <form name="power">
                         <div class="modal-body">
                             <div class="form-group">
-                                <label for="powerupdluxamount">Amount (Balance <a href="#"
+                                <label for="poweramount">Amount (Balance <a href="#"
                                         @click="amount = balance / 1000">{{((balance)/1000)}}</a>):</label>
-                                <div class="input-group">
+                                <div class="input-group" id="poweramount">
                                     <input class="form-control" type="number" step="0.001"
                                         min="0.001" placeholder="1.000" v-model="amount">
                                     <div class="input-group-append">
