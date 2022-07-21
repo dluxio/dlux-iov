@@ -313,7 +313,7 @@
                                                     {{((accountapi.balance)/1000)}} DLUX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
-                                                    <modal-vue type="send" token="DLUX" :balance="accountapi.balance" :account="account" @modalsign="sendIt($event)">
+                                                    <modal-vue type="send" token="DLUX" i="-99" :balance="accountapi.balance" :account="account" @modalsign="sendIt($event)">
                                                         <button slot="trigger" type="button" class="btn btn-info me-half"><i
                                                             class="fas fa-paper-plane me-2"></i>Send</button>
                                                     </modal-vue>
@@ -324,7 +324,7 @@
                                                             aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
                                                             aria-labelledby="btnGroupDrop1">
-                                                            <modal-vue type="send" token="DLUX" func="Power Up" :balance="accountapi.balance" :account="account" @modalsign="sendIt($event)">
+                                                            <modal-vue type="send" token="DLUX" func="Power Up" i="-99" :balance="accountapi.balance" :account="account" @modalsign="sendIt($event)">
                                                                 <a class="dropdown-item" slot="trigger" href="#/">
                                                                     <i class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</a>
                                                             </modal-vue>
@@ -365,10 +365,10 @@
                                                     <h6 id="delegatebal">(-0 G)<i class="fas fa-search ms-2"></i></h6>
                                                 </a>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
-                                                    <button type="button" class="btn btn-info me-half"
-                                                        data-bs-toggle="modal" title="Delegate DLUX"
-                                                        id="delegatedluxbtn" data-bs-target="#sendDluxModal"><i
+                                                    <modal-vue type="send" token="DLUX" func="Lock" :balance="accountapi.poweredUp" :account="account" @modalsign="sendIt($event)">
+                                                        <button type="button" class="btn btn-info me-half" slot="trigger"><i
                                                             class="fas fa-user-friends fa-fw me-2"></i>Delegate</button>
+                                                    </modal-vue>
                                                     <div v-if="me" class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
@@ -385,6 +385,12 @@
                                                                 data-bs-target="#sendDluxModal"><i
                                                                     class="fas fa-random fa-fw me-2"></i>Convert to
                                                                 GOV</a></div>
+                                                    </div>
+                                                    <div v-else class="btn-group" role="group">
+                                                        <button id="btnGroupDrop1" type="button"
+                                                            class="btn btn-info dropdown-toggle"
+                                                            data-bs-toggle="dropdown" aria-haspopup="true"
+                                                            aria-expanded="false" disabled></button>
                                                     </div>
                                                 </div>
                                             </div>

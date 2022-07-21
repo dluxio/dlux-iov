@@ -3,13 +3,13 @@ const { Modal } = bootstrap;
 export default {
   template: `
     <div>
-        <div class="modal fade" id="send" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal fade" id="send" :tabindex="i" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content bg-darker text-white">
                     <div class="modal-header">
                         <h5 class="modal-title"> Send {{token}}</h5>
-                        <button type="button" class="close" data-dismiss="sendModal" aria-label="Close"> <span
-                                class="close text-white">×</span></button>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"> <span
+                                class="close text-black">×</span></button>
                     </div>
                     <form name="sendhive">
                         <div class="modal-body">
@@ -52,7 +52,7 @@ export default {
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button :disabled="!valid" type="submit" class="btn btn-primary" @click="send">Send</button>
                         </div>
                     </form>
@@ -64,8 +64,8 @@ export default {
                 <div class="modal-content bg-darker text-white">
                     <div class="modal-header">
                         <h5 class="modal-title">{{func}} {{token}}</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span
-                                class="close text-white">×</span></button>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"> <span
+                                class="close text-black">×</span></button>
                     </div>
                     <form name="power">
                         <div class="modal-body">
@@ -82,7 +82,7 @@ export default {
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button type="submit" class="btn btn-primary">Continue</button>
                         </div>
                     </form>
@@ -186,6 +186,9 @@ export default {
     },
     trigger: {
       default: "click",
+    },
+    i: {
+      default: -1,
     },
     delay: {
       default: 0,
