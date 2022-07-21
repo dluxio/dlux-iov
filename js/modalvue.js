@@ -3,63 +3,94 @@ const { Modal } = bootstrap;
 export default {
   template: `
     <div>
-            <div class="modal fade" id="send" tabindex="-1" role="dialog" aria-labelledby="sendModalTitle"
-                aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content bg-darker text-white">
-                        <div class="modal-header">
-                            <h5 class="modal-title"> Send {{token}}</h5>
-                            <button type="button" class="close" data-dismiss="sendModal" aria-label="Close"> <span
-                                    class="close text-white">×</span></button>
-                        </div>
-                        <form name="sendhive">
-                            <div class="modal-body">
-                                <div class="form-group">
-                                    <label for="sendhivefrom">From:</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <div class="input-group-text">@</div>
-                                        </div>
-                                        <input class="form-control" type="text" :placeholder="account"
-                                            readonly>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="sendhiveto">To:</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <div class="input-group-text">@</div>
-                                        </div>
-                                        <input @blur="accountCheck" class="form-control" type="text" placeholder="Recipient" v-model="to">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="sendAmount">Amount (Balance <a href="#"
-                                            @click="amount = balance / 1000">{{((balance)/1000)}}</a>):</label>
-                                    <div class="input-group">
-                                        <input class="form-control" id="sendAmount" type="number" step="0.001"
-                                            min="0.001" placeholder="1.000" v-model="amount">
-                                        <div class="input-group-append">
-                                            <div class="input-group-text">{{token}}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="sendhivememo">Memo:</label>
-                                    <div class="input-group">
-                                        <input class="form-control" type="text"
-                                            placeholder="Include a memo (optional)" v-model="memo">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                <button :disabled="!valid" type="submit" class="btn btn-primary" @click="send">Send</button>
-                            </div>
-                        </form>
+        <div class="modal fade" id="send" tabindex="-1" role="dialog" aria-labelledby="sendModalTitle"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content bg-darker text-white">
+                    <div class="modal-header">
+                        <h5 class="modal-title"> Send {{token}}</h5>
+                        <button type="button" class="close" data-dismiss="sendModal" aria-label="Close"> <span
+                                class="close text-white">×</span></button>
                     </div>
+                    <form name="sendhive">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="sendhivefrom">From:</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">@</div>
+                                    </div>
+                                    <input class="form-control" type="text" :placeholder="account"
+                                        readonly>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="sendhiveto">To:</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">@</div>
+                                    </div>
+                                    <input @blur="accountCheck" class="form-control" type="text" placeholder="Recipient" v-model="to">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="sendAmount">Amount (Balance <a href="#"
+                                        @click="amount = balance / 1000">{{((balance)/1000)}}</a>):</label>
+                                <div class="input-group">
+                                    <input class="form-control" id="sendAmount" type="number" step="0.001"
+                                        min="0.001" placeholder="1.000" v-model="amount">
+                                    <div class="input-group-append">
+                                        <div class="input-group-text">{{token}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="sendhivememo">Memo:</label>
+                                <div class="input-group">
+                                    <input class="form-control" type="text"
+                                        placeholder="Include a memo (optional)" v-model="memo">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button :disabled="!valid" type="submit" class="btn btn-primary" @click="send">Send</button>
+                        </div>
+                    </form>
                 </div>
             </div>
+        </div>
+        <div class="modal fade" id="power" tabindex="-1" role="dialog"
+            aria-labelledby="powerupDluxModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content bg-darker text-white">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="powerDluxTitle">{{func}} {{token}}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span
+                                class="close text-white">×</span></button>
+                    </div>
+                    <form name="power">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="powerupdluxamount">Amount (Balance <a href="#"
+                                        @click="amount = balance / 1000">{{((balance)/1000)}}</a>):</label>
+                                <div class="input-group">
+                                    <input class="form-control" type="number" step="0.001"
+                                        min="0.001" placeholder="1.000" v-model=amount>
+                                    <div class="input-group-append">
+                                        <div class="input-group-text">{{token}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Continue</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
         <slot name="trigger"></slot>
     </div>`,
   methods: {
@@ -144,7 +175,9 @@ export default {
           msg: `Trying to send ${this.token}...`,
           ops: ["getHiveUser"],
         };
-      if (op) {this.$emit("modalsign", op)}
+      if (op) {
+        this.$emit("modalsign", op);
+      }
     },
   },
   emits: ["modalsign"],
@@ -164,6 +197,9 @@ export default {
     },
     type: {
       default: "send",
+    },
+    func: {
+      default: "Power Up",
     },
     account: {
       default: "Not Logged In",
