@@ -3,8 +3,7 @@ const { Modal } = bootstrap;
 export default {
   template: `
     <div>
-        <div class="modal fade" id="send" tabindex="-1" role="dialog" aria-labelledby="sendModalTitle"
-            aria-hidden="true">
+        <div class="modal fade" id="send" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content bg-darker text-white">
                     <div class="modal-header">
@@ -60,12 +59,11 @@ export default {
                 </div>
             </div>
         </div>
-        <div class="modal fade" id="power" tabindex="-1" role="dialog"
-            aria-labelledby="powerupDluxModalTitle" aria-hidden="true">
+        <div class="modal fade" id="power" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content bg-darker text-white">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="powerDluxTitle">{{func}} {{token}}</h5>
+                        <h5 class="modal-title">{{func}} {{token}}</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span
                                 class="close text-white">×</span></button>
                     </div>
@@ -76,7 +74,7 @@ export default {
                                         @click="amount = balance / 1000">{{((balance)/1000)}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" type="number" step="0.001"
-                                        min="0.001" placeholder="1.000" v-model=amount>
+                                        min="0.001" placeholder="1.000" v-model="amount">
                                     <div class="input-group-append">
                                         <div class="input-group-text">{{token}}</div>
                                     </div>
@@ -233,6 +231,7 @@ export default {
     var options = this.$props;
     var trigger = this.$slots["trigger"][0].elm;
     var target = this.$el.children[options.type];
+    console.log(options.type, target);
     trigger.addEventListener("click", () => {
       var theModal = new Modal(target, {});
       theModal.show();

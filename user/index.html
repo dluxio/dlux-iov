@@ -323,11 +323,12 @@
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
-                                                            aria-labelledby="btnGroupDrop1"> <a class="dropdown-item"
-                                                                href="#" id="powerupdluxbutton" data-bs-toggle="modal"
-                                                                data-bs-target="#powerupDluxModal"><i
-                                                                    class="fas fa-angle-double-up fa-fw me-2"></i>Power
-                                                                Up</a> <a class="dropdown-item" href="#"
+                                                            aria-labelledby="btnGroupDrop1">
+                                                            <modal-vue type="send" token="DLUX" func="Power Up" :balance="accountapi.balance" :account="account" @modalsign="sendIt($event)">
+                                                                <button class="dropdown-item" slot="trigger">
+                                                                    <i class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
+                                                            </modal-vue>
+                                                             <a class="dropdown-item" href="#"
                                                                 id="freezedluxbutton" data-bs-toggle="modal"
                                                                 data-bs-target="#lockgovDluxModal"><i
                                                                     class="fas fa-lock fa-fw me-2"></i>Lock GOV</a>
