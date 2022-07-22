@@ -507,15 +507,12 @@
                                                             class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
                                                             aria-haspopup="true" aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-right text-white"
-                                                            aria-labelledby="btnGroupDrop1"> <a
-                                                                class="dropdown-item disabled d-none" href="#"
-                                                                id="poweruplarynxbutton" data-bs-toggle="modal"
-                                                                data-bs-target="#powerupLarynxModal"><i
+                                                            aria-labelledby="btnGroupDrop1"> 
+                                                            <modal-vue type="power" token="LARYNX" func="Power Up" :balance="saccountapi.spk" :account="account" @modalsign="sendIt($event)">
+                                                                <button class="dropdown-item" slot="trigger" type="button"><i
                                                                     class="fas fa-angle-double-up fa-fw me-2"></i>Power
-                                                                Up</a> <a class="dropdown-item" href="#"
-                                                                id="locklarynxbutton" data-bs-toggle="modal"
-                                                                data-bs-target="#lockgovLarynxModal"><i
-                                                                    class="fas fa-lock fa-fw me-2"></i>Lock GOV</a>
+                                                                Up</button>
+                                                            </modal-vue>
                                                             <div class="dropdown-divider"></div>
                                                             <a class="dropdown-item" href="/dex/larynx" id="buylink"><i
                                                                     class="fas fa-cart-arrow-down fa-fw me-2"></i>Buy
