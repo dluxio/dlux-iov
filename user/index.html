@@ -277,7 +277,7 @@
                                             </div>
                                             <div id="claimdluxbtn" class="text-end d-column">
                                                 <h5 id="dluxclaim" class="text-end">
-                                                    {{((accountapi.claim)/1000)}} DLUX</h5>
+                                                    {{formatNumber((accountapi.claim)/1000, 3, '.', ',')}} DLUX</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Claim">
                                                     <button type="submit" class="btn btn-info me-half"><i
                                                             class="fas fa-coin"></i><i
@@ -310,7 +310,7 @@
                                             </div>
                                             <div id="dluxactions" class="float-right text-end">
                                                 <h5 id="dluxbalance">
-                                                    {{((accountapi.balance)/1000)}} DLUX
+                                                    {{formatNumber((accountapi.balance)/1000, 3, '.', ',')}} DLUX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <modal-vue type="send" token="DLUX" :balance="accountapi.balance" :account="account" @modalsign="sendIt($event)">
@@ -357,7 +357,7 @@
                                             </div>
                                             <div id="dluxpactions" class="float-right text-end">
                                                 <h5 id="pwrbalance">
-                                                    {{((accountapi.poweredUp)/1000)}} DLUX
+                                                    {{formatNumber((accountapi.poweredUp)/1000, 3, '.', ',')}} DLUX
                                                 </h5>
                                                 <a data-bs-toggle="collapse" id="delegationsbtn" href="#delegations"
                                                     role="button" aria-expanded="false" aria-controls="Show delegations"
@@ -376,7 +376,7 @@
                                                             aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
                                                             aria-labelledby="btnGroupDrop1"> 
-                                                            <modal-vue type="delegate" token="DLUX" func="why" :balance="accountapi.poweredUp" :account="account" @modalsign="sendIt($event)">
+                                                            <modal-vue type="power" token="DLUX" func="Power Down" :balance="accountapi.poweredUp" :account="account" @modalsign="sendIt($event)">
                                                                 <button class="dropdown-item" slot="trigger" type="button">
                                                                 <i class="fas fa-angle-double-down fa-fw me-2"></i>Power Down</button>
                                                             </modal-vue>
@@ -421,7 +421,7 @@
                                             </div>
                                             <div id="dluxgactions" class="float-right text-end">
                                                 <h5 id="govbalance">
-                                                    {{((accountapi.gov)/1000)}} DLUX</h5>
+                                                    {{formatNumber((accountapi.gov)/1000, 3, '.', ',')}} DLUX</h5>
                                                 <a data-bs-toggle="collapse" id="escrowtxbutton" href="#escrowtx"
                                                     role="button" aria-expanded="false"
                                                     aria-controls="Show escrow transactions" class="text-white d-none"
@@ -494,7 +494,7 @@
                                             </div>
                                             <div class="float-right text-end">
                                                 <h5 >
-                                                    {{((saccountapi.spk)/1000)}} SPK
+                                                    {{formatNumber((saccountapi.spk)/1000, 3, '.', ',')}} SPK
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="SPK Actions">
                                                     <modal-vue type="send" token="SPK" :balance="saccountapi.spk" :account="account" @modalsign="sendIt($event)">
@@ -538,7 +538,7 @@
                                                     class="d-none">
                                             </div>
                                             <div id="claimlarynxbtn" class="float-right text-end d-column">
-                                                <h5>{{((saccountapi.drop.availible.amount)/1000)}}
+                                                <h5>{{formatNumber((saccountapi.drop.availible.amount)/1000, 3, '.', ',')}}
                                                     LARYNX</h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Claim">
                                                     <button type="submit" class="btn btn-info me-half"
@@ -555,7 +555,7 @@
                                                 <p class="text-white-50">Claimable rewards for running a SPK service node.</p>
                                             </div>
                                             <div id="claimlarynxrewardbtn" class="float-right text-end d-column">
-                                                <h5>{{((saccountapi.claim)/1000)}} LARYNX
+                                                <h5>{{formatNumber((saccountapi.claim)/1000, 3, '.', ',')}} LARYNX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Claim">
                                                     <button type="submit" class="btn btn-info me-half"
@@ -572,7 +572,7 @@
                                             </div>
                                             <div id="larynxactions" class="float-right text-end">
                                                 <h5 id="larynxbalance">
-                                                    {{((saccountapi.balance)/1000)}} LARYNX
+                                                    {{formatNumber((saccountapi.balance)/1000, 3, '.', ',')}} LARYNX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Actions">
                                                     <modal-vue type="send" token="LARYNX" :balance="saccountapi.balance" :account="account" @modalsign="sendIt($event)">
@@ -619,7 +619,7 @@
                                             </div>
                                             <div id="larynxgactions" class="float-right text-end">
                                                 <h5 id="govbalance">
-                                                    {{((saccountapi.gov)/1000)}} LARYNX
+                                                    {{formatNumber((saccountapi.gov)/1000, 3, '.', ',')}} LARYNX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Actions">
                                                     <button type="button" class="btn btn-info me-half"
@@ -661,7 +661,7 @@
                                             </div>
                                             <div id="larynxgactions" class="float-right text-end">
                                                 <h5 id="govbalance">
-                                                    {{((saccountapi.gov)/1000)}} LARYNX
+                                                    {{formatNumber((saccountapi.gov)/1000, 3, '.', ',')}} LARYNX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Actions">
                                                     <button type="button" class="btn btn-info me-half"
