@@ -90,7 +90,7 @@ export default {
                             </div>
                             <div class="form-group">
                                 <label for="delAmount">Amount (Balance <a href="#"
-                                        @click="amount = balance / 1000">{{{{formatNumber((balance)/1000, 3, '.', ',')}}}}</a>):</label>
+                                        @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" type="number" step="0.001" id="delAmount" 
                                         min="0.001" placeholder="1.000" v-model="amount">
