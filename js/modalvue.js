@@ -34,7 +34,7 @@ export default {
                             </div>
                             <div class="form-group">
                                 <label for="sendAmount">Amount (Balance <a href="#"
-                                        @click="amount = balance / 1000">{{((balance)/1000)}}</a>):</label>
+                                        @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" id="sendAmount" type="number" step="0.001"
                                         min="0.001" placeholder="1.000" v-model="amount">
@@ -90,7 +90,7 @@ export default {
                             </div>
                             <div class="form-group">
                                 <label for="delAmount">Amount (Balance <a href="#"
-                                        @click="amount = balance / 1000">{{((balance)/1000)}}</a>):</label>
+                                        @click="amount = balance / 1000">{{{{formatNumber((balance)/1000, 3, '.', ',')}}}}</a>):</label>
                                 <div class="input-group">
                                     <input class="form-control" type="number" step="0.001" id="delAmount" 
                                         min="0.001" placeholder="1.000" v-model="amount">
@@ -120,7 +120,7 @@ export default {
                         <div class="modal-body">
                             <div class="form-group">
                                 <label for="poweramount">Amount (Balance <a href="#"
-                                        @click="amount = balance / 1000">{{((balance)/1000)}}</a>):</label>
+                                        @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a>):</label>
                                 <div class="input-group" id="poweramount">
                                     <input class="form-control" type="number" step="0.001"
                                         min="0.001" placeholder="1.000" v-model="amount">
@@ -156,6 +156,21 @@ export default {
           if (re.result.length) this.valid = true;
           else this.valid = false;
         });
+    },
+    formatNumber(t, n, r, e) {
+      if (typeof t != "number") t = parseFloat(t);
+      if (isNaN(t)) return "Invalid Number";
+      if (!isFinite(t)) return (t < 0 ? "-" : "") + "infinite";
+      (r = r || "."), (e = e || "");
+      var u = t < 0;
+      t = Math.abs(t);
+      var a = (null != n && 0 <= n ? t.toFixed(n) : t.toString()).split("."),
+        i = a[0],
+        o = 1 < a.length ? r + a[1] : "";
+      if (e)
+        for (var c = /(\d+)(\d{3})/; c.test(i); )
+          i = i.replace(c, "$1" + e + "$2");
+      return (u ? "-" : "") + i + o;
     },
     send() {
       var op;
