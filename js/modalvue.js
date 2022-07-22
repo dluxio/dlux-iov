@@ -234,9 +234,11 @@ export default {
     var options = this.$props;
     var trigger = this.$slots["trigger"][0].elm;
     var target = this.$el.children[options.type];
+    document.getElementById("app").appendChild(target);
     console.log(options.type, target);
     trigger.addEventListener("click", () => {
-      var theModal = new Modal(target, {});
+      var theModal = new Modal(target, () => {
+        });
       theModal.show();
     });
   },
