@@ -582,15 +582,16 @@
                                                             class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
                                                             aria-haspopup="true" aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-right text-white"
-                                                            aria-labelledby="btnGroupDrop1"> <a
-                                                                class="dropdown-item" href="#"
-                                                                id="poweruplarynxbutton" data-bs-toggle="modal"
-                                                                data-bs-target="#powerupLarynxModal"><i
+                                                            aria-labelledby="btnGroupDrop1"> 
+                                                            <modal-vue type="power" token="LARYNX" func="Power Up" :balance="saccountapi.balance" :account="account" @modalsign="sendIt($event)">
+                                                                <button class="dropdown-item" slot="trigger" type="button"><i
                                                                     class="fas fa-angle-double-up fa-fw me-2"></i>Power
-                                                                Up</a> <a class="dropdown-item" href="#"
-                                                                id="locklarynxbutton" data-bs-toggle="modal"
-                                                                data-bs-target="#lockgovLarynxModal"><i
-                                                                    class="fas fa-lock fa-fw me-2"></i>Lock Liquidity</a>
+                                                                Up</button>
+                                                            </modal-vue>
+                                                            <modal-vue type="power" token="LARYNX" func="Lock Liquidity" :balance="saccountapi.balance" :account="account" @modalsign="sendIt($event)">
+                                                                <button class="dropdown-item" slot="trigger" type="button"><i
+                                                                    class="fas fa-lock fa-fw me-2"></i>Lock Liquidity</button>
+                                                            </modal-vue>
                                                             <div class="dropdown-divider"></div>
                                                             <a class="dropdown-item" href="/dex/larynx" id="buylink"><i
                                                                     class="fas fa-cart-arrow-down fa-fw me-2"></i>Buy
@@ -605,7 +606,7 @@
                                         <hr class="my-4 bg-light">
                                         <div class="clearfix">
                                             <div class="float-left">
-                                                <h4>LARYNX Liquidity</h4>
+                                                <h4>LARYNX in Network Liquidity</h4>
                                                 <p class="text-white-50">Locked tokens used to determine consensus and
                                                     earn rewards for running a node</p>
                                                 <p class="text-white-50">Benefits of LARYNX Liquidity:</p>
@@ -623,22 +624,18 @@
                                                     <button type="button" class="btn btn-info me-half"
                                                         data-bs-toggle="modal" title="DelegateLarynx"
                                                         id="delegatedluxbtn" data-bs-target="#sendDluxModal"><i
-                                                            class="fas fa-user-friends fa-fw me-2"></i>Delegate</button>
+                                                            class="fas fa-user-friends fa-fw me-2"></i>Options</button>
                                                     <div class="btn-group" role="group" v-if="me">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
                                                             aria-haspopup="true" aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-right text-white"
-                                                            aria-labelledby="btnGroupDrop1"> <a class="dropdown-item"
-                                                                href="#" data-bs-toggle="modal"
-                                                                id="larynxgovdownModalButton"
-                                                                data-bs-target="#unlockgovLarynxModal"><i
+                                                            aria-labelledby="btnGroupDrop1"> 
+                                                            <modal-vue type="power" token="LARYNX" func="Unlock Liquidity" :balance="saccountapi.balance" :account="account" @modalsign="sendIt($event)">
+                                                                <button class="dropdown-item" slot="trigger" type="button"><i
                                                                     class="fas fa-lock-open fa-fw me-2"></i>Unlock
-                                                                Liquidity</a> <a class="dropdown-item disabled d-none"
-                                                                href="#" data-bs-toggle="modal" id="govtopowerbutton"
-                                                                data-bs-target="#sendDluxModal"><i
-                                                                    class="fas fa-random fa-fw me-2"></i>Convert to
-                                                                PWR</a></div>
+                                                                Liquidity</button>
+                                                            </modal-vue>
                                                     </div>
                                                 </div>
                                             </div>
