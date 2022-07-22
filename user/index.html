@@ -28,9 +28,8 @@
 <body class="d-flex flex-column h-100 padme-t70 text-white" id="explore">
     <div id="app">
         <div v-scroll="handleScroll">
-            <nav-vue @login="account = $event;newme($event)"
-                @logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
-                :lapi="lapi" />
+            <nav-vue @login="account = $event;newme($event)" @logout="account = '';removeUser()" @ack="removeOp($event)"
+                @refresh="run($event)" :op="toSign" :lapi="lapi" />
         </div>
         <main role="main" class="flex-shrink-0 text-white" v-cloak>
             <div class="container-fluid px-0 ">
@@ -64,9 +63,11 @@
                                         class="fas fa-ellipsis-h ms-2"></i></button>
                                 <div class="dropdown-menu dropdown-menu-dark nav-item dropdown-menu-right"> <a
                                         class="dropdown-item" type="button">Follow</a> <a class="dropdown-item"
-                                        type="button">Unfollow</a> <modal-vue type="send" token="DLUX" :balance="accountapi.balance" :account="account" @modalsign="sendIt($event)">
-                                                        <a slot="trigger" class="dropdown-item" type="button">Send DLUX</a>
-                                                    </modal-vue>
+                                        type="button">Unfollow</a>
+                                    <modal-vue type="send" token="DLUX" :balance="accountapi.balance" :account="account"
+                                        @modalsign="sendIt($event)">
+                                        <a slot="trigger" class="dropdown-item" type="button">Send DLUX</a>
+                                    </modal-vue>
                                 </div>
                             </div>
                         </div>
@@ -79,10 +80,12 @@
                                     aria-controls="wallet" aria-expanded="true" href="#wallet">Wallet</a></li>
                             <li class="nav-item"> <a class="nav-link" id="inventorytab" role="tab" data-bs-toggle="tab"
                                     aria-controls="inventory" aria-expanded="true" href="#inventory">Inventory</a></li>
-                            <li class="nav-item" v-show="me"> <a class="nav-link" id="nodestab" role="tab" data-bs-toggle="tab"
-                                    aria-controls="nodes" aria-expanded="true" href="#nodes">Nodes</a></li>
-                            <li class="nav-item" v-show="me"> <a class="nav-link" id="settingstab" role="tab" data-bs-toggle="tab"
-                                    aria-controls="settings" aria-expanded="true" href="#settings">Settings</a></li>
+                            <li class="nav-item" v-show="me"> <a class="nav-link" id="nodestab" role="tab"
+                                    data-bs-toggle="tab" aria-controls="nodes" aria-expanded="true"
+                                    href="#nodes">Nodes</a></li>
+                            <li class="nav-item" v-show="me"> <a class="nav-link" id="settingstab" role="tab"
+                                    data-bs-toggle="tab" aria-controls="settings" aria-expanded="true"
+                                    href="#settings">Settings</a></li>
                         </ul>
                     </div>
                 </div>
@@ -313,24 +316,31 @@
                                                     {{formatNumber((accountapi.balance)/1000, 3, '.', ',')}} DLUX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
-                                                    <modal-vue type="send" token="DLUX" :balance="accountapi.balance" :account="account" @modalsign="sendIt($event)">
-                                                        <button slot="trigger" type="button" class="btn btn-info me-half"><i
-                                                            class="fas fa-paper-plane me-2"></i>Send</button>
+                                                    <modal-vue type="send" token="DLUX" :balance="accountapi.balance"
+                                                        :account="account" @modalsign="sendIt($event)">
+                                                        <button slot="trigger" type="button"
+                                                            class="btn btn-info me-half"><i
+                                                                class="fas fa-paper-plane me-2"></i>Send</button>
                                                     </modal-vue>
                                                     <div class="btn-group" role="group" v-if="me">
-                                                        <button type="button"
-                                                            class="btn btn-info dropdown-toggle"
+                                                        <button type="button" class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
                                                             aria-labelledby="btnGroupDrop1">
-                                                            <modal-vue type="power" token="DLUX" func="Power Up" i="-99" :balance="accountapi.balance" :account="account" @modalsign="sendIt($event)">
+                                                            <modal-vue type="power" token="DLUX" func="Power Up" i="-99"
+                                                                :balance="accountapi.balance" :account="account"
+                                                                @modalsign="sendIt($event)">
                                                                 <a class="dropdown-item" slot="trigger" href="#/">
-                                                                    <i class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</a>
+                                                                    <i
+                                                                        class="fas fa-angle-double-up fa-fw me-2"></i>Power
+                                                                    Up</a>
                                                             </modal-vue>
-                                                            <modal-vue type="power" token="DLUX" func="Lock" :balance="accountapi.balance" :account="account" @modalsign="sendIt($event)">
+                                                            <modal-vue type="power" token="DLUX" func="Lock"
+                                                                :balance="accountapi.balance" :account="account"
+                                                                @modalsign="sendIt($event)">
                                                                 <a class="dropdown-item" slot="trigger" href="#/"><i
-                                                                    class="fas fa-lock fa-fw me-2"></i>Lock GOV</a>
+                                                                        class="fas fa-lock fa-fw me-2"></i>Lock GOV</a>
                                                             </modal-vue>
                                                             <div class="dropdown-divider"></div>
                                                             <a class="dropdown-item" href="/dex/#dlux" id="buylink"><i
@@ -365,9 +375,12 @@
                                                     <h6 id="delegatebal">(-0 G)<i class="fas fa-search ms-2"></i></h6>
                                                 </a>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
-                                                    <modal-vue type="delegate" token="DLUX" func="why" :balance="accountapi.poweredUp" :account="account" @modalsign="sendIt($event)">
-                                                        <button type="button" class="btn btn-info me-half" slot="trigger"><i
-                                                            class="fas fa-user-friends fa-fw me-2"></i>Delegate</button>
+                                                    <modal-vue type="delegate" token="DLUX" func="why"
+                                                        :balance="accountapi.poweredUp" :account="account"
+                                                        @modalsign="sendIt($event)">
+                                                        <button type="button" class="btn btn-info me-half"
+                                                            slot="trigger"><i
+                                                                class="fas fa-user-friends fa-fw me-2"></i>Delegate</button>
                                                     </modal-vue>
                                                     <div v-if="me" class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
@@ -375,13 +388,20 @@
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
-                                                            aria-labelledby="btnGroupDrop1"> 
-                                                            <modal-vue type="power" token="DLUX" func="Power Down" :balance="accountapi.poweredUp" :account="account" @modalsign="sendIt($event)">
-                                                                <button class="dropdown-item" slot="trigger" type="button">
-                                                                <i class="fas fa-angle-double-down fa-fw me-2"></i>Power Down</button>
+                                                            aria-labelledby="btnGroupDrop1">
+                                                            <modal-vue type="power" token="DLUX" func="Power Down"
+                                                                :balance="accountapi.poweredUp" :account="account"
+                                                                @modalsign="sendIt($event)">
+                                                                <button class="dropdown-item" slot="trigger"
+                                                                    type="button">
+                                                                    <i
+                                                                        class="fas fa-angle-double-down fa-fw me-2"></i>Power
+                                                                    Down</button>
                                                             </modal-vue>
                                                             <a class="dropdown-item disabled d-none" href="#">
-                                                                <i class="fas fa-random fa-fw me-2"></i>Convert to GOV</a></div>
+                                                                <i class="fas fa-random fa-fw me-2"></i>Convert to
+                                                                GOV</a>
+                                                        </div>
                                                     </div>
                                                     <div v-else class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
@@ -438,17 +458,21 @@
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
-                                                            aria-labelledby="btnGroupDrop1"> 
-                                                            <modal-vue type="power" token="DLUX" func="Unlock" :balance="accountapi.gov" :account="account" @modalsign="sendIt($event)">
-                                                                <button class="dropdown-item" slot="trigger" type="button"><i
-                                                                    class="fas fa-lock-open fa-fw me-2"></i>Unlock
-                                                                GOV</button>
+                                                            aria-labelledby="btnGroupDrop1">
+                                                            <modal-vue type="power" token="DLUX" func="Unlock"
+                                                                :balance="accountapi.gov" :account="account"
+                                                                @modalsign="sendIt($event)">
+                                                                <button class="dropdown-item" slot="trigger"
+                                                                    type="button"><i
+                                                                        class="fas fa-lock-open fa-fw me-2"></i>Unlock
+                                                                    GOV</button>
                                                             </modal-vue>
                                                             <a class="dropdown-item disabled" href="#"
                                                                 data-bs-toggle="modal" id="govtopowerbutton"
                                                                 data-bs-target="#sendDluxModal"><i
                                                                     class="fas fa-random fa-fw me-2"></i>Convert to
-                                                                PWR</a></div>
+                                                                PWR</a>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -464,7 +488,8 @@
                                                     your account</p>
                                             </div>
                                             <div id="dluxval" class="float-right text-end">
-                                                <h5 id="totaldbal">${{toFixed(dluxval * accountapi.tick * hiveprice.hive.usd,2)}}
+                                                <h5 id="totaldbal">${{toFixed(dluxval * accountapi.tick *
+                                                    hiveprice.hive.usd,2)}}
                                                 </h5>
                                             </div>
                                         </div>
@@ -494,24 +519,30 @@
                                                 <p class="text-white-50">The governance token for the SPK network.</p>
                                             </div>
                                             <div class="float-right text-end">
-                                                <h5 >
+                                                <h5>
                                                     {{formatNumber((saccountapi.spk)/1000, 3, '.', ',')}} SPK
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="SPK Actions">
-                                                    <modal-vue type="send" token="SPK" :balance="saccountapi.spk" :account="account" @modalsign="sendIt($event)">
-                                                        <button slot="trigger" type="button" class="btn btn-info me-half"><i
-                                                            class="fas fa-paper-plane me-2"></i>Send</button>
+                                                    <modal-vue type="send" token="SPK" :balance="saccountapi.spk"
+                                                        :account="account" @modalsign="sendIt($event)">
+                                                        <button slot="trigger" type="button"
+                                                            class="btn btn-info me-half"><i
+                                                                class="fas fa-paper-plane me-2"></i>Send</button>
                                                     </modal-vue>
                                                     <div class="btn-group" role="group" v-if="false">
                                                         <button id="btnGroupDrop1" type="button"
-                                                            class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
-                                                            aria-haspopup="true" aria-expanded="false"></button>
+                                                            class="btn btn-info dropdown-toggle"
+                                                            data-bs-toggle="dropdown" aria-haspopup="true"
+                                                            aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-right text-white"
-                                                            aria-labelledby="btnGroupDrop1"> 
-                                                            <modal-vue type="power" token="LARYNX" func="Power Up" :balance="saccountapi.spk" :account="account" @modalsign="sendIt($event)">
-                                                                <button class="dropdown-item" slot="trigger" type="button"><i
-                                                                    class="fas fa-angle-double-up fa-fw me-2"></i>Power
-                                                                Up</button>
+                                                            aria-labelledby="btnGroupDrop1">
+                                                            <modal-vue type="power" token="LARYNX" func="Power Up"
+                                                                :balance="saccountapi.spk" :account="account"
+                                                                @modalsign="sendIt($event)">
+                                                                <button class="dropdown-item" slot="trigger"
+                                                                    type="button"><i
+                                                                        class="fas fa-angle-double-up fa-fw me-2"></i>Power
+                                                                    Up</button>
                                                             </modal-vue>
                                                             <div class="dropdown-divider"></div>
                                                             <a class="dropdown-item" href="/dex/larynx" id="buylink"><i
@@ -536,7 +567,8 @@
                                                     class="d-none">
                                             </div>
                                             <div id="claimlarynxbtn" class="float-right text-end d-column">
-                                                <h5>{{formatNumber((saccountapi.drop.availible.amount)/1000, 3, '.', ',')}}
+                                                <h5>{{formatNumber((saccountapi.drop.availible.amount)/1000, 3, '.',
+                                                    ',')}}
                                                     LARYNX</h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Claim">
                                                     <button type="submit" class="btn btn-info me-half"
@@ -550,7 +582,8 @@
                                             <hr class="my-4 bg-light">
                                             <div class="float-left">
                                                 <h4>Claim LARYNX Rewards</h4>
-                                                <p class="text-white-50">Claimable rewards for running a SPK service node.</p>
+                                                <p class="text-white-50">Claimable rewards for running a SPK service
+                                                    node.</p>
                                             </div>
                                             <div id="claimlarynxrewardbtn" class="float-right text-end d-column">
                                                 <h5>{{formatNumber((saccountapi.claim)/1000, 3, '.', ',')}} LARYNX
@@ -573,24 +606,34 @@
                                                     {{formatNumber((saccountapi.balance)/1000, 3, '.', ',')}} LARYNX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Actions">
-                                                    <modal-vue type="send" token="LARYNX" :balance="saccountapi.balance" :account="account" @modalsign="sendIt($event)">
-                                                        <button slot="trigger" type="button" class="btn btn-info me-half"><i
-                                                            class="fas fa-paper-plane me-2"></i>Send</button>
+                                                    <modal-vue type="send" token="LARYNX" :balance="saccountapi.balance"
+                                                        :account="account" @modalsign="sendIt($event)">
+                                                        <button slot="trigger" type="button"
+                                                            class="btn btn-info me-half"><i
+                                                                class="fas fa-paper-plane me-2"></i>Send</button>
                                                     </modal-vue>
                                                     <div class="btn-group" role="group" v-if="me">
                                                         <button id="btnGroupDrop1" type="button"
-                                                            class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
-                                                            aria-haspopup="true" aria-expanded="false"></button>
+                                                            class="btn btn-info dropdown-toggle"
+                                                            data-bs-toggle="dropdown" aria-haspopup="true"
+                                                            aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-right text-white"
-                                                            aria-labelledby="btnGroupDrop1"> 
-                                                            <modal-vue type="power" token="LARYNX" func="Power Up" :balance="saccountapi.balance" :account="account" @modalsign="sendIt($event)">
-                                                                <button class="dropdown-item" slot="trigger" type="button"><i
-                                                                    class="fas fa-angle-double-up fa-fw me-2"></i>Power
-                                                                Up</button>
+                                                            aria-labelledby="btnGroupDrop1">
+                                                            <modal-vue type="power" token="LARYNX" func="Power Up"
+                                                                :balance="saccountapi.balance" :account="account"
+                                                                @modalsign="sendIt($event)">
+                                                                <button class="dropdown-item" slot="trigger"
+                                                                    type="button"><i
+                                                                        class="fas fa-angle-double-up fa-fw me-2"></i>Power
+                                                                    Up</button>
                                                             </modal-vue>
-                                                            <modal-vue type="power" token="LARYNX" func="Lock Liquidity" :balance="saccountapi.balance" :account="account" @modalsign="sendIt($event)">
-                                                                <button class="dropdown-item" slot="trigger" type="button"><i
-                                                                    class="fas fa-lock fa-fw me-2"></i>Lock Liquidity</button>
+                                                            <modal-vue type="power" token="LARYNX" func="Lock Liquidity"
+                                                                :balance="saccountapi.balance" :account="account"
+                                                                @modalsign="sendIt($event)">
+                                                                <button class="dropdown-item" slot="trigger"
+                                                                    type="button"><i
+                                                                        class="fas fa-lock fa-fw me-2"></i>Lock
+                                                                    Liquidity</button>
                                                             </modal-vue>
                                                             <div class="dropdown-divider"></div>
                                                             <a class="dropdown-item" href="/dex/larynx" id="buylink"><i
@@ -627,235 +670,258 @@
                                                             class="fas fa-user-friends fa-fw me-2"></i>Options</button>
                                                     <div class="btn-group" role="group" v-if="me">
                                                         <button id="btnGroupDrop1" type="button"
-                                                            class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
-                                                            aria-haspopup="true" aria-expanded="false"></button>
+                                                            class="btn btn-info dropdown-toggle"
+                                                            data-bs-toggle="dropdown" aria-haspopup="true"
+                                                            aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-right text-white"
-                                                            aria-labelledby="btnGroupDrop1"> 
-                                                            <modal-vue type="power" token="LARYNX" func="Unlock Liquidity" :balance="saccountapi.balance" :account="account" @modalsign="sendIt($event)">
-                                                                <button class="dropdown-item" slot="trigger" type="button"><i
-                                                                    class="fas fa-lock-open fa-fw me-2"></i>Unlock
-                                                                Liquidity</button>
+                                                            aria-labelledby="btnGroupDrop1">
+                                                            <modal-vue type="power" token="LARYNX"
+                                                                func="Unlock Liquidity" :balance="saccountapi.gov"
+                                                                :account="account" @modalsign="sendIt($event)">
+                                                                <button class="dropdown-item" slot="trigger"
+                                                                    type="button"><i
+                                                                        class="fas fa-lock-open fa-fw me-2"></i>Unlock
+                                                                    Liquidity</button>
                                                             </modal-vue>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <hr class="my-4 bg-light">
-                                        <div class="clearfix">
-                                            <div class="float-left">
-                                                <h4>LARYNX Power</h4>
-                                                <p class="text-white-50">Powered tokens used to mine SPK</p>
-                                                <p class="text-white-50">Benefits of LARYNX Power:</p>
-                                                <ul class="text-white-50">
-                                                    <li>Earns SPK governance tokens!</li>
-                                                    <li>Delegate to node service accounts to build consensus. (DPoS)</li>
-                                                    <li>Simply locking tokens earns SPK at {{toFixed(parseFloat(spkStats.spk_rate_lpow) * 100,3)}}%</li>
-                                                    <li>Delegate locked tokens to earn both accounts {{toFixed(parseFloat(spkStats.spk_rate_ldel) * 100,3)}}%</li>
-                                                    <li>Run node services to earn {{toFixed(parseFloat(spkStats.spk_rate_lgov) * 100,3)}}% and be eligible to receive delegations</li>
-                                                </ul>
-                                            </div>
-                                            <div id="larynxgactions" class="float-right text-end">
-                                                <h5 id="govbalance">
-                                                    {{formatNumber((saccountapi.gov)/1000, 3, '.', ',')}} LARYNX
-                                                </h5>
-                                                <div class="btn-group" role="group" aria-label="LARYNX Actions">
-                                                    <button type="button" class="btn btn-info me-half"
-                                                        data-bs-toggle="modal" title="DelegateLarynx"
-                                                        id="delegatedluxbtn" data-bs-target="#sendDluxModal"><i
-                                                            class="fas fa-user-friends fa-fw me-2"></i>Delegate</button>
-                                                    <div class="btn-group d-none" role="group" v-if="me">
-                                                        <button id="btnGroupDrop1" type="button"
-                                                            class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
-                                                            aria-haspopup="true" aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-right text-white"
-                                                            aria-labelledby="btnGroupDrop1"> <a class="dropdown-item"
-                                                                href="#" data-bs-toggle="modal"
-                                                                id="larynxgovdownModalButton"
-                                                                data-bs-target="#unlockgovLarynxModal"><i
-                                                                    class="fas fa-lock-open fa-fw me-2"></i>Unlock
-                                                                GOV</a> <a class="dropdown-item disabled d-none"
-                                                                href="#" data-bs-toggle="modal" id="govtopowerbutton"
-                                                                data-bs-target="#sendDluxModal"><i
-                                                                    class="fas fa-random fa-fw me-2"></i>Convert to
-                                                                PWR</a></div>
+                                            <hr class="my-4 bg-light">
+                                            <div class="clearfix">
+                                                <div class="float-left">
+                                                    <h4>LARYNX Power</h4>
+                                                    <p class="text-white-50">Powered tokens used to mine SPK</p>
+                                                    <p class="text-white-50">Benefits of LARYNX Power:</p>
+                                                    <ul class="text-white-50">
+                                                        <li>Earns SPK governance tokens!</li>
+                                                        <li>Delegate to node service accounts to build consensus. (DPoS)
+                                                        </li>
+                                                        <li>Simply locking tokens earns SPK at
+                                                            {{toFixed(parseFloat(spkStats.spk_rate_lpow) * 100,3)}}%
+                                                        </li>
+                                                        <li>Delegate locked tokens to earn both accounts
+                                                            {{toFixed(parseFloat(spkStats.spk_rate_ldel) * 100,3)}}%
+                                                        </li>
+                                                        <li>Run node services to earn
+                                                            {{toFixed(parseFloat(spkStats.spk_rate_lgov) * 100,3)}}% and
+                                                            be eligible to receive delegations</li>
+                                                    </ul>
+                                                </div>
+                                                <div id="larynxgactions" class="float-right text-end">
+                                                    <h5 id="govbalance">
+                                                        {{formatNumber((saccountapi.gov)/1000, 3, '.', ',')}} LARYNX
+                                                    </h5>
+                                                    <div class="btn-group" role="group" aria-label="LARYNX Actions">
+                                                        <button type="button" class="btn btn-info me-half"
+                                                            data-bs-toggle="modal" title="DelegateLarynx"
+                                                            id="delegatedluxbtn" data-bs-target="#sendDluxModal"><i
+                                                                class="fas fa-user-friends fa-fw me-2"></i>Delegate</button>
+                                                        <div class="btn-group d-none" role="group" v-if="me">
+                                                            <button id="btnGroupDrop1" type="button"
+                                                                class="btn btn-info dropdown-toggle"
+                                                                data-bs-toggle="dropdown" aria-haspopup="true"
+                                                                aria-expanded="false"></button>
+                                                            <div class="dropdown-menu dropdown-menu-right text-white"
+                                                                aria-labelledby="btnGroupDrop1"> <a
+                                                                    class="dropdown-item" href="#"
+                                                                    data-bs-toggle="modal" id="larynxgovdownModalButton"
+                                                                    data-bs-target="#unlockgovLarynxModal"><i
+                                                                        class="fas fa-lock-open fa-fw me-2"></i>Unlock
+                                                                    GOV</a> <a class="dropdown-item disabled d-none"
+                                                                    href="#" data-bs-toggle="modal"
+                                                                    id="govtopowerbutton"
+                                                                    data-bs-target="#sendDluxModal"><i
+                                                                        class="fas fa-random fa-fw me-2"></i>Convert to
+                                                                    PWR</a></div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <hr class="my-4 bg-light">
-                                        <div class="clearfix">
-                                            <div class="float-left">
-                                                <h4>Estimated Account Value</h4>
-                                                <p class="text-white-50">The approximate US Dollar value for all SPK assets
-                                                    in your account</p>
+                                            <hr class="my-4 bg-light">
+                                            <div class="clearfix">
+                                                <div class="float-left">
+                                                    <h4>Estimated Account Value</h4>
+                                                    <p class="text-white-50">The approximate US Dollar value for all SPK
+                                                        assets
+                                                        in your account</p>
+                                                </div>
+                                                <div class="float-right text-end">
+                                                    <h5 id="totallarynx">
+                                                        ${{toFixed(spkval * saccountapi.tick * hiveprice.hive.usd,2)}}
+                                                    </h5>
+                                                </div>
                                             </div>
-                                            <div class="float-right text-end">
-                                                <h5 id="totallarynx">
-                                                    ${{toFixed(spkval * saccountapi.tick * hiveprice.hive.usd,2)}}
-                                                </h5>
-                                            </div>
                                         </div>
-                                    </div>
-                                    <div id="larynxtxs" class="jumbotron pt-3 bg-darker text-white">
-                                        <!-- <div dmx-repeat:larynxtx="larynxfeed.data.feed">
+                                        <div id="larynxtxs" class="jumbotron pt-3 bg-darker text-white">
+                                            <!-- <div dmx-repeat:larynxtx="larynxfeed.data.feed">
                                             {{larynxtx.$value}}
                                         </div> -->
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <!-- hive wallet tab-->
-                            <div role="tabpanel" class="tab-pane fade show" id="hive" aria-labelledby="hivetab">
-                                <div class="container">
-                                    <div class="jumbotron pt-4 bg-darker">
-                                        <h1 class="display-5">HIVE</h1>
-                                        <p class="lead ">A proof-of-stake blockchain built for censorship resistant
-                                            content and apps</p>
-                                        <hr class="my-4 bg-light">
-                                        <div class="clearfix">
-                                            <div class="float-left">
-                                                <h4>HIVE Token</h4>
-                                                <p class="text-white-50">The main token of the chain, often rewarded for
-                                                    content.</p>
-                                            </div>
-                                            <div id="hiveactions" class="float-right text-end">
-                                                <h5 id="hivebalance">{{focus.balance}}</h5>
-                                                <div class="btn-group" role="group" aria-label="DLUX Actions">
-                                                    <modal-vue type="send" token="HIVE" :balance="focus.balance" :account="account" @modalsign="sendIt($event)">
-                                                        <button slot="trigger" type="button" class="btn btn-info me-half"><i
-                                                            class="fas fa-paper-plane me-2"></i>Send</button>
-                                                    </modal-vue>
-                                                    <div class="btn-group" role="group" v-if="me">
-                                                        <button id="btnGroupDrop1" type="button"
-                                                            class="btn btn-info dropdown-toggle"
-                                                            data-bs-toggle="dropdown" aria-haspopup="true"
-                                                            aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
-                                                            aria-labelledby="btnGroupDrop1"> <a
-                                                                class="dropdown-item disabled" href="#"
-                                                                id="poweruphivebutton" data-bs-toggle="modal"
-                                                                data-bs-target="#powerupDluxModal"><i
-                                                                    class="fas fa-angle-double-up fa-fw me-2"></i>Power
-                                                                Up</a> <a class="dropdown-item disabled" href="#"><i
-                                                                    class="fas fa-random fa-fw me-2"></i>Convert to
-                                                                HBD</a>
-                                                            <div class="dropdown-divider"></div>
-                                                            <a class="dropdown-item" href="/dex#dlux"><i
-                                                                    class="fas fa-store fa-fw me-2"></i>Trade</a>
+                                <!-- hive wallet tab-->
+                                <div role="tabpanel" class="tab-pane fade show" id="hive" aria-labelledby="hivetab">
+                                    <div class="container">
+                                        <div class="jumbotron pt-4 bg-darker">
+                                            <h1 class="display-5">HIVE</h1>
+                                            <p class="lead ">A proof-of-stake blockchain built for censorship resistant
+                                                content and apps</p>
+                                            <hr class="my-4 bg-light">
+                                            <div class="clearfix">
+                                                <div class="float-left">
+                                                    <h4>HIVE Token</h4>
+                                                    <p class="text-white-50">The main token of the chain, often rewarded
+                                                        for
+                                                        content.</p>
+                                                </div>
+                                                <div id="hiveactions" class="float-right text-end">
+                                                    <h5 id="hivebalance">{{focus.balance}}</h5>
+                                                    <div class="btn-group" role="group" aria-label="DLUX Actions">
+                                                        <modal-vue type="send" token="HIVE" :balance="parseFloat(focus.balance) * 1000"
+                                                            :account="account" @modalsign="sendIt($event)">
+                                                            <button slot="trigger" type="button"
+                                                                class="btn btn-info me-half"><i
+                                                                    class="fas fa-paper-plane me-2"></i>Send</button>
+                                                        </modal-vue>
+                                                        <div class="btn-group" role="group" v-if="me">
+                                                            <button id="btnGroupDrop1" type="button"
+                                                                class="btn btn-info dropdown-toggle"
+                                                                data-bs-toggle="dropdown" aria-haspopup="true"
+                                                                aria-expanded="false"></button>
+                                                            <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
+                                                                aria-labelledby="btnGroupDrop1"> <a
+                                                                    class="dropdown-item disabled" href="#"
+                                                                    id="poweruphivebutton" data-bs-toggle="modal"
+                                                                    data-bs-target="#powerupDluxModal"><i
+                                                                        class="fas fa-angle-double-up fa-fw me-2"></i>Power
+                                                                    Up</a> <a class="dropdown-item disabled" href="#"><i
+                                                                        class="fas fa-random fa-fw me-2"></i>Convert to
+                                                                    HBD</a>
+                                                                <div class="dropdown-divider"></div>
+                                                                <a class="dropdown-item" href="/dex#dlux"><i
+                                                                        class="fas fa-store fa-fw me-2"></i>Trade</a>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <hr class="my-4 bg-light">
-                                        <div class="clearfix">
-                                            <div class="float-left">
-                                                <h4>HIVE Power</h4>
-                                                <p class="text-white-50">Staked tokens (Powered Up) allowing for
-                                                    inflationary rewards on new content</p>
-                                                <p class="text-white-50">Benefits of HIVE Power:</p>
-                                                <ul class="text-white-50">
-                                                    <li>Increased voting power on content</li>
-                                                    <li>Increased rewards from content</li>
-                                                    <li>Increased resource credits</li>
-                                                </ul>
-                                            </div>
-                                            <div id="hivepactions" class="float-right text-end">
-                                                <h5 id="hpbal">
-                                                    {{toFixed(((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares)),3)}}
-                                                    HP</h5>
-                                                <div class="btn-group" role="group" aria-label="DLUX Actions">
-                                                    <button type="button" class="btn btn-info me-half"
-                                                        style="pointer-events: none;" disabled><i
-                                                            class="fas fa-user-friends me-2"></i>Delegate</button>
-                                                    <div class="btn-group" role="group" v-if="me">
-                                                        <button id="btnGroupDrop1" type="button"
-                                                            class="btn btn-info dropdown-toggle"
-                                                            data-bs-toggle="dropdown" aria-haspopup="true"
-                                                            aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
-                                                            aria-labelledby="btnGroupDrop1"> <a
-                                                                class="dropdown-item disabled" href="#"><i
-                                                                    class="fas fa-angle-double-down fa-fw me-2"></i>Power
-                                                                Down</a>
-                                                            <div class="dropdown-divider"></div>
-                                                            <a class="dropdown-item disabled" href="../dex/">Claim
-                                                                Account Creation Token</a>
+                                            <hr class="my-4 bg-light">
+                                            <div class="clearfix">
+                                                <div class="float-left">
+                                                    <h4>HIVE Power</h4>
+                                                    <p class="text-white-50">Staked tokens (Powered Up) allowing for
+                                                        inflationary rewards on new content</p>
+                                                    <p class="text-white-50">Benefits of HIVE Power:</p>
+                                                    <ul class="text-white-50">
+                                                        <li>Increased voting power on content</li>
+                                                        <li>Increased rewards from content</li>
+                                                        <li>Increased resource credits</li>
+                                                    </ul>
+                                                </div>
+                                                <div id="hivepactions" class="float-right text-end">
+                                                    <h5 id="hpbal">
+                                                        {{toFixed(((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares)),3)}}
+                                                        HP</h5>
+                                                    <div class="btn-group" role="group" aria-label="DLUX Actions">
+                                                        <button type="button" class="btn btn-info me-half"
+                                                            style="pointer-events: none;" disabled><i
+                                                                class="fas fa-user-friends me-2"></i>Delegate</button>
+                                                        <div class="btn-group" role="group" v-if="me">
+                                                            <button id="btnGroupDrop1" type="button"
+                                                                class="btn btn-info dropdown-toggle"
+                                                                data-bs-toggle="dropdown" aria-haspopup="true"
+                                                                aria-expanded="false"></button>
+                                                            <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
+                                                                aria-labelledby="btnGroupDrop1"> <a
+                                                                    class="dropdown-item disabled" href="#"><i
+                                                                        class="fas fa-angle-double-down fa-fw me-2"></i>Power
+                                                                    Down</a>
+                                                                <div class="dropdown-divider"></div>
+                                                                <a class="dropdown-item disabled" href="../dex/">Claim
+                                                                    Account Creation Token</a>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <hr class="my-4 bg-light">
-                                        <div class="clearfix">
-                                            <div class="float-left">
-                                                <h4>HIVE Backed Dollar</h4>
-                                                <p class="text-white-50">Also a reward for content, this token is pegged
-                                                    to the US Dollar</p>
-                                            </div>
-                                            <div id="hbdactions" class="float-right text-end">
-                                                <h5 id="hbdbalance">{{focus.hbd_balance}}</h5>
-                                                <div class="btn-group" role="group" aria-label="DLUX Actions">
-                                                    <modal-vue type="send" token="HBD" :balance="focus.hbd_balance" :account="account" @modalsign="sendIt($event)">
-                                                        <button slot="trigger" type="button" class="btn btn-info me-half"><i
-                                                            class="fas fa-paper-plane me-2"></i>Send</button>
-                                                    </modal-vue>
-                                                    <div class="btn-group" role="group" v-if="me">
-                                                        <button id="btnGroupDrop1" type="button"
-                                                            class="btn btn-info dropdown-toggle"
-                                                            data-bs-toggle="dropdown" aria-haspopup="true"
-                                                            aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
-                                                            aria-labelledby="btnGroupDrop1"> <a
-                                                                class="dropdown-item disabled" href="#"><i
-                                                                    class="fas fa-random fa-fw me-2"></i>Convert to
-                                                                HIVE</a> <a class="dropdown-item disabled" href="#"><i
-                                                                    class="fas fa-piggy-bank fa-fw me-2"></i>Transfer to
-                                                                Savings</a>
-                                                            <div class="dropdown-divider"></div>
-                                                            <a class="dropdown-item" href="/dex#dlux"><i
-                                                                    class="fas fa-store fa-fw me-2"></i>Trade</a>
+                                            <hr class="my-4 bg-light">
+                                            <div class="clearfix">
+                                                <div class="float-left">
+                                                    <h4>HIVE Backed Dollar</h4>
+                                                    <p class="text-white-50">Also a reward for content, this token is
+                                                        pegged
+                                                        to the US Dollar</p>
+                                                </div>
+                                                <div id="hbdactions" class="float-right text-end">
+                                                    <h5 id="hbdbalance">{{focus.hbd_balance}}</h5>
+                                                    <div class="btn-group" role="group" aria-label="DLUX Actions">
+                                                        <modal-vue type="send" token="HBD" :balance="parseFloat(focus.hbd_balance) * 1000"
+                                                            :account="account" @modalsign="sendIt($event)">
+                                                            <button slot="trigger" type="button"
+                                                                class="btn btn-info me-half"><i
+                                                                    class="fas fa-paper-plane me-2"></i>Send</button>
+                                                        </modal-vue>
+                                                        <div class="btn-group" role="group" v-if="me">
+                                                            <button id="btnGroupDrop1" type="button"
+                                                                class="btn btn-info dropdown-toggle"
+                                                                data-bs-toggle="dropdown" aria-haspopup="true"
+                                                                aria-expanded="false"></button>
+                                                            <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
+                                                                aria-labelledby="btnGroupDrop1"> <a
+                                                                    class="dropdown-item disabled" href="#"><i
+                                                                        class="fas fa-random fa-fw me-2"></i>Convert to
+                                                                    HIVE</a> <a class="dropdown-item disabled"
+                                                                    href="#"><i
+                                                                        class="fas fa-piggy-bank fa-fw me-2"></i>Transfer
+                                                                    to
+                                                                    Savings</a>
+                                                                <div class="dropdown-divider"></div>
+                                                                <a class="dropdown-item" href="/dex#dlux"><i
+                                                                        class="fas fa-store fa-fw me-2"></i>Trade</a>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                            <hr class="my-4 bg-light">
+                                            <div class="clearfix">
+                                                <div class="float-left">
+                                                    <h4>HIVE Savings</h4>
+                                                    <p class="text-white-50 mb-0">A 3 day waiting period is imposed on
+                                                        withdrawl</p>
+                                                </div>
+                                                <div id="savingsactions" class="float-right text-end">
+                                                    <h5 id="savbal">{{focus.savings_hbd_balance}}</h5>
+                                                </div>
+                                            </div>
+                                            <hr class="my-4 bg-light">
+                                            <div class="clearfix">
+                                                <div class="float-left">
+                                                    <h4>Estimated Account Value</h4>
+                                                    <p class="text-white-50">The approximate US Dollar value for all
+                                                        HIVE in
+                                                        your account</p>
+                                                </div>
+                                                <div id="hiveval" class="float-right text-end">
+                                                    <h5 id="totalhivebalance">
+                                                        ${{toFixed((((((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares))+parseFloat(focus.balance))*hiveprice.hive.usd)+((parseFloat(focus.hbd_balance)+parseFloat(focus.savings_hbd_balance))*hbdprice.hive_dollar.usd)),2)}}
+                                                    </h5>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <hr class="my-4 bg-light">
-                                        <div class="clearfix">
-                                            <div class="float-left">
-                                                <h4>HIVE Savings</h4>
-                                                <p class="text-white-50 mb-0">A 3 day waiting period is imposed on
-                                                    withdrawl</p>
-                                            </div>
-                                            <div id="savingsactions" class="float-right text-end">
-                                                <h5 id="savbal">{{focus.savings_hbd_balance}}</h5>
-                                            </div>
-                                        </div>
-                                        <hr class="my-4 bg-light">
-                                        <div class="clearfix">
-                                            <div class="float-left">
-                                                <h4>Estimated Account Value</h4>
-                                                <p class="text-white-50">The approximate US Dollar value for all HIVE in
-                                                    your account</p>
-                                            </div>
-                                            <div id="hiveval" class="float-right text-end">
-                                                <h5 id="totalhivebalance">
-                                                    ${{toFixed((((((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares))+parseFloat(focus.balance))*hiveprice.hive.usd)+((parseFloat(focus.hbd_balance)+parseFloat(focus.savings_hbd_balance))*hbdprice.hive_dollar.usd)),2)}}
-                                                </h5>
-                                            </div>
-                                        </div>
+                                        <div id="hivetransactions" class="jumbotron pt-3 bg-darker text-white"> </div>
                                     </div>
-                                    <div id="hivetransactions" class="jumbotron pt-3 bg-darker text-white"> </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- inventory tab -->
-                    <div role="tabpanel" class="tab-pane fade show" id="inventory" aria-labelledby="inventorytab">
-                        <div class="container">
-                            <!-- Trade FT repeat -->
-                            <!-- <div class="card-columns cc-3 pt-5" id="trade-ft-cards" is="dmx-repeat"
+                        <!-- inventory tab -->
+                        <div role="tabpanel" class="tab-pane fade show" id="inventory" aria-labelledby="inventorytab">
+                            <div class="container">
+                                <!-- Trade FT repeat -->
+                                <!-- <div class="card-columns cc-3 pt-5" id="trade-ft-cards" is="dmx-repeat"
                                 :repeat="tradefts.data.result">
                                 <div :id="{{script}}-trade-card" class="card text-white" style="border: none;">
                                     {{script.getSetDetailsColors('-trade-card')}}
@@ -903,8 +969,8 @@
                                     </div>
                                 </div>
                             </div> -->
-                            <!-- Trade NFT repeat -->
-                            <!-- <div class="card-columns cc-3 pt-5" id="trade-nft-cards" is="dmx-repeat"
+                                <!-- Trade NFT repeat -->
+                                <!-- <div class="card-columns cc-3 pt-5" id="trade-nft-cards" is="dmx-repeat"
                                 :repeat="tradenfts.data.result">
                                 <div class="card text-white bg-dark ">
                                     <div class="card-header border-0 d-flex align-items-center"
@@ -946,8 +1012,8 @@
                                     </div>
                                 </div>
                             </div> -->
-                            <!-- Mint repeat -->
-                            <!-- <div class="card-columns cc-3 pt-5" id="inventory-mint" is="dmx-repeat"
+                                <!-- Mint repeat -->
+                                <!-- <div class="card-columns cc-3 pt-5" id="inventory-mint" is="dmx-repeat"
                                 :repeat="inventorydata.data.mint_tokens">
                                 <div :id="{{script}}-card" class="card text-white border-0">
                                     {{script.getSetDetailsColors('-card')}}
@@ -990,8 +1056,8 @@
                                     </div>
                                 </div>
                             </div> -->
-                            <!-- Transfer FT Mint -->
-                            <!-- <dmx-data-detail id="mint_detail" :data="inventorydata.data.mint_tokens" key="set">
+                                <!-- Transfer FT Mint -->
+                                <!-- <dmx-data-detail id="mint_detail" :data="inventorydata.data.mint_tokens" key="set">
                                 <div class="modal fade show" id="mintTransferModal" tabindex="11" role="dialog"
                                     aria-hidden="true">
                                     <div class="modal-dialog modal-full modal-dialog-centered" role="document">
@@ -1358,8 +1424,8 @@
                                 </div>
                                 <center>
                             </dmx-data-detail> -->
-                            <!-- NFT repeat -->
-                            <!-- <div class="card-columns cc-3 pt-5" id="inventory-cards" is="dmx-repeat"
+                                <!-- NFT repeat -->
+                                <!-- <div class="card-columns cc-3 pt-5" id="inventory-cards" is="dmx-repeat"
                                 :repeat="inventorydata.data.result">
                                 <div class="card text-white bg-dark ">
                                     <div class="card-header border-0 d-flex align-items-center"
@@ -1380,18 +1446,18 @@
                                     </a>
                                 </div>
                             </div> -->
-                            <!-- NFT iterator -->
-                            <!-- <dmx-data-iterator id="inventory_iterator" :data="inventorydata.data.result"
+                                <!-- NFT iterator -->
+                                <!-- <dmx-data-iterator id="inventory_iterator" :data="inventorydata.data.result"
                                 loop="true"></dmx-data-iterator> -->
-                            <!-- NFT detail modal -->
+                                <!-- NFT detail modal -->
 
 
+                            </div>
                         </div>
-                    </div>
-                    <!-- nodes tab -->
-                    <div role="tabpanel" class="tab-pane fade show" id="nodes" aria-labelledby="nodestab">
-                        <div class="container"> <br>
-                            <!-- <div dmx-repeat:spkrepeat="">
+                        <!-- nodes tab -->
+                        <div role="tabpanel" class="tab-pane fade show" id="nodes" aria-labelledby="nodestab">
+                            <div class="container"> <br>
+                                <!-- <div dmx-repeat:spkrepeat="">
                             <form>
                                 <div class="form-row">
                                     <div class="form-group col-lg-6 p-2">
@@ -1439,345 +1505,347 @@
                                 </div>
                             </form>
                         </div> -->
-                        </div>
-                    </div>
-                    <!-- settings tab -->
-                    <div role="tabpanel" class="tab-pane fade show" id="settings" aria-labelledby="settingstab">
-                        <div class="container">
-                            <div class="alert alert-warning mt-5" role="alert"> Settings is under development and
-                                coming
-                                soon. </div>
-                            <div class="p-3">
-                                <ul class="nav nav-pills justify-content-center" role="tablist">
-                                    <li class="nav-item"> <a class="nav-link active" id="generalSettingsTab" role="tab"
-                                            data-bs-toggle="tab" aria-controls="generalsettings" aria-expanded="true"
-                                            href="#generalsettings">General</a></li>
-                                    <li class="nav-item"> <a class="nav-link" id="contentSettingsTab" role="tab"
-                                            data-bs-toggle="tab" aria-controls="contentsettings" aria-expanded="true"
-                                            href="#contentsettings">Content</a></li>
-                                    <li class="nav-item"> <a class="nav-link" id="nodeSettingsTab" role="tab"
-                                            data-bs-toggle="tab" aria-controls="nodesettings" aria-expanded="true"
-                                            href="#nodesettings">Node</a></li>
-                                </ul>
                             </div>
-                            <div class="tab-content">
-                                <div role="tabpanel" class="tab-pane fade show active" id="generalsettings"
-                                    aria-labelledby="generalSettingsTab">
-                                    <div class="container">
-                                        <form>
-                                            <div class="jumbotron pt-4 bg-darker">
-                                                <h1 class="display-5">DLUX Settings</h1>
-                                                <p class="lead ">Control your voting and rewards settings</p>
-                                                <hr class="my-4 bg-light">
-                                                <div class="clearfix">
-                                                    <div class="float-left">
-                                                        <h4>Default DLUX Weight For Posts</h4>
-                                                        <p class="text-white-50">Adjust the default DLUX weight you
-                                                            vote
-                                                            on posts, 1-100</p>
+                        </div>
+                        <!-- settings tab -->
+                        <div role="tabpanel" class="tab-pane fade show" id="settings" aria-labelledby="settingstab">
+                            <div class="container">
+                                <div class="alert alert-warning mt-5" role="alert"> Settings is under development and
+                                    coming
+                                    soon. </div>
+                                <div class="p-3">
+                                    <ul class="nav nav-pills justify-content-center" role="tablist">
+                                        <li class="nav-item"> <a class="nav-link active" id="generalSettingsTab"
+                                                role="tab" data-bs-toggle="tab" aria-controls="generalsettings"
+                                                aria-expanded="true" href="#generalsettings">General</a></li>
+                                        <li class="nav-item"> <a class="nav-link" id="contentSettingsTab" role="tab"
+                                                data-bs-toggle="tab" aria-controls="contentsettings"
+                                                aria-expanded="true" href="#contentsettings">Content</a></li>
+                                        <li class="nav-item"> <a class="nav-link" id="nodeSettingsTab" role="tab"
+                                                data-bs-toggle="tab" aria-controls="nodesettings" aria-expanded="true"
+                                                href="#nodesettings">Node</a></li>
+                                    </ul>
+                                </div>
+                                <div class="tab-content">
+                                    <div role="tabpanel" class="tab-pane fade show active" id="generalsettings"
+                                        aria-labelledby="generalSettingsTab">
+                                        <div class="container">
+                                            <form>
+                                                <div class="jumbotron pt-4 bg-darker">
+                                                    <h1 class="display-5">DLUX Settings</h1>
+                                                    <p class="lead ">Control your voting and rewards settings</p>
+                                                    <hr class="my-4 bg-light">
+                                                    <div class="clearfix">
+                                                        <div class="float-left">
+                                                            <h4>Default DLUX Weight For Posts</h4>
+                                                            <p class="text-white-50">Adjust the default DLUX weight you
+                                                                vote
+                                                                on posts, 1-100</p>
+                                                        </div>
+                                                        <div class="float-right">
+                                                            <div class="input-group">
+                                                                <input type="number" class="form-control input-75"
+                                                                    id="dluxweightposts" placeholder="100">
+                                                                <div class="input-group-append">
+                                                                    <div class="input-group-text">%</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div class="float-right">
-                                                        <div class="input-group">
-                                                            <input type="number" class="form-control input-75"
-                                                                id="dluxweightposts" placeholder="100">
-                                                            <div class="input-group-append">
-                                                                <div class="input-group-text">%</div>
+                                                    <hr class="my-4 bg-light">
+                                                    <div class="clearfix">
+                                                        <div class="float-left">
+                                                            <h4>Default DLUX Weight For Comments</h4>
+                                                            <p class="text-white-50">Adjust the default DLUX weight you
+                                                                vote
+                                                                on comments, 1-100</p>
+                                                        </div>
+                                                        <div class="float-right">
+                                                            <div class="input-group">
+                                                                <input type="number" class="form-control input-75"
+                                                                    id="dluxweightcomments" placeholder="100">
+                                                                <div class="input-group-append">
+                                                                    <div class="input-group-text">%</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <hr class="my-4 bg-light">
+                                                    <div class="clearfix">
+                                                        <div class="float-left">
+                                                            <h4>Default DLUX Payout</h4>
+                                                            <p class="text-white-50">Adjust the default DLUX reward for
+                                                                new
+                                                                posts</p>
+                                                        </div>
+                                                        <div class="float-right">
+                                                            <select class="form-control" id="dluxreward">
+                                                                <option value="1">50% DLUX and 50% DP</option>
+                                                                <option value="2">100% DLUX Power</option>
+                                                                <option value="3">Decline Rewards</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <hr class="my-4 bg-light">
+                                                    <div class="clearfix">
+                                                        <div class="float-left">
+                                                            <h4>DLUX Beneficiary Amount</h4>
+                                                            <p class="text-white-50">Adjust the beneficiary amount paid
+                                                                to
+                                                                dlux on new posts, 10-100</p>
+                                                        </div>
+                                                        <div class="float-right">
+                                                            <div class="input-group">
+                                                                <input type="number" class="form-control input-75"
+                                                                    id="dluxbeneficiary" placeholder="10">
+                                                                <div class="input-group-append">
+                                                                    <div class="input-group-text">%</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <hr class="my-4 bg-light">
+                                                    <div class="clearfix">
+                                                        <div class="float-left">
+                                                            <h4>Default DLUX Escrow Agent</h4>
+                                                            <p class="text-white-50">Choose your preffered 3rd party
+                                                                node
+                                                                for handling DEX transactions</p>
+                                                        </div>
+                                                        <div class="float-right">
+                                                            <div class="input-group">
+                                                                <div class="input-group-prepend">
+                                                                    <div class="input-group-text">@</div>
+                                                                </div>
+                                                                <input type="text" class="form-control"
+                                                                    id="dluxbeneficiary" placeholder="disregardfiat">
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <hr class="my-4 bg-light">
-                                                <div class="clearfix">
-                                                    <div class="float-left">
-                                                        <h4>Default DLUX Weight For Comments</h4>
-                                                        <p class="text-white-50">Adjust the default DLUX weight you
-                                                            vote
-                                                            on comments, 1-100</p>
+                                                <div class="jumbotron pt-4 bg-darker">
+                                                    <h1 class="display-5">HIVE Settings</h1>
+                                                    <p class="lead ">Control your voting and rewards settings</p>
+                                                    <hr class="my-4 bg-light">
+                                                    <div class="clearfix">
+                                                        <div class="float-left">
+                                                            <h4>Default HIVE Weight For Posts</h4>
+                                                            <p class="text-white-50">Adjust the default HIVE weight you
+                                                                vote
+                                                                on posts, 1-100</p>
+                                                        </div>
+                                                        <div class="float-right">
+                                                            <div class="input-group">
+                                                                <input type="number" class="form-control input-75"
+                                                                    id="hiveweightposts" placeholder="100">
+                                                                <div class="input-group-append">
+                                                                    <div class="input-group-text">%</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div class="float-right">
-                                                        <div class="input-group">
-                                                            <input type="number" class="form-control input-75"
-                                                                id="dluxweightcomments" placeholder="100">
-                                                            <div class="input-group-append">
-                                                                <div class="input-group-text">%</div>
+                                                    <hr class="my-4 bg-light">
+                                                    <div class="clearfix">
+                                                        <div class="float-left">
+                                                            <h4>Default HIVE Weight For Comments</h4>
+                                                            <p class="text-white-50">Adjust the default HIVE weight you
+                                                                vote
+                                                                on comments, 1-100</p>
+                                                        </div>
+                                                        <div class="float-right">
+                                                            <div class="input-group">
+                                                                <input type="number" class="form-control input-75"
+                                                                    id="hiveweightcomments" placeholder="100">
+                                                                <div class="input-group-append">
+                                                                    <div class="input-group-text">%</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <hr class="my-4 bg-light">
+                                                    <div class="clearfix">
+                                                        <div class="float-left">
+                                                            <h4>Default HIVE Payout</h4>
+                                                            <p class="text-white-50">Adjust the default HIVE rewards for
+                                                                new
+                                                                posts</p>
+                                                        </div>
+                                                        <div class="float-right">
+                                                            <select class="form-control" id="hivereward">
+                                                                <option value="1">50% HBD and 50% HP</option>
+                                                                <option value="2">100% HIVE Power</option>
+                                                                <option value="3">Decline Rewards</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <hr class="my-4 bg-light">
+                                                    <div class="clearfix">
+                                                        <div class="float-left">
+                                                            <h4>Default HIVE API Node</h4>
+                                                            <p class="text-white-50">Select the API node with which to
+                                                                retrieve data from the HIVE blockchain</p>
+                                                        </div>
+                                                        <div class="float-right">
+                                                            <select class="form-control" id="hivereward">
+                                                                <option value="1">anyx.io</option>
+                                                                <option value="2">api.hive.blog</option>
+                                                                <option value="3">api.hivekings.com</option>
+                                                                <option value="3">api.openhive.network</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="text-center mb-4">
+                                                    <button type="submit" class="btn btn-primary btn-lg">Save</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div role="tabpanel" class="tab-pane fade show" id="contentsettings"
+                                        aria-labelledby="contentSettingsTab">
+                                        <div class="container">
+                                            <form>
+                                                <div class="jumbotron pt-4 bg-darker">
+                                                    <h1 class="display-5">Content Settings</h1>
+                                                    <p class="lead ">Control what you see</p>
+                                                    <hr class="my-4 bg-light">
+                                                    <div class="clearfix">
+                                                        <div class="float-left">
+                                                            <h4>NSFW Posts</h4>
+                                                            <p class="text-white-50">Configure how NSFW (Not Safe For
+                                                                Work)
+                                                                posts appear</p>
+                                                        </div>
+                                                        <div class="float-right">
+                                                            <select class="form-control" id="nsfwselect">
+                                                                <option value="1">Hide</option>
+                                                                <option value="2">Click to show</option>
+                                                                <option value="3">Show</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <hr class="my-4 bg-light">
+                                                    <div class="clearfix">
+                                                        <div class="float-left">
+                                                            <h4>Author Muting</h4>
+                                                            <p class="text-white-50">Use author's list of ignored
+                                                                accounts
+                                                                when viewing comments</p>
+                                                        </div>
+                                                        <div class="float-right my-3">
+                                                            <div class="custom-control custom-switch py-2">
+                                                                <input type="checkbox" class="custom-control-input"
+                                                                    id="muteswitch">
+                                                                <label class="custom-control-label"
+                                                                    for="muteswitch"></label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <hr class="my-4 bg-light">
+                                                    <div class="clearfix">
+                                                        <div class="float-left">
+                                                            <h4>Global Blacklist</h4>
+                                                            <p class="text-white-50">Display a warning on accounts found
+                                                                in
+                                                                <a href="https://peakd.com/utopian-io/@themarkymark/global-blacklist-api-2-0-released"
+                                                                    target="_blank">The Global Blacklist</a> maintained
+                                                                by
+                                                                @themarkymark
+                                                            </p>
+                                                        </div>
+                                                        <div class="float-right my-3">
+                                                            <div class="custom-control custom-switch py-2">
+                                                                <input type="checkbox" class="custom-control-input"
+                                                                    id="bkacklistswitch" checked>
+                                                                <label class="custom-control-label"
+                                                                    for="blacklistswitch"></label>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <hr class="my-4 bg-light">
-                                                <div class="clearfix">
-                                                    <div class="float-left">
-                                                        <h4>Default DLUX Payout</h4>
-                                                        <p class="text-white-50">Adjust the default DLUX reward for
-                                                            new
-                                                            posts</p>
-                                                    </div>
-                                                    <div class="float-right">
-                                                        <select class="form-control" id="dluxreward">
-                                                            <option value="1">50% DLUX and 50% DP</option>
-                                                            <option value="2">100% DLUX Power</option>
-                                                            <option value="3">Decline Rewards</option>
-                                                        </select>
-                                                    </div>
+                                                <div class="text-center mb-4">
+                                                    <button type="submit" class="btn btn-primary btn-lg">Save</button>
                                                 </div>
-                                                <hr class="my-4 bg-light">
-                                                <div class="clearfix">
-                                                    <div class="float-left">
-                                                        <h4>DLUX Beneficiary Amount</h4>
-                                                        <p class="text-white-50">Adjust the beneficiary amount paid
-                                                            to
-                                                            dlux on new posts, 10-100</p>
-                                                    </div>
-                                                    <div class="float-right">
-                                                        <div class="input-group">
-                                                            <input type="number" class="form-control input-75"
-                                                                id="dluxbeneficiary" placeholder="10">
-                                                            <div class="input-group-append">
-                                                                <div class="input-group-text">%</div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <hr class="my-4 bg-light">
-                                                <div class="clearfix">
-                                                    <div class="float-left">
-                                                        <h4>Default DLUX Escrow Agent</h4>
-                                                        <p class="text-white-50">Choose your preffered 3rd party
-                                                            node
-                                                            for handling DEX transactions</p>
-                                                    </div>
-                                                    <div class="float-right">
-                                                        <div class="input-group">
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div role="tabpanel" class="tab-pane fade show" id="nodesettings"
+                                        aria-labelledby="nodeSettingsTab">
+                                        <div class="container">
+                                            <form>
+                                                <div class="form-row">
+                                                    <div class="form-group col-lg-6 p-2">
+                                                        <label for="nodeDomainSet">Domain</label>
+                                                        <div class="input-group mb-2">
                                                             <div class="input-group-prepend">
-                                                                <div class="input-group-text">@</div>
+                                                                <div class="input-group-text">https://</div>
                                                             </div>
-                                                            <input type="text" class="form-control" id="dluxbeneficiary"
-                                                                placeholder="disregardfiat">
+                                                            <input type="text" class="form-control" id="nodeDomainSet"
+                                                                placeholder="yourname-dluxtoken.herokuapp.com">
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                            <div class="jumbotron pt-4 bg-darker">
-                                                <h1 class="display-5">HIVE Settings</h1>
-                                                <p class="lead ">Control your voting and rewards settings</p>
-                                                <hr class="my-4 bg-light">
-                                                <div class="clearfix">
-                                                    <div class="float-left">
-                                                        <h4>Default HIVE Weight For Posts</h4>
-                                                        <p class="text-white-50">Adjust the default HIVE weight you
-                                                            vote
-                                                            on posts, 1-100</p>
-                                                    </div>
-                                                    <div class="float-right">
-                                                        <div class="input-group">
-                                                            <input type="number" class="form-control input-75"
-                                                                id="hiveweightposts" placeholder="100">
+                                                    <div class="form-group col-lg-2 p-2">
+                                                        <label for="nodeBidRateSet">Node Inflation Vote</label>
+                                                        <div class="input-group mb-2">
+                                                            <input type="number" class="form-control"
+                                                                id="nodeBidRateSet" placeholder="0.0 - 20.0">
                                                             <div class="input-group-append">
                                                                 <div class="input-group-text">%</div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <hr class="my-4 bg-light">
-                                                <div class="clearfix">
-                                                    <div class="float-left">
-                                                        <h4>Default HIVE Weight For Comments</h4>
-                                                        <p class="text-white-50">Adjust the default HIVE weight you
-                                                            vote
-                                                            on comments, 1-100</p>
-                                                    </div>
-                                                    <div class="float-right">
-                                                        <div class="input-group">
-                                                            <input type="number" class="form-control input-75"
-                                                                id="hiveweightcomments" placeholder="100">
+                                                    <div class="form-group col-lg-2 p-2">
+                                                        <label for="nodeDaoRateSet">DAO Inflation Vote</label>
+                                                        <div class="input-group mb-2">
+                                                            <input type="number" class="form-control"
+                                                                id="nodeDaoRateSet" placeholder="0.0 - 20.0">
                                                             <div class="input-group-append">
                                                                 <div class="input-group-text">%</div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <hr class="my-4 bg-light">
-                                                <div class="clearfix">
-                                                    <div class="float-left">
-                                                        <h4>Default HIVE Payout</h4>
-                                                        <p class="text-white-50">Adjust the default HIVE rewards for
-                                                            new
-                                                            posts</p>
-                                                    </div>
-                                                    <div class="float-right">
-                                                        <select class="form-control" id="hivereward">
-                                                            <option value="1">50% HBD and 50% HP</option>
-                                                            <option value="2">100% HIVE Power</option>
-                                                            <option value="3">Decline Rewards</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <hr class="my-4 bg-light">
-                                                <div class="clearfix">
-                                                    <div class="float-left">
-                                                        <h4>Default HIVE API Node</h4>
-                                                        <p class="text-white-50">Select the API node with which to
-                                                            retrieve data from the HIVE blockchain</p>
-                                                    </div>
-                                                    <div class="float-right">
-                                                        <select class="form-control" id="hivereward">
-                                                            <option value="1">anyx.io</option>
-                                                            <option value="2">api.hive.blog</option>
-                                                            <option value="3">api.hivekings.com</option>
-                                                            <option value="3">api.openhive.network</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="text-center mb-4">
-                                                <button type="submit" class="btn btn-primary btn-lg">Save</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                                <div role="tabpanel" class="tab-pane fade show" id="contentsettings"
-                                    aria-labelledby="contentSettingsTab">
-                                    <div class="container">
-                                        <form>
-                                            <div class="jumbotron pt-4 bg-darker">
-                                                <h1 class="display-5">Content Settings</h1>
-                                                <p class="lead ">Control what you see</p>
-                                                <hr class="my-4 bg-light">
-                                                <div class="clearfix">
-                                                    <div class="float-left">
-                                                        <h4>NSFW Posts</h4>
-                                                        <p class="text-white-50">Configure how NSFW (Not Safe For
-                                                            Work)
-                                                            posts appear</p>
-                                                    </div>
-                                                    <div class="float-right">
-                                                        <select class="form-control" id="nsfwselect">
-                                                            <option value="1">Hide</option>
-                                                            <option value="2">Click to show</option>
-                                                            <option value="3">Show</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <hr class="my-4 bg-light">
-                                                <div class="clearfix">
-                                                    <div class="float-left">
-                                                        <h4>Author Muting</h4>
-                                                        <p class="text-white-50">Use author's list of ignored
-                                                            accounts
-                                                            when viewing comments</p>
-                                                    </div>
-                                                    <div class="float-right my-3">
-                                                        <div class="custom-control custom-switch py-2">
+                                                    <div class="form-group col-lg-2 p-2"> <br>
+                                                        <div class="custom-control custom-switch">
                                                             <input type="checkbox" class="custom-control-input"
-                                                                id="muteswitch">
+                                                                id="escrowCheckSet" checked>
                                                             <label class="custom-control-label"
-                                                                for="muteswitch"></label>
+                                                                for="escrowCheckSet">Escrow
+                                                                Agent</label>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                                <hr class="my-4 bg-light">
-                                                <div class="clearfix">
-                                                    <div class="float-left">
-                                                        <h4>Global Blacklist</h4>
-                                                        <p class="text-white-50">Display a warning on accounts found
-                                                            in
-                                                            <a href="https://peakd.com/utopian-io/@themarkymark/global-blacklist-api-2-0-released"
-                                                                target="_blank">The Global Blacklist</a> maintained
-                                                            by
-                                                            @themarkymark
-                                                        </p>
-                                                    </div>
-                                                    <div class="float-right my-3">
-                                                        <div class="custom-control custom-switch py-2">
+                                                        <div class="custom-control custom-switch">
                                                             <input type="checkbox" class="custom-control-input"
-                                                                id="bkacklistswitch" checked>
+                                                                id="mirrorCheckSet">
                                                             <label class="custom-control-label"
-                                                                for="blacklistswitch"></label>
+                                                                for="mirrorCheckSet">Mirror
+                                                                Leader</label>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="text-center mb-4">
-                                                <button type="submit" class="btn btn-primary btn-lg">Save</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                                <div role="tabpanel" class="tab-pane fade show" id="nodesettings"
-                                    aria-labelledby="nodeSettingsTab">
-                                    <div class="container">
-                                        <form>
-                                            <div class="form-row">
-                                                <div class="form-group col-lg-6 p-2">
-                                                    <label for="nodeDomainSet">Domain</label>
-                                                    <div class="input-group mb-2">
-                                                        <div class="input-group-prepend">
-                                                            <div class="input-group-text">https://</div>
-                                                        </div>
-                                                        <input type="text" class="form-control" id="nodeDomainSet"
-                                                            placeholder="yourname-dluxtoken.herokuapp.com">
+                                                <div class="form-row">
+                                                    <div class="form-group col-4">
+                                                        <label for="mswitpubkey">Dlux MS Witness Pub Key</label>
+                                                        <input type="text" class="form-control" id="mswitpubkey">
+                                                    </div>
+                                                    <div class="form-group col-4">
+                                                        <label for="bytecost">byte cost</label>
+                                                        <input type="number" class="form-control" id="bytecost"
+                                                            min=".001" step=".001">
                                                     </div>
                                                 </div>
-                                                <div class="form-group col-lg-2 p-2">
-                                                    <label for="nodeBidRateSet">Node Inflation Vote</label>
-                                                    <div class="input-group mb-2">
-                                                        <input type="number" class="form-control" id="nodeBidRateSet"
-                                                            placeholder="0.0 - 20.0">
-                                                        <div class="input-group-append">
-                                                            <div class="input-group-text">%</div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group col-lg-2 p-2">
-                                                    <label for="nodeDaoRateSet">DAO Inflation Vote</label>
-                                                    <div class="input-group mb-2">
-                                                        <input type="number" class="form-control" id="nodeDaoRateSet"
-                                                            placeholder="0.0 - 20.0">
-                                                        <div class="input-group-append">
-                                                            <div class="input-group-text">%</div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group col-lg-2 p-2"> <br>
-                                                    <div class="custom-control custom-switch">
-                                                        <input type="checkbox" class="custom-control-input"
-                                                            id="escrowCheckSet" checked>
-                                                        <label class="custom-control-label" for="escrowCheckSet">Escrow
-                                                            Agent</label>
-                                                    </div>
-                                                    <div class="custom-control custom-switch">
-                                                        <input type="checkbox" class="custom-control-input"
-                                                            id="mirrorCheckSet">
-                                                        <label class="custom-control-label" for="mirrorCheckSet">Mirror
-                                                            Leader</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="form-row">
-                                                <div class="form-group col-4">
-                                                    <label for="mswitpubkey">Dlux MS Witness Pub Key</label>
-                                                    <input type="text" class="form-control" id="mswitpubkey">
-                                                </div>
-                                                <div class="form-group col-4">
-                                                    <label for="bytecost">byte cost</label>
-                                                    <input type="number" class="form-control" id="bytecost" min=".001"
-                                                        step=".001">
-                                                </div>
-                                            </div>
-                                            <div class="form-group"> <br>
+                                                <div class="form-group"> <br>
 
-                                                <button id="updateNode" type="submit" class="btn btn-primary">Update
-                                                    Node</button>
+                                                    <button id="updateNode" type="submit" class="btn btn-primary">Update
+                                                        Node</button>
 
-                                            </div>
-                                        </form>
+                                                </div>
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
         </main>
         <!-- Footer -->
         <div>
@@ -1909,7 +1977,7 @@
         integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"
         integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous"
         async></script>
