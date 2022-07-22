@@ -731,8 +731,9 @@ var app = new Vue({
               rez.posting_json_metadata = { profile: { about: "" } };
             }
           }
-          if (re.result.length) this[key] = rez;
-          else this[key] = false;
+          if (!rez.posting_json_metadata.profile){rez.posting_json_metadata.profile = {about: ""}}
+            if (re.result.length) this[key] = rez;
+            else this[key] = false;
         });
     },
     tokenSend() {
