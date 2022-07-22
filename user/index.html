@@ -365,7 +365,7 @@
                                                     <h6 id="delegatebal">(-0 G)<i class="fas fa-search ms-2"></i></h6>
                                                 </a>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
-                                                    <modal-vue type="send" token="DLUX" func="Lock" :balance="accountapi.poweredUp" :account="account" @modalsign="sendIt($event)">
+                                                    <modal-vue type="delegate" token="DLUX" func="why" :balance="accountapi.poweredUp" :account="account" @modalsign="sendIt($event)">
                                                         <button type="button" class="btn btn-info me-half" slot="trigger"><i
                                                             class="fas fa-user-friends fa-fw me-2"></i>Delegate</button>
                                                     </modal-vue>
@@ -375,16 +375,13 @@
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
-                                                            aria-labelledby="btnGroupDrop1"> <a class="dropdown-item"
-                                                                href="#" data-bs-toggle="modal"
-                                                                id="dluxpowerdownModalButton"
-                                                                data-bs-target="#powerdownDluxModal"><i
-                                                                    class="fas fa-angle-double-down fa-fw me-2"></i>Power
-                                                                Down</a> <a class="dropdown-item disabled" href="#"
-                                                                data-bs-toggle="modal" id="powertogovbutton"
-                                                                data-bs-target="#sendDluxModal"><i
-                                                                    class="fas fa-random fa-fw me-2"></i>Convert to
-                                                                GOV</a></div>
+                                                            aria-labelledby="btnGroupDrop1"> 
+                                                            <modal-vue type="delegate" token="DLUX" func="why" :balance="accountapi.poweredUp" :account="account" @modalsign="sendIt($event)">
+                                                                <button class="dropdown-item" slot="trigger" type="button">
+                                                                <i class="fas fa-angle-double-down fa-fw me-2"></i>Power Down</button>
+                                                            </modal-vue>
+                                                            <a class="dropdown-item disabled d-none" href="#">
+                                                                <i class="fas fa-random fa-fw me-2"></i>Convert to GOV</a></div>
                                                     </div>
                                                     <div v-else class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"

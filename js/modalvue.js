@@ -59,6 +59,55 @@ export default {
                 </div>
             </div>
         </div>
+        <div class="modal fade" id="delegate" :tabindex="i" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content bg-darker text-white">
+                    <div class="modal-header">
+                        <h5 class="modal-title"> Delegate {{token}}</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"> <span
+                                class="close text-black">×</span></button>
+                    </div>
+                    <form name="sendhive">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="sendhivefrom">From:</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">@</div>
+                                    </div>
+                                    <input class="form-control" type="text" :placeholder="account"
+                                        readonly>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="sendhiveto">To:</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">@</div>
+                                    </div>
+                                    <input @blur="accountCheck" class="form-control" type="text" placeholder="Recipient" v-model="to">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="delAmount">Amount (Balance <a href="#"
+                                        @click="amount = balance / 1000">{{((balance)/1000)}}</a>):</label>
+                                <div class="input-group">
+                                    <input class="form-control" type="number" step="0.001" id="delAmount" 
+                                        min="0.001" placeholder="1.000" v-model="amount">
+                                    <div class="input-group-append">
+                                        <div class="input-group-text">{{token}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button :disabled="!valid" type="submit" class="btn btn-primary" @click="send">Confirm</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
         <div class="modal fade" id="power" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content bg-darker text-white">
@@ -237,8 +286,7 @@ export default {
     document.getElementById("app").appendChild(target);
     console.log(options.type, target);
     trigger.addEventListener("click", () => {
-      var theModal = new Modal(target, () => {
-        });
+      var theModal = new Modal(target, () => {});
       theModal.show();
     });
   },
