@@ -664,9 +664,7 @@
                                                     {{formatNumber((saccountapi.gov)/1000, 3, '.', ',')}} LARYNX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Actions">
-                                                    <button type="button" class="btn btn-info me-half"
-                                                        data-bs-toggle="modal" title="DelegateLarynx"
-                                                        id="delegatedluxbtn" data-bs-target="#sendDluxModal"><i
+                                                    <button type="button" class="btn btn-info me-half"><i
                                                             class="fas fa-user-friends fa-fw me-2"></i>Options</button>
                                                     <div class="btn-group" role="group" v-if="me">
                                                         <button id="btnGroupDrop1" type="button"
@@ -709,14 +707,14 @@
                                                     </ul>
                                                 </div>
                                                 <div id="larynxgactions" class="float-right text-end">
-                                                    <h5 id="govbalance">
-                                                        {{formatNumber((saccountapi.gov)/1000, 3, '.', ',')}} LARYNX
+                                                    <h5>
+                                                        {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}} LARYNX
                                                     </h5>
                                                     <div class="btn-group" role="group" aria-label="LARYNX Actions">
                                                         <modal-vue type="delegate" token="LARYNX" func="Lock Liquidity"
                                                             :balance="saccountapi.poweredUp" :account="account"
                                                             @modalsign="sendIt($event)">
-                                                            <button class="dropdown-item" slot="trigger"
+                                                            <button class="btn btn-info me-half" slot="trigger"
                                                                 type="button"><i
                                                             class="fas fa-user-friends fa-fw me-2"></i>Delegate</button>
                                                         </modal-vue>
@@ -776,14 +774,7 @@
                                                                 data-bs-toggle="dropdown" aria-haspopup="true"
                                                                 aria-expanded="false"></button>
                                                             <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
-                                                                aria-labelledby="btnGroupDrop1"> <a
-                                                                    class="dropdown-item disabled" href="#"
-                                                                    id="poweruphivebutton" data-bs-toggle="modal"
-                                                                    data-bs-target="#powerupDluxModal"><i
-                                                                        class="fas fa-angle-double-up fa-fw me-2"></i>Power
-                                                                    Up</a> <a class="dropdown-item disabled" href="#"><i
-                                                                        class="fas fa-random fa-fw me-2"></i>Convert to
-                                                                    HBD</a>
+                                                                aria-labelledby="btnGroupDrop1"> 
                                                                 <div class="dropdown-divider"></div>
                                                                 <a class="dropdown-item" href="/dex#dlux"><i
                                                                         class="fas fa-store fa-fw me-2"></i>Trade</a>
