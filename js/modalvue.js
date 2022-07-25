@@ -102,7 +102,7 @@ export default {
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button :disabled="!valid" type="submit" class="btn btn-primary" @click="send">Confirm</button>
+                            <button :disabled="!valid" type="submit" class="btn btn-primary" @click="delegate">Confirm</button>
                         </div>
                     </form>
                 </div>
@@ -132,7 +132,7 @@ export default {
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Continue</button>
+                            <button type="button" class="btn btn-primary" @click="power">Continue</button>
                         </div>
                     </form>
                 </div>
@@ -240,6 +240,142 @@ export default {
       if (op) {
         this.$emit("modalsign", op);
       }
+    },
+    delegate(){
+      var op;
+      if (this.token == "DLUX")
+        op = {
+          type: "cja",
+          cj: {
+            to: this.to,
+            amount: parseInt(this.amount * 1000)
+          },
+          id: `${this.token.toLowerCase()}_grant`,
+          msg: `Trying to send ${this.token}...`,
+          ops: ["getTokenUser"],
+          txid: "delegate",
+        };
+      // else if (this.token == "SPK")
+      //   op = {
+      //     type: "cja",
+      //     cj: {
+      //       to: this.to,
+      //       amount: parseInt(this.amount * 1000),
+      //       memo: this.memo,
+      //     },
+      //     id: `spkcc_spk_send`,
+      //     msg: `Trying to send ${this.token}...`,
+      //     ops: ["getSapi"],
+      //     txid: "delegate",
+      //   };
+      else if (this.token == "LARYNX")
+        op = {
+          type: "cja",
+          cj: {
+            to: this.to,
+            amount: parseInt(this.amount * 1000)
+          },
+          id: `spkcc_grant`,
+          msg: `Trying to delegate ${this.token}...`,
+          ops: ["getSapi"],
+          txid: "delegate",
+        };
+      // else if (this.token == "HIVE")
+      //   op = {
+      //     type: "xfr",
+      //     cj: {
+      //       to: this.to,
+      //       hive: this.amount * 1000,
+      //       memo: this.memo,
+      //     },
+      //     txid: "delegate",
+      //     msg: `Trying to send ${this.token}...`,
+      //     ops: ["getHiveUser"],
+      //   };
+      // else if (this.token == "HBD")
+      //   op = {
+      //     type: "xfr",
+      //     cj: {
+      //       to: this.to,
+      //       hbd: this.amount * 1000,
+      //       memo: this.memo,
+      //     },
+      //     txid: "delegate",
+      //     msg: `Trying to send ${this.token}...`,
+      //     ops: ["getHiveUser"],
+      //   };
+      if (op) {
+        this.$emit("modalsign", op);
+      }
+    },
+    power(){
+var op;
+if (this.token == "DLUX")
+  op = {
+    type: "cja",
+    cj: {
+      to: this.to,
+      amount: parseInt(this.amount * 1000),
+      memo: this.memo,
+    },
+    id: `${this.token.toLowerCase()}_send`,
+    msg: `Trying to send ${this.token}...`,
+    ops: ["getTokenUser"],
+    txid: "send",
+  };
+else if (this.token == "SPK")
+  op = {
+    type: "cja",
+    cj: {
+      to: this.to,
+      amount: parseInt(this.amount * 1000),
+      memo: this.memo,
+    },
+    id: `spkcc_spk_send`,
+    msg: `Trying to send ${this.token}...`,
+    ops: ["getSapi"],
+    txid: "send",
+  };
+else if (this.token == "LARYNX")
+  op = {
+    type: "cja",
+    cj: {
+      to: this.to,
+      amount: parseInt(this.amount * 1000),
+      memo: this.memo,
+    },
+    id: `spkcc_send`,
+    msg: `Trying to send ${this.token}...`,
+    ops: ["getSapi"],
+    txid: "send",
+  };
+else if (this.token == "HIVE")
+  op = {
+    type: "xfr",
+    cj: {
+      to: this.to,
+      hive: this.amount * 1000,
+      memo: this.memo,
+    },
+    txid: "sendhive",
+    msg: `Trying to send ${this.token}...`,
+    ops: ["getHiveUser"],
+  };
+else if (this.token == "HBD")
+  op = {
+    type: "xfr",
+    cj: {
+      to: this.to,
+      hbd: this.amount * 1000,
+      memo: this.memo,
+    },
+    txid: "sendhbd",
+    msg: `Trying to send ${this.token}...`,
+    ops: ["getHiveUser"],
+  };
+if (op) {
+  this.$emit("modalsign", op);
+}
     },
   },
   emits: ["modalsign"],

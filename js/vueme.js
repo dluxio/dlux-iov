@@ -167,6 +167,8 @@ var app = new Vue({
       runners: [],
       runnersSearch: [],
       marketnodes: {},
+      smarkets: "",
+      sstats:"",
       dexapi: {
         markets: {
           hive: {
@@ -1209,19 +1211,19 @@ var app = new Vue({
           this.hbdprice = data;
         });
     },
-    getNodes() {
-      fetch(this.lapi + "/runners")
+    getSNodes() {
+      // fetch(this.sapi + "/runners")
+      //   .then((response) => response.json())
+      //   .then((data) => {
+      //     this.runners = data.result.sort((a, b) => {
+      //       return b.g - a.g;
+      //     });
+      //   });
+      fetch(this.sapi + "/markets")
         .then((response) => response.json())
         .then((data) => {
-          this.runners = data.result.sort((a, b) => {
-            return b.g - a.g;
-          });
-        });
-      fetch(this.lapi + "/markets")
-        .then((response) => response.json())
-        .then((data) => {
-          this.nodes = data.markets.node;
-          this.stats = data.stats;
+          this.smarkets = data.markets;
+          this.sstats = data.stats;
         });
     },
     getProtocol() {

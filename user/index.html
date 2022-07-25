@@ -500,7 +500,7 @@
                             <!-- spk wallet tab-->
                             <div role="tabpanel" class="tab-pane fade show " id="spk" aria-labelledby="spktab">
                                 <div class="container">
-                                    <div class="jumbotron pt-4 bg-darker">
+                                    < class="jumbotron pt-4 bg-darker">
                                         <div class="d-flex align-items-center pb-2">
                                             <h1 class="display-5 m-0 p-0">SPK</h1>
                                             <div class="text-center small m-0 p-2 ms-2" v-bind:class="{'text-success': larynxbehind < 30,
@@ -647,7 +647,7 @@
                                             </div>
                                         </div>
                                         <hr class="my-4 bg-light">
-                                        <div class="clearfix">
+                                        <div class="clearfix" v-show="saccountapi.gov">
                                             <div class="float-left">
                                                 <h4>LARYNX in Network Liquidity</h4>
                                                 <p class="text-white-50">Locked tokens used to determine consensus and
@@ -685,210 +685,205 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <hr class="my-4 bg-light">
-                                            <div class="clearfix">
-                                                <div class="float-left">
-                                                    <h4>LARYNX Power</h4>
-                                                    <p class="text-white-50">Powered tokens used to mine SPK</p>
-                                                    <p class="text-white-50">Benefits of LARYNX Power:</p>
-                                                    <ul class="text-white-50">
-                                                        <li>Earns SPK governance tokens!</li>
-                                                        <li>Delegate to node service accounts to build consensus. (DPoS)
-                                                        </li>
-                                                        <li>Simply locking tokens earns SPK at
-                                                            {{toFixed(parseFloat(spkStats.spk_rate_lpow) * 100,3)}}%
-                                                        </li>
-                                                        <li>Delegate locked tokens to earn both accounts
-                                                            {{toFixed(parseFloat(spkStats.spk_rate_ldel) * 100,3)}}%
-                                                        </li>
-                                                        <li>Run node services to earn
-                                                            {{toFixed(parseFloat(spkStats.spk_rate_lgov) * 100,3)}}% and
-                                                            be eligible to receive delegations</li>
-                                                    </ul>
-                                                </div>
-                                                <div id="larynxgactions" class="float-right text-end">
-                                                    <h5>
-                                                        {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}}
-                                                        LARYNX
-                                                    </h5>
-                                                    <div class="btn-group" role="group" aria-label="LARYNX Actions">
-                                                        <modal-vue type="delegate" token="LARYNX" func="Lock Liquidity"
-                                                            :balance="saccountapi.poweredUp" :account="account"
-                                                            @modalsign="sendIt($event)">
-                                                            <button class="btn btn-info me-half" slot="trigger"
-                                                                type="button"><i
-                                                                    class="fas fa-user-friends fa-fw me-2"></i>Delegate</button>
-                                                        </modal-vue>
-
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <hr class="my-4 bg-light">
-                                            <div class="clearfix">
-                                                <div class="float-left">
-                                                    <h4>Estimated Account Value</h4>
-                                                    <p class="text-white-50">The approximate US Dollar value for all SPK
-                                                        assets
-                                                        in your account</p>
-                                                </div>
-                                                <div class="float-right text-end">
-                                                    <h5 id="totallarynx">
-                                                        ${{toFixed(spkval * saccountapi.tick * hiveprice.hive.usd,2)}}
-                                                    </h5>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- hive wallet tab-->
-                            <div role="tabpanel" class="tab-pane fade show" id="hive" aria-labelledby="hivetab">
-                                <div class="container">
-                                    <div class="jumbotron pt-4 bg-darker">
-                                        <h1 class="display-5">HIVE</h1>
-                                        <p class="lead ">A proof-of-stake blockchain built for censorship resistant
-                                            content and apps</p>
-                                        <hr class="my-4 bg-light">
-                                        <div class="clearfix">
-                                            <div class="float-left">
-                                                <h4>HIVE Token</h4>
-                                                <p class="text-white-50">The main token of the chain, often rewarded
-                                                    for
-                                                    content.</p>
-                                            </div>
-                                            <div id="hiveactions" class="float-right text-end">
-                                                <h5 id="hivebalance">{{focus.balance}}</h5>
-                                                <div class="btn-group" role="group" aria-label="DLUX Actions">
-                                                    <modal-vue type="send" token="HIVE"
-                                                        :balance="parseFloat(focus.balance) * 1000" :account="account"
-                                                        @modalsign="sendIt($event)">
-                                                        <button slot="trigger" type="button"
-                                                            class="btn btn-info me-half"><i
-                                                                class="fas fa-paper-plane me-2"></i>Send</button>
-                                                    </modal-vue>
-                                                    <div class="btn-group" role="group" v-if="me">
-                                                        <button id="btnGroupDrop1" type="button"
-                                                            class="btn btn-info dropdown-toggle"
-                                                            data-bs-toggle="dropdown" aria-haspopup="true"
-                                                            aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
-                                                            aria-labelledby="btnGroupDrop1">
-                                                            <div class="dropdown-divider"></div>
-                                                            <a class="dropdown-item" href="/dex#dlux"><i
-                                                                    class="fas fa-store fa-fw me-2"></i>Trade</a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
                                         </div>
                                         <hr class="my-4 bg-light">
                                         <div class="clearfix">
                                             <div class="float-left">
-                                                <h4>HIVE Power</h4>
-                                                <p class="text-white-50">Staked tokens (Powered Up) allowing for
-                                                    inflationary rewards on new content</p>
-                                                <p class="text-white-50">Benefits of HIVE Power:</p>
+                                                <h4>LARYNX Power</h4>
+                                                <p class="text-white-50">Powered tokens used to mine SPK</p>
+                                                <p class="text-white-50">Benefits of LARYNX Power:</p>
                                                 <ul class="text-white-50">
-                                                    <li>Increased voting power on content</li>
-                                                    <li>Increased rewards from content</li>
-                                                    <li>Increased resource credits</li>
+                                                    <li>Earns SPK governance tokens!</li>
+                                                    <li>Delegate to node service accounts to build consensus. (DPoS)
+                                                    </li>
+                                                    <li>Simply locking tokens earns SPK at
+                                                        {{toFixed(parseFloat(spkStats.spk_rate_lpow) * 100,3)}}%
+                                                    </li>
+                                                    <li>Delegate locked tokens to earn both accounts
+                                                        {{toFixed(parseFloat(spkStats.spk_rate_ldel) * 100,3)}}%
+                                                    </li>
+                                                    <li>Run node services to earn
+                                                        {{toFixed(parseFloat(spkStats.spk_rate_lgov) * 100,3)}}% and
+                                                        be eligible to receive delegations</li>
                                                 </ul>
                                             </div>
-                                            <div id="hivepactions" class="float-right text-end">
-                                                <h5 id="hpbal">
-                                                    {{toFixed(((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares)),3)}}
-                                                    HP</h5>
-                                                <div class="btn-group" role="group" aria-label="DLUX Actions">
-                                                    <button type="button" class="btn btn-info me-half"
-                                                        style="pointer-events: none;" disabled><i
-                                                            class="fas fa-user-friends me-2"></i>Delegate</button>
-                                                    <div class="btn-group" role="group" v-if="me">
-                                                        <button id="btnGroupDrop1" type="button"
-                                                            class="btn btn-info dropdown-toggle"
-                                                            data-bs-toggle="dropdown" aria-haspopup="true"
-                                                            aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
-                                                            aria-labelledby="btnGroupDrop1"> <a
-                                                                class="dropdown-item disabled" href="#"><i
-                                                                    class="fas fa-angle-double-down fa-fw me-2"></i>Power
-                                                                Down</a>
-                                                            <div class="dropdown-divider"></div>
-                                                            <a class="dropdown-item disabled" href="../dex/">Claim
-                                                                Account Creation Token</a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <hr class="my-4 bg-light">
-                                        <div class="clearfix">
-                                            <div class="float-left">
-                                                <h4>HIVE Backed Dollar</h4>
-                                                <p class="text-white-50">Also a reward for content, this token is
-                                                    pegged
-                                                    to the US Dollar</p>
-                                            </div>
-                                            <div id="hbdactions" class="float-right text-end">
-                                                <h5 id="hbdbalance">{{focus.hbd_balance}}</h5>
-                                                <div class="btn-group" role="group" aria-label="DLUX Actions">
-                                                    <modal-vue type="send" token="HBD"
-                                                        :balance="parseFloat(focus.hbd_balance) * 1000"
-                                                        :account="account" @modalsign="sendIt($event)">
-                                                        <button slot="trigger" type="button"
-                                                            class="btn btn-info me-half"><i
-                                                                class="fas fa-paper-plane me-2"></i>Send</button>
+                                            <div id="larynxgactions" class="float-right text-end">
+                                                <h5>
+                                                    {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}}
+                                                    LARYNX
+                                                </h5>
+                                                <div class="btn-group" role="group" aria-label="LARYNX Actions">
+                                                    <modal-vue type="delegate" token="LARYNX" func="Lock Liquidity"
+                                                        :balance="saccountapi.poweredUp" :account="account"
+                                                        @modalsign="sendIt($event)">
+                                                        <button class="btn btn-info me-half" slot="trigger"
+                                                            type="button"><i
+                                                                class="fas fa-user-friends fa-fw me-2"></i>Delegate</button>
                                                     </modal-vue>
-                                                    <div class="btn-group" role="group" v-if="me">
-                                                        <button id="btnGroupDrop1" type="button"
-                                                            class="btn btn-info dropdown-toggle"
-                                                            data-bs-toggle="dropdown" aria-haspopup="true"
-                                                            aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
-                                                            aria-labelledby="btnGroupDrop1"> <a
-                                                                class="dropdown-item disabled" href="#"><i
-                                                                    class="fas fa-random fa-fw me-2"></i>Convert to
-                                                                HIVE</a> <a class="dropdown-item disabled" href="#"><i
-                                                                    class="fas fa-piggy-bank fa-fw me-2"></i>Transfer
-                                                                to
-                                                                Savings</a>
-                                                            <div class="dropdown-divider"></div>
-                                                            <a class="dropdown-item" href="/dex#dlux"><i
-                                                                    class="fas fa-store fa-fw me-2"></i>Trade</a>
-                                                        </div>
-                                                    </div>
+
                                                 </div>
-                                            </div>
-                                        </div>
-                                        <hr class="my-4 bg-light">
-                                        <div class="clearfix">
-                                            <div class="float-left">
-                                                <h4>HIVE Savings</h4>
-                                                <p class="text-white-50 mb-0">A 3 day waiting period is imposed on
-                                                    withdrawl</p>
-                                            </div>
-                                            <div id="savingsactions" class="float-right text-end">
-                                                <h5 id="savbal">{{focus.savings_hbd_balance}}</h5>
                                             </div>
                                         </div>
                                         <hr class="my-4 bg-light">
                                         <div class="clearfix">
                                             <div class="float-left">
                                                 <h4>Estimated Account Value</h4>
-                                                <p class="text-white-50">The approximate US Dollar value for all
-                                                    HIVE in
-                                                    your account</p>
+                                                <p class="text-white-50">The approximate US Dollar value for all SPK
+                                                    assets
+                                                    in your account</p>
                                             </div>
-                                            <div id="hiveval" class="float-right text-end">
-                                                <h5 id="totalhivebalance">
-                                                    ${{toFixed((((((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares))+parseFloat(focus.balance))*hiveprice.hive.usd)+((parseFloat(focus.hbd_balance)+parseFloat(focus.savings_hbd_balance))*hbdprice.hive_dollar.usd)),2)}}
+                                            <div class="float-right text-end">
+                                                <h5 id="totallarynx">
+                                                    ${{toFixed(spkval * saccountapi.tick * hiveprice.hive.usd,2)}}
                                                 </h5>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div id="hivetransactions" class="jumbotron pt-3 bg-darker text-white"> </div>
                                 </div>
                             </div>
+                        </div>
+                        <!-- hive wallet tab-->
+                        <div role="tabpanel" class="tab-pane fade show" id="hive" aria-labelledby="hivetab">
+                            <div class="container">
+                                <div class="jumbotron pt-4 bg-darker">
+                                    <h1 class="display-5">HIVE</h1>
+                                    <p class="lead ">A proof-of-stake blockchain built for censorship resistant
+                                        content and apps</p>
+                                    <hr class="my-4 bg-light">
+                                    <div class="clearfix">
+                                        <div class="float-left">
+                                            <h4>HIVE Token</h4>
+                                            <p class="text-white-50">The main token of the chain, often rewarded
+                                                for
+                                                content.</p>
+                                        </div>
+                                        <div id="hiveactions" class="float-right text-end">
+                                            <h5 id="hivebalance">{{focus.balance}}</h5>
+                                            <div class="btn-group" role="group" aria-label="DLUX Actions">
+                                                <modal-vue type="send" token="HIVE"
+                                                    :balance="parseFloat(focus.balance) * 1000" :account="account"
+                                                    @modalsign="sendIt($event)">
+                                                    <button slot="trigger" type="button" class="btn btn-info me-half"><i
+                                                            class="fas fa-paper-plane me-2"></i>Send</button>
+                                                </modal-vue>
+                                                <div class="btn-group" role="group" v-if="me">
+                                                    <button id="btnGroupDrop1" type="button"
+                                                        class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false"></button>
+                                                    <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
+                                                        aria-labelledby="btnGroupDrop1">
+                                                        <div class="dropdown-divider"></div>
+                                                        <a class="dropdown-item" href="/dex#dlux"><i
+                                                                class="fas fa-store fa-fw me-2"></i>Trade</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr class="my-4 bg-light">
+                                    <div class="clearfix">
+                                        <div class="float-left">
+                                            <h4>HIVE Power</h4>
+                                            <p class="text-white-50">Staked tokens (Powered Up) allowing for
+                                                inflationary rewards on new content</p>
+                                            <p class="text-white-50">Benefits of HIVE Power:</p>
+                                            <ul class="text-white-50">
+                                                <li>Increased voting power on content</li>
+                                                <li>Increased rewards from content</li>
+                                                <li>Increased resource credits</li>
+                                            </ul>
+                                        </div>
+                                        <div id="hivepactions" class="float-right text-end">
+                                            <h5 id="hpbal">
+                                                {{toFixed(((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares)),3)}}
+                                                HP</h5>
+                                            <div class="btn-group" role="group" aria-label="DLUX Actions">
+                                                <button type="button" class="btn btn-info me-half"
+                                                    style="pointer-events: none;" disabled><i
+                                                        class="fas fa-user-friends me-2"></i>Delegate</button>
+                                                <div class="btn-group" role="group" v-if="me">
+                                                    <button id="btnGroupDrop1" type="button"
+                                                        class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false"></button>
+                                                    <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
+                                                        aria-labelledby="btnGroupDrop1"> <a
+                                                            class="dropdown-item disabled" href="#"><i
+                                                                class="fas fa-angle-double-down fa-fw me-2"></i>Power
+                                                            Down</a>
+                                                        <div class="dropdown-divider"></div>
+                                                        <a class="dropdown-item disabled" href="../dex/">Claim
+                                                            Account Creation Token</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-4 bg-light">
+                                    <div class="clearfix">
+                                        <div class="float-left">
+                                            <h4>HIVE Backed Dollar</h4>
+                                            <p class="text-white-50">Also a reward for content, this token is
+                                                pegged
+                                                to the US Dollar</p>
+                                        </div>
+                                        <div id="hbdactions" class="float-right text-end">
+                                            <h5 id="hbdbalance">{{focus.hbd_balance}}</h5>
+                                            <div class="btn-group" role="group" aria-label="DLUX Actions">
+                                                <modal-vue type="send" token="HBD"
+                                                    :balance="parseFloat(focus.hbd_balance) * 1000" :account="account"
+                                                    @modalsign="sendIt($event)">
+                                                    <button slot="trigger" type="button" class="btn btn-info me-half"><i
+                                                            class="fas fa-paper-plane me-2"></i>Send</button>
+                                                </modal-vue>
+                                                <div class="btn-group" role="group" v-if="me">
+                                                    <button id="btnGroupDrop1" type="button"
+                                                        class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false"></button>
+                                                    <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
+                                                        aria-labelledby="btnGroupDrop1"> <a
+                                                            class="dropdown-item disabled" href="#"><i
+                                                                class="fas fa-random fa-fw me-2"></i>Convert to
+                                                            HIVE</a> <a class="dropdown-item disabled" href="#"><i
+                                                                class="fas fa-piggy-bank fa-fw me-2"></i>Transfer
+                                                            to
+                                                            Savings</a>
+                                                        <div class="dropdown-divider"></div>
+                                                        <a class="dropdown-item" href="/dex#dlux"><i
+                                                                class="fas fa-store fa-fw me-2"></i>Trade</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr class="my-4 bg-light">
+                                    <div class="clearfix">
+                                        <div class="float-left">
+                                            <h4>HIVE Savings</h4>
+                                            <p class="text-white-50 mb-0">A 3 day waiting period is imposed on
+                                                withdrawl</p>
+                                        </div>
+                                        <div id="savingsactions" class="float-right text-end">
+                                            <h5 id="savbal">{{focus.savings_hbd_balance}}</h5>
+                                        </div>
+                                    </div>
+                                    <hr class="my-4 bg-light">
+                                    <div class="clearfix">
+                                        <div class="float-left">
+                                            <h4>Estimated Account Value</h4>
+                                            <p class="text-white-50">The approximate US Dollar value for all
+                                                HIVE in
+                                                your account</p>
+                                        </div>
+                                        <div id="hiveval" class="float-right text-end">
+                                            <h5 id="totalhivebalance">
+                                                ${{toFixed((((((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares))+parseFloat(focus.balance))*hiveprice.hive.usd)+((parseFloat(focus.hbd_balance)+parseFloat(focus.savings_hbd_balance))*hbdprice.hive_dollar.usd)),2)}}
+                                            </h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="hivetransactions" class="jumbotron pt-3 bg-darker text-white"> </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
