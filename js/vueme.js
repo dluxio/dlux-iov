@@ -167,7 +167,13 @@ var app = new Vue({
       runners: [],
       runnersSearch: [],
       marketnodes: {},
-      smarkets: "",
+      smarkets: {
+        node:{
+          na:{
+            self:""
+          }
+        }
+      },
       sstats:"",
       dexapi: {
         markets: {
