@@ -521,13 +521,13 @@ var app = new Vue({
         txid: "claim",
       };
     },
-    rewardClaim(prefix, reward_id, gov = false) {
+    rewardClaim(prefix, rewards_id, gov = false) {
       this.toSign = {
         type: "cja",
         cj: {
-          gov: this.features.reward2Gov,
+          gov,
         },
-        id: `${this.prefix}_${this.features.rewards_id}`,
+        id: `${prefix}_${rewards_id}`,
         msg: `Claiming ${this.TOKEN}...`,
         ops: ["getTokenUser"],
         txid: "reward_claim",
