@@ -795,7 +795,7 @@ var app = new Vue({
       return parseInt(a, b);
     },
     frmDate() {
-      return new Date().getMonth();
+      return new Date().getMonth() + 1;
     },
     sendhive() {
       if (!this.hiveFormValid) return;
