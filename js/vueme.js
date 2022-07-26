@@ -189,6 +189,8 @@ var app = new Vue({
       multisig: "",
       jsontoken: "",
       node: "",
+      spk2gov: false,
+      dlux2gov: false,
       showTokens: {},
       behind: "",
       stats: {},
@@ -505,6 +507,30 @@ var app = new Vue({
         msg: `Voting ...`,
         ops: [""],
         txid: "vote",
+      };
+    },
+    dropClaim(prefix, claim_id) {
+      this.toSign = {
+        type: "cja",
+        cj: {
+          claim: true,
+        },
+        id: `${prefix}_${claim_id}`,
+        msg: `Claiming ${this.TOKEN}...`,
+        ops: ["getTokenUser"],
+        txid: "claim",
+      };
+    },
+    rewardClaim(prefix, reward_id, gov = false) {
+      this.toSign = {
+        type: "cja",
+        cj: {
+          gov: this.features.reward2Gov,
+        },
+        id: `${this.prefix}_${this.features.rewards_id}`,
+        msg: `Claiming ${this.TOKEN}...`,
+        ops: ["getTokenUser"],
+        txid: "reward_claim",
       };
     },
     pending(url, text) {

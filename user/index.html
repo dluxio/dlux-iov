@@ -285,18 +285,18 @@
                                                 <div class="btn-group" role="group" aria-label="DLUX Claim">
                                                     <button type="submit" class="btn btn-info me-half"><i
                                                             class="fas fa-coin"></i><i
-                                                            class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
+                                                            class="fas fa-money-bill-wave-alt me-2" @click="rewardClaim('dlux', 'claim', dlux2gov)"></i>Claim</button>
                                                 </div>
-                                                <div> <span class="small" v-show="!features.reward2Gov">50% Liquid | 50%
+                                                <div> <span class="small" v-show="!dlux2gov">50% Liquid | 50%
                                                         Power</span> <span class="small"
-                                                        v-show="features.reward2Gov">50%
+                                                        v-show="dlux2gov">50%
                                                         Liquid | 50% Gov</span></div>
                                                 <div v-show="accountapi.gov > 0" class="bg-dark text-white">
                                                     <div class="input-group my-3">
                                                         <span class="input-group-text bg-darkg border-info text-info">
                                                             <div class="form-check form-switch ">
                                                                 <input class="form-check-input" type="checkbox"
-                                                                    role="switch" id="flexSwitchCheckDefault">
+                                                                    role="switch" id="flexSwitchCheckDefault" v-model="dlux2gov">
                                                                 <label class="form-check-label"
                                                                     for="flexSwitchCheckDefault">Claim GOV not
                                                                     PWR</label>
@@ -574,7 +574,7 @@
                                                     LARYNX</h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Claim">
                                                     <button type="submit" class="btn btn-info me-half"
-                                                        onClick="adclaim()"><i class="fas fa-coin"></i><i
+                                                        @click="dropClaim('spkcc', 'claim')"><i class="fas fa-coin"></i><i
                                                             class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
                                                 </div>
                                             </div>
@@ -590,9 +590,26 @@
                                             <div id="claimlarynxrewardbtn" class="float-right text-end d-column">
                                                 <h5>{{formatNumber((saccountapi.claim)/1000, 3, '.', ',')}} LARYNX
                                                 </h5>
+                                                <div> <span class="small" v-show="!spk2gov">50% Liquid | 50%
+                                                        Power</span> <span class="small"
+                                                        v-show="spk2gov">50%
+                                                        Liquid | 50% Gov</span></div>
+                                                <div v-show="accountapi.gov > 0" class="bg-dark text-white">
+                                                    <div class="input-group my-3">
+                                                        <span class="input-group-text bg-darkg border-info text-info">
+                                                            <div class="form-check form-switch ">
+                                                                <input class="form-check-input" type="checkbox"
+                                                                    role="switch" id="flexSwitchCheckDefault" v-model="spk2gov">
+                                                                <label class="form-check-label"
+                                                                    for="flexSwitchCheckDefault">Claim GOV not
+                                                                    PWR</label>
+                                                            </div>
+                                                        </span>
+                                                    </div>
+                                                </div>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Claim">
                                                     <button type="submit" class="btn btn-info me-half"
-                                                        onClick="rclaim()"><i class="fas fa-coin"></i><i
+                                                        @click="rewardClaim('spkcc', 'shares_claim', spk2gov)"><i class="fas fa-coin"></i><i
                                                             class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
                                                 </div>
                                             </div>
