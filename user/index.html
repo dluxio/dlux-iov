@@ -667,6 +667,7 @@
                                         </div>
                                         <hr class="my-4 bg-light">
                                         <div class="clearfix">
+                                            <div v-show="saccountapi.gov">
                                             <div class="float-left">
                                                 <h4>LARYNX in Network Liquidity</h4>
                                                 <p class="text-white-50">Locked tokens used to determine consensus and
@@ -678,7 +679,7 @@
                                                     <li>Instant Lock | 4 Week Unlock | Must run a node service</li>
                                                 </ul>
                                             </div>
-                                            <div id="larynxgactions" class="float-right text-end">
+                                            <div id="larynxgactions" class="float-right text-end" v-show="me">
                                                 <h5 id="govbalance">
                                                     {{formatNumber((saccountapi.gov)/1000, 3, '.', ',')}} LARYNX
                                                 </h5>
@@ -703,6 +704,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                            </div>
                                             </div>
                                             <hr class="my-4 bg-light">
                                             <div class="clearfix">
