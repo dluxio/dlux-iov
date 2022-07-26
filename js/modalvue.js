@@ -316,69 +316,76 @@ export default {
     },
     power() {
       var op;
-      if (this.token == "DLUX")
+      if (this.token == "DLUX" && this.func == 'up')
         op = {
           type: "cja",
           cj: {
-            to: this.to,
-            amount: parseInt(this.amount * 1000),
-            memo: this.memo,
+            amount: parseInt(this.amount * 1000)
           },
-          id: `${this.token.toLowerCase()}_send`,
-          msg: `Trying to send ${this.token}...`,
+          id: `${this.token.toLowerCase()}_power_up`,
+          msg: `Trying to power up ${this.token}...`,
           ops: ["getTokenUser"],
           txid: "send",
         };
-      else if (this.token == "SPK")
+      else if (this.token == "DLUX" && this.func == "down")
         op = {
           type: "cja",
           cj: {
-            to: this.to,
             amount: parseInt(this.amount * 1000),
-            memo: this.memo,
           },
-          id: `spkcc_spk_send`,
+          id: `${this.token.toLowerCase()}_power_down`,
+          msg: `Trying to power up ${this.token}...`,
+          ops: ["getTokenUser"],
+          txid: "send",
+        };
+      // else if (this.token == "SPK")
+      //   op = {
+      //     type: "cja",
+      //     cj: {
+      //       to: this.to,
+      //       amount: parseInt(this.amount * 1000),
+      //       memo: this.memo,
+      //     },
+      //     id: `spkcc_spk_send`,
+      //     msg: `Trying to send ${this.token}...`,
+      //     ops: ["getSapi"],
+      //     txid: "send",
+      //   };
+      else if (this.token == "LARYNX" && this.func == "up")
+        op = {
+          type: "cja",
+          cj: {
+            amount: parseInt(this.amount * 1000)
+          },
+          id: `spkcc_power_up`,
           msg: `Trying to send ${this.token}...`,
           ops: ["getSapi"],
           txid: "send",
         };
-      else if (this.token == "LARYNX")
-        op = {
-          type: "cja",
-          cj: {
-            to: this.to,
-            amount: parseInt(this.amount * 1000),
-            memo: this.memo,
-          },
-          id: `spkcc_send`,
-          msg: `Trying to send ${this.token}...`,
-          ops: ["getSapi"],
-          txid: "send",
-        };
-      else if (this.token == "HIVE")
-        op = {
-          type: "xfr",
-          cj: {
-            to: this.to,
-            hive: this.amount * 1000,
-            memo: this.memo,
-          },
-          txid: "sendhive",
-          msg: `Trying to send ${this.token}...`,
-          ops: ["getHiveUser"],
-        };
-      else if (this.token == "HBD")
-        op = {
-          type: "xfr",
-          cj: {
-            to: this.to,
-            hbd: this.amount * 1000,
-            memo: this.memo,
-          },
-          txid: "sendhbd",
-          msg: `Trying to send ${this.token}...`,
-          ops: ["getHiveUser"],
-        };
+      // else if (this.token == "HIVE")
+      //   op = {
+      //     type: "xfr",
+      //     cj: {
+      //       to: this.to,
+      //       hive: this.amount * 1000,
+      //       memo: this.memo,
+      //     },
+      //     txid: "sendhive",
+      //     msg: `Trying to send ${this.token}...`,
+      //     ops: ["getHiveUser"],
+      //   };
+      // else if (this.token == "HBD")
+      //   op = {
+      //     type: "xfr",
+      //     cj: {
+      //       to: this.to,
+      //       hbd: this.amount * 1000,
+      //       memo: this.memo,
+      //     },
+      //     txid: "sendhbd",
+      //     msg: `Trying to send ${this.token}...`,
+      //     ops: ["getHiveUser"],
+      //   };
       if (op) {
         this.$emit("modalsign", op);
       }
