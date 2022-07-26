@@ -86,7 +86,7 @@ export default {
                                   <input class="form-control" list="datalistOptions" id="exampleDataList" placeholder="Type to search..." v-model="to">
                                   <datalist id="datalistOptions">
                                     <template v-for="node in smarkets">
-                                      <option :value="node.self">
+                                      <option :value="node.self"></option>
                                     </template>
                                   </datalist>
                                 </div>
@@ -386,13 +386,6 @@ export default {
         this.$emit("modalsign", op);
       }
     },
-    smark(){
-      return {
-        na:{
-          self:""
-        }
-      }
-    }
   },
   emits: ["modalsign"],
   props: {
@@ -406,8 +399,14 @@ export default {
     i: {
       default: -1,
     },
-    smarkets:{
-        default: this.smark()
+    smarkets: {
+      default: function (){
+        return {
+          na: {
+            self: "",
+          },
+        };
+      },
     },
     delay: {
       default: 0,
@@ -459,5 +458,5 @@ export default {
       var theModal = new Modal(target, () => {});
       theModal.show();
     });
-  },
+  }
 };
