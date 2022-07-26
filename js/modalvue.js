@@ -316,25 +316,47 @@ export default {
     },
     power() {
       var op;
-      if (this.token == "DLUX" && this.func == 'up')
+      if (this.token == "DLUX" && this.func == "Power Up")
         op = {
           type: "cja",
           cj: {
-            amount: parseInt(this.amount * 1000)
+            amount: parseInt(this.amount * 1000),
           },
           id: `${this.token.toLowerCase()}_power_up`,
           msg: `Trying to power up ${this.token}...`,
           ops: ["getTokenUser"],
           txid: "send",
         };
-      else if (this.token == "DLUX" && this.func == "down")
+      else if (this.token == "DLUX" && this.func == "Power Down")
         op = {
           type: "cja",
           cj: {
             amount: parseInt(this.amount * 1000),
           },
           id: `${this.token.toLowerCase()}_power_down`,
-          msg: `Trying to power up ${this.token}...`,
+          msg: `Trying to power down ${this.token}...`,
+          ops: ["getTokenUser"],
+          txid: "send",
+        };
+      else if (this.token == "DLUX" && this.func == "Unlock")
+        op = {
+          type: "cja",
+          cj: {
+            amount: parseInt(this.amount * 1000),
+          },
+          id: `${this.token.toLowerCase()}_gov_down`,
+          msg: `Trying to unlock ${this.token}...`,
+          ops: ["getTokenUser"],
+          txid: "send",
+        };
+      else if (this.token == "DLUX" && this.func == "Lock")
+        op = {
+          type: "cja",
+          cj: {
+            amount: parseInt(this.amount * 1000),
+          },
+          id: `${this.token.toLowerCase()}_gov_down`,
+          msg: `Trying to lock ${this.token}...`,
           ops: ["getTokenUser"],
           txid: "send",
         };
@@ -351,14 +373,36 @@ export default {
       //     ops: ["getSapi"],
       //     txid: "send",
       //   };
-      else if (this.token == "LARYNX" && this.func == "up")
+      else if (this.token == "LARYNX" && this.func == "Power Up")
         op = {
           type: "cja",
           cj: {
-            amount: parseInt(this.amount * 1000)
+            amount: parseInt(this.amount * 1000),
           },
           id: `spkcc_power_up`,
-          msg: `Trying to send ${this.token}...`,
+          msg: `Trying to power up ${this.token}...`,
+          ops: ["getSapi"],
+          txid: "send",
+        };
+      else if (this.token == "LARYNX" && this.func == "Unlock")
+        op = {
+          type: "cja",
+          cj: {
+            amount: parseInt(this.amount * 1000),
+          },
+          id: `spkcc_gov_down`,
+          msg: `Trying to unlock ${this.token}...`,
+          ops: ["getSapi"],
+          txid: "send",
+        };
+      else if (this.token == "LARYNX" && this.func == "Lock")
+        op = {
+          type: "cja",
+          cj: {
+            amount: parseInt(this.amount * 1000),
+          },
+          id: `spkcc_gov_up`,
+          msg: `Trying to lock ${this.token}...`,
           ops: ["getSapi"],
           txid: "send",
         };
