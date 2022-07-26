@@ -81,18 +81,16 @@ export default {
                             </div>
                             <div class="form-group">
                                 <label for="sendhiveto">To:</label>
-                                <div class="input-group">
+                                <div class="input-group" v-if="token == 'LARYNX'">
                                   <span class="input-group-text">@</span>
-                                  <input class="form-control" list="datalistOptions" id="exampleDataList" placeholder="Type to search...">
+                                  <input class="form-control" list="datalistOptions" id="exampleDataList" placeholder="Type to search..." v-model="to">
                                   <datalist id="datalistOptions">
-                                    <option value="San Francisco">
-                                    <option value="New York">
-                                    <option value="Seattle">
-                                    <option value="Los Angeles">
-                                    <option value="Chicago">
+                                    <template v-for="node in smarkets.node">
+                                      <option :value="node.self">
+                                    </template>
                                   </datalist>
                                 </div>
-                                <div class="input-group">
+                                <div class="input-group" v-if="token = 'DLUX'">
                                     <div class="input-group-prepend">
                                         <div class="input-group-text">@</div>
                                     </div>
@@ -179,7 +177,7 @@ export default {
         i = a[0],
         o = 1 < a.length ? r + a[1] : "";
       if (e)
-        for (var c = /(\d+)(\d{3})/; c.test(i);)
+        for (var c = /(\d+)(\d{3})/; c.test(i); )
           i = i.replace(c, "$1" + e + "$2");
       return (u ? "-" : "") + i + o;
     },
@@ -259,7 +257,7 @@ export default {
           type: "cja",
           cj: {
             to: this.to,
-            amount: parseInt(this.amount * 1000)
+            amount: parseInt(this.amount * 1000),
           },
           id: `${this.token.toLowerCase()}_grant`,
           msg: `Trying to send ${this.token}...`,
@@ -284,7 +282,7 @@ export default {
           type: "cja",
           cj: {
             to: this.to,
-            amount: parseInt(this.amount * 1000)
+            amount: parseInt(this.amount * 1000),
           },
           id: `spkcc_grant`,
           msg: `Trying to delegate ${this.token}...`,
@@ -448,7 +446,7 @@ export default {
     document.getElementById("app").appendChild(target);
     console.log(options.type, target);
     trigger.addEventListener("click", () => {
-      var theModal = new Modal(target, () => { });
+      var theModal = new Modal(target, () => {});
       theModal.show();
     });
   },

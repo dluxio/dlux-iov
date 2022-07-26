@@ -1434,6 +1434,7 @@ var app = new Vue({
     this.checkAccount("pageAccount", "focus");
     this.getHiveStats();
     this.getQuotes();
+    this.getSNodes();
     this.getPosts();
     this.getProtocol();
     this.getSpkStats();
