@@ -714,7 +714,7 @@
                                                         LARYNX
                                                     </h5>
                                                     <div class="btn-group" role="group" aria-label="LARYNX Actions">
-                                                        <modal-vue type="delegate" :smarkets="smarkets" token="LARYNX" func="Lock Liquidity"
+                                                        <modal-vue type="delegate" :smarkets="smarkets.node" token="LARYNX" func="Lock Liquidity"
                                                             :balance="saccountapi.poweredUp" :account="account"
                                                             @modalsign="sendIt($event)">
                                                             <button class="btn btn-info me-half" slot="trigger"

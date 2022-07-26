@@ -85,7 +85,7 @@ export default {
                                   <span class="input-group-text">@</span>
                                   <input class="form-control" list="datalistOptions" id="exampleDataList" placeholder="Type to search..." v-model="to">
                                   <datalist id="datalistOptions">
-                                    <template v-for="node in smarkets.node">
+                                    <template v-for="node in smarkets">
                                       <option :value="node.self">
                                     </template>
                                   </datalist>
@@ -400,7 +400,7 @@ export default {
       default: -1,
     },
     smarkets:{
-        node: {}
+        default: {}
     },
     delay: {
       default: 0,
