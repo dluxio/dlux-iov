@@ -399,6 +399,11 @@ export default {
     i: {
       default: -1,
     },
+    smarkets:{
+      default: {
+        node: {}
+      }
+    },
     delay: {
       default: 0,
     },
