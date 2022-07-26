@@ -84,9 +84,7 @@ export default {
                                 <div class="input-group" v-if="token == 'LARYNX'">
                                   <span class="input-group-text">@</span>
                                   <select @blur="accountCheck" class="form-select" id="datalistOptions" v-model="to">
-                                    
                                       <option v-for="node in smarkets" :value="node.self">{{node.self}}</option>
-                                    
                                   </select>
                                 </div>
                                 <div class="input-group" v-if="token == 'DLUX'">
