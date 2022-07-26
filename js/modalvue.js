@@ -83,8 +83,7 @@ export default {
                                 <label for="sendhiveto">To:</label>
                                 <div class="input-group" v-if="token == 'LARYNX'">
                                   <span class="input-group-text">@</span>
-                                  <input class="form-control" list="datalistOptions" id="exampleDataList" placeholder="Type to search..." v-model="to">
-                                  <select id="datalistOptions">
+                                  <select @blur="accountCheck" class="form-select" id="datalistOptions" v-model="to">
                                     
                                       <option v-for="node in smarkets" :value="node.self">{{node.self}}</option>
                                     
