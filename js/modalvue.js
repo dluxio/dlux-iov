@@ -1,6 +1,11 @@
 const { Modal } = bootstrap;
 
 export default {
+  data(){
+    return {
+      spkprefix: 'TESTspkcc'
+    }
+  },
   template: `
     <div>
         <div class="modal fade" id="send" :tabindex="i" role="dialog" aria-hidden="true">
@@ -201,7 +206,7 @@ export default {
             amount: parseInt(this.amount * 1000),
             memo: this.memo,
           },
-          id: `spkcc_spk_send`,
+          id: `${this.spkprefix}_spk_send`,
           msg: `Trying to send ${this.token}...`,
           ops: ["getSapi"],
           txid: "send",
@@ -214,7 +219,7 @@ export default {
             amount: parseInt(this.amount * 1000),
             memo: this.memo,
           },
-          id: `spkcc_send`,
+          id: `${this.spkprefix}_send`,
           msg: `Trying to send ${this.token}...`,
           ops: ["getSapi"],
           txid: "send",
@@ -269,7 +274,7 @@ export default {
       //       amount: parseInt(this.amount * 1000),
       //       memo: this.memo,
       //     },
-      //     id: `spkcc_spk_send`,
+      //     id: `${this.spkprefix}_spk_send`,
       //     msg: `Trying to send ${this.token}...`,
       //     ops: ["getSapi"],
       //     txid: "delegate",
@@ -281,7 +286,7 @@ export default {
             to: this.to,
             amount: parseInt(this.amount * 1000),
           },
-          id: `spkcc_grant`,
+          id: `${this.spkprefix}_grant`,
           msg: `Trying to delegate ${this.token}...`,
           ops: ["getSapi"],
           txid: "delegate",
@@ -368,7 +373,7 @@ export default {
       //       amount: parseInt(this.amount * 1000),
       //       memo: this.memo,
       //     },
-      //     id: `spkcc_spk_send`,
+      //     id: `${this.spkprefix}_spk_send`,
       //     msg: `Trying to send ${this.token}...`,
       //     ops: ["getSapi"],
       //     txid: "send",
@@ -379,7 +384,7 @@ export default {
           cj: {
             amount: parseInt(this.amount * 1000),
           },
-          id: `spkcc_power_up`,
+          id: `${this.spkprefix}_power_up`,
           msg: `Trying to power up ${this.token}...`,
           ops: ["getSapi"],
           txid: "send",
@@ -390,7 +395,7 @@ export default {
           cj: {
             amount: parseInt(this.amount * 1000),
           },
-          id: `spkcc_gov_down`,
+          id: `${this.spkprefix}_gov_down`,
           msg: `Trying to unlock ${this.token}...`,
           ops: ["getSapi"],
           txid: "send",
@@ -401,7 +406,7 @@ export default {
           cj: {
             amount: parseInt(this.amount * 1000),
           },
-          id: `spkcc_gov_up`,
+          id: `${this.spkprefix}_gov_up`,
           msg: `Trying to lock ${this.token}...`,
           ops: ["getSapi"],
           txid: "send",
