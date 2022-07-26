@@ -82,6 +82,17 @@ export default {
                             <div class="form-group">
                                 <label for="sendhiveto">To:</label>
                                 <div class="input-group">
+                                  <span class="input-group-text">@</span>
+                                  <input class="form-control" list="datalistOptions" id="exampleDataList" placeholder="Type to search...">
+                                  <datalist id="datalistOptions">
+                                    <option value="San Francisco">
+                                    <option value="New York">
+                                    <option value="Seattle">
+                                    <option value="Los Angeles">
+                                    <option value="Chicago">
+                                  </datalist>
+                                </div>
+                                <div class="input-group">
                                     <div class="input-group-prepend">
                                         <div class="input-group-text">@</div>
                                     </div>
@@ -168,7 +179,7 @@ export default {
         i = a[0],
         o = 1 < a.length ? r + a[1] : "";
       if (e)
-        for (var c = /(\d+)(\d{3})/; c.test(i); )
+        for (var c = /(\d+)(\d{3})/; c.test(i);)
           i = i.replace(c, "$1" + e + "$2");
       return (u ? "-" : "") + i + o;
     },
@@ -241,7 +252,7 @@ export default {
         this.$emit("modalsign", op);
       }
     },
-    delegate(){
+    delegate() {
       var op;
       if (this.token == "DLUX")
         op = {
@@ -308,74 +319,74 @@ export default {
         this.$emit("modalsign", op);
       }
     },
-    power(){
-var op;
-if (this.token == "DLUX")
-  op = {
-    type: "cja",
-    cj: {
-      to: this.to,
-      amount: parseInt(this.amount * 1000),
-      memo: this.memo,
-    },
-    id: `${this.token.toLowerCase()}_send`,
-    msg: `Trying to send ${this.token}...`,
-    ops: ["getTokenUser"],
-    txid: "send",
-  };
-else if (this.token == "SPK")
-  op = {
-    type: "cja",
-    cj: {
-      to: this.to,
-      amount: parseInt(this.amount * 1000),
-      memo: this.memo,
-    },
-    id: `spkcc_spk_send`,
-    msg: `Trying to send ${this.token}...`,
-    ops: ["getSapi"],
-    txid: "send",
-  };
-else if (this.token == "LARYNX")
-  op = {
-    type: "cja",
-    cj: {
-      to: this.to,
-      amount: parseInt(this.amount * 1000),
-      memo: this.memo,
-    },
-    id: `spkcc_send`,
-    msg: `Trying to send ${this.token}...`,
-    ops: ["getSapi"],
-    txid: "send",
-  };
-else if (this.token == "HIVE")
-  op = {
-    type: "xfr",
-    cj: {
-      to: this.to,
-      hive: this.amount * 1000,
-      memo: this.memo,
-    },
-    txid: "sendhive",
-    msg: `Trying to send ${this.token}...`,
-    ops: ["getHiveUser"],
-  };
-else if (this.token == "HBD")
-  op = {
-    type: "xfr",
-    cj: {
-      to: this.to,
-      hbd: this.amount * 1000,
-      memo: this.memo,
-    },
-    txid: "sendhbd",
-    msg: `Trying to send ${this.token}...`,
-    ops: ["getHiveUser"],
-  };
-if (op) {
-  this.$emit("modalsign", op);
-}
+    power() {
+      var op;
+      if (this.token == "DLUX")
+        op = {
+          type: "cja",
+          cj: {
+            to: this.to,
+            amount: parseInt(this.amount * 1000),
+            memo: this.memo,
+          },
+          id: `${this.token.toLowerCase()}_send`,
+          msg: `Trying to send ${this.token}...`,
+          ops: ["getTokenUser"],
+          txid: "send",
+        };
+      else if (this.token == "SPK")
+        op = {
+          type: "cja",
+          cj: {
+            to: this.to,
+            amount: parseInt(this.amount * 1000),
+            memo: this.memo,
+          },
+          id: `spkcc_spk_send`,
+          msg: `Trying to send ${this.token}...`,
+          ops: ["getSapi"],
+          txid: "send",
+        };
+      else if (this.token == "LARYNX")
+        op = {
+          type: "cja",
+          cj: {
+            to: this.to,
+            amount: parseInt(this.amount * 1000),
+            memo: this.memo,
+          },
+          id: `spkcc_send`,
+          msg: `Trying to send ${this.token}...`,
+          ops: ["getSapi"],
+          txid: "send",
+        };
+      else if (this.token == "HIVE")
+        op = {
+          type: "xfr",
+          cj: {
+            to: this.to,
+            hive: this.amount * 1000,
+            memo: this.memo,
+          },
+          txid: "sendhive",
+          msg: `Trying to send ${this.token}...`,
+          ops: ["getHiveUser"],
+        };
+      else if (this.token == "HBD")
+        op = {
+          type: "xfr",
+          cj: {
+            to: this.to,
+            hbd: this.amount * 1000,
+            memo: this.memo,
+          },
+          txid: "sendhbd",
+          msg: `Trying to send ${this.token}...`,
+          ops: ["getHiveUser"],
+        };
+      if (op) {
+        this.$emit("modalsign", op);
+      }
     },
   },
   emits: ["modalsign"],
@@ -437,7 +448,7 @@ if (op) {
     document.getElementById("app").appendChild(target);
     console.log(options.type, target);
     trigger.addEventListener("click", () => {
-      var theModal = new Modal(target, () => {});
+      var theModal = new Modal(target, () => { });
       theModal.show();
     });
   },
