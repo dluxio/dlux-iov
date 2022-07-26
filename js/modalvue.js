@@ -90,7 +90,7 @@ export default {
                                     </template>
                                   </datalist>
                                 </div>
-                                <div class="input-group" v-if="token = 'DLUX'">
+                                <div class="input-group" v-if="token == 'DLUX'">
                                     <div class="input-group-prepend">
                                         <div class="input-group-text">@</div>
                                     </div>
@@ -386,6 +386,13 @@ export default {
         this.$emit("modalsign", op);
       }
     },
+    smark(){
+      return {
+        na:{
+          self:""
+        }
+      }
+    }
   },
   emits: ["modalsign"],
   props: {
@@ -400,7 +407,7 @@ export default {
       default: -1,
     },
     smarkets:{
-        default: {}
+        default: this.smark()
     },
     delay: {
       default: 0,
