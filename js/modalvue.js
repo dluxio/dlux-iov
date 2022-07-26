@@ -84,11 +84,11 @@ export default {
                                 <div class="input-group" v-if="token == 'LARYNX'">
                                   <span class="input-group-text">@</span>
                                   <input class="form-control" list="datalistOptions" id="exampleDataList" placeholder="Type to search..." v-model="to">
-                                  <datalist id="datalistOptions">
-                                    <template v-for="node in smarkets">
-                                      <option :value="node.self"></option>
-                                    </template>
-                                  </datalist>
+                                  <select id="datalistOptions">
+                                    
+                                      <option v-for="node in smarkets" :value="node.self">{{node.self}}</option>
+                                    
+                                  </select>
                                 </div>
                                 <div class="input-group" v-if="token == 'DLUX'">
                                     <div class="input-group-prepend">
@@ -400,7 +400,7 @@ export default {
       default: -1,
     },
     smarkets: {
-      default: function (){
+      default: function () {
         return {
           na: {
             self: "",
@@ -458,5 +458,5 @@ export default {
       var theModal = new Modal(target, () => {});
       theModal.show();
     });
-  }
+  },
 };
