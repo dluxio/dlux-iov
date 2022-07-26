@@ -283,9 +283,9 @@
                                                 <h5 id="dluxclaim" class="text-end">
                                                     {{formatNumber((accountapi.claim)/1000, 3, '.', ',')}} DLUX</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Claim">
-                                                    <button type="submit" class="btn btn-info me-half"><i
+                                                    <button type="submit" class="btn btn-info me-half" @click="rewardClaim('dlux', 'claim', dlux2gov)"><i
                                                             class="fas fa-coin"></i><i
-                                                            class="fas fa-money-bill-wave-alt me-2" @click="rewardClaim('dlux', 'claim', dlux2gov)"></i>Claim</button>
+                                                            class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
                                                 </div>
                                                 <div> <span class="small" v-show="!dlux2gov">50% Liquid | 50%
                                                         Power</span> <span class="small"

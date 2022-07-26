@@ -516,7 +516,7 @@ var app = new Vue({
           claim: true,
         },
         id: `${prefix}_${claim_id}`,
-        msg: `Claiming ${this.TOKEN}...`,
+        msg: `Claiming...`,
         ops: ["getTokenUser"],
         txid: "claim",
       };
@@ -528,7 +528,7 @@ var app = new Vue({
           gov,
         },
         id: `${prefix}_${rewards_id}`,
-        msg: `Claiming ${this.TOKEN}...`,
+        msg: `Claiming...`,
         ops: ["getTokenUser"],
         txid: "reward_claim",
       };
