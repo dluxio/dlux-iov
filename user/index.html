@@ -754,7 +754,7 @@
                                                 <p class="float-left pt-2">@{{b}} is delegated {{formatNumber((a)/1000, 3, '.', ',')}} LARYNX
                                                 </p>
                                                 <div class="float-right">
-                                                    <modal-vue type="delegate" :smarkets="smarkets.node" token="LARYNX" :to="b" :amount="a"
+                                                    <modal-vue type="delegate" :smarkets="smarkets.node + a" token="LARYNX" :to="b" :amount="a"
                                                             :balance="saccountapi.poweredUp" :account="account"
                                                             @modalsign="sendIt($event)">
                                                             <button slot="trigger" type="button" class="btn btn-secondary"><i
