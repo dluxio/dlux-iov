@@ -414,11 +414,12 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="collapse" id="delegations">
+                                        <!--<div class="collapse" id="delegations">
                                             <hr class="my-2 bg-light">
                                             <div class="clearfix">
-                                                <div v-for="item in delegate">
-                                                <p class="float-left pt-2">@username was delegated unknown DP 5 Days Ago
+                                                <div v-for="item in saccountapi.granting">
+                                                    <div v-if="item != 't'">
+                                                <p class="float-left pt-2">@{{item}} was delegated unknown DP 5 Days Ago
                                                 </p>
                                                 <div class="float-right">
                                                     <button class="btn btn-secondary"><i
@@ -427,8 +428,9 @@
                                                             class="fas fa-fw fa-trash-alt"></i></button>
                                                 </div>
                                                 </div>
+                                                </div>
                                             </div>
-                                        </div>
+                                        </div>-->
                                         <hr class="my-4 bg-light">
                                         <div class="clearfix">
                                             <div class="float-left">
@@ -747,14 +749,16 @@
                                                     <div class="collapse" id="delegationsspk">
                                             <hr class="my-2 bg-light">
                                             <div class="clearfix">
-                                                <div>
-                                                <p class="float-left pt-2">@item was delegated item DP 5 Days Ago
+                                                <div v-for="item in saccountapi.granting">
+                                                    <div v-if="item != 't'">
+                                                <p class="float-left pt-2">@{{item}} was delegated unknown DP 5 Days Ago
                                                 </p>
                                                 <div class="float-right">
                                                     <button class="btn btn-secondary"><i
                                                             class="fas fa-fw fa-user-edit"></i></button>
                                                     <button class="btn btn-danger ms-1"><i
                                                             class="fas fa-fw fa-trash-alt"></i></button>
+                                                </div>
                                                 </div>
                                                 </div>
                                             </div>
