@@ -417,13 +417,15 @@
                                         <div class="collapse" id="delegations">
                                             <hr class="my-2 bg-light">
                                             <div class="clearfix">
-                                                <p class="float-left pt-2">@username was delegated 1000 DP 5 Days Ago
+                                                <div v-for="item in delegate">
+                                                <p class="float-left pt-2">@{{item}} was delegated {{item}} DP 5 Days Ago
                                                 </p>
                                                 <div class="float-right">
                                                     <button class="btn btn-secondary"><i
                                                             class="fas fa-fw fa-user-edit"></i></button>
                                                     <button class="btn btn-danger ms-1"><i
                                                             class="fas fa-fw fa-trash-alt"></i></button>
+                                                </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -732,14 +734,31 @@
                                                         {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}}
                                                         LARYNX
                                                     </h5>
-                                                    <h6 v-if="saccountapi.granting">
-                                                        Delegating: {{formatNumber((saccountapi.granting)/1000, 3, '.', ',')}}
+                                                    <a v-if="saccountapi.granting.t" data-bs-toggle="collapse" id="delegationsbtn" href="#delegationsspk"
+                                                    role="button" aria-expanded="false" aria-controls="Show delegations"
+                                                    class="text-white" style="text-decoration: none">
+                                                    <h6 id="delegatebal">Delegated: {{formatNumber((saccountapi.granting.t)/1000, 3, '.', ',')}}
+                                                        LARYNX<i class="fas fa-search ms-2"></i></h6>
+                                                </a>
+                                                    <h6 v-if="saccountapi.granted.t">
+                                                        Received: {{formatNumber((saccountapi.granted.t)/1000, 3, '.', ',')}}
                                                         LARYNX
                                                     </h6>
-                                                    <h6 v-if="saccountapi.granted">
-                                                        Delegated: {{formatNumber((saccountapi.granted)/1000, 3, '.', ',')}}
-                                                        LARYNX
-                                                    </h6>
+                                                    <div class="collapse" id="delegationsspk">
+                                            <hr class="my-2 bg-light">
+                                            <div class="clearfix">
+                                                <div>
+                                                <p class="float-left pt-2">@item was delegated item DP 5 Days Ago
+                                                </p>
+                                                <div class="float-right">
+                                                    <button class="btn btn-secondary"><i
+                                                            class="fas fa-fw fa-user-edit"></i></button>
+                                                    <button class="btn btn-danger ms-1"><i
+                                                            class="fas fa-fw fa-trash-alt"></i></button>
+                                                </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                                     <div class="btn-group" role="group" aria-label="LARYNX Actions">
                                                         <modal-vue type="delegate" :smarkets="smarkets.node" token="LARYNX" func="Lock Liquidity"
                                                             :balance="saccountapi.poweredUp" :account="account"
