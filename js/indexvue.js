@@ -51,6 +51,20 @@ var app = new Vue({
     return {
       account: user,
       toSign: {},
+      tickers: {
+        DLUX:{
+          change:"",
+          tick:""
+        },
+        DUAT:{
+          change:"",
+          tick:""
+        },
+        LARYNX:{
+          change:"",
+          tick:""
+        }
+      },
       lapi: lapi,
       hapi: hapi,
       accountapi: {},
