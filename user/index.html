@@ -732,6 +732,10 @@
                                                         {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}}
                                                         LARYNX
                                                     </h5>
+                                                    <h4>
+                                                        Delegated: {{formatNumber((saccountapi.granted)/1000, 3, '.', ',')}}
+                                                        LARYNX
+                                                    </h4>
                                                     <div class="btn-group" role="group" aria-label="LARYNX Actions">
                                                         <modal-vue type="delegate" :smarkets="smarkets.node" token="LARYNX" func="Lock Liquidity"
                                                             :balance="saccountapi.poweredUp" :account="account"
