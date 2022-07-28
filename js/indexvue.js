@@ -304,6 +304,17 @@ var app = new Vue({
           this.hbdprice = data;
         });
     },
+    getTickers(){
+      fetch("https://data.dlux.io/hc/tickers")
+        .then((response) => response.json())
+        .then((data) => {
+          var tickers = {}
+          for(var i = 0; i < data.tickers.length; i++){
+            tickers[data.tickers[i].token] = data.tickers[i] 
+          }
+          this.tickers = tickers
+        });
+    },
     getNodes() {
       fetch(this.lapi + "/runners")
         .then((response) => response.json())
@@ -472,6 +483,7 @@ var app = new Vue({
     this.getQuotes();
     this.getNodes();
     this.getProtocol();
+    this.getTickers();
     // if (user != "GUEST") this.getTokenUser(user);
     // if (user != "GUEST") this.getHiveUser(user);
   },
