@@ -749,9 +749,9 @@
                                                     <div class="collapse" id="delegationsspk">
                                             <hr class="my-2 bg-light">
                                             <div class="clearfix">
-                                                <div v-for="item in saccountapi.granting">
-                                                    <div v-if="item != 't'">
-                                                <p class="float-left pt-2">@{{item}} was delegated unknown DP 5 Days Ago
+                                                <div v-for="(a,b,c) in saccountapi.granting">
+                                                    <div v-if="b != 't'">
+                                                <p class="float-left pt-2">@{{b}} was delegated {{formatNumber((a)/1000, 3, '.', ',')}} DP 5 Days Ago
                                                 </p>
                                                 <div class="float-right">
                                                     <button class="btn btn-secondary"><i
