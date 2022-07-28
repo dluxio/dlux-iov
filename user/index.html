@@ -754,10 +754,18 @@
                                                 <p class="float-left pt-2">@{{b}} is delegated {{formatNumber((a)/1000, 3, '.', ',')}} LARYNX
                                                 </p>
                                                 <div class="float-right">
-                                                    <button class="btn btn-secondary"><i
+                                                    <modal-vue type="delegate" :smarkets="smarkets.node" token="LARYNX" :to="b" :amount="a"
+                                                            :balance="saccountapi.poweredUp" :account="account"
+                                                            @modalsign="sendIt($event)">
+                                                            <button slot="trigger" type="button" class="btn btn-secondary"><i
                                                             class="fas fa-fw fa-user-edit"></i></button>
-                                                    <button class="btn btn-danger ms-1"><i
+                                                        </modal-vue>
+                                                    <modal-vue type="delegate" :smarkets="smarkets.node" token="LARYNX" :to="b" amount="0"
+                                                            :balance="saccountapi.poweredUp" :account="account"
+                                                            @modalsign="sendIt($event)">
+                                                            <button class="btn btn-danger ms-1" slot="trigger" type="button"><i
                                                             class="fas fa-fw fa-trash-alt"></i></button>
+                                                        </modal-vue>
                                                 </div>
                                                 </div>
                                                 </div>
