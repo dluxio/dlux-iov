@@ -106,6 +106,12 @@ var app = new Vue({
         gov: 0,
         tick: 0.01,
         claim: 0,
+        granted:{
+          t:0
+        },
+        granting:{
+          t:0
+        },
         poweredUp: 0,
         drop: {
           last_claim: 0,
