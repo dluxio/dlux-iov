@@ -286,7 +286,7 @@ export default {
             to: this.to,
             amount: parseInt(this.amount * 1000),
           },
-          id: `${this.spkprefix}_grant`,
+          id: `${this.spkprefix}power_grant`,
           msg: `Trying to delegate ${this.token}...`,
           ops: ["getSapi"],
           txid: "delegate",
