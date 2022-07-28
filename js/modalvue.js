@@ -261,7 +261,7 @@ export default {
             to: this.to,
             amount: parseInt(this.amount * 1000),
           },
-          id: `${this.token.toLowerCase()}_grant`,
+          id: `${this.token.toLowerCase()}power_grant`,
           msg: `Trying to send ${this.token}...`,
           ops: ["getTokenUser"],
           txid: "delegate",
