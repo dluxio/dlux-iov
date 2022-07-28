@@ -99,7 +99,7 @@
 
 <body class="d-flex flex-column h-100 padme-t70">
   <div id="app">
-    <div v-scroll="handleScroll">
+    <div>
       <nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event)" @logout="account = '';removeUser()"
         @ack="removeOp($event)" @refresh="run($event)" :op="toSign" :lapi="lapi" />
     </div>
