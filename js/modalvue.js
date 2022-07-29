@@ -88,7 +88,7 @@ export default {
                                 <label for="sendhiveto">To:</label>
                                 <div class="input-group" v-if="token == 'LARYNX'">
                                   <span class="input-group-text">@</span>
-                                  <select @blur="accountCheck" class="form-select" id="datalistOptions" v-model="to">
+                                  <select class="form-select" id="datalistOptions" v-model="to">
                                       <option v-for="node in smarkets" :value="node.self">{{node.self}}</option>
                                   </select>
                                 </div>
@@ -113,7 +113,7 @@ export default {
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button :disabled="!valid" type="submit" class="btn btn-primary" @click="delegate">Confirm</button>
+                            <button type="submit" class="btn btn-primary" @click="delegate">Confirm</button>
                         </div>
                     </form>
                 </div>
