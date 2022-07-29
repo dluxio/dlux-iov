@@ -515,14 +515,6 @@ var app = new Vue({
         txid: "vote",
       };
     },
-    keyOf(obj = "smarkets", key = "node"){
-      if (this[obj]){
-        if(this[obj][key]){
-          return 1
-        }
-      }
-      return 0
-    },
     dropClaim(prefix, claim_id) {
       this.toSign = {
         type: "cja",
@@ -1551,6 +1543,14 @@ var app = new Vue({
       get() {
         return location;
       },
+    },
+    keyOf(obj = "smarkets", key = "node"){
+      if (this[obj]){
+        if(this[obj][key]){
+          return 1
+        }
+      }
+      return 0
     },
     voteVal() {
       return (
