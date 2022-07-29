@@ -654,7 +654,7 @@
                                                                         class="fas fa-angle-double-up fa-fw me-2"></i>Power
                                                                     Up</button>
                                                             </modal-vue>
-                                                            <modal-vue v-show="keyOf(smarkets, account)" type="power"
+                                                            <modal-vue v-show="isNode" type="power"
                                                                 token="LARYNX" func="Lock Liquidity"
                                                                 :balance="saccountapi.balance" :account="account"
                                                                 @modalsign="sendIt($event)">

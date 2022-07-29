@@ -1546,6 +1546,11 @@ var app = new Vue({
         return location;
       },
     },
+    isNode: {
+      get() {
+        return this.smarkets[this.account] ? true : false
+      }
+    },
     voteVal() {
       return (
         (this.accountinfo.rshares / parseInt(this.rewardFund.recent_claims)) *
