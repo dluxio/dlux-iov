@@ -106,11 +106,11 @@ var app = new Vue({
         gov: 0,
         tick: 0.01,
         claim: 0,
-        granted:{
-          t:0
+        granted: {
+          t: 0,
         },
-        granting:{
-          t:0
+        granting: {
+          t: 0,
         },
         poweredUp: 0,
         drop: {
@@ -174,13 +174,13 @@ var app = new Vue({
       runnersSearch: [],
       marketnodes: {},
       smarkets: {
-        node:{
-          na:{
-            self:""
-          }
-        }
+        node: {
+          na: {
+            self: "",
+          },
+        },
       },
-      sstats:"",
+      sstats: "",
       dexapi: {
         markets: {
           hive: {
@@ -771,9 +771,11 @@ var app = new Vue({
               rez.posting_json_metadata = { profile: { about: "" } };
             }
           }
-          if (!rez.posting_json_metadata.profile){rez.posting_json_metadata.profile = {about: ""}}
-            if (re.result.length) this[key] = rez;
-            else this[key] = false;
+          if (!rez.posting_json_metadata.profile) {
+            rez.posting_json_metadata.profile = { about: "" };
+          }
+          if (re.result.length) this[key] = rez;
+          else this[key] = false;
         });
     },
     tokenSend() {
@@ -793,9 +795,9 @@ var app = new Vue({
         };
       } else alert("Username not found");
     },
-    sendIt(op){
-      console.log(op)
-      this.toSign = op
+    sendIt(op) {
+      console.log(op);
+      this.toSign = op;
     },
     parseInt(a, b = 10) {
       return parseInt(a, b);
@@ -937,8 +939,8 @@ var app = new Vue({
         if (this.postSelect.types[type].checked)
           bitMask += this.postSelect.types[type].bitFlag;
       }
-      if(reset){
-        this.posturls = {}
+      if (reset) {
+        this.posturls = {};
       }
       if (this.postSelect.bitMask != bitMask || reset) {
         this.postSelect.bitMask = bitMask;
@@ -1265,51 +1267,43 @@ var app = new Vue({
           this.sstats.head_block = data.head_block;
         });
     },
-    reward_spk(){
+    reward_spk() {
       var r = 0,
         a = 0,
         b = 0,
         c = 0,
         t = 0,
         diff = this.sstats.head_block - this.saccountapi.spkblock;
-                if (!this.saccountapi.spkblock){
-                    return 0
-                } else if (diff < 28800) {
-                    return 0
-                } else {
-                  t = parseInt(diff / 28800);
-                  a = simpleInterest(
-                    this.saccountapi.gov,
-                    t,
-                    this.sstats.spk_rate_lgov
-                  );
-                  b = simpleInterest(
-                    this.saccountapi.pow,
-                    t,
-                    this.sstats.spk_rate_lpow
-                  );
-                  c = simpleInterest(
-                    this.saccountapi.granted?.t > 0
-                      ? this.saccountapi.granted.t
-                      : 0 + this.saccountapi.granting?.t > 0
-                      ? this.saccountapi.granting.t
-                      : 0,
-                    t,
-                    this.sstats.spk_rate_ldel
-                  );
-                  const i = a + b + c;
-                  if (i) {
-                    return i;
-                  } else {
-                    return 0;
-                  }
-                }
-                function simpleInterest (p, t, r){
-                  const amount = p * (1 + r / 365);
-                  const interest = amount - p;
-                  return parseInt(interest * t);
-                };
-},
+      if (!this.saccountapi.spkblock) {
+        return 0;
+      } else if (diff < 28800) {
+        return 0;
+      } else {
+        t = parseInt(diff / 28800);
+        a = simpleInterest(this.saccountapi.gov, t, this.sstats.spk_rate_lgov);
+        b = simpleInterest(this.saccountapi.pow, t, this.sstats.spk_rate_lpow);
+        c = simpleInterest(
+          this.saccountapi.granted?.t > 0
+            ? this.saccountapi.granted.t
+            : 0 + this.saccountapi.granting?.t > 0
+            ? this.saccountapi.granting.t
+            : 0,
+          t,
+          this.sstats.spk_rate_ldel
+        );
+        const i = a + b + c;
+        if (i) {
+          return i;
+        } else {
+          return 0;
+        }
+      }
+      function simpleInterest(p, t, r) {
+        const amount = p * (1 + r / 365);
+        const interest = amount - p;
+        return parseInt(interest * t);
+      }
+    },
     getProtocol() {
       fetch(this.lapi + "/api/protocol")
         .then((response) => response.json())
@@ -1372,64 +1366,64 @@ var app = new Vue({
       }
     },
     getTokenUser(user = this.account, fu) {
-        fetch(this.lapi + "/@" + user)
-          .then((response) => response.json())
-          .then((data) => {
-            data.tick = data.tick || 0.01;
-            this.behind = data.behind;
-            if (!fu) {
-              this.balance = (data.balance / 1000).toFixed(3);
-              this.bargov = (data.gov / 1000).toFixed(3);
-              this.accountapi = data;
-              this.dluxval =
-                (data.balance + data.gov + data.poweredUp + data.claim) / 1000;
-            } else {
-              this.focusaccountapi = data;
-            }
-          });
+      fetch(this.lapi + "/@" + user)
+        .then((response) => response.json())
+        .then((data) => {
+          data.tick = data.tick || 0.01;
+          this.behind = data.behind;
+          if (!fu) {
+            this.balance = (data.balance / 1000).toFixed(3);
+            this.bargov = (data.gov / 1000).toFixed(3);
+            this.accountapi = data;
+            this.dluxval =
+              (data.balance + data.gov + data.poweredUp + data.claim) / 1000;
+          } else {
+            this.focusaccountapi = data;
+          }
+        });
     },
-    getSpkStats(){
+    getSpkStats() {
       fetch(this.sapi + "/stats")
-          .then((response) => response.json())
-          .then((data) => {
-            console.log(data)
-            this.spkStats = data.result
-          })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+          this.spkStats = data.result;
+        });
     },
     getSapi(user = this.account, fu) {
-        fetch(this.sapi + "/@" + user)
-          .then((response) => response.json())
-          .then((data) => {
-            data.tick = data.tick || 0.01;
-            this.larynxbehind = data.behind;
-            if (!fu) {
-              this.lbalance = (data.balance / 1000).toFixed(3);
-              this.lbargov = (data.gov / 1000).toFixed(3);
-              this.saccountapi = data;
-              this.spkval =
-                (data.balance +
-                  data.gov +
-                  data.poweredUp +
-                  data.claim +
-                  data.spk) /
-                1000;
-            } else {
-              this.focussaccountapi = data;
-            }
-            // if (
-            //   new Date().getMonth() + 1 !=
-            //     parseInt(data.drop?.last_claim, 16) &&
-            //   data.drop?.availible.amount > 0
-            // ) {
-            //   this.hasDrop = true;
-            //   this.dropnai = `${parseFloat(
-            //     data.drop.availible.amount /
-            //       Math.pow(10, data.drop.availible.precision)
-            //   ).toFixed(data.drop.availible.precision)} ${
-            //     data.drop.availible.token
-            //   }`;
-            // }
-          });
+      fetch(this.sapi + "/@" + user)
+        .then((response) => response.json())
+        .then((data) => {
+          data.tick = data.tick || 0.01;
+          this.larynxbehind = data.behind;
+          if (!fu) {
+            this.lbalance = (data.balance / 1000).toFixed(3);
+            this.lbargov = (data.gov / 1000).toFixed(3);
+            this.saccountapi = data;
+            this.spkval =
+              (data.balance +
+                data.gov +
+                data.poweredUp +
+                data.claim +
+                data.spk) /
+              1000;
+          } else {
+            this.focussaccountapi = data;
+          }
+          // if (
+          //   new Date().getMonth() + 1 !=
+          //     parseInt(data.drop?.last_claim, 16) &&
+          //   data.drop?.availible.amount > 0
+          // ) {
+          //   this.hasDrop = true;
+          //   this.dropnai = `${parseFloat(
+          //     data.drop.availible.amount /
+          //       Math.pow(10, data.drop.availible.precision)
+          //   ).toFixed(data.drop.availible.precision)} ${
+          //     data.drop.availible.token
+          //   }`;
+          // }
+        });
     },
     getHiveUser(user) {
       if (user)
@@ -1490,6 +1484,14 @@ var app = new Vue({
           });
       }
     },
+    keyOf(obj = "smarkets", key = "node") {
+      if (this[obj]) {
+        if (this[obj][key]) {
+          return 1;
+        }
+      }
+      return 0;
+    },
     newme(user) {
       if (!location.pathname.split("/@")[1] && this.prefix) {
         this.pageAccount = location.pathname.split("/@")[1]
@@ -1506,13 +1508,13 @@ var app = new Vue({
   },
   mounted() {
     console.log(location.pathname.split("/@")[1]);
-    if (location.pathname.split("/@")[1]){
-      this.pageAccount = location.pathname.split("/@")[1]
+    if (location.pathname.split("/@")[1]) {
+      this.pageAccount = location.pathname.split("/@")[1];
     } else {
       this.pageAccount = this.account;
-      this.me = true
+      this.me = true;
     }
-    if (this.pageAccount == this.account)this.me = true;
+    if (this.pageAccount == this.account) this.me = true;
     this.focus.account = this.pageAccount;
     this.sapi = sapi;
     this.checkAccount("pageAccount", "focus");
@@ -1543,14 +1545,6 @@ var app = new Vue({
       get() {
         return location;
       },
-    },
-    keyOf(obj = "smarkets", key = "node"){
-      if (this[obj]){
-        if(this[obj][key]){
-          return 1
-        }
-      }
-      return 0
     },
     voteVal() {
       return (
