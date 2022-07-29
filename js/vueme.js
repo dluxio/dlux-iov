@@ -516,8 +516,12 @@ var app = new Vue({
       };
     },
     keyOf(obj = "smarkets", key = "node"){
-      console.log({obj,key})
-      return Object.keys(this[obj]).indexOf(key) >= 0 ? true : false
+      if (this[obj]){
+        if(this[obj][key]){
+          return 1
+        }
+      }
+      return 0
     },
     dropClaim(prefix, claim_id) {
       this.toSign = {
