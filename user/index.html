@@ -508,7 +508,7 @@
                                 <div class="container">
                                     <div class="jumbotron pt-4 bg-darker">
                                         <div class="d-flex align-items-center pb-2">
-                                            <h1 class="display-5 m-0 p-0">SPK</h1>
+                                            <h1 class="display-5 m-0 p-0">TEST SPK</h1>
                                             <div class="text-center small m-0 p-2 ms-2" v-bind:class="{'text-success': larynxbehind < 30,
                                                     'text-warning': larynxbehind >= 30,
                                                     'text-danger': larynxbehind > 100}"> <span
@@ -521,12 +521,12 @@
                                             providers with SPK governance and BROCA gas tokens.</p>
                                         <div class="clearfix">
                                             <div class="float-left">
-                                                <h4>SPK Token</h4>
+                                                <h4>TESTSPK Token</h4>
                                                 <p class="text-white-50">The governance token for the SPK network.</p>
                                             </div>
                                             <div class="float-right text-end">
                                                 <h5>
-                                                    {{formatNumber((saccountapi.spk)/1000, 3, '.', ',')}} SPK
+                                                    {{formatNumber((saccountapi.spk)/1000, 3, '.', ',')}} TESTSPK
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="SPK Actions">
                                                     <modal-vue type="send" token="SPK" :balance="saccountapi.spk"
