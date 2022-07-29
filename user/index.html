@@ -747,18 +747,26 @@
                                                         id="delegationsbtn" href="#delegationsspk" role="button"
                                                         aria-expanded="false" aria-controls="Show delegations"
                                                         class="text-white" style="text-decoration: none">
-                                                        <h6 id="delegatebal">Delegated:
-                                                            {{formatNumber((saccountapi.granting.t)/1000, 3, '.', ',')}}
-                                                            TESTLARYNX<i class="fas fa-search ms-2"></i></h6>
+                                                        <h6 id="delegatebal">
+                                                            <span>(-{{formatNumber((saccountapi.granting.t)/1000, 3,
+                                                                '.', ',')}} TLP)</span>
+                                                            <span
+                                                                v-if="saccountapi.granted.t">(+{{formatNumber((saccountapi.granted.t)/1000,
+                                                                3,'.', ',')}} TLP)</span>
+                                                            <i class="fas fa-search ms-2"></i>
+                                                        </h6>
+
                                                     </a>
                                                     <div class="collapse" id="delegationsspk">
-                                                        <hr class="my-2 bg-light">
-                                                        <div class="d-flex flex-column">
+                                                        <div class="d-flex flex-column text-start border border-secondary rounded p-4 my-4">
+                                                            <h4 class="border-bottom border-secondary py-2">Delegated: {{formatNumber((saccountapi.granting.t)/1000, 3,
+                                                                '.', ',')}} TLP</h4>
                                                             <div v-for="(a,b,c) in saccountapi.granting">
-                                                                <div class="d-flex align-items-center border-bottom pb-2 my-1" v-if="b != 't'">
-                                                                    <p class="my-0">To @{{b}}:
+                                                                <div class="d-flex align-items-center border-bottom border-secondary pb-2 my-1"
+                                                                    v-if="b != 't'">
+                                                                    <p class="my-0">@{{b}}:
                                                                         {{formatNumber((a)/1000, 3, '.', ',')}}
-                                                                        TESTLARYNX
+                                                                        TLP
                                                                     </p>
                                                                     <div class="d-flex ms-auto ">
                                                                         <modal-vue type="delegate"
@@ -782,36 +790,22 @@
                                                                                     class="fas fa-fw fa-trash-alt"></i></button>
                                                                         </modal-vue>
                                                                     </div>
-                                                                
                                                                 </div>
-
                                                             </div>
-                                                        </div>
-                                                    </div>
-                                                    <a v-if="saccountapi.granted.t" data-bs-toggle="collapse"
-                                                        id="delegationsbtn" href="#delegatedsspk" role="button"
-                                                        aria-expanded="false" aria-controls="Show delegations"
-                                                        class="text-white" style="text-decoration: none">
-                                                        <h6 v-if="saccountapi.granted.t">
-                                                            Received: {{formatNumber((saccountapi.granted.t)/1000, 3,
-                                                            '.', ',')}}
-                                                            TESTLARYNX
-                                                        </h6>
-                                                    </a>
-                                                    <div class="collapse" id="delegatedsspk">
-                                                        <hr class="my-2 bg-light">
-                                                        <div class="clearfix">
+                                                            <h4 class="border-bottom border-secondary py-2 mt-5">Received: {{formatNumber((saccountapi.granted.t)/1000,
+                                                                3,'.', ',')}} TLP</h4>
                                                             <div v-for="(a,b,c) in saccountapi.granted">
-                                                                <div v-if="b != 't'">
-                                                                    <p class="float-left pt-2">From @{{b}}:
+                                                                <div class="d-flex align-items-center border-bottom border-secondary pb-2 my-1" v-if="b != 't'">
+                                                                    <p class="my-0">@{{b}}:
                                                                         {{formatNumber((a)/1000, 3, '.', ',')}}
-                                                                        TESTLARYNX
+                                                                        TLP
                                                                     </p>
 
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
+
                                                     <div class="btn-group" role="group" aria-label="TESTLARYNX Actions">
                                                         <modal-vue type="delegate" :smarkets="smarkets.node"
                                                             token="LARYNX" func="Lock Liquidity"
