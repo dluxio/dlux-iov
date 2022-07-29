@@ -1,10 +1,10 @@
 const { Modal } = bootstrap;
 
 export default {
-  data(){
+  data() {
     return {
-      spkprefix: 'TESTspkcc'
-    }
+      spkprefix: "TESTspkcc",
+    };
   },
   template: `
     <div>
@@ -149,7 +149,7 @@ export default {
                 </div>
             </div>
         </div>
-        <slot name="trigger"></slot>
+        <slot name="trigger" :disabled="dis"></slot>
     </div>`,
   methods: {
     accountCheck() {
@@ -451,6 +451,9 @@ export default {
     },
     i: {
       default: -1,
+    },
+    dis: {
+      default: false,
     },
     smarkets: {
       default: function () {
