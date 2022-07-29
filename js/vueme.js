@@ -516,7 +516,7 @@ var app = new Vue({
       };
     },
     keyOf(obj, key){
-      return this?.[obj]?.[key] ? true : false
+      return this?.[obj]?.[key]?.self == key ? true : false
     },
     dropClaim(prefix, claim_id) {
       this.toSign = {
