@@ -135,6 +135,9 @@
                 <div class="card-body">
                   <span>24 hr change:</span>
                   <h5 :class="{'card-title': true, 'text-success': tickers.DLUX.change > 0, 'text-danger': tickers.DLUX.change < 0}">{{tickers.DLUX.change}}%<i :class="{'ms-2': true, 'fa-solid': true, 'fa-equals': tickers.DLUX.change == 0, 'fa-arrow-down': tickers.DLUX.change < 0, 'fa-arrow-up': tickers.DLUX.change > 0}"></i></h5>
+                  <span>24 hr volume:</span>
+                  <h6 class="card-title">{{toFixed(tickers.DLUX.vol/1000,3)}}<i class="ms-2 fa-brands fa-hive"></i></h6>
+                
                 </div>
                 <div class="card-footer">
                   <p class="card-text">{{tickers.DLUX.tick}}<i class="ms-2 fa-brands fa-hive"></i></p>
@@ -147,6 +150,8 @@
                 <div class="card-body">
                   <span>24 hr change:</span>
                   <h5 :class="{'card-title': true, 'text-success': tickers.LARYNX.change > 0, 'text-danger': tickers.LARYNX.change < 0}">{{tickers.LARYNX.change}}%<i :class="{'ms-2': true, 'fa-solid': true, 'fa-equals': tickers.LARYNX.change == 0, 'fa-arrow-down': tickers.LARYNX.change < 0, 'fa-arrow-up': tickers.LARYNX.change > 0}"></i></h5>
+                  <span>24 hr volume:</span>
+                  <h6 class="card-title">{{toFixed(tickers.LARYNX.vol/1000,3)}}<i class="ms-2 fa-brands fa-hive"></i></h6>
                 </div>
                 <div class="card-footer">
                   <p class="card-text">{{tickers.LARYNX.tick}}<i class="ms-2 fa-brands fa-hive"></i></p>
@@ -159,6 +164,8 @@
                 <div class="card-body">
                   <span>24 hr change:</span>
                   <h5 :class="{'card-title': true, 'text-success': tickers.DUAT.change > 0, 'text-danger': tickers.DUAT.change < 0}">{{tickers.DUAT.change}}%<i :class="{'ms-2': true, 'fa-solid': true, 'fa-equals': tickers.DUAT.change == 0, 'fa-arrow-down': tickers.DUAT.change < 0, 'fa-arrow-up': tickers.DUAT.change > 0}"></i></h5>
+                  <span>24 hr volume:</span>
+                  <h6 class="card-title">{{toFixed(tickers.DUAT.vol/1000,3)}}<i class="ms-2 fa-brands fa-hive"></i></h6>
                 </div>
                 <div class="card-footer">
                   <p class="card-text">{{tickers.DUAT.tick}}<i class="ms-2 fa-brands fa-hive"></i></p>
