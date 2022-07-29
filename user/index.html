@@ -655,7 +655,7 @@
                                                                     Up</button>
                                                             </modal-vue>
                                                             
-                                                            <modal-vue type="power"
+                                                            <modal-vue :class="{'d-none': isNode}"type="power"
                                                                 token="LARYNX" func="Lock Liquidity"
                                                                 :balance="saccountapi.balance" :account="account"
                                                                 @modalsign="sendIt($event)">
