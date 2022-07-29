@@ -1548,7 +1548,7 @@ var app = new Vue({
     },
     isNode: {
       get() {
-        return this.smarkets[this.account] ? true : false
+        return this.smarkets[this.account]?.self ? true : false
       }
     },
     voteVal() {
