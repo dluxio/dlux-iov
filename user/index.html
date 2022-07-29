@@ -654,7 +654,7 @@
                                                                         class="fas fa-angle-double-up fa-fw me-2"></i>Power
                                                                     Up</button>
                                                             </modal-vue>
-                                                            <div v-show="isNode">
+                                                            <div v-if="isNode">
                                                             <modal-vue type="power"
                                                                 token="LARYNX" func="Lock Liquidity"
                                                                 :balance="saccountapi.balance" :account="account"
