@@ -742,10 +742,6 @@
                                                     <h6 id="delegatebal">Delegated: {{formatNumber((saccountapi.granting.t)/1000, 3, '.', ',')}}
                                                         LARYNX<i class="fas fa-search ms-2"></i></h6>
                                                 </a>
-                                                    <h6 v-if="saccountapi.granted.t">
-                                                        Received: {{formatNumber((saccountapi.granted.t)/1000, 3, '.', ',')}}
-                                                        LARYNX
-                                                    </h6>
                                                     <div class="collapse" id="delegationsspk">
                                             <hr class="my-2 bg-light">
                                             <div class="clearfix">
@@ -767,6 +763,26 @@
                                                             class="fas fa-fw fa-trash-alt"></i></button>
                                                         </modal-vue>
                                                 </div>
+                                                </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <a v-if="saccountapi.granted.t" data-bs-toggle="collapse" id="delegationsbtn" href="#delegatedsspk"
+                                                    role="button" aria-expanded="false" aria-controls="Show delegations"
+                                                    class="text-white" style="text-decoration: none">
+                                                    <h6 v-if="saccountapi.granted.t">
+                                                        Received: {{formatNumber((saccountapi.granted.t)/1000, 3, '.', ',')}}
+                                                        LARYNX
+                                                    </h6>
+                                                </a>
+                                                    <div class="collapse" id="delegatedsspk">
+                                            <hr class="my-2 bg-light">
+                                            <div class="clearfix">
+                                                <div v-for="(a,b,c) in saccountapi.granted">
+                                                    <div v-if="b != 't'">
+                                                <p class="float-left pt-2">From @{{b}} is delegating {{formatNumber((a)/1000, 3, '.', ',')}} LARYNX
+                                                </p>
+        
                                                 </div>
                                                 </div>
                                             </div>
