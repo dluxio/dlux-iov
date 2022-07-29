@@ -149,7 +149,7 @@ export default {
                 </div>
             </div>
         </div>
-        <slot name="trigger" :disabled="dis"></slot>
+        <slot name="trigger"></slot>
     </div>`,
   methods: {
     accountCheck() {
