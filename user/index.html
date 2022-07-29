@@ -658,7 +658,7 @@
                                                                 token="LARYNX" func="Lock Liquidity"
                                                                 :balance="saccountapi.balance" :account="account"
                                                                 @modalsign="sendIt($event)">
-                                                                <button class="dropdown-item" slot="trigger"
+                                                                <button class="dropdown-item" :disabled="dis" slot="trigger"
                                                                     type="button"><i
                                                                         class="fas fa-lock fa-fw me-2"></i>Lock
                                                                     Liquidity</button>
