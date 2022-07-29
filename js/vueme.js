@@ -1265,8 +1265,54 @@ var app = new Vue({
         .then((data) => {
           this.smarkets = data.markets;
           this.sstats = data.stats;
+          this.sstats.head_block = data.head_block;
         });
     },
+    reward_spk(){
+      var r = 0,
+        a = 0,
+        b = 0,
+        c = 0,
+        t = 0,
+        diff = this.sstats.head_block - this.saccountapi.spkblock;
+                if (!this.saccountapi.spkblock){
+                    return 0
+                } else if (diff < 28800) {
+                    return 0
+                } else {
+                  t = parseInt(diff / 28800);
+                  a = simpleInterest(
+                    this.saccountapi.gov,
+                    t,
+                    this.sstats.spk_rate_lgov
+                  );
+                  b = simpleInterest(
+                    this.saccountapi.pow,
+                    t,
+                    this.sstats.spk_rate_lpow
+                  );
+                  c = simpleInterest(
+                    this.saccountapi.granted?.t > 0
+                      ? this.saccountapi.granted.t
+                      : 0 + this.saccountapi.granting?.t > 0
+                      ? this.saccountapi.granting.t
+                      : 0,
+                    t,
+                    this.sstats.spk_rate_ldel
+                  );
+                  const i = a + b + c;
+                  if (i) {
+                    return i;
+                  } else {
+                    return 0;
+                  }
+                }
+                function simpleInterest (p, t, r){
+                  const amount = p * (1 + r / 365);
+                  const interest = amount - p;
+                  return parseInt(interest * t);
+                };
+},
     getProtocol() {
       fetch(this.lapi + "/api/protocol")
         .then((response) => response.json())

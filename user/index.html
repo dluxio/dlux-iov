@@ -527,7 +527,7 @@
                                             </div>
                                             <div class="float-right text-end">
                                                 <h5>
-                                                    {{formatNumber((saccountapi.spk)/1000, 3, '.', ',')}} TESTSPK
+                                                    {{formatNumber((saccountapi.spk + reward_spk())/1000, 3, '.', ',')}} TESTSPK
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="SPK Actions">
                                                     <modal-vue type="send" token="SPK" :balance="saccountapi.spk"
