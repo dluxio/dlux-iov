@@ -268,7 +268,7 @@
                                                     'text-danger': behind > 100}"> <span v-show="behind < 30">ONLINE -
                                                 </span> <span v-show="behind >= 30 && behind <=100">LAGGING
                                                     - </span> <span v-show="behind > 100">OFFLINE -
-                                                </span> <span>{{behind}} BBH</span></div>
+                                                </span> <span>{{behind}} Blocks behind HIVE</span></div>
                                         </div>
                                         <p class="lead ">An open source platform for p2p games, apps, and experiences.
                                         </p>
@@ -516,7 +516,7 @@
                                                     v-show="larynxbehind < 30">ONLINE - </span> <span
                                                     v-show="larynxbehind >= 30 && larynxbehind <=100">LAGGING
                                                     - </span> <span v-show="larynxbehind > 100">OFFLINE -
-                                                </span> <span>{{larynxbehind}} BBH</span></div>
+                                                </span> <span>{{larynxbehind}} Blocks behind HIVE</span></div>
                                         </div>
                                         <p class="lead">Decentralized and incentivized network infrastructure, rewarding
                                             providers with SPK governance and BROCA gas tokens.</p>
@@ -679,20 +679,22 @@
                                         <div class="clearfix">
                                             <div v-show="saccountapi.gov">
                                                 <div class="float-left">
-                                                    <h4>TESTLARYNX in Network Liquidity</h4>
-                                                    <p class="text-white-50">Locked tokens used to determine consensus
-                                                        and
-                                                        earn rewards for running a node</p>
-                                                    <p class="text-white-50">Benefits of TESTLARYNX Liquidity:</p>
+                                                    <h4>TESTLARYNX Locked</h4>
+                                                    <p class="text-white-50">Locked tokens provide liquidity to the network, aid in determining consensus,
+                                                        and earn rewards for node runners</p>
+                                                    <p class="text-white-50">Benefits of LARYNX Locked:</p>
                                                     <ul class="text-white-50">
                                                         <li>Proof of Stake Consensus</li>
                                                         <li>Collateral for DEX transactions</li>
                                                         <li>Instant Lock | 4 Week Unlock | Must run a node service</li>
+                                                        <li>Run node services to earn
+                                                            {{toFixed(parseFloat(spkStats.spk_rate_lgov) * 100,3)}}% and
+                                                            be eligible to receive delegations</li>
                                                     </ul>
                                                 </div>
                                                 <div id="larynxgactions" class="float-right text-end" v-show="me">
                                                     <h5 id="govbalance">
-                                                        {{formatNumber((saccountapi.gov)/1000, 3, '.', ',')}} TESTLARYNX
+                                                        {{formatNumber((saccountapi.gov)/1000, 3, '.', ',')}} LL
                                                     </h5>
                                                     <div class="btn-group" role="group" aria-label="TESTLARYNX Actions">
                                                         <button type="button" class="btn btn-info me-half"><i
@@ -720,28 +722,26 @@
                                             <hr class="my-4 bg-light">
                                             <div class="clearfix">
                                                 <div class="float-left">
-                                                    <h4>TESTLARYNX Power</h4>
+                                                    <h4>LARYNX Power</h4>
                                                     <p class="text-white-50">Powered tokens used to mine SPK</p>
-                                                    <p class="text-white-50">Benefits of TESTLARYNX Power:</p>
+                                                    <p class="text-white-50">Benefits of LARYNX Power:</p>
                                                     <ul class="text-white-50">
-                                                        <li>Earns SPK governance tokens!</li>
+                                                        <li>Earns SPK governance tokens</li>
+                                                        <li>Instant Lock | 4 Week Unlock | Must run a node service</li>
                                                         <li>Delegate to node service accounts to build consensus. (DPoS)
                                                         </li>
-                                                        <li>Simply locking tokens earns SPK at
+                                                        <li>TESTLARYNX POWER (TLP) tokens earn SPK tokens at
                                                             {{toFixed(parseFloat(spkStats.spk_rate_lpow) * 100,3)}}%
                                                         </li>
-                                                        <li>Delegate locked tokens to earn both accounts
+                                                        <li>Delegated TLP tokens earn SPK tokens for both delegator and delegatee at
                                                             {{toFixed(parseFloat(spkStats.spk_rate_ldel) * 100,3)}}%
                                                         </li>
-                                                        <li>Run node services to earn
-                                                            {{toFixed(parseFloat(spkStats.spk_rate_lgov) * 100,3)}}% and
-                                                            be eligible to receive delegations</li>
                                                     </ul>
                                                 </div>
                                                 <div id="larynxgactions" class="float-right text-end">
                                                     <h5>
                                                         {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}}
-                                                        TESTLARYNX
+                                                        TLP
                                                     </h5>
                                                     <a v-if="saccountapi.granting.t" data-bs-toggle="collapse"
                                                         id="delegationsbtn" href="#delegationsspk" role="button"
@@ -758,8 +758,10 @@
 
                                                     </a>
                                                     <div class="collapse" id="delegationsspk">
-                                                        <div class="d-flex flex-column text-start border border-secondary rounded p-4 my-4">
-                                                            <h4 class="border-bottom border-secondary py-2">Delegated: {{formatNumber((saccountapi.granting.t)/1000, 3,
+                                                        <div
+                                                            class="d-flex flex-column text-start border border-secondary rounded p-4 my-4">
+                                                            <h4 class="border-bottom border-secondary py-2">Delegated:
+                                                                {{formatNumber((saccountapi.granting.t)/1000, 3,
                                                                 '.', ',')}} TLP</h4>
                                                             <div v-for="(a,b,c) in saccountapi.granting">
                                                                 <div class="d-flex align-items-center border-bottom border-secondary pb-2 my-1"
@@ -792,10 +794,12 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <h4 class="border-bottom border-secondary py-2 mt-5">Received: {{formatNumber((saccountapi.granted.t)/1000,
+                                                            <h4 class="border-bottom border-secondary py-2 mt-5">
+                                                                Received: {{formatNumber((saccountapi.granted.t)/1000,
                                                                 3,'.', ',')}} TLP</h4>
                                                             <div v-for="(a,b,c) in saccountapi.granted">
-                                                                <div class="d-flex align-items-center border-bottom border-secondary pb-2 my-1" v-if="b != 't'">
+                                                                <div class="d-flex align-items-center border-bottom border-secondary pb-2 my-1"
+                                                                    v-if="b != 't'">
                                                                     <p class="my-0">@{{b}}:
                                                                         {{formatNumber((a)/1000, 3, '.', ',')}}
                                                                         TLP
