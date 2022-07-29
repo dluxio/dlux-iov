@@ -543,7 +543,7 @@
                                                         <div class="dropdown-menu dropdown-menu-right text-white"
                                                             aria-labelledby="btnGroupDrop1">
                                                             <modal-vue type="power" token="LARYNX" func="Power Up"
-                                                                :balance="saccountapi.spk" :account="account"
+                                                                :balance="saccountapi.balance" :account="account"
                                                                 @modalsign="sendIt($event)">
                                                                 <button class="dropdown-item" slot="trigger"
                                                                     type="button"><i
@@ -650,7 +650,7 @@
                                                                         class="fas fa-angle-double-up fa-fw me-2"></i>Power
                                                                     Up</button>
                                                             </modal-vue>
-                                                            <modal-vue type="power" token="LARYNX" func="Lock Liquidity"
+                                                            <modal-vue v-if="keyOf(smarkets, account)" type="power" token="LARYNX" func="Lock Liquidity"
                                                                 :balance="saccountapi.balance" :account="account"
                                                                 @modalsign="sendIt($event)">
                                                                 <button class="dropdown-item" slot="trigger"

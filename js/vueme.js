@@ -515,6 +515,9 @@ var app = new Vue({
         txid: "vote",
       };
     },
+    keyOf(obj, key){
+      return obj[key] ? true : false
+    },
     dropClaim(prefix, claim_id) {
       this.toSign = {
         type: "cja",
