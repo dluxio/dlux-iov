@@ -515,7 +515,7 @@ var app = new Vue({
         txid: "vote",
       };
     },
-    keyOf(obj = "smarkets", key){
+    keyOf(obj = "smarkets", key = "node"){
       return Object.keys(this[obj]).indexOf(key) >= 0 ? true : false
     },
     dropClaim(prefix, claim_id) {
