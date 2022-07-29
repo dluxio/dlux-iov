@@ -740,14 +740,14 @@
                                                     role="button" aria-expanded="false" aria-controls="Show delegations"
                                                     class="text-white" style="text-decoration: none">
                                                     <h6 id="delegatebal">Delegated: {{formatNumber((saccountapi.granting.t)/1000, 3, '.', ',')}}
-                                                        TESTTESTLARYNX<i class="fas fa-search ms-2"></i></h6>
+                                                        TESTLARYNX<i class="fas fa-search ms-2"></i></h6>
                                                 </a>
                                                     <div class="collapse" id="delegationsspk">
                                             <hr class="my-2 bg-light">
                                             <div class="clearfix">
                                                 <div v-for="(a,b,c) in saccountapi.granting">
                                                     <div v-if="b != 't'">
-                                                <p class="float-left pt-2">To @{{b}}: {{formatNumber((a)/1000, 3, '.', ',')}} TESTTESTLARYNX
+                                                <p class="float-left pt-2">To @{{b}}: {{formatNumber((a)/1000, 3, '.', ',')}} TESTLARYNX
                                                 </p>
                                                 <div class="float-right">
                                                     <modal-vue type="delegate" :smarkets="smarkets.node + a" token="LARYNX" :to="b" :amount="a"
