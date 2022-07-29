@@ -654,8 +654,8 @@
                                                                         class="fas fa-angle-double-up fa-fw me-2"></i>Power
                                                                     Up</button>
                                                             </modal-vue>
-                                                            
-                                                            <modal-vue :class="{'d-none': isNode}"type="power"
+                                                            <div :class="{'d-none': isNode}">
+                                                            <modal-vue type="power"
                                                                 token="LARYNX" func="Lock Liquidity"
                                                                 :balance="saccountapi.balance" :account="account"
                                                                 @modalsign="sendIt($event)">
@@ -664,7 +664,7 @@
                                                                         class="fas fa-lock fa-fw me-2"></i>Lock
                                                                     Liquidity</button>
                                                             </modal-vue>
-                                                            
+                                                            </div>
                                                             <div class="dropdown-divider"></div>
                                                             <a class="dropdown-item" href="/dex/larynx" id="buylink"><i
                                                                     class="fas fa-cart-arrow-down fa-fw me-2"></i>Buy
