@@ -797,10 +797,10 @@
                                                         class="text-white" style="text-decoration: none">
                                                         <h6 id="delegatebal">
                                                             <span>(-{{formatNumber((saccountapi.granting.t)/1000, 3,
-                                                                '.', ',')}} TLP)</span>
+                                                                '.', ',')}} LP)</span>
                                                             <span
                                                                 v-if="saccountapi.granted.t">(+{{formatNumber((saccountapi.granted.t)/1000,
-                                                                3,'.', ',')}} TLP)</span>
+                                                                3,'.', ',')}} LP)</span>
                                                             <i class="fas fa-search ms-2"></i>
                                                         </h6>
 
@@ -824,13 +824,13 @@
                                                     class="d-flex flex-column text-start border border-secondary rounded p-4 my-4">
                                                     <h4 class="border-bottom border-secondary py-2">Delegated:
                                                         {{formatNumber((saccountapi.granting.t)/1000, 3,
-                                                        '.', ',')}} TLP</h4>
+                                                        '.', ',')}} LP</h4>
                                                     <div v-for="(a,b,c) in saccountapi.granting">
                                                         <div class="d-flex align-items-center border-bottom border-secondary pb-2 my-1"
                                                             v-if="b != 't'">
                                                             <p class="my-0">@{{b}}:
                                                                 {{formatNumber((a)/1000, 3, '.', ',')}}
-                                                                TLP
+                                                                LP
                                                             </p>
                                                             <div class="d-flex ms-auto ">
                                                                 <modal-vue type="delegate" :smarkets="smarkets.node"
