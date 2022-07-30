@@ -12,49 +12,34 @@ export default {
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content bg-darker text-white">
                     <div class="modal-header">
-                        <h5 class="modal-title"> Send {{token}}</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"> <span
-                                class="close text-black">×</span></button>
+                        <h5 class="modal-title">Send {{token}}</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form name="sendhive">
                         <div class="modal-body">
-                            <div class="form-group">
-                                <label for="sendhivefrom">From:</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <div class="input-group-text">@</div>
-                                    </div>
-                                    <input class="form-control" type="text" :placeholder="account"
+                                <label class="small" for="sendhivefrom">From:</label>
+                                <div class="input-group mb-3">
+                                        <span class="input-group-text bg-dark border-dark text-secondary">@</span>
+                                    <input class="form-control text-white bg-dark border-dark" type="text" placeholder="Please login" :value="account"
                                         readonly>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="sendhiveto">To:</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <div class="input-group-text">@</div>
-                                    </div>
-                                    <input @blur="accountCheck" class="form-control" type="text" placeholder="Recipient" v-model="to">
+                                <label class="small" for="sendhiveto">To:</label>
+                                <div class="input-group mb-3">
+                                        <span class="input-group-text bg-dark border-dark text-secondary">@</span>
+                                    <input @blur="accountCheck" class="form-control text-white bg-dark border-dark" type="text" placeholder="Payment recipient" v-model="to">
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="sendAmount">Amount (Balance <a href="#"
-                                        @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a>):</label>
-                                <div class="input-group">
-                                    <input class="form-control" id="sendAmount" type="number" step="0.001"
-                                        min="0.001" placeholder="1.000" v-model="amount">
-                                    <div class="input-group-append">
-                                        <div class="input-group-text">{{token}}</div>
-                                    </div>
+                                <label class="small" for="sendAmount">Amount (Balance: <a href="#/"
+                                        @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
+                                <div class="input-group mb-3">
+                                    <input class="form-control text-white bg-dark border-dark" id="sendAmount" type="number" step="0.001"
+                                        min="0.001" placeholder="Enter amount" v-model="amount">
+                                        <span class="input-group-text bg-dark border-dark text-secondary">{{token}}</span>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="sendhivememo">Memo:</label>
-                                <div class="input-group">
-                                    <input class="form-control" type="text"
+                                <label class="small" for="sendhivememo">Memo:</label>
+                                <div class="input-group mb-3">
+                                    <input class="form-control text-white bg-dark border-dark" type="text"
                                         placeholder="Include a memo (optional)" v-model="memo">
                                 </div>
-                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -68,48 +53,36 @@ export default {
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content bg-darker text-white">
                     <div class="modal-header">
-                        <h5 class="modal-title"> Delegate {{token}}</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"> <span
-                                class="close text-black">×</span></button>
+                        <h5 class="modal-title">Delegate {{token}}</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form name="sendhive">
                         <div class="modal-body">
-                            <div class="form-group">
-                                <label for="sendhivefrom">From:</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <div class="input-group-text">@</div>
-                                    </div>
-                                    <input class="form-control" type="text" :placeholder="account"
+                                <label for="sendhivefrom" class="small">From:</label>
+                                <div class="input-group mb-3">
+                                        <div class="input-group-text bg-dark border-secondary text-secondary">@</div>
+                                    <input class="form-control bg-dark border-secondary text-white" type="text" placeholder="Please login" :value="account"
                                         readonly>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="sendhiveto">To:</label>
-                                <div class="input-group" v-if="token == 'LARYNX'">
-                                  <span class="input-group-text">@</span>
-                                  <select class="form-select" id="datalistOptions" v-model="to">
-                                      <option v-for="node in smarkets" :value="node.self">{{node.self}}</option>
+                                <label for="sendhiveto" class="small">To:</label>
+                                <div class="input-group mb-3" v-if="token == 'LARYNX'">
+                                  <span class="input-group-text bg-dark border-secondary text-secondary">@</span>
+                                  <select class="form-select text-white bg-dark border-secondary" id="datalistOptions" v-model="to">
+                                    <option value="" disabled selected>Select node operator</option>
+                                     <option v-for="node in smarkets" :value="node.self">{{node.self}}</option>
                                   </select>
                                 </div>
-                                <div class="input-group" v-if="token == 'DLUX'">
-                                    <div class="input-group-prepend">
-                                        <div class="input-group-text">@</div>
-                                    </div>
-                                    <input @blur="accountCheck" class="form-control" type="text" placeholder="Recipient" v-model="to">
+                                <div class="input-group mb-3" v-if="token == 'DLUX'">
+                                        <span class="input-group-text bg-dark border-secondary text-secondary">@</span>
+                                    <input @blur="accountCheck" class="form-control bg-dark border-secondary text-white" type="text" placeholder="Recipient" v-model="to">
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="delAmount">Amount (Balance <a href="#"
-                                        @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a>):</label>
-                                <div class="input-group">
-                                    <input class="form-control" type="number" step="0.001" id="delAmount" 
-                                        min="0.001" placeholder="1.000" v-model="amount">
-                                    <div class="input-group-append">
-                                        <div class="input-group-text">{{token}}</div>
-                                    </div>
+                                <label for="delAmount" class="small">Amount (Balance: <a href="#/"
+                                        @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
+                                <div class="input-group mb-3">
+                                    <input class="form-control bg-dark border-secondary text-white" type="number" step="0.001" id="delAmount" 
+                                        min="0.001" placeholder="Enter amount" v-model="amount">
+                                        <span class="input-group-text bg-dark border-secondary text-secondary">{{token}}</span>
                                 </div>
-                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -124,23 +97,43 @@ export default {
                 <div class="modal-content bg-darker text-white">
                     <div class="modal-header">
                         <h5 class="modal-title">{{func}} {{token}}</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"> <span
-                                class="close text-black">×</span></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form name="power">
                         <div class="modal-body">
-                            <div class="form-group">
-                                <label for="poweramount">Amount (Balance <a href="#"
-                                        @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a>):</label>
-                                <div class="input-group" id="poweramount">
-                                    <input class="form-control" type="number" step="0.001"
+                                <label for="poweramount" class="small">Amount (Balance: <a href="#/"
+                                        @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
+                                <div class="input-group mb-3" id="poweramount">
+                                    <input class="form-control text-white border-dark bg-dark" type="number" step="0.001"
                                         min="0.001" placeholder="1.000" v-model="amount">
-                                    <div class="input-group-append">
-                                        <div class="input-group-text">{{token}}</div>
-                                    </div>
+                                        <span class="input-group-text text-secondary border-dark bg-dark">{{token}}</span>
                                 </div>
                             </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" @click="power">Continue</button>
                         </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="confirm" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content bg-darker text-white">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{func}} {{token}}</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form name="power">
+                        <div class="modal-body">
+                                <label for="poweramount" class="small">Amount (Balance: <a href="#/"
+                                        @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
+                                <div class="input-group mb-3" id="poweramount">
+                                    <input class="form-control text-white border-dark bg-dark" type="number" step="0.001"
+                                        min="0.001" placeholder="1.000" v-model="amount">
+                                        <span class="input-group-text text-secondary border-dark bg-dark">{{token}}</span>
+                                </div>
+                            </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button type="button" class="btn btn-primary" @click="power">Continue</button>

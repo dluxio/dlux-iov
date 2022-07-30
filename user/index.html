@@ -288,7 +288,7 @@
                                                 <h5 id="dluxclaim" class="text-end">
                                                     {{formatNumber((accountapi.claim)/1000, 3, '.', ',')}} DLUX</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Claim">
-                                                    <button type="submit" class="btn btn-info me-half"
+                                                    <button type="submit" class="btn btn-info "
                                                         @click="rewardClaim('dlux', 'claim', dlux2gov)"><i
                                                             class="fas fa-coin"></i><i
                                                             class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
@@ -328,7 +328,7 @@
                                                     <modal-vue type="send" token="DLUX" :balance="accountapi.balance"
                                                         :account="account" @modalsign="sendIt($event)">
                                                         <button slot="trigger" type="button"
-                                                            class="btn btn-info me-half"><i
+                                                            class="btn btn-info "><i
                                                                 class="fas fa-paper-plane me-2"></i>Send</button>
                                                     </modal-vue>
                                                     <div class="btn-group" role="group" v-if="me">
@@ -388,7 +388,7 @@
                                                     <modal-vue type="delegate" token="DLUX" func="why"
                                                         :balance="accountapi.poweredUp" :account="account"
                                                         @modalsign="sendIt($event)">
-                                                        <button type="button" class="btn btn-info me-half"
+                                                        <button type="button" class="btn btn-info "
                                                             slot="trigger"><i
                                                                 class="fas fa-user-friends fa-fw me-2"></i>Delegate</button>
                                                     </modal-vue>
@@ -463,7 +463,7 @@
                                                     <h6 id="escrowbal">(-0 DG)<i class="fas fa-search ms-2"></i></h6>
                                                 </a>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
-                                                    <button type="button" class="btn btn-info me-half" disabled
+                                                    <button type="button" class="btn btn-info " disabled
                                                         title="Coming soon!" style="pointer-events: none;"><i
                                                             class="fas fa-balance-scale fa-fw me-2"></i>Measures</button>
                                                     <div v-if="me" class="btn-group" role="group">
@@ -561,7 +561,7 @@
                                                     <modal-vue type="send" token="SPK" :balance="saccountapi.spk"
                                                         :account="account" @modalsign="sendIt($event)">
                                                         <button slot="trigger" type="button"
-                                                            class="btn btn-info me-half"><i
+                                                            class="btn btn-info "><i
                                                                 class="fas fa-paper-plane me-2"></i>Send</button>
                                                     </modal-vue>
                                                     <div class="btn-group" role="group" v-if="false">
@@ -608,7 +608,7 @@
                                                     ',')}}
                                                     LARYNX</h5>
                                                 <div class="btn-group" role="group" aria-label="TESTLARYNX Claim">
-                                                    <button type="submit" class="btn btn-info me-half"
+                                                    <button type="submit" class="btn btn-info "
                                                         @click="dropClaim('TESTspkcc', 'claim')"><i
                                                             class="fas fa-coin"></i><i
                                                             class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
@@ -648,7 +648,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="btn-group" role="group" aria-label="TESTLARYNX Claim">
-                                                    <button type="submit" class="btn btn-info me-half"
+                                                    <button type="submit" class="btn btn-info "
                                                         @click="rewardClaim('TESTspkcc', 'shares_claim', spk2gov)"><i
                                                             class="fas fa-coin"></i><i
                                                             class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
@@ -670,18 +670,20 @@
                                                     {{formatNumber((saccountapi.balance)/1000, 3, '.', ',')}} LARYNX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="TESTLARYNX Actions">
+                                                    <button type="button" class="btn btn-info ">
                                                     <modal-vue type="send" token="LARYNX" :balance="saccountapi.balance"
                                                         :account="account" @modalsign="sendIt($event)">
-                                                        <button slot="trigger" type="button"
-                                                            class="btn btn-info me-half"><i
-                                                                class="fas fa-paper-plane me-2"></i>Send</button>
+                                                        <span slot="trigger" ><i
+                                                                class="fas fa-paper-plane me-2"></i>Send</span>
                                                     </modal-vue>
+                                                </button>
+                                                <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
                                                     <div class="btn-group" role="group" v-if="me">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
+                                                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                                             aria-labelledby="btnGroupDrop1">
                                                             <modal-vue type="power" token="LARYNX" func="Power Up"
                                                                 :balance="saccountapi.balance" :account="account"
@@ -702,7 +704,7 @@
                                                             <div class="dropdown-divider"></div>
                                                             <a class="dropdown-item" href="/dex/larynx" id="buylink"><i
                                                                 class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
-                                                        </div>
+                                                        </ul>
                                                     </div>
                                                 </div>
                                             </div>
@@ -733,14 +735,17 @@
                                                     {{formatNumber((saccountapi.gov)/1000, 3, '.', ',')}} LL
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="TESTLARYNX Actions">
-                                                    <button type="button" class="btn btn-info me-half"><i
-                                                            class="fas fa-user-friends fa-fw me-2"></i>Options</button>
+                                                    <button type="button" class="btn btn-info">
+                                                        <span><i class="fas fa-user-friends fa-fw me-2"></i>Options</span>
+                                                    </button>
+                                                        <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
                                                     <div class="btn-group" role="group" v-if="me">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
+                                                            
+                                                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                                             aria-labelledby="btnGroupDrop1">
                                                             <modal-vue type="power" token="LARYNX"
                                                                 func="Unlock Liquidity" :balance="saccountapi.gov"
@@ -750,7 +755,7 @@
                                                                         class="fas fa-lock-open fa-fw me-2"></i>Unlock
                                                                     Liquidity</button>
                                                             </modal-vue>
-                                                        </div>
+                                                        </ul>
                                                     </div>
                                                 </div>
                                             </div>
@@ -805,7 +810,7 @@
                                                             token="LARYNX" func="Lock Liquidity"
                                                             :balance="saccountapi.poweredUp" :account="account"
                                                             @modalsign="sendIt($event)">
-                                                            <button class="btn btn-info me-half" slot="trigger"
+                                                            <button class="btn btn-info " slot="trigger"
                                                                 type="button"><i
                                                                     class="fas fa-user-friends fa-fw me-2"></i>Delegate</button>
                                                         </modal-vue>
@@ -901,7 +906,7 @@
                                                         :balance="parseFloat(focus.balance) * 1000" :account="account"
                                                         @modalsign="sendIt($event)">
                                                         <button slot="trigger" type="button"
-                                                            class="btn btn-info me-half"><i
+                                                            class="btn btn-info "><i
                                                                 class="fas fa-paper-plane me-2"></i>Send</button>
                                                     </modal-vue>
                                                     <div class="btn-group" role="group" v-if="me">
@@ -937,7 +942,7 @@
                                                     {{toFixed(((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares)),3)}}
                                                     HP</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
-                                                    <button type="button" class="btn btn-info me-half"
+                                                    <button type="button" class="btn btn-info "
                                                         style="pointer-events: none;" disabled><i
                                                             class="fas fa-user-friends me-2"></i>Delegate</button>
                                                     <div class="btn-group" role="group" v-if="me">
@@ -974,7 +979,7 @@
                                                         :balance="parseFloat(focus.hbd_balance) * 1000"
                                                         :account="account" @modalsign="sendIt($event)">
                                                         <button slot="trigger" type="button"
-                                                            class="btn btn-info me-half"><i
+                                                            class="btn btn-info "><i
                                                                 class="fas fa-paper-plane me-2"></i>Send</button>
                                                     </modal-vue>
                                                     <div class="btn-group" role="group" v-if="me">
