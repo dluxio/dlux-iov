@@ -13,8 +13,11 @@
     <meta name="theme-color" content="#111222" />
     <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
     <!-- Bootstrap -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <!-- JavaScript Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa"
         crossorigin="anonymous"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" />
@@ -250,8 +253,10 @@
                             <ul id="wallettabs" class="nav nav-pills justify-content-center" role="tablist">
                                 <li class="nav-item"> <a class="nav-link active" href="#dlux" id="dluxtab" role="tab"
                                         data-bs-toggle="tab" aria-controls="dlux" aria-expanded="true">DLUX</a></li>
-                                <li class="nav-item"> <a class="nav-link " href="#spk" id="spktab" role="tab"
-                                        data-bs-toggle="tab" aria-controls="spk" aria-expanded="true">SPK Test</a></li>
+                                <li class="nav-item"> <a class="nav-link d-flex align-items-center" href="#spk"
+                                        id="spktab" role="tab" data-bs-toggle="tab" aria-controls="spk"
+                                        aria-expanded="true">SPK<span class="badge text-bg-warning ms-2">TEST</span></a>
+                                </li>
                                 <li class="nav-item"> <a class="nav-link" href="#hive" id="hivetab" role="tab"
                                         data-bs-toggle="tab" aria-controls="hive" aria-expanded="true">HIVE</a></li>
                             </ul>
@@ -433,8 +438,8 @@
                                             </div>
                                         </div>-->
                                         <hr class="my-4 bg-light">
-                                        <div class="clearfix">
-                                            <div class="float-left">
+                                        <div class="">
+                                            <div class="">
                                                 <h4>DLUX Governance</h4>
                                                 <p class="text-white-50">Locked tokens used to determine concensus and
                                                     earn rewards for running a node</p>
@@ -507,9 +512,20 @@
                             <!-- spk wallet tab-->
                             <div role="tabpanel" class="tab-pane fade show " id="spk" aria-labelledby="spktab">
                                 <div class="container">
-                                    <div class="jumbotron pt-4 bg-darker">
-                                        <div class="d-flex align-items-center pb-2">
-                                            <h1 class="display-5 m-0 p-0">TEST SPK</h1>
+                                    <div class="">
+                                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                                            <div>
+                                                <i class="fa-solid fa-triangle-exclamation me-2"></i>These tokens and
+                                                functions are in testing - use at your own risk, you may encounter
+                                                issues.
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center mt-4 mb-2">
+                                            <div class="d-flex align-items-start">
+                                                <h1 class="m-0">SPK</h1><small><span
+                                                        class="badge ms-1 me-2 text-bg-warning">TEST</span></small>
+                                                <h4 class="m-0"></h4>
+                                            </div>
                                             <div class="text-center small m-0 p-2 ms-2" v-bind:class="{'text-success': larynxbehind < 30,
                                                     'text-warning': larynxbehind >= 30,
                                                     'text-danger': larynxbehind > 100}"> <span
@@ -518,16 +534,26 @@
                                                     - </span> <span v-show="larynxbehind > 100">OFFLINE -
                                                 </span> <span>{{larynxbehind}} Blocks behind HIVE</span></div>
                                         </div>
-                                        <p class="lead">Decentralized and incentivized network infrastructure, rewarding
-                                            providers with SPK governance and BROCA gas tokens.</p>
-                                        <div class="clearfix">
-                                            <div class="float-left">
-                                                <h4>TESTSPK Token</h4>
-                                                <p class="text-white-50">The governance token for the SPK network.</p>
+                                        <div class="border-bottom border-secondary">
+                                            <p class="lead">Decentralized and incentivized network infrastructure,
+                                                rewarding
+                                                providers with SPK governance and BROCA gas tokens.</p>
+                                        </div>
+                                        <!--spk token-->
+                                        <div class="d-flex align-items-center border-bottom border-secondary py-5">
+                                            <div>
+                                                <div class="d-flex align-items-start">
+                                                    <h4 class="m-0">SPK</h4><small><span
+                                                            class="badge ms-1 me-2 text-bg-warning">TEST</span></small>
+                                                    <h4 class="m-0">Token</h4>
+                                                </div>
+                                                <p class="text-white-50 m-0">The governance token for the SPK network.
+                                                </p>
                                             </div>
-                                            <div class="float-right text-end">
+                                            <div class="ms-auto text-end">
                                                 <h5>
-                                                    {{formatNumber((saccountapi.spk + reward_spk())/1000, 3, '.', ',')}} TESTSPK
+                                                    {{formatNumber((saccountapi.spk + reward_spk())/1000, 3, '.', ',')}}
+                                                    SPK
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="SPK Actions">
                                                     <modal-vue type="send" token="SPK" :balance="saccountapi.spk"
@@ -563,21 +589,26 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="clearfix" id="larynxclaimdiv"
+                                        <!--claim larynx airdrop-->
+                                        <div id="larynxclaimdiv"
+                                            class="d-flex align-items-center border-bottom border-secondary py-5"
                                             v-show="parseInt(saccountapi.drop.last_claim, 16) != frmDate() && saccountapi.drop.availible.amount > 0 && me">
-                                            <hr class="my-4 bg-light">
-                                            <div class="float-left">
-                                                <h4>Claim TESTLARYNX AirDrop</h4>
+                                            <div>
+                                                <div class="d-flex align-items-start">
+                                                    <h4 class="m-0">Claim LARYNX</h4><small><span
+                                                            class="badge ms-1 me-2 text-bg-warning">TEST</span></small>
+                                                    <h4 class="m-0">Airdrop</h4>
+                                                </div>
                                                 <p class="text-white-50">This months claimable tokens based on a January
                                                     6th HIVE blockchain snapshot.</p>
                                                 <p>Tokens not claimed do not roll over to next month.</p>
                                                 <input type="text" name="frmDateReg" required id="frmDate" value=""
                                                     class="d-none">
                                             </div>
-                                            <div id="claimlarynxbtn" class="float-right text-end d-column">
+                                            <div id="claimlarynxbtn" class="ms-auto text-end">
                                                 <h5>{{formatNumber((saccountapi.drop.availible.amount)/1000, 3, '.',
                                                     ',')}}
-                                                    TESTLARYNX</h5>
+                                                    LARYNX</h5>
                                                 <div class="btn-group" role="group" aria-label="TESTLARYNX Claim">
                                                     <button type="submit" class="btn btn-info me-half"
                                                         @click="dropClaim('TESTspkcc', 'claim')"><i
@@ -586,16 +617,20 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="clearfix" id="larynxclaimrewards"
-                                            v-show="saccountapi.claim > 0 && me">
-                                            <hr class="my-4 bg-light">
-                                            <div class="float-left">
-                                                <h4>Claim TESTLARYNX Rewards</h4>
+                                        <!--claim larynx rewards-->
+                                        <div class="d-flex align-items-center border-bottom border-secondary py-5"
+                                            id="larynxclaimrewards" v-show="saccountapi.claim > 0 && me">
+                                            <div>
+                                                <div class="d-flex align-items-start">
+                                                    <h4 class="m-0">Claim LARYNX</h4><small><span
+                                                            class="badge ms-1 me-2 text-bg-warning">TEST</span></small>
+                                                    <h4 class="m-0">Rewards</h4>
+                                                </div>
                                                 <p class="text-white-50">Claimable rewards for running a SPK service
                                                     node.</p>
                                             </div>
-                                            <div id="claimlarynxrewardbtn" class="float-right text-end d-column">
-                                                <h5>{{formatNumber((saccountapi.claim)/1000, 3, '.', ',')}} TESTLARYNX
+                                            <div id="claimlarynxrewardbtn" class="ms-auto text-end">
+                                                <h5>{{formatNumber((saccountapi.claim)/1000, 3, '.', ',')}} LARYNX
                                                 </h5>
                                                 <div> <span class="small" v-show="!spk2gov">50% Liquid | 50%
                                                         Power</span> <span class="small" v-show="spk2gov">50%
@@ -622,15 +657,19 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <hr class="my-4 bg-light">
-                                        <div class="clearfix">
-                                            <div class="float-left">
-                                                <h4>TESTLARYNX Token</h4>
+                                        <!--larynx token-->
+                                        <div class="d-flex align-items-center border-bottom border-secondary py-5">
+                                            <div>
+                                                <div class="d-flex align-items-start">
+                                                    <h4 class="m-0">Liquid LARYNX</h4><small><span
+                                                            class="badge ms-1 me-2 text-bg-warning">TEST</span></small>
+                                                    <h4 class="m-0"></h4>
+                                                </div>
                                                 <p class="text-white-50">The mining token for the SPK network.</p>
                                             </div>
-                                            <div id="larynxactions" class="float-right text-end">
+                                            <div id="larynxactions" class="ms-auto text-end">
                                                 <h5 id="larynxbalance">
-                                                    {{formatNumber((saccountapi.balance)/1000, 3, '.', ',')}} TESTLARYNX
+                                                    {{formatNumber((saccountapi.balance)/1000, 3, '.', ',')}} LARYNX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="TESTLARYNX Actions">
                                                     <modal-vue type="send" token="LARYNX" :balance="saccountapi.balance"
@@ -654,12 +693,11 @@
                                                                         class="fas fa-angle-double-up fa-fw me-2"></i>Power
                                                                     Up</button>
                                                             </modal-vue>
-                                                            <modal-vue type="power" :dis="!isNode"
-                                                                token="LARYNX" func="Lock Liquidity"
-                                                                :balance="saccountapi.balance" :account="account"
-                                                                @modalsign="sendIt($event)">
-                                                                <button class="dropdown-item" :disabled="!isNode" slot="trigger"
-                                                                    type="button"><i
+                                                            <modal-vue type="power" :dis="!isNode" token="LARYNX"
+                                                                func="Lock Liquidity" :balance="saccountapi.balance"
+                                                                :account="account" @modalsign="sendIt($event)">
+                                                                <button class="dropdown-item" :disabled="!isNode"
+                                                                    slot="trigger" type="button"><i
                                                                         class="fas fa-lock fa-fw me-2"></i>Lock
                                                                     Liquidity</button>
                                                             </modal-vue>
@@ -675,167 +713,171 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <hr class="my-4 bg-light">
-                                        <div class="clearfix">
+                                        <!--locked larynx-->
+                                        <div class="d-flex align-items-center border-bottom border-secondary py-5">
                                             <div v-show="saccountapi.gov">
-                                                <div class="float-left">
-                                                    <h4>TESTLARYNX Locked</h4>
-                                                    <p class="text-white-50">Locked tokens provide liquidity to the network, aid in determining consensus,
-                                                        and earn rewards for node runners</p>
-                                                    <p class="text-white-50">Benefits of LARYNX Locked:</p>
-                                                    <ul class="text-white-50">
-                                                        <li>Proof of Stake Consensus</li>
-                                                        <li>Collateral for DEX transactions</li>
-                                                        <li>Instant Lock | 4 Week Unlock | Must run a node service</li>
-                                                        <li>Run node services to earn
-                                                            {{toFixed(parseFloat(spkStats.spk_rate_lgov) * 100,3)}}% and
-                                                            be eligible to receive delegations</li>
-                                                    </ul>
+
+                                                <div class="d-flex align-items-start">
+                                                    <h4 class="m-0">Locked LARYNX</h4><small><span
+                                                            class="badge ms-1 me-2 text-bg-warning">TEST</span></small>
+                                                    <h4 class="m-0"></h4>
                                                 </div>
-                                                <div id="larynxgactions" class="float-right text-end" v-show="me">
-                                                    <h5 id="govbalance">
-                                                        {{formatNumber((saccountapi.gov)/1000, 3, '.', ',')}} LL
-                                                    </h5>
-                                                    <div class="btn-group" role="group" aria-label="TESTLARYNX Actions">
-                                                        <button type="button" class="btn btn-info me-half"><i
-                                                                class="fas fa-user-friends fa-fw me-2"></i>Options</button>
-                                                        <div class="btn-group" role="group" v-if="me">
-                                                            <button id="btnGroupDrop1" type="button"
-                                                                class="btn btn-info dropdown-toggle"
-                                                                data-bs-toggle="dropdown" aria-haspopup="true"
-                                                                aria-expanded="false"></button>
-                                                            <div class="dropdown-menu dropdown-menu-right text-white"
-                                                                aria-labelledby="btnGroupDrop1">
-                                                                <modal-vue type="power" token="LARYNX"
-                                                                    func="Unlock Liquidity" :balance="saccountapi.gov"
-                                                                    :account="account" @modalsign="sendIt($event)">
-                                                                    <button class="dropdown-item" slot="trigger"
-                                                                        type="button"><i
-                                                                            class="fas fa-lock-open fa-fw me-2"></i>Unlock
-                                                                        Liquidity</button>
-                                                                </modal-vue>
-                                                            </div>
+                                                <p class="text-white-50">Locked tokens provide liquidity to the
+                                                    network, aid in determining consensus,
+                                                    and earn rewards for node runners</p>
+                                                <p class="text-white-50">Benefits of LARYNX Locked:</p>
+                                                <ul class="text-white-50">
+                                                    <li>Proof of Stake Consensus</li>
+                                                    <li>Collateral for DEX transactions</li>
+                                                    <li>Instant Lock | 4 Week Unlock</li>
+                                                    <li>Requires an operating LARYNX node</li>
+                                                    <li>Earns {{toFixed(parseFloat(spkStats.spk_rate_lgov) *
+                                                        100,3)}}%</li>
+                                                </ul>
+                                            </div>
+                                            <div id="larynxgactions" class="ms-auto text-end" v-show="me">
+                                                <h5 id="govbalance">
+                                                    {{formatNumber((saccountapi.gov)/1000, 3, '.', ',')}} LL
+                                                </h5>
+                                                <div class="btn-group" role="group" aria-label="TESTLARYNX Actions">
+                                                    <button type="button" class="btn btn-info me-half"><i
+                                                            class="fas fa-user-friends fa-fw me-2"></i>Options</button>
+                                                    <div class="btn-group" role="group" v-if="me">
+                                                        <button id="btnGroupDrop1" type="button"
+                                                            class="btn btn-info dropdown-toggle"
+                                                            data-bs-toggle="dropdown" aria-haspopup="true"
+                                                            aria-expanded="false"></button>
+                                                        <div class="dropdown-menu dropdown-menu-right text-white"
+                                                            aria-labelledby="btnGroupDrop1">
+                                                            <modal-vue type="power" token="LARYNX"
+                                                                func="Unlock Liquidity" :balance="saccountapi.gov"
+                                                                :account="account" @modalsign="sendIt($event)">
+                                                                <button class="dropdown-item" slot="trigger"
+                                                                    type="button"><i
+                                                                        class="fas fa-lock-open fa-fw me-2"></i>Unlock
+                                                                    Liquidity</button>
+                                                            </modal-vue>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <hr class="my-4 bg-light">
-                                            <div class="clearfix">
-                                                <div class="float-left">
-                                                    <h4>TESTLARYNX Power</h4>
-                                                    <p class="text-white-50">Powered tokens used to mine SPK</p>
-                                                    <p class="text-white-50">Benefits of LARYNX Power:</p>
-                                                    <ul class="text-white-50">
-                                                        <li>Earns SPK governance tokens</li>
-                                                        <li>Instant Lock | 4 Week Unlock</li>
-                                                        <li>Delegate to node service accounts to build consensus. (DPoS)
-                                                        </li>
-                                                        <li>TESTLARYNX POWER (TLP) tokens earn SPK tokens at
-                                                            {{toFixed(parseFloat(spkStats.spk_rate_lpow) * 100,3)}}%
-                                                        </li>
-                                                        <li>Delegated TLP tokens earn SPK tokens for both delegator and delegatee at
-                                                            {{toFixed(parseFloat(spkStats.spk_rate_ldel) * 100,3)}}%
-                                                        </li>
-                                                    </ul>
+                                        </div>
+                                        <!--larynx power-->
+                                        <div class="d-flex align-items-center border-bottom border-secondary py-5">
+                                            <div>
+                                                <div class="d-flex align-items-start">
+                                                    <h4 class="m-0">LARYNX</h4><small><span
+                                                            class="badge ms-1 me-2 text-bg-warning">TEST</span></small>
+                                                    <h4 class="m-0">Power</h4>
                                                 </div>
-                                                <div id="larynxgactions" class="float-right text-end">
-                                                    <h5>
-                                                        {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}}
-                                                        TLP
-                                                    </h5>
-                                                    <a v-if="saccountapi.granting.t" data-bs-toggle="collapse"
-                                                        id="delegationsbtn" href="#delegationsspk" role="button"
-                                                        aria-expanded="false" aria-controls="Show delegations"
-                                                        class="text-white" style="text-decoration: none">
-                                                        <h6 id="delegatebal">
-                                                            <span>(-{{formatNumber((saccountapi.granting.t)/1000, 3,
-                                                                '.', ',')}} TLP)</span>
-                                                            <span
-                                                                v-if="saccountapi.granted.t">(+{{formatNumber((saccountapi.granted.t)/1000,
-                                                                3,'.', ',')}} TLP)</span>
-                                                            <i class="fas fa-search ms-2"></i>
-                                                        </h6>
+                                                <p class="text-white-50">Powered tokens used to mine SPK</p>
+                                                <p class="text-white-50">Benefits of LARYNX Power:</p>
+                                                <ul class="text-white-50">
+                                                    <li>Earns SPK governance tokens</li>
+                                                    <li>Instant Lock | 4 Week Unlock</li>
+                                                    <li>Delegate to node service accounts to build consensus (DPoS)
+                                                    </li>
+                                                    <li>LARYNX POWER (LP) tokens earn SPK tokens at
+                                                        {{toFixed(parseFloat(spkStats.spk_rate_lpow) * 100,3)}}%
+                                                    </li>
+                                                    <li>Delegated LP tokens earn SPK tokens for both delegator and
+                                                        delegatee at
+                                                        {{toFixed(parseFloat(spkStats.spk_rate_ldel) * 100,3)}}%
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div id="larynxgactions" class="ms-auto text-end">
+                                                <h5>
+                                                    {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}}
+                                                    LP
+                                                </h5>
+                                                <a v-if="saccountapi.granting.t" data-bs-toggle="collapse"
+                                                    id="delegationsbtn" href="#delegationsspk" role="button"
+                                                    aria-expanded="false" aria-controls="Show delegations"
+                                                    class="text-white" style="text-decoration: none">
+                                                    <h6 id="delegatebal">
+                                                        <span>(-{{formatNumber((saccountapi.granting.t)/1000, 3,
+                                                            '.', ',')}} TLP)</span>
+                                                        <span
+                                                            v-if="saccountapi.granted.t">(+{{formatNumber((saccountapi.granted.t)/1000,
+                                                            3,'.', ',')}} TLP)</span>
+                                                        <i class="fas fa-search ms-2"></i>
+                                                    </h6>
 
-                                                    </a>
-                                                    <div class="collapse" id="delegationsspk">
-                                                        <div
-                                                            class="d-flex flex-column text-start border border-secondary rounded p-4 my-4">
-                                                            <h4 class="border-bottom border-secondary py-2">Delegated:
-                                                                {{formatNumber((saccountapi.granting.t)/1000, 3,
-                                                                '.', ',')}} TLP</h4>
-                                                            <div v-for="(a,b,c) in saccountapi.granting">
-                                                                <div class="d-flex align-items-center border-bottom border-secondary pb-2 my-1"
-                                                                    v-if="b != 't'">
-                                                                    <p class="my-0">@{{b}}:
-                                                                        {{formatNumber((a)/1000, 3, '.', ',')}}
-                                                                        TLP
-                                                                    </p>
-                                                                    <div class="d-flex ms-auto ">
-                                                                        <modal-vue type="delegate"
-                                                                            :smarkets="smarkets.node" token="LARYNX"
-                                                                            :to="b" :amount="a"
-                                                                            :balance="saccountapi.poweredUp"
-                                                                            :account="account"
-                                                                            @modalsign="sendIt($event)">
-                                                                            <button slot="trigger" type="button"
-                                                                                class="ms-1 btn btn-secondary"><i
-                                                                                    class="fas fa-fw fa-user-edit"></i></button>
-                                                                        </modal-vue>
-                                                                        <modal-vue type="delegate"
-                                                                            :smarkets="smarkets.node" token="LARYNX"
-                                                                            :to="b" amount="0"
-                                                                            :balance="saccountapi.poweredUp"
-                                                                            :account="account"
-                                                                            @modalsign="sendIt($event)">
-                                                                            <button class="ms-1 btn btn-danger ms-1"
-                                                                                slot="trigger" type="button"><i
-                                                                                    class="fas fa-fw fa-trash-alt"></i></button>
-                                                                        </modal-vue>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <h4 class="border-bottom border-secondary py-2 mt-5">
-                                                                Received: {{formatNumber((saccountapi.granted.t)/1000,
-                                                                3,'.', ',')}} TLP</h4>
-                                                            <div v-for="(a,b,c) in saccountapi.granted">
-                                                                <div class="d-flex align-items-center border-bottom border-secondary pb-2 my-1"
-                                                                    v-if="b != 't'">
-                                                                    <p class="my-0">@{{b}}:
-                                                                        {{formatNumber((a)/1000, 3, '.', ',')}}
-                                                                        TLP
-                                                                    </p>
-
+                                                </a>
+                                                <div class="collapse" id="delegationsspk">
+                                                    <div
+                                                        class="d-flex flex-column text-start border border-secondary rounded p-4 my-4">
+                                                        <h4 class="border-bottom border-secondary py-2">Delegated:
+                                                            {{formatNumber((saccountapi.granting.t)/1000, 3,
+                                                            '.', ',')}} TLP</h4>
+                                                        <div v-for="(a,b,c) in saccountapi.granting">
+                                                            <div class="d-flex align-items-center border-bottom border-secondary pb-2 my-1"
+                                                                v-if="b != 't'">
+                                                                <p class="my-0">@{{b}}:
+                                                                    {{formatNumber((a)/1000, 3, '.', ',')}}
+                                                                    TLP
+                                                                </p>
+                                                                <div class="d-flex ms-auto ">
+                                                                    <modal-vue type="delegate" :smarkets="smarkets.node"
+                                                                        token="LARYNX" :to="b" :amount="a"
+                                                                        :balance="saccountapi.poweredUp"
+                                                                        :account="account" @modalsign="sendIt($event)">
+                                                                        <button slot="trigger" type="button"
+                                                                            class="ms-1 btn btn-secondary"><i
+                                                                                class="fas fa-fw fa-user-edit"></i></button>
+                                                                    </modal-vue>
+                                                                    <modal-vue type="delegate" :smarkets="smarkets.node"
+                                                                        token="LARYNX" :to="b" amount="0"
+                                                                        :balance="saccountapi.poweredUp"
+                                                                        :account="account" @modalsign="sendIt($event)">
+                                                                        <button class="ms-1 btn btn-danger ms-1"
+                                                                            slot="trigger" type="button"><i
+                                                                                class="fas fa-fw fa-trash-alt"></i></button>
+                                                                    </modal-vue>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
+                                                        <h4 class="border-bottom border-secondary py-2 mt-5">
+                                                            Received: {{formatNumber((saccountapi.granted.t)/1000,
+                                                            3,'.', ',')}} TLP</h4>
+                                                        <div v-for="(a,b,c) in saccountapi.granted">
+                                                            <div class="d-flex align-items-center border-bottom border-secondary pb-2 my-1"
+                                                                v-if="b != 't'">
+                                                                <p class="my-0">@{{b}}:
+                                                                    {{formatNumber((a)/1000, 3, '.', ',')}}
+                                                                    TLP
+                                                                </p>
 
-                                                    <div class="btn-group" role="group" aria-label="TESTLARYNX Actions">
-                                                        <modal-vue type="delegate" :smarkets="smarkets.node"
-                                                            token="LARYNX" func="Lock Liquidity"
-                                                            :balance="saccountapi.poweredUp" :account="account"
-                                                            @modalsign="sendIt($event)">
-                                                            <button class="btn btn-info me-half" slot="trigger"
-                                                                type="button"><i
-                                                                    class="fas fa-user-friends fa-fw me-2"></i>Delegate</button>
-                                                        </modal-vue>
-
+                                                            </div>
+                                                        </div>
                                                     </div>
+                                                </div>
+
+                                                <div class="btn-group" role="group" aria-label="TESTLARYNX Actions">
+                                                    <modal-vue type="delegate" :smarkets="smarkets.node" token="LARYNX"
+                                                        func="Lock Liquidity" :balance="saccountapi.poweredUp"
+                                                        :account="account" @modalsign="sendIt($event)">
+                                                        <button class="btn btn-info me-half" slot="trigger"
+                                                            type="button"><i
+                                                                class="fas fa-user-friends fa-fw me-2"></i>Delegate</button>
+                                                    </modal-vue>
+
                                                 </div>
                                             </div>
-                                            <hr class="my-4 bg-light">
-                                            <div class="clearfix">
-                                                <div class="float-left">
-                                                    <h4>Estimated Account Value</h4>
-                                                    <p class="text-white-50">The approximate US Dollar value for all SPK
-                                                        assets
-                                                        in your account</p>
-                                                </div>
-                                                <div class="float-right text-end">
-                                                    <h5 id="totallarynx">
-                                                        ${{toFixed(spkval * saccountapi.tick * hiveprice.hive.usd,2)}}
-                                                    </h5>
-                                                </div>
+                                        </div>
+                                        <!--account value-->
+                                        <div class="d-flex align-items-center border-bottom border-secondary py-5">
+                                            <div class="">
+                                                <h4>Estimated Account Value</h4>
+                                                <p class="text-white-50">The approximate US Dollar value for all SPK
+                                                    assets
+                                                    in your account</p>
+                                            </div>
+                                            <div class="ms-auto text-end">
+                                                <h5 id="totallarynx">
+                                                    ${{toFixed(spkval * saccountapi.tick * hiveprice.hive.usd,2)}}
+                                                </h5>
                                             </div>
                                         </div>
                                     </div>
@@ -991,7 +1033,6 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- inventory tab -->
                     <div role="tabpanel" class="tab-pane fade show" id="inventory" aria-labelledby="inventorytab">
                         <div class="container">
