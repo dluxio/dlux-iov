@@ -1400,13 +1400,15 @@ var app = new Vue({
             this.lbalance = (data.balance / 1000).toFixed(3);
             this.lbargov = (data.gov / 1000).toFixed(3);
             this.saccountapi = data;
-            this.spkval =
-              (data.balance +
-                data.gov +
-                data.poweredUp +
-                data.claim +
-                data.spk) /
-              1000;
+            if (!this.saccountapi.granted.t)this.saccountapi.granted.t = 0
+            if (!this.saccountapi.granting.t) this.saccountapi.granting.t = 0;
+              this.spkval =
+                (data.balance +
+                  data.gov +
+                  data.poweredUp +
+                  data.claim +
+                  data.spk) /
+                1000;
           } else {
             this.focussaccountapi = data;
           }
