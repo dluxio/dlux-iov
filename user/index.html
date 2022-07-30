@@ -715,7 +715,7 @@
                                         </div>
                                         <!--locked larynx-->
                                         <div class="d-flex align-items-center border-bottom border-secondary py-5" v-if="saccountapi.gov">
-
+                                            <div>
                                                 <div class="d-flex align-items-start">
                                                     <h4 class="m-0">Locked LARYNX</h4><small><span
                                                             class="badge ms-1 me-2 text-bg-warning">TEST</span></small>
@@ -733,7 +733,7 @@
                                                     <li>Earns {{toFixed(parseFloat(spkStats.spk_rate_lgov) *
                                                         100,3)}}%</li>
                                                 </ul>
-                        
+                                            </div>
                                             <div id="larynxgactions" class="ms-auto text-end" v-show="me">
                                                 <h5 id="govbalance">
                                                     {{formatNumber((saccountapi.gov)/1000, 3, '.', ',')}} LL
