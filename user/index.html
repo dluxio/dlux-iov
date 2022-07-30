@@ -592,7 +592,7 @@
                                         <!--claim larynx airdrop-->
                                         <div id="larynxclaimdiv"
                                             class="d-flex align-items-center border-bottom border-secondary py-5"
-                                            v-show="parseInt(saccountapi.drop.last_claim, 16) != frmDate() && saccountapi.drop.availible.amount > 0 && me">
+                                            v-if="parseInt(saccountapi.drop.last_claim, 16) != frmDate() && saccountapi.drop.availible.amount > 0 && me">
                                             <div>
                                                 <div class="d-flex align-items-start">
                                                     <h4 class="m-0">Claim LARYNX</h4><small><span
