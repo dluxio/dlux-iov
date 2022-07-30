@@ -619,7 +619,7 @@
                                         </div>
                                         <!--claim larynx rewards-->
                                         <div class="d-flex align-items-center border-bottom border-secondary py-5"
-                                            id="larynxclaimrewards" v-show="saccountapi.claim > 0 && me">
+                                            id="larynxclaimrewards" v-if="saccountapi.claim > 0 && me">
                                             <div>
                                                 <div class="d-flex align-items-start">
                                                     <h4 class="m-0">Claim LARYNX</h4><small><span
