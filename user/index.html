@@ -791,12 +791,12 @@
                                                         {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}}
                                                         LP
                                                     </h5>
-                                                    <a v-if="saccountapi.granting.t" data-bs-toggle="collapse"
+                                                    <a v-if="saccountapi.granting.t || saccountapi.granted.t" data-bs-toggle="collapse"
                                                         id="delegationsbtn" href="#delegationsspk" role="button"
                                                         aria-expanded="false" aria-controls="Show delegations"
                                                         class="text-white" style="text-decoration: none">
                                                         <h6 id="delegatebal">
-                                                            <span>(-{{formatNumber((saccountapi.granting.t)/1000, 3,
+                                                            <span v-if="saccountapi.granting.t">(-{{formatNumber((saccountapi.granting.t)/1000, 3,
                                                                 '.', ',')}} LP)</span>
                                                             <span
                                                                 v-if="saccountapi.granted.t">(+{{formatNumber((saccountapi.granted.t)/1000,
