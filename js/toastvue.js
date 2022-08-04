@@ -33,16 +33,14 @@ export default {
   },
   methods: {
     removeOp(txid){
-      console.log('remove:', txid)
       var pend = JSON.parse(localStorage.getItem("pending"))
-      console.log(pend)
       for (var i = 0; i < pend.length; i++){
-        console.log(pend, pend[i])
         if(pend[i].txid == txid){
           pend.splice(i,1)
           i--
         }
       }
+      localStorage.setItem('pending', JSON.stringify(pend))
     },
     elaspedTime() {
       var time = new Date();
