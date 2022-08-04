@@ -807,7 +807,7 @@
 
                                                     <div class="btn-group" role="group" aria-label="TESTLARYNX Actions">
                                                         <modal-vue type="delegate" :smarkets="smarkets.node"
-                                                            token="LARYNX" func="Lock Liquidity"
+                                                            token="LARYNX" func="Lock Liquidity" :stats="sstats"
                                                             :balance="saccountapi.poweredUp" :account="account"
                                                             @modalsign="sendIt($event)">
                                                             <button class="btn btn-info " slot="trigger"
@@ -833,7 +833,7 @@
                                                             </p>
                                                             <div class="d-flex ms-auto ">
                                                                 <modal-vue type="delegate" :smarkets="smarkets.node"
-                                                                    token="LARYNX" :to="b" :amount="a"
+                                                                    token="LARYNX" :to="b" :amount="a" :stats="sstats"
                                                                     :balance="saccountapi.poweredUp" :account="account"
                                                                     @modalsign="sendIt($event)">
                                                                     <button slot="trigger" type="button"
