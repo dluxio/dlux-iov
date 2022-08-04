@@ -69,7 +69,7 @@ export default {
                                   <span class="input-group-text bg-dark border-secondary text-secondary">@</span>
                                   <select class="form-select text-white bg-dark border-secondary" id="datalistOptions" v-model="to">
                                     <option value="" disabled selected>Select node operator</option>
-                                     <option v-for="node in smarkets" :value="node.self">{{node.self}}</option>
+                                     <option v-for="node in smarkets" :value="node.self">{{node.self}} {{node.lastGood >= stats.head_block - 1200 ? '🟩': node.lastGood > stats.head_block - 28800  ? '🟨' : '🟥'}}</option>
                                   </select>
                                 </div>
                                 <div class="input-group mb-3" v-if="token == 'DLUX'">
@@ -438,6 +438,13 @@ export default {
     content: {
       required: false,
       default: "",
+    },
+    stats: {
+      default: function () {
+        return {
+          head_block: 0,
+        };
+      },
     },
     trigger: {
       default: "click",

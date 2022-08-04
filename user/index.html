@@ -841,7 +841,7 @@
                                                                             class="fas fa-fw fa-user-edit"></i></button>
                                                                 </modal-vue>
                                                                 <modal-vue type="delegate" :smarkets="smarkets.node"
-                                                                    token="LARYNX" :to="b" amount="0"
+                                                                    token="LARYNX" :to="b" amount="0" :stats="sstats"
                                                                     :balance="saccountapi.poweredUp" :account="account"
                                                                     @modalsign="sendIt($event)">
                                                                     <button class="ms-1 btn btn-danger ms-1"
