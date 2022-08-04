@@ -11,7 +11,7 @@ export default {
             <div class="toast-header bg-info">
               <strong class="me-auto text-dark">{{alert.title}}</strong>
               <small class="text-dark">{{elaspedTime(alert.time)}}</small>
-              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" @click="removeOp(alert.txid)" aria-label="Close"></button>
             </div>
             <div class="toast-body text-white">{{alert.status}}</div>
             <div class="toast-body text-white" v-if="alert.link">
@@ -32,6 +32,15 @@ export default {
     this.toast.show();
   },
   methods: {
+    removeOp(txid){
+      var pend = JSON.parse(localStorage.getItem("pending"))
+      for (var i = 0; i < pend.length; i++){
+        if(pend[i].txid == txid){
+          pend.splice(i,1)
+          i--
+        }
+      }
+    },
     elaspedTime() {
       var time = new Date();
       var diff = time.getTime() - this.alert.time;
