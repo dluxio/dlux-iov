@@ -43,7 +43,7 @@ export default {
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button :disabled="!valid" type="submit" class="btn btn-primary" @click="send">Send</button>
+                            <button :disabled="!valid" type="submit" class="btn btn-primary" @click="send" data-bs-dismiss="modal">Send</button>
                         </div>
                     </form>
                 </div>
@@ -86,7 +86,7 @@ export default {
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button :disabled="!to" type="submit" class="btn btn-primary" @click="delegate">Confirm</button>
+                            <button :disabled="!to" type="submit" class="btn btn-primary" @click="delegate" data-bs-dismiss="modal">Confirm</button>
                         </div>
                     </form>
                 </div>
@@ -111,7 +111,7 @@ export default {
                             </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-primary" @click="power">Continue</button>
+                            <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
                         </div>
                     </form>
                 </div>
@@ -136,7 +136,7 @@ export default {
                             </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-primary" @click="power">Continue</button>
+                            <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
                         </div>
                     </form>
                 </div>
