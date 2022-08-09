@@ -406,7 +406,7 @@ export default {
           api: "https://spkinstant.hivehoneycomb.com",
           txid: "send",
         };
-      else if (this.token == "LARYNX" && this.func == "Lock")
+      else if (this.token == "LARYNX" && this.func == "Lock Liquidity")
         op = {
           type: "cja",
           cj: {
