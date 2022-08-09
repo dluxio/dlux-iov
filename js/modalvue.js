@@ -203,7 +203,7 @@ export default {
           id: `${this.spkprefix}_spk_send`,
           msg: `Trying to send ${this.token}...`,
           ops: ["getSapi"],
-          api: "https://spktoken.dlux.io",
+          api: "https://spkinstant.hivehoneycomb.com",
           txid: "send",
         };
       else if (this.token == "LARYNX")
@@ -217,7 +217,7 @@ export default {
           id: `${this.spkprefix}_send`,
           msg: `Trying to send ${this.token}...`,
           ops: ["getSapi"],
-          api: "https://spktoken.dlux.io",
+          api: "https://spkinstant.hivehoneycomb.com",
           txid: "send",
         };
       else if (this.token == "HIVE")
@@ -274,7 +274,7 @@ export default {
       //     id: `${this.spkprefix}_spk_send`,
       //     msg: `Trying to send ${this.token}...`,
       //     ops: ["getSapi"],
-      //     api: "https://spktoken.dlux.io",
+      //     api: "https://spkinstant.hivehoneycomb.com",
       //     txid: "delegate",
       //   };
       else if (this.token == "LARYNX")
@@ -287,7 +287,7 @@ export default {
           id: `${this.spkprefix}_power_grant`,
           msg: `Trying to delegate ${this.token}...`,
           ops: ["getSapi"],
-          api: "https://spktoken.dlux.io",
+          api: "https://spkinstant.hivehoneycomb.com",
           txid: "delegate",
         };
       // else if (this.token == "HIVE")
@@ -379,7 +379,7 @@ export default {
       //     id: `${this.spkprefix}_spk_send`,
       //     msg: `Trying to send ${this.token}...`,
       //     ops: ["getSapi"],
-      //     api: "https://spktoken.dlux.io",
+      //     api: "https://spkinstant.hivehoneycomb.com",
       //     txid: "send",
       //   };
       else if (this.token == "LARYNX" && this.func == "Power Up")
@@ -391,7 +391,7 @@ export default {
           id: `${this.spkprefix}_power_up`,
           msg: `Trying to power up ${this.token}...`,
           ops: ["getSapi"],
-          api: "https://spktoken.dlux.io",
+          api: "https://spkinstant.hivehoneycomb.com",
           txid: "send",
         };
       else if (this.token == "LARYNX" && this.func == "Unlock")
@@ -403,7 +403,7 @@ export default {
           id: `${this.spkprefix}_gov_down`,
           msg: `Trying to unlock ${this.token}...`,
           ops: ["getSapi"],
-          api: "https://spktoken.dlux.io",
+          api: "https://spkinstant.hivehoneycomb.com",
           txid: "send",
         };
       else if (this.token == "LARYNX" && this.func == "Lock")
@@ -415,7 +415,7 @@ export default {
           id: `${this.spkprefix}_gov_up`,
           msg: `Trying to lock ${this.token}...`,
           ops: ["getSapi"],
-          api: "https://spktoken.dlux.io",
+          api: "https://spkinstant.hivehoneycomb.com",
           txid: "send",
         };
       // else if (this.token == "HIVE")

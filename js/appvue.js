@@ -24,7 +24,7 @@ let lapi = "";
 //     if (hash[1].includes("dlux")) {
 //         lapi = "https://token.dlux.io";
 //     } else if (hash[1].includes("larynx")) {
-//         lapi = "https://spktoken.dlux.io";
+//         lapi = "https://spkinstant.hivehoneycomb.com";
 //     } else if (hash[1].includes("duat")) {
 //         lapi = "https://duat.hivehoneycomb.com";
 //     }
@@ -35,7 +35,7 @@ let lapi = "";
 console.log(lapi);
 if (
     lapi == "https://token.dlux.io" ||
-    lapi == "https://spktoken.dlux.io" ||
+    lapi == "https://spkinstant.hivehoneycomb.com" ||
     lapi == "https://duat.hivehoneycomb.com"
 ) {
     console.log("using defaults");
@@ -718,7 +718,7 @@ var app = new Vue({
       }
       let api =
         url ||
-        prompt("Please enter your API", "https://spktoken.dlux.io");
+        prompt("Please enter your API", "https://spkinstant.hivehoneycomb.com");
       if (url.indexOf("https://") == -1) {
         alert("https is required");
         return;

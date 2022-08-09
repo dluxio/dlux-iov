@@ -297,7 +297,7 @@ let HP
 //     switch (prefix){
 //         case 'spkcc_':
 //             token = 'LARYNX'
-//             statusapi = 'spktoken.dlux.io'
+//             statusapi = 'spkinstant.hivehoneycomb.com'
 //             break;
 //         default:
 //             token = 'DLUX'
@@ -458,7 +458,7 @@ let HP
 //     switch (prefix){
 //         case 'spkcc_':
 //             token = 'LARYNX'
-//             statusapi = 'spktoken.dlux.io'
+//             statusapi = 'spkinstant.hivehoneycomb.com'
 //             break;
 //         default:
 //             token = 'DLUX'
@@ -483,7 +483,7 @@ let HP
 //         case 'spkcc_':
 //             token = 'LARYNX'
 //             msaccount = 'spk-cc'
-//             statusapi = 'spktoken.dlux.io'
+//             statusapi = 'spkinstant.hivehoneycomb.com'
 //             break;
 //         default:
 //             token = 'DLUX'
@@ -506,7 +506,7 @@ let HP
 //     switch (prefix){
 //         case 'spkcc_':
 //             token = 'LARYNX'
-//             statusapi = 'spktoken.dlux.io'
+//             statusapi = 'spkinstant.hivehoneycomb.com'
 //             break;
 //         default:
 //             token = 'DLUX'
