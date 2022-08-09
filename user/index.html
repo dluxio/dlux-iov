@@ -253,9 +253,9 @@
                             <ul id="wallettabs" class="nav nav-pills justify-content-center" role="tablist">
                                 <li class="nav-item"> <a class="nav-link active" href="#dlux" id="dluxtab" role="tab"
                                         data-bs-toggle="tab" aria-controls="dlux" aria-expanded="true">DLUX</a></li>
-                                <li class="nav-item" v-show="false"> <a class="nav-link d-flex align-items-center" href="#spk"
+                                <li class="nav-item"> <a class="nav-link d-flex align-items-center" href="#spk"
                                         id="spktab" role="tab" data-bs-toggle="tab" aria-controls="spk"
-                                        aria-expanded="true">SPK<span class="badge text-bg-warning ms-2">TEST</span></a>
+                                        aria-expanded="true">SPK</a>
                                 </li>
                                 <li class="nav-item" v-show="false"> <a class="nav-link d-flex align-items-center" href="#/"
                                         id="spktab" role="tab">SOON - SPK</a>
@@ -518,17 +518,9 @@
                             <div role="tabpanel" class="tab-pane fade show " id="spk" aria-labelledby="spktab">
                                 <div class="container">
                                     <div class="">
-                                        <div class="alert alert-warning d-flex align-items-center" role="alert">
-                                            <div>
-                                                <i class="fa-solid fa-triangle-exclamation me-2"></i>These tokens and
-                                                functions are in testing - use at your own risk, you may encounter
-                                                issues.
-                                            </div>
-                                        </div>
                                         <div class="d-flex align-items-center mt-4 mb-2">
                                             <div class="d-flex align-items-start">
-                                                <h1 class="m-0">SPK</h1><small><span
-                                                        class="badge ms-1 me-2 text-bg-warning">TEST</span></small>
+                                                <h1 class="m-0">SPK</h1>
                                                 <h4 class="m-0"></h4>
                                             </div>
                                             <div class="text-center small m-0 p-2 ms-2" v-bind:class="{'text-success': larynxbehind < 30,
@@ -548,8 +540,7 @@
                                         <div class="d-flex align-items-center border-bottom border-secondary py-5">
                                             <div>
                                                 <div class="d-flex align-items-start">
-                                                    <h4 class="m-0">SPK</h4><small><span
-                                                            class="badge ms-1 me-2 text-bg-warning">TEST</span></small>
+                                                    <h4 class="m-0">SPK</h4>
                                                     <h4 class="m-0">Token</h4>
                                                 </div>
                                                 <p class="text-white-50 m-0">The governance token for the SPK network.
@@ -596,8 +587,7 @@
                                             v-if="parseInt(saccountapi.drop.last_claim, 16) != frmDate() && saccountapi.drop.availible.amount > 0 && me">
                                             <div>
                                                 <div class="d-flex align-items-start">
-                                                    <h4 class="m-0">Claim LARYNX</h4><small><span
-                                                            class="badge ms-1 me-2 text-bg-warning">TEST</span></small>
+                                                    <h4 class="m-0">Claim LARYNX</h4>
                                                     <h4 class="m-0">Airdrop</h4>
                                                 </div>
                                                 <p class="text-white-50">This months claimable tokens based on a January
@@ -610,9 +600,9 @@
                                                 <h5>{{formatNumber((saccountapi.drop.availible.amount)/1000, 3, '.',
                                                     ',')}}
                                                     LARYNX</h5>
-                                                <div class="btn-group" role="group" aria-label="TESTLARYNX Claim">
+                                                <div class="btn-group" role="group" aria-label="LARYNX Claim">
                                                     <button type="submit" class="btn btn-info "
-                                                        @click="dropClaim('TESTspkcc', 'claim')"><i
+                                                        @click="dropClaim('spkcc', 'claim')"><i
                                                             class="fas fa-coin"></i><i
                                                             class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
                                                 </div>
@@ -623,8 +613,7 @@
                                             id="larynxclaimrewards" v-if="saccountapi.claim > 0 && me">
                                             <div>
                                                 <div class="d-flex align-items-start">
-                                                    <h4 class="m-0">Claim LARYNX</h4><small><span
-                                                            class="badge ms-1 me-2 text-bg-warning">TEST</span></small>
+                                                    <h4 class="m-0">Claim LARYNX</h4>
                                                     <h4 class="m-0">Rewards</h4>
                                                 </div>
                                                 <p class="text-white-50">Claimable rewards for running a SPK service
@@ -650,9 +639,9 @@
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <div class="btn-group" role="group" aria-label="TESTLARYNX Claim">
+                                                <div class="btn-group" role="group" aria-label="LARYNX Claim">
                                                     <button type="submit" class="btn btn-info "
-                                                        @click="rewardClaim('TESTspkcc', 'shares_claim', spk2gov)"><i
+                                                        @click="rewardClaim('spkcc', 'shares_claim', spk2gov)"><i
                                                             class="fas fa-coin"></i><i
                                                             class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
                                                 </div>
@@ -662,8 +651,7 @@
                                         <div class="d-flex align-items-center border-bottom border-secondary py-5">
                                             <div>
                                                 <div class="d-flex align-items-start">
-                                                    <h4 class="m-0">LARYNX</h4><small><span
-                                                            class="badge ms-1 me-2 text-bg-warning">TEST</span></small>
+                                                    <h4 class="m-0">LARYNX</h4>
                                                     <h4 class="m-0">Token</h4>
                                                 </div>
                                                 <p class="text-white-50">The mining token for the SPK network.</p>
@@ -672,7 +660,7 @@
                                                 <h5 id="larynxbalance">
                                                     {{formatNumber((saccountapi.balance)/1000, 3, '.', ',')}} LARYNX
                                                 </h5>
-                                                <div class="btn-group" role="group" aria-label="TESTLARYNX Actions">
+                                                <div class="btn-group" role="group" aria-label="LARYNX Actions">
                                                     <button type="button" class="btn btn-info ">
                                                     <modal-vue type="send" token="LARYNX" :balance="saccountapi.balance"
                                                         :account="account" @modalsign="sendIt($event)">
@@ -716,8 +704,7 @@
                                         <div class="d-flex align-items-center border-bottom border-secondary py-5" v-if="saccountapi.gov">
                                             <div>
                                                 <div class="d-flex align-items-start">
-                                                    <h4 class="m-0">LARYNX</h4><small><span
-                                                            class="badge ms-1 me-2 text-bg-warning">TEST</span></small>
+                                                    <h4 class="m-0">LARYNX</h4>
                                                     <h4 class="m-0">Locked</h4>
                                                 </div>
                                                 <p class="text-white-50">Locked tokens provide liquidity to the
@@ -737,7 +724,7 @@
                                                 <h5 id="govbalance">
                                                     {{formatNumber((saccountapi.gov)/1000, 3, '.', ',')}} LL
                                                 </h5>
-                                                <div class="btn-group" role="group" aria-label="TESTLARYNX Actions">
+                                                <div class="btn-group" role="group" aria-label="LARYNX Actions">
                                                     <button type="button" class="btn btn-info">
                                                         <span><i class="fas fa-user-friends fa-fw me-2"></i>Options</span>
                                                     </button>
@@ -768,8 +755,9 @@
                                             <div class="d-flex align-items-center">
                                                 <div>
                                                     <div class="d-flex align-items-start">
-                                                        <h4 class="m-0">LARYNX</h4><small><span
-                                                                class="badge ms-1 me-2 text-bg-warning">TEST</span></small>
+                                                        <h4 class="m-0">LARYNX</h4>
+                                                        <!-- <small><span
+                                                                class="badge ms-1 me-2 text-bg-warning">TEST</span></small> -->
                                                         <h4 class="m-0">Power</h4>
                                                     </div>
                                                     <p class="text-white-50">Powered tokens used to mine SPK</p>
@@ -808,7 +796,7 @@
 
                                                     </a>
 
-                                                    <div class="btn-group" role="group" aria-label="TESTLARYNX Actions">
+                                                    <div class="btn-group" role="group" aria-label="LARYNX Actions">
                                                         <modal-vue type="delegate" :smarkets="smarkets.node"
                                                             token="LARYNX" func="Lock Liquidity" :stats="sstats"
                                                             :balance="saccountapi.poweredUp" :account="account"

@@ -3,7 +3,7 @@ const { Modal } = bootstrap;
 export default {
   data() {
     return {
-      spkprefix: "TESTspkcc",
+      spkprefix: "spkcc",
     };
   },
   template: `
@@ -189,6 +189,7 @@ export default {
           id: `${this.token.toLowerCase()}_send`,
           msg: `Trying to send ${this.token}...`,
           ops: ["getTokenUser"],
+          api: "https://token.dlux.io",
           txid: "send",
         };
       else if (this.token == "SPK")
@@ -202,6 +203,7 @@ export default {
           id: `${this.spkprefix}_spk_send`,
           msg: `Trying to send ${this.token}...`,
           ops: ["getSapi"],
+          api: "https://spktoken.dlux.io",
           txid: "send",
         };
       else if (this.token == "LARYNX")
@@ -215,6 +217,7 @@ export default {
           id: `${this.spkprefix}_send`,
           msg: `Trying to send ${this.token}...`,
           ops: ["getSapi"],
+          api: "https://spktoken.dlux.io",
           txid: "send",
         };
       else if (this.token == "HIVE")
@@ -257,6 +260,7 @@ export default {
           id: `${this.token.toLowerCase()}_power_grant`,
           msg: `Trying to send ${this.token}...`,
           ops: ["getTokenUser"],
+          api: "https://token.dlux.io",
           txid: "delegate",
         };
       // else if (this.token == "SPK")
@@ -270,6 +274,7 @@ export default {
       //     id: `${this.spkprefix}_spk_send`,
       //     msg: `Trying to send ${this.token}...`,
       //     ops: ["getSapi"],
+      //     api: "https://spktoken.dlux.io",
       //     txid: "delegate",
       //   };
       else if (this.token == "LARYNX")
@@ -282,6 +287,7 @@ export default {
           id: `${this.spkprefix}_power_grant`,
           msg: `Trying to delegate ${this.token}...`,
           ops: ["getSapi"],
+          api: "https://spktoken.dlux.io",
           txid: "delegate",
         };
       // else if (this.token == "HIVE")
@@ -323,6 +329,7 @@ export default {
           id: `${this.token.toLowerCase()}_power_up`,
           msg: `Trying to power up ${this.token}...`,
           ops: ["getTokenUser"],
+          api: "https://token.dlux.io",
           txid: "send",
         };
       else if (this.token == "DLUX" && this.func == "Power Down")
@@ -334,6 +341,7 @@ export default {
           id: `${this.token.toLowerCase()}_power_down`,
           msg: `Trying to power down ${this.token}...`,
           ops: ["getTokenUser"],
+          api: "https://token.dlux.io",
           txid: "send",
         };
       else if (this.token == "DLUX" && this.func == "Unlock")
@@ -345,6 +353,7 @@ export default {
           id: `${this.token.toLowerCase()}_gov_down`,
           msg: `Trying to unlock ${this.token}...`,
           ops: ["getTokenUser"],
+          api: "https://token.dlux.io",
           txid: "send",
         };
       else if (this.token == "DLUX" && this.func == "Lock")
@@ -356,6 +365,7 @@ export default {
           id: `${this.token.toLowerCase()}_gov_down`,
           msg: `Trying to lock ${this.token}...`,
           ops: ["getTokenUser"],
+          api: "https://token.dlux.io",
           txid: "send",
         };
       // else if (this.token == "SPK")
@@ -369,6 +379,7 @@ export default {
       //     id: `${this.spkprefix}_spk_send`,
       //     msg: `Trying to send ${this.token}...`,
       //     ops: ["getSapi"],
+      //     api: "https://spktoken.dlux.io",
       //     txid: "send",
       //   };
       else if (this.token == "LARYNX" && this.func == "Power Up")
@@ -380,6 +391,7 @@ export default {
           id: `${this.spkprefix}_power_up`,
           msg: `Trying to power up ${this.token}...`,
           ops: ["getSapi"],
+          api: "https://spktoken.dlux.io",
           txid: "send",
         };
       else if (this.token == "LARYNX" && this.func == "Unlock")
@@ -391,6 +403,7 @@ export default {
           id: `${this.spkprefix}_gov_down`,
           msg: `Trying to unlock ${this.token}...`,
           ops: ["getSapi"],
+          api: "https://spktoken.dlux.io",
           txid: "send",
         };
       else if (this.token == "LARYNX" && this.func == "Lock")
@@ -402,6 +415,7 @@ export default {
           id: `${this.spkprefix}_gov_up`,
           msg: `Trying to lock ${this.token}...`,
           ops: ["getSapi"],
+          api: "https://spktoken.dlux.io",
           txid: "send",
         };
       // else if (this.token == "HIVE")

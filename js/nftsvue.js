@@ -21,7 +21,7 @@ if (location.hash && !lapi) {
   if (hash[1].includes("dlux")) {
     lapi = "https://token.dlux.io";
   } else if (hash[1].includes("larynx")) {
-    lapi = "https://spkinstant.hivehoneycomb.com";
+    lapi = "https://spktoken.dlux.io";
   } else if (hash[1].includes("duat")) {
     lapi = "https://duat.hivehoneycomb.com";
   }
@@ -32,7 +32,7 @@ if (!lapi) {
 console.log(lapi);
 if (
   lapi == "https://token.dlux.io" ||
-  lapi == "https://spkinstant.hivehoneycomb.com" ||
+  lapi == "https://spktoken.dlux.io" ||
   lapi == "https://duat.hivehoneycomb.com"
 ) {
   console.log("using defaults");
@@ -139,7 +139,7 @@ var app = new Vue({
       stats: {},
       behindTitle: "",
       TOKEN: "LARYNX",
-      dataAPI: 'https://data.dlux.io',
+      dataAPI: "https://data.dlux.io",
       bform: {
         cl: false,
         tl: false,
@@ -610,6 +610,7 @@ function buyFT(setname, uid, price, type,  callback){
         id: `${this.prefix}ft_buy`,
         msg: `Purchasing: ${set}:${uid}`,
         ops: ["getTokenUser", "getUserNFTs"],
+        api: this.apiFor(this.prefix),
         txid: `${set}:${uid}_ft_buy`,
       };
     },
@@ -621,10 +622,11 @@ function bidFT(setname, uid, callback){
  }
     */
     bidFT(uid, set, price, type) {
-      price = parseInt(price * 1000);
+      bid_amount = parseInt(price * 1000);
       var cja = {
         set: set || this.focusSet.set,
         uid: uid,
+        bid_amount,
       };
       this.toSign = {
         type: "cja",
@@ -632,6 +634,7 @@ function bidFT(setname, uid, callback){
         id: `${this.prefix}ft_buy`,
         msg: `Purchasing: ${set}:${uid}`,
         ops: ["getTokenUser", "getUserNFTs"],
+        api: this.apiFor(this.prefix),
         txid: `${set}:${uid}_ft_buy`,
       };
     },
@@ -643,7 +646,21 @@ function giveFT(setname, to, qty, callback){
     })
     .catch(e=>alert(`${to} is not a valid hive account`))
  }
-
+    */
+    giveFT(setname, to, qty) {
+      qty = parseInt(qty);
+      var cja = { set: setname, to, qty };
+      this.toSign = {
+        type: "cja",
+        cj: cja,
+        id: `${this.prefix}ft_transfer`,
+        msg: `Trying to give ${setname} mint token to ${to}`,
+        ops: ["getTokenUser", "getUserNFTs"],
+        api: this.apiFor(this.prefix),
+        txid: `${set} _ft_transfer`,
+      };
+    },
+    /*
 function tradeFT(setname, to, price, callback){
     price = parseInt(price * 1000)
     checkAccount(to)
@@ -652,12 +669,21 @@ function tradeFT(setname, to, price, callback){
     })
     .catch(e=>alert(`${to} is not a valid hive account`))
  }
-// {
-//     hive:1000, //1.000 Hive || hbd: 1000 // 1.000 HBD
-//     quantity: 4096, //4096 NFTs
-//     set: 'dlux', //set tokens to sell
-//     distro: 'account1_5000,acc2_5000' //must add to 10000
-// }
+    */
+    tradeFT(setname, to, price) {
+      price = parseInt(price * 1000);
+      var cja = { set: setname, to, price };
+      this.toSign = {
+        type: "cja",
+        cj: cja,
+        id: `${this.prefix}ft_escrow`,
+        msg: `Trying to trade ${setname}: Mint Token`,
+        ops: ["getTokenUser", "getUserNFTs"],
+        api: this.apiFor(this.prefix),
+        txid: `${set} _ft_escrow`,
+      };
+    },
+    /*
 function sellFT(setname, price, type, quantity = 1, distro,  callback){
     price = parseInt(price * 1000)
     if(type.toUpperCase() == 'HIVE')type = 'hive'
@@ -666,6 +692,33 @@ function sellFT(setname, price, type, quantity = 1, distro,  callback){
     if(!type)broadcastCJA({set: setname, price}, 'dlux_ft_sell', `Trying to sell ${setname} mint token`)
     else broadcastCJA({set: setname, [type]:price, quantity, distro}, 'dlux_fts_sell_h', `Trying to sell ${setname} mint token`)
  }
+    */
+    sellFT(setname, price, type, quantity = 1, distro) {
+      price = parseInt(price * 1000);
+      var cja = { set: setname, price },
+        id = `${this.prefix}ft_sell`;
+      if (type.toUpperCase() == "HIVE") {
+        cja.hive = price
+        cja.quantity = quantity 
+        cja.distro = distro
+        id = `${this.prefix}fts_sell_h`;
+      } else if (type.toUpperCase() == "HBD") {
+        cja.hbd = price;
+        cja.quantity = quantity;
+        cja.distro = distro;
+        id = `${this.prefix}fts_sell_h`;
+      } else type = "cja";
+      this.toSign = {
+          type: "cja",
+          cj: cja,
+          id,
+          msg: `Trying to sell ${setname} mint token`,
+          ops: ["getTokenUser", "getUserNFTs"],
+          api: this.apiFor(this.prefix),
+          txid: `${set} _ft sell`,
+        };
+    },
+    /*
 
  function auctionFT(setname, price, now, time, callback){
     time = parseInt(time)
@@ -808,41 +861,53 @@ function setPFP(setname, uid, callback){
  }
 */
     setPFP(item) {
-      var pjm = JSON.parse(this.accountinfo.posting_json_metadata)
-      if(pjm.profile)pjm.profile.profile_image = `${this.dataAPI}/pfp/${this.account}?${item.setname}-${item.uid}`
-      else pjm.profile = {profile_image: `${this.dataAPI}/pfp/${this.account}?${item.setname}-${item.uid}`}
+      var pjm = JSON.parse(this.accountinfo.posting_json_metadata);
+      if (pjm.profile)
+        pjm.profile.profile_image = `${this.dataAPI}/pfp/${this.account}?${item.setname}-${item.uid}`;
+      else
+        pjm.profile = {
+          profile_image: `${this.dataAPI}/pfp/${this.account}?${item.setname}-${item.uid}`,
+        };
       var cja = [
-        ['custom_json', {
-            "required_auths": [],
-            "required_posting_auths": [this.account],
-            "id": `${this.prefix}nft_pfp`,
-            "json": JSON.stringify({
+          [
+            "custom_json",
+            {
+              required_auths: [],
+              required_posting_auths: [this.account],
+              id: `${this.prefix}nft_pfp`,
+              json: JSON.stringify({
                 set: item.setname,
-                uid: item.uid
-            })
-        }],
-        ["account_update2",{
-            "account": this.account,
-            "json_metadata": "",
-            "posting_json_metadata": JSON.stringify(pjm)}
-        ]
-      ],
+                uid: item.uid,
+              }),
+            },
+          ],
+          [
+            "account_update2",
+            {
+              account: this.account,
+              json_metadata: "",
+              posting_json_metadata: JSON.stringify(pjm),
+            },
+          ],
+        ],
         type = "raw";
       this.toSign = {
         type,
         op: cja,
-        key: 'posting',
+        key: "posting",
         id: `${this.prefix}nft_pfp`,
         msg: `Setting PFP: ${item.setname}:${item.uid}`,
         ops: ["getUserNFTs"],
+        api: this.apiFor(this.prefix),
         txid: `${item.setname}:${item.uid}_nft_pfp`,
       };
     },
-    /*
- function deleteNFT(setname, uid, callback){
-    broadcastCJA({ set: setname, uid }, "dlux_nft_delete", `Trying to melt ${setname}:${uid}`) 
- }
-*/
+    apiFor(prefex) {
+      if (prefix == "dlux_") return "https://token.dlux.io";
+      if (prefix == "spkcc_") return "https://spktoken.dlux.io";
+      if (prefix == "duat_") return "https://duat.hivehoneycomb.com";
+      else return "";
+    },
     meltNFT(item) {
       var cja = {
           set: item.setname,
@@ -855,6 +920,7 @@ function setPFP(setname, uid, callback){
         id: `${this.prefix}nft_delete`,
         msg: `Melting: ${item.setname}:${item.uid}`,
         ops: ["getUserNFTs"],
+        api: this.apiFor(this.prefix),
         txid: `${item.setname}:${item.uid}_nft_delete`,
       };
     },
@@ -881,6 +947,7 @@ function giveNFT(setname, uid, to, callback){
           id: `${this.prefix}nft_transfer`,
           msg: `Giving: ${item.setname}:${item.uid}`,
           ops: ["getUserNFTs"],
+          api: this.apiFor(this.prefix),
           txid: `${item.setname}:${item.uid}_nft_transfer`,
         };
       }
@@ -911,6 +978,7 @@ function tradeNFT(setname, uid, to, price, type, callback){
           id: `${this.prefix}nft_reserve_transfer`,
           msg: `Proposing Trade: ${item.setname}:${item.uid}`,
           ops: ["getUserNFTs"],
+          api: this.apiFor(this.prefix),
           txid: `${item.setname}:${item.uid}_nft_reserve_transfer`,
         };
       }
@@ -935,6 +1003,7 @@ function sellNFT(setname, uid, price, type, callback){
         id: `${this.prefix}nft_sell`,
         msg: `Selling: ${item.setname}:${item.uid}`,
         ops: ["getUserNFTs"],
+        api: this.apiFor(this.prefix),
         txid: `${item.setname}:${item.uid}_nft_sell`,
       };
     },
@@ -955,6 +1024,7 @@ function sellNFTcancel(setname, uid, callback){
         id: `${this.prefix}nft_sell_cancel`,
         msg: `Canceling: ${item.set}:${item.uid}`,
         ops: ["getUserNFTs"],
+        api: this.apiFor(this.prefix),
         txid: `${item.set}:${item.uid}_nft_sell_cancel`,
       };
     },
@@ -984,6 +1054,7 @@ function buyNFT(setname, uid, price, type, callback){
         id: `${this.prefix}nft_buy`,
         msg: `Purchasing: ${item.set}:${item.uid}`,
         ops: ["getTokenUser", "getUserNFTs", "getHiveUser"],
+        api: this.apiFor(this.prefix),
         txid: `${item.set}:${item.uid}_nft_buy`,
       };
     },
@@ -1020,6 +1091,7 @@ function auctionNFT(setname, uid, price, now, time, type, callback){
         id: `${this.prefix}nft_${cja.type ? "h" : ""}auction`,
         msg: `Auctioning: ${item.setname}:${item.uid}`,
         ops: ["getUserNFTs"],
+        api: this.apiFor(this.prefix),
         txid: `${item.setname}:${item.uid}_nft_${cja.type ? "h" : ""}auction`,
       };
     },
@@ -1057,6 +1129,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         id: `${this.prefix}nft_bid`,
         msg: `Bidding on: ${item.setname}:${item.uid}`,
         ops: ["getUserNFTs"],
+        api: this.apiFor(this.prefix),
         txid: `${item.setname}:${item.uid}_nft_bid`,
       };
     },
@@ -1206,6 +1279,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           id: `${this.prefix}send`,
           msg: `Trying to send ${this.TOKEN}...`,
           ops: ["getTokenUser"],
+          api: this.apiFor(this.prefix),
           txid: "send",
         };
       } else alert("Username not found");
@@ -1291,7 +1365,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       }
       let api =
         url ||
-        prompt("Please enter your API", "https://spkinstant.hivehoneycomb.com");
+        prompt("Please enter your API", "https://spktoken.dlux.io");
       if (url.indexOf("https://") == -1) {
         alert("https is required");
         return;
@@ -1412,9 +1486,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           this.multisig = data.multisig;
           this.jsontoken = data.jsontoken;
           this.TOKEN = data.jsontoken.toUpperCase();
-          if(this.TOKEN == 'DLUX')this.dataAPI = 'https://data.dlux.io'
-          else if (data.dataAPI)this.dataAPI = data.dataAPI
-          else this.dataAPI = ''
+          if (this.TOKEN == "DLUX") this.dataAPI = "https://data.dlux.io";
+          else if (data.dataAPI) this.dataAPI = data.dataAPI;
+          else this.dataAPI = "";
           this.nftSellTabToken = this.TOKEN;
           this.nftAuctionTabToken = this.TOKEN;
           this.nftTradeTabToken = this.TOKEN;

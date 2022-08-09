@@ -48,7 +48,7 @@ export default {
         op.status = "Pending your approval";
         op.delay = 5000;
         op.title = op.id ? op.id : op.cj.memo;
-        op.api = this.lapi;
+        if(!op.api)op.api = this.lapi;
         this.ops.push(op);
         this.$emit("ack", op.txid);
         if (op.type == "cja") {
