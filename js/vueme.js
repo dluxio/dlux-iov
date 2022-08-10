@@ -1400,6 +1400,7 @@ var app = new Vue({
             this.lbalance = (data.balance / 1000).toFixed(3);
             this.lbargov = (data.gov / 1000).toFixed(3);
             this.saccountapi = data;
+            this.saccountapi.spkcal = this.reward_spk();
             if (!this.saccountapi.granted.t)this.saccountapi.granted.t = 0
             if (!this.saccountapi.granting.t) this.saccountapi.granting.t = 0;
               this.spkval =
@@ -1530,6 +1531,7 @@ var app = new Vue({
     this.getFeedPrice();
     this.getSapi(this.pageAccount, false);
     this.getTokenUser(this.pageAccount, false);
+    deepLink()
   },
   watch: {
     postSelect(a, b) {
