@@ -1282,7 +1282,11 @@ var app = new Vue({
         return 0;
       } else {
         t = parseInt(diff / 28800);
-        a = simpleInterest(this.saccountapi.gov, t, this.sstats.spk_rate_lgov);
+        a = this.saccountapi.gov ? simpleInterest(
+          this.saccountapi.gov,
+          t,
+          this.sstats.spk_rate_lgov
+        ): 0
         b = this.saccountapi.pow ? simpleInterest(
           this.saccountapi.pow,
           t,
