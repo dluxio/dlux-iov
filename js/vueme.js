@@ -1508,17 +1508,132 @@ var app = new Vue({
       return 0;
     },
     newme(user) {
-      if (!location.pathname.split("/@")[1] && this.prefix) {
-        this.pageAccount = location.pathname.split("/@")[1]
-          ? location.pathname.split("/@")[1]
-          : this.account;
-        this.focus.account = this.pageAccount;
-        if (this.pageAccount == this.account) this.me = true;
-        this.checkAccount("pageAccount", "focus");
-        this.getPosts(true);
-        this.getSapi(this.pageAccount, false);
-        this.getTokenUser(this.pageAccount, false);
+      this.posturls = {}
+      this.postSelect = {
+        sort: "time",
+        searchTerm: "",
+        bitMask: 0,
+        entry: "new",
+        search: {
+          a: 10,
+          o: 0,
+          e: false,
+          p: false,
+        },
+        new: {
+          a: 10, //amount
+          o: 0, //offset
+          e: false, //end
+          p: false, //pending - One pending request
+        },
+        trending: {
+          a: 10,
+          o: 0,
+          e: false,
+          p: false,
+        },
+        promoted: {
+          a: 10,
+          o: 0,
+          e: false,
+          p: false,
+        },
+        sortDir: "desc",
+        types: {
+          VR: {
+            checked: true,
+            icon: "fa-solid fa-vr-cardboard me-2",
+            launch: "3D / VR Experience",
+            location: "/dlux/@",
+            hint: "",
+            bitFlag: 1,
+          },
+          AR: {
+            checked: true,
+            icon: "fa-solid fa-glasses me-2",
+            launch: "AR Experience",
+            location: "/dlux/@",
+            hint: "",
+            bitFlag: 2,
+          },
+          XR: {
+            checked: true,
+            icon: "fa-brands fa-unity me-2",
+            launch: "Extended Reality Experience",
+            location: "/dlux/@",
+            hint: "",
+            bitFlag: 4,
+          },
+          APP: {
+            checked: true,
+            icon: "fa-solid fa-mobile-screen-button me-2",
+            launch: "Unstoppable App",
+            location: "/dlux/@",
+            hint: "",
+            bitFlag: 8,
+          },
+          ["360"]: {
+            checked: true,
+            icon: "fa-solid fa-globe me-2",
+            launch: "360 Photo Gallery",
+            location: "/dlux/@",
+            hint: "",
+            bitFlag: 16,
+          },
+          ["3D"]: {
+            checked: true,
+            icon: "fa-solid fa-shapes me-2",
+            launch: "3D / VR Experience",
+            location: "/dlux/@",
+            hint: "",
+            bitFlag: 32,
+          },
+          Audio: {
+            checked: true,
+            icon: "fa-solid fa-music me-2",
+            launch: "Unstoppable Audio",
+            location: "/dlux/@",
+            hint: "",
+            bitFlag: 64,
+          },
+          Video: {
+            checked: true,
+            icon: "fa-solid fa-film me-2",
+            launch: "Unstoppable Video",
+            location: "/dlux/@",
+            hint: "",
+            bitFlag: 128,
+          },
+          Blog: {
+            checked: false,
+            icon: "fa-solid fa-book me-2",
+            launch: "Visit Full Blog",
+            location: "/blog/@",
+            hint: "",
+            bitFlag: 256,
+          },
+        },
+      };
+      if (location.pathname.split("/@")[1]) {
+        this.pageAccount = location.pathname.split("/@")[1];
+      } else {
+        this.pageAccount = this.account;
+        this.me = true;
       }
+      if (this.pageAccount == this.account) this.me = true;
+      this.focus.account = this.pageAccount;
+      this.sapi = sapi;
+      this.checkAccount("pageAccount", "focus");
+      this.getHiveStats();
+      this.getQuotes();
+      this.getSNodes();
+      this.getPosts();
+      this.getProtocol();
+      this.getSpkStats();
+      this.getRewardFund();
+      this.getFeedPrice();
+      this.getSapi(this.pageAccount, false);
+      this.getTokenUser(this.pageAccount, false);
     },
   },
   mounted() {
