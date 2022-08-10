@@ -1273,15 +1273,21 @@ var app = new Vue({
         b = 0,
         c = 0,
         t = 0,
-        diff = this.sstats.head_block - this.saccountapi.spkblock;
-      if (!this.saccountapi.spkblock) {
+        diff = this.saccountapi.head_block - this.saccountapi.spk_block;
+      if (!this.saccountapi.spk_block) {
+        console.log("No SPK seconds")
         return 0;
       } else if (diff < 28800) {
+        console.log("Wait for SPK")
         return 0;
       } else {
         t = parseInt(diff / 28800);
         a = simpleInterest(this.saccountapi.gov, t, this.sstats.spk_rate_lgov);
-        b = simpleInterest(this.saccountapi.pow, t, this.sstats.spk_rate_lpow);
+        b = this.saccountapi.pow ? simpleInterest(
+          this.saccountapi.pow,
+          t,
+          this.sstats.spk_rate_lpow
+        ) : 0
         c = simpleInterest(
           this.saccountapi.granted?.t > 0
             ? this.saccountapi.granted.t
@@ -1293,8 +1299,10 @@ var app = new Vue({
         );
         const i = a + b + c;
         if (i) {
+          console.log(i, "Phantom SPK")
           return i;
         } else {
+          console.log("0 SPK")
           return 0;
         }
       }
@@ -1400,7 +1408,7 @@ var app = new Vue({
             this.lbalance = (data.balance / 1000).toFixed(3);
             this.lbargov = (data.gov / 1000).toFixed(3);
             this.saccountapi = data;
-            this.saccountapi.spkcal = this.reward_spk();
+            this.saccountapi.spk += this.reward_spk();
             if (!this.saccountapi.granted.t)this.saccountapi.granted.t = 0
             if (!this.saccountapi.granting.t) this.saccountapi.granting.t = 0;
               this.spkval =
