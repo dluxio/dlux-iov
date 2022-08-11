@@ -1419,6 +1419,7 @@ var app = new Vue({
                 (data.balance +
                   data.gov +
                   data.poweredUp +
+                  this.saccountapi.granting.t +
                   data.claim +
                   data.spk) /
                 1000;
