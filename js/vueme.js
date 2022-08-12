@@ -1293,11 +1293,11 @@ var app = new Vue({
           this.sstats.spk_rate_lpow
         ) : 0
         c = simpleInterest(
-          this.saccountapi.granted?.t > 0
+          (this.saccountapi.granted?.t > 0
             ? this.saccountapi.granted.t
-            : 0 + this.saccountapi.granting?.t > 0
+            : 0) + (this.saccountapi.granting?.t > 0
             ? this.saccountapi.granting.t
-            : 0,
+            : 0),
           t,
           this.sstats.spk_rate_ldel
         );
