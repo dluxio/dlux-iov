@@ -1301,6 +1301,14 @@ var app = new Vue({
           t,
           this.sstats.spk_rate_ldel
         );
+        console.log({
+          t,
+          a,
+          b,
+          c,
+          d: this.saccountapi.granted?.t > 0 ? this.saccountapi.granted.t : 0,
+          g: this.saccountapi.granting?.t > 0 ? this.saccountapi.granting.t : 0,
+        });
         const i = a + b + c;
         if (i) {
           console.log(i, "Phantom SPK")
