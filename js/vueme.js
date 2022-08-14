@@ -1319,7 +1319,7 @@ var app = new Vue({
         }
       }
       function simpleInterest(p, t, r) {
-        const amount = p * (1 + r / 365);
+        const amount = p * ((1 + parseFloat(r)) / 365);
         const interest = amount - p;
         return parseInt(interest * t);
       }
