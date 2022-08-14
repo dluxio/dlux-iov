@@ -182,8 +182,8 @@ var app = new Vue({
       },
       sstats: {
         spk_rate_lgov:"0.001",
-        spk_rate_lpow:"0.00015",
-        spk_rate_ldel:"0.0001",
+        spk_rate_lpow:"0.0001",
+        spk_rate_ldel:"0.00015",
       },
       dexapi: {
         markets: {
@@ -1317,7 +1317,7 @@ var app = new Vue({
         }
         function simpleInterest(p, t, r) {
           console.log({ p, t, r });
-          const amount = p * ((1 + parseFloat(r)) / 365);
+          const amount = p * (1 + (parseFloat(r) / 365));
           const interest = amount - p;
           return parseInt(interest * t);
         }
