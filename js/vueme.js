@@ -180,7 +180,11 @@ var app = new Vue({
           },
         },
       },
-      sstats: "",
+      sstats: {
+        spk_rate_lgov:"0.001",
+        spk_rate_lpow:"0.00015",
+        spk_rate_ldel:"0.0001",
+      },
       dexapi: {
         markets: {
           hive: {
@@ -1266,7 +1270,6 @@ var app = new Vue({
         });
     },
     reward_spk() {
-      if (this.sstats.spk_rate_lpow > 0) {
         var r = 0,
           a = 0,
           b = 0,
@@ -1318,11 +1321,6 @@ var app = new Vue({
           const interest = amount - p;
           return parseInt(interest * t);
         }
-      } else {
-        setTimeout(()=>{
-          return this.reward_spk()
-        }, 1000)
-      }
     },
     getProtocol() {
       fetch(this.lapi + "/api/protocol")
@@ -1434,19 +1432,7 @@ var app = new Vue({
           } else {
             this.focussaccountapi = data;
           }
-          // if (
-          //   new Date().getMonth() + 1 !=
-          //     parseInt(data.drop?.last_claim, 16) &&
-          //   data.drop?.availible.amount > 0
-          // ) {
-          //   this.hasDrop = true;
-          //   this.dropnai = `${parseFloat(
-          //     data.drop.availible.amount /
-          //       Math.pow(10, data.drop.availible.precision)
-          //   ).toFixed(data.drop.availible.precision)} ${
-          //     data.drop.availible.token
-          //   }`;
-          // }
+        
         });
     },
     getHiveUser(user) {
