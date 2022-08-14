@@ -9,17 +9,17 @@ import Ratings from "/js/ratings.js";
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "",
-  sapi = "https://spkinstant.hivehoneycomb.com"; 
+  sapi = "https://spkinstant.hivehoneycomb.com";
 if (location.search) {
-    const string = location.search.replace("?", "");
-    let params = string.split("&");
-    for (let i = 0; i < params.length; i++) {
-        let param = params[i].split("=");
-        if (param[0] == "sapi") {
-            sapi = param[1];
-        }
+  const string = location.search.replace("?", "");
+  let params = string.split("&");
+  for (let i = 0; i < params.length; i++) {
+    let param = params[i].split("=");
+    if (param[0] == "sapi") {
+      sapi = param[1];
     }
-    //window.history.replaceState(null, null, "?api=" + lapi);
+  }
+  //window.history.replaceState(null, null, "?api=" + lapi);
 }
 if (location.search) {
   const string = location.search.replace("?", "");
@@ -43,7 +43,7 @@ if (location.search) {
 //     }
 // }
 if (!lapi) {
-lapi = "https://token.dlux.io";
+  lapi = "https://token.dlux.io";
 }
 console.log(lapi);
 if (
@@ -547,8 +547,8 @@ var app = new Vue({
       var meta = this.posturls[url].edit
         ? this.posturls[url].json_metadata
         : {
-            tags: this.posturls[url].json_metadata.tags,
-          };
+          tags: this.posturls[url].json_metadata.tags,
+        };
       if (this.posturls[url].rating)
         meta.review = { rating: this.posturls[url].rating };
       this.toSign = {
@@ -589,7 +589,7 @@ var app = new Vue({
       if (
         document.documentElement.clientHeight + window.scrollY >
         document.documentElement.scrollHeight -
-          document.documentElement.clientHeight * 2
+        document.documentElement.clientHeight * 2
       ) {
         this.getPosts();
       }
@@ -639,7 +639,7 @@ var app = new Vue({
                   this.posturls[key].replies[i].json_metadata
                 );
                 this.posturls[key].replies[i].edit = false;
-              } catch (e) {}
+              } catch (e) { }
             }
             this.posturls[this.posturls[key].replies[i].url] =
               this.posturls[key].replies[i];
@@ -860,7 +860,7 @@ var app = new Vue({
         i = a[0],
         o = 1 < a.length ? r + a[1] : "";
       if (e)
-        for (var c = /(\d+)(\d{3})/; c.test(i); )
+        for (var c = /(\d+)(\d{3})/; c.test(i);)
           i = i.replace(c, "$1" + e + "$2");
       return (u ? "-" : "") + i + o;
     },
@@ -955,11 +955,9 @@ var app = new Vue({
       ) {
         this.postSelect[this.postSelect.entry].p = true;
         fetch("https://api.hive.blog", {
-          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_blog_entries", "params":["${
-            this.pageAccount
-          }",${this.postSelect[this.postSelect.entry].o},${
-            this.postSelect[this.postSelect.entry].a
-          }], "id":1}`,
+          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_blog_entries", "params":["${this.pageAccount
+            }",${this.postSelect[this.postSelect.entry].o},${this.postSelect[this.postSelect.entry].a
+            }], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
@@ -977,7 +975,7 @@ var app = new Vue({
               res.result[i].type = "Blog";
               if (
                 !this.posturls[
-                  `/@${res.result[i].author}/${res.result[i].permlink}`
+                `/@${res.result[i].author}/${res.result[i].permlink}`
                 ]
               ) {
                 this.posturls[
@@ -1195,7 +1193,7 @@ var app = new Vue({
       var arr;
       try {
         arr = json.image[0];
-      } catch (e) {}
+      } catch (e) { }
       if (typeof json.image == "string") {
         return json.image;
       } else if (typeof arr == "string") {
@@ -1268,61 +1266,62 @@ var app = new Vue({
         });
     },
     reward_spk() {
-      var r = 0,
-        a = 0,
-        b = 0,
-        c = 0,
-        t = 0,
-        diff = this.saccountapi.head_block - this.saccountapi.spk_block;
-      if (!this.saccountapi.spk_block) {
-        console.log("No SPK seconds")
-        return 0;
-      } else if (diff < 28800) {
-        console.log("Wait for SPK")
-        return 0;
-      } else {
-        t = parseInt(diff / 28800);
-        a = this.saccountapi.gov ? simpleInterest(
-          this.saccountapi.gov,
-          t,
-          this.sstats.spk_rate_lgov
-        ): 0
-        b = this.saccountapi.pow ? simpleInterest(
-          this.saccountapi.pow,
-          t,
-          this.sstats.spk_rate_lpow
-        ) : 0
-        c = simpleInterest(
-          parseInt(this.saccountapi.granted?.t > 0
-            ? this.saccountapi.granted.t
-            : 0) + parseInt(this.saccountapi.granting?.t > 0
-            ? this.saccountapi.granting.t
-            : 0),
-          t,
-          this.sstats.spk_rate_ldel
-        );
-        console.log({
-          t,
-          a,
-          b,
-          c,
-          d: this.saccountapi.granted?.t > 0 ? this.saccountapi.granted.t : 0,
-          g: this.saccountapi.granting?.t > 0 ? this.saccountapi.granting.t : 0,
-        });
-        const i = a + b + c;
-        if (i) {
-          console.log(i, "Phantom SPK")
-          return i;
-        } else {
-          console.log("0 SPK")
+      if (this.sstats.spk_rate_lpow > 0) {
+        var r = 0,
+          a = 0,
+          b = 0,
+          c = 0,
+          t = 0,
+          diff = this.saccountapi.head_block - this.saccountapi.spk_block;
+        if (!this.saccountapi.spk_block) {
+          console.log("No SPK seconds");
           return 0;
+        } else if (diff < 28800) {
+          console.log("Wait for SPK");
+          return 0;
+        } else {
+          t = parseInt(diff / 28800);
+          a = this.saccountapi.gov
+            ? simpleInterest(this.saccountapi.gov, t, this.sstats.spk_rate_lgov)
+            : 0;
+          b = this.saccountapi.pow
+            ? simpleInterest(this.saccountapi.pow, t, this.sstats.spk_rate_lpow)
+            : 0;
+          c = simpleInterest(
+            parseInt(this.saccountapi.granted?.t > 0 ? this.saccountapi.granted.t : 0) +
+            parseInt(
+              this.saccountapi.granting?.t > 0 ? this.saccountapi.granting.t : 0
+            ),
+            t,
+            this.sstats.spk_rate_ldel
+          );
+          console.log({
+            t,
+            a,
+            b,
+            c,
+            d: this.saccountapi.granted?.t > 0 ? this.saccountapi.granted.t : 0,
+            g: this.saccountapi.granting?.t > 0 ? this.saccountapi.granting.t : 0,
+          });
+          const i = a + b + c;
+          if (i) {
+            console.log(i, "Phantom SPK");
+            return i;
+          } else {
+            console.log("0 SPK");
+            return 0;
+          }
         }
-      }
-      function simpleInterest(p, t, r) {
-        console.log({p,t,r})
-        const amount = p * ((1 + parseFloat(r)) / 365);
-        const interest = amount - p;
-        return parseInt(interest * t);
+        function simpleInterest(p, t, r) {
+          console.log({ p, t, r });
+          const amount = p * ((1 + parseFloat(r)) / 365);
+          const interest = amount - p;
+          return parseInt(interest * t);
+        }
+      } else {
+        setTimeout(()=>{
+          return this.reward_spk()
+        }, 1000)
       }
     },
     getProtocol() {
@@ -1422,16 +1421,16 @@ var app = new Vue({
             this.lbargov = (data.gov / 1000).toFixed(3);
             this.saccountapi = data;
             this.saccountapi.spk += this.reward_spk();
-            if (!this.saccountapi.granted.t)this.saccountapi.granted.t = 0
+            if (!this.saccountapi.granted.t) this.saccountapi.granted.t = 0
             if (!this.saccountapi.granting.t) this.saccountapi.granting.t = 0;
-              this.spkval =
-                (data.balance +
-                  data.gov +
-                  data.poweredUp +
-                  this.saccountapi.granting.t +
-                  data.claim +
-                  data.spk) /
-                1000;
+            this.spkval =
+              (data.balance +
+                data.gov +
+                data.poweredUp +
+                this.saccountapi.granting.t +
+                data.claim +
+                data.spk) /
+              1000;
           } else {
             this.focussaccountapi = data;
           }
