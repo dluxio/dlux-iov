@@ -257,8 +257,8 @@
                                         id="spktab" role="tab" data-bs-toggle="tab" aria-controls="spk"
                                         aria-expanded="true">SPK</a>
                                 </li>
-                                <li class="nav-item" v-show="false"> <a class="nav-link d-flex align-items-center" href="#/"
-                                        id="spktab" role="tab">SOON - SPK</a>
+                                <li class="nav-item" v-show="false"> <a class="nav-link d-flex align-items-center"
+                                        href="#/" id="spktab" role="tab">SOON - SPK</a>
                                 </li>
                                 <li class="nav-item"> <a class="nav-link" href="#hive" id="hivetab" role="tab"
                                         data-bs-toggle="tab" aria-controls="hive" aria-expanded="true">HIVE</a></li>
@@ -330,8 +330,7 @@
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <modal-vue type="send" token="DLUX" :balance="accountapi.balance"
                                                         :account="account" @modalsign="sendIt($event)">
-                                                        <button slot="trigger" type="button"
-                                                            class="btn btn-info "><i
+                                                        <button slot="trigger" type="button" class="btn btn-info "><i
                                                                 class="fas fa-paper-plane me-2"></i>Send</button>
                                                     </modal-vue>
                                                     <div class="btn-group" role="group" v-if="me">
@@ -391,8 +390,7 @@
                                                     <modal-vue type="delegate" token="DLUX" func="why"
                                                         :balance="accountapi.poweredUp" :account="account"
                                                         @modalsign="sendIt($event)">
-                                                        <button type="button" class="btn btn-info "
-                                                            slot="trigger"><i
+                                                        <button type="button" class="btn btn-info " slot="trigger"><i
                                                                 class="fas fa-user-friends fa-fw me-2"></i>Delegate</button>
                                                     </modal-vue>
                                                     <div v-if="me" class="btn-group" role="group">
@@ -540,8 +538,7 @@
                                         <div class="d-flex align-items-center border-bottom border-secondary py-5">
                                             <div>
                                                 <div class="d-flex align-items-start">
-                                                    <h4 class="m-0">SPK</h4>
-                                                    <h4 class="m-0">Token</h4>
+                                                    <h4 class="m-0">SPK Token</h4>
                                                 </div>
                                                 <p class="text-white-50 m-0">The governance token for the SPK network.
                                                 </p>
@@ -554,8 +551,7 @@
                                                 <div class="btn-group" role="group" aria-label="SPK Actions">
                                                     <modal-vue type="send" token="SPK" :balance="saccountapi.spk"
                                                         :account="account" @modalsign="sendIt($event)">
-                                                        <button slot="trigger" type="button"
-                                                            class="btn btn-info "><i
+                                                        <button slot="trigger" type="button" class="btn btn-info "><i
                                                                 class="fas fa-paper-plane me-2"></i>Send</button>
                                                     </modal-vue>
                                                     <div class="btn-group" role="group" v-if="false">
@@ -575,7 +571,7 @@
                                                             </modal-vue>
                                                             <div class="dropdown-divider"></div>
                                                             <a class="dropdown-item" href="/dex/larynx" id="buylink"><i
-                                                                class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
+                                                                    class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -587,8 +583,7 @@
                                             v-if="parseInt(saccountapi.drop.last_claim, 16) != frmDate() && saccountapi.drop.availible.amount > 0 && me">
                                             <div>
                                                 <div class="d-flex align-items-start">
-                                                    <h4 class="m-0">Claim LARYNX</h4>
-                                                    <h4 class="m-0">Airdrop</h4>
+                                                    <h4 class="m-0">LARYNX Airdrop Claim</h4>
                                                 </div>
                                                 <p class="text-white-50">This months claimable tokens based on a January
                                                     6th HIVE blockchain snapshot.</p>
@@ -613,8 +608,7 @@
                                             id="larynxclaimrewards" v-if="saccountapi.claim > 0 && me">
                                             <div>
                                                 <div class="d-flex align-items-start">
-                                                    <h4 class="m-0">Claim LARYNX</h4>
-                                                    <h4 class="m-0">Rewards</h4>
+                                                    <h4 class="m-0">LARYNX Rewards Claim</h4>
                                                 </div>
                                                 <p class="text-white-50">Claimable rewards for running a SPK service
                                                     node.</p>
@@ -622,7 +616,8 @@
                                             <div id="claimlarynxrewardbtn" class="ms-auto text-end">
                                                 <h5>{{formatNumber((saccountapi.claim)/1000, 3, '.', ',')}} LARYNX
                                                 </h5>
-                                                <div class="mb-2"> <span class="small" v-show="!spk2gov">50% Liquid | 50%
+                                                <div class="mb-2"> <span class="small" v-show="!spk2gov">50% Liquid |
+                                                        50%
                                                         Power</span> <span class="small" v-show="spk2gov">50%
                                                         Liquid | 50% Gov</span></div>
                                                 <div v-show="accountapi.gov > 0" class="bg-dark text-white">
@@ -651,8 +646,7 @@
                                         <div class="d-flex align-items-center border-bottom border-secondary py-5">
                                             <div>
                                                 <div class="d-flex align-items-start">
-                                                    <h4 class="m-0">LARYNX</h4>
-                                                    <h4 class="m-0">Token</h4>
+                                                    <h4 class="m-0">LARYNX Token</h4>
                                                 </div>
                                                 <p class="text-white-50">The mining token for the SPK network.</p>
                                             </div>
@@ -661,14 +655,16 @@
                                                     {{formatNumber((saccountapi.balance)/1000, 3, '.', ',')}} LARYNX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Actions">
-                                                    <button type="button" class="btn btn-info ">
-                                                    <modal-vue type="send" token="LARYNX" :balance="saccountapi.balance"
-                                                        :account="account" @modalsign="sendIt($event)">
-                                                        <span slot="trigger" ><i
-                                                                class="fas fa-paper-plane me-2"></i>Send</span>
-                                                    </modal-vue>
-                                                </button>
-                                                <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
+                                                    <button type="button" class="btn btn-info p-0">
+                                                        <modal-vue type="send" token="LARYNX"
+                                                            :balance="saccountapi.balance" :account="account"
+                                                            @modalsign="sendIt($event)">
+                                                            <span slot="trigger" class="p-2"><i
+                                                                    class="fas fa-paper-plane me-2"></i>Send</span>
+                                                        </modal-vue>
+                                                    </button>
+                                                    <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                        disabled></button>
                                                     <div class="btn-group" role="group" v-if="me">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
@@ -689,22 +685,23 @@
                                                                 :account="account" @modalsign="sendIt($event)">
                                                                 <button class="dropdown-item" :disabled="!isNode"
                                                                     slot="trigger" type="button"><i
-                                                                        class="fas fa-lock fa-fw me-2"></i>Lock Liquidity</button>
+                                                                        class="fas fa-lock fa-fw me-2"></i>Lock
+                                                                    Liquidity</button>
                                                             </modal-vue>
                                                             <div class="dropdown-divider"></div>
                                                             <a class="dropdown-item" href="/dex/larynx" id="buylink"><i
-                                                                class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
+                                                                    class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
                                                         </ul>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <!--locked larynx-->
-                                        <div class="d-flex align-items-center border-bottom border-secondary py-5" v-if="saccountapi.gov">
+                                        <div class="d-flex align-items-center border-bottom border-secondary py-5"
+                                            v-if="saccountapi.gov">
                                             <div>
                                                 <div class="d-flex align-items-start">
-                                                    <h4 class="m-0">LARYNX</h4>
-                                                    <h4 class="m-0">Locked</h4>
+                                                    <h4 class="m-0">LARYNX Locked</h4>
                                                 </div>
                                                 <p class="text-white-50">Locked tokens provide liquidity to the
                                                     network, aid in determining consensus,
@@ -724,16 +721,18 @@
                                                     {{formatNumber((saccountapi.gov)/1000, 3, '.', ',')}} LL
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Actions">
-                                                    <button type="button" class="btn btn-info">
-                                                        <span><i class="fas fa-user-friends fa-fw me-2"></i>Options</span>
+                                                    <button type="button" class="btn btn-info p-0">
+                                                        <span class="p-2"><i
+                                                                class="fas fa-user-friends fa-fw me-2"></i>Options</span>
                                                     </button>
-                                                        <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
+                                                    <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                        disabled></button>
                                                     <div class="btn-group" role="group" v-if="me">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
-                                                            
+
                                                         <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                                             aria-labelledby="btnGroupDrop1">
                                                             <modal-vue type="power" token="LARYNX"
@@ -754,10 +753,9 @@
                                             <div class="d-flex align-items-center">
                                                 <div>
                                                     <div class="d-flex align-items-start">
-                                                        <h4 class="m-0">LARYNX</h4>
+                                                        <h4 class="m-0">LARYNX Power</h4>
                                                         <!-- <small><span
                                                                 class="badge ms-1 me-2 text-bg-warning">TEST</span></small> -->
-                                                        <h4 class="m-0">Power</h4>
                                                     </div>
                                                     <p class="text-white-50">Powered tokens used to mine SPK</p>
                                                     <p class="text-white-50">Benefits of LARYNX Power:</p>
@@ -780,12 +778,15 @@
                                                         {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}}
                                                         LP
                                                     </h5>
-                                                    <a v-if="saccountapi.granting.t || saccountapi.granted.t" data-bs-toggle="collapse"
-                                                        id="delegationsbtn" href="#delegationsspk" role="button"
-                                                        aria-expanded="false" aria-controls="Show delegations"
-                                                        class="text-white" style="text-decoration: none">
+                                                    <a v-if="saccountapi.granting.t || saccountapi.granted.t"
+                                                        data-bs-toggle="collapse" id="delegationsbtn"
+                                                        href="#delegationsspk" role="button" aria-expanded="false"
+                                                        aria-controls="Show delegations" class="text-white"
+                                                        style="text-decoration: none">
                                                         <h6 id="delegatebal">
-                                                            <span v-if="saccountapi.granting.t">(-{{formatNumber((saccountapi.granting.t)/1000, 3,
+                                                            <span
+                                                                v-if="saccountapi.granting.t">(-{{formatNumber((saccountapi.granting.t)/1000,
+                                                                3,
                                                                 '.', ',')}} LP)</span>
                                                             <span
                                                                 v-if="saccountapi.granted.t">(+{{formatNumber((saccountapi.granted.t)/1000,
@@ -796,15 +797,35 @@
                                                     </a>
 
                                                     <div class="btn-group" role="group" aria-label="LARYNX Actions">
-                                                        <modal-vue type="delegate" :smarkets="smarkets.node"
-                                                            token="LARYNX" func="Lock Liquidity" :stats="sstats"
-                                                            :balance="saccountapi.poweredUp" :account="account"
-                                                            @modalsign="sendIt($event)">
-                                                            <button class="btn btn-info " slot="trigger"
-                                                                type="button"><i
-                                                                    class="fas fa-user-friends fa-fw me-2"></i>Delegate</button>
-                                                        </modal-vue>
+                                                        <button class="btn btn-info p-0" type="button">
+                                                            <modal-vue type="delegate" :smarkets="smarkets.node"
+                                                                token="LARYNX" func="Lock Liquidity" :stats="sstats"
+                                                                :balance="saccountapi.poweredUp" :account="account"
+                                                                @modalsign="sendIt($event)"><span slot="trigger" class="p-2">
+                                                                    <i
+                                                                        class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
+                                                            </modal-vue>
+                                                        </button>
+                                                        <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                            disabled></button>
+                                                        <div class="btn-group" role="group" v-if="me">
+                                                            <button id="btnGroupDrop1" type="button"
+                                                                class="btn btn-info dropdown-toggle"
+                                                                data-bs-toggle="dropdown" aria-haspopup="true"
+                                                                aria-expanded="false"></button>
 
+                                                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
+                                                                aria-labelledby="btnGroupDrop1">
+                                                                <modal-vue type="power" token="LARYNX"
+                                                                    func="Unlock Liquidity" :balance="saccountapi.gov"
+                                                                    :account="account" @modalsign="sendIt($event)">
+                                                                    <button class="dropdown-item" disabled slot="trigger"
+                                                                        type="button"><i
+                                                                            class="fas fa-angle-double-down fa-fw me-2"></i>Power
+                                                                        Down (soon<i class="fa-solid fa-trademark"></i>)</button>
+                                                                </modal-vue>
+                                                            </ul>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -895,8 +916,7 @@
                                                     <modal-vue type="send" token="HIVE"
                                                         :balance="parseFloat(focus.balance) * 1000" :account="account"
                                                         @modalsign="sendIt($event)">
-                                                        <button slot="trigger" type="button"
-                                                            class="btn btn-info "><i
+                                                        <button slot="trigger" type="button" class="btn btn-info "><i
                                                                 class="fas fa-paper-plane me-2"></i>Send</button>
                                                     </modal-vue>
                                                     <div class="btn-group" role="group" v-if="me">
@@ -968,8 +988,7 @@
                                                     <modal-vue type="send" token="HBD"
                                                         :balance="parseFloat(focus.hbd_balance) * 1000"
                                                         :account="account" @modalsign="sendIt($event)">
-                                                        <button slot="trigger" type="button"
-                                                            class="btn btn-info "><i
+                                                        <button slot="trigger" type="button" class="btn btn-info "><i
                                                                 class="fas fa-paper-plane me-2"></i>Send</button>
                                                     </modal-vue>
                                                     <div class="btn-group" role="group" v-if="me">
@@ -2050,37 +2069,37 @@
         }); */
         // NEW CODE FOR BS5
         // deep linking - load tab on refresh
-        function deepLink(){
-        let url = location.href.replace(/\/$/, '');
-        if (location.hash) {
-            const hash = url.split('#');
-            
-            const currentTab = hash[1] == 'dlux' || hash[1] == 'hive' || hash[1] == 'spk' ? document.querySelector('#wallettab a[href="#' + hash[1] + '"]') : document.querySelector('#usertabs a[href="#' + hash[1] + '"]')
-            console.log(currentTab)
-            const curTab = new bootstrap.Tab(currentTab);
-            curTab.show();
-            url = location.href.replace(/\/#/, '#');
-            history.replaceState(null, null, url);
-            setTimeout(() => {
-                window.scrollTop = 0;
-            }, 400);
-        }
-        // change url based on selected tab
-        const selectableTabList = [].slice.call(document.querySelectorAll('a[data-bs-toggle="tab"]'));
-        selectableTabList.forEach((selectableTab) => {
-            const selTab = new bootstrap.Tab(selectableTab);
-            selectableTab.addEventListener('click', function () {
-                var newUrl;
-                const hash = selectableTab.getAttribute('href');
-                if (hash == '#blog') {
-                    newUrl = url.split('#')[0];
-                } else {
-                    newUrl = url.split('#')[0] + hash;
-                }
-                history.replaceState(null, null, newUrl);
+        function deepLink() {
+            let url = location.href.replace(/\/$/, '');
+            if (location.hash) {
+                const hash = url.split('#');
+
+                const currentTab = hash[1] == 'dlux' || hash[1] == 'hive' || hash[1] == 'spk' ? document.querySelector('#wallettab a[href="#' + hash[1] + '"]') : document.querySelector('#usertabs a[href="#' + hash[1] + '"]')
+                console.log(currentTab)
+                const curTab = new bootstrap.Tab(currentTab);
+                curTab.show();
+                url = location.href.replace(/\/#/, '#');
+                history.replaceState(null, null, url);
+                setTimeout(() => {
+                    window.scrollTop = 0;
+                }, 400);
+            }
+            // change url based on selected tab
+            const selectableTabList = [].slice.call(document.querySelectorAll('a[data-bs-toggle="tab"]'));
+            selectableTabList.forEach((selectableTab) => {
+                const selTab = new bootstrap.Tab(selectableTab);
+                selectableTab.addEventListener('click', function () {
+                    var newUrl;
+                    const hash = selectableTab.getAttribute('href');
+                    if (hash == '#blog') {
+                        newUrl = url.split('#')[0];
+                    } else {
+                        newUrl = url.split('#')[0] + hash;
+                    }
+                    history.replaceState(null, null, newUrl);
+                });
             });
-        });   
-    }
+        }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
         integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
