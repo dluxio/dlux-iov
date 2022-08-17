@@ -171,6 +171,7 @@ export default {
       return (u ? "-" : "") + i + o;
     },
     confirm() {
+      var op
       if (this.func == "powercancel") {
         if (this.token == "LARYNX")
           op = {
@@ -198,6 +199,9 @@ export default {
             api: "https://spkinstant.hivehoneycomb.com",
             txid: "cancel power down",
           };
+      }
+      if (op) {
+        this.$emit("modalsign", op);
       }
     },
     send() {
