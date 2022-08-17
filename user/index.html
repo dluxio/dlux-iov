@@ -854,8 +854,8 @@
                                                                             class="fas fa-angle-double-down fa-fw me-2"></i>Power
                                                                         Down</button>
                                                                 </modal-vue>
-                                                                <modal-vue v-show="false" type="power" token="LARYNX" func="Power Down"
-                                                                    :balance="saccountapi.pow" :account="account"
+                                                                <modal-vue v-show="false" type="confirm" token="LARYNX" func="powercancel"
+                                                                    :account="account"
                                                                     @modalsign="sendIt($event)">
                                                                     <button class="dropdown-item" slot="trigger"
                                                                         type="button">
@@ -871,8 +871,13 @@
                                             </div>
                                             <div class="d-flex d-none align-items-center"><b>A power down is scheduled
                                                     to happen in 7 days (~0.077 LARYNX, remaining 3 weeks)</b><small
-                                                    class="ms-2"><button
-                                                        class="btn btn-sm btn-outline-danger">STOP</button></small>
+                                                    class="ms-2"><modal-vue v-show="false" type="confirm" token="LARYNX" func="powercancel"
+                                                                    :account="account"
+                                                                    @modalsign="sendIt($event)">
+                                                                    <button class="btn btn-sm btn-outline-danger" slot="trigger"
+                                                                        type="button">
+                                                                        STOP</button>
+                                                                </modal-vue></small>
                                             </div>
                                             <div class="collapse" id="delegationsspk">
                                                 <div

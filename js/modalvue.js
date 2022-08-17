@@ -121,13 +121,18 @@ export default {
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content bg-darker text-white">
                     <div class="modal-header">
-                        <h5 class="modal-title">MSG 1: Remove Delegation | MSG 2: Cancel Power Down?</h5>
+                        <h5 v-if="func == 'powercancel'" class="modal-title">Cancel Power Down?</h5>
+                        <h5 v-if="func == 'delcancel'" class="modal-title">Remove Delegation</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <p>MSG 1: Do you really want to remove the delegation to @dlux-io?</p>
-                        <p>MSG 2: This will cancel the current power down request. Are you sure?</p>
+                        <p v-if="func == 'delcancel'">Do you really want to remove the delegation to @dlux-io?</p>
+                        <p v-if="func == 'powercancel'">This will cancel the current power down request. Are you sure?</p>
                     </div>
+                    <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" @click="confirm" data-bs-dismiss="modal">Continue</button>
+                        </div>
                 </div>
             </div>
         </div>
@@ -164,6 +169,36 @@ export default {
         for (var c = /(\d+)(\d{3})/; c.test(i); )
           i = i.replace(c, "$1" + e + "$2");
       return (u ? "-" : "") + i + o;
+    },
+    confirm() {
+      if (this.func == "powercancel") {
+        if (this.token == "LARYNX")
+          op = {
+            type: "cja",
+            cj: {
+              amount: 0,
+            },
+            id: `${this.spkprefix}_power_down`,
+            msg: `Canceling Power Down...`,
+            ops: ["getSapi"],
+            api: "https://spkinstant.hivehoneycomb.com",
+            txid: "cancel power down",
+          };
+      } else if (this.func == "powercancel") {
+        if (this.token == "LARYNX")
+          op = {
+            type: "cja",
+            cj: {
+              to: this.account,
+              amount: 0,
+            },
+            id: `${this.spkprefix}_power_grant`,
+            msg: `Canceling Power Down...`,
+            ops: ["getSapi"],
+            api: "https://spkinstant.hivehoneycomb.com",
+            txid: "cancel power down",
+          };
+      }
     },
     send() {
       var op;
@@ -331,6 +366,18 @@ export default {
           msg: `Trying to power down ${this.token}...`,
           ops: ["getTokenUser"],
           api: "https://token.dlux.io",
+          txid: "send",
+        };
+      else if (this.token == "LARYNX" && this.func == "Power Down")
+        op = {
+          type: "cja",
+          cj: {
+            amount: parseInt(this.amount * 1000),
+          },
+          id: `${this.token.toLowerCase()}_power_down`,
+          msg: `Trying to power down ${this.token}...`,
+          ops: ["getSapi"],
+          api: "https://spkinstant.hivehoneycomb.com",
           txid: "send",
         };
       else if (this.token == "DLUX" && this.func == "Unlock")
