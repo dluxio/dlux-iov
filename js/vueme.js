@@ -1418,12 +1418,12 @@ var app = new Vue({
           if (!fu) {
             this.lbalance = (data.balance / 1000).toFixed(3);
             this.lbargov = (data.gov / 1000).toFixed(3);
+            data.power_downs = Object.keys(data.power_downs);
+            for (var i = 0; i < data.power_downs.length; i++) {
+              data.power_downs[i] = data.power_downs[i].split(":")[0];
+            }
             this.saccountapi = data;
             this.saccountapi.spk += this.reward_spk();
-            data.power_downs = Object.keys(data.power_downs)
-            for(var i = 0; i < data.power_downs.length; i++){
-              data.power_downs[i] = data.power_downs[i].split(':')[0]
-            }
             if (!this.saccountapi.granted.t) this.saccountapi.granted.t = 0
             if (!this.saccountapi.granting.t) this.saccountapi.granting.t = 0;
             this.spkval =
