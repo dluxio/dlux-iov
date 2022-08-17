@@ -854,7 +854,7 @@
                                                                             class="fas fa-angle-double-down fa-fw me-2"></i>Power
                                                                         Down</button>
                                                                 </modal-vue>
-                                                                <modal-vue v-show="false" type="confirm" token="LARYNX" func="powercancel"
+                                                                <modal-vue type="confirm" token="LARYNX" func="powercancel"
                                                                     :account="account"
                                                                     @modalsign="sendIt($event)">
                                                                     <button class="dropdown-item" :disabled="!when(saccountapi.powerDowns)" slot="trigger"
