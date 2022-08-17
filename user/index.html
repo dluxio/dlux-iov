@@ -847,7 +847,7 @@
                                                             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                                                 aria-labelledby="btnGroupDrop1">
                                                                 <modal-vue type="power" token="LARYNX" func="Power Down"
-                                                                    :balance="saccountapi.pow" :account="account"
+                                                                    :balance="saccountapi.poweredUp" :account="account"
                                                                     @modalsign="sendIt($event)">
                                                                     <button :disabled="!saccountapi.poweredUp" class="dropdown-item" slot="trigger"
                                                                         type="button"><i
