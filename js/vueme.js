@@ -1445,9 +1445,6 @@ var app = new Vue({
       if (!arr.length)return ""
       var seconds = (parseInt(this.saccountapi.head_block) - parseInt(arr[1])) * -3
       var interval = Math.floor(seconds / 86400);
-      if (interval > 7) {
-        return new Date(date).toLocaleDateString();
-      }
       if (interval >= 1) {
         return interval + ` day${interval > 1 ? "s" : ""}`;
       }
