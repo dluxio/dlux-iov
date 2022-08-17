@@ -374,7 +374,7 @@ export default {
           cj: {
             amount: parseInt(this.amount * 1000),
           },
-          id: `${this.token.toLowerCase()}_power_down`,
+          id: `spkcc_power_down`,
           msg: `Trying to power down ${this.token}...`,
           ops: ["getSapi"],
           api: "https://spkinstant.hivehoneycomb.com",
