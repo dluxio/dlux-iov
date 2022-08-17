@@ -113,7 +113,8 @@ var app = new Vue({
           t: 0,
         },
         poweredUp: 0,
-        power_downs: [],
+        powerDowns: [],
+        power_downs: {},
         drop: {
           last_claim: 0,
           availible: {
