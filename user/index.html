@@ -869,9 +869,9 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div v-show="saccountapi.power_downs.length" class="d-flex align-items-center"><b>A power down is scheduled
+                                            <div v-show="when(saccountapi.power_downs)" class="d-flex align-items-center"><b>A power down is scheduled
                                                     to happen in {{when(saccountapi.power_downs)}} ({{saccountapi.power_downs.length}} installments remaining)</b><small
-                                                    class="ms-2"><modal-vue v-show="false" type="confirm" token="LARYNX" func="powercancel"
+                                                    class="ms-2"><modal-vue type="confirm" token="LARYNX" func="powercancel"
                                                                     :account="account"
                                                                     @modalsign="sendIt($event)">
                                                                     <button class="btn btn-sm btn-outline-danger" slot="trigger"
