@@ -113,6 +113,7 @@ var app = new Vue({
           t: 0,
         },
         poweredUp: 0,
+        power_downs: [],
         drop: {
           last_claim: 0,
           availible: {
@@ -120,7 +121,6 @@ var app = new Vue({
           },
         },
       },
-      power_downs:[],
       dluxval: 0,
       spkval: 0,
       focusval: 0,
@@ -182,9 +182,9 @@ var app = new Vue({
         },
       },
       sstats: {
-        spk_rate_lgov:"0.001",
-        spk_rate_lpow:"0.0001",
-        spk_rate_ldel:"0.00015",
+        spk_rate_lgov: "0.001",
+        spk_rate_lpow: "0.0001",
+        spk_rate_ldel: "0.00015",
       },
       dexapi: {
         markets: {
