@@ -839,13 +839,13 @@
                                                             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                                                 aria-labelledby="btnGroupDrop1">
                                                                 <modal-vue type="power" token="LARYNX"
-                                                                    func="Unlock Liquidity" :balance="saccountapi.gov"
+                                                                    func="Power Down" :balance="saccountapi.pow"
                                                                     :account="account" @modalsign="sendIt($event)">
-                                                                    <button class="dropdown-item" disabled slot="trigger"
+                                                                    <button class="dropdown-item" :disabled="true" slot="trigger"
                                                                         type="button"><i
                                                                             class="fas fa-angle-double-down fa-fw me-2"></i>Power
                                                                         Down (soon<i class="fa-solid fa-trademark"></i>)</button>
-                                                                        <button v-show="false" class="dropdown-item" disabled slot="trigger"
+                                                                        <button v-show="false" class="dropdown-item" :disabled="true" slot="trigger"
                                                                         type="button"><i class="fa-solid fa-xmark fa-fw me-2"></i>Cancel Power
                                                                         Down</button>
                                                                 </modal-vue>
