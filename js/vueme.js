@@ -1443,7 +1443,7 @@ var app = new Vue({
     },
     when(arr){
       if (!arr.length)return ""
-      var seconds = (parseInt(this.saccountapi.head_block) - parseInt(arr[1])) * 3
+      var seconds = (parseInt(this.saccountapi.head_block) - parseInt(arr[1])) * -3
       var interval = Math.floor(seconds / 86400);
       if (interval > 7) {
         return new Date(date).toLocaleDateString();
