@@ -121,24 +121,13 @@ export default {
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content bg-darker text-white">
                     <div class="modal-header">
-                        <h5 class="modal-title">{{func}} {{token}}</h5>
+                        <h5 class="modal-title">MSG 1: Remove Delegation | MSG 2: Cancel Power Down?</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form name="power">
-                        <div class="modal-body">
-                                <label for="poweramount" class="small">Amount (Balance: <a href="#/"
-                                        @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
-                                <div class="input-group mb-3" id="poweramount">
-                                    <input class="form-control text-white border-dark bg-dark" type="number" step="0.001"
-                                        min="0.001" placeholder="1.000" v-model="amount">
-                                        <span class="input-group-text text-secondary border-dark bg-dark">{{token}}</span>
-                                </div>
-                            </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
-                        </div>
-                    </form>
+                    <div class="modal-body">
+                        <p>MSG 1: Do you really want to remove the delegation to @dlux-io?</p>
+                        <p>MSG 2: This will cancel the current power down request. Are you sure?</p>
+                    </div>
                 </div>
             </div>
         </div>
