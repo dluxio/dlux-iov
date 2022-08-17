@@ -869,8 +869,8 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="d-flex d-none align-items-center"><b>A power down is scheduled
-                                                    to happen in 7 days (~0.077 LARYNX, remaining 3 weeks)</b><small
+                                            <div v-show="saccountapi.power_downs.length" class="d-flex align-items-center"><b>A power down is scheduled
+                                                    to happen in {{when(saccountapi.power_downs)}} ({{saccountapi.power_downs.length}} installments remaining)</b><small
                                                     class="ms-2"><modal-vue v-show="false" type="confirm" token="LARYNX" func="powercancel"
                                                                     :account="account"
                                                                     @modalsign="sendIt($event)">

@@ -120,6 +120,7 @@ var app = new Vue({
           },
         },
       },
+      power_downs:[],
       dluxval: 0,
       spkval: 0,
       focusval: 0,
@@ -1419,6 +1420,10 @@ var app = new Vue({
             this.lbargov = (data.gov / 1000).toFixed(3);
             this.saccountapi = data;
             this.saccountapi.spk += this.reward_spk();
+            data.power_downs = Object.keys(data.power_downs)
+            for(var i = 0; i < data.power_downs.length; i++){
+              data.power_downs[i] = data.power_downs[i].split(':')[0]
+            }
             if (!this.saccountapi.granted.t) this.saccountapi.granted.t = 0
             if (!this.saccountapi.granting.t) this.saccountapi.granting.t = 0;
             this.spkval =
@@ -1434,6 +1439,26 @@ var app = new Vue({
           }
         
         });
+    },
+    when(arr){
+      if (!arr.length)return
+      var seconds = this.saccountapi.head_block - parseInt(arr[1]);
+      var interval = Math.floor(seconds / 86400);
+      if (interval > 7) {
+        return new Date(date).toLocaleDateString();
+      }
+      if (interval >= 1) {
+        return interval + ` day${interval > 1 ? "s" : ""}`;
+      }
+      interval = Math.floor(seconds / 3600);
+      if (interval >= 1) {
+        return interval + ` hour${interval > 1 ? "s" : ""}`;
+      }
+      interval = Math.floor(seconds / 60);
+      if (interval >= 1) {
+        return `${interval} minute${interval > 1 ? "s" : ""}`;
+      }
+      return Math.floor(seconds) + " seconds";
     },
     getHiveUser(user) {
       if (user)
