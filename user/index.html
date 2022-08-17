@@ -717,9 +717,14 @@
                                                 </ul>
                                             </div>
                                             <div id="larynxgactions" class="ms-auto text-end" v-show="me">
-                                                <h5 id="govbalance">
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <small class="ms-auto"><span
+                                                        class="badge me-2 text-bg-success">{{toFixed(parseFloat(spkStats.spk_rate_lgov) *
+                                                            100,3)}}%</span></small>
+                                                <h5 id="govbalance" class="m-0">
                                                     {{formatNumber((saccountapi.gov)/1000, 3, '.', ',')}} LL
                                                 </h5>
+                                            </div>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Actions">
                                                     <button onclick="location.href='/dex/#larynx'" type="button" class="btn btn-info p-0" >
                                                         <span class="p-2"><i class="fa-solid fa-gear fa-fw me-2"></i>Options</span>
@@ -763,24 +768,42 @@
                                                         <li>Instant Lock | 4 Week Unlock</li>
                                                         <li>Delegate to node service accounts to build consensus (DPoS)
                                                         </li>
-                                                        <li>LARYNX POWER (LP) tokens earn SPK tokens at
+                                                        <li>LARYNX POWER (LP) earns SPK tokens at
                                                             {{toFixed(parseFloat(spkStats.spk_rate_lpow) * 100,3)}}%
                                                         </li>
-                                                        <li>Delegated LP tokens earn SPK tokens for both delegator and
+                                                        <li>Delegated LP (DLP) earns SPK tokens for both delegator and
                                                             delegatee at
                                                             {{toFixed(parseFloat(spkStats.spk_rate_ldel) * 100,3)}}%
                                                         </li>
                                                     </ul>
                                                 </div>
                                                 <div id="larynxgactions" class="ms-auto text-end">
-                                                    <h5>
+                                                    <div class="d-flex align-items-center mb-2">
+                                                    <small class="ms-auto"><span
+                                                        class="badge me-2 text-bg-success">{{toFixed(parseFloat(spkStats.spk_rate_lpow) * 100,3)}}%</span></small>
+                                                    <h5 class="m-0">
                                                         {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}}
                                                         LP
                                                     </h5>
-                                                    <a v-if="saccountapi.granting.t || saccountapi.granted.t"
+                                                </div>
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <small class="ms-auto"><span
+                                                        class="badge me-2 text-bg-success">{{toFixed(parseFloat(spkStats.spk_rate_ldel) * 100,3)}}%</span></small>
+                                                        <a v-if="saccountapi.granting.t || saccountapi.granted.t"
                                                         data-bs-toggle="collapse" id="delegationsbtn"
                                                         href="#delegationsspk" role="button" aria-expanded="false"
                                                         aria-controls="Show delegations" class="text-white"
+                                                        style="text-decoration: none">
+                                                        <h5 class="m-0">
+                                                        {{formatNumber((saccountapi.granting.t+saccountapi.granted.t)/1000, 3, '.', ',')}}
+                                                        DLP<i class="fas fa-search ms-2"></i>
+                                                    </h5>
+                                                    </a>
+                                                </div>
+                                                    <a v-if="saccountapi.granting.t || saccountapi.granted.t"
+                                                        data-bs-toggle="collapse" id="delegationsbtn"
+                                                        href="#delegationsspk" role="button" aria-expanded="false"
+                                                        aria-controls="Show delegations" class="text-white d-none"
                                                         style="text-decoration: none">
                                                         <h6 id="delegatebal">
                                                             <span
