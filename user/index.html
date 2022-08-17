@@ -857,7 +857,7 @@
                                                                 <modal-vue v-show="false" type="confirm" token="LARYNX" func="powercancel"
                                                                     :account="account"
                                                                     @modalsign="sendIt($event)">
-                                                                    <button class="dropdown-item" slot="trigger"
+                                                                    <button class="dropdown-item" :disabled="!when(saccountapi.powerDowns)" slot="trigger"
                                                                         type="button">
                                                                         <i
                                                                             class="fa-solid fa-xmark fa-fw me-2"></i>Cancel
