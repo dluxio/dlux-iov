@@ -849,7 +849,7 @@
                                                                 <modal-vue type="power" token="LARYNX" func="Power Down"
                                                                     :balance="saccountapi.pow" :account="account"
                                                                     @modalsign="sendIt($event)">
-                                                                    <button :disabled="!saccountapi.pow" class="dropdown-item" slot="trigger"
+                                                                    <button :disabled="!saccountapi.poweredUp" class="dropdown-item" slot="trigger"
                                                                         type="button"><i
                                                                             class="fas fa-angle-double-down fa-fw me-2"></i>Power
                                                                         Down</button>
