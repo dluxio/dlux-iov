@@ -1418,9 +1418,9 @@ var app = new Vue({
           if (!fu) {
             this.lbalance = (data.balance / 1000).toFixed(3);
             this.lbargov = (data.gov / 1000).toFixed(3);
-            data.power_downs = Object.keys(data.power_downs);
-            for (var i = 0; i < data.power_downs.length; i++) {
-              data.power_downs[i] = data.power_downs[i].split(":")[0];
+            data.powerDowns = Object.keys(data.power_downs);
+            for (var i = 0; i < data.powerDowns.length; i++) {
+              data.powerDowns[i] = data.powerDowns[i].split(":")[0];
             }
             this.saccountapi = data;
             this.saccountapi.spk += this.reward_spk();
