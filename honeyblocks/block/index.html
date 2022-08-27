@@ -127,7 +127,7 @@
                           <th role="columnheader" v-bind:class="{'col-sort':filteraccount.apia || filteraccount.apid}"
                             class="" aria-colindex="3">
                             <div class="d-flex align-items-center">
-                              <div class="me-3">API (Click to load)</div>
+                              <div class="me-3">API</div>
                               <button title="Sort Ascending" type="button" class="mx-1 btn btn-sm btn-dark"
                                 v-bind:class="{'bg-primary':filteraccount.apia}"
                                 @click="sort(!filteraccount.value ? 'runners' : 'runnersSearch','api','asc');toggleAPI('apia')">
@@ -151,10 +151,10 @@
                             {{formatNumber(node.g/1000,3,'.',',')}}
                           </td>
                           <td role="cell" class="" aria-colindex="3">
-                            <a href="#" @click="setApi(node.api)"><button type="button" class="btn btn-secondary has-tooltip"
+                            <button type="button" @click="setApi(node.api)" class="px-2 py-1 btn btn-dark has-tooltip"
                               data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
                               :data-bs-title="node.api">
-                              Indicator
+                              <i class="fa-solid fa-square" style="color: yellow;"></i></button>
                           </td>
                         </tr>
                         <tr class="" role="row" v-for="node in runnersSearch" v-if="filteraccount.value">
@@ -165,11 +165,10 @@
                             {{formatNumber(node.g/1000,3,'.',',')}}
                           </td>
                           <td role="cell" class="" aria-colindex="3">
-                            <a href="#" @click="setApi(node.api)"><button type="button" class="btn btn-secondary has-tooltip"
-                                data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
-                                :data-bs-title="node.api">
-                                Indicator
-                              </button></a>
+                            <button type="button" @click="setApi(node.api)" class="px-2 py-1 btn btn-dark has-tooltip"
+                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                            :data-bs-title="node.api">
+                            <i class="fa-solid fa-square" style="color: yellow;"></i></button>
                           </td>
                         </tr>
                       </tbody>
@@ -248,7 +247,7 @@
       return new bootstrap.Toast(toastEl, option);
     });
     var tooltipList = new bootstrap.Tooltip(document.body, {
-            selector: '.has-tooltip'
+      selector: '.has-tooltip'
     });
   </script>
 </body>
