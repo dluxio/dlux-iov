@@ -74,7 +74,7 @@
                           @click="focus('filteraccount')"><i class="fas fa-search"></i></span>
                         <input type="text" v-on:keyup="searchRunners()"
                           class="form-control bg-darkg border-dark text-info" id="filteraccount"
-                          v-model="filteraccount.value" @ aria-required="true" placeholder="Filter username" />
+                          v-model="filteraccount.value" @ aria-required="true" placeholder="Filter username / API" />
 
                         <span class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix"
                           style="width: 42px">
@@ -84,7 +84,7 @@
                           </span>
                         </span>
                       </div>
-                      
+
                     </div>
                   </div>
                   <div class="table-responsive rounded">
@@ -151,7 +151,10 @@
                             {{formatNumber(node.g/1000,3,'.',',')}}
                           </td>
                           <td role="cell" class="" aria-colindex="3">
-                            <a href="#" @click="setApi(node.api)">{{node.api}}</a>
+                            <a href="#" @click="setApi(node.api)"><button type="button" class="btn btn-secondary"
+                              data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                              data-bs-title="{{node.api}}">
+                              Indicator
                           </td>
                         </tr>
                         <tr class="" role="row" v-for="node in runnersSearch" v-if="filteraccount.value">
@@ -162,7 +165,11 @@
                             {{formatNumber(node.g/1000,3,'.',',')}}
                           </td>
                           <td role="cell" class="" aria-colindex="3">
-                            <a href="#" @click="setApi(node.api)">{{node.api}}</a>
+                            <a href="#" @click="setApi(node.api)"><button type="button" class="btn btn-secondary"
+                                data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                                data-bs-title="{{node.api}}">
+                                Indicator
+                              </button></a>
                           </td>
                         </tr>
                       </tbody>
@@ -205,7 +212,6 @@
       <foot-vue />
     </div>
   </div>
-
   <script>
     (function () {
       "use strict";
