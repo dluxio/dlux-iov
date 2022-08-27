@@ -57,7 +57,7 @@
         <div class="dropdown">
           <a class="btn btn-sm btn-dark dropdown-toggle" href="#" role="button" id="tokenDropdownBtn"
             data-bs-toggle="dropdown" aria-expanded="false">
-            Token
+            <span v-cloak>{{TOKEN}}</span>
           </a>
           <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="tokenDropdownBtn">
             <li>
@@ -85,16 +85,16 @@
       </div>
       <div class="containe text-center">
         <div class="col-md-6 ms-auto me-auto px-3">
-          <h1>Block View</h1>
+          <h1 v-cloak>{{TOKEN}} Block Explorer</h1>
           <div class="h-100 py-5 text-bg-success rounded-3 my-3">
             <h2>Block #67,387,463</h2>
             <div class="my-3">
-              <a class="text-white" data-bs-toggle="collapse" href="#nodeDrawer" role="button" aria-expanded="false"
-                aria-controls="nodeDrawer">
-                25 / 25 Node Concensus
+              <a class="text-white btn btn-dark" data-bs-toggle="collapse" href="#nodeDrawer1" role="button" aria-expanded="false"
+                aria-controls="nodeDrawer1">
+                25 / 25 Node Concensus <i class="fa-solid fa-user-lock ms-2"></i>
               </a>
             </div>
-            <div id="nodeDrawer" class="collapse">
+            <div id="nodeDrawer1" class="collapse">
               <div class="pb-5">
                 <div class="container">
                   <div class="d-flex flex-wrap align-items-center justify-content-between mb-1">
@@ -211,7 +211,7 @@
             <div class="p-3 mx-5 border border-light rounded">
               <div class="d-flex text-start align-items-end mb-3">
                 <h3 class="m-0">37 transactions</h3>
-                <a class="ms-auto btn btn-outline-light" role="button" href="/honeyblocks/list/">Explore</a>
+                <a class="ms-auto btn btn-outline-light" role="button" href="/honeyblocks/list/">View<i class="fa-solid fa-list ms-2"></i></a>
               </div>
               <p class="text-start mb-0">token-buy, token-sell, nft-buy, nft-sell, nft-mint, nft-create, nft-delete,
                 propose-trade,
@@ -219,21 +219,269 @@
             </div>
 
           </div>
-          <div class="h-100 p-5 text-bg-warning rounded-3 my-3">
+          <div class="h-100 py-5 text-bg-warning rounded-3 my-3">
             <h2>Block #67,387,462</h2>
-            <ul class="d-flex flex-column p-0">
-              <ls>23 / 25 Node Concensus</ls>
-              <ls>76 Transactions</ls>
-            </ul>
-            <a class="btn btn-outline-dark" role="button" href="/honeyblocks/list/">Explore Transactions</a>
+            <div class="my-3">
+              <a class="text-white btn btn-dark" data-bs-toggle="collapse" href="#nodeDrawer2" role="button" aria-expanded="false"
+                aria-controls="nodeDrawer2">
+                23 / 25 Node Concensus <i class="fa-solid fa-user-lock ms-2"></i>
+              </a>
+            </div>
+            <div id="nodeDrawer2" class="collapse">
+              <div class="pb-5">
+                <div class="container">
+                  <div class="d-flex flex-wrap align-items-center justify-content-between mb-1">
+                    <div class="w-100">
+                      <span>API Endpoint: {{lapi}} - {{behind}} block(s) behind HIVE</span>
+                      <div class="input-group mt-2">
+                        <span class="input-group-text bg-darkg border-dark text-secondary"
+                          @click="focus('filteraccount')"><i class="fas fa-search"></i></span>
+                        <input type="text" v-on:keyup="searchRunners()"
+                          class="form-control bg-darkg border-dark text-info" id="filteraccount"
+                          v-model="filteraccount.value" @ aria-required="true" placeholder="Filter username / API" />
+
+                        <span class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix"
+                          style="width: 42px">
+                          <span v-if="filteraccount.value">
+                            <a href="#" class="badge badge-secondary" @click="setValue('filteraccount.value','')"><i
+                                class="fas fa-times"></i></a>
+                          </span>
+                        </span>
+                      </div>
+
+                    </div>
+                  </div>
+                  <div class="table-responsive rounded">
+                    <table role="table" aria-busy="false" aria-colcount="3"
+                      class="table table-dark bg-darkger text-white-50 table-striped table-hover table-borderless mb-0">
+                      <thead role="rowgroup" class="">
+                        <tr role="row" class="">
+                          <th role="columnheader" v-bind:class="{'col-sort':filteraccount.usera || filteraccount.userd}"
+                            class="" aria-colindex="1">
+                            <div class="d-flex align-items-center">
+                              <div class="me-3">USER NAME</div>
+                              <button title="Sort Ascending" type="button" class="mx-1 btn btn-sm btn-dark"
+                                v-bind:class="{'bg-primary':filteraccount.usera}"
+                                @click="sort(!filteraccount.value ? 'runners' : 'runnersSearch','account','asc');toggleAPI('usera')">
+                                <i class="fas fa-caret-up"></i>
+                              </button>
+                              <button title="Sort Descending" type="button" class="mx-1 btn btn-sm btn-dark"
+                                v-bind:class="{'bg-primary':filteraccount.userd}"
+                                @click="sort(!filteraccount.value ? 'runners' : 'runnersSearch','account','desc');toggleAPI('userd')">
+                                <i class="fas fa-caret-down"></i>
+                              </button>
+                            </div>
+                          </th>
+                          <th role="columnheader" v-bind:class="{'col-sort':filteraccount.gova || filteraccount.govd}"
+                            class="" aria-colindex="2">
+                            <div class="d-flex align-items-center">
+                              <div class="me-3">GOV BAL</div>
+                              <button title="Sort Ascending" type="button" class="mx-1 btn btn-sm btn-dark"
+                                v-bind:class="{'bg-primary':filteraccount.gova}"
+                                @click="sort(!filteraccount.value ? 'runners' : 'runnersSearch','g','asc');toggleAPI('gova')">
+                                <i class="fas fa-caret-up"></i>
+                              </button>
+                              <button title="Sort Descending" type="button" class="mx-1 btn btn-sm btn-dark"
+                                v-bind:class="{'bg-primary':filteraccount.govd}"
+                                @click="sort(!filteraccount.value ? 'runners' : 'runnersSearch','g','desc');toggleAPI('govd')">
+                                <i class="fas fa-caret-down"></i>
+                              </button>
+                            </div>
+                          </th>
+                          <th role="columnheader" v-bind:class="{'col-sort':filteraccount.apia || filteraccount.apid}"
+                            class="" aria-colindex="3">
+                            <div class="d-flex align-items-center">
+                              <div class="me-3">API</div>
+                              <button title="Sort Ascending" type="button" class="mx-1 btn btn-sm btn-dark"
+                                v-bind:class="{'bg-primary':filteraccount.apia}"
+                                @click="sort(!filteraccount.value ? 'runners' : 'runnersSearch','api','asc');toggleAPI('apia')">
+                                <i class="fas fa-caret-up"></i>
+                              </button>
+                              <button title="Sort Descending" type="button" class="mx-1 btn btn-sm btn-dark"
+                                v-bind:class="{'bg-primary':filteraccount.apid}"
+                                @click="sort(!filteraccount.value ? 'runners' : 'runnersSearch','api','desc');toggleAPI('apid')">
+                                <i class="fas fa-caret-down"></i>
+                              </button>
+                            </div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody role="rowgroup" class="tbody-scroll-nolimit">
+                        <tr class="" role="row" v-for="node in runners" v-if="!filteraccount.value">
+                          <td role="cell" class="" aria-colindex="1">
+                            <a :href="atref(node.account)">@{{node.account}}</a>
+                          </td>
+                          <td role="cell" class="text-white-50" aria-colindex="2">
+                            {{formatNumber(node.g/1000,3,'.',',')}}
+                          </td>
+                          <td role="cell" class="" aria-colindex="3">
+                            <button type="button" @click="setApi(node.api)" class="px-2 py-1 btn btn-dark has-tooltip"
+                              data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                              :data-bs-title="node.api">
+                              <i class="fa-solid fa-square" style="color: yellow;"></i></button>
+                          </td>
+                        </tr>
+                        <tr class="" role="row" v-for="node in runnersSearch" v-if="filteraccount.value">
+                          <td role="cell" class="" aria-colindex="1">
+                            <a :href="atref(node.account)">@{{node.account}}</a>
+                          </td>
+                          <td role="cell" class="" aria-colindex="2">
+                            {{formatNumber(node.g/1000,3,'.',',')}}
+                          </td>
+                          <td role="cell" class="" aria-colindex="3">
+                            <button type="button" @click="setApi(node.api)" class="px-2 py-1 btn btn-dark has-tooltip"
+                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                            :data-bs-title="node.api">
+                            <i class="fa-solid fa-square" style="color: yellow;"></i></button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="p-3 mx-5 border border-dark rounded">
+              <div class="d-flex text-start align-items-end mb-3">
+                <h3 class="m-0">64 transactions</h3>
+                <a class="ms-auto btn btn-outline-dark" role="button" href="/honeyblocks/list/">View<i class="fa-solid fa-list ms-2"></i></a>
+              </div>
+              <p class="text-start mb-0">token-buy, token-sell, nft-buy, nft-sell</p>
+            </div>
+
           </div>
-          <div class="h-100 p-5 text-bg-danger rounded-3 my-3">
+          <div class="h-100 py-5 text-bg-danger rounded-3 my-3">
             <h2>Block #67,387,461</h2>
-            <ul class="d-flex flex-column p-0">
-              <ls>20 / 25 Node Concensus</ls>
-              <ls>16 Transactions</ls>
-            </ul>
-            <a class="btn btn-outline-light" role="button" href="/honeyblocks/list/">Explore Transactions</a>
+            <div class="my-3">
+              <a class="text-white btn btn-dark" data-bs-toggle="collapse" href="#nodeDrawer3" role="button" aria-expanded="false"
+                aria-controls="nodeDrawer3">
+                20 / 25 Node Concensus <i class="fa-solid fa-user-lock ms-2"></i>
+              </a>
+            </div>
+            <div id="nodeDrawer3" class="collapse">
+              <div class="pb-5">
+                <div class="container">
+                  <div class="d-flex flex-wrap align-items-center justify-content-between mb-1">
+                    <div class="w-100">
+                      <span>API Endpoint: {{lapi}} - {{behind}} block(s) behind HIVE</span>
+                      <div class="input-group mt-2">
+                        <span class="input-group-text bg-darkg border-dark text-secondary"
+                          @click="focus('filteraccount')"><i class="fas fa-search"></i></span>
+                        <input type="text" v-on:keyup="searchRunners()"
+                          class="form-control bg-darkg border-dark text-info" id="filteraccount"
+                          v-model="filteraccount.value" @ aria-required="true" placeholder="Filter username / API" />
+
+                        <span class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix"
+                          style="width: 42px">
+                          <span v-if="filteraccount.value">
+                            <a href="#" class="badge badge-secondary" @click="setValue('filteraccount.value','')"><i
+                                class="fas fa-times"></i></a>
+                          </span>
+                        </span>
+                      </div>
+
+                    </div>
+                  </div>
+                  <div class="table-responsive rounded">
+                    <table role="table" aria-busy="false" aria-colcount="3"
+                      class="table table-dark bg-darkger text-white-50 table-striped table-hover table-borderless mb-0">
+                      <thead role="rowgroup" class="">
+                        <tr role="row" class="">
+                          <th role="columnheader" v-bind:class="{'col-sort':filteraccount.usera || filteraccount.userd}"
+                            class="" aria-colindex="1">
+                            <div class="d-flex align-items-center">
+                              <div class="me-3">USER NAME</div>
+                              <button title="Sort Ascending" type="button" class="mx-1 btn btn-sm btn-dark"
+                                v-bind:class="{'bg-primary':filteraccount.usera}"
+                                @click="sort(!filteraccount.value ? 'runners' : 'runnersSearch','account','asc');toggleAPI('usera')">
+                                <i class="fas fa-caret-up"></i>
+                              </button>
+                              <button title="Sort Descending" type="button" class="mx-1 btn btn-sm btn-dark"
+                                v-bind:class="{'bg-primary':filteraccount.userd}"
+                                @click="sort(!filteraccount.value ? 'runners' : 'runnersSearch','account','desc');toggleAPI('userd')">
+                                <i class="fas fa-caret-down"></i>
+                              </button>
+                            </div>
+                          </th>
+                          <th role="columnheader" v-bind:class="{'col-sort':filteraccount.gova || filteraccount.govd}"
+                            class="" aria-colindex="2">
+                            <div class="d-flex align-items-center">
+                              <div class="me-3">GOV BAL</div>
+                              <button title="Sort Ascending" type="button" class="mx-1 btn btn-sm btn-dark"
+                                v-bind:class="{'bg-primary':filteraccount.gova}"
+                                @click="sort(!filteraccount.value ? 'runners' : 'runnersSearch','g','asc');toggleAPI('gova')">
+                                <i class="fas fa-caret-up"></i>
+                              </button>
+                              <button title="Sort Descending" type="button" class="mx-1 btn btn-sm btn-dark"
+                                v-bind:class="{'bg-primary':filteraccount.govd}"
+                                @click="sort(!filteraccount.value ? 'runners' : 'runnersSearch','g','desc');toggleAPI('govd')">
+                                <i class="fas fa-caret-down"></i>
+                              </button>
+                            </div>
+                          </th>
+                          <th role="columnheader" v-bind:class="{'col-sort':filteraccount.apia || filteraccount.apid}"
+                            class="" aria-colindex="3">
+                            <div class="d-flex align-items-center">
+                              <div class="me-3">API</div>
+                              <button title="Sort Ascending" type="button" class="mx-1 btn btn-sm btn-dark"
+                                v-bind:class="{'bg-primary':filteraccount.apia}"
+                                @click="sort(!filteraccount.value ? 'runners' : 'runnersSearch','api','asc');toggleAPI('apia')">
+                                <i class="fas fa-caret-up"></i>
+                              </button>
+                              <button title="Sort Descending" type="button" class="mx-1 btn btn-sm btn-dark"
+                                v-bind:class="{'bg-primary':filteraccount.apid}"
+                                @click="sort(!filteraccount.value ? 'runners' : 'runnersSearch','api','desc');toggleAPI('apid')">
+                                <i class="fas fa-caret-down"></i>
+                              </button>
+                            </div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody role="rowgroup" class="tbody-scroll-nolimit">
+                        <tr class="" role="row" v-for="node in runners" v-if="!filteraccount.value">
+                          <td role="cell" class="" aria-colindex="1">
+                            <a :href="atref(node.account)">@{{node.account}}</a>
+                          </td>
+                          <td role="cell" class="text-white-50" aria-colindex="2">
+                            {{formatNumber(node.g/1000,3,'.',',')}}
+                          </td>
+                          <td role="cell" class="" aria-colindex="3">
+                            <button type="button" @click="setApi(node.api)" class="px-2 py-1 btn btn-dark has-tooltip"
+                              data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                              :data-bs-title="node.api">
+                              <i class="fa-solid fa-square" style="color: yellow;"></i></button>
+                          </td>
+                        </tr>
+                        <tr class="" role="row" v-for="node in runnersSearch" v-if="filteraccount.value">
+                          <td role="cell" class="" aria-colindex="1">
+                            <a :href="atref(node.account)">@{{node.account}}</a>
+                          </td>
+                          <td role="cell" class="" aria-colindex="2">
+                            {{formatNumber(node.g/1000,3,'.',',')}}
+                          </td>
+                          <td role="cell" class="" aria-colindex="3">
+                            <button type="button" @click="setApi(node.api)" class="px-2 py-1 btn btn-dark has-tooltip"
+                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                            :data-bs-title="node.api">
+                            <i class="fa-solid fa-square" style="color: yellow;"></i></button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="p-3 mx-5 border border-light rounded">
+              <div class="d-flex text-start align-items-end mb-3">
+                <h3 class="m-0">16 transactions</h3>
+                <a class="ms-auto btn btn-outline-light" role="button" href="/honeyblocks/list/">View<i class="fa-solid fa-list ms-2"></i></a>
+              </div>
+              <p class="text-start mb-0">token-buy, nft-mint, nft-create, nft-delete,
+                propose-trade,
+                accept-trade, add-royalty</p>
+            </div>
+
           </div>
         </div>
       </div>
