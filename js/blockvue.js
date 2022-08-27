@@ -330,13 +330,6 @@ var app = new Vue({
         this[op](this.account);
       }
     },
-    onResize(event) {
-      this.chart.width = this.$refs.chartContainer.scrollWidth - 15;
-      this.chart.height = this.chart.width / 2.5;
-      this.$refs.dumbo.style = `width: ${this.chart.width}px; height: ${
-        this.chart.height + 30
-      }px;`;
-    },
     saveNodeSettings() {
       let updates = {};
       for (var i = 0; i < this.features.node.opts.length; i++) {
@@ -1445,12 +1438,6 @@ var app = new Vue({
     },
   },
   mounted() {
-    this.chart.width = this.$refs.chartContainer.scrollWidth - 15;
-    this.chart.height = this.chart.width / 2.5;
-    this.$refs.dumbo.style = `width: ${this.chart.width}px; height: ${
-      this.chart.height + 30
-    }px;`;
-    window.addEventListener("resize", this.onResize);
     this.getQuotes();
     this.getNodes();
     this.getProtocol();
