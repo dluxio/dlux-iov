@@ -52,6 +52,37 @@
     </div>
     <main class="d-flex flex-column flex-shrink-0 text-white">
       <h1 class="visually-hidden">HoneyComb Block Explorer</h1>
+      <!-- token select -->
+      <div id="userApiSelect">
+        <div class="dropdown">
+          <a class="btn btn-sm btn-dark dropdown-toggle" href="#" role="button" id="tokenDropdownBtn"
+            data-bs-toggle="dropdown" aria-expanded="false">
+            Token
+          </a>
+          <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="tokenDropdownBtn">
+            <li>
+              <h6 class="dropdown-header">HIVE / HBD</h6>
+            </li>
+            <li>
+              <a class="dropdown-item" href="#/" @click="setApi('https://token.dlux.io')">DLUX</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="#/"
+                @click="setApi('https://spkinstant.hivehoneycomb.com')">LARYNX</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="#/"
+                @click="setApi('https://duat.hivehoneycomb.com')">DUAT</a>
+            </li>
+            <li>
+              <hr class="dropdown-divider" />
+            </li>
+            <li>
+              <a class="dropdown-item disabled" href="#/" @click="setApi()">Other...</a>
+            </li>
+          </ul>
+        </div>
+      </div>
       <div class="containe text-center">
         <div class="col-md-6 ms-auto me-auto px-3">
           <h1>Block View</h1>
