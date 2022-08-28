@@ -902,7 +902,7 @@ function setPFP(setname, uid, callback){
         txid: `${item.setname}:${item.uid}_nft_pfp`,
       };
     },
-    apiFor(prefex) {
+    apiFor(prefix) {
       if (prefix == "dlux_") return "https://token.dlux.io";
       if (prefix == "spkcc_") return "https://spkinstant.hivehoneycomb.com";
       if (prefix == "duat_") return "https://duat.hivehoneycomb.com";
