@@ -650,7 +650,6 @@ function giveFT(setname, to, qty, callback){
  }
     */
     giveFT(setname) {
-      qty = parseInt(qty);
       var cja = { set: setname, to: this.giveFTusername, qty: parseInt(this.giveFTqty) };
       this.toSign = {
         type: "cja",
