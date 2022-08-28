@@ -655,9 +655,9 @@ function giveFT(setname, to, qty, callback){
         type: "cja",
         cj: cja,
         id: `${this.prefix}ft_transfer`,
-        msg: `Trying to give ${parseInt(
-          this.giveFTqty
-        )} ${setname} mint token${parseInt(this.giveFTqty)>1 ? 's' : ''} to ${to}`,
+        msg: `Trying to give ${parseInt(this.giveFTqty)} ${setname} mint token${
+          parseInt(this.giveFTqty) > 1 ? "s" : ""
+        } to ${this.giveFTusername}`,
         ops: ["getTokenUser", "getUserNFTs"],
         api: this.apiFor(this.prefix),
         txid: `${this.prefix} _ft_transfer`,
