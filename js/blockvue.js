@@ -1436,8 +1436,12 @@ var app = new Vue({
           if (this.hivebuys[0]) this.sellPrice = this.hivebuys[0].rate;
         });
     },
+    findCurrent() {
+      
+    }
   },
   mounted() {
+    this.findCurrent()
     this.getQuotes();
     this.getNodes();
     this.getProtocol();
