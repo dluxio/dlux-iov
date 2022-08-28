@@ -659,7 +659,7 @@ function giveFT(setname, to, qty, callback){
         msg: `Trying to give ${setname} mint token to ${to}`,
         ops: ["getTokenUser", "getUserNFTs"],
         api: this.apiFor(this.prefix),
-        txid: `${set} _ft_transfer`,
+        txid: `${this.prefix} _ft_transfer`,
       };
     },
     /*
@@ -682,7 +682,7 @@ function tradeFT(setname, to, price, callback){
         msg: `Trying to trade ${setname}: Mint Token`,
         ops: ["getTokenUser", "getUserNFTs"],
         api: this.apiFor(this.prefix),
-        txid: `${set} _ft_escrow`,
+        txid: `${this.prefix} _ft_escrow`,
       };
     },
     /*
@@ -711,14 +711,14 @@ function sellFT(setname, price, type, quantity = 1, distro,  callback){
         id = `${this.prefix}fts_sell_h`;
       } else type = "cja";
       this.toSign = {
-          type: "cja",
-          cj: cja,
-          id,
-          msg: `Trying to sell ${setname} mint token`,
-          ops: ["getTokenUser", "getUserNFTs"],
-          api: this.apiFor(this.prefix),
-          txid: `${set} _ft sell`,
-        };
+        type: "cja",
+        cj: cja,
+        id,
+        msg: `Trying to sell ${setname} mint token`,
+        ops: ["getTokenUser", "getUserNFTs"],
+        api: this.apiFor(this.prefix),
+        txid: `${this.prefix} _ft sell`,
+      };
     },
     /*
 
