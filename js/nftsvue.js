@@ -92,6 +92,8 @@ var app = new Vue({
       bargov: "",
       barpow: "",
       toSign: {},
+      giveFTusername: '',
+      giveFTqty: 1,
       buyFormValid: false,
       sellFormValid: false,
       govFormValid: false,

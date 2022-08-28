@@ -397,14 +397,14 @@
                   </ul>
                   <div class="tab-content">
                     <div role="tabpanel" class="tab-pane fade show active" id="giveFTtab" aria-labelledby="giveFT">
-                      <form class="needs-validation mt-4" @action="giveFT(mint_detail.data.set,giveFTusername.value,giveFTqty.value)" novalidate>
+                      <form class="needs-validation mt-4" @action="giveFT(mint_detail.set,giveFTusername,giveFTqty)" novalidate>
                         <!--:action="javascript:giveFT('{{mint_detail.data.set}}','{{giveFTusername.value}}','{{giveFTqty.value}}')"-->
                         <div class="row mb-3">
                           <label for="giveFTusername" class="form-label">Username</label>
                           <div class="input-group">
                             <span class="input-group-text bg-darkg border-dark text-white-50">@</span>
                             <input type="text" class="form-control bg-darkg border-dark text-info r-radius-hotfix"
-                              id="giveFTusername" aria-describedby="giveFTuserprep" required>
+                              v-model="giveFTusername" aria-describedby="giveFTuserprep" required>
                             <div class="invalid-feedback"> Please enter the username
                               you'd like to give to. </div>
                           </div>
@@ -412,7 +412,7 @@
                         <div class="row mb-3">
                           <label for="giveFTqty" class="form-label">Quantity</label>
                           <div class="input-group">
-                            <input type="number" class="form-control bg-darkg border-dark text-info " id="giveFTqty"
+                            <input type="number" class="form-control bg-darkg border-dark text-info " v-model="giveFTqty"
                               aria-describedby="giveFTqtyappend" value="1" step="1" min="1" required>
                             <span class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50 "
                               id="giveFTqtyappend">{{mint_detail.set}} FT</span>
