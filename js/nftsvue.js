@@ -649,13 +649,17 @@ function giveFT(setname, to, qty, callback){
     .catch(e=>alert(`${to} is not a valid hive account`))
  }
     */
-    giveFT(setname) {
-      var cja = { set: setname, to: this.giveFTusername, qty: parseInt(this.giveFTqty) };
+    giveFT() {
+      var cja = {
+        set: this.mint_detail.set,
+        to: this.giveFTusername,
+        qty: parseInt(this.giveFTqty),
+      };
       this.toSign = {
         type: "cja",
         cj: cja,
         id: `${this.prefix}ft_transfer`,
-        msg: `Trying to give ${parseInt(this.giveFTqty)} ${setname} mint token${
+        msg: `Trying to give ${parseInt(this.giveFTqty)} ${this.mint_detail.set} mint token${
           parseInt(this.giveFTqty) > 1 ? "s" : ""
         } to ${this.giveFTusername}`,
         ops: ["getTokenUser", "getUserNFTs"],
