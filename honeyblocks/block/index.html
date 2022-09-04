@@ -52,52 +52,61 @@
     </div>
     <main class="d-flex flex-column flex-shrink-0 text-white">
       <h1 class="visually-hidden">HoneyComb Block Explorer</h1>
-      <!-- token select -->
-      <div id="userApiSelect">
-        <div class="dropdown">
-          <a class="btn btn-sm btn-dark dropdown-toggle" href="#" role="button" id="tokenDropdownBtn"
-            data-bs-toggle="dropdown" aria-expanded="false">
-            <span v-cloak>{{TOKEN}}</span>
-          </a>
-          <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="tokenDropdownBtn">
-            <li>
-              <h6 class="dropdown-header">HIVE / HBD</h6>
-            </li>
-            <li>
-              <a class="dropdown-item" href="#/" @click="setApi('https://token.dlux.io')">DLUX</a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="#/"
-                @click="setApi('https://spkinstant.hivehoneycomb.com')">LARYNX</a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="#/"
-                @click="setApi('https://duat.hivehoneycomb.com')">DUAT</a>
-            </li>
-            <li>
-              <hr class="dropdown-divider" />
-            </li>
-            <li>
-              <a class="dropdown-item disabled" href="#/" @click="setApi()">Other...</a>
-            </li>
-          </ul>
-        </div>
-      </div>
+
       <div class="containe text-center">
-        <div class="col-md-6 ms-auto me-auto px-3">
-          <h1 v-cloak>{{TOKEN}} Block Explorer</h1>
+        <div class="col-md-8 col-lg-6 ms-auto me-auto px-3">
+          <div class="d-flex align-items-center mt-3">
+            <h1 class="mb-0 ms-2 me-auto">Block Explorer</h1>
+             <!-- token select -->
+              <div id="userApiSelect ms-auto">
+                <div class="dropdown">
+                  <a class="btn btn-lg btn-secondary dropdown-toggle" href="#" role="button" id="tokenDropdownBtn"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <span v-cloak>{{TOKEN}}</span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="tokenDropdownBtn">
+                    <li>
+                      <a class="dropdown-item" href="#/" @click="setApi('https://token.dlux.io')">DLUX</a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="#/"
+                        @click="setApi('https://spkinstant.hivehoneycomb.com')">LARYNX</a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="#/" @click="setApi('https://duat.hivehoneycomb.com')">DUAT</a>
+                    </li>
+                    <li>
+                      <hr class="dropdown-divider" />
+                    </li>
+                    <li>
+                      <a class="dropdown-item disabled" href="#/" @click="setApi()">Other...</a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+          </div>
           <div class="h-100 py-5 text-bg-success rounded-3 my-3">
-            <h2>Block #67,387,463</h2>
-            <div class="my-3">
-              <a class="text-white btn btn-dark" data-bs-toggle="collapse" href="#nodeDrawer1" role="button" aria-expanded="false"
-                aria-controls="nodeDrawer1">
+            <h2 class="m-0">Block #67,387,463</h2>
+            <div class="p-4 m-5 border border-light rounded">
+              <div class="d-flex text-start align-items-center mb-3">
+                <h3 class="m-0">37 transactions</h3>
+                <a class="ms-auto btn btn-outline-light" role="button" href="/honeyblocks/list/">View<i
+                    class="fa-solid fa-list ms-2"></i></a>
+              </div>
+              <p class="text-start mb-0">token-buy, token-sell, nft-buy, nft-sell, nft-mint, nft-create, nft-delete,
+                propose-trade,
+                accept-trade, cancel-trade, token-airdrop, add-royalty</p>
+            </div>
+            <div>
+              <a class="text-white btn btn-lg btn-dark" data-bs-toggle="collapse" href="#nodeDrawer1" role="button"
+                aria-expanded="false" aria-controls="nodeDrawer1">
                 25 / 25 Node Concensus <i class="fa-solid fa-user-lock ms-2"></i>
               </a>
             </div>
             <div id="nodeDrawer1" class="collapse">
               <div class="pb-5">
                 <div class="container">
-                  <div class="d-flex flex-wrap align-items-center justify-content-between mb-1">
+                  <div class="d-flex flex-wrap align-items-center justify-content-between mb-2">
                     <div class="w-100">
                       <span>API Endpoint: {{lapi}} - {{behind}} block(s) behind HIVE</span>
                       <div class="input-group mt-2">
@@ -197,9 +206,9 @@
                           </td>
                           <td role="cell" class="" aria-colindex="3">
                             <button type="button" @click="setApi(node.api)" class="px-2 py-1 btn btn-dark has-tooltip"
-                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
-                            :data-bs-title="node.api">
-                            <i class="fa-solid fa-square" style="color: yellow;"></i></button>
+                              data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                              :data-bs-title="node.api">
+                              <i class="fa-solid fa-square" style="color: yellow;"></i></button>
                           </td>
                         </tr>
                       </tbody>
@@ -208,22 +217,12 @@
                 </div>
               </div>
             </div>
-            <div class="p-3 mx-5 border border-light rounded">
-              <div class="d-flex text-start align-items-end mb-3">
-                <h3 class="m-0">37 transactions</h3>
-                <a class="ms-auto btn btn-outline-light" role="button" href="/honeyblocks/list/">View<i class="fa-solid fa-list ms-2"></i></a>
-              </div>
-              <p class="text-start mb-0">token-buy, token-sell, nft-buy, nft-sell, nft-mint, nft-create, nft-delete,
-                propose-trade,
-                accept-trade, cancel-trade, token-airdrop, add-royalty</p>
-            </div>
-
           </div>
           <div class="h-100 py-5 text-bg-warning rounded-3 my-3">
             <h2>Block #67,387,462</h2>
             <div class="my-3">
-              <a class="text-white btn btn-dark" data-bs-toggle="collapse" href="#nodeDrawer2" role="button" aria-expanded="false"
-                aria-controls="nodeDrawer2">
+              <a class="text-white btn btn-lg btn-dark" data-bs-toggle="collapse" href="#nodeDrawer2" role="button"
+                aria-expanded="false" aria-controls="nodeDrawer2">
                 23 / 25 Node Concensus <i class="fa-solid fa-user-lock ms-2"></i>
               </a>
             </div>
@@ -330,9 +329,9 @@
                           </td>
                           <td role="cell" class="" aria-colindex="3">
                             <button type="button" @click="setApi(node.api)" class="px-2 py-1 btn btn-dark has-tooltip"
-                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
-                            :data-bs-title="node.api">
-                            <i class="fa-solid fa-square" style="color: yellow;"></i></button>
+                              data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                              :data-bs-title="node.api">
+                              <i class="fa-solid fa-square" style="color: yellow;"></i></button>
                           </td>
                         </tr>
                       </tbody>
@@ -344,7 +343,8 @@
             <div class="p-3 mx-5 border border-dark rounded">
               <div class="d-flex text-start align-items-end mb-3">
                 <h3 class="m-0">64 transactions</h3>
-                <a class="ms-auto btn btn-outline-dark" role="button" href="/honeyblocks/list/">View<i class="fa-solid fa-list ms-2"></i></a>
+                <a class="ms-auto btn btn-outline-dark" role="button" href="/honeyblocks/list/">View<i
+                    class="fa-solid fa-list ms-2"></i></a>
               </div>
               <p class="text-start mb-0">token-buy, token-sell, nft-buy, nft-sell</p>
             </div>
@@ -353,8 +353,8 @@
           <div class="h-100 py-5 text-bg-danger rounded-3 my-3">
             <h2>Block #67,387,461</h2>
             <div class="my-3">
-              <a class="text-white btn btn-dark" data-bs-toggle="collapse" href="#nodeDrawer3" role="button" aria-expanded="false"
-                aria-controls="nodeDrawer3">
+              <a class="text-white btn btn-dark" data-bs-toggle="collapse" href="#nodeDrawer3" role="button"
+                aria-expanded="false" aria-controls="nodeDrawer3">
                 20 / 25 Node Concensus <i class="fa-solid fa-user-lock ms-2"></i>
               </a>
             </div>
@@ -461,9 +461,9 @@
                           </td>
                           <td role="cell" class="" aria-colindex="3">
                             <button type="button" @click="setApi(node.api)" class="px-2 py-1 btn btn-dark has-tooltip"
-                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
-                            :data-bs-title="node.api">
-                            <i class="fa-solid fa-square" style="color: yellow;"></i></button>
+                              data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                              :data-bs-title="node.api">
+                              <i class="fa-solid fa-square" style="color: yellow;"></i></button>
                           </td>
                         </tr>
                       </tbody>
@@ -475,7 +475,8 @@
             <div class="p-3 mx-5 border border-light rounded">
               <div class="d-flex text-start align-items-end mb-3">
                 <h3 class="m-0">16 transactions</h3>
-                <a class="ms-auto btn btn-outline-light" role="button" href="/honeyblocks/list/">View<i class="fa-solid fa-list ms-2"></i></a>
+                <a class="ms-auto btn btn-outline-light" role="button" href="/honeyblocks/list/">View<i
+                    class="fa-solid fa-list ms-2"></i></a>
               </div>
               <p class="text-start mb-0">token-buy, nft-mint, nft-create, nft-delete,
                 propose-trade,
