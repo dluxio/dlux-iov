@@ -91,8 +91,6 @@ mspublic=STMpublickey
 #STARTURL=<HIVE_RPC_Node_with_History>
 # Your blockbased HIVE node for getting blocks and broadcasting transactions
 #APIURL=<Any_HIVE_RPC_Node>
-
-
 ```
    - Optionally you can include `discordwebhook=https://discordapp.com/api/webhooks/NUMB3RS/KeYs` to stream the feed into a discord channel
 3. Save & exit
