@@ -73,11 +73,27 @@ Once you have an up-to-date ubuntu server with docker, you can install Honeycomb
 2. Type `touch .env && nano .env` to edit the node attributes
    - Type the following into the text editor: 
 ```
+# This is an example file. Uncomment and change any variables you would like to override.
+
+# The HIVE account running the node (defaults to disregardfiat)
 account="hiveaccount"
+# The HIVE account active private key
 active=5JactivePrivateKey
+# Your API public address (deafults to http://dlux-token.herokuapp.com)
+domain=https://api.yourdomain.com
+# Required for Spkcc Network and DUAT
 msowner=5KadditionalPrivateKey
 mspublic=STMpublickey
-domain=https://api.yourdomain.com
+# Your API port (defaults to 3001)
+#PORT=3001
+# Your bidRate (defaults to 2500)
+#BIDRATE=2500
+# Your History based HIVE node for startup purposes
+#STARTURL=<HIVE_RPC_Node_with_History>
+# Your blockbased HIVE node for getting blocks and broadcasting transactions
+#APIURL=<Any_HIVE_RPC_Node>
+
+
 ```
    - Optionally you can include `discordwebhook=https://discordapp.com/api/webhooks/NUMB3RS/KeYs` to stream the feed into a discord channel
 3. Save & exit
