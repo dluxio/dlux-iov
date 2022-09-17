@@ -74,7 +74,6 @@ Once you have an up-to-date ubuntu server with docker, you can install Honeycomb
    - Type the following into the text editor: 
 ```
 # This is an example file. Uncomment and change any variables you would like to override.
-
 # The HIVE account running the node (defaults to disregardfiat)
 account="hiveaccount"
 # The HIVE account active private key
