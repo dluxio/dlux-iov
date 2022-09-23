@@ -1228,7 +1228,7 @@ var app = new Vue({
         ],
         id: `Update Proposal Votes`,
         msg: `Supporting Proposal${num}`,
-        ops: [banishPrompt],
+        ops: ["banishPrompt"],
         txid: `Update Proposal Votes`,
       };
       this.hasHiddenPrompt = true;
