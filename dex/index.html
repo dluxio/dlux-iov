@@ -651,6 +651,11 @@
           </div>
         </div>
         <div class="container text-white" style="margin-top: 50px">
+          <div v-if="!hidePrompt && !hasHiddenPrompt" class="alert alert-info" role="alert">
+            Help support further development by supporting the <a href="https://peakd.com/proposals/234">HoneyComb Improvement Proposal</a>
+            <button @click="voteProposal(234)">Vote Now</button>
+            <button @click="banishPrompt">Maybe Later</button>
+          </div>
           <!-- current token tick -->
           <div class="row mb-3">
             <div class="col-6 col-md-4">

@@ -57,6 +57,8 @@ var app = new Vue({
   data() {
     return {
       ohlcv: [],
+      hidePrompt: true,
+      hasHiddenPrompt: true,
       chart: {
         id: "honeycomb_tv",
         width: 600,
@@ -1211,6 +1213,30 @@ var app = new Vue({
           this.stats = data.stats;
         });
     },
+    voteProposal(num) {
+      this.toSign = {
+        type: "raw",
+        op: [
+          [
+            "update_proposal_votes",
+            {
+              voter: user,
+              proposal_ids: [`${num}`],
+              approve: true,
+            },
+          ],
+        ],
+        id: `Update Proposal Votes`,
+        msg: `Supporting Proposal${num}`,
+        ops: [banishPrompt],
+        txid: `Update Proposal Votes`,
+      };
+    },
+    banishPrompt() {
+      localStorage.setItem(`hhp:${user}`, new Date().getTime());
+      this.hasHiddenPrompt = true
+      console.log('BANISH')
+    },
     getRecents(){
       fetch(this.lapi + "/api/recent/HIVE_" + this.TOKEN + "?limit=1000")
         .then((response) => response.json())
@@ -1358,6 +1384,31 @@ var app = new Vue({
             this.barhive = this.accountinfo.balance;
             this.barhbd = this.accountinfo.hbd_balance;
           });
+        if (localStorage.getItem(`hhp:${user}`) && 
+          localStorage.getItem(`hhp:${user}`) >
+          new Date().getTime() - 86400000
+        )this.hasHiddenPrompt = true
+        else {
+          this.hasHiddenPrompt = false;
+          localStorage.removeItem(`hhp:${user}`);
+        }
+          fetch("https://api.hive.blog", {
+            body: `{"jsonrpc":"2.0", "method":"condenser_api.list_proposal_votes", "params":[["${user}", 234], 1, "by_voter_proposal", "ascending", "active"], "id":1}`,
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            method: "POST",
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+              if (
+                data.result[0].proposal.proposal_id == 234 &&
+                data.result[0].voter == user
+              )
+                this.hidePrompt = true;
+              else this.hidePrompt = false;
+            });
     },
     popDEX() {
       fetch(this.lapi + "/dex")
