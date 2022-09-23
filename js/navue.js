@@ -145,7 +145,7 @@ export default {
       ];
       this.sign(op)
         .then((r) => {
-          this.statusFinder(r, obj);
+          if(obj.txid)this.statusFinder(r, obj);
         })
         .catch((e) => {
           console.log(e);
