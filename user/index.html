@@ -1109,7 +1109,7 @@
                                         style="background-color: black">
                                         <div class="pr-2"><small>MINTS OWNED: </small></div>
                                         <div class="px-2">
-                                            <h2 class="m-0">{{getMint(focusSet.set, 'qty')}}</h2>
+                                            <h2 class="m-0">{{getMint('', 'qty')}}</h2>
                                         </div>
                                     </div>
                                     <div> <a :href="'/nfts/set/' + focusSet.set" class="no-decoration">
@@ -1120,7 +1120,7 @@
 
                                 <div class="px-2 py-5 text-center">
                                     <img class="rounded max-160"
-                                        :src="makeLink('https://ipfs.io/ipfs/', focusSet.computed.set ? focusSet.computed.set.wrapped : '')"></img>
+                                        :src="'https://ipfs.io/ipfs/' + focusSet.computed.set ? 'why' : ''"></img>
                                     <div style="-webkit-background-clip: text;color: transparent;">
                                         <h3 class="my-0 mx-2 p-0 p-2 ms-auto">sealed NFT</h3>
                                     </div>
@@ -1857,7 +1857,7 @@
                                                     </div>
                                                     <h3
                                                         class="card-title lead border rounded border-dark p-2 ms-auto mb-0 text-center">
-                                                        <a :href="makeLink('/nfts/set/',item.setname)"
+                                                        <a :href="'/nfts/set/' + item.setname"
                                                             class="lead no-decoration"
                                                             style="color: black">{{item.setname}}
                                                             NFT</a>
@@ -1866,7 +1866,7 @@
                                                 <a href="#itemModal" class="a-1" data-bs-toggle="modal"
                                                     @click="modalIndex('itemModal',item.uid);setValue('itemModal.hidden', false)">
                                                     <div class="card-img-top"
-                                                        :alt="makeLink('image-', item.setname, ['-', item.uid])"
+                                                        :alt="'image-' +  item.setname + '-' + item.uid"
                                                         v-html="item.HTML">
                                                     </div>
                                                     <div class="card-body d-flex flex-column text-center">
@@ -1877,7 +1877,7 @@
                                                 <div class="card-footer text-center d-flex justify-content-between align-items-center"
                                                     v-if="item.owner.length > 2">
                                                     <span><i class="fa-brands fa-hive me-2"></i><a
-                                                            :href="makeLink('/@', item.owner, ['#inventory'])">{{item.owner}}</a></span>
+                                                            :href="'/@' + item.owner + '#inventory'">{{item.owner}}</a></span>
                                                 </div>
 
                                                 <div class="card-footer text-center d-flex justify-content-between align-items-center"
@@ -1926,7 +1926,7 @@
                                                     <div class="col-12 px-0 px-sm-2">
                                                         <!-- NFT img -->
                                                         <div class="card-img-top"
-                                                            :alt="makeLink(itemModal.item.setname, '-', ['itemModal.item.uid'])">
+                                                            :alt="itemModal.item.setname + '-' + itemModal.item.uid">
                                                             <div v-html="itemModal.item.HTML"></div>
                                                             <!--back forward btns-->
                                                             <div class="card-footer d-flex align-items-center">
@@ -2761,7 +2761,7 @@
                                             </div>
                                             <div class="ms-auto me-auto">
                                                 <h3 class="modal-title lead border border-dark rounded mb-0 p-2"><a
-                                                        :href="makeLink('/nfts/set/',itemModal.item.setname)"
+                                                        :href="'/nfts/set/' + itemModal.item.setname"
                                                         style="color: black">{{itemModal.item.setname}}
                                                         NFT</a></h3>
                                             </div>
@@ -2780,14 +2780,14 @@
                                                                 class="fas fa-caret-square-right"></i></a></h2>
                                                 </div>
                                                 <div class="card-img-top"
-                                                    :alt="makeLink(itemModal.item.set, '-', ['itemModal.item.uid'])">
+                                                    :alt="itemModal.item.set + '-' + itemModal.item.uid">
                                                     <div v-html="itemModal.item.HTML"></div>
                                                     {{itemModal.item.set ? itemModal.item.set.Description : ''}}
                                                 </div>
                                                 <div class="text-center mt-2 text-white-50">
                                                     <p>Owner: <a
-                                                            :href="makeLink('/',itemModal.item.owner,['#inventory/'])"
-                                                            :title="makeLink('/',itemModal.item.owner,['#inventory/'])">{{itemModal.item.owner}}</a>
+                                                            :href="'/' + itemModal.item.owner + '#inventory/'"
+                                                            :title="'/' + itemModal.item.owner + '#inventory/'">{{itemModal.item.owner}}</a>
                                                     </p>
                                                 </div>
                                             </div>
