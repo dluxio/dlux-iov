@@ -1231,6 +1231,7 @@ var app = new Vue({
         ops: [banishPrompt],
         txid: `Update Proposal Votes`,
       };
+      this.hasHiddenPrompt = true;
     },
     banishPrompt() {
       localStorage.setItem(`hhp:${user}`, new Date().getTime());
