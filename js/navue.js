@@ -47,7 +47,7 @@ export default {
         op.time = new Date().getTime();
         op.status = "Pending your approval";
         op.delay = 5000;
-        op.title = op.id ? op.id : op.cj.memo;
+        op.title = op.id ? op.id : op.cj ? op.cj.memo : "No Waiter";
         if(!op.api)op.api = this.lapi;
         this.ops.push(op);
         this.$emit("ack", op.txid);
@@ -145,7 +145,7 @@ export default {
       ];
       this.sign(op)
         .then((r) => {
-          this.statusFinder(r, obj);
+          if(obj.id)this.statusFinder(r, obj);
         })
         .catch((e) => {
           console.log(e);
