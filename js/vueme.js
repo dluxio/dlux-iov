@@ -2244,12 +2244,15 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         );
       }
     },
-    getNFTs(un){
+    getNFTs(){
+      this.accountNFTs = []
+      this.accountRNFTs = []
       for (var i = 0; i < this.providers.length; i++){
-        this.NFTsLookUp(un, this.providers, i);
+        this.NFTsLookUp(this.account, this.providers, i);
       }
     },
     NFTsLookUp(un, p, i){
+      console.log({un,p,i})
         fetch(p[i].api + '/api/nfts/' + un)
         .then(r => r.json())
         .then(json => {
@@ -2259,7 +2262,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           for (var j = 0; j < NFTs.length; j++){
             NFTs[j].token = p[i].token;
             scripts[NFTs[j].script] = p[i].token;
-            this.accountNFTs.concat(NFTs[j]);
+            this.accountNFTs.push(NFTs[j]);
           }
           for (var j = 0; j < rNFTs.length; j++) {
             rNFTs[j].token = p[i].token;
