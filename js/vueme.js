@@ -669,8 +669,9 @@ var app = new Vue({
     getSetPhotos(s, c) {
       return s.set ? `https://ipfs.io/ipfs/${s.set[c]}` : "";
     },
-    getSetDetailsColors(s) {
+    getSetDetailsColors(script) {
       let r = "chartreuse,lawngreen";
+      const s = this.baseScript[script]
       if (s && s.set) {
         try {
           r = `${s.set.Color1},${s.set.Color2 ? s.set.Color2 : s.set.Color1}`;
