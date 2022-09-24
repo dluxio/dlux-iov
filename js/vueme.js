@@ -206,6 +206,7 @@ var app = new Vue({
         searching: false,
       },
       accountRNFTs: [],
+      accountNFTs: [],
       mint_detail: {
         set: "",
       },
@@ -2266,8 +2267,10 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           var scripts = {};
           for (var j = 0; j < NFTs.length; j++) {
             NFTs[j].token = p[i].token;
-            scripts[NFTs[j].script] = { token: p[i].token, set: NFTs[j].set };
-            this.accountNFTs.push(NFTs[j]);
+            scripts[NFTs[j].script] = { token: p[i].token, set: NFTs[j].set }
+            this.callScript(NFTs[j]).then((comp) => {
+              this.accountNFTs.push(comp);
+            });
           }
           console.log(rNFTs);
           for (var j = 0; j < rNFTs.length; j++) {
