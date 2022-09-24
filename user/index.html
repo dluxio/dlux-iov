@@ -1112,7 +1112,7 @@
                                             <h2 class="m-0">{{rnft.qty}}</h2>
                                         </div>
                                     </div>
-                                    <div> <a :href="'/nfts/set/' + rnft.set" class="no-decoration">+ '#' rnft.token"
+                                    <div> <a :href="'/nfts/set/' + rnft.set + addToken(rnft.token)" class="no-decoration">
                                             <h3 class="card-title lead shimmer rounded p-2 m-0"><b>{{rnft.set}}
                                                     NFT</b></h3>
                                         </a></div>
@@ -1120,7 +1120,7 @@
 
                                 <div class="px-2 py-5 text-center">
                                     <img class="rounded max-160"
-                                        :src="'https://ipfs.io/ipfs/' + rnft.script ? rnft.script : ''"></img>
+                                        :src="'https://ipfs.io/ipfs/' + getAttr(rnft.script, 'wrapped')"></img>
                                     <div style="-webkit-background-clip: text;color: transparent;">
                                         <h3 class="my-0 mx-2 p-0 p-2 ms-auto">sealed NFT</h3>
                                     </div>

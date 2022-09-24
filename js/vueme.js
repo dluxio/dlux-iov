@@ -77,9 +77,11 @@ var app = new Vue({
       account: user,
       providers: [
         { api: "https://token.dlux.io", token: "dlux" },
-        { api: "https://duat.hivehoneycomb.com", token: "duat" }
+        { api: "https://duat.hivehoneycomb.com", token: "duat" },
       ],
       scripts: {},
+      nftscripts: {},
+      baseScript: {},
       NFTs: [],
       rNFTs: [],
       allNFTs: [],
@@ -1754,6 +1756,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         if (!this[key]) this[key] = value;
       }
     },
+    addToken(token) {
+      return "#" + token;
+    },
     setMem(key, value, reload) {
       if (value.indexOf("https://") == -1) {
         alert("https:// is required for security reasons");
@@ -2244,24 +2249,24 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         );
       }
     },
-    getNFTs(){
-      this.accountNFTs = []
-      this.accountRNFTs = []
-      for (var i = 0; i < this.providers.length; i++){
+    getNFTs() {
+      this.accountNFTs = [];
+      this.accountRNFTs = [];
+      for (var i = 0; i < this.providers.length; i++) {
         this.NFTsLookUp(this.account, this.providers, i);
       }
     },
-    NFTsLookUp(un, p, i){
-      console.log({un,p,i})
-        fetch(p[i].api + '/api/nfts/' + un)
-        .then(r => r.json())
-        .then(json => {
-          var NFTs = json.result
-          var rNFTs = json.mint_tokens
-          var scripts = {}
-          for (var j = 0; j < NFTs.length; j++){
+    NFTsLookUp(un, p, i) {
+      console.log({ un, p, i });
+      fetch(p[i].api + "/api/nfts/" + un)
+        .then((r) => r.json())
+        .then((json) => {
+          var NFTs = json.result;
+          var rNFTs = json.mint_tokens;
+          var scripts = {};
+          for (var j = 0; j < NFTs.length; j++) {
             NFTs[j].token = p[i].token;
-            scripts[NFTs[j].script] = p[i].token;
+            scripts[NFTs[j].script] = { token: p[i].token, set: NFTs[j].set };
             this.accountNFTs.push(NFTs[j]);
           }
           console.log(rNFTs);
@@ -2271,12 +2276,17 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             this.accountRNFTs.push(rNFTs[j]);
             console.log(j, rNFTs[j], this.accountRNFTs);
           }
-          for (var script in scripts){
-            console.log(script)
+          for (var script in scripts) {
             this.scripts[script] = p[i].token;
+            this.baseScript[script] = this.callScript({
+              script,
+              token: this.scripts[script].token,
+              set: this.scripts[script].set
+            });
           }
-        })
-      },
+        });
+    },
+    getAttr(script, att){return this.baseScript[script][att]},
     getTokenUser(user = this.account, fu) {
       fetch(this.lapi + "/@" + user)
         .then((response) => response.json())
@@ -2408,6 +2418,48 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             }
           });
       }
+    },
+    pullScript(id) {
+      return new Promise((resolve, reject) => {
+        fetch(`https://ipfs.io/ipfs/${id}`)
+          .then((response) => response.text())
+          .then((data) => {
+            this.nftscripts[id] = data;
+            resolve("OK");
+          });
+      });
+    },
+    Base64toNumber(chars) {
+      const glyphs =
+        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
+      var result = 0;
+      chars = chars.split("");
+      for (var e = 0; e < chars.length; e++) {
+        result = result * 64 + glyphs.indexOf(chars[e]);
+      }
+      return result;
+    },
+    callScript(o) {
+      return new Promise((resolve, reject) => {
+        if (this.nftscripts[o.script]) {
+          const code = `(//${this.nftscripts[o.script]}\n)("${
+            o.uid ? o.uid : 0
+          }")`;
+          var computed = eval(code);
+          computed.uid = o.uid || '';
+          computed.owner = o.owner || '';
+          computed.script = o.script;
+          computed.setname = o.set,
+          computed.token = o.token
+          resolve(computed);
+        } else {
+          this.pullScript(o.script).then((empty) => {
+            this.callScript(o).then((r) => {
+              resolve(r);
+            });
+          });
+        }
+      });
     },
     keyOf(obj = "smarkets", key = "node") {
       if (this[obj]) {
