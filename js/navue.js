@@ -661,7 +661,6 @@ export default {
               <li><a class="dropdown-item" href="#" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers"><i class="fas fa-user-friends me-2"></i>Users</a></li>
 			        <li><a class="dropdown-item" href="#" @click="logout()"><i class="fas fa-power-off fa-fw me-2"></i>Logout</a></li>
 		        </ul>
-          </li>
         </ul>
       </div>
       <!--pwa brand-->
@@ -672,12 +671,22 @@ export default {
           <li class="nav-item"></li>
           <li class="nav-item"><button class="btn btn-primary ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button></li>
         </ul>
-        <ul class="navbar-nav d-none" v-show="user">
+        <ul class="navbar-nav d-sm-none" v-show="user">
           <li>
-            <a href="#" v-show="user" class="nav-link d-flex align-items-center text-white-50" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
-            <img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light me-1 cover">
-            <span id="userName" class="ms-2 d-none d-md-block">{{user}}</span>
-            </a>
+		        <a class="nav-link dropdown-toggle dropdown-bs-toggle text-white-50 text-end" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
+			      <span id="userName" class="ms-auto me-1"><img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light cover"></span></a>
+            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end pt-0" aria-labelledby="userDropdown" style="position: absolute;">
+			        <li class=""><a class="dropdown-item" :href="'/me#blog/'" onClick="showTab('blog')"><i class="fas fa-user fa-fw me-2"></i>Profile</a></li>
+			        <li class=""><a class="dropdown-item" :href="'/me#wallet/'" onClick="showTab('wallet')"><i class="fas fa-wallet fa-fw me-2"></i>Wallet</a></li>
+			        <li class=""><a class="dropdown-item" :href="'/me#inventory/'" onClick="showTab('inventory')"><i class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
+			        <li class="d-none"><a class="dropdown-item" :href="'/me#node/'" onClick="showTab('node')"><i class="fas fa-robot fa-fw me-2"></i>Node</a></li>
+			        <li class="d-none"><a class="dropdown-item" :href="'/me#settings/'" onClick="showTab('settings')"><i class="fas fa-cog fa-fw me-2"></i>Settings</a></li>
+              <li class=""><hr class="dropdown-divider"></li>
+			        <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
+              <li class=""><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers"><i class="fas fa-user-friends me-2"></i>Users</a></li>
+			        <li><a class="dropdown-item" href="#" @click="logout()"><i class="fas fa-power-off fa-fw me-2"></i>Logout</a></li>
+		        </ul>
           </li>
         </ul>
       </div>
