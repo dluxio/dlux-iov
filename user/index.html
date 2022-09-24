@@ -1103,7 +1103,8 @@
                     <div role="tabpanel" class="tab-pane fade show" id="inventory" aria-labelledby="inventorytab">
                         <div class="container">
                             <!--mint manager col-->
-                            <div v-for="rnft in rNFTs" class="col-lg-3 mt-5 mt-lg-0">
+                            <d v-for="token in rNFTs" class="col-lg-3 mt-5 mt-lg-0">
+                                
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="rounded-pill d-flex align-items-center p-2"
                                         style="background-color: black">
@@ -1112,7 +1113,7 @@
                                             <h2 class="m-0">{{getMint(rnft.set, 'qty')}}</h2>
                                         </div>
                                     </div>
-                                    <div> <a :href="'/nfts/set/' + rnft.set + '#' rnft.token" class="no-decoration">
+                                    <div> <a href="/" class="no-decoration">:href="'/nfts/set/' + rnft.set + '#' rnft.token"
                                             <h3 class="card-title lead shimmer rounded p-2 m-0"><b>{{rnft.set}}
                                                     NFT</b></h3>
                                         </a></div>
@@ -1136,6 +1137,7 @@
                                         @click="mint_detail.set = rnft.set">Transfer<i
                                             class="fas fa-exchange-alt ms-3"></i></button>
                                 </div>
+                                
                             </div>
                             <div class="modal fade" id="mintTransferModal" tabindex="-1" role="dialog"
                                 aria-hidden="true">

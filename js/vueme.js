@@ -2067,10 +2067,10 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       }
     },
     getMint(set, item) {
-      for (let i = 0; i < this.accountRNFTs.length; i++) {
-        if (this.accountRNFTs[i].set == set) {
-          if (item) return this.accountRNFTs[i][item];
-          return this.accountRNFTs[i];
+      for (let i = 0; i < this.rNFTs.length; i++) {
+        if (this.rNFTs[i].set == set) {
+          if (item) return this.rNFTs[i][item];
+          return this.rNFTs[i];
         }
       }
       return 0;
@@ -2246,32 +2246,33 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
     getNFTs(un){
       for (var i = 0; i < this.providers.length; i++){
-        NFTsLookUp(i);
+        this.NFTsLookUp(un, this.providers, i);
       }
-      function NFTsLookUp(i){
-        fetch(this.providers[i].api + '/api/nfts/' + un)
+    },
+    NFTsLookUp(un, p, i){
+        fetch(p[i].api + '/api/nfts/' + un)
         .then(r => r.json())
         .then(json => {
           var NFTs = json.result
           var rNFTs = json.mint_tokens
           var scripts = {}
           for (var j = 0; j < NFTs.length; j++){
-            NFTs[j].token = this.providers[i].token;
-            scripts[NFTs[j].script] = 1
+            NFTs[j].token = p[i].token;
+            scripts[NFTs[j].script] = p[i].token;
+            this.accountNFTs.concat(NFTs[j]);
           }
           for (var j = 0; j < rNFTs.length; j++) {
-            rNFTs[j].token = this.providers[i].token;
+            rNFTs[j].token = p[i].token;
             scripts[rNFTs[j].script] = 1;
+            this.accountRNFTs.push(rNFTs[j]);
           }
           for (var script in scripts){
-            this.scripts[script] = this.providers[i].token;
+            this.scripts[script] = p[i].token;
           }
-          this.NFTs[this.providers[i].token] = NFTs;
-          this.rNFTs[this.providers[i].token] = rNFTs;
         })
-      }
-    },
+      },
     getTokenUser(user = this.account, fu) {
+      this.getNFTs()
       fetch(this.lapi + "/@" + user)
         .then((response) => response.json())
         .then((data) => {
