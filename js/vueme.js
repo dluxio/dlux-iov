@@ -2263,11 +2263,13 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             NFTs[j].token = p[i].token;
             scripts[NFTs[j].script] = p[i].token;
             this.accountNFTs.push(NFTs[j]);
+            console.log(j)
           }
           for (var j = 0; j < rNFTs.length; j++) {
             rNFTs[j].token = p[i].token;
             scripts[rNFTs[j].script] = 1;
             this.accountRNFTs.push(rNFTs[j]);
+            console.log(j, rNFTs[j], this.accountRNFTs);
           }
           for (var script in scripts){
             this.scripts[script] = p[i].token;
