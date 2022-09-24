@@ -2256,6 +2256,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         fetch(p[i].api + '/api/nfts/' + un)
         .then(r => r.json())
         .then(json => {
+          console.log(json)
           var NFTs = json.result
           var rNFTs = json.mint_tokens
           var scripts = {}
