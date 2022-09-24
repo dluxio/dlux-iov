@@ -84,10 +84,10 @@
                                     aria-controls="wallet" aria-expanded="true" href="#wallet">Wallet</a></li>
                             <li class="nav-item"> <a class="nav-link" id="inventorytab" role="tab" data-bs-toggle="tab"
                                     aria-controls="inventory" aria-expanded="true" href="#inventory">Inventory</a></li>
-                            <li class="nav-item" v-show="me"> <a class="nav-link" id="nodestab" role="tab"
+                            <li class="nav-item d-none" v-show="me"> <a class="nav-link" id="nodestab" role="tab"
                                     data-bs-toggle="tab" aria-controls="nodes" aria-expanded="true"
                                     href="#nodes">Nodes</a></li>
-                            <li class="nav-item" v-show="me"> <a class="nav-link" id="settingstab" role="tab"
+                            <li class="nav-item d-none" v-show="me"> <a class="nav-link" id="settingstab" role="tab"
                                     data-bs-toggle="tab" aria-controls="settings" aria-expanded="true"
                                     href="#settings">Settings</a></li>
                         </ul>
@@ -1136,7 +1136,7 @@
                                             </div>
                                         </div>
                                         <div class="card-footer">
-                                            <div class="d-flex flex-wrap justify-content-between" v-if="rnft.qty > 0">
+                                            <div class="d-flex flex-wrap justify-content-between mb-2" v-if="rnft.qty > 0">
                                                 <button type="button" class="btn btn-outline-light me-auto ms-auto mt-1"
                                                     @click="">Open<i class="fas fa-box-open ms-3"></i></button>
                                                 <button type="button" class="btn btn-outline-light me-auto ms-auto mt-1"
