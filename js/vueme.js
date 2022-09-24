@@ -80,6 +80,8 @@ var app = new Vue({
         { api: "https://duat.hivehoneycomb.com", token: "duat" }
       ],
       scripts: {},
+      NFTs: [],
+      rNFTs: [],
       allNFTs: [],
       saleNFTs: [],
       auctionNFTs: [],
