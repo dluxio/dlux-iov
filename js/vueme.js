@@ -75,6 +75,11 @@ var app = new Vue({
     return {
       toSign: {},
       account: user,
+      providers: [
+        { api: "https://token.dlux.io", token: "dlux" },
+        { api: "https://duat.hivehoneycomb.com", token: "duat" }
+      ],
+      scripts: {},
       allNFTs: [],
       saleNFTs: [],
       auctionNFTs: [],
@@ -2235,6 +2240,33 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         this.posturls[a].rep = this.readRep(
           this.authors[this.posturls[a].author].reputation
         );
+      }
+    },
+    getNFTs(un){
+      for (var i = 0; i < this.providers.length; i++){
+        NFTsLookUp(i);
+      }
+      function NFTsLookUp(i){
+        fetch(this.providers[i].api + '/api/nfts/' + un)
+        .then(r => r.json())
+        .then(json => {
+          var NFTs = json.result
+          var rNFTs = json.mint_tokens
+          var scripts = {}
+          for (var j = 0; j < NFTs.length; j++){
+            NFTs[j].token = this.providers[i].token;
+            scripts[NFTs[j].script] = 1
+          }
+          for (var j = 0; j < rNFTs.length; j++) {
+            rNFTs[j].token = this.providers[i].token;
+            scripts[rNFTs[j].script] = 1;
+          }
+          for (var script in scripts){
+            this.scripts[script] = this.providers[i].token;
+          }
+          this.NFTs[this.providers[i].token] = NFTs;
+          this.rNFTs[this.providers[i].token] = rNFTs;
+        })
       }
     },
     getTokenUser(user = this.account, fu) {
