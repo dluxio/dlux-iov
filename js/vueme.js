@@ -2284,7 +2284,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               token: this.scripts[script].token,
               set: this.scripts[script].set
             }).then(comp => {
-              this.baseScript[script] = comp
+              this.baseScript[comp.script] = comp
             })
           }
         });
