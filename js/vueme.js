@@ -2268,6 +2268,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           var scripts = {};
           for (var j = 0; j < NFTs.length; j++) {
             NFTs[j].token = p[i].token;
+            this.itemModal.items.push(NFTs[j]);
+            this.itemModal.item = this.itemModal[0];
             scripts[NFTs[j].script] = { token: p[i].token, set: NFTs[j].set }
             this.callScript(NFTs[j]).then((comp) => {
               this.accountNFTs.push(comp);

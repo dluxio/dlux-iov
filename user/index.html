@@ -1498,7 +1498,7 @@
                             </div>
                             <div class="row">
                                 <!--filters-->
-                                <div class="col" style="max-width: 300px;">
+                                <!-- <div class="col" style="max-width: 300px;">
                                     <div class="accordion bg-dark" id="accordionFilter">
                                         <div class="accordion-item bg-secondary">
                                             <h2 class="accordion-header" id="headingOne">
@@ -1652,7 +1652,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </div> -->
 
 
                                 <!--set items-->
@@ -1660,7 +1660,7 @@
                                     <div class="text-center my-3 d-flex align-items-center">
                                         <div class="d-flex flex-wrap">
                                             <!--filter-->
-                                            <div class="me-2">
+                                            <!-- <div class="me-2">
                                                 <div class="dropdown">
                                                     <button class="btn btn-secondary dropdown-toggle"
                                                         data-bs-auto-close="outside" type="button" id="filterDropdown"
@@ -1747,7 +1747,7 @@
                                                         </li>
                                                     </ul>
                                                 </div>
-                                            </div>
+                                            </div> -->
                                             <!--search-->
                                             <div class="col me-2">
 
@@ -1786,17 +1786,11 @@
                                                     <span v-if="NFTselect.sort == 'uid' && NFTselect.dir == 'desc'">UID:
                                                         High to Low</span>
                                                     <span
-                                                        v-if="NFTselect.sort == 'owner' && NFTselect.dir == 'asc'">Owner:
-                                                        A to Z</span>
-                                                    <span
-                                                        v-if="NFTselect.sort == 'owner' && NFTselect.dir == 'desc'">Owner:
-                                                        Z to A</span>
-                                                    <span
-                                                        v-if="NFTselect.sort == 'price' && NFTselect.dir == 'asc'">Price:
+                                                        v-if="NFTselect.sort == 'token' && NFTselect.dir == 'asc'">Token:
                                                         Low
                                                         to High</span>
                                                     <span
-                                                        v-if="NFTselect.sort == 'price' && NFTselect.dir == 'desc'">Price:
+                                                        v-if="NFTselect.sort == 'token' && NFTselect.dir == 'desc'">Token:
                                                         High to Low</span>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-dark"
@@ -1833,27 +1827,6 @@
                                                             High to Low</a></li>
                                                 </ul>
                                             </div>
-                                            <!--deleted show / hide-->
-                                            <div class="dropdown col">
-                                                <button
-                                                    class="btn btn-dark border-secondary text-white-50 w-100 dropdown-toggle"
-                                                    type="button" id="deletedDropdown" data-bs-toggle="dropdown"
-                                                    aria-expanded="false">
-                                                    <span v-if="!NFTselect.showDeleted">Deleted: Hiding</span>
-                                                    <span v-if="NFTselect.showDeleted">Deleted: Showing</span>
-                                                </button>
-                                                <ul class="dropdown-menu dropdown-menu-dark"
-                                                    aria-labelledby="deletedDropdown">
-                                                    <li><a class="dropdown-item"
-                                                            :class="{'active':!NFTselect.showDeleted}" href="#/"
-                                                            @click="setValue('NFTselect.showDeleted', false);selectNFTs(true)">Hide
-                                                            Deleted</a></li>
-                                                    <li><a class="dropdown-item"
-                                                            :class="{'active':NFTselect.showDeleted}" href="#/"
-                                                            @click="setValue('NFTselect.showDeleted', true);selectNFTs(true)">Show
-                                                            Deleted</a></li>
-                                                </ul>
-                                            </div>
                                         </div>
                                     </div>
                                     <div class="row row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
@@ -1861,14 +1834,14 @@
                                         <div class="col mb-4" v-for="item in accountNFTs">
                                             <div class="card text-white bg-dark">
                                                 <div class="card-header border-0 d-flex align-items-center"
-                                                    :style="{'background': getSetDetailsColors(focusSet.computed ? focusSet.computed : '')}">
+                                                    :style="{'background': getSetDetailsColors(item.script)}">
                                                     <div class="rounded-pill d-flex align-items-center p-2 me-2"
                                                         style="background: black">
                                                         <h2 class="m-0 px-2">{{item.uid}}</h2>
                                                     </div>
                                                     <h3
                                                         class="card-title lead border rounded border-dark p-2 ms-auto mb-0 text-center">
-                                                        <a :href="'/nfts/set/' + item.setname"
+                                                        <a :href="'/nfts/set/' + item.setname + addToken(item.token)"
                                                             class="lead no-decoration"
                                                             style="color: black">{{item.setname}}
                                                             NFT</a>
