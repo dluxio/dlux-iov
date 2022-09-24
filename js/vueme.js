@@ -2278,11 +2278,13 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           }
           for (var script in scripts) {
             this.scripts[script] = p[i].token;
-            this.baseScript[script] = this.callScript({
+            this.callScript({
               script,
               token: this.scripts[script].token,
               set: this.scripts[script].set
-            });
+            }).then(comp => {
+              this.baseScript[script] = comp
+            })
           }
         });
     },
