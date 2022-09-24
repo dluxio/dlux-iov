@@ -2271,7 +2271,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             this.accountRNFTs.push(rNFTs[j]);
             console.log(j, rNFTs[j], this.accountRNFTs);
           }
-          for (var script of scripts){
+          for (var script in scripts){
             console.log(script)
             this.scripts[script] = p[i].token;
           }
