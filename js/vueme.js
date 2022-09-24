@@ -2256,7 +2256,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         fetch(p[i].api + '/api/nfts/' + un)
         .then(r => r.json())
         .then(json => {
-          console.log(json)
           var NFTs = json.result
           var rNFTs = json.mint_tokens
           var scripts = {}
@@ -2276,7 +2275,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         })
       },
     getTokenUser(user = this.account, fu) {
-      this.getNFTs()
       fetch(this.lapi + "/@" + user)
         .then((response) => response.json())
         .then((data) => {
@@ -2543,6 +2541,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this.getFeedPrice();
       this.getSapi(this.pageAccount, false);
       this.getTokenUser(this.pageAccount, false);
+      this.getNFTs();
     },
   },
   mounted() {
@@ -2567,6 +2566,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     this.getFeedPrice();
     this.getSapi(this.pageAccount, false);
     this.getTokenUser(this.pageAccount, false);
+    this.getNFTs();
     deepLink();
   },
   watch: {
