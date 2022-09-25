@@ -182,6 +182,9 @@ var app = new Vue({
       sendHBDAllowed: false,
       sendHBDAmount: 0,
       sendHBDMemo: "",
+      tradeTo: "",
+      tradePrice: 0,
+      tradeQty: 1,
       recenthive: {},
       recenthbd: {},
       openorders: [],
@@ -677,9 +680,10 @@ function tradeFT(setname, to, price, callback){
     .catch(e=>alert(`${to} is not a valid hive account`))
  }
     */
-    tradeFT(setname, to, price) {
-      price = parseInt(price * 1000);
-      var cja = { set: setname, to, price };
+    tradeFT(setname) {
+      const qty = this.tradeQty,
+      price = parseInt(this.tradePrice * 1000);
+      var cja = { set: setname, to: this.tradeTo, price };
       this.toSign = {
         type: "cja",
         cj: cja,

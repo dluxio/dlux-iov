@@ -398,7 +398,6 @@
                   <div class="tab-content">
                     <div role="tabpanel" class="tab-pane fade show active" id="giveFTtab" aria-labelledby="giveFT">
                       <form class="needs-validation mt-4" @action="giveFT()" novalidate>
-                        <!--:action="javascript:giveFT('{{mint_detail.data.set}}','{{giveFTusername.value}}','{{giveFTqty.value}}')"-->
                         <div class="row mb-3">
                           <label for="giveFTusername" class="form-label">Username</label>
                           <div class="input-group">
@@ -428,34 +427,33 @@
                     </div>
                     <div role="tabpanel" class="tab-pane fade show " id="tradeFTtab" aria-labelledby="tradeFT">
                       <form class="needs-validation mt-4" novalidate>
-                        <!--:action="javascript:tradeFT('{{mint_detail.data.set}}','{{tradeFTusername.value}}','{{tradeFTamount.value}}')"-->
                         <div class="row mb-3">
                           <label for="tradeFTusername" class="form-label">Username</label>
                           <div class="input-group">
                             <span class="input-group-text bg-darkg border-dark text-white-50"
                               id="tradeFTuserprep">@</span>
                             <input type="text" class="form-control r-radius-hotfix bg-darkg border-dark text-info "
-                              id="tradeFTusername" aria-describedby="tradeFTuserprep" required>
+                              id="tradeFTusername" aria-describedby="tradeFTuserprep" v-model="tradeTo" required>
                             <div class="invalid-feedback"> Please enter the username
                               you'd like to trade with. </div>
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <div class="col-6">
+                          <!-- <div class="col-6">
                             <label for="tradeFTqty" class="form-label">Quantity</label>
                             <div class="input-group">
-                              <input type="number" class="form-control bg-darkg border-dark text-info " id="tradeFTqty"
+                              <input type="number" class="form-control bg-darkg border-dark text-info " v-model="tradeQty" id="tradeFTqty"
                                 aria-describedby="tradeFTqtyappend" placeholder="1" step="1" min="1" required readonly>
                               <span class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
                                 id="tradeFTqtyappend">{{mint_detail.set}} FT</span>
                               <div class="invalid-feedback"> Please enter the number
                                 of FTs to trade. </div>
                             </div>
-                          </div>
+                          </div> -->
                           <div class="col-6">
                             <label for="tradeFTamount" class="form-label">Amount</label>
                             <div class="input-group">
-                              <input type="number" class="form-control bg-darkg border-dark text-info "
+                              <input type="number" class="form-control bg-darkg border-dark text-info " v-model="tradePrice"
                                 id="tradeFTamount" aria-describedby="tradeFTamountappend" placeholder="0.000"
                                 step="0.001" min="0.001" required readonly>
                               <span class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
@@ -466,7 +464,7 @@
                           </div>
                         </div>
                         <div class="text-center">
-                          <button id="tradeFTbutton" class="btn btn-info my-2" type="submit">Propose Trade</button>
+                          <button id="tradeFTbutton" class="btn btn-info my-2" @click="tradeFT(mint_detail.set)">Propose Trade</button>
                         </div>
                       </form>
                     </div>

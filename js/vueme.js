@@ -75,8 +75,8 @@ var app = new Vue({
     return {
       toSign: {},
       account: user,
-      hasFTtrade: false,
-      hasNFTtrade: false,
+      FTtrades: [],
+      NFTtrades: [],
       providers: [
         { api: "https://token.dlux.io", token: "dlux" },
         { api: "https://duat.hivehoneycomb.com", token: "duat" },
@@ -2258,10 +2258,24 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this.accountRNFTs = [];
       for (var i = 0; i < this.providers.length; i++) {
         this.NFTsLookUp(this.account, this.providers, i);
+        this.trades(i); ///api/trades/:kind/:user
       }
     },
+    trades(i) {
+      fetch(this.providers[i].api + "/api/trades/fts/" + this.account)
+        .then((r) => r.json())
+        .then((json) => {
+          console.log({ json, fts: this.providers[i].api });
+        })
+        .catch((e) => console.log(e));
+      fetch(this.providers[i].api + "/api/trades/nfts/" + this.account)
+        .then((r) => r.json())
+        .then((json) => {
+          console.log({ json, nfts: this.providers[i].api });
+        })
+        .catch((e) => console.log(e));
+    },
     NFTsLookUp(un, p, i) {
-      console.log({ un, p, i });
       fetch(p[i].api + "/api/nfts/" + un)
         .then((r) => r.json())
         .then((json) => {
