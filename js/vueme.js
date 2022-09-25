@@ -75,6 +75,8 @@ var app = new Vue({
     return {
       toSign: {},
       account: user,
+      hasFTtrade: false,
+      hasNFTtrade: false,
       providers: [
         { api: "https://token.dlux.io", token: "dlux" },
         { api: "https://duat.hivehoneycomb.com", token: "duat" },

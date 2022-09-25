@@ -1103,7 +1103,7 @@
                         <div class="container">
                             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-2 row-cols-xl-3">
                                 <!-- Trade FT repeat -->
-                                <div class="col my-4">
+                                <div v-if="hasFTtrade" class="col my-4">
                                     <div class="card h-100 text-white" style="border: none;">
                                         <div
                                             class="card-header border-0 d-flex align-items-center justify-content-between">
@@ -1150,7 +1150,7 @@
                                     </div>
                                 </div>
                                 <!-- Trade NFT repeat -->
-                                <div class="col my-4" id="trade-nft-cards">
+                                <div v-if="hasNFTtrade" class="col my-4" id="trade-nft-cards">
                                     <div class="card h-100 text-white bg-darkest ">
                                         <div class="card-header border-0 d-flex align-items-center"> <!--add color to header-->
                                             <div class="rounded-pill d-flex align-items-center p-2"
