@@ -1114,7 +1114,7 @@
                                                     <h2 class="m-0">{{trade.qty}}</h2>
                                                 </div>
                                             </div>
-                                            <div> <a :href="'/nfts/set/' trade.set + addToken(trade.token)"
+                                            <div> <a :href="'/nfts/set/' + trade.set + addToken(trade.token)"
                                                     <h3 class="card-title lead shimmer rounded p-2 m-0 ms-auto"
                                                         style="color: black"><b>{{trade.set}} NFT</b></h3>
                                                 </a></div>
@@ -1159,7 +1159,7 @@
                                                 <h2 class="m-0 px-2">{{trade.uid}}</h2>
                                             </div>
                                             <h3 class="card-title lead border rounded border-dark p-2 ms-auto mb-0 "><a
-                                                    :href="'/nfts/set/' trade.set + addToken(trade.token)" class="lead" style="color: black">{{trade.set}} NFT</a>
+                                                    :href="'/nfts/set/' + trade.set + addToken(trade.token)" class="lead" style="color: black">{{trade.set}} NFT</a>
                                             </h3>
                                         </div>
                                         <div class="card-body d-flex flex-column p-0">
