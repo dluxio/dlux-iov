@@ -2258,20 +2258,31 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this.accountRNFTs = [];
       for (var i = 0; i < this.providers.length; i++) {
         this.NFTsLookUp(this.account, this.providers, i);
-        this.trades(i); ///api/trades/:kind/:user
+        this.trades(i);
       }
     },
     trades(i) {
       fetch(this.providers[i].api + "/api/trades/fts/" + this.account)
         .then((r) => r.json())
         .then((json) => {
-          console.log({ json, fts: this.providers[i].api });
+          console.log('FT trades', { json, fts: this.providers[i].api });
+          const arr = json.result
+          const token = this.providers[i].token
+          for (var j = 0; j < arr.length; j++){
+            var trade = arr[j]
+            trade.token = token
+            trade.priceString = `${parseFloat(
+              trade.nai.amount / Math.pow(10, trade.nai.precision)
+            ).toFixed(trade.nai.precision)} ${token.toUpperCase()}`
+            trade.qty = 1
+            this.FTtrades.push(trade)
+          }
         })
         .catch((e) => console.log(e));
       fetch(this.providers[i].api + "/api/trades/nfts/" + this.account)
         .then((r) => r.json())
         .then((json) => {
-          console.log({ json, nfts: this.providers[i].api });
+          console.log('NFT trades', { json, nfts: this.providers[i].api });
         })
         .catch((e) => console.log(e));
     },
