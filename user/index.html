@@ -1124,7 +1124,7 @@
                                                 style="background-color: rgba(0,0,0,0.75)">
                                                 getSetDetailsIcon
                                                 <h1 class="text-center rainbow-text"><i id="script-trade-icon"></i></h1>
-                                                <h3 class="my-0 mx-2 p-0 p-2 ms-auto rainbow-text">sealed NFT{{trade.qty > 1 : 's' : ''}}</h3>
+                                                <h3 class="my-0 mx-2 p-0 p-2 ms-auto rainbow-text">sealed NFT{{trade.qty > 1 ? 's' : ''}}</h3>
                                                 <h5>Unwrap to see what's inside.</h5>
                                             </div>
                                             <div v-if="trade.to != account" class="text-dark">To: {{trade.to}} Price: {{trade.priceString}}</div>
