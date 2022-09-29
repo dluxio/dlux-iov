@@ -1104,7 +1104,7 @@
                             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-2 row-cols-xl-3">
                                 <!-- Trade FT repeat -->
                                 <div v-for="(trade, index) in FTtrades" :key="index" class="col my-4">
-                                    <div class="card h-100 text-white" :style="{'background': getSetDetailsColors(trade.script), 'border': 'node'}">
+                                    <div class="card h-100 text-white" :style="{'background': getSetDetailsColors(trade.script), 'border': 'none'}">
                                         <div
                                             class="card-header border-0 d-flex align-items-center justify-content-between">
                                             <div class="rounded-pill d-flex align-items-center p-2"
@@ -1114,9 +1114,9 @@
                                                     <h2 class="m-0">{{trade.qty}}</h2>
                                                 </div>
                                             </div>
-                                            <div> <a :href="'/nfts/set/' + trade.set + addToken(trade.token)">
+                                            <div> <a class="no-decoration" :href="'/nfts/set/' + trade.set + addToken(trade.token)">
                                                     <h3 class="card-title lead shimmer rounded p-2 m-0 ms-auto"
-                                                        style="color: black"><i id="script-trade-icon" :class="[getIcon(trade.script)]"></i><b> {{trade.set}} NFT</b></h3>
+                                                        style="color: black"><b> {{trade.set}} NFT</b></h3>
                                                 </a></div>
                                         </div>
                                         <div class="card-body text-center d-flex flex-column lead">
@@ -1125,7 +1125,12 @@
                                                 <img class="rounded max-160"
                                                     :src="'https://ipfs.io/ipfs/' + getAttr(trade.script, 'wrapped')"></img>
                                                 <!-- <h1 class="text-center rainbow-text"><i id="script-trade-icon" :class="[getIcon(trade.script)]"></i></h1> -->
-                                                <h3 class="my-0 mx-2 p-0 p-2 ms-auto rainbow-text">sealed NFT{{trade.qty > 1 ? 's' : ''}}</h3>
+                                                <h3 class="my-0 mx-2 p-0 p-2 ms-auto rainbow-text" 
+                                                :style="{'background-image': getSetDetailsColors(trade.script)}"
+                                                style="-webkit-background-clip: text;
+                                                -webkit-text-fill-color: transparent; 
+                                                -moz-background-clip: text;
+                                                -moz-text-fill-color: transparent;"><i id="script-trade-icon" :class="[getIcon(trade.script)]"></i> sealed NFT{{trade.qty > 1 ? 's' : ''}}</h3>
                                                 <h3 class="my-0 mx-2 p-0 p-2 ms-auto rainbow-text">{{trade.token}} Network</h3>
                                                 <h5>Unwrap to see what's inside.</h5>
                                             </div>
@@ -1133,8 +1138,8 @@
                                             <div v-if="trade.to == account" class="text-dark">From: {{trade.from}} Price: {{trade.priceString}}</div>
                                         </div>
                                         <div class="card-footer" v-if="trade.from != account"
-                                            style="background: rgba(0,0,0,0.8)">
-                                            <div class="d-flex flex-wrap justify-content-between">
+                                            >
+                                            <div class="d-flex flex-wrap justify-content-between rounded-pill p-2" style="background: rgba(0,0,0,1)">
                                                 <button type="button" class="btn btn-success me-auto ms-auto mt-1"
                                                     @click="tradeFTaccept(trade.set, trade.uid)">Accept<i
                                                         class="fas fa-check-square ms-3"></i></button>
@@ -1229,7 +1234,7 @@
                                                         style="-webkit-background-clip: text;
                                                            -webkit-text-fill-color: transparent; 
                                                            -moz-background-clip: text;
-                                                           -moz-text-fill-color: transparent;">sealed NFT</h3>
+                                                           -moz-text-fill-color: transparent;"> sealed NFT</h3>
                                                 </div>
                                                 <h5 v-if="rnft.qty > 0">Unwrap to see what's inside.</h5>
                                             </div>
