@@ -77,6 +77,14 @@ var app = new Vue({
       account: user,
       FTtrades: [],
       NFTtrades: [],
+      FTmenu:{
+        to: '',
+        amount: 0
+      },
+      NFTmenu:{
+        to: '',
+        amount: 0
+      },
       providers: [
         { api: "https://token.dlux.io", token: "dlux" },
         { api: "https://duat.hivehoneycomb.com", token: "duat" },
@@ -211,6 +219,7 @@ var app = new Vue({
       accountNFTs: [],
       mint_detail: {
         set: "",
+        token: "",
       },
       focusSet: {
         computed: {},
@@ -673,7 +682,7 @@ var app = new Vue({
     },
     getSetDetailsColors(script) {
       let r = "chartreuse,lawngreen";
-      const s = this.baseScript[script]
+      const s = this.baseScript[script];
       if (s && s.set) {
         try {
           r = `${s.set.Color1},${s.set.Color2 ? s.set.Color2 : s.set.Color1}`;
@@ -863,17 +872,17 @@ function tradeFT(setname, to, price, callback){
     .catch(e=>alert(`${to} is not a valid hive account`))
  }
     */
-    tradeFT(setname, to, price) {
-      price = parseInt(price * 1000);
-      var cja = { set: setname, to, price };
+    tradeFT(item) {
+      const price = parseInt(this.FTmenu.amount * 1000);
+      var cja = { set: item.set, to:this.FTmenu.to, price };
       this.toSign = {
         type: "cja",
         cj: cja,
-        id: `${this.prefix}ft_escrow`,
-        msg: `Trying to trade ${setname}: Mint Token`,
+        id: `${item.token}_ft_escrow`,
+        msg: `Trying to trade ${item.setname}: Mint Token`,
         ops: ["getTokenUser", "getUserNFTs"],
-        api: this.apiFor(this.prefix),
-        txid: `${this.prefix} _ft_escrow`,
+        api: this.apiFor(item.token),
+        txid: `${item.token}_ft_escrow`,
       };
     },
     /*
@@ -1214,11 +1223,27 @@ function sellNFTcancel(setname, uid, callback){
       this.toSign = {
         type,
         cj: cja,
-        id: `${this.prefix}nft_sell_cancel`,
+        id: `${item.token}_nft_sell_cancel`,
         msg: `Canceling: ${item.set}:${item.uid}`,
         ops: ["getUserNFTs"],
-        api: this.apiFor(this.prefix),
+        api: this.apiFor(item.token),
         txid: `${item.set}:${item.uid}_nft_sell_cancel`,
+      };
+    },
+    cancelFT(item) {
+      var cja = {
+          set: item.set,
+          uid: item.uid,
+        },
+        type = "cja";
+      this.toSign = {
+        type,
+        cj: cja,
+        id: `${item.token}_ft_sell_cancel`,
+        msg: `Canceling: ${item.set}:${item.uid}`,
+        ops: ["getUserNFTs"],
+        api: this.apiFor(item.token),
+        txid: `${item.set}:${item.uid}_ft_sell_cancel`,
       };
     },
     /*
@@ -2261,28 +2286,55 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         this.trades(i);
       }
     },
+    finishPFT(s) {
+      if (this.baseScript[s.script]) {
+        this.FTtrades.push(s);
+      } else
+        setTimeout(() => {
+          this.finishPFT(s);
+        }, 250);
+    },
+    finishPNFT(s) {
+      if (this.baseScript[s.script]) {
+        this.NFTtrades.push(s);
+      } else
+        setTimeout(() => {
+          this.finishPFT(s);
+        }, 250);
+    },
     trades(i) {
       fetch(this.providers[i].api + "/api/trades/fts/" + this.account)
         .then((r) => r.json())
         .then((json) => {
-          console.log('FT trades', { json, fts: this.providers[i].api });
-          const arr = json.result
-          const token = this.providers[i].token
-          for (var j = 0; j < arr.length; j++){
-            var trade = arr[j]
-            trade.token = token
+          console.log("FT trades", { json, fts: this.providers[i].api });
+          const arr = json.result;
+          const token = this.providers[i].token;
+          for (var j = 0; j < arr.length; j++) {
+            var trade = arr[j];
+            trade.token = token;
             trade.priceString = `${parseFloat(
               trade.nai.amount / Math.pow(10, trade.nai.precision)
-            ).toFixed(trade.nai.precision)} ${token.toUpperCase()}`
-            trade.qty = 1
-            this.FTtrades.push(trade)
+            ).toFixed(trade.nai.precision)} ${token.toUpperCase()}`;
+            trade.qty = 1;
+            this.finishPFT(trade);
           }
         })
         .catch((e) => console.log(e));
       fetch(this.providers[i].api + "/api/trades/nfts/" + this.account)
         .then((r) => r.json())
         .then((json) => {
-          console.log('NFT trades', { json, nfts: this.providers[i].api });
+          console.log("NFT trades", { json, nfts: this.providers[i].api });
+          const arr = json.result;
+          const token = this.providers[i].token;
+          for (var j = 0; j < arr.length; j++) {
+            var trade = arr[j];
+            trade.token = token;
+            trade.priceString = `${parseFloat(
+              trade.nai.amount / Math.pow(10, trade.nai.precision)
+            ).toFixed(trade.nai.precision)} ${token.toUpperCase()}`;
+            trade.qty = 1;
+            this.finishPNFT(trade);
+          }
         })
         .catch((e) => console.log(e));
     },
@@ -2297,7 +2349,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             NFTs[j].token = p[i].token;
             // this.itemModal.items.push(NFTs[j]);
             // this.itemModal.item = this.itemModal[0];
-            scripts[NFTs[j].script] = { token: p[i].token, set: NFTs[j].set }
+            scripts[NFTs[j].script] = { token: p[i].token, set: NFTs[j].set };
             this.callScript(NFTs[j]).then((comp) => {
               this.accountNFTs.push(comp);
             });
@@ -2310,19 +2362,22 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             console.log(j, rNFTs[j], this.accountRNFTs);
           }
           for (var script in scripts) {
-            console.log({script})
-            this.scripts[script] = p[i].token;
+            console.log({ script });
             this.callScript({
               script,
-              token: this.scripts[script].token,
-              set: this.scripts[script].set
-            }).then(comp => {
-              this.baseScript[comp.script] = comp
-            })
+              token: scripts[script].token,
+              set: scripts[script].set,
+            }).then((comp) => {
+              this.baseScript[comp.script] = comp;
+              this.baseScript[comp.script].token = p[i].token;
+              this.baseScript[comp.script].setname = scripts[script].set;
+            });
           }
         });
     },
-    getAttr(script, att){if (this.baseScript[script]) return this.baseScript[script].set[att];},
+    getAttr(script, att) {
+      if (this.baseScript[script]) return this.baseScript[script].set[att];
+    },
     getTokenUser(user = this.account, fu) {
       fetch(this.lapi + "/@" + user)
         .then((response) => response.json())
@@ -2482,11 +2537,10 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             o.uid ? o.uid : 0
           }")`;
           var computed = eval(code);
-          computed.uid = o.uid || '';
-          computed.owner = o.owner || '';
+          computed.uid = o.uid || "";
+          computed.owner = o.owner || "";
           computed.script = o.script;
-          computed.setname = o.set,
-          computed.token = o.token
+          (computed.setname = o.set), (computed.token = o.token);
           resolve(computed);
         } else {
           this.pullScript(o.script).then((empty) => {
@@ -2633,6 +2687,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this.getSapi(this.pageAccount, false);
       this.getTokenUser(this.pageAccount, false);
       //this.getNFTs();
+    },
+    getIcon(s) {
+      return this.baseScript[s] ? this.baseScript[s].set.faicon : "";
     },
   },
   mounted() {

@@ -644,7 +644,7 @@ export default {
         <!--user dropdown-->
 	      <ul class="navbar-nav" v-show="user" id="userMenu">
           <li class="nav-item d-flex align-items-center"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus me-2"></i></a></li>
-		      <li class="nav-item dropdown d-flex align-items-center">
+		      <li class="nav-item dropdown d-flex align-items-center"></li>
           <a href="#" v-show="user" class="p-0 nav-link d-flex align-items-center text-white-50" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
             <img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light cover"></a>
 		        <a class="nav-link dropdown-toggle dropdown-bs-toggle text-white-50" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
