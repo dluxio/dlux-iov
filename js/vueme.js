@@ -1607,7 +1607,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         source.HTML = source.comp.HTML
         this[modal].index = 0;
         this[modal].items = [source];
-        this[modal].item = this[modal].items[i];
+        this[modal].item = source;
         return
       }
       var i = 0;
