@@ -217,6 +217,7 @@ var app = new Vue({
       },
       accountRNFTs: [],
       accountNFTs: [],
+      displayNFTs: [],
       mint_detail: {
         set: "",
         token: "",
@@ -1477,8 +1478,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         this.getPosts();
       }
     },
-    modalNext(modal) {
+    modalNext(modal, kind) {
       if (
+        kind == 'item' ||
         this.postSelect.VR.checked ||
         this.postSelect.AR.checked ||
         this.postSelect.XR.checked ||
@@ -1562,13 +1564,17 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
     modalIndex(modal, index) {
       var i = 0;
-      for (i; i < this.selectedNFTs.length; i++) {
-        if (this.selectedNFTs[i].uid == index) break;
+      for (i; i < this.displayNFTs.length; i++) {
+        if (`${this.displayNFTs[i].setname}:${this.displayNFTs[i].uid}` == index) break;
       }
       this[modal].index = i;
-      this[modal].item = this[modal].items[this[modal].index];
-      if (this[modal].item.owner == "ls") this.saleData(modal);
-      else if (this[modal].item.owner == "ah") this.auctionData(modal);
+      this[modal].items = [...this.displayNFTs]
+      this[modal].item = this[modal].items[i];
+    },
+    printProps(obj) {
+      return Object.keys(obj)
+        .map((key) => key + ": " + obj[key])
+        .join(", ");
     },
     sigFig(num, sig) {
       // return a number in K or M or B format
@@ -2299,7 +2305,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         this.NFTtrades.push(s);
       } else
         setTimeout(() => {
-          this.finishPFT(s);
+          this.finishPNFT(s);
         }, 250);
     },
     trades(i) {
@@ -2338,6 +2344,25 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         })
         .catch((e) => console.log(e));
     },
+    displayNFT(code, payload){
+      if(code === 0) {
+        this.displayNFTs = this.accountNFTs;
+        return
+      }
+      if(code === 1) {
+        this.displayNFTs = [...this.accountNFTs]
+        for(var i = 0; i < this.displayNFTs.length; i++){
+          if(this.NFTselect.searchTerm && 
+            this.NFTselect.searchTerm.indexOf(this.displayNFTs[i][this.NFTselect.sort]) == -1){
+            this.displayNFTs.splice(i,1)
+            i--
+          }
+        }
+        if(this.NFTselect.dir == "desc"){
+          this.displayNFTs.reverse()
+        }
+      }
+    },
     NFTsLookUp(un, p, i) {
       fetch(p[i].api + "/api/nfts/" + un)
         .then((r) => r.json())
@@ -2347,11 +2372,13 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           var scripts = {};
           for (var j = 0; j < NFTs.length; j++) {
             NFTs[j].token = p[i].token;
+            NFTs[j].owner = un
             // this.itemModal.items.push(NFTs[j]);
             // this.itemModal.item = this.itemModal[0];
             scripts[NFTs[j].script] = { token: p[i].token, set: NFTs[j].set };
             this.callScript(NFTs[j]).then((comp) => {
               this.accountNFTs.push(comp);
+              this.displayNFT(0)
             });
           }
           console.log(rNFTs);

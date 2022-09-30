@@ -1856,7 +1856,7 @@
                                                     @click="focus('searchTerm')"><i class="fas fa-search"></i></span>
                                                 <input type="text" id="searchTerm"
                                                     class="form-control bg-darkg border-dark text-info"
-                                                    v-model="NFTselect.searchTerm" @keyup.enter="selectNFTs(true)"
+                                                    v-model="NFTselect.searchTerm" @keyup.enter="displayNFT(1)"
                                                     aria-required="true" :placeholder="NFTselect.searchDefault" />
 
                                                 <span
@@ -1864,7 +1864,7 @@
                                                     style="width: 42px">
                                                     <span v-if="NFTselect.searchTerm">
                                                         <a href="#/" class="badge badge-secondary"
-                                                            @click="setValue('NFTselect.searchTerm','');selectNFTs(true)"><i
+                                                            @click="NFTselect.searchTerm ='';displayNFT(1)"><i
                                                                 class="fas fa-times"></i></a>
                                                     </span>
                                                 </span>
@@ -1894,32 +1894,32 @@
                                                 <li><a class="dropdown-item"
                                                         :class="{'active':NFTselect.sort == 'uid' && NFTselect.dir == 'asc'}"
                                                         href="#/"
-                                                        @click="setValue('NFTselect.sort','uid');setValue('NFTselect.dir','asc');selectNFTs(true)">UID:
+                                                        @click="NFTselect.sort = 'uid'; NFTselect.dir = 'asc';displayNFT(1)">UID:
                                                         Low to High</a></li>
                                                 <li><a class="dropdown-item"
                                                         :class="{'active':NFTselect.sort == 'uid' && NFTselect.dir == 'desc'}"
                                                         href="#/"
-                                                        @click="setValue('NFTselect.sort','uid');setValue('NFTselect.dir','desc');selectNFTs(true)">UID:
+                                                        @click="NFTselect.sort = 'uid'; NFTselect.dir = 'desc';displayNFT(1)">UID:
                                                         High to Low</a></li>
                                                 <li><a class="dropdown-item"
-                                                        :class="{'active':NFTselect.sort == 'owner' && NFTselect.dir == 'asc'}"
+                                                        :class="{'active':NFTselect.sort == 'token' && NFTselect.dir == 'asc'}"
                                                         href="#/"
-                                                        @click="setValue('NFTselect.sort','owner');setValue('NFTselect.dir','asc');selectNFTs(true)">Owner:
+                                                        @click="NFTselect.sort = 'token'; NFTselect.dir = 'asc';displayNFT(1)">Token:
                                                         A to Z</a></li>
                                                 <li><a class="dropdown-item"
-                                                        :class="{'active':NFTselect.sort == 'owner' && NFTselect.dir == 'desc'}"
+                                                        :class="{'active':NFTselect.sort == 'token' && NFTselect.dir == 'desc'}"
                                                         href="#/"
-                                                        @click="setValue('NFTselect.sort','owner');setValue('NFTselect.dir','desc');selectNFTs(true)">Ownder:
+                                                        @click="NFTselect.sort = 'token'; NFTselect.dir = 'desc';displayNFT(1)">Token:
                                                         Z to A</a></li>
                                                 <li><a class="dropdown-item"
-                                                        :class="{'active':NFTselect.sort == 'price' && NFTselect.dir == 'asc'}"
+                                                        :class="{'active':NFTselect.sort == 'set' && NFTselect.dir == 'asc'}"
                                                         href="#/"
-                                                        @click="setValue('NFTselect.sort','price');setValue('NFTselect.dir','asc');selectNFTs(true)">Price:
+                                                        @click="NFTselect.sort = 'setname'; NFTselect.dir = 'asc';displayNFT(1)">Set:
                                                         Low to High</a></li>
                                                 <li><a class="dropdown-item"
-                                                        :class="{'active':NFTselect.sort == 'price' && NFTselect.dir == 'desc'}"
+                                                        :class="{'active':NFTselect.sort == 'set' && NFTselect.dir == 'desc'}"
                                                         href="#/"
-                                                        @click="setValue('NFTselect.sort','price');setValue('NFTselect.dir','desc');selectNFTs(true)">Price:
+                                                        @click="NFTselect.sort = 'setname'; NFTselect.dir = 'desc';displayNFT(1)">Set:
                                                         High to Low</a></li>
                                             </ul>
                                         </div>
@@ -1929,7 +1929,7 @@
 
                             <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-1">
 
-                                <div class="col mb-4" v-for="item in accountNFTs">
+                                <div class="col mb-4" v-for="item in displayNFTs">
                                     <div class="card h-100 text-white bg-darkest">
                                         <div class="card-header border-0 d-flex align-items-center"
                                             :style="{'background': getSetDetailsColors(item.script)}">
@@ -1946,7 +1946,7 @@
                                         </div>
                                         <div class="card-body bg-darkest p-0">
                                             <a href="#itemModal" class="a-1" data-bs-toggle="modal"
-                                                @click="modalIndex('itemModal',item.uid);setValue('itemModal.hidden', false)">
+                                                @click="modalIndex('itemModal', item.setname + ':' + item.uid );itemModal.hidden = false">
                                                 <div class="card-img-top"
                                                     :alt="'image-' +  item.setname + '-' + item.uid" v-html="item.HTML">
                                                 </div>
@@ -1969,7 +1969,7 @@
                                     <div class="modal-content bg-dark text-white">
                                         <div class="card text-white bg-dark ">
                                             <div class="card-header border-0 d-flex align-items-center justify-content-between"
-                                                :style="{'background': getSetDetailsColors(focusSet.computed ? focusSet.computed : '')}">
+                                                :style="{'background': getSetDetailsColors(itemModal.item.script)}">
                                                 <div class="rounded-pill d-flex align-items-center p-2"
                                                     style="background-color: black">
                                                     <h2 class="m-0 px-2">{{itemModal.item.uid}}</h2>
@@ -2001,10 +2001,9 @@
                                                                         {{itemModal.index + 1}} of
                                                                         {{NFTselect.auctionOnly || NFTselect.saleOnly ||
                                                                         NFTselect.sort == 'price' ||
-                                                                        NFTselect.searchTerm ? allSearchNFTs.length :
-                                                                        allNFTs.length}}</i></small>
+                                                                        displayNFTs.length}}</i></small>
                                                                 <h2 class="ms-auto"><a class="text-muted p-3" href="#/"
-                                                                        @click="modalNext('itemModal')"><i
+                                                                        @click="modalNext('itemModal', 'item')"><i
                                                                             class="fas fa-caret-square-right"></i></a>
                                                                 </h2>
                                                             </div>
