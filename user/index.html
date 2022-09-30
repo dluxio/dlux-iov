@@ -2053,7 +2053,7 @@
                                                                         {{itemModal.index + 1}} of
                                                                         {{NFTselect.auctionOnly || NFTselect.saleOnly ||
                                                                         NFTselect.sort == 'price' ||
-                                                                        itemModal.items.length + 1}}</i></small>
+                                                                        itemModal.items.length}}</i></small>
                                                                 <h2 class="ms-auto"><a class="text-muted p-3" href="#/"
                                                                         @click="modalNext('itemModal', 'item')"><i
                                                                             class="fas fa-caret-square-right"></i></a>
@@ -2100,7 +2100,7 @@
                                                                 aria-labelledby="headingDescription"
                                                                 data-parent="#accordion">
                                                                 <div class="card-body">
-                                                                    <p>{{itemModal.item.set.Description}}</p>
+                                                                    <p>{{itemModal.item.set.Description ?? itemModal.item.comp.Description}}</p>
                                                                     </p>
                                                                 </div>
                                                             </div>
@@ -2125,6 +2125,14 @@
                                                                 <div class="card-body">
                                                                     <div class="d-flex flex-wrap">
                                                                         <div v-for="thing in itemModal.item.attributes"
+                                                                            class="border border-white rounded d-flex mx-2 my-2">
+                                                                            <div v-for="(value, key, index) in thing"
+                                                                                class="p-2">
+                                                                                <div class="">{{key}}:</div>
+                                                                                <div class="">{{value}}</div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div v-for="thing in itemModal.item.comp.attributes"
                                                                             class="border border-white rounded d-flex mx-2 my-2">
                                                                             <div v-for="(value, key, index) in thing"
                                                                                 class="p-2">

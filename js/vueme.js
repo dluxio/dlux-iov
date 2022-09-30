@@ -1605,6 +1605,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     modalIndex(modal, index, source = 'displayNFTs') {
       if(source != 'displayNFTs'){
         source.HTML = source.comp.HTML
+        source.setname = source.set
         this[modal].index = 0;
         this[modal].items = [source];
         this[modal].item = source;
