@@ -957,6 +957,27 @@ function tradeFTaccept(setname, uid, callback){
 function tradeFTreject(setname, uid, callback){
     broadcastCJA({ set: setname, uid }, "dlux_ft_escrow_cancel", `Trying to cancel ${setname} mint token trade`)
  }
+*/
+
+rejectFT(item) {
+    var cja = {
+        set: item.setname,
+        uid: item.uid
+      },
+      type = "cja";
+    this.toSign = {
+      type,
+      cj: cja,
+      id: `${item.token}_nft_reserve_transfer`,
+      msg: `Proposing Trade: ${item.setname}:${item.uid}`,
+      ops: ["getUserNFTs"],
+      api: this.apiFor(item.token),
+      txid: `${item.setname}:${item.uid}_nft_reserve_transfer`,
+    };
+},
+
+/*
+
 
 function tradeFTcancel(setname, uid, callback){
     broadcastCJA({ set: setname, uid }, "dlux_ft_escrow_cancel", `Trying to cancel ${setname} mint token trade`)
