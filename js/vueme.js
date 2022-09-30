@@ -2379,7 +2379,10 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               trade.nai.amount / Math.pow(10, trade.nai.precision)
             ).toFixed(trade.nai.precision)} ${token.toUpperCase()}`;
             trade.qty = 1;
-            this.finishPNFT(trade);
+            this.callScript(trade).then((comp) => {
+              trade.comp = comp
+              this.finishPNFT(trade);
+            });
           }
         })
         .catch((e) => console.log(e));
