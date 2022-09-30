@@ -959,6 +959,23 @@ function tradeFTreject(setname, uid, callback){
  }
 */
 
+acceptFT(item){
+  var cja = {
+      set: item.setname,
+      uid: item.uid,
+    },
+    type = "cja";
+  this.toSign = {
+    type,
+    cj: cja,
+    id: `${item.token}_ft_escrow_complete`,
+    msg: `Proposing Trade: ${item.setname}:${item.uid}`,
+    ops: ["getUserNFTs"],
+    api: this.apiFor(item.token),
+    txid: `${item.setname}:${item.uid}_ft_escrow_complete`,
+  };
+},
+
 rejectFT(item) {
     var cja = {
         set: item.setname,
@@ -968,11 +985,11 @@ rejectFT(item) {
     this.toSign = {
       type,
       cj: cja,
-      id: `${item.token}_nft_reserve_transfer`,
+      id: `${item.token}_ft_escrow_cancel`,
       msg: `Proposing Trade: ${item.setname}:${item.uid}`,
       ops: ["getUserNFTs"],
       api: this.apiFor(item.token),
-      txid: `${item.setname}:${item.uid}_nft_reserve_transfer`,
+      txid: `${item.setname}:${item.uid}_ft_escrow_cancel`,
     };
 },
 
