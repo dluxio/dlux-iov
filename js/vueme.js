@@ -1602,13 +1602,19 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           this.feedPrice = r.result;
         });
     },
-    modalIndex(modal, index) {
+    modalIndex(modal, index, source = 'displayNFTs') {
+      if(source != 'displayNFTs'){
+        this[modal].index = 0;
+        this[modal].items = [source];
+        this[modal].item = this[modal].items[i];
+        return
+      }
       var i = 0;
-      for (i; i < this.displayNFTs.length; i++) {
-        if (`${this.displayNFTs[i].setname}:${this.displayNFTs[i].uid}` == index) break;
+      for (i; i < this[source].length; i++) {
+        if (`${this[source][i].setname}:${this[source][i].uid}` == index) break;
       }
       this[modal].index = i;
-      this[modal].items = [...this.displayNFTs]
+      this[modal].items = [...this[source]]
       this[modal].item = this[modal].items[i];
     },
     printProps(obj) {
