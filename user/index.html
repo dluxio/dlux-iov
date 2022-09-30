@@ -1106,8 +1106,7 @@
                                 <div v-for="(trade, index) in FTtrades" :key="index" class="col my-4">
                                     <div class="card h-100 text-white"
                                         :style="{'background': getSetDetailsColors(trade.script), 'border': 'none'}">
-                                        <div
-                                            class="card-header d-flex align-items-center justify-content-between">
+                                        <div class="card-header d-flex align-items-center justify-content-between">
                                             <div class="rounded-pill d-flex align-items-center p-2"
                                                 style="background-color: black">
                                                 <div class="pr-2"><small>QTY: </small></div>
@@ -1200,11 +1199,11 @@
                                         </div>
 
                                         <div class="card-body bg-darkest d-flex flex-column p-0">
-                                            <div class="card-img-top" v-html="trade.comp.HTML"></div>
-
-                                            <div class="mb-2"><small><span
-                                                        class="badge bg-dark text-muted">{{trade.token}}
-                                                        Network</span></small></div>
+                                            <a href="#itemModal" class="a-1" data-bs-toggle="modal"
+                                                @click="modalIndex('itemModal', item.setname + ':' + item.uid );itemModal.hidden = false">
+                                                <div class="card-img-top" v-html="trade.comp.HTML"></div>
+                                            </a>
+                                            
                                             <div v-if="trade.to != account" class="text-dark d-flex flex-column mb-0">
                                                 <div class="mb-1 p-2 text-center text-white rounded"
                                                     style="background-color: rgba(0,0,0,0.75)">
@@ -1219,6 +1218,9 @@
                                                     <h5 class="mb-0">Price: {{trade.priceString}}</h5>
                                                 </div>
                                             </div>
+                                            <div class="mb-2 text-center"><small><span
+                                                class="badge bg-dark text-muted">{{trade.token}}
+                                                Network</span></small></div>
                                         </div>
                                         <div class="card-footer" v-if="trade.to == account">
                                             <div class="d-flex flex-wrap rounded-pill p-3 justify-content-between"
@@ -1976,7 +1978,7 @@
                                     </div>
                                 </div>
                             </div>
-
+                            <!-- NFT inventory items -->
                             <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-1">
 
                                 <div class="col mb-4" v-for="item in displayNFTs">
