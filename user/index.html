@@ -1207,7 +1207,7 @@
                                                 @click="modalIndex('itemModal', 0, trade );itemModal.hidden = false">
                                                 <div class="card-img-top" v-html="trade.comp.HTML"></div>
                                             </a>
-                                            <div>#{{Base64toNumber(item.uid)}} / {{focusSet.max}}</div>
+                                            <div>#{{Base64toNumber(trade.uid)}}</div>
 
                                             <div v-if="trade.to != account" class="text-dark d-flex flex-column mb-0">
                                                 <div class="mb-1 p-2 text-center text-white rounded"
