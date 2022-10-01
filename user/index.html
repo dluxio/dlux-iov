@@ -1267,7 +1267,8 @@
                                                 <div> <a :href="'/nfts/set/' + rnft.set + addToken(rnft.token)"
                                                         class="no-decoration">
                                                         <h3 class="card-title lead shimmer rounded p-2 m-0">
-                                                            <b>{{rnft.set}}
+                                                            <b>{{rnft.set}} <i
+                                                                :class="[getIcon(rnft.script)]"></i> 
                                                                 NFT</b>
                                                         </h3>
                                                     </a></div>
@@ -1483,7 +1484,8 @@
                                         <h3
                                             class="card-title lead border rounded border-dark p-2 ms-auto mb-0 text-center">
                                             <a :href="'/nfts/set/' + item.setname + addToken(item.token)"
-                                                class="lead no-decoration" style="color: black">{{item.setname}}
+                                                class="lead no-decoration" style="color: black">{{item.setname}} <i
+                                                :class="[getIcon(item.script)]"></i> 
                                                 NFT</a>
                                         </h3>
                                     </div>
