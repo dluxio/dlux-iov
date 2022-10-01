@@ -1207,6 +1207,7 @@
                                                 @click="modalIndex('itemModal', 0, trade );itemModal.hidden = false">
                                                 <div class="card-img-top" v-html="trade.comp.HTML"></div>
                                             </a>
+                                            <div>#{{Base64toNumber(item.uid)}} / {{focusSet.max}}</div>
 
                                             <div v-if="trade.to != account" class="text-dark d-flex flex-column mb-0">
                                                 <div class="mb-1 p-2 text-center text-white rounded"
@@ -1304,7 +1305,7 @@
                                 </div>
                             </div>
                             <!-- NFT INVENTORY -->
-                            <div class="border-bottom border-5 mt-5"><h2 class="">YOUR NFTs</h2></div>
+                            <div class="border-bottom border-5 mt-5"><h2 class="">YOUR NFTS</h2></div>
                             <div class="row">
                                 <div class="text-center my-3 d-flex align-items-center">
                                     <div class="d-flex flex-wrap">
@@ -1493,6 +1494,10 @@
                                                 v-html="item.HTML">
                                             </div>
                                         </a>
+                                        <div class="mb-2 text-center"><small><span
+                                            class="badge bg-dark text-muted">{{trade.token}}<i
+                                                class="fa-solid fa-link mx-2"></i>network</span></small>
+                                </div>
                                     </div>
                                     <div class="card-footer text-center p-3">
                                         <div>#{{Base64toNumber(item.uid)}} / {{focusSet.max}}</div>
