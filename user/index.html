@@ -1101,8 +1101,8 @@
                     <!-- inventory tab -->
                     <div role="tabpanel" class="tab-pane fade show" id="inventory" aria-labelledby="inventorytab">
                         <div class="container">
-                            <div class="border-bottom border-5 mt-5 mb-1"><h2 class="">PENDING TRADES</h2></div>
-                            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
+                            <div v-if="FTtrades.lenght || NFTtrades.length" class="border-bottom border-5 mt-5 mb-1"><h2 class="">PENDING TRADES</h2></div>
+                            <div v-if="FTtrades.lenght || NFTtrades.length" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
                                 
                                 <!-- MINT TRADES -->
                                 <div v-for="(trade, index) in FTtrades" :key="index" class="col my-3">
@@ -1248,9 +1248,9 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="border-bottom border-5 mt-5"><h2 class="">UNOPENED MINTS</h2></div>
+                            <div v-if="accountRNFTs.length" class="border-bottom border-5 mt-5"><h2 class="">UNOPENED MINTS</h2></div>
                             <!-- MINT INVENTORY -->
-                            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
+                            <div v-if="accountRNFTs.length" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
                                 <div v-for="rnft of accountRNFTs" class="col">
                                     <div class="card h-100 my-3"
                                         :style="{'background': getSetDetailsColors(rnft.script)}" style="border: none;">
