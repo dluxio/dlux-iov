@@ -1523,28 +1523,35 @@
 
                                         </div>
                                         <div class="card-body mx-1 p-0" style="background: rgba(0,0,0,.75)">
+                                           
+                                            <div class="my-3 mx-2">
+                                                <a href="#itemModal" class="a-1" data-bs-toggle="modal"
+                                                    @click="modalIndex('itemModal', item.setname + ':' + item.uid );itemModal.hidden = false">
+                                                    <div class="card-img-top"
+                                                        :alt="'image-' +  item.setname + '-' + item.uid"
+                                                        v-html="item.HTML">
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="text-center my-2 me-2">
+                                                <h3 class="my-0 mx-2 p-0 p-2 ms-auto"
+                                                    :style="{'background-image': getSetDetailsColors(item.script)}"
+                                                    style="-webkit-background-clip: text;
+                                                           -webkit-text-fill-color: transparent; 
+                                                           -moz-background-clip: text;
+                                                           -moz-text-fill-color: transparent;">
+                                                    #{{Base64toNumber(item.uid)}}</h3>
+                                            </div>
                                             <div class="mt-1 mb-2 text-center lead"><small><span
                                                         class="badge bg-dark text-muted">{{item.token}}<i
-                                                            class="fa-solid fa-link mx-2"></i>network</span></small>
-                                            </div>
-                                            <div class="mx-2">
-                                            <a href="#itemModal" class="a-1" data-bs-toggle="modal"
-                                                @click="modalIndex('itemModal', item.setname + ':' + item.uid );itemModal.hidden = false">
-                                                <div class="card-img-top"
-                                                    :alt="'image-' +  item.setname + '-' + item.uid" v-html="item.HTML">
-                                                </div>
-                                            </a>
-                                        </div>
-                                            <div class="text-center my-2">
-                                                <h4>#{{Base64toNumber(item.uid)}}</h4>
+                                                            class="fa-solid fa-link mx-2 text-info"></i>network</span></small>
                                             </div>
                                         </div>
                                         <div class="card-footer border-0">
                                             <div class="d-flex flex-wrap text-center rounded-pill p-3"
                                                 style="background-color: rgba(0,0,0,0.75)">
                                                 <div class="btn-group ms-auto me-auto">
-                                                    <button type="button" class="btn btn-dark mt-1"
-                                                        @click="">Set pfp<i
+                                                    <button type="button" class="btn btn-dark mt-1" @click="">Set pfp<i
                                                             class="fa-regular fa-circle-user ms-2"></i></button>
                                                     <button type="button" class="btn btn-dark mt-1"
                                                         data-bs-toggle="modal" data-bs-target="#mintTransferModal"
