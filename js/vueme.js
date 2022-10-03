@@ -74,6 +74,14 @@ var app = new Vue({
   data() {
     return {
       sets: {},
+      nftTradeTabTo: '',
+      nftTradeTabToken: '',
+      nftTradeTabPrice: 0,
+      nftSellTabToken: '',
+      nftSellTabPrice: 0,
+      nftAuctionTabToken: '',
+      nftAuctionTabPrice: 0,
+      nftAuctionTabTime: 0,
       toSign: {},
       account: user,
       FTtrades: [],
@@ -2363,7 +2371,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         .then((res) => {
           this.sets[this.providers[i].token] = {};
           for (var j = 0; j < res.result.length; j++) {
-            this.sets[this.providers[i].token][res.result[j].setname] =
+            this.sets[this.providers[i].token][res.result[j].set] =
               res.result[j];
           }
         });
