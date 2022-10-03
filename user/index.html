@@ -1498,19 +1498,15 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- NFT itmes -->
+                            <!-- NFT items -->
                             <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-1">
 
                                 <div class="col mb-4" v-for="item in displayNFTs">
-                                    <div class="card h-100 text-white bg-darkest border-dark border-dark"
+                                    <div class="card h-100 text-white border-0"
                                         :style="{'background': getSetDetailsColors(item.script)}">
                                         <div class="card-header border-0 d-flex align-items-center">
-                                            <div class="rounded-pill d-flex align-items-center p-2 me-2"
-                                                style="background: black">
-                                                <h2 class="m-0 px-2">{{item.uid}}</h2>
-                                            </div>
-                                            <div class="rounded ms-auto mb-0 px-3 py-1"
-                                                style="background: rgba(0,0,0,1)">
+
+                                            <div class="rounded mb-0 px-3 py-1" style="background: rgba(0,0,0,1)">
                                                 <a :href="'/nfts/set/' + item.setname + addToken(item.token)"
                                                     class="no-decoration" style="font-size: 1.3em;"><span
                                                         class="rainbow-text" style="background-image: linear-gradient(rgb(194, 255, 182), rgb(255, 163, 182), rgb(221, 169, 255), rgb(162, 209, 255));
@@ -1520,10 +1516,14 @@
                                                 -moz-text-fill-color: transparent;;"><i class="me-2"
                                                             :class="[getIcon(item.script)]"></i><b>{{item.setname}}</b></span></a>
                                             </div>
+                                            <div class="rounded-pill d-flex align-items-center p-2 ms-auto"
+                                                style="background: black">
+                                                <h2 class="m-0 px-2">{{item.uid}}</h2>
+                                            </div>
 
                                         </div>
-                                        <div class="card-body mx-1 p-0" style="background: rgba(0,0,0,.75)">
-                                           
+                                        <div class="card-body mx-1 p-0 rounded" style="background: rgba(0,0,0,.75)">
+
                                             <div class="my-3 mx-2">
                                                 <a href="#itemModal" class="a-1" data-bs-toggle="modal"
                                                     @click="modalIndex('itemModal', item.setname + ':' + item.uid );itemModal.hidden = false">
@@ -1548,15 +1548,21 @@
                                             </div>
                                         </div>
                                         <div class="card-footer border-0">
-                                            <div class="d-flex flex-wrap text-center rounded-pill p-3"
-                                                style="background-color: rgba(0,0,0,0.75)">
-                                                <div class="btn-group ms-auto me-auto">
-                                                    <button type="button" class="btn btn-dark mt-1" @click="">Set pfp<i
-                                                            class="fa-regular fa-circle-user ms-2"></i></button>
-                                                    <button type="button" class="btn btn-dark mt-1"
-                                                        data-bs-toggle="modal" data-bs-target="#mintTransferModal"
-                                                        @click="">Transfer<i
-                                                            class="fas fa-exchange-alt ms-2"></i></button>
+
+                                            <div class="d-flex flex-wrap text-center rounded-pill"
+                                                style="background-color: rgba(0,0,0,0)">
+                                                <div class="ms-auto me-auto">
+                                                    <div class="btn-group">
+                                                        <button type="button" class="btn btn-dark btn-lg" @click=""><i
+                                                                class="fa-regular fa-circle-user me-2"></i>Set
+                                                            pfp</button>
+                                                        <button type="button" class="btn btn-lg ps-1 pe-1 border-0"
+                                                            disabled></button>
+                                                        <button type="button" class="btn btn-dark btn-lg"
+                                                            data-bs-toggle="modal" data-bs-target="#mintTransferModal"
+                                                            @click=""><i
+                                                                class="fas fa-exchange-alt me-2"></i>Transfer</button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
