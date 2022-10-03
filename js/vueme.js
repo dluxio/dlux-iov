@@ -961,17 +961,17 @@ function tradeFTreject(setname, uid, callback){
 
     openFT(item) {
       var cja = {
-          set: item.setname
+          set: item.set
         },
         type = "cja";
       this.toSign = {
         type,
         cj: cja,
         id: `${item.token}_nft_mint`,
-        msg: `Minting: ${item.setname} NFT`,
+        msg: `Minting: ${item.set} NFT`,
         ops: ["getUserNFTs"],
         api: this.apiFor(item.token),
-        txid: `${item.setname}_nft_mint`,
+        txid: `${item.set}_nft_mint`,
       };
     },
 
