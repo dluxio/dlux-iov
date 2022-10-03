@@ -1558,10 +1558,9 @@
                                                             pfp</button>
                                                         <button type="button" class="btn ps-1 pe-1 border-0"
                                                             disabled></button>
-                                                        <button type="button" class="btn btn-dark"
-                                                            data-bs-toggle="modal" data-bs-target="#mintTransferModal"
-                                                            @click=""><i
-                                                                class="fas fa-exchange-alt me-2"></i>Transfer</button>
+                                                        <a href="#itemModal" class="a-1" data-bs-toggle="modal"
+                                                    @click="modalIndex('itemModal', item.setname + ':' + item.uid );itemModal.hidden = false"><button type="button" class="btn btn-dark"><i
+                                                                class="fas fa-exchange-alt me-2"></i>Actions</button></a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1763,7 +1762,7 @@
                                                             </div>
                                                             <div class="text-center">
                                                                 <button id="sellFTbutton" class="btn btn-info my-2"
-                                                                    type="submit">List Item</button>
+                                                                    @click="sellNFT()">List Item</button>
                                                             </div>
                                                         </form>
                                                     </div>
@@ -2645,10 +2644,10 @@
                                                                         aria-expanded="false"
                                                                         aria-controls="collapseRedeem"><i
                                                                             class="fa-solid fa-fire me-3"></i>MELT<span
-                                                                            class="ms-2 small">({{focusSet.bond ?
-                                                                            precision(focusSet.bond.amount,
-                                                                            focusSet.bond.precision) : 0 }}
-                                                                            {{focusSet.bond ? focusSet.bond.token :
+                                                                            class="ms-2 small">({{set[itemModal.item.token] ?
+                                                                            precision(set[itemModal.item.token][itemModal.item.setname].bond.amount,
+                                                                            set[itemModal.item.token][itemModal.item.setname].bond.precision) : 0 }}
+                                                                            {{set[itemModal.item.token]? fset[itemModal.item.token][itemModal.item.setname].bond.token :
                                                                             ''}})</span></button>
                                                                 </h5>
                                                             </div>

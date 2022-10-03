@@ -2353,7 +2353,19 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       for (var i = 0; i < this.providers.length; i++) {
         this.NFTsLookUp(this.account, this.providers, i);
         this.trades(i);
+        this.getSetDetails(i)
       }
+    },
+    getSetDetails(i){
+      fetch(`${this.providers[i].api}/api/sets`)
+        .then((r) => r.json())
+        .then((res) => {
+          this.sets[this.providers[i].token] = {};
+          for (var j = 0; j < res.result.length; j++) {
+            this.sets[this.providers[j].token][res.result[j].set] =
+              res.result[j];
+          }
+        });
     },
     finishPFT(s) {
       if (this.baseScript[s.script]) {
