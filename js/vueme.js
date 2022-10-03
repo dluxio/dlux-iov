@@ -2363,7 +2363,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         .then((res) => {
           this.sets[this.providers[i].token] = {};
           for (var j = 0; j < res.result.length; j++) {
-            this.sets[this.providers[j].token][res.result[j].set] =
+            this.sets[this.providers[i].token][res.result[j].setname] =
               res.result[j];
           }
         });
