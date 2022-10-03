@@ -77,13 +77,13 @@ var app = new Vue({
       account: user,
       FTtrades: [],
       NFTtrades: [],
-      FTmenu:{
-        to: '',
-        amount: 0
+      FTmenu: {
+        to: "",
+        amount: 0,
       },
-      NFTmenu:{
-        to: '',
-        amount: 0
+      NFTmenu: {
+        to: "",
+        amount: 0,
       },
       providers: [
         { api: "https://token.dlux.io", token: "dlux" },
@@ -875,7 +875,7 @@ function tradeFT(setname, to, price, callback){
     */
     tradeFT(item) {
       const price = parseInt(this.FTmenu.amount * 1000);
-      var cja = { set: item.set, to:this.FTmenu.to, price };
+      var cja = { set: item.set, to: this.FTmenu.to, price };
       this.toSign = {
         type: "cja",
         cj: cja,
@@ -959,43 +959,58 @@ function tradeFTreject(setname, uid, callback){
  }
 */
 
-acceptFT(item){
-
-  var cja = {
-      set: item.set,
-      uid: item.uid,
+    openFT(item) {
+      var cja = {
+          set: item.setname
+        },
+        type = "cja";
+      this.toSign = {
+        type,
+        cj: cja,
+        id: `${item.token}_nft_mint`,
+        msg: `Minting: ${item.setname} NFT`,
+        ops: ["getUserNFTs"],
+        api: this.apiFor(item.token),
+        txid: `${item.setname}_nft_mint`,
+      };
     },
-    type = "cja";
-  this.toSign = {
-    type,
-    cj: cja,
-    id: `${item.token}_ft_escrow_complete`,
-    msg: `Proposing Trade: ${item.set}:${item.uid}`,
-    ops: ["getUserNFTs"],
-    api: this.apiFor(item.token),
-    txid: `${item.set}:${item.uid}_ft_escrow_complete`,
-  };
-},
 
-rejectFT(item) {
-  console.log({item})
-    var cja = {
-        set: item.set,
-        uid: item.uid
-      },
-      type = "cja";
-    this.toSign = {
-      type,
-      cj: cja,
-      id: `${item.token}_ft_escrow_cancel`,
-      msg: `Proposing Trade: ${item.setname}:${item.uid}`,
-      ops: ["getUserNFTs"],
-      api: this.apiFor(item.token),
-      txid: `${item.setname}:${item.uid}_ft_escrow_cancel`,
-    };
-},
+    acceptFT(item) {
+      var cja = {
+          set: item.set,
+          uid: item.uid,
+        },
+        type = "cja";
+      this.toSign = {
+        type,
+        cj: cja,
+        id: `${item.token}_ft_escrow_complete`,
+        msg: `Proposing Trade: ${item.set}:${item.uid}`,
+        ops: ["getUserNFTs"],
+        api: this.apiFor(item.token),
+        txid: `${item.set}:${item.uid}_ft_escrow_complete`,
+      };
+    },
 
-/*
+    rejectFT(item) {
+      console.log({ item });
+      var cja = {
+          set: item.set,
+          uid: item.uid,
+        },
+        type = "cja";
+      this.toSign = {
+        type,
+        cj: cja,
+        id: `${item.token}_ft_escrow_cancel`,
+        msg: `Proposing Trade: ${item.setname}:${item.uid}`,
+        ops: ["getUserNFTs"],
+        api: this.apiFor(item.token),
+        txid: `${item.setname}:${item.uid}_ft_escrow_cancel`,
+      };
+    },
+
+    /*
 
 
 function tradeFTcancel(setname, uid, callback){
@@ -1520,7 +1535,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
     modalNext(modal, kind) {
       if (
-        kind == 'item' ||
+        kind == "item" ||
         this.postSelect.VR.checked ||
         this.postSelect.AR.checked ||
         this.postSelect.XR.checked ||
@@ -1602,21 +1617,21 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           this.feedPrice = r.result;
         });
     },
-    modalIndex(modal, index, source = 'displayNFTs') {
-      if(source != 'displayNFTs'){
-        source.HTML = source.comp.HTML
-        source.setname = source.set
+    modalIndex(modal, index, source = "displayNFTs") {
+      if (source != "displayNFTs") {
+        source.HTML = source.comp.HTML;
+        source.setname = source.set;
         this[modal].index = 0;
         this[modal].items = [source];
         this[modal].item = source;
-        return
+        return;
       }
       var i = 0;
       for (i; i < this[source].length; i++) {
         if (`${this[source][i].setname}:${this[source][i].uid}` == index) break;
       }
       this[modal].index = i;
-      this[modal].items = [...this[source]]
+      this[modal].items = [...this[source]];
       this[modal].item = this[modal].items[i];
     },
     printProps(obj) {
@@ -2388,29 +2403,33 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             ).toFixed(trade.nai.precision)} ${token.toUpperCase()}`;
             trade.qty = 1;
             this.callScript(trade).then((comp) => {
-              trade.comp = comp
+              trade.comp = comp;
               this.finishPNFT(trade);
             });
           }
         })
         .catch((e) => console.log(e));
     },
-    displayNFT(code, payload){
-      if(code === 0) {
+    displayNFT(code, payload) {
+      if (code === 0) {
         this.displayNFTs = this.accountNFTs;
-        return
+        return;
       }
-      if(code === 1) {
-        this.displayNFTs = [...this.accountNFTs]
-        for(var i = 0; i < this.displayNFTs.length; i++){
-          if(this.NFTselect.searchTerm && 
-            this.NFTselect.searchTerm.indexOf(this.displayNFTs[i][this.NFTselect.sort]) == -1){
-            this.displayNFTs.splice(i,1)
-            i--
+      if (code === 1) {
+        this.displayNFTs = [...this.accountNFTs];
+        for (var i = 0; i < this.displayNFTs.length; i++) {
+          if (
+            this.NFTselect.searchTerm &&
+            this.NFTselect.searchTerm.indexOf(
+              this.displayNFTs[i][this.NFTselect.sort]
+            ) == -1
+          ) {
+            this.displayNFTs.splice(i, 1);
+            i--;
           }
         }
-        if(this.NFTselect.dir == "desc"){
-          this.displayNFTs.reverse()
+        if (this.NFTselect.dir == "desc") {
+          this.displayNFTs.reverse();
         }
       }
     },
@@ -2423,13 +2442,13 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           var scripts = {};
           for (var j = 0; j < NFTs.length; j++) {
             NFTs[j].token = p[i].token;
-            NFTs[j].owner = un
+            NFTs[j].owner = un;
             // this.itemModal.items.push(NFTs[j]);
             // this.itemModal.item = this.itemModal[0];
             scripts[NFTs[j].script] = { token: p[i].token, set: NFTs[j].set };
             this.callScript(NFTs[j]).then((comp) => {
               this.accountNFTs.push(comp);
-              this.displayNFT(0)
+              this.displayNFT(0);
             });
           }
           console.log(rNFTs);

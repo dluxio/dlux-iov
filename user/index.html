@@ -1321,7 +1321,7 @@
                                             <div class="d-flex flex-wrap justify-content-between rounded-pill p-3"
                                                 style="background-color: rgba(0,0,0,0.75)" v-if="rnft.qty > 0">
                                                 <button type="button" class="btn btn-primary me-auto ms-auto mt-1"
-                                                    @click="">Open<i class="fas fa-box-open ms-2"></i></button>
+                                                    @click="openFT(rnft)">Open<i class="fas fa-box-open ms-2"></i></button>
                                                 <button type="button" class="btn btn-info me-auto ms-auto mt-1"
                                                     data-bs-toggle="modal" data-bs-target="#mintTransferModal"
                                                     @click="mint_detail.set = rnft.set; mint_detail.token = rnft.token">Transfer<i
