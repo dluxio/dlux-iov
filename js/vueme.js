@@ -73,6 +73,7 @@ var app = new Vue({
   el: "#app", // vue 2
   data() {
     return {
+      sets: {},
       toSign: {},
       account: user,
       FTtrades: [],
