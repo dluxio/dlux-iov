@@ -2670,12 +2670,11 @@
                                                                                 </div>
                                                                                 <div class="d-flex no-wrap ms-1"> <u>
                                                                                         <h1>
-                                                                                            {{focusSet.bond ?
-                                                                                            precision(focusSet.bond.amount,
-                                                                                            focusSet.bond.precision) : 0
-                                                                                            }} {{focusSet.bond ?
-                                                                                            focusSet.bond.token :
-                                                                                            ''}}</h1>
+                                                                                            {{sets[itemModal.item.token] ?
+                                                                            precision(sets[itemModal.item.token][itemModal.item.setname].bond.amount,
+                                                                            sets[itemModal.item.token][itemModal.item.setname].bond.precision) : 0 }}
+                                                                            {{sets[itemModal.item.token]? sets[itemModal.item.token][itemModal.item.setname].bond.token :
+                                                                            ''}}</h1>
                                                                                     </u></div>
                                                                             </div>
                                                                             <div class="pt-2">
