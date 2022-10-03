@@ -2560,8 +2560,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       }
       return Math.floor(seconds) + " seconds";
     },
-    getHiveUser(user) {
-      if (user)
+    getHiveUser(user = this.account) {
         fetch(hapi, {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[["${user}"]], "id":1}`,
           headers: {
@@ -2574,6 +2573,10 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             this.accountinfo = data.result[0];
             this.barhive = this.accountinfo.balance;
             this.barhbd = this.accountinfo.hbd_balance;
+            var pfp = ''
+            try {
+              pfp = this.accountinfo.posting_json_metadata.profile.profile_image
+            } catch (e) {}
             const total_vests =
               parseInt(this.accountinfo.vesting_shares) +
               parseInt(this.accountinfo.received_vesting_shares) -
