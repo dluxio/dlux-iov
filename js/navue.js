@@ -271,7 +271,7 @@ export default {
         }
         const sign_data = {
           key_type: op[2],
-          challenge: op[1]
+          challenge: `${op[0]}:${op[1]}`
         };
         const data = CryptoJS.AES.encrypt(
           JSON.stringify(sign_data),
@@ -290,10 +290,15 @@ export default {
     HKCsignOnly(op){
       return new Promise((res, rej) => {
         console.log(op)
-        window.hive_keychain.requestSignBuffer(op[0], `${op[1]}`, op[2], (sig) => {
-          if(sig.error)rej(sig)
-          else res(sig.result)
-        });
+        window.hive_keychain.requestSignBuffer(
+          op[0],
+          `${op[0]}:${op[1]}`,
+          op[2],
+          (sig) => {
+            if (sig.error) rej(sig);
+            else res(sig.result);
+          }
+        );
       });
     },
     HSRsign(op) {
