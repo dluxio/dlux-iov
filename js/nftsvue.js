@@ -598,7 +598,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
         if (window.IpfsHttpClient) {
           const ipfs = window.IpfsHttpClient({
             host: "ipfs.dlux.io",
-            port: "443",
+            port: "5001",
             protocol: "https",
             headers: {
               account: this.account,
