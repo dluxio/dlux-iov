@@ -61,6 +61,8 @@ export default {
           this.broadcastVote(op);
         } else if (this.op.type == "raw") {
           this.broadcastRaw(op);
+        } else if (this.op.type == "sign") {
+          this.signRaw(op);
         }
         localStorage.setItem("pending", JSON.stringify(this.ops));
       }
@@ -151,6 +153,21 @@ export default {
           console.log(e);
         });
     },
+    signRaw(obj) {
+      var op = [
+        this.user,
+        obj.challenge,
+        obj.key || 'posting',
+      ];
+      this.signOnly(op)
+        .then((r) => {
+          console.log('signRaw Return', r)
+          //if(r.sig)localStorage.setItem(`${this.user}:${obj.nonce}`, r.sig);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
     broadcastVote(obj) {
       var op = [
         this.user,
@@ -218,6 +235,58 @@ export default {
           this.HSRsign(op);
           reject("No TXID");
         }
+      });
+    },
+    signOnly(op) {
+      return new Promise((resolve, reject) => {
+        if (this.HKC) {
+          console.log("HKC");
+          this.HKCsignOnly(op)
+            .then((r) => resolve(r))
+            .catch((e) => reject(e));
+        } else if (this.HAS) {
+          console.log({ op });
+          this.HASsignOnly(op)
+            .then((r) => resolve(r))
+            .catch((e) => reject(e))
+        } else {
+          alert('This feature is not supported with Hive Signer')
+          //this.HSRsignOnly(op);
+          reject("Not Supported");
+        }
+      });
+    },
+    HASsignOnly(op){
+      return new Promise ((res, rej) => {
+        const now = new Date().getTime();
+        if (now > this.HAS_.expire) {
+          alert(`Hive Auth Session expired. Please login again.`);
+          return;
+        }
+        const sign_data = {
+          key_type: op[2],
+          challenge: op[1]
+        };
+        const data = CryptoJS.AES.encrypt(
+          JSON.stringify(sign_data),
+          this.HAS_.auth_key
+        ).toString();
+        const payload = {
+          cmd: "challenge_req",
+          account: this.user,
+          token: this.HAS_.token,
+          data: data,
+        };
+        this.HAS_.ws.send(JSON.stringify(payload));
+        alert("Review and Sign on your PKSA App");
+      })
+    },
+    HKCsignOnly(op){
+      return new Promise((res, rej) => {
+        window.hive_keychain.requestSignBuffer(op[0], op[1], op[2], (sig) => {
+          if(sig.error)rej(sig)
+          else res(sig.result)
+        });
       });
     },
     HSRsign(op) {
@@ -388,6 +457,21 @@ export default {
                 break;
               case "sign_err":
                 this.HAS_.ws_status = `transaction ${message.uuid} failed: ${message.error}`;
+                break;
+              case "challenge_wait":
+                this.HAS_.ws_status = `challenge ${message.uuid} is waiting for signature`;
+                break;
+              case "challenge_ack":
+                this.HAS_.ws_status = `challenge ${message.uuid} signed`;
+                console.log(message);
+                console.log(message.data);
+                //this.statusFinder(r, obj);
+                break;
+              case "challenge_nack":
+                this.HAS_.ws_status = `challenge ${message.uuid} has been declined`;
+                break;
+              case "challenge_err":
+                this.HAS_.ws_status = `challenge ${message.uuid} failed: ${message.error}`;
                 break;
             }
           }
