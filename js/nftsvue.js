@@ -572,28 +572,55 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
       }
       return s;
     },
+    validateHeaders(rawHeaders){
+      return new Promise ((res, rej)=>{
+        if (!rawHeaders || rawHeaders.split(":")[0] < Date.now() - 600000000) {
+          this.toSign = {
+            type: "sign_headers",
+            challenge: Date.now(),
+            key: "posting",
+            ops: [],
+            callback: [res],
+            txid: 'Sign Auth Headers'
+          };
+        } else {
+          console.log(2)
+          res(rawHeaders)
+        }
+      })
+    },
     ipfsUpload(event) {
       console.log("1", event);
-      if (window.IpfsHttpClient) {
-        const ipfs = window.IpfsHttpClient({
-          host: "ipfs.infura.io",
-          port: "5001",
-          protocol: "https",
-        });
-        var ipfsIP = [];
-        var info = [];
-        for (var name in ar) {
-          ipfsIP.push({ path: `${ar[name][1]}`, content: ar[name][0] });
-          info.push([name, ar[name][1]]);
-        }
-        ipfs.add(ipfsIP, (err, ipfsReturn) => {
-          if (!err) {
-            //store imagehash somewhere
-          } else {
-            console.log("IPFS Upload Failed", err);
-          }
-        });
-      }
+      var rawHeaders = localStorage.getItem(`${this.account}:auth`)
+      console.log({rawHeaders})
+      this.validateHeaders(rawHeaders)
+      .then(headers =>{
+        if (window.IpfsHttpClient) {
+          const ipfs = window.IpfsHttpClient({
+            host: "ipfs.dlux.io",
+            port: "5001",
+            protocol: "http",
+            headers: {
+              account: this.account,
+              nonce: headers.split(":")[0],
+              sig: headers.split(":")[1],
+            },
+          });
+          const buf = buffer.Buffer.from("Success");
+          ipfs.add(buf, (err, ipfsReturn) => {
+            if (!err) {
+              console.log(ipfsReturn)
+            } else {
+              console.log("IPFS Upload Failed", err);
+            }
+          });
+        } 
+        // else {
+        //   fetch(
+        //     `http://127.0.0.1:5050/?account=${this.account}&sig=${sig}&msg=${digest}`
+        //   );
+        // }
+      })
     },
     /*
 function buyFT(setname, uid, price, type,  callback){

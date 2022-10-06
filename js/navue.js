@@ -61,8 +61,8 @@ export default {
           this.broadcastVote(op);
         } else if (this.op.type == "raw") {
           this.broadcastRaw(op);
-        } else if (this.op.type == "sign") {
-          this.signRaw(op);
+        } else if (this.op.type == "sign_headers") {
+          this.signHeaders(op);
         }
         localStorage.setItem("pending", JSON.stringify(this.ops));
       }
@@ -153,7 +153,7 @@ export default {
           console.log(e);
         });
     },
-    signRaw(obj) {
+    signHeaders(obj) {
       var op = [
         this.user,
         obj.challenge,
@@ -161,8 +161,14 @@ export default {
       ];
       this.signOnly(op)
         .then((r) => {
-          console.log('signRaw Return', r)
-          //if(r.sig)localStorage.setItem(`${this.user}:${obj.nonce}`, r.sig);
+          console.log('signHeaders Return', r)
+          if(r){
+            localStorage.setItem(
+            `${this.user}:auth`,
+            `${obj.challenge}:${r}`
+          );
+          op.callback[0](`${obj.challenge}:${r}`, console.log('callback?'));
+          }
         })
         .catch((e) => {
           console.log(e);
@@ -283,7 +289,8 @@ export default {
     },
     HKCsignOnly(op){
       return new Promise((res, rej) => {
-        window.hive_keychain.requestSignBuffer(op[0], op[1], op[2], (sig) => {
+        console.log(op)
+        window.hive_keychain.requestSignBuffer(op[0], `${op[1]}`, op[2], (sig) => {
           if(sig.error)rej(sig)
           else res(sig.result)
         });

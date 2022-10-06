@@ -18,6 +18,7 @@
     <link href="/css/custom.css" rel="stylesheet" />
     <script src="https://unpkg.com/ipfs-http-client@29.1.1/dist/index.min.js"></script>
     <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
+    <script src="https://bundle.run/buffer@5.2.1"></script>
     <script type="module" src="/js/nftsvue.js"></script>
 
 
@@ -518,7 +519,7 @@
                                                         the
                                                         left (+10% Margin)</small>
                                                 </div>
-                                                <div class="my-2"><button type="submit" class="btn btn-warning btn-lg"
+                                                <div class="my-2"><button type="button" @click="ipfsUpload('Working')" class="btn btn-warning btn-lg"
                                                         id="newNFTsubmit">Define
                                                         Set
                                                         and Issue Mints</button></div>
