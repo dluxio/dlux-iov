@@ -580,7 +580,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
             challenge: Date.now(),
             key: "posting",
             ops: [],
-            callback: [res],
+            callbacks: [res],
             txid: 'Sign Auth Headers'
           };
         } else {

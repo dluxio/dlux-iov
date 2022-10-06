@@ -167,7 +167,7 @@ export default {
             `${this.user}:auth`,
             `${obj.challenge}:${r}`
           );
-          op.callback[0](`${obj.challenge}:${r}`, console.log('callback?'));
+          obj.callbacks[0](`${obj.challenge}:${r}`, console.log('callback?'));
           }
         })
         .catch((e) => {
