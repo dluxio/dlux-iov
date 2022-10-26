@@ -49,7 +49,9 @@
             if (hashy.split('/')[3] == 'ipfs') {
                 hashy = hashy.split('/')[4];
             }
-            const subauthor = author.replace('.', '-')
+            function match (s,t) {var a=[];for(var i=0;i<s.length;i++){j=s.indexOf(t,i);if(j>=0){a.push(j);i=j}else return a}}
+
+            const subauthor = match(author,'.').length ? match(author,'.').join('') + author.replace('.', '-') : author
             ipfsdomain = `https://${subauthor}.ipfs.dlux.io`;
             location.href = ipfsdomain + `${vars}&hash=${hashy}&author=${author}&permlink=${permlink}&user=${user}`
             
