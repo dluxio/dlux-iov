@@ -137,7 +137,7 @@
 				<div id="two">
 					<div class="flex-column flex-shrink mx-3">
 						<div style="border-style:solid;">
-							<input type="file" @change="uploadFile"/>
+							<input id="fileInput" type="file" @change="uploadFile"/>
 							<div @drop="dragFile" style="background-color:green;margin-bottom:10px;padding:10px;">
 								Or drag the file here
 							</div>

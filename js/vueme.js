@@ -941,12 +941,11 @@ var app = new Vue({
       this.validateHeaders(this.File[index].md5).then((headers) => {
         var myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
-        myHeaders.append("Account", this.account);
-        myHeaders.append("Nonce", headers.split(":")[0]);
-        myHeaders.append("Sig", headers.split(":")[1]);
+        // myHeaders.append("Account", this.account);
+        // myHeaders.append("Nonce", headers.split(":")[0]);
+        // myHeaders.append("Sig", headers.split(":")[1]);
         var formdata = new FormData();
-        console.log(this.File[index]);
-        formdata.append(this.File[index].name, this.File[index].blob);
+        formdata.append("blob", new Blob([this.File[index].blob]));
         formdata.append(
           "path",
           `/${headers.split(":")[0]}/${headers.split(":")[1]}.${this.account}`
@@ -954,12 +953,7 @@ var app = new Vue({
 
         var requestOptions = {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Account: this.account,
-            Nonce: headers.split(":")[0],
-            Sig: headers.split(":")[1],
-          },
+          headers: myHeaders,
           body: formdata,
           redirect: "follow",
           mode: "no-cors",
