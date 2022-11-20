@@ -614,12 +614,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
               console.log("IPFS Upload Failed", err);
             }
           });
-        } 
-        // else {
-        //   fetch(
-        //     `http://127.0.0.1:5050/?account=${this.account}&sig=${sig}&msg=${digest}`
-        //   );
-        // }
+        }
       })
     },
     /*

@@ -74,12 +74,30 @@ var app = new Vue({
   data() {
     return {
       sets: {},
-      nftTradeTabTo: '',
-      nftTradeTabToken: '',
+      disablePost: true,
+      File: [],
+      postTitle: "",
+      postBody: "",
+      postTags: "",
+      postPermlink: "",
+      postCustom_json: {
+        "app": "dlux/0.1.0",
+        "xr": true,
+        "Hash360": "",
+        "format": "markdown",
+        "assets": [
+        ],
+        "tags": [
+          "dlux"
+        ],
+        "vrHash": "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16"
+      },
+      nftTradeTabTo: "",
+      nftTradeTabToken: "",
       nftTradeTabPrice: 0,
-      nftSellTabToken: '',
+      nftSellTabToken: "",
       nftSellTabPrice: 0,
-      nftAuctionTabToken: '',
+      nftAuctionTabToken: "",
       nftAuctionTabPrice: 0,
       nftAuctionTabTime: 0,
       toSign: {},
@@ -690,6 +708,133 @@ var app = new Vue({
     getSetPhotos(s, c) {
       return s.set ? `https://ipfs.io/ipfs/${s.set[c]}` : "";
     },
+    md5(file){
+      return
+    },
+    uploadFile(e) {
+        for (var i = 0; i < e.target.files.length; i++) {
+          var reader = new FileReader();
+          reader.File = e.target.files[i]
+          reader.onload = (event) => {
+            const fileContent = event.target.result;
+            for(var i = 0; i < this.File.length; i++){
+              if (
+                this.File[i].name == event.currentTarget.File.name
+                && this.File[i].size == event.currentTarget.File.size
+              ) {
+                this.File[i].md5 = md5(fileContent);
+                const file = this.File[i];
+                this.File.splice(i, 1, file)
+                break
+              }
+            }
+          };
+          reader.readAsArrayBuffer(e.target.files[i]);
+          var File = e.target.files[i];
+          File.pin = true;
+          File.hash = "";
+          File.md5 = ""
+          this.File.push(File);
+        }
+      },
+    dragFile(e) {
+      for (var i = 0; i < e.dataTransfer.files.length; i++) {
+        var reader = new FileReader();
+        reader.File = e.dataTransfer.files[i]
+        reader.onload = (event) => {
+          const fileContent = event.target.result;
+          for(var i = 0; i < this.File.length; i++){
+            if (
+              this.File[i].name == event.currentTarget.File.name
+              && this.File[i].size == event.currentTarget.File.size
+            ) {
+              this.File[i].md5 = md5(fileContent);
+              const file = this.File[i];
+              this.File.splice(i, 1, file)
+              break
+            }
+          }
+        };
+        reader.readAsArrayBuffer(e.dataTransfer.files[i]);
+        var File = e.dataTransfer.files[i];
+        File.pin = true;
+        File.hash = "";
+        File.md5 = ""
+        this.File.push(File);
+      }
+    },
+    togglePin(index){
+      this.File[index].pin = !this.File[index].pin;
+    },
+    deleteImg (index){
+      this.File.splice(index, 1)
+    },
+    validPost(){
+      var valid = true
+      if(!this.postPermlink)valid = false
+      if (!this.postTitle) valid = false;
+      if (!this.postBody) valid = false;
+      if (!this.postCustom_json.assets.length) valid = false;
+      this.disablePost = !valid
+    },
+    permlink(text) {
+			if (text) {
+				text.replace(/[\W_]+/g, '-').replace(' ', '-').toLowerCase()
+				text = text.replace(' ', '-')
+				text = text.replace(/[\W_]+/g, '')
+				text = text.toLowerCase()
+				this.postPermlink = text
+			} else {
+				text = this.postTitle
+				text = text.replace(' ', '-')
+				text = text.replace(/[\W_]+/g, '-')
+				text = text.toLowerCase()
+				this.postPermlink = text;
+			}
+		},
+    post() {
+			var tags = this.postTags.toLowerCase().split(',')
+			this.postCustom_json.tags = ['dlux']
+			for (i = 0; i < tags.length; i++) {
+				if (tags[i] != 'dlux') {
+					this.postCustom_json.tags.push(tags[i].replace(/[\W_]+/g, "-"));
+				}
+			}
+			console.log(custom_json.tags)
+			if (this.account) {
+				const operations = [["comment",
+					{
+						"parent_author": "",
+						"parent_permlink": "dlux",
+						"author": this.account,
+						"permlink": this.postPermlink,
+						"title": this.postTitle,
+						"body": simplemde.value() + `\n***\n#### [View in VR @ dlux.io](https://dlux.io/dlux/@${this.account}/${this.postPermlink})\n`,
+						"json_metadata": JSON.stringify(this.postCustom_json)
+					}],
+				["comment_options",
+					{
+						"author": this.account,
+						"permlink": this.postPermlink,
+						"max_accepted_payout": "1000000.000 HBD",
+						"percent_hbd": 10000,
+						"allow_votes": true,
+						"allow_curation_rewards": true,
+						"extensions":
+							[[0,
+								{
+									"beneficiaries":
+										[{
+											"account": "dlux-io",
+											"weight": 1000
+										}]
+								}]]
+					}]]
+				hive_keychain.requestBroadcast(localStorage.getItem('user'), operations, 'active', function (response) {
+					console.log(response);
+				});
+			}
+		},
     getSetDetailsColors(script) {
       let r = "chartreuse,lawngreen";
       const s = this.baseScript[script];
@@ -703,6 +848,9 @@ var app = new Vue({
       }
       return `linear-gradient(${r})`;
     },
+    update: _.debounce(function(e) {
+            this.postBody = e.target.value;
+          }, 300),
     breakIt(it, reset) {
       if (reset) {
         this.SL = [];
@@ -772,28 +920,60 @@ var app = new Vue({
       }
       return s;
     },
+    validateHeaders(rawHeaders) {
+      return new Promise((res, rej) => {
+        if (!rawHeaders || rawHeaders.split(":")[0] < Date.now() - 600000000) {
+          this.toSign = {
+            type: "sign_headers",
+            challenge: Date.now(),
+            key: "posting",
+            ops: [],
+            callbacks: [res],
+            txid: "Sign Auth Headers",
+          };
+        } else {
+          console.log(2);
+          res(rawHeaders);
+        }
+      });
+    },
     ipfsUpload(event) {
       console.log("1", event);
-      if (window.IpfsHttpClient) {
-        const ipfs = window.IpfsHttpClient({
-          host: "ipfs.infura.io",
-          port: "5001",
-          protocol: "https",
-        });
-        var ipfsIP = [];
-        var info = [];
-        for (var name in ar) {
-          ipfsIP.push({ path: `${ar[name][1]}`, content: ar[name][0] });
-          info.push([name, ar[name][1]]);
-        }
-        ipfs.add(ipfsIP, (err, ipfsReturn) => {
-          if (!err) {
-            //store imagehash somewhere
-          } else {
-            console.log("IPFS Upload Failed", err);
+      var rawHeaders = localStorage.getItem(`${this.account}:auth`);
+      console.log({ rawHeaders });
+      this.validateHeaders(rawHeaders).then((headers) => {
+          const buf = buffer.Buffer.from("Success");
+          var myHeaders = new Headers();
+          myHeaders.append("Content-Type", "application/json");
+          myHeaders.append("account", this.account);
+          myHeaders.append("nonce", headers.split(":")[0]);
+          myHeaders.append("sig", headers.split(":")[1]);
+          var formdata = new FormData();
+          for(var i = 0; i < this.File.length; i++){
+            formdata.append("", this.File[i], "file");
+            formdata.append(
+              "path",
+              `/${headers.split(":")[0]}/${headers.split(":")[1]}.${
+                this.account
+              }`
+            );
           }
-        });
-      }
+
+          var requestOptions = {
+            method: "POST",
+            headers: myHeaders,
+            body: formdata,
+            redirect: "follow",
+          };
+
+          fetch(
+            "https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true",
+            requestOptions
+          )
+            .then((response) => response.text())
+            .then((result) => console.log(result))
+            .catch((error) => console.log("error", error));
+      });
     },
     /*
 function buyFT(setname, uid, price, type,  callback){
@@ -970,7 +1150,7 @@ function tradeFTreject(setname, uid, callback){
 
     openFT(item) {
       var cja = {
-          set: item.set
+          set: item.set,
         },
         type = "cja";
       this.toSign = {
@@ -2362,10 +2542,10 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       for (var i = 0; i < this.providers.length; i++) {
         this.NFTsLookUp(this.account, this.providers, i);
         this.trades(i);
-        this.getSetDetails(i)
+        this.getSetDetails(i);
       }
     },
-    getSetDetails(i){
+    getSetDetails(i) {
       fetch(`${this.providers[i].api}/api/sets`)
         .then((r) => r.json())
         .then((res) => {
@@ -2570,31 +2750,31 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       return Math.floor(seconds) + " seconds";
     },
     getHiveUser(user = this.account) {
-        fetch(hapi, {
-          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[["${user}"]], "id":1}`,
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          method: "POST",
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            this.accountinfo = data.result[0];
-            this.barhive = this.accountinfo.balance;
-            this.barhbd = this.accountinfo.hbd_balance;
-            var pfp = ''
-            try {
-              pfp = this.accountinfo.posting_json_metadata.profile.profile_image
-            } catch (e) {}
-            const total_vests =
-              parseInt(this.accountinfo.vesting_shares) +
-              parseInt(this.accountinfo.received_vesting_shares) -
-              parseInt(this.accountinfo.delegated_vesting_shares);
-            const final_vest = total_vests * 1000000;
-            const power =
-              (parseInt(this.accountinfo.voting_power) * 10000) / 10000 / 50;
-            this.accountinfo.rshares = (power * final_vest) / 10000;
-          });
+      fetch(hapi, {
+        body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[["${user}"]], "id":1}`,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        method: "POST",
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          this.accountinfo = data.result[0];
+          this.barhive = this.accountinfo.balance;
+          this.barhbd = this.accountinfo.hbd_balance;
+          var pfp = "";
+          try {
+            pfp = this.accountinfo.posting_json_metadata.profile.profile_image;
+          } catch (e) {}
+          const total_vests =
+            parseInt(this.accountinfo.vesting_shares) +
+            parseInt(this.accountinfo.received_vesting_shares) -
+            parseInt(this.accountinfo.delegated_vesting_shares);
+          const final_vest = total_vests * 1000000;
+          const power =
+            (parseInt(this.accountinfo.voting_power) * 10000) / 10000 / 50;
+          this.accountinfo.rshares = (power * final_vest) / 10000;
+        });
     },
     getHiveStats() {
       fetch(this.hapi, {
@@ -2860,6 +3040,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         return this.smarkets.node[this.account] ? true : false;
       },
     },
+    compiledMarkdown: function() {
+            return marked(this.postBody, { sanitize: true });
+          },
     voteVal() {
       return (
         (this.accountinfo.rshares / parseInt(this.rewardFund.recent_claims)) *
