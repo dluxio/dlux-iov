@@ -967,7 +967,7 @@ var app = new Vue({
             redirect: "follow",
             mode : "no-cors"
           };
-
+          console.log(requestOptions)
           fetch(
             "https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true",
             requestOptions
