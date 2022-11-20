@@ -721,6 +721,7 @@ var app = new Vue({
               ) {
                 Hash.of(fileContent).then((hash) => {
                   this.File[i].md5 = hash;
+                  this.File[i].blob = fileContent; 
                   const file = this.File[i];
                   this.File.splice(i, 1, file);
                 });
@@ -728,7 +729,7 @@ var app = new Vue({
               }
             }
           };
-          reader.readAsArrayBuffer(e.target.files[i]);
+          reader.readAsBinaryString(e.target.files[i]);
           var File = e.target.files[i];
           File.pin = true;
           File.hash = "";
@@ -749,6 +750,7 @@ var app = new Vue({
             ) {
               Hash.of(fileContent).then(hash=>{
                 this.File[i].md5 = hash 
+                this.File[i].blob = fileContent; 
                 const file = this.File[i];
                  this.File.splice(i, 1, file);
               })
@@ -944,7 +946,7 @@ var app = new Vue({
         myHeaders.append("Sig", headers.split(":")[1]);
         var formdata = new FormData();
         console.log(this.File[index]);
-        formdata.append(this.File[index].name, this.File[index]);
+        formdata.append(this.File[index].name, this.File[index].blob);
         formdata.append(
           "path",
           `/${headers.split(":")[0]}/${headers.split(":")[1]}.${this.account}`
