@@ -940,10 +940,6 @@ var app = new Vue({
     ipfsUpload(index) {
       this.validateHeaders(this.File[index].md5).then((headers) => {
         var myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
-        // myHeaders.append("Account", this.account);
-        // myHeaders.append("Nonce", headers.split(":")[0]);
-        // myHeaders.append("Sig", headers.split(":")[1]);
         var formdata = new FormData();
         formdata.append("blob", new Blob([this.File[index].blob]));
         formdata.append(
@@ -953,7 +949,6 @@ var app = new Vue({
 
         var requestOptions = {
           method: "POST",
-          headers: myHeaders,
           body: formdata,
           redirect: "follow",
         };
