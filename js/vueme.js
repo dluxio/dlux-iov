@@ -937,28 +937,25 @@ var app = new Vue({
         }
       });
     },
-    ipfsUpload(event) {
-      console.log("1", event);
+    ipfsUpload(index) {
+      console.log("1", index);
       var rawHeaders = localStorage.getItem(`${this.account}:auth`);
       console.log({ rawHeaders });
       this.validateHeaders(rawHeaders).then((headers) => {
-        console.log({headers})
-          const buf = buffer.Buffer.from("Success");
           var myHeaders = new Headers();
           myHeaders.append("Content-Type", "application/json");
           myHeaders.append("Account", this.account);
           myHeaders.append("Nonce", headers.split(":")[0]);
           myHeaders.append("Sig", headers.split(":")[1]);
           var formdata = new FormData();
-          for(var i = 0; i < this.File.length; i++){
-            formdata.append("", this.File[i], "file");
+            formdata.append("", this.File[index], "file");
             formdata.append(
               "path",
               `/${headers.split(":")[0]}/${headers.split(":")[1]}.${
                 this.account
               }`
             );
-          }
+          
 
           var requestOptions = {
             method: "POST",
@@ -972,11 +969,13 @@ var app = new Vue({
             redirect: "follow",
             mode : "no-cors"
           };
-          console.log(requestOptions)
+          console.log(formdata.entries)
           fetch(
             `https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true&account=${
               this.account
-            }&nonce=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
+            }&nonce=${headers.split(":")[0]}&sig=${headers.split(":")[1]}&md5=${
+              this.File[index].md5
+            }`,
             requestOptions
           )
             .then((response) => response.text())
