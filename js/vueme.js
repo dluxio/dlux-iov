@@ -708,9 +708,6 @@ var app = new Vue({
     getSetPhotos(s, c) {
       return s.set ? `https://ipfs.io/ipfs/${s.set[c]}` : "";
     },
-    md5(file){
-      return
-    },
     uploadFile(e) {
         for (var i = 0; i < e.target.files.length; i++) {
           var reader = new FileReader();
@@ -722,7 +719,7 @@ var app = new Vue({
                 this.File[i].name == event.currentTarget.File.name
                 && this.File[i].size == event.currentTarget.File.size
               ) {
-                this.File[i].md5 = md5(fileContent);
+                this.File[i].md5 = Hash(fileContent);
                 const file = this.File[i];
                 this.File.splice(i, 1, file)
                 break
@@ -748,14 +745,16 @@ var app = new Vue({
               this.File[i].name == event.currentTarget.File.name
               && this.File[i].size == event.currentTarget.File.size
             ) {
-              this.File[i].md5 = md5(fileContent);
-              const file = this.File[i];
-              this.File.splice(i, 1, file)
+              Hash.of(fileContent).then(hash=>{
+                this.File[i].md5 = hash 
+                const file = this.File[i];
+                 this.File.splice(i, 1, file);
+              })
               break
             }
           }
         };
-        reader.readAsArrayBuffer(e.dataTransfer.files[i]);
+        reader.readAsBinaryString(e.dataTransfer.files[i]);
         var File = e.dataTransfer.files[i];
         File.pin = true;
         File.hash = "";
@@ -969,7 +968,7 @@ var app = new Vue({
             redirect: "follow",
             mode : "no-cors"
           };
-          console.log(formdata.entries)
+          console.log(formdata.entries())
           fetch(
             `https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true&account=${
               this.account
