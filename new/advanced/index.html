@@ -135,9 +135,6 @@
 				</div>
 				<div id="two">
 					<div class="flex-column flex-shrink mx-3">
-						<div v-if="File.length">
-							<button @click="ipfsUpload">Sign and Upload</button>
-						</div>
 						<div style="border-style:solid;">
 							<input type="file" multiple @change="uploadFile"/>
 							<div @drop="dragFile" style="background-color:green;margin-bottom:10px;padding:10px;">
@@ -157,6 +154,9 @@
 								<div v-if="file.hash">
 									<div><img :src="'https://ipfs.dlux.io/ipfs/' + file.hash" width="100%"/></div>
 									<div class="small"><a :href="'https://ipfs.dlux.io/ipfs/' + file.hash" target="_blank">https://ipfs.io/ipfs/{{file.hash}}</a></div>
+								</div>
+								<div v-if="!file.hash">
+									<button @click="ipfsUpload(index)">Sign and Upload</button>
 								</div>
 							</div>
 						</div>
