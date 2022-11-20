@@ -962,7 +962,12 @@ var app = new Vue({
 
           var requestOptions = {
             method: "POST",
-            headers: myHeaders,
+            headers: {
+              "Content-Type": "application/json",
+              "Account": this.account,
+              "Nonce": headers.split(":")[0],
+              "Sig": headers.split(":")[1],
+            },
             body: formdata,
             redirect: "follow",
             mode : "no-cors"
