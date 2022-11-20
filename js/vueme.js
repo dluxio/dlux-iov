@@ -956,12 +956,11 @@ var app = new Vue({
           headers: myHeaders,
           body: formdata,
           redirect: "follow",
-          mode: "no-cors",
         };
         fetch(
           `https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true&account=${
             this.account
-          }&nonce=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
+          }&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
           requestOptions
         )
           .then((response) => response.text())
