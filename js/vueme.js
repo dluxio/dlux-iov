@@ -942,12 +942,13 @@ var app = new Vue({
       var rawHeaders = localStorage.getItem(`${this.account}:auth`);
       console.log({ rawHeaders });
       this.validateHeaders(rawHeaders).then((headers) => {
+        console.log({headers})
           const buf = buffer.Buffer.from("Success");
           var myHeaders = new Headers();
           myHeaders.append("Content-Type", "application/json");
-          myHeaders.append("account", this.account);
-          myHeaders.append("nonce", headers.split(":")[0]);
-          myHeaders.append("sig", headers.split(":")[1]);
+          myHeaders.append("Account", this.account);
+          myHeaders.append("Nonce", headers.split(":")[0]);
+          myHeaders.append("Sig", headers.split(":")[1]);
           var formdata = new FormData();
           for(var i = 0; i < this.File.length; i++){
             formdata.append("", this.File[i], "file");
