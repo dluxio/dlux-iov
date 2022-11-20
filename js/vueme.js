@@ -719,9 +719,11 @@ var app = new Vue({
                 this.File[i].name == event.currentTarget.File.name
                 && this.File[i].size == event.currentTarget.File.size
               ) {
-                this.File[i].md5 = Hash(fileContent);
-                const file = this.File[i];
-                this.File.splice(i, 1, file)
+                Hash.of(fileContent).then((hash) => {
+                  this.File[i].md5 = hash;
+                  const file = this.File[i];
+                  this.File.splice(i, 1, file);
+                });
                 break
               }
             }
@@ -919,67 +921,56 @@ var app = new Vue({
       }
       return s;
     },
-    validateHeaders(rawHeaders) {
+    validateHeaders(CID) {
       return new Promise((res, rej) => {
-        if (!rawHeaders || rawHeaders.split(":")[0] < Date.now() - 600000000) {
+        if (CID) {
           this.toSign = {
             type: "sign_headers",
-            challenge: Date.now(),
+            challenge: CID,
             key: "posting",
             ops: [],
             callbacks: [res],
             txid: "Sign Auth Headers",
           };
-        } else {
-          console.log(2);
-          res(rawHeaders);
         }
       });
     },
     ipfsUpload(index) {
-      console.log("1", index);
-      var rawHeaders = localStorage.getItem(`${this.account}:auth`);
-      console.log({ rawHeaders });
-      this.validateHeaders(rawHeaders).then((headers) => {
-          var myHeaders = new Headers();
-          myHeaders.append("Content-Type", "application/json");
-          myHeaders.append("Account", this.account);
-          myHeaders.append("Nonce", headers.split(":")[0]);
-          myHeaders.append("Sig", headers.split(":")[1]);
-          var formdata = new FormData();
-            formdata.append("", this.File[index], "file");
-            formdata.append(
-              "path",
-              `/${headers.split(":")[0]}/${headers.split(":")[1]}.${
-                this.account
-              }`
-            );
-          
+      this.validateHeaders(this.File[index].md5).then((headers) => {
+        var myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+        myHeaders.append("Account", this.account);
+        myHeaders.append("Nonce", headers.split(":")[0]);
+        myHeaders.append("Sig", headers.split(":")[1]);
+        var formdata = new FormData();
+        console.log(this.File[index]);
+        formdata.append(this.File[index].name, this.File[index]);
+        formdata.append(
+          "path",
+          `/${headers.split(":")[0]}/${headers.split(":")[1]}.${this.account}`
+        );
 
-          var requestOptions = {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Account": this.account,
-              "Nonce": headers.split(":")[0],
-              "Sig": headers.split(":")[1],
-            },
-            body: formdata,
-            redirect: "follow",
-            mode : "no-cors"
-          };
-          console.log(formdata.entries())
-          fetch(
-            `https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true&account=${
-              this.account
-            }&nonce=${headers.split(":")[0]}&sig=${headers.split(":")[1]}&md5=${
-              this.File[index].md5
-            }`,
-            requestOptions
-          )
-            .then((response) => response.text())
-            .then((result) => console.log(result))
-            .catch((error) => console.log("error", error));
+        var requestOptions = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Account: this.account,
+            Nonce: headers.split(":")[0],
+            Sig: headers.split(":")[1],
+          },
+          body: formdata,
+          redirect: "follow",
+          mode: "no-cors",
+        };
+        fetch(
+          `https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true&account=${
+            this.account
+          }&nonce=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
+          requestOptions
+        )
+          .then((response) => response.text())
+          .then((result) => console.log(result))
+          .catch((error) => console.log("error", error));
       });
     },
     /*

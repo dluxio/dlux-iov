@@ -23,7 +23,6 @@
     <script src="https://unpkg.com/lodash@4.16.0"></script>
 	<script type="text/javascript" src="/js/onlyhash.js">
 	</script>
-	<script src="https://cdn.jsdelivr.net/npm/js-md5@0.7.3/src/md5.min.js"></script>
 	<style>
 		#img-well {
 			color: #FF7A5A;
@@ -151,7 +150,7 @@
 								</div>
 								<div class="d-flex flex-row">
 								<div>
-									<div class="small">Bytes: {{file.size}} | md5: {{file.md5}}</div>
+									<div class="small">Bytes: {{file.size}} | CID: {{file.md5}}</div>
 								</div>
 								<div v-if="file.hash">
 									<div><img :src="'https://ipfs.dlux.io/ipfs/' + file.hash" width="100%"/></div>
