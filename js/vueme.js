@@ -939,9 +939,8 @@ var app = new Vue({
     },
     ipfsUpload(index) {
       this.validateHeaders(this.File[index].md5).then((headers) => {
-        var myHeaders = new Headers();
         var formdata = new FormData();
-        formdata.append("blob", new Blob([this.File[index].blob]));
+        formdata.append("blob", document.getElementById('fileInput').files[0]);
         formdata.append(
           "path",
           `/${headers.split(":")[0]}/${headers.split(":")[1]}.${this.account}`
@@ -951,6 +950,8 @@ var app = new Vue({
           method: "POST",
           body: formdata,
           redirect: "follow",
+          mode: 'no-cors',
+          credentials: 'include'
         };
         fetch(
           `https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true&account=${
@@ -958,7 +959,10 @@ var app = new Vue({
           }&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
           requestOptions
         )
-          .then((response) => response.text())
+          .then((response) => {
+            response.text()
+            console.log(response)
+          })
           .then((result) => console.log(result))
           .catch((error) => console.log("error", error));
       });
