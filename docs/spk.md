@@ -32,7 +32,7 @@ Go to [Privex server](https://www.privex.io) or equivalent of your choosing:
 
 1. Choose a server that meets the following requirements:
    - Region: `Allowed to run IPFS` (currently USA & Sweden)
-   - Min specs: `Virtual Dual-Core 1GB / 25GB` (check specific community guidelines)
+   - Min specs: `Virtual Dual-Core 1GB / 10GB` (check specific community guidelines)
    - Recommend specs:
      * dual core +
      * 2GB RAM +
@@ -50,11 +50,9 @@ Go to [Privex server](https://www.privex.io) or equivalent of your choosing:
    - Locate your SSH private key file
    - Type: `ssh -i "sshkey" user@IP.ADD.RE.SS`
    - Add this connection to the list of known hosts 
-4. Update packages and install Docker
+4. Update packages
    - Type `sudo apt update` to update repos
    - Type `sudo apt upgrade` to upgrade packages
-   - Type `sudo apt install git` to install git
-   - Type `cd ~ && git clone https://github.com/disregardfiat/trole.git`
 5. Choose how to install;
    - Install Script
 ---
@@ -63,11 +61,11 @@ Go to [Privex server](https://www.privex.io) or equivalent of your choosing:
 
 We've provided an install script that will install everything for you on an ubuntu/debian system.
 
-Always always always understand a script: https://github.com/disregardfiat/trole/blob/main/install.sh This will do some system checks, ensure you are not the root user, ask for your domain name (example.com), ask for your hive username, ask for the previously generated keypair... 
-
-Then installs caddy, ipfs, trole, and postgres and configure them together to collectively become a storage/upload node.
+Always always always understand a script: https://github.com/disregardfiat/trole/blob/main/install.sh This will do some system checks, ensure you are not the root user, ask for your domain name (example.com), ask for your hive username, ask for the previously generated keypair... Then installs caddy, ipfs, trole, and postgres and configure them together to collectively become a storage/upload node.
 
 * From the shell/terminal input the following commands from your home directory:
+   * Type `sudo apt install git` to install git
+   * Type `cd ~ && git clone https://github.com/disregardfiat/trole.git`
    * `cd trole && ./install.sh`
 
 That's it, it should have configured your .env file, https, added services that maintain the programs running, configured ipfs and trole. 
