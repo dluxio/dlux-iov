@@ -2,7 +2,7 @@
 
 ### Prerequisites
 
-* [Hive account](https://signup.hive.io/) with 100 Hive Power worth of Resource Credits available for each node you wish to install
+* [Hive account](https://signup.hive.io/) with ~300 Hive Power worth of Resource Credits available for each node you wish to install
 * SSH private and .pub key for your computer ([Mac/Linux](https://docs.oracle.com/en/cloud/cloud-at-customer/occ-get-started/generate-ssh-key-pair.html), [Windows](https://docs.joyent.com/public-cloud/getting-started/ssh-keys/generating-an-ssh-key-manually/manually-generating-your-ssh-key-in-windows))
 * Domain Name Registrar such as [Namecheap](https://namecheap.com/) for your API domain names
 
