@@ -751,7 +751,7 @@ var app = new Vue({
             ) {
               Hash.of(fileContent).then(hash=>{
                 const dict = {hash, index:i, size: event.currentTarget.File.size, name: event.currentTarget.File.name}
-                this.FileInfo[i] = dict
+                this.FileInfo[dict.name] = dict
                 // this.File[i].md5 = hash 
                 // this.File[i].blob = fileContent; 
                 // const file = this.File[i];

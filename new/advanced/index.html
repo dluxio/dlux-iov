@@ -144,7 +144,7 @@
 								</div>
 							</form>
 						</div>
-						<div id="listOfImgs" v-for="file in FileInfo">
+						<div id="listOfImgs" v-for="file in File">
 							<div class="p-3 mb-3 bg-dark" style="border-radius: 10px;">
 								<div class="d-flex align-items-center flex-row pb-2 mb-2" style="border-bottom-style: solid; border-bottom-color: #909090">
 									<div class="d-flex"><input class="form-control form-control-sm mr-2" type="text" v-model="file.name"></div>
@@ -152,13 +152,13 @@
 								</div>
 								<div class="d-flex flex-row">
 								<div>
-									<div class="small">Bytes: {{file.size}} | CID: {{file.hash}}</div>
+									<div class="small">Bytes: {{file.size}} | CID: {{FileInfo[file.name]}}</div>
 								</div>
-								<div v-if="file.hash">
-									<div><img :src="'https://ipfs.dlux.io/ipfs/' + file.hash" width="100%"/></div>
-									<div class="small"><a :href="'https://ipfs.dlux.io/ipfs/' + file.hash" target="_blank">https://ipfs.io/ipfs/{{file.hash}}</a></div>
+								<div v-if="FileInfo[file.name]">
+									<div><img :src="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name]" width="100%"/></div>
+									<div class="small"><a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name]" target="_blank">https://ipfs.io/ipfs/{{FileInfo[file.name]}}</a></div>
 								</div>
-								<div v-if="!file.hash">
+								<div v-if="!FileInfo[file.name]">
 									<button @click="ipfsUpload(index)">Sign and Upload</button>
 								</div>
 							</div>
