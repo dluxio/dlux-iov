@@ -959,7 +959,7 @@ var app = new Vue({
         var requestOptions = {
           method: "POST",
           body: formdata,
-          redirect: "follow",
+          //redirect: "follow",
           mode: 'no-cors',
           credentials: 'include'
         };
