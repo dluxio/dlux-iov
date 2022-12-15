@@ -946,7 +946,8 @@ var app = new Vue({
     ipfsUpload(name) {
       this.validateHeaders(this.FileInfo[name].hash).then((headers) => {
         var formdata = new FormData();
-        formdata.append('file', document.getElementsByName(this.FileInfo[name].path).File);
+        console.log(document.getElementsByName(this.FileInfo[name].path))
+        formdata.append('file', document.getElementsByName(this.FileInfo[name].path)[0].File);
         formdata.append(
           "path",
           `/${headers.split(":")[0]}/${headers.split(":")[1]}.${this.account}`
