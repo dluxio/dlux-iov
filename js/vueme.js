@@ -722,7 +722,7 @@ var app = new Vue({
                 && this.File[i].size == event.currentTarget.File.size
               ) {
                 Hash.of(fileContent).then((hash) => {
-                  const dict = {hash, index:i, size: event.currentTarget.File.size, name: event.currentTarget.File.name}
+                  const dict = {hash, index:i, size: event.currentTarget.File.size, name: event.currentTarget.File.name, path:e.path[0]}
                   this.FileInfo[dict.name] = dict
                   // this.File[i].md5 = hash;
                   // this.File[i].blob = new Blob([fileContent], event.currentTarget.File.name)
@@ -946,7 +946,7 @@ var app = new Vue({
     ipfsUpload(name) {
       this.validateHeaders(this.FileInfo[name].hash).then((headers) => {
         var formdata = new FormData();
-        formdata.append('file', this.File[this.FileInfo[name].index]);
+        formdata.append('file', document.getElementsByName(this.FileInfo[name].path).File);
         formdata.append(
           "path",
           `/${headers.split(":")[0]}/${headers.split(":")[1]}.${this.account}`
