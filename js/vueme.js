@@ -76,6 +76,7 @@ var app = new Vue({
       sets: {},
       disablePost: true,
       File: [],
+      FileInfo: {},
       postTitle: "",
       postBody: "",
       postTags: "",
@@ -749,10 +750,12 @@ var app = new Vue({
               && this.File[i].size == event.currentTarget.File.size
             ) {
               Hash.of(fileContent).then(hash=>{
-                this.File[i].md5 = hash 
-                this.File[i].blob = fileContent; 
-                const file = this.File[i];
-                 this.File.splice(i, 1, file);
+                const dict = {hash, index:i, size: event.currentTarget.File.size, name: event.currentTarget.File.name}
+                this.FileInfo[i] = dict
+                // this.File[i].md5 = hash 
+                // this.File[i].blob = fileContent; 
+                // const file = this.File[i];
+                //  this.File.splice(i, 1, file);
               })
               break
             }
@@ -760,9 +763,9 @@ var app = new Vue({
         };
         reader.readAsBinaryString(e.dataTransfer.files[i]);
         var File = e.dataTransfer.files[i];
-        File.pin = true;
-        File.hash = "";
-        File.md5 = ""
+        // File.pin = true;
+        // File.hash = "";
+        // File.md5 = ""
         this.File.push(File);
       }
     },
@@ -938,9 +941,8 @@ var app = new Vue({
       });
     },
     ipfsUpload(index) {
-      this.validateHeaders(this.File[index].md5).then((headers) => {
+      this.validateHeaders(this.FileInfo[index].hash).then((headers) => {
         var formdata = new FormData();
-        console.log(this.File[index], this.File[index].blob)
         formdata.append('file', this.File[index]);
         formdata.append(
           "path",
