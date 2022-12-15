@@ -940,12 +940,11 @@ var app = new Vue({
     ipfsUpload(index) {
       this.validateHeaders(this.File[index].md5).then((headers) => {
         var formdata = new FormData();
-        formdata.append("blob", document.getElementById('fileInput').files[0]);
+        formdata.append("blob", document.getElementById('fileInput').files[0].blob);
         formdata.append(
           "path",
           `/${headers.split(":")[0]}/${headers.split(":")[1]}.${this.account}`
         );
-
         var requestOptions = {
           method: "POST",
           body: formdata,
