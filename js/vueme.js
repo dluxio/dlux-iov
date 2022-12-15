@@ -720,10 +720,8 @@ var app = new Vue({
                 && this.File[i].size == event.currentTarget.File.size
               ) {
                 Hash.of(fileContent).then((hash) => {
-                  console.log(typeof fileContent)
-                  console.log(fileContent)
                   this.File[i].md5 = hash;
-                  this.File[i].blob = fileContent; 
+                  this.File[i].blob = URL.createObjectURL(fileContent); 
                   const file = this.File[i];
                   this.File.splice(i, 1, file);
                 });
