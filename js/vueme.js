@@ -710,6 +710,7 @@ var app = new Vue({
       return s.set ? `https://ipfs.io/ipfs/${s.set[c]}` : "";
     },
     uploadFile(e) {
+      console.log(e)
         for (var i = 0; i < e.target.files.length; i++) {
           var reader = new FileReader();
           reader.File = e.target.files[i]
@@ -945,7 +946,7 @@ var app = new Vue({
     ipfsUpload(name) {
       this.validateHeaders(this.FileInfo[name].hash).then((headers) => {
         var formdata = new FormData();
-        //formdata.append('file', this.File[this.FileInfo[name].index]);
+        formdata.append('file', this.File[this.FileInfo[name].index]);
         formdata.append(
           "path",
           `/${headers.split(":")[0]}/${headers.split(":")[1]}.${this.account}`
