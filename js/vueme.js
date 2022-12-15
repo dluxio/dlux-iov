@@ -721,7 +721,7 @@ var app = new Vue({
               ) {
                 Hash.of(fileContent).then((hash) => {
                   this.File[i].md5 = hash;
-                  //this.File[i].blob 
+                  this.File[i].blob = fileContent
                   const file = this.File[i];
                   this.File.splice(i, 1, file);
                 });
@@ -941,7 +941,7 @@ var app = new Vue({
       this.validateHeaders(this.File[index].md5).then((headers) => {
         var formdata = new FormData();
         console.log(this.File[index], this.File[index].blob)
-        formdata.append('file', this.File[index].File, this.File[index].name);
+        formdata.append('file', this.File[index], this.File[index].name);
         formdata.append(
           "path",
           `/${headers.split(":")[0]}/${headers.split(":")[1]}.${this.account}`
