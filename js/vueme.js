@@ -735,9 +735,9 @@ var app = new Vue({
           };
           reader.readAsBinaryString(e.target.files[i]);
           var File = e.target.files[i];
-          File.pin = true;
-          File.hash = "";
-          File.md5 = ""
+          // File.pin = true;
+          // File.hash = "";
+          // File.md5 = ""
           this.File.push(File);
         }
       },
@@ -948,7 +948,7 @@ var app = new Vue({
         var formdata = new FormData();
         console.log(this.FileInfo[name].path)
         console.log(document.getElementById(this.FileInfo[name].path))
-        formdata.append('file', document.getElementById(this.FileInfo[name].path).File);
+        formdata.append('file', document.getElementById(this.FileInfo[name].path).files[0]);
         formdata.append(
           "path",
           `/${headers.split(":")[0]}/${headers.split(":")[1]}.${this.account}`
