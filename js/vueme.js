@@ -961,8 +961,8 @@ var app = new Vue({
           credentials: 'include'
         };
         fetch(
-          `https://7afa6c0f-fa9f-412c-b43c-cd0adea5c8d0.mock.pstmn.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
-          //`https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true&account=${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
+          //`https://7afa6c0f-fa9f-412c-b43c-cd0adea5c8d0.mock.pstmn.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
+          `https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true&account=${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
           requestOptions
         )
           .then((response) => {
