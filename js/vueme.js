@@ -953,7 +953,9 @@ var app = new Vue({
           "path",
           `/${headers.split(":")[0]}/${headers.split(":")[1]}.${this.account}`
         );
-        console.log(formdata)
+        for (const value of formdata.values()) {
+          console.log(value);
+        }
         var requestOptions = {
           method: "POST",
           body: formdata,
