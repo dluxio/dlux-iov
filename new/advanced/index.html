@@ -159,7 +159,7 @@
 									<div class="small"><a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name]" target="_blank">https://ipfs.io/ipfs/{{FileInfo[file.name]}}</a></div>
 								</div>
 								<div v-if="!FileInfo[file.name]">
-									<button @click="ipfsUpload(index)">Sign and Upload</button>
+									<button @click="ipfsUpload(file.name)">Sign and Upload</button>
 								</div>
 							</div>
 						</div>

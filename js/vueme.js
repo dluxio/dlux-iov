@@ -940,10 +940,10 @@ var app = new Vue({
         }
       });
     },
-    ipfsUpload(index) {
-      this.validateHeaders(this.FileInfo[index].hash).then((headers) => {
+    ipfsUpload(name) {
+      this.validateHeaders(this.FileInfo[name].hash).then((headers) => {
         var formdata = new FormData();
-        formdata.append('file', this.File[index]);
+        formdata.append('file', this.File[this.FileInfo[name].index]);
         formdata.append(
           "path",
           `/${headers.split(":")[0]}/${headers.split(":")[1]}.${this.account}`
