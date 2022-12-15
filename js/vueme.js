@@ -940,6 +940,7 @@ var app = new Vue({
     ipfsUpload(index) {
       this.validateHeaders(this.File[index].md5).then((headers) => {
         var formdata = new FormData();
+        console.log(this.File[index], this.File[index].blob)
         formdata.append('file', this.File[index].blob, this.File[index].name);
         formdata.append(
           "path",
