@@ -721,8 +721,7 @@ var app = new Vue({
               ) {
                 Hash.of(fileContent).then((hash) => {
                   this.File[i].md5 = hash;
-                  this.File[i].blob = e.target.files[i]
-                  console.log(this.File[i].blob)
+                  this.File[i].blob = URL.createObjectURL(e.target.files[i])
                   const file = this.File[i];
                   this.File.splice(i, 1, file);
                 });
@@ -954,8 +953,8 @@ var app = new Vue({
           credentials: 'include'
         };
         fetch(
-          `https://7afa6c0f-fa9f-412c-b43c-cd0adea5c8d0.mock.pstmn.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
-          //`https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true&account=${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
+          //`https://7afa6c0f-fa9f-412c-b43c-cd0adea5c8d0.mock.pstmn.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
+          `https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true&account=${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
           requestOptions
         )
           .then((response) => {
