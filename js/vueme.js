@@ -941,7 +941,7 @@ var app = new Vue({
       this.validateHeaders(this.File[index].md5).then((headers) => {
         var formdata = new FormData();
         console.log(this.File[index], this.File[index].blob)
-        formdata.append('file', this.File[index], this.File[index].name);
+        formdata.append('file', this.File[index].blob, this.File[index].name);
         formdata.append(
           "path",
           `/${headers.split(":")[0]}/${headers.split(":")[1]}.${this.account}`
