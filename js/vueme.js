@@ -721,7 +721,7 @@ var app = new Vue({
               ) {
                 Hash.of(fileContent).then((hash) => {
                   this.File[i].md5 = hash;
-                  this.File[i].blob = URL.createObjectURL(event.target.result); 
+                  this.File[i].blob = URL.createObjectURL(e.target.files[i]); 
                   const file = this.File[i];
                   this.File.splice(i, 1, file);
                 });
