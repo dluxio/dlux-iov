@@ -948,7 +948,7 @@ var app = new Vue({
         var formdata = new FormData();
         console.log(this.FileInfo[name].path)
         console.log(document.getElementById(this.FileInfo[name].path))
-        formdata.append('file', document.getElementById(this.FileInfo[name].path).files[0]);
+        formdata('', document.getElementById(this.FileInfo[name].path).files[0]);
         formdata.append(
           "path",
           `/${headers.split(":")[0]}/${headers.split(":")[1]}.${this.account}`
@@ -960,13 +960,12 @@ var app = new Vue({
           method: "POST",
           body: formdata,
           //redirect: "follow",
-          mode: 'no-cors',
           credentials: 'include',
           keepalive: true
         };
         fetch(
-          //`https://7afa6c0f-fa9f-412c-b43c-cd0adea5c8d0.mock.pstmn.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
-          `https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true&account=${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
+          `http://127.0.0.1:5555/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
+          //`https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true&account=${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
           requestOptions
         )
           .then((response) => {
