@@ -948,7 +948,7 @@ var app = new Vue({
         var formdata = new FormData();
         console.log(this.FileInfo[name].path)
         console.log(document.getElementById(this.FileInfo[name].path))
-        formdata('', document.getElementById(this.FileInfo[name].path).files[0]);
+        formdata.append('file', document.getElementById(this.FileInfo[name].path).files[0]);
         formdata.append(
           "path",
           `/${headers.split(":")[0]}/${headers.split(":")[1]}.${this.account}`
