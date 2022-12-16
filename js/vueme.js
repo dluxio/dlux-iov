@@ -956,12 +956,14 @@ var app = new Vue({
         for (const value of formdata.values()) {
           console.log(value);
         }
+        var myHeaders = new Headers()
+        myHeaders.append("Content-Type", "application/json")
         var requestOptions = {
           method: "POST",
           body: formdata,
+          headers: myHeaders,
           //redirect: "follow",
-          credentials: 'include',
-          keepalive: true
+          credentials: 'omit',
         };
         fetch(
           `https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
