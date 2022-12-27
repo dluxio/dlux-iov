@@ -330,6 +330,7 @@ var app = new Vue({
       fetch(this.lapi)
       .then(r=>{r.json()})
       .then(json=>{
+        console.log(json)
         this.stats = json.result
         this.getBlock(json.result.lastBlock)
       })
