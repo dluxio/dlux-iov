@@ -326,6 +326,14 @@ var app = new Vue({
         this.toSign = {};
       }
     },
+    currentBlock(){
+      fetch(this.lapi)
+      .then(r=>{r.json()})
+      .then(json=>{
+        this.stats = json.result
+        this.getBlock(json.result.lastBlock)
+      })
+    },
     getBlock(hash = "QmbtVQ5v3Nrtk8rLkSJpNKr5tFEEY613iAtQPGBBdRqwSy"){
       
       fetch(`https://ipfs.io/${hash}`)
@@ -1450,7 +1458,7 @@ var app = new Vue({
     }
   },
   mounted() {
-    this.getBlock()
+    this.currentBlock()
   },
   computed: {
     chartTitle: {
