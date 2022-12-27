@@ -339,7 +339,7 @@ var app = new Vue({
       fetch(`https://ipfs.io/${hash}`)
       .then(r=>{r.json()})
       .then(json=>{
-        block[hash] = json
+        this.block[hash] = json
       })
     },
     run(op){
