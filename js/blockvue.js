@@ -328,8 +328,9 @@ var app = new Vue({
     },
     currentBlock(){
       fetch(this.lapi)
-      .then(r=>{r.json()})
-      .then(json=>{
+      .then(r=>{r.text()})
+      .then(text=>{
+        const json = JSON.parse(text)
         console.log(json)
         this.stats = json.result
         this.getBlock(json.result.lastBlock)
