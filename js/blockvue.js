@@ -1450,13 +1450,7 @@ var app = new Vue({
     }
   },
   mounted() {
-    this.findCurrent()
-    this.getQuotes();
-    this.getNodes();
-    this.getProtocol();
-    this.popDEX(user);
-    if (user != "GUEST") this.getTokenUser(user);
-    if (user != "GUEST") this.getHiveUser(user);
+    this.getBlock()
   },
   computed: {
     chartTitle: {
