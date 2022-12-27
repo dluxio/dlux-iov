@@ -56,6 +56,7 @@ var app = new Vue({
   el: "#app", // vue 2
   data() {
     return {
+      block:{},
       ohlcv: [],
       chart: {
         id: "honeycomb_tv",
@@ -324,6 +325,14 @@ var app = new Vue({
       if(this.toSign.txid == txid){
         this.toSign = {};
       }
+    },
+    getBlock(hash = "QmbtVQ5v3Nrtk8rLkSJpNKr5tFEEY613iAtQPGBBdRqwSy"){
+      
+      fetch(`https://ipfs.io/${hash}`)
+      .then(r=>{r.json()})
+      .then(json=>{
+        block[hash] = json
+      })
     },
     run(op){
       if (typeof this[op] == 'function' && this.account != 'GUEST') {
