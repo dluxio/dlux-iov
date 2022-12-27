@@ -328,9 +328,10 @@ var app = new Vue({
     },
     currentBlock(){
       fetch(this.lapi)
-      .then(r=>{r.text()})
-      .then(text=>{
-        const json = JSON.parse(text)
+      .then((r) => {
+        return r.json();
+      })
+      .then(json=>{
         console.log(json)
         this.stats = json.result
         this.getBlock(json.result.lastBlock)
@@ -339,7 +340,9 @@ var app = new Vue({
     getBlock(hash = "QmbtVQ5v3Nrtk8rLkSJpNKr5tFEEY613iAtQPGBBdRqwSy"){
       
       fetch(`https://ipfs.io/${hash}`)
-      .then(r=>{r.json()})
+      .then((r) => {
+        return r.json();
+      })
       .then(json=>{
         this.block[hash] = json
       })
