@@ -26,7 +26,6 @@
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
     <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
     <script type="module" src="/js/vueme.js"></script>
-
 </head>
 
 <body class="d-flex flex-column h-100 padme-t70 text-white" id="explore">
@@ -50,6 +49,12 @@
                                     <div class="d-flex flex-column">
                                         <div class="d-flex">
                                             <p class="display-4 mb-0">{{pageAccount}}</p>
+                                            <a href="#" class="ms-auto text-secondary"
+                                            data-bs-toggle="tooltip" data-bs-placement="top"
+                                            data-bs-custom-class=""
+                                            data-bs-title="put text here">
+                                            <i class="fa-solid fa-circle-question"></i>
+                                    </a>
                                         </div>
                                         <div class="d-flex"><small
                                                 class="lead p-2">{{focus.posting_json_metadata.profile.about}}</small>
@@ -571,13 +576,20 @@
                                                         <form name="nodeSettings" class="needs-validation" novalidate>
                                                             <div class="row mb-3" v-for="opt in tokenGov.options">
                                                                 <label :for="opt.json"
-                                                                    class="form-label">{{opt.title}}:</label>
+                                                                    class="form-label d-flex">{{opt.title}}:
+                                                                    <a href="#" class="ms-auto text-secondary"
+                                                                    data-bs-toggle="tooltip" data-bs-placement="top"
+                                                                    data-bs-custom-class=""
+                                                                    data-bs-title="put text here">
+                                                                    <i class="fa-solid fa-circle-question"></i>
+                                                            </a></label>
                                                                 <div class="input-group">
                                                                     <input type="number"
                                                                         v-model="opt.val"
-                                                                        class="form-control bg-darkg border-dark text-info"
+                                                                        class="form-control bg-darkg border-secondary text-info"
                                                                         :id="opt.id" 
                                                                         :max="opt.range_high" :min="opt.range_low" :step="opt.step" />
+                                                                        <span class="input-group-text bg-darkg border-secondary text-secondary">unit</span>    
                                                                 </div>
                                                             </div>
                                                             <div class="text-center mt-3">
@@ -4014,6 +4026,12 @@
             <foot-vue />
         </div>
     </div>
+    <script>
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+        </script>
     <script>
         (function () {
             "use strict";
