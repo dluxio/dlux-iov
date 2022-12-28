@@ -67,13 +67,15 @@ Vue.directive("scroll", {
   },
 });
 
-Vue.directive('tooltip', function(el, binding){
-  $(el).tooltip({
-           title: binding.value,
-           placement: binding.arg,
-           trigger: 'hover'             
-       })
-})
+Vue.directive('tooltip', {
+  mounted(el, binding) {  
+      el.setAttribute('data-toggle', 'tooltip')
+      
+      new bootstrap.Tooltip(el,{
+          title: binding.value,
+          placement: binding.arg,
+          trigger: 'hover'
+      })
 
 // createApp({ // vue 3
 var app = new Vue({
