@@ -577,7 +577,15 @@
                                                             <div class="row mb-3" v-for="opt in tokenGov.options">
                                                                 <label :for="opt.json"
                                                                     class="form-label d-flex">{{opt.title}}:
-                                                                    <i v-if="opt.info" class="fa-solid fa-circle-question" v-tooltip:bottom="opt.info"></i>
+                                                                    <div class="dropdown show d-flex align-items-center p-0 m-0">
+                                                                        <a class="text-white" href="#" role="button" data-bs-toggle="dropdown"
+                                                                          aria-haspopup="true" aria-expanded="false">
+                                                                          <h5 class="m-0"><i class="fas fa-info-circle ms-2"></i></h5></a>
+                                                                        <div
+                                                                          class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
+                                                                          <p>{{opt.info}}</p>
+                                                                        </div>
+                                                                      </div>
                                                             </label>
                                                                 <div class="input-group">
                                                                     <input type="number"
