@@ -268,28 +268,37 @@
                             <!-- dlux wallet tab-->
                             <div role="tabpanel" class="tab-pane fade show active" id="dlux" aria-labelledby="dluxtab">
                                 <div class="container">
-                                    <div class="jumbotron pt-4 bg-darker">
-                                        <div class="d-flex align-items-center pb-2">
-                                            <h1 class="display-5 p-0 m-0">DLUX</h1>
-                                            <div class="text-center small p-0 m-0 ms-4" v-bind:class="{'text-success': behind < 30,
+                                    <div>
+                                        <div class="d-flex align-items-center mt-4 mb-2">
+                                            <div class="d-flex align-items-start">
+                                                <h1 class="m-0">DLUX</h1>
+                                            </div>
+                                            <div class="text-center small m-0 p-2 ms-2" v-bind:class="{'text-success': behind < 30,
                                                     'text-warning': behind >= 30,
                                                     'text-danger': behind > 100}"> <span v-show="behind < 30">ONLINE -
                                                 </span> <span v-show="behind >= 30 && behind <=100">LAGGING
                                                     - </span> <span v-show="behind > 100">OFFLINE -
                                                 </span> <span>{{behind}} Blocks behind HIVE</span></div>
                                         </div>
-                                        <p class="lead ">An open source platform for p2p games, apps, and experiences.
-                                        </p>
-                                        <div class="d-flex" v-if="accountapi.claim > 0 && me">
-                                            <hr class="my-4 bg-light">
-                                            <div class="me-auto">
-                                                <h4 class="">Claim DLUX</h4>
-                                                <p class="text-white-50">Tokens from earnings, delegation, PoB, node
-                                                    rewards, etc.</p>
+                                        <div class="border-bottom border-secondary">
+                                            <p class="lead">An open source platform for p2p games, apps, and
+                                                experiences.
+                                            </p>
+                                        </div>
+                                        <!--claim dlux-->
+                                        <div class="d-flex align-items-center border-bottom border-secondary py-5">
+                                            <div>
+                                                <div class="d-flex align-items-start">
+                                                    <h4 class="m-0">Claim DLUX</h4>
+                                                </div>
+                                                <p class="text-white-50 m-0">Tokens from earnings, delegation, PoB, node
+                                                    rewards, etc.
+                                                </p>
                                             </div>
-                                            <div id="claimdluxbtn" class="text-end d-column">
-                                                <h5 id="dluxclaim" class="text-end">
-                                                    {{formatNumber((accountapi.claim)/1000, 3, '.', ',')}} DLUX</h5>
+                                            <div class="ms-auto text-end">
+                                                <h5>
+                                                    {{formatNumber((accountapi.claim)/1000, 3, '.', ',')}} DLUX
+                                                </h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Claim">
                                                     <button type="submit" class="btn btn-info "
                                                         @click="rewardClaim('dlux', 'claim', dlux2gov)"><i
@@ -316,28 +325,34 @@
                                             </div>
                                         </div>
                                         <!--dlux token-->
-                                        <hr class="my-4 bg-light">
-                                        <div class="clearfix">
-                                            <div class="float-left">
-                                                <h4>DLUX Token</h4>
+                                        <div class="d-flex align-items-center border-bottom border-secondary py-5">
+                                            <div>
+                                                <div class="d-flex align-items-start">
+                                                    <h4>DLUX Token</h4>
+                                                </div>
                                                 <p class="text-white-50">The utility token for content distribution and
-                                                    smart contracts, also called a smart media token (SMT)</p>
+                                                    smart contracts, and NFT creation.</p>
                                             </div>
-                                            <div id="dluxactions" class="float-right text-end">
+                                            <div id="dluxactions" class="ms-auto text-end">
                                                 <h5 id="dluxbalance">
                                                     {{formatNumber((accountapi.balance)/1000, 3, '.', ',')}} DLUX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
-                                                    <modal-vue type="send" token="DLUX" :balance="accountapi.balance"
-                                                        :account="account" @modalsign="sendIt($event)">
-                                                        <button slot="trigger" type="button" class="btn btn-info "><i
-                                                                class="fas fa-paper-plane me-2"></i>Send</button>
+                                                    <button type="button" class="btn btn-info p-0">
+                                                        <modal-vue type="send" token="DLUX"
+                                                            :balance="accountapi.balance" :account="account"
+                                                            @modalsign="sendIt($event)">
+                                                            <span slot="trigger" class="p-2"><i
+                                                                    class="fas fa-paper-plane me-2"></i>Send</button>
                                                     </modal-vue>
+                                                    </button>
+                                                    <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                        disabled></button>
                                                     <div class="btn-group" role="group" v-if="me">
                                                         <button type="button" class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
+                                                        <ul class="dropdown-menu dropdown-menu-dark text-white"
                                                             aria-labelledby="btnGroupDrop1">
                                                             <modal-vue type="power" token="DLUX" func="Power Up" i="-99"
                                                                 :balance="accountapi.balance" :account="account"
@@ -357,16 +372,17 @@
                                                             <a class="dropdown-item" href="/dex/#dlux" id="buylink"><i
                                                                     class="fas fa-coins fa-fw me-2"></i>Buy / Sell
                                                             </a>
-                                                        </div>
+                                                        </ul>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <!--dlux power-->
-                                        <hr class="my-4 bg-light">
-                                        <div class="clearfix">
-                                            <div class="float-left">
-                                                <h4>DLUX Power</h4>
+                                        <div class="d-flex align-items-center border-bottom border-secondary py-5">
+                                            <div>
+                                                <div class="d-flex align-items-start">
+                                                    <h4>DLUX Power</h4>
+                                                </div>
                                                 <p class="text-white-50">Staked tokens (Powered Up) allowing for
                                                     inflationary rewards on new content</p>
                                                 <p class="text-white-50">Benefits of DLUX Power:</p>
@@ -377,7 +393,7 @@
                                                     <li>Instant Power Up | 4 Week Power Down | 1 Week Convert</li>
                                                 </ul>
                                             </div>
-                                            <div id="dluxpactions" class="float-right text-end">
+                                            <div id="dluxpactions" class="ms-auto text-end">
                                                 <h5 id="pwrbalance">
                                                     {{formatNumber((accountapi.poweredUp)/1000, 3, '.', ',')}} DLUX
                                                 </h5>
@@ -386,19 +402,23 @@
                                                     class="text-white" style="text-decoration: none">
                                                     <h6 id="delegatebal">(-0 G)<i class="fas fa-search ms-2"></i></h6>
                                                 </a>
-                                                <div class="btn-group" role="group" aria-label="DLUX Actions">
-                                                    <modal-vue type="delegate" token="DLUX" func="why"
-                                                        :balance="accountapi.poweredUp" :account="account"
-                                                        @modalsign="sendIt($event)">
-                                                        <button type="button" class="btn btn-info " slot="trigger"><i
-                                                                class="fas fa-user-friends fa-fw me-2"></i>Delegate</button>
-                                                    </modal-vue>
+                                                <div class="btn-group" role="group" aria-label="DLUX Power Actions">
+                                                    <button type="button" class="btn btn-info p-0">
+                                                        <modal-vue type="delegate" token="DLUX" func="why"
+                                                            :balance="accountapi.poweredUp" :account="account"
+                                                            @modalsign="sendIt($event)">
+                                                            <span class="p-2" slot="trigger"><i
+                                                                    class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
+                                                        </modal-vue>
+                                                    </button>
+                                                    <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                        disabled></button>
                                                     <div v-if="me" class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
+                                                        <div class="dropdown-menu dropdown-menu-dark text-white"
                                                             aria-labelledby="btnGroupDrop1">
                                                             <modal-vue type="power" token="DLUX" func="Power Down"
                                                                 :balance="accountapi.poweredUp" :account="account"
@@ -440,10 +460,11 @@
                                                 </div>
                                             </div>
                                         </div>-->
-                                        <hr class="my-4 bg-light">
-                                        <div class="">
-                                            <div class="">
-                                                <h4>DLUX Governance</h4>
+                                        <div class="d-flex align-items-center border-bottom border-secondary py-5">
+                                            <div>
+                                                <div class="d-flex align-items-start">
+                                                    <h4>DLUX Governance</h4>
+                                                </div>
                                                 <p class="text-white-50">Locked tokens used to determine concensus and
                                                     earn rewards for running a node</p>
                                                 <p class="text-white-50">Benefits of DLUX Governance:</p>
@@ -454,7 +475,7 @@
                                                     <li>1 Week Lock | 4 Week Unlock | 1 Week Convert</li>
                                                 </ul>
                                             </div>
-                                            <div id="dluxgactions" class="float-right text-end">
+                                            <div id="dluxgactions" class="ms-auto text-end">
                                                 <h5 id="govbalance">
                                                     {{formatNumber((accountapi.gov)/1000, 3, '.', ',')}} DLUX</h5>
                                                 <a data-bs-toggle="collapse" id="escrowtxbutton" href="#escrowtx"
@@ -467,12 +488,14 @@
                                                     <button type="button" class="btn btn-info " disabled
                                                         title="Coming soon!" style="pointer-events: none;"><i
                                                             class="fas fa-balance-scale fa-fw me-2"></i>Measures</button>
+                                                    <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                        disabled></button>
                                                     <div v-if="me" class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
+                                                        <div class="dropdown-menu dropdown-menu-dark text-white"
                                                             aria-labelledby="btnGroupDrop1">
                                                             <modal-vue type="power" token="DLUX" func="Unlock"
                                                                 :balance="accountapi.gov" :account="account"
@@ -495,31 +518,30 @@
                                         <div class="collapse" id="escrowtx">
                                             <hr class="my-2 bg-light">
                                         </div>
-                                        <hr class="my-4 bg-light">
-                                        <div class="clearfix">
-                                            <div class="float-left">
-                                                <h4>Estimated Account Value</h4>
+                                        <div class="d-flex align-items-center border-bottom border-secondary py-5">
+                                            <div>
+                                                <div class="d-flex align-items-start">
+                                                    <h4>Estimated Account Value</h4>
+                                                </div>
                                                 <p class="text-white-50">The approximate US Dollar value for all DLUX in
                                                     your account</p>
                                             </div>
-                                            <div id="dluxval" class="float-right text-end">
+                                            <div id="dluxval" class="ms-auto text-end">
                                                 <h5 id="totaldbal">${{toFixed(dluxval * accountapi.tick *
                                                     hiveprice.hive.usd,2)}}
                                                 </h5>
                                             </div>
                                         </div>
                                     </div>
-                                    <div id="dluxtxs" class="jumbotron pt-3 bg-darker text-white"></div>
                                 </div>
                             </div>
                             <!-- spk wallet tab-->
                             <div role="tabpanel" class="tab-pane fade show " id="spk" aria-labelledby="spktab">
                                 <div class="container">
-                                    <div class="">
+                                    <div>
                                         <div class="d-flex align-items-center mt-4 mb-2">
                                             <div class="d-flex align-items-start">
                                                 <h1 class="m-0">SPK</h1>
-                                                <h4 class="m-0"></h4>
                                             </div>
                                             <div class="text-center small m-0 p-2 ms-2" v-bind:class="{'text-success': larynxbehind < 30,
                                                     'text-warning': larynxbehind >= 30,
@@ -666,8 +688,7 @@
                                                     <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                                                         disabled></button>
                                                     <div class="btn-group" role="group" v-if="me">
-                                                        <button id="btnGroupDrop1" type="button"
-                                                            class="btn btn-info dropdown-toggle"
+                                                        <button type="button" class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
                                                         <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
@@ -1321,7 +1342,8 @@
                                             <div class="d-flex flex-wrap justify-content-between rounded-pill p-3"
                                                 style="background-color: rgba(0,0,0,0.75)" v-if="rnft.qty > 0">
                                                 <button type="button" class="btn btn-primary me-auto ms-auto mt-1"
-                                                    @click="openFT(rnft)">Open<i class="fas fa-box-open ms-2"></i></button>
+                                                    @click="openFT(rnft)">Open<i
+                                                        class="fas fa-box-open ms-2"></i></button>
                                                 <button type="button" class="btn btn-info me-auto ms-auto mt-1"
                                                     data-bs-toggle="modal" data-bs-target="#mintTransferModal"
                                                     @click="mint_detail.set = rnft.set; mint_detail.token = rnft.token">Transfer<i
@@ -1559,8 +1581,9 @@
                                                         <button type="button" class="btn ps-1 pe-1 border-0"
                                                             disabled></button>
                                                         <a href="#itemModal" class="a-1" data-bs-toggle="modal"
-                                                    @click="modalIndex('itemModal', item.setname + ':' + item.uid );itemModal.hidden = false"><button type="button" class="btn btn-dark"><i
-                                                                class="fas fa-exchange-alt me-2"></i>Actions</button></a>
+                                                            @click="modalIndex('itemModal', item.setname + ':' + item.uid );itemModal.hidden = false"><button
+                                                                type="button" class="btn btn-dark"><i
+                                                                    class="fas fa-exchange-alt me-2"></i>Actions</button></a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -2644,10 +2667,14 @@
                                                                         aria-expanded="false"
                                                                         aria-controls="collapseRedeem"><i
                                                                             class="fa-solid fa-fire me-3"></i>MELT<span
-                                                                            class="ms-2 small">({{sets[itemModal.item.token] ?
+                                                                            class="ms-2 small">({{sets[itemModal.item.token]
+                                                                            ?
                                                                             precision(sets[itemModal.item.token][itemModal.item.setname].bond.amount,
-                                                                            sets[itemModal.item.token][itemModal.item.setname].bond.precision) : 0 }}
-                                                                            {{sets[itemModal.item.token]? sets[itemModal.item.token][itemModal.item.setname].bond.token :
+                                                                            sets[itemModal.item.token][itemModal.item.setname].bond.precision)
+                                                                            : 0 }}
+                                                                            {{sets[itemModal.item.token]?
+                                                                            sets[itemModal.item.token][itemModal.item.setname].bond.token
+                                                                            :
                                                                             ''}})</span></button>
                                                                 </h5>
                                                             </div>
@@ -2670,11 +2697,15 @@
                                                                                 </div>
                                                                                 <div class="d-flex no-wrap ms-1"> <u>
                                                                                         <h1>
-                                                                                            {{sets[itemModal.item.token] ?
-                                                                            precision(sets[itemModal.item.token][itemModal.item.setname].bond.amount,
-                                                                            sets[itemModal.item.token][itemModal.item.setname].bond.precision) : 0 }}
-                                                                            {{sets[itemModal.item.token]? sets[itemModal.item.token][itemModal.item.setname].bond.token :
-                                                                            ''}}</h1>
+                                                                                            {{sets[itemModal.item.token]
+                                                                                            ?
+                                                                                            precision(sets[itemModal.item.token][itemModal.item.setname].bond.amount,
+                                                                                            sets[itemModal.item.token][itemModal.item.setname].bond.precision)
+                                                                                            : 0 }}
+                                                                                            {{sets[itemModal.item.token]?
+                                                                                            sets[itemModal.item.token][itemModal.item.setname].bond.token
+                                                                                            :
+                                                                                            ''}}</h1>
                                                                                     </u></div>
                                                                             </div>
                                                                             <div class="pt-2">
