@@ -352,7 +352,7 @@
                                                         <button type="button" class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
-                                                        <ul class="dropdown-menu dropdown-menu-dark text-white"
+                                                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                                             aria-labelledby="btnGroupDrop1">
                                                             <modal-vue type="power" token="DLUX" func="Power Up" i="-99"
                                                                 :balance="accountapi.balance" :account="account"
@@ -418,7 +418,7 @@
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-dark text-white"
+                                                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                                             aria-labelledby="btnGroupDrop1">
                                                             <modal-vue type="power" token="DLUX" func="Power Down"
                                                                 :balance="accountapi.poweredUp" :account="account"
@@ -432,7 +432,7 @@
                                                             <a class="dropdown-item disabled d-none" href="#">
                                                                 <i class="fas fa-random fa-fw me-2"></i>Convert to
                                                                 GOV</a>
-                                                        </div>
+                                                            </ul>
                                                     </div>
                                                     <div v-else class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
@@ -495,7 +495,7 @@
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-dark text-white"
+                                                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                                             aria-labelledby="btnGroupDrop1">
                                                             <modal-vue type="power" token="DLUX" func="Unlock"
                                                                 :balance="accountapi.gov" :account="account"
@@ -510,7 +510,7 @@
                                                                 data-bs-target="#sendDluxModal"><i
                                                                     class="fas fa-random fa-fw me-2"></i>Convert to
                                                                 PWR</a>
-                                                        </div>
+                                                        </ul>
                                                     </div>
                                                 </div>
                                             </div>
@@ -571,17 +571,21 @@
                                                     SPK
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="SPK Actions">
+                                                    <button type="button" class="btn btn-info p-0">
                                                     <modal-vue type="send" token="SPK" :balance="saccountapi.spk"
                                                         :account="account" @modalsign="sendIt($event)">
-                                                        <button slot="trigger" type="button" class="btn btn-info "><i
-                                                                class="fas fa-paper-plane me-2"></i>Send</button>
+                                                        <span slot="trigger" class="p-2"><i
+                                                                class="fas fa-paper-plane me-2"></i>Send</span>
                                                     </modal-vue>
-                                                    <div class="btn-group" role="group" v-if="false">
-                                                        <button id="btnGroupDrop1" type="button"
+                                                    </button>
+                                                    <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                        disabled></button>
+                                                    <div class="btn-group" role="group" v-if="me">
+                                                        <button type="button"
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
+                                                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                                             aria-labelledby="btnGroupDrop1">
                                                             <modal-vue type="power" token="LARYNX" func="Power Up"
                                                                 :balance="saccountapi.balance" :account="account"
@@ -594,7 +598,7 @@
                                                             <div class="dropdown-divider"></div>
                                                             <a class="dropdown-item" href="/dex/larynx" id="buylink"><i
                                                                     class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
-                                                        </div>
+                                                            </ul>
                                                     </div>
                                                 </div>
                                             </div>
@@ -672,8 +676,8 @@
                                                 </div>
                                                 <p class="text-white-50">The mining token for the SPK network.</p>
                                             </div>
-                                            <div id="larynxactions" class="ms-auto text-end">
-                                                <h5 id="larynxbalance">
+                                            <div class="ms-auto text-end">
+                                                <h5>
                                                     {{formatNumber((saccountapi.balance)/1000, 3, '.', ',')}} LARYNX
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="LARYNX Actions">
