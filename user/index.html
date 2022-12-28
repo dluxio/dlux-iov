@@ -432,7 +432,7 @@
                                                             <a class="dropdown-item disabled d-none" href="#">
                                                                 <i class="fas fa-random fa-fw me-2"></i>Convert to
                                                                 GOV</a>
-                                                            </ul>
+                                                        </ul>
                                                     </div>
                                                     <div v-else class="btn-group" role="group">
                                                         <button id="btnGroupDrop1" type="button"
@@ -552,55 +552,64 @@
                                                 </span> <span>{{larynxbehind}} Blocks behind HIVE</span>
                                             </div>
                                             <div id="userNode" class="ms-auto" if="isnode">
-                                                <a class="dropdown btn btn-lg btn-secondary" data-bs-auto-close="outside" href="#" role="button"
-                                                  id="settingsDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                                                  <i class="fas fa-cog"></i></a>
+                                                <a class="dropdown btn btn-lg btn-outline-info"
+                                                    data-bs-auto-close="outside" href="#" role="button"
+                                                    id="settingsDropdownBtn" data-bs-toggle="dropdown"
+                                                    aria-expanded="false">
+                                                    Vote<i class="ms-2 fa-solid fa-person-booth"></i></a>
                                                 <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black dropdown-menu-end"
-                                                  aria-labelledby="settingsDropdownBtn" style="width: 300px">
-                                                  <li>
-                                                    <h6 class="dropdown-header text-center">
-                                                      {{TOKEN}} NODE SETTINGS
-                                                    </h6>
-                                                  </li>
-                                                  <li>
-                                                    <h4 class="text-center text-white-50">@{{account}}</h4>
-                                                  </li>
-                                                  <li>
-                                                    <form name="nodeSettings" class="needs-validation" novalidate>
-                                                      <div class="row mb-3" v-for="opt in features.node.opts">
-                                                        <label :for="opt.json" class="form-label">{{opt.S}}:</label>
-                                                        <div class="input-group">
-                                                          <!-- <div class="input-group-prepend">
-                                                            <div class="input-group-text bg-darkg border-dark text-white-50">https://</div>
-                                                          </div> -->
-                                                          <input v-if="opt.type == 'text'" :type="opt.type" v-model="opt.val"
-                                                            class="form-control bg-darkg border-dark text-info" :id="opt.json"
-                                                            :placeholder="opt.info" />
-                                                          <input v-if="opt.type == 'number'" :type="opt.type" v-model="opt.val"
-                                                            class="form-control bg-darkg border-dark text-info" :id="opt.json" :placeholder="opt.info"
-                                                            :max="opt.max" :min="opt.min" />
-                                                        </div>
-                                                      </div>
-                                                      <!-- <div class="form-group"> <br>
-                                                        <div class="custom-control custom-switch">
-                                                          <input type="checkbox" class="custom-control-input" id="escrowCheck" checked disabled>
-                                                          <label class="custom-control-label" for="escrowCheck">Escrow Agent</label>
-                                                        </div>
-                                                        <div class="custom-control custom-switch">
-                                                          <input type="checkbox" class="custom-control-input" id="mirrorCheck" disabled>
-                                                          <label class="custom-control-label" for="mirrorCheck">Mirror Leader</label>
-                                                        </div>
-                                                      </div> -->
-                                                      <div class="text-center mt-3">
-                                                        <button id="saveSettingsBtn" type="button" class="btn btn-secondary"
-                                                          @click="saveNodeSettings()">
-                                                          Save<i class="far fa-save ms-2"></i>
-                                                        </button>
-                                                      </div>
-                                                    </form>
-                                                  </li>
+                                                    aria-labelledby="settingsDropdownBtn" style="width: 300px">
+                                                    <li>
+                                                        <h6 class="dropdown-header text-center">
+                                                            {{TOKEN}} NODE SETTINGS
+                                                        </h6>
+                                                    </li>
+                                                    <li>
+                                                        <h4 class="text-center text-white-50">@{{account}}</h4>
+                                                    </li>
+                                                    <li>
+                                                        <form name="nodeSettings" class="needs-validation" novalidate>
+                                                            <div class="row mb-3" v-for="opt in features.node.opts">
+                                                                <label :for="opt.json"
+                                                                    class="form-label">{{opt.S}}:</label>
+                                                                <div class="input-group">
+                                                                    <input v-if="opt.type == 'text'" :type="opt.type"
+                                                                        v-model="opt.val"
+                                                                        class="form-control bg-darkg border-dark text-info"
+                                                                        :id="opt.json" :placeholder="opt.info" />
+                                                                    <input v-if="opt.type == 'number'" :type="opt.type"
+                                                                        v-model="opt.val"
+                                                                        class="form-control bg-darkg border-dark text-info"
+                                                                        :id="opt.json" :placeholder="opt.info"
+                                                                        :max="opt.max" :min="opt.min" />
+                                                                </div>
+                                                            </div>
+                                                            <div class="text-center mt-3">
+                                                                <button id="saveSettingsBtn" type="button"
+                                                                    class="btn btn-primary mb-2"
+                                                                    @click="saveNodeSettings()">
+                                                                    Vote<i class="ms-2 fa-solid fa-check-to-slot"></i>
+                                                                </button>
+                                                                <p class="small">Your vote cannot be changed or
+                                                                    cancelled once submitted.</p>
+                                                            </div>
+                                                            <div class="text-start">
+                                                                <p class="lead mb-1">VOTE POWER (VP)</p>
+                                                                <div class="progress mb-2" role="progressbar"
+                                                                    aria-label="Vote Power" aria-valuenow="75"
+                                                                    aria-valuemin="0" aria-valuemax="100">
+                                                                    <div class="progress-bar" style="width: 75%">75%
+                                                                    </div>
+                                                                </div>
+                                                                <ul class="small">
+                                                                    <li>Voting drains VP to 0%</li>
+                                                                    <li>VP recharges over 2 weeks</li>
+                                                                </ul>
+                                                            </div>
+                                                        </form>
+                                                    </li>
                                                 </ul>
-                                              </div>
+                                            </div>
                                         </div>
                                         <div class="border-bottom border-secondary">
                                             <p class="lead">Decentralized and incentivized network infrastructure,
@@ -623,17 +632,16 @@
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="SPK Actions">
                                                     <button type="button" class="btn btn-info p-0">
-                                                    <modal-vue type="send" token="SPK" :balance="saccountapi.spk"
-                                                        :account="account" @modalsign="sendIt($event)">
-                                                        <span slot="trigger" class="p-2"><i
-                                                                class="fas fa-paper-plane me-2"></i>Send</span>
-                                                    </modal-vue>
+                                                        <modal-vue type="send" token="SPK" :balance="saccountapi.spk"
+                                                            :account="account" @modalsign="sendIt($event)">
+                                                            <span slot="trigger" class="p-2"><i
+                                                                    class="fas fa-paper-plane me-2"></i>Send</span>
+                                                        </modal-vue>
                                                     </button>
                                                     <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                                                         disabled></button>
                                                     <div class="btn-group" role="group" v-if="me">
-                                                        <button type="button"
-                                                            class="btn btn-info dropdown-toggle"
+                                                        <button type="button" class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
                                                         <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
@@ -649,7 +657,7 @@
                                                             <div class="dropdown-divider"></div>
                                                             <a class="dropdown-item" href="/dex/larynx" id="buylink"><i
                                                                     class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
-                                                            </ul>
+                                                        </ul>
                                                     </div>
                                                 </div>
                                             </div>
