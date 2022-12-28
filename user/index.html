@@ -561,7 +561,7 @@
                                                     aria-labelledby="settingsDropdownBtn" style="width: 300px">
                                                     <li>
                                                         <h6 class="dropdown-header text-center">
-                                                            {{TOKEN}} VOTE
+                                                            {{tokenGov.title}}
                                                         </h6>
                                                     </li>
                                                     <li>
@@ -569,19 +569,15 @@
                                                     </li>
                                                     <li>
                                                         <form name="nodeSettings" class="needs-validation" novalidate>
-                                                            <div class="row mb-3" v-for="opt in features.node.opts">
+                                                            <div class="row mb-3" v-for="opt in tokenGov.options">
                                                                 <label :for="opt.json"
-                                                                    class="form-label">{{opt.S}}:</label>
+                                                                    class="form-label">{{opt.title}}:</label>
                                                                 <div class="input-group">
-                                                                    <input v-if="opt.type == 'text'" :type="opt.type"
+                                                                    <input :type="number"
                                                                         v-model="opt.val"
                                                                         class="form-control bg-darkg border-dark text-info"
-                                                                        :id="opt.json" :placeholder="opt.info" />
-                                                                    <input v-if="opt.type == 'number'" :type="opt.type"
-                                                                        v-model="opt.val"
-                                                                        class="form-control bg-darkg border-dark text-info"
-                                                                        :id="opt.json" :placeholder="opt.info"
-                                                                        :max="opt.max" :min="opt.min" />
+                                                                        :id="opt.id" 
+                                                                        :max="opt.range_high" :min="opt.range_low" :step="opt.step" />
                                                                 </div>
                                                             </div>
                                                             <div class="text-center mt-3">
