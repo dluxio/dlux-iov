@@ -577,7 +577,7 @@
                                                             <div class="row mb-3" v-for="opt in tokenGov.options">
                                                                 <label :for="opt.json"
                                                                     class="form-label d-flex">{{opt.title}}:
-                                                                    <i v-if="opt.info" class="fa-solid fa-circle-question" :v-tooltip:bottom="opt.info"></i>
+                                                                    <i v-if="opt.info" class="fa-solid fa-circle-question" v-tooltip:bottom="opt.info"></i>
                                                             </label>
                                                                 <div class="input-group">
                                                                     <input type="number"
