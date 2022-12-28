@@ -577,19 +577,15 @@
                                                             <div class="row mb-3" v-for="opt in tokenGov.options">
                                                                 <label :for="opt.json"
                                                                     class="form-label d-flex">{{opt.title}}:
-                                                                    <a href="#" class="ms-auto text-secondary"
-                                                                    data-bs-toggle="tooltip" data-bs-placement="top"
-                                                                    data-bs-custom-class=""
-                                                                    data-bs-title="put text here">
-                                                                    <i class="fa-solid fa-circle-question"></i>
-                                                            </a></label>
+                                                                    <i v-if="opt.infos" class="fa-solid fa-circle-question" :v-tooltip:bottom="opt.info"></i>
+                                                            </label>
                                                                 <div class="input-group">
                                                                     <input type="number"
                                                                         v-model="opt.val"
                                                                         class="form-control bg-darkg border-secondary text-info"
                                                                         :id="opt.id" 
                                                                         :max="opt.range_high" :min="opt.range_low" :step="opt.step" />
-                                                                        <span class="input-group-text bg-darkg border-secondary text-secondary">unit</span>    
+                                                                        <span v-if="opt.unit" class="input-group-text bg-darkg border-secondary text-secondary">{{opt.unit}}</span>    
                                                                 </div>
                                                             </div>
                                                             <div class="text-center mt-3">
