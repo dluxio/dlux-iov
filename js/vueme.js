@@ -76,6 +76,8 @@ Vue.directive('tooltip', {
           placement: binding.arg,
           trigger: 'hover'
       })
+    }
+  })
 
 // createApp({ // vue 3
 var app = new Vue({
