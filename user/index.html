@@ -49,12 +49,6 @@
                                     <div class="d-flex flex-column">
                                         <div class="d-flex">
                                             <p class="display-4 mb-0">{{pageAccount}}</p>
-                                            <a href="#" class="ms-auto text-secondary"
-                                            data-bs-toggle="tooltip" data-bs-placement="top"
-                                            data-bs-custom-class=""
-                                            data-bs-title="put text here">
-                                            <i class="fa-solid fa-circle-question"></i>
-                                    </a>
                                         </div>
                                         <div class="d-flex"><small
                                                 class="lead p-2">{{focus.posting_json_metadata.profile.about}}</small>
@@ -577,23 +571,28 @@
                                                             <div class="row mb-3" v-for="opt in tokenGov.options">
                                                                 <label :for="opt.json"
                                                                     class="form-label d-flex">{{opt.title}}:
-                                                                    <div class="dropdown show d-flex align-items-center p-0 m-0">
-                                                                        <a class="text-white" href="#" role="button" data-bs-toggle="dropdown"
-                                                                          aria-haspopup="true" aria-expanded="false">
-                                                                          <h5 class="m-0"><i class="fas fa-info-circle ms-2"></i></h5></a>
+                                                                    <div
+                                                                        class="dropdown show d-flex align-items-center p-0 m-0">
+                                                                        <a class="text-white" href="#" role="button"
+                                                                            data-bs-toggle="dropdown"
+                                                                            aria-haspopup="true" aria-expanded="false">
+                                                                            <h5 class="m-0"><i
+                                                                                    class="fas fa-info-circle ms-2"></i>
+                                                                            </h5>
+                                                                        </a>
                                                                         <div
-                                                                          class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
-                                                                          <p>{{opt.info}}</p>
+                                                                            class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
+                                                                            <p>{{opt.info}}</p>
                                                                         </div>
-                                                                      </div>
-                                                            </label>
+                                                                    </div>
+                                                                </label>
                                                                 <div class="input-group">
-                                                                    <input type="number"
-                                                                        v-model="opt.val"
+                                                                    <input type="number" v-model="opt.val"
                                                                         class="form-control bg-darkg border-secondary text-info"
-                                                                        :id="opt.id" 
-                                                                        :max="opt.range_high" :min="opt.range_low" :step="opt.step" />
-                                                                        <span v-if="opt.unit" class="input-group-text bg-darkg border-secondary text-secondary">{{opt.unit}}</span>    
+                                                                        :id="opt.id" :max="opt.range_high"
+                                                                        :min="opt.range_low" :step="opt.step" />
+                                                                    <span v-if="opt.unit"
+                                                                        class="input-group-text bg-darkg border-secondary text-secondary">{{opt.unit}}</span>
                                                                 </div>
                                                             </div>
                                                             <div class="text-center mt-3">
@@ -617,7 +616,7 @@
                                                                     <li>Voting will drain VP to 0%</li>
                                                                     <li>Recharge rate: 200,000 blocks</li>
                                                                     <li>Recharge rate: 14 days</li>
-                                                                    
+
                                                                 </ul>
                                                             </div>
                                                         </form>
@@ -4030,12 +4029,6 @@
             <foot-vue />
         </div>
     </div>
-    <script>
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-          return new bootstrap.Tooltip(tooltipTriggerEl)
-        })
-        </script>
     <script>
         (function () {
             "use strict";
