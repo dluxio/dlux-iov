@@ -432,7 +432,7 @@ var app = new Vue({
       tokenGov: {
         title: "SPK VOTE",
         options: [
-          {id:spk_cycle_length,
+          {id:"spk_cycle_length",
           range_low: 28800,
           range_high: 2592000,
           info: "Time in blocks to complete a power down cycle. 4 cycles to completely divest. 28800 blocks per day.",
@@ -440,7 +440,7 @@ var app = new Vue({
           step: 1,
           unit: "Blocks",
           title: "Down Power Period"}, 
-          {id:dex_fee,
+          {id:"dex_fee",
             range_low: 0,
             range_high: 0.01,
             info: "Share of DEX completed DEX trades to allocate over the collateral group.",
@@ -448,7 +448,7 @@ var app = new Vue({
             step: 0.000001,
             unit: "",
             title: "DEX Fee" }, 
-          {id:dex_max,
+          {id:"dex_max",
             range_low: 28800,
             range_high: 2592000,
             info: "Largest open trade size in relation to held collateral.",
@@ -456,7 +456,7 @@ var app = new Vue({
             step: 1,
             unit: "%",
             title: "Max Trade Size" }, 
-          {id:dex_slope,
+          {id:"dex_slope",
             range_low: 0,
             range_high: 100,
             info: "0 Allows any size buy orders to be placed. 1 will disallow large buy orders at low prices.",
@@ -464,7 +464,7 @@ var app = new Vue({
             step: 0.01,
             unit: "%",
             title: "Max Lowball Trade Size" }, 
-          {id:spk_rate_ldel,
+          {id:"spk_rate_ldel",
             range_low: 0.00001, //current lpow
             range_high: 0.0001, //current lgov
             info: "SPK generation rate for delegated LARYNX Power",
@@ -472,7 +472,7 @@ var app = new Vue({
             step: 1,
             unit: "",
             title: "SPK Gen Rate: Delegated" }, 
-          {id:spk_rate_lgov,
+          {id:"spk_rate_lgov",
             range_low: 0.00015, //current ldel
             range_high: 0.01,
             info: "SPK generation rate for Larynx Locked",
@@ -480,7 +480,7 @@ var app = new Vue({
             step: 0.000001,
             unit: "",
             title: "SPK Gen Rate: Locked" }, 
-          {id:spk_rate_lpow,
+          {id:"spk_rate_lpow",
             range_low: 0.000001,
             range_high: 0.00015, //current ldel
             info: "SPK generation rate for undelegated Larynx Power",
@@ -488,7 +488,7 @@ var app = new Vue({
             step: 0.000001,
             unit: "",
             title: "Min SPK Gen Rate: Min" }, 
-          {id:max_coll_members,
+          {id:"max_coll_members",
             range_low: 25,
             range_high: 79,
             info: "The Max number of accounts that can share DEX fees. The richer half of this group controls outflows from the multisig wallet.",
