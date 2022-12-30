@@ -1031,6 +1031,7 @@ var app = new Vue({
           method: "POST",
           body: formdata,
           headers: myHeaders,
+          mode: 'cors',
           //redirect: "follow",
           credentials: 'include',
         };
