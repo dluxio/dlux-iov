@@ -138,7 +138,7 @@
 					<div class="flex-column flex-shrink mx-3">
 						<div style="border-style:solid;">
 							<form>
-								<input id="fileInput" type="file" @change="uploadFile"/>
+								<input id="fileInput" type="file" @change="uploadFile" multiple/>
 								<div @drop="dragFile" style="background-color:green;margin-bottom:10px;padding:10px;">
 									Or drag the file here
 								</div>
