@@ -999,21 +999,25 @@ var app = new Vue({
       }
       return s;
     },
-    validateHeaders(CID) {
+    validateHeaders(contract) {
       return new Promise((res, rej) => {
-        if (CID) {
+        var challenge = `${this.account}|${contract}` 
+        const keys = Object.keys(this.FileInfo);
+        for (var i = 0; i < keys.length; i++) {
+          if(this.FileInfo[keys[i]].hash)challenge += `:${this.FileInfo[keys[i]].hash}`
+        }
           this.toSign = {
             type: "sign_headers",
-            challenge: CID,
+            challenge,
             key: "posting",
             ops: [],
-            callbacks: [res],
+            callbacks: [res, rej],
             txid: "Sign Auth Headers",
           };
-        }
+        
       });
     },
-    upload(cid = 'QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3', contract = {api: 'https://127.0.0.1:5050', id: '1668913215284', sigs: {QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3: '20548a0032e0cf51ba75721743d2ec6fac180f7bc773ce3d77b769d9c4c9fa9dbb7d59503f05be8edcaac00d5d66709b0bce977f3207785913f7fbad2773ae4ac2'}}){
+    upload(cid = 'QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3', contract = {api: 'https://127.0.0.1:5050', id: '1668913215284', sigs: {}, s:10241024, t: 0}){
    
       const ENDPOINTS = {
           UPLOAD: `${contract.api}/upload`,
@@ -1210,7 +1214,7 @@ var app = new Vue({
    }
     },
     uploadAndTrack(name, contract) {
-      this.validateHeaders(this.FileInfo[name].hash).then((headers) => {
+      this.validateHeaders().then((headers) => {
         let uploader = null;
         const setFileElement = (file) => {
           // create file element here
