@@ -2,7 +2,7 @@
 <html lang="en" class="h-100">
 
 <head>
-	<title>DLUX 360° Gallery</title>
+	<title>DLUX SPK Hosting</title>
 	<meta charset="UTF-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -40,87 +40,89 @@
 					<div class="flex-column mb-4 px-3">
 						<div class="flex-row">
 							<h1 class="px-4 font-weight-bold">DLUX</h1>
-							<h1 class="px-4 font-weight-bold" style="font-variant:small-caps;">SPK Network Uploader
+							<h1 class="px-4 font-weight-bold" style="font-variant:small-caps;">File Hosting
 							</h1>
-							<p class="lead">Upload your assets here, and select an available contract for hosting. This
-								will place your files on IPFS.</p>
-
+							<p class="lead">Upload your assets here, and select an available SPK hosting contract to pin
+								your files on IPFS.</p>
+							<ul class="text-center ms-auto me-auto col-md-8 col-lg-6 col-xl-4">
+								<h3><u>Contract Types</u></h3>
+								<li class="text-start">Simple: you pay for hosting</li>
+								<li class="text-start">Sponsored: free hosting with a beneficiary
+									fee</li>
+							</ul>
 							<hr class="bg-light">
 						</div>
 						<div class="flex-row text-start mt-2">
-							<form>
-								<div class="form-group mb-3">
-									<label for="username">Client</label>
-									<div class="input-group">
-										<div class="input-group-prepend">
-											<div class="input-group-text">@</div>
-										</div>
-										<input type="text" class="form-control" readonly id="username"
-											v-model="account">
-									</div>
-								</div>
-								<div class="form-group mb-3">
-									<label for="title">Service Provider</label>
-									<div class="d-flex">
-										<div class="flex-column ">
-											<ul class="text-center ms-auto me-auto">
-												<h3><u>Contract Types</u></h3>
-												<li class="text-start">Simple: you pay for hosting</li>
-												<li class="text-start">Sponsored: free hosting - sets beneficiary fee
-													for HIVE posts</li>
-											</ul>
-										</div>
-										<div class="flex-column ms-auto me-auto">
-											<div class="">
-												<div class="btn-group"><input type="radio" name="buyType" id="buyLimit"
+							<form class="row">
+								<div class="col-md-6">
+									<div class="form-group mb-3">
+										<div class="d-flex align-items-center mb-3">
+											<label for="username">Client</label>
+											<div class="ms-auto" style="visibility: hidden;">
+												<div class="btn-group"><input type="radio" name="" id=""
 														autocomplete="off" checked="checked" class="btn-check"> <label
-														for="buyLimit" class="btn btn-outline-warning">
+														for="" class="btn btn-outline-warning">
 														SIMPLE
-													</label> <input type="radio" name="buyType" id="buyMarket"
-														autocomplete="off" class="btn-check"> <label for="buyMarket"
+													</label> <input type="radio" name="" id="" autocomplete="off"
+														class="btn-check"> <label for=""
 														class="btn btn-outline-warning">
 														SPONSORED
 													</label>
 												</div>
-												<div>
-													<input class="form-control" list="datalistOptions"
-														id="exampleDataList" placeholder="Type to search...">
-													<datalist id="datalistOptions">
-														<option value="San Francisco">
-														<option value="New York">
-														<option value="Seattle">
-														<option value="Los Angeles">
-														<option value="Chicago">
-													</datalist>
-												</div>
-												<div>
-													
+											</div>
+										</div>
+										<div class="input-group">
+											<div class="input-group-prepend">
+												<div class="input-group-text">@</div>
+											</div>
+											<input type="text" class="form-control" readonly id="username"
+												v-model="account">
+										</div>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group mb-3">
+										<div class="d-flex align-items-center mb-3">
+											<label for="title">Service Provider</label>
+											<div class="ms-auto">
+												<div class="btn-group"><input type="radio" name="contractType"
+														id="simple" autocomplete="off" checked="checked"
+														class="btn-check"> <label for="simple"
+														class="btn btn-outline-warning">
+														SIMPLE
+													</label> <input type="radio" name="contractType" id="sponsored"
+														autocomplete="off" class="btn-check"> <label for="sponsored"
+														class="btn btn-outline-warning">
+														SPONSORED
+													</label>
 												</div>
 											</div>
 										</div>
+										<div if="simple.checked">
+											<input class="form-control" list="datalistOptions" id="simpleContracts"
+												placeholder="Type to search...">
+											<datalist id="datalistOptions">
+												<option value="San Francisco"></option>
+												<option value="New York"></option>
+												<option value="Seattle"></option>
+												<option value="Los Angeles"></option>
+												<option value="Chicago"></option>
+											</datalist>
+										</div>
+										<div if="sponsored.checked">
+											<input class="form-control" list="datalistOptions" id="sponsoredContracts"
+												placeholder="Type to search...">
+											<datalist id="datalistOptions">
+												<option value="San Francisco"></option>
+												<option value="New York"></option>
+												<option value="Seattle"></option>
+												<option value="Los Angeles"></option>
+												<option value="Chicago"></option>
+											</datalist>
+										</div>
 									</div>
-									<input type="text" class="form-control" id="title" @blur="permlink();validPost()"
-										placeholder="Enter an attention grabbing title" v-model="postTitle">
-									<small id="permlinkPreview" class="form-text text-muted d-flex"><span id="permlink"
-											class="mr-auto">Permlink: {{postPermlink}}</span></small>
 								</div>
-								<div class="form-group">
-									<label for="description">Post Content:</label>
-									<textarea id="description" :value="postBody" @input="update"></textarea>
-									<div v-html="compiledMarkdown"></div>
-								</div>
-								<div class="form-group">
-									<label for="title">Tags</label>
-									<input type="text" class="form-control" pattern="[-,a-z]+" id="tags"
-										placeholder="tags,look-like,this" v-model="postTags">
-									<small id="tagsHelp" class="form-text text-muted">Add up to 9 tags, comma separated,
-										no spaces</small>
-								</div>
-								<div class="text-center">
-									<button type="button" @click="post()" :disabled="disablePost"
-										class="btn btn-primary" data-toggle="tooltip" data-placement="top"
-										title="Publish Gallery to HIVE">Publish</button>
-								</div>
+
 							</form>
 						</div>
 					</div>
@@ -179,25 +181,8 @@
 			</section>
 		</main>
 	</div>
-
-	<script>
-		const GUTTER_SIZE = 100;
-
-		const gutterStyle = dimension => ({
-			'flex-basis': `${GUTTER_SIZE}px`,
-		});
-
-		const elementStyle = (dimension, size) => ({
-			'flex-basis': `calc(${size}% - ${GUTTER_SIZE}px)`,
-		})
-
-		Split(['#one', '#two', '#three'], {
-			sizes: [350, 350, 600],
-			minSize: 200,
-			elementStyle,
-			gutterStyle
-		});</script>
 	<script src="/js/img-ipfs.js"></script>
+
 	<script>
 		// Example starter JavaScript for disabling form submissions if there are invalid fields
 		(function () {
