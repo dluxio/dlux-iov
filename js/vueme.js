@@ -792,7 +792,7 @@ var app = new Vue({
                 && this.File[i].size == event.currentTarget.File.size
               ) {
                 Hash.of(fileContent).then((hash) => {
-                  const dict = {hash, index:i, size: event.currentTarget.File.size, name: event.currentTarget.File.name, path:e.target.id}
+                  const dict = {hash, index:i, size: event.currentTarget.File.size, name: event.currentTarget.File.name, path:e.target.id, progress: '..........'}
                   this.FileInfo[dict.name] = dict
                   // this.File[i].md5 = hash;
                   // this.File[i].blob = new Blob([fileContent], event.currentTarget.File.name)
@@ -805,7 +805,7 @@ var app = new Vue({
           };
           reader.readAsBinaryString(e.target.files[i]);
           var File = e.target.files[i];
-          // File.pin = true;
+           File.progress = '..........';
           // File.hash = "";
           // File.md5 = ""
           this.File.push(File);
