@@ -20,73 +20,21 @@
 	<script src="https://cdn.jsdelivr.net/npm/@hiveio/hive-js/dist/hive.min.js"></script>
 	<script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
 	<script src="https://unpkg.com/marked@0.3.6"></script>
-    <script src="https://unpkg.com/lodash@4.16.0"></script>
-	<script type="text/javascript" src="/js/onlyhash.js">
-	</script>
-	<style>
-		#img-well {
-			color: #FF7A5A;
-			background: #FCF4D9;
-			border-style: none;
-			border-radius: 10px;
-			border-width: 1.5px;
-			border-color: #FFAB96;
-		}
-
-		#img-well.drag {
-			background: #8ED2C9;
-		}
-
-		.specs {
-			color: #000;
-			border-style: solid;
-			border-width: 1.5px;
-			border-radius: 5px;
-			border-color: #000;
-		}
-
-		.flex {
-			display: flex;
-			flex-direction: row;
-		}
-
-		.gutter {
-			background-repeat: no-repeat;
-			background-position: 50%;
-		}
-
-		.gutter.gutter-horizontal {
-			cursor: col-resize;
-			background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
-		}
-
-		.gutter.gutter-vertical {
-			cursor: row-resize;
-			background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
-		}
-
-		#tags:invalid {
-			background: red;
-		}
-
-		#tags:valid {
-			background: green;
-		}
-	</style>
-
+	<script src="https://unpkg.com/lodash@4.16.0"></script>
+	<script type="text/javascript" src="/js/onlyhash.js"></script>
 	<script src="/js/buffer.js"></script>
 	<script src="/js/drag-drop.js"></script>
 	<script type="module" src="/js/vueme.js"></script>
 </head>
 
-<body class="d-flex flex-column h-100 padme-t70 text-center text-white">
+<body class="container h-100 padme-t70 text-center text-white">
 	<div id="app" @dragover.prevent @drop.prevent>
 		<div>
 			<nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event)"
 				@logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
 				:lapi="lapi" />
 		</div>
-        <main role="main" class="p-3 flex-shrink-0">
+		<main role="main" class="p-3 flex-shrink-0">
 			<section class="flex">
 				<div id="one">
 					<div class="flex-column mb-4 px-3">
@@ -94,12 +42,15 @@
 							<h1 class="px-4 font-weight-bold">DLUX</h1>
 							<h1 class="px-4 font-weight-bold" style="font-variant:small-caps;">SPK Network Uploader
 							</h1>
+							<p class="lead">Upload your assets here, and select an available contract for hosting. This
+								will place your files on IPFS.</p>
+
 							<hr class="bg-light">
 						</div>
-						<div class="flex-row text-left mt-2">
+						<div class="flex-row text-start mt-2">
 							<form>
-								<div class="form-group">
-									<label for="username">Author</label>
+								<div class="form-group mb-3">
+									<label for="username">Client</label>
 									<div class="input-group">
 										<div class="input-group-prepend">
 											<div class="input-group-text">@</div>
@@ -108,8 +59,46 @@
 											v-model="account">
 									</div>
 								</div>
-								<div class="form-group">
-									<label for="title">Title</label>
+								<div class="form-group mb-3">
+									<label for="title">Service Provider</label>
+									<div class="d-flex">
+										<div class="flex-column ">
+											<ul class="text-center ms-auto me-auto">
+												<h3><u>Contract Types</u></h3>
+												<li class="text-start">Simple: you pay for hosting</li>
+												<li class="text-start">Sponsored: free hosting - sets beneficiary fee
+													for HIVE posts</li>
+											</ul>
+										</div>
+										<div class="flex-column ms-auto me-auto">
+											<div class="">
+												<div class="btn-group"><input type="radio" name="buyType" id="buyLimit"
+														autocomplete="off" checked="checked" class="btn-check"> <label
+														for="buyLimit" class="btn btn-outline-warning">
+														SIMPLE
+													</label> <input type="radio" name="buyType" id="buyMarket"
+														autocomplete="off" class="btn-check"> <label for="buyMarket"
+														class="btn btn-outline-warning">
+														SPONSORED
+													</label>
+												</div>
+												<div>
+													<input class="form-control" list="datalistOptions"
+														id="exampleDataList" placeholder="Type to search...">
+													<datalist id="datalistOptions">
+														<option value="San Francisco">
+														<option value="New York">
+														<option value="Seattle">
+														<option value="Los Angeles">
+														<option value="Chicago">
+													</datalist>
+												</div>
+												<div>
+													
+												</div>
+											</div>
+										</div>
+									</div>
 									<input type="text" class="form-control" id="title" @blur="permlink();validPost()"
 										placeholder="Enter an attention grabbing title" v-model="postTitle">
 									<small id="permlinkPreview" class="form-text text-muted d-flex"><span id="permlink"
@@ -118,17 +107,19 @@
 								<div class="form-group">
 									<label for="description">Post Content:</label>
 									<textarea id="description" :value="postBody" @input="update"></textarea>
-      								<div v-html="compiledMarkdown"></div>
+									<div v-html="compiledMarkdown"></div>
 								</div>
 								<div class="form-group">
 									<label for="title">Tags</label>
-									<input type="text" class="form-control" pattern="[-,a-z]+" id="tags" placeholder="tags,look-like,this" v-model="postTags">
+									<input type="text" class="form-control" pattern="[-,a-z]+" id="tags"
+										placeholder="tags,look-like,this" v-model="postTags">
 									<small id="tagsHelp" class="form-text text-muted">Add up to 9 tags, comma separated,
 										no spaces</small>
 								</div>
 								<div class="text-center">
-									<button type="button" @click="post()" :disabled="disablePost" class="btn btn-primary" data-toggle="tooltip"
-										data-placement="top" title="Publish Gallery to HIVE">Publish</button>
+									<button type="button" @click="post()" :disabled="disablePost"
+										class="btn btn-primary" data-toggle="tooltip" data-placement="top"
+										title="Publish Gallery to HIVE">Publish</button>
 								</div>
 							</form>
 						</div>
@@ -138,7 +129,7 @@
 					<div class="flex-column flex-shrink mx-3">
 						<div style="border-style:solid;">
 							<form>
-								<input id="fileInput" type="file" @change="uploadFile" multiple/>
+								<input id="fileInput" type="file" @change="uploadFile" multiple />
 								<div @drop="dragFile" style="background-color:green;margin-bottom:10px;padding:10px;">
 									Or drag the file here
 								</div>
@@ -146,30 +137,49 @@
 						</div>
 						<div id="listOfImgs" v-for="file in File">
 							<div class="p-3 mb-3 bg-dark" style="border-radius: 10px;">
-								<div class="d-flex align-items-center flex-row pb-2 mb-2" style="border-bottom-style: solid; border-bottom-color: #909090">
-									<div class="d-flex"><h6>{{file.name}}</h6></div>
-									<div class="ml-auto"><button type="button" @click="togglePin(index)" class="btn ${btnclass} btn-sm mr-2" data-toggle="tooltip" data-placement="top" title="Asset Pinned to IPFS"><i class="fas fa-fw fa-thumbtack"></i></button><button class="btn btn-danger btn-sm" @click="deleteImg(index)" data-toggle="tooltip" data-placement="top" title="Delete Asset"><i class="fas fa-fw fa-trash-alt"></i></button></div>
+								<div class="d-flex align-items-center flex-row pb-2 mb-2"
+									style="border-bottom-style: solid; border-bottom-color: #909090">
+									<div class="d-flex">
+										<h6>{{file.name}}</h6>
+									</div>
+									<div class="ml-auto"><button type="button" @click="togglePin(index)"
+											class="btn ${btnclass} btn-sm mr-2" data-toggle="tooltip"
+											data-placement="top" title="Asset Pinned to IPFS"><i
+												class="fas fa-fw fa-thumbtack"></i></button><button
+											class="btn btn-danger btn-sm" @click="deleteImg(index)"
+											data-toggle="tooltip" data-placement="top" title="Delete Asset"><i
+												class="fas fa-fw fa-trash-alt"></i></button></div>
 								</div>
 								<div class="d-flex flex-row">
-								<div>
-									<div class="small"><ls><li>Bytes: {{file.size}}</li><li>CID: {{FileInfo[file.name].hash}}</li><li>{{file.progress}}</li></ls></div>
-								</div>
-								<div v-if="FileInfo[file.name].uploaded">
-									<div><img :src="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash" width="100%"/></div>
-									<div class="small"><a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash" target="_blank">https://ipfs.io/ipfs/{{FileInfo[file.name].hash}}</a></div>
-								</div>
-								<div v-if="!FileInfo[file.name].uploaded">
-									<button @click="ipfsUpload(file.name)">Sign and Upload</button>
+									<div>
+										<div class="small">
+											<ls>
+												<li>Bytes: {{file.size}}</li>
+												<li>CID: {{FileInfo[file.name].hash}}</li>
+												<li>{{file.progress}}</li>
+											</ls>
+										</div>
+									</div>
+									<div v-if="FileInfo[file.name].uploaded">
+										<div><img :src="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
+												width="100%" /></div>
+										<div class="small"><a
+												:href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
+												target="_blank">https://ipfs.io/ipfs/{{FileInfo[file.name].hash}}</a>
+										</div>
+									</div>
+									<div v-if="!FileInfo[file.name].uploaded">
+										<button @click="ipfsUpload(file.name)">Sign and Upload</button>
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-				</div>
 			</section>
 		</main>
 	</div>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.3.5/split.min.js"></script>
+
 	<script>
 		const GUTTER_SIZE = 100;
 
@@ -393,38 +403,38 @@
 		}
 
 		function post() {
-				const operations = [["comment",
-					{
-						"parent_author": "",
-						"parent_permlink": "dlux",
-						"author": localStorage.getItem('user'),
-						"permlink": permlink,
-						"title": document.getElementById('title').value,
-						"body": simplemde.value() + `\n***\n#### [View in VR @ dlux.io](https://dlux.io/dlux/@${localStorage.getItem('user')}/${permlink})\n`,
-						"json_metadata": JSON.stringify(custom_json)
-					}],
-				["comment_options",
-					{
-						"author": localStorage.getItem('user'),
-						"permlink": permlink,
-						"max_accepted_payout": "1000000.000 HBD",
-						"percent_hbd": 10000,
-						"allow_votes": true,
-						"allow_curation_rewards": true,
-						"extensions":
-							[[0,
-								{
-									"beneficiaries":
-										[{
-											"account": "dlux-io",
-											"weight": 1000
-										}]
-								}]]
-					}]]
-				hive_keychain.requestBroadcast(localStorage.getItem('user'), operations, 'active', function (response) {
-					console.log(response);
-				});
-			
+			const operations = [["comment",
+				{
+					"parent_author": "",
+					"parent_permlink": "dlux",
+					"author": localStorage.getItem('user'),
+					"permlink": permlink,
+					"title": document.getElementById('title').value,
+					"body": simplemde.value() + `\n***\n#### [View in VR @ dlux.io](https://dlux.io/dlux/@${localStorage.getItem('user')}/${permlink})\n`,
+					"json_metadata": JSON.stringify(custom_json)
+				}],
+			["comment_options",
+				{
+					"author": localStorage.getItem('user'),
+					"permlink": permlink,
+					"max_accepted_payout": "1000000.000 HBD",
+					"percent_hbd": 10000,
+					"allow_votes": true,
+					"allow_curation_rewards": true,
+					"extensions":
+						[[0,
+							{
+								"beneficiaries":
+									[{
+										"account": "dlux-io",
+										"weight": 1000
+									}]
+							}]]
+				}]]
+			hive_keychain.requestBroadcast(localStorage.getItem('user'), operations, 'active', function (response) {
+				console.log(response);
+			});
+
 		}
 	</script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
