@@ -73,6 +73,7 @@ var app = new Vue({
   el: "#app", // vue 2
   data() {
     return {
+      fileRequests: {},
       sets: {},
       disablePost: true,
       File: [],
@@ -1012,40 +1013,185 @@ var app = new Vue({
         }
       });
     },
-    ipfsUpload(name) {
-      this.validateHeaders(this.FileInfo[name].hash).then((headers) => {
-        var formdata = new FormData();
-        console.log(this.FileInfo[name].path)
-        console.log(document.getElementById(this.FileInfo[name].path))
-        formdata.append('file', document.getElementById(this.FileInfo[name].path).files[0]);
-        formdata.append(
-          "path",
-          `/${headers.split(":")[0]}/${headers.split(":")[1]}.${this.account}`
+    upload(cid = 'QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3', contract = {api: 'https://127.0.0.1:5050', id: '1668913215284', sigs: {QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3: '20548a0032e0cf51ba75721743d2ec6fac180f7bc773ce3d77b769d9c4c9fa9dbb7d59503f05be8edcaac00d5d66709b0bce977f3207785913f7fbad2773ae4ac2'}}){
+   
+      const ENDPOINTS = {
+          UPLOAD: `${contract.api}/upload`,
+          UPLOAD_STATUS: `${contract.api}/upload-check`,
+          UPLOAD_REQUEST: `${contract.api}/upload-authorize`
+      };
+      const defaultOptions = {
+          url: ENDPOINTS.UPLOAD,
+          startingByte: 0,
+          cid,
+          onAbort() {},
+          onProgress() {},
+          onError() {},
+          onComplete() {}
+      };
+      const uploadFileChunks = (file, options) => {
+        const formData = new FormData();
+        const req = new XMLHttpRequest();
+        const chunk = file.slice(options.startingByte);
+        
+        formData.append('chunk', chunk, file.name);
+        formData.append('cid', options.cid);
+        
+        req.open('POST', options.url, true);
+        req.setRequestHeader(
+          'Content-Range',    `bytes=${options.startingByte}-${options.startingByte+chunk.size}/${file.size}`
         );
-        for (const value of formdata.values()) {
-          console.log(value);
-        }
-        var myHeaders = new Headers()
-        myHeaders.append("Content-Type", "multipart/form-data")
-        var requestOptions = {
-          method: "POST",
-          body: formdata,
-          headers: myHeaders,
-          mode: 'cors',
-          //redirect: "follow",
-          //credentials: 'include',
+        req.setRequestHeader('X-Cid', options.cid);
+        
+        req.onload = (e) => {
+              if (req.status === 200) {
+                  options.onComplete(e, file);
+              } else {
+                  options.onError(e, file);
+              }
+            };
+        
+        req.upload.onprogress = (e) => {
+          const loaded = options.startingByte + e.loaded;
+          options.onProgress({...e,
+            loaded,
+            total: file.size,
+            percentage: loaded * 100 / file.size
+          }, file);
         };
-        fetch(
-          `https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true&account=${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
-          //`https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true&account=${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
-          requestOptions
-        )
-          .then((response) => {
-            response.text()
-            console.log(response)
+        
+        req.ontimeout = (e) => options.onError(e, file);
+        
+        req.onabort = (e) => options.onAbort(e, file);
+        
+        req.onerror = (e) => options.onError(e, file);
+        
+        this.fileRequests[cid].request = req;
+        
+        req.send(formData);
+      };
+      const uploadFile = (file, options) => {
+        return fetch(ENDPOINTS.UPLOAD_REQUEST, {
+          method: 'GET',
+          headers: {
+              'Content-Type': 'application/json',
+              'sig': contract.sigs[cid],
+              'account': this.account,
+              'contract': contract.id,
+              'cid': cid
+            }
           })
-          .then((result) => console.log(result))
-          .catch((error) => console.log("error", error));
+          .then(res => res.json())
+          .then(res => {
+              options = {...options, ...res};
+              this.fileRequests[cid] =  {request: null, options}
+              uploadFileChunks(file, options);
+          })
+          .catch(e => {
+              options.onError({...e, file})
+      })
+   };
+   const abortFileUpload = (file) => {};
+   const retryFileUpload = (file) => {};
+   const clearFileUpload = (file) => {};
+   const resumeFileUpload = (file) => {
+      const fileReq = this.fileRequests[cid];
+		
+        if (fileReq) {
+      return fetch(
+              `${ENDPOINTS.UPLOAD_STATUS}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'sig': contract.sigs[cid],
+                    'account': this.account,
+                    'contract': contract.id,
+                    'cid': cid
+                  }
+                })
+      .then(res => res.json())
+      .then(res => {
+                uploadFileChunks(
+                  file, 
+                  {
+                      ...fileReq.options, 
+                      startingByte: Number(res.totalChunkUploaded)
+                  }
+                );
+      })
+      .catch(e => {
+                fileReq.options.onError({...e, file})
+      })
+    }
+   };
+   return (files, options = defaultOptions) => {
+      [...files]
+        .forEach(file => {
+            uploadFile(file, {...defaultOptions, ...options})
+        });
+		
+	return {
+	    abortFileUpload,
+            retryFileUpload,
+	    clearFileUpload,
+	    resumeFileUpload
+	};
+   }
+    },
+    uploadAndTrack(name, contract) {
+      this.validateHeaders(this.FileInfo[name].hash).then((headers) => {
+        let uploader = null;
+        const setFileElement = (file) => {
+          // create file element here
+        }
+        const onProgress = (e, file) => {};
+        const onError = (e, file) => {};
+        const onAbort = (e, file) => {};
+        const onComplete = (e, file) => {};
+        return (uploadedFiles) => {
+          [...uploadedFiles].forEach(setFileElement);
+      
+        //append progress box
+        uploader = uploadFiles(uploadedFiles, {
+            onProgress,
+            onError,
+            onAbort,
+            onComplete
+        });
+      }
+        // var formdata = new FormData();
+        // console.log(this.FileInfo[name].path)
+        // console.log(document.getElementById(this.FileInfo[name].path))
+        // formdata.append('file', document.getElementById(this.FileInfo[name].path).files[0]);
+        // formdata.append(
+        //   "path",
+        //   `/${headers.split(":")[0]}/${headers.split(":")[1]}.${this.account}`
+        // );
+        // for (const value of formdata.values()) {
+        //   console.log(value);
+        // }
+        // var myHeaders = new Headers()
+        // myHeaders.append("Content-Type", "multipart/form-data")
+        // var requestOptions = {
+        //   method: "POST",
+        //   body: formdata,
+        //   headers: myHeaders,
+        //   connection: 'keep-alive', 
+        //   mode: 'cors',
+        //   redirect: "follow",
+        //   //credentials: 'include',
+        // };
+        // fetch(
+        //   `https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true&account=${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
+        //   //`https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true&account=${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
+        //   requestOptions
+        // )
+        //   .then((response) => {
+        //     response.text()
+        //     console.log(response)
+        //   })
+        //   .then((result) => console.log(result))
+        //   .catch((error) => console.log("error", error));
       });
     },
     /*

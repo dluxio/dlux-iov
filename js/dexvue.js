@@ -1317,21 +1317,6 @@ var app = new Vue({
           ).toFixed(3);
           this.bargov = (data.gov / 1000).toFixed(3);
           this.accountapi = data;
-          if (
-            data.drop?.last_claim
-              ? new Date().getMonth() + 1 !=
-                  parseInt(data.drop?.last_claim, 16) &&
-                data.drop?.availible.amount > 0
-              : data.drop?.availible.amount > 0
-          ) {
-            this.hasDrop = true;
-            this.dropnai = `${parseFloat(
-              data.drop.availible.amount /
-                Math.pow(10, data.drop.availible.precision)
-            ).toFixed(data.drop.availible.precision)} ${
-              data.drop.availible.token
-            }`;
-          }
           this.openorders = data.contracts.reduce((acc, cur) => {
             cur.nai = `${
               cur.type.split(":")[0] == "hive"
