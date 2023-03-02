@@ -1130,7 +1130,7 @@ var app = new Vue({
         const chunk = file.slice(options.startingByte);
 
         formData.append('chunk', chunk);
-
+        console.log(options)
         req.open('POST', options.url, true);
         req.setRequestHeader(
           'Content-Range', `bytes=${options.startingByte}-${options.startingByte + chunk.size}/${file.size}`
