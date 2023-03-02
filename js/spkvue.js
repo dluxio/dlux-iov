@@ -1176,7 +1176,7 @@ var app = new Vue({
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'X-Sig': contract.sigfo,
+            'X-Sig': options.contract.sigfo,
             'X-Account': this.account,
             'X-Contract': options.contract.id,
             'X-Cid': options.cid,
