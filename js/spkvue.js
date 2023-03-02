@@ -1180,15 +1180,13 @@ var app = new Vue({
             'X-Account': this.account,
             'X-Contract': options.contract.id,
             'X-Cid': options.cid,
-            'X-Files': options.contract.cids,
+            'X-Files': options.cids,
             'X-Chain': 'HIVE'
           }
         })
           .then(res => res.json())
           .then(res => {
-            console.log({options})
             options = { ...options, ...res };
-            console.log({options})
             this.fileRequests[options.cid] = { request: null, options }
             uploadFileChunks(file, options);
           })
