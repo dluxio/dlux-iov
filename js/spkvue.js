@@ -848,6 +848,7 @@ var app = new Vue({
     },
     dragFile(e) {
       console.log(e)
+      e.preventDefault();
       for (var i = 0; i < e.dataTransfer.files.length; i++) {
         var reader = new FileReader();
         reader.File = e.dataTransfer.files[i]
