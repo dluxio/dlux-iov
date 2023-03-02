@@ -1180,7 +1180,7 @@ var app = new Vue({
             'X-Account': this.account,
             'X-Contract': options.contract.id,
             'X-Cid': options.cid,
-            'X-Files': options.cids,
+            'X-Files': options.contract.files,
             'X-Chain': 'HIVE'
           }
         })
