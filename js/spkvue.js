@@ -1132,12 +1132,12 @@ var app = new Vue({
           // updateFileElement(fileObj);
         },
         onComplete(e,f) {
+          console.log('options.onComplete', e, f)
           this.File[this.FileInfo[f.name].index].actions.pause = false
           this.File[this.FileInfo[f.name].index].actions.resume = false
           this.File[this.FileInfo[f.name].index].actions.cancel = false
           this.FileInfo[f.name].progress = 1
           this.FileInfo[f.name].status = 'done'
-          console.log('options.onComplete', e, f)
           
         }
       };
