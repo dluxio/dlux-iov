@@ -44,24 +44,26 @@
 							</h1>
 							<p class="lead">Upload your assets here, and select an available SPK hosting contract to pin
 								your files on IPFS.</p>
-							<ul class="text-center ms-auto me-auto col-md-8 col-lg-6 col-xl-4">
-								<h3><u>Contract Types</u></h3>
-								<li class="text-start">Direct: you pay for hosting</li>
-								<li class="text-start">Sponsored: free hosting + beneficiary
-									fee</li>
-							</ul>
+
 							<hr class="bg-light">
 						</div>
-						<div class="flex-row text-start mt-2">
-							<form class="row">
-								<div class="col-md-6">
+						<div class="mt-2">
+							<form>
+								<ul class="text-center ms-auto me-auto col-md-8 col-lg-6 col-xl-4">
+									<h3><u>Contract Types</u></h3>
+									<li class="text-start">Direct: you pay for hosting</li>
+									<li class="text-start">Sponsored: free hosting + beneficiary
+										fee</li>
+								</ul>
+								<div class="col-md-6 ms-auto me-auto">
+
 									<div class="form-group mb-3">
 										<div class="d-flex align-items-center mb-3">
 											<label for="username">Client</label>
 											<div class="ms-auto" style="visibility: hidden;">
 												<div class="btn-group"><input type="radio" name="" id=""
-														autocomplete="off" checked="checked" class="btn-check"> <label
-														for="" class="btn btn-outline-warning">
+														autocomplete="off" checked="checked" class="btn-check">
+													<label for="" class="btn btn-outline-warning">
 														SIMPLE
 													</label> <input type="radio" name="" id="" autocomplete="off"
 														class="btn-check"> <label for=""
@@ -72,26 +74,29 @@
 											</div>
 										</div>
 										<div class="input-group">
-											
-												<span class="input-group-text bg-darkg border-secondary text-white-50 l-radius-hotfix">@</span>
-											
-											<input type="text" class="form-control bg-darkg border-secondary text-info" readonly id="username"
-												v-model="account">
+
+											<span
+												class="input-group-text bg-darkg border-secondary text-white-50 l-radius-hotfix">@</span>
+
+											<input type="text" class="form-control bg-darkg border-secondary text-info"
+												readonly id="username" v-model="account">
 										</div>
 									</div>
-								</div>
-								<div class="col-md-6">
+
 									<div class="form-group mb-3">
 										<div class="d-flex align-items-center mb-3">
 											<label for="title">Provider</label>
 											<div class="ms-auto">
-												<div class="btn-group"><input type="radio" name="contractType" @click="simple.checked = true; sponsored.checked = false"
-														id="simple" autocomplete="off" checked="checked" 
+												<div class="btn-group"><input type="radio" name="contractType"
+														@click="simple.checked = true; sponsored.checked = false"
+														id="simple" autocomplete="off" checked="checked"
 														class="btn-check" :checked="simple.checked"> <label for="simple"
 														class="btn btn-outline-warning">
 														DIRECT
-													</label> <input type="radio" name="contractType" id="sponsored" @click="simple.checked = false; sponsored.checked = true"
-														autocomplete="off" class="btn-check" :checked="sponsored.checked"> <label for="sponsored"
+													</label> <input type="radio" name="contractType" id="sponsored"
+														@click="simple.checked = false; sponsored.checked = true"
+														autocomplete="off" class="btn-check"
+														:checked="sponsored.checked"> <label for="sponsored"
 														class="btn btn-outline-warning">
 														SPONSORED
 													</label>
@@ -99,7 +104,8 @@
 											</div>
 										</div>
 										<div v-if="simple.checked">
-											<input class="form-control bg-darkg border-secondary text-info" list="datalistOptions1" id="simpleContracts"
+											<input class="form-control bg-darkg border-secondary text-info"
+												list="datalistOptions1" id="simpleContracts"
 												placeholder="Type to search direct contracts...">
 											<datalist id="datalistOptions1">
 												<option value="High"></option>
@@ -109,7 +115,8 @@
 											</datalist>
 										</div>
 										<div v-if="sponsored.checked">
-											<input class="form-control bg-darkg border-secondary text-info" list="datalistOptions2" id="sponsoredContracts"
+											<input class="form-control bg-darkg border-secondary text-info"
+												list="datalistOptions2" id="sponsoredContracts"
 												placeholder="Type to search sponsored contracts...">
 											<datalist id="datalistOptions2">
 												<option value="San Francisco"></option>
@@ -120,17 +127,12 @@
 											</datalist>
 										</div>
 									</div>
-								</div>
-								<div>
-									<!-- v-if=provider selected -->
-									<h5>Terms</h5>
-									<ls>
-										<li>10% Rate</li>
-										<li>@account bennif</li>
-										<li>1 month</li>
-										<li>10 GB</li>
-										<li>1000 Broca</li>
-									</ls>
+
+
+									<div>
+										<!-- v-if=provider selected -->
+										<p class="text-start text-white-50 small">By submitting you agree to grant @account 10% beneficiary rewards for one month in exchange for 10 GB of storage valued at 1000 BROCA.</p>
+									</div>
 								</div>
 							</form>
 						</div>
@@ -170,9 +172,15 @@
 											<ls>
 												<li>Bytes: {{file.size}}</li>
 												<li>CID: {{FileInfo[file.name].hash}}</li>
-												<li><div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
-													<div class="progress-bar" :style="'width: ' + FileInfo[file.progress]*100 + '%'">{{file.progress*100}}%</div>
-												  </div></li>
+												<li>
+													<div class="progress" role="progressbar"
+														aria-label="Example with label" aria-valuenow="25"
+														aria-valuemin="0" aria-valuemax="100">
+														<div class="progress-bar"
+															:style="'width: ' + FileInfo[file.progress]*100 + '%'">
+															{{file.progress*100}}%</div>
+													</div>
+												</li>
 											</ls>
 										</div>
 									</div>
