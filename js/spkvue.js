@@ -858,6 +858,7 @@ var app = new Vue({
               && this.File[i].size == event.currentTarget.File.size
             ) {
               Hash.of(fileContent).then(hash => {
+                console.log('hereasdasd')
                 const dict = { hash, index: i, size: event.currentTarget.File.size, name: event.currentTarget.File.name }
                 this.FileInfo[dict.name] = dict
                 // this.File[i].md5 = hash 
