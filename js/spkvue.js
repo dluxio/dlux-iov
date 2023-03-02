@@ -1171,14 +1171,14 @@ var app = new Vue({
         req.send(formData);
       };
       const uploadFile = (file, options) => {
-        console.log('Uploading', options.cid)
+        console.log('Uploading', options)
         return fetch(ENDPOINTS.UPLOAD_REQUEST, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             'X-Sig': contract.sigfo,
             'X-Account': this.account,
-            'X-Contract': contract.id,
+            'X-Contract': options.contract.id,
             'X-Cid': options.cid,
             'X-Files': options.cids,
             'X-Chain': 'HIVE'
