@@ -822,7 +822,7 @@ var app = new Vue({
               this.File[i].name == event.currentTarget.File.name
               && this.File[i].size == event.currentTarget.File.size
             ) {
-              Hash.of(fileContent, {unixfs: UnixFS}).then((hash) => {
+              Hash.of(fileContent, {unixfs: 'UnixFS'}).then((hash) => {
                 const dict = { hash, index: i, size: event.currentTarget.File.size, name: event.currentTarget.File.name, path: e.target.id, progress: 0 }
                 this.FileInfo[dict.name] = dict
                 // this.File[i].md5 = hash;
