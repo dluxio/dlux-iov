@@ -1171,7 +1171,7 @@ var app = new Vue({
         req.send(formData);
       };
       const uploadFile = (file, options) => {
-        console.log('Uploading', options)
+        console.log('Uploading', options.contract)
         return fetch(ENDPOINTS.UPLOAD_REQUEST, {
           method: 'GET',
           headers: {
