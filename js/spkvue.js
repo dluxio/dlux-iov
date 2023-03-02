@@ -1091,6 +1091,7 @@ var app = new Vue({
         url: ENDPOINTS.UPLOAD,
         startingByte: 0,
         cid: null,
+        cids: `${this.account}:${contract.id},${cids.join(',')}`,
         onAbort() {
           console.log('options.onAbort')
           // const fileObj = files.get(file);
@@ -1137,6 +1138,7 @@ var app = new Vue({
         req.setRequestHeader('X-Contract', options.contract.id);
         req.setRequestHeader('X-Sig', options.contract.fosig);
         req.setRequestHeader('X-Account', this.account);
+        req.setRequestHeader('X-Files', options.cids);
 
 
         req.onload = (e) => {
