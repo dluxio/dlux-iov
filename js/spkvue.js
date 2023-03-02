@@ -1039,7 +1039,10 @@ var app = new Vue({
     },
     signNUpload() {
       console.log(this.contract.id)
-      var header = `${this.account}|${this.contract.id}`, body = ""
+      var header = this.account
+      header += '|',
+      header += this.contract.id
+      var body = ""
       var names = Object.keys(this.FileInfo)
       for(var i = 0; i < names.length; i++){
         body += `,${this.FileInfo[names[i]].hash}`
