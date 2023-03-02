@@ -194,9 +194,9 @@
 										</div>
 									</div>
 									<div v-if="File.length">
-										<button v-if="file.actions.pause" @click="pause(file.cid)">Pause</button>
-										<button v-if="file.actions.resume" @click="resume(file.cid)">Resume</button>
-										<button v-if="file.actions.cancel" @click="abort(file.cid)">Cancel</button>
+										<button v-if="file.actions.pause" @click="fileRequest[file.index].resumeFileUpload()">Pause</button>
+										<button v-if="file.actions.resume" @click="fileRequest[file.index].resumeFileUpload()">Resume</button>
+										<button v-if="file.actions.cancel" @click="fileRequest[file.index].resumeFileUpload()">Cancel</button>
 										<h5 >{{FileInfo[file.name].status}}</h5>
 									</div>
 								</div>
