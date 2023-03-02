@@ -1092,6 +1092,7 @@ var app = new Vue({
         startingByte: 0,
         cid: null,
         onAbort() {
+          console.log('options.onAbort')
           // const fileObj = files.get(file);
 
           // fileObj.status = FILE_STATUS.PAUSED;
@@ -1099,6 +1100,7 @@ var app = new Vue({
           // updateFileElement(fileObj);
         },
         onProgress() {
+          console.log('options.onProgress')
           // const fileObj = files.get(file);
 
           // fileObj.status = FILE_STATUS.UPLOADING;
@@ -1108,6 +1110,7 @@ var app = new Vue({
           // updateFileElement(fileObj);
         },
         onError() {
+          console.log('options.onError')
           // const fileObj = files.get(file);
 
           // fileObj.status = FILE_STATUS.FAILED;
@@ -1116,12 +1119,7 @@ var app = new Vue({
           // updateFileElement(fileObj);
         },
         onComplete() {
-          const fileObj = files.get(file);
-
-          fileObj.status = FILE_STATUS.COMPLETED;
-          fileObj.percentage = 100;
-
-          updateFileElement(fileObj);
+          console.log('options.onComplete')
         }
       };
       const uploadFileChunks = (file, options) => {
@@ -1267,6 +1265,12 @@ var app = new Vue({
             })
         }
       };
+      [...files]
+          .forEach(file => {
+            console.log(file)
+            options.cid = file.cid
+            uploadFile(file, options)
+          });
       return (files, options = defaultOptions) => {
         [...files]
           .forEach(file => {
