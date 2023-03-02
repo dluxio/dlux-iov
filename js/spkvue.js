@@ -1090,7 +1090,7 @@ var app = new Vue({
       const defaultOptions = {
         url: ENDPOINTS.UPLOAD,
         startingByte: 0,
-        cid,
+        cid: null,
         onAbort() {
           // const fileObj = files.get(file);
 
