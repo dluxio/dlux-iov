@@ -1111,7 +1111,7 @@ var app = new Vue({
           this.File[this.FileInfo[f.name].index].actions.resume = false
           this.File[this.FileInfo[f.name].index].actions.cancel = true
           // const fileObj = files.get(file);
-
+          this.FileInfo[f.name].status = 'uploading'
           // fileObj.status = FILE_STATUS.UPLOADING;
           // fileObj.percentage = e.percentage;
           // fileObj.uploadedChunkSize = e.loaded;
@@ -1121,7 +1121,7 @@ var app = new Vue({
         onError(e,f) {
           console.log('options.onError', e, f)
           // const fileObj = files.get(file);
-
+          this.FileInfo[f.name].status = '!!ERROR!!'
           // fileObj.status = FILE_STATUS.FAILED;
           // fileObj.percentage = 100;
 
@@ -1132,6 +1132,7 @@ var app = new Vue({
           this.File[this.FileInfo[f.name].index].actions.resume = false
           this.File[this.FileInfo[f.name].index].actions.cancel = false
           this.FileInfo[f.name].progress = 1
+          this.FileInfo[f.name].status = 'done'
           console.log('options.onComplete', e, f)
           
         }

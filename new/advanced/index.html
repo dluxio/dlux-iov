@@ -197,7 +197,7 @@
 										<button v-if="file.actions.pause" @click="pause(file.cid)">Pause</button>
 										<button v-if="file.actions.resume" @click="resume(file.cid)">Resume</button>
 										<button v-if="file.actions.cancel" @click="abort(file.cid)">Cancel</button>
-										<h3>Complete</h3>
+										<h5 >{{FileInfo[file.name].status}}</h5>
 									</div>
 								</div>
 							</div>
