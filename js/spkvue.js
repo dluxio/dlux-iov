@@ -1112,6 +1112,7 @@ var app = new Vue({
           this.File[this.FileInfo[f.name].index].actions.pause = true
           this.File[this.FileInfo[f.name].index].actions.resume = false
           this.File[this.FileInfo[f.name].index].actions.cancel = true
+          this.File[this.FileInfo[f.name].index].progress = e.percentage
           // const fileObj = files.get(file);
           this.FileInfo[f.name].status = 'uploading'
           // fileObj.status = FILE_STATUS.UPLOADING;
@@ -1161,7 +1162,7 @@ var app = new Vue({
 
         req.onload = (e) => {
           if (req.status === 200) {
-            options.onComplete(e, file).bind(this);
+            options.onComplete(e, file);
           } else {
             options.onError(e, file);
           }
@@ -1174,14 +1175,14 @@ var app = new Vue({
             loaded,
             total: file.size,
             percentage: loaded * 100 / file.size
-          }, file).bind(this);
+          }, file);
         };
 
-        req.ontimeout = (e) => options.onError(e, file).bind(this);
+        req.ontimeout = (e) => options.onError(e, file);
 
-        req.onabort = (e) => options.onAbort(e, file).bind(this);
+        req.onabort = (e) => options.onAbort(e, file);
 
-        req.onerror = (e) => options.onError(e, file).bind(this);
+        req.onerror = (e) => options.onError(e, file);
 
         this.fileRequests[options.cid].request = req;
 
