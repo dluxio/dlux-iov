@@ -169,7 +169,7 @@
 								<div class="d-flex flex-row">
 									<div>
 										<div class="small">
-											<ls>
+											<ul>
 												<li>Bytes: {{file.size}}</li>
 												<li>CID: {{FileInfo[file.name].hash}}</li>
 												<li>
@@ -181,7 +181,7 @@
 															{{file.progress*100}}%</div>
 													</div>
 												</li>
-											</ls>
+											</ul>
 										</div>
 									</div>
 									<div v-if="FileInfo[file.name].uploaded">
