@@ -144,7 +144,7 @@
 						<div style="border-style:solid;">
 							<form>
 								<input id="fileInput" type="file" @change="uploadFile" multiple />
-								<div style="background-color:green;margin-bottom:10px;padding:10px;" id="img-well" @drop="dragFile()" @drop.prevent="dropLink" @dragenter.prevent @dragover.prevent>
+								<div style="background-color:green;margin-bottom:10px;padding:10px;" id="img-well" @drop="dragFile($event)" >
 									Or drag the file here
 								</div>
 							</form>
