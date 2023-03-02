@@ -852,7 +852,6 @@ var app = new Vue({
       for (var i = 0; i < e.dataTransfer.files.length; i++) {
         var reader = new FileReader();
         reader.File = e.dataTransfer.files[i]
-        var found = false
         reader.onload = (event) => {
           const fileContent = event.target.result;
           for (var i = 0; i < this.File.length; i++) {
@@ -1110,7 +1109,6 @@ var app = new Vue({
         },
         onProgress(e,f) {
           console.log(e, f)
-          options.b
           this.File[this.FileInfo[f.name].index].actions.pause = true
           this.File[this.FileInfo[f.name].index].actions.resume = false
           this.File[this.FileInfo[f.name].index].actions.cancel = true
