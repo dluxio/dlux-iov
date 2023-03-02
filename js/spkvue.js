@@ -1173,10 +1173,11 @@ var app = new Vue({
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'sig': contract.sigfo,
-            'account': this.account,
-            'contract': contract.id,
-            'cid': options.cid
+            'X-Sig': contract.sigfo,
+            'X-Account': this.account,
+            'X-Contract': contract.id,
+            'X-Cid': options.cid,
+            'X-Chain': 'HIVE'
           }
         })
           .then(res => res.json())
