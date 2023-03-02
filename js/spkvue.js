@@ -1107,6 +1107,9 @@ var app = new Vue({
         onProgress(e,f) {
           console.log(e, f)
           options.b
+          this.File[this.FileInfo[f.name].index].actions.pause = true
+          this.File[this.FileInfo[f.name].index].actions.resume = false
+          this.File[this.FileInfo[f.name].index].actions.cancel = true
           // const fileObj = files.get(file);
 
           // fileObj.status = FILE_STATUS.UPLOADING;
@@ -1125,6 +1128,10 @@ var app = new Vue({
           // updateFileElement(fileObj);
         },
         onComplete(e,f) {
+          this.File[this.FileInfo[f.name].index].actions.pause = false
+          this.File[this.FileInfo[f.name].index].actions.resume = false
+          this.File[this.FileInfo[f.name].index].actions.cancel = false
+          this.FileInfo[f.name].progress = 1
           console.log('options.onComplete', e, f)
           
         }

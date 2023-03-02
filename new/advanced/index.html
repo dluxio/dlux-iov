@@ -178,7 +178,7 @@
 														aria-label="Example with label" aria-valuenow="25"
 														aria-valuemin="0" aria-valuemax="100">
 														<div class="progress-bar"
-															:style="'width: ' + FileInfo[file.progress]*100 + '%'">
+															:style="'width: ' + FileInfo[file.name].progress *100 + '%'">
 															{{file.progress*100}}%</div>
 													</div>
 												</li>
@@ -197,6 +197,7 @@
 										<button v-if="file.actions.pause" @click="pause(file.cid)">Pause</button>
 										<button v-if="file.actions.resume" @click="resume(file.cid)">Resume</button>
 										<button v-if="file.actions.cancel" @click="abort(file.cid)">Cancel</button>
+										<h3>Complete</h3>
 									</div>
 								</div>
 							</div>
