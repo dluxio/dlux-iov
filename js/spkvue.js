@@ -1048,7 +1048,7 @@ var app = new Vue({
         body += `,${this.FileInfo[names[i]].hash}`
       }
       this.contract.files = body
-      this.signText(body).then(res=>{
+      this.signText(header + body).then(res=>{
         console.log({res})
         this.contract.fosig = res.split(":")[1]
         for(var i = 0; i < names.length; i++){
