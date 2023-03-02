@@ -1267,10 +1267,10 @@ var app = new Vue({
             })
         }
       };
-      console.log({files})
       return (files, options = defaultOptions) => {
         [...files]
           .forEach(file => {
+            console.log(file)
             options.cid = file.cid
             uploadFile(file, options)
           });
