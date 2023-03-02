@@ -859,27 +859,27 @@ var app = new Vue({
               this.File[i].name == event.currentTarget.File.name
               && this.File[i].size == event.currentTarget.File.size
             ) {
-              found = true
+              Hash.of(fileContent).then(hash => {
+                console.log('hereasdasd')
+                const dict = { hash, index: i, size: event.currentTarget.File.size, name: event.currentTarget.File.name }
+                this.FileInfo[dict.name] = dict
+                // this.File[i].md5 = hash 
+                // this.File[i].blob = fileContent; 
+                // const file = this.File[i];
+                //  this.File.splice(i, 1, file);
+              })
             }
           }
-          if (!found) {
-            Hash.of(fileContent).then(hash => {
-              console.log('hereasdasd')
-              const dict = { hash, index: i, size: event.currentTarget.File.size, name: event.currentTarget.File.name }
-              this.FileInfo[dict.name] = dict
-              // this.File[i].md5 = hash 
-              // this.File[i].blob = fileContent; 
-              // const file = this.File[i];
-              //  this.File.splice(i, 1, file);
-            })
-            
-          }
+          
         };
         reader.readAsBinaryString(e.dataTransfer.files[i]);
         var File = e.dataTransfer.files[i];
-        // File.pin = true;
-        // File.hash = "";
-        // File.md5 = ""
+        File.progress = 0;
+        File.actions = {
+          cancel: true,
+          pause: false,
+          resume: false,
+        }
         this.File.push(File);
       }
     },
