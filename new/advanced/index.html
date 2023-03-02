@@ -86,12 +86,12 @@
 											<label for="title">Provider</label>
 											<div class="ms-auto">
 												<div class="btn-group"><input type="radio" name="contractType"
-														id="simple" autocomplete="off" checked="checked" v-model="simple.checked"
+														id="simple" autocomplete="off" @clicked="!sponsored.checked;simple.checked" checked="checked" v-model="simple.checked"
 														class="btn-check"> <label for="simple"
 														class="btn btn-outline-warning">
 														SIMPLE
 													</label> <input type="radio" name="contractType" id="sponsored"
-														autocomplete="off" class="btn-check" v-model="sponsored.checked"> <label for="sponsored"
+														autocomplete="off" class="btn-check" @clicked="sponsored.checked;!simple.checked" v-model="sponsored.checked"> <label for="sponsored"
 														class="btn btn-outline-warning">
 														SPONSORED
 													</label>
