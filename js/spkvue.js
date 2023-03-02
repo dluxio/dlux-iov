@@ -1097,13 +1097,16 @@ var app = new Vue({
         onAbort(e,f) {
           console.log('options.onAbort')
           // const fileObj = files.get(file);
-
+          this.File = []
+          this.FileInfo = {}
+          this.fileRequests = {}
           // fileObj.status = FILE_STATUS.PAUSED;
 
           // updateFileElement(fileObj);
         },
         onProgress(e,f) {
-          console.log('options.onProgress')
+          console.log(e, f)
+          options.b
           // const fileObj = files.get(file);
 
           // fileObj.status = FILE_STATUS.UPLOADING;
@@ -1122,7 +1125,8 @@ var app = new Vue({
           // updateFileElement(fileObj);
         },
         onComplete(e,f) {
-          console.log('options.onComplete')
+          console.log('options.onComplete', e, f)
+          
         }
       };
       const uploadFileChunks = (file, options) => {
