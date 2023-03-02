@@ -1161,7 +1161,7 @@ var app = new Vue({
 
         req.onload = (e) => {
           if (req.status === 200) {
-            options.onComplete(e, file);
+            options.onComplete(e, file).bind(this);
           } else {
             options.onError(e, file);
           }
@@ -1174,14 +1174,14 @@ var app = new Vue({
             loaded,
             total: file.size,
             percentage: loaded * 100 / file.size
-          }, file);
+          }, file).bind(this);
         };
 
-        req.ontimeout = (e) => options.onError(e, file);
+        req.ontimeout = (e) => options.onError(e, file).bind(this);
 
-        req.onabort = (e) => options.onAbort(e, file);
+        req.onabort = (e) => options.onAbort(e, file).bind(this);
 
-        req.onerror = (e) => options.onError(e, file);
+        req.onerror = (e) => options.onError(e, file).bind(this);
 
         this.fileRequests[options.cid].request = req;
 
