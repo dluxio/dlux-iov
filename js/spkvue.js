@@ -1090,6 +1090,7 @@ var app = new Vue({
       const defaultOptions = {
         url: ENDPOINTS.UPLOAD,
         startingByte: 0,
+        contract: contract,
         cid: null,
         cids: `${this.account}:${contract.id},${cids.join(',')}`,
         onAbort(e,f) {
