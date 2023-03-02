@@ -1092,7 +1092,7 @@ var app = new Vue({
         startingByte: 0,
         cid: null,
         cids: `${this.account}:${contract.id},${cids.join(',')}`,
-        onAbort() {
+        onAbort(e,f) {
           console.log('options.onAbort')
           // const fileObj = files.get(file);
 
@@ -1100,7 +1100,7 @@ var app = new Vue({
 
           // updateFileElement(fileObj);
         },
-        onProgress() {
+        onProgress(e,f) {
           console.log('options.onProgress')
           // const fileObj = files.get(file);
 
@@ -1110,8 +1110,8 @@ var app = new Vue({
 
           // updateFileElement(fileObj);
         },
-        onError() {
-          console.log('options.onError')
+        onError(e,f) {
+          console.log('options.onError', e, f)
           // const fileObj = files.get(file);
 
           // fileObj.status = FILE_STATUS.FAILED;
@@ -1119,7 +1119,7 @@ var app = new Vue({
 
           // updateFileElement(fileObj);
         },
-        onComplete() {
+        onComplete(e,f) {
           console.log('options.onComplete')
         }
       };
