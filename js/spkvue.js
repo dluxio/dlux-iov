@@ -1166,7 +1166,7 @@ var app = new Vue({
 
         req.onerror = (e) => options.onError(e, file);
 
-        this.fileRequests[cid].request = req;
+        this.fileRequests[options.cid].request = req;
 
         req.send(formData);
       };
