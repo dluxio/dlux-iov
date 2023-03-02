@@ -1113,6 +1113,7 @@ var app = new Vue({
         req.setRequestHeader('X-Cid', options.cid);
         req.setRequestHeader('X-Contract', options.contract.id);
         req.setRequestHeader('X-Sig', options.contract.fosig);
+        req.setRequestHeader('X-Account', this.account);
         
 
         req.onload = (e) => {
@@ -1147,7 +1148,7 @@ var app = new Vue({
           method: 'GET',
           headers: {
               'Content-Type': 'application/json',
-              'sig': contract.sigs[cid],
+              'sig': contract.sigfo,
               'account': this.account,
               'contract': contract.id,
               'cid': cid
@@ -3178,7 +3179,7 @@ function tradeFTreject(setname, uid, callback){
     this.getFeedPrice();
     this.getSapi(this.pageAccount, false);
     this.getTokenUser(this.pageAccount, false);
-    this.getNFTs();
+    //this.getNFTs();
     //deepLink();
   },
   watch: {
