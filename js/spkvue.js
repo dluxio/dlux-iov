@@ -1186,6 +1186,7 @@ var app = new Vue({
         })
           .then(res => res.json())
           .then(res => {
+            console.log({options})
             options = { ...options, ...res };
             this.fileRequests[options.cid] = { request: null, options }
             uploadFileChunks(file, options);
