@@ -834,7 +834,7 @@ var app = new Vue({
             }
           }
         };
-        reader.readAsBinaryString(e.target.files[i]);
+        reader.readAsArrayBuffer(e.target.files[i]);
         var File = e.target.files[i];
         File.progress = 0;
         File.actions = {
@@ -872,7 +872,7 @@ var app = new Vue({
           }
           
         };
-        reader.readAsBinaryString(e.dataTransfer.files[i]);
+        reader.readAsArrayBuffer(e.dataTransfer.files[i]);
         var File = e.dataTransfer.files[i];
         File.progress = 0;
         File.actions = {
