@@ -75,7 +75,14 @@ var app = new Vue({
     return {
       fileRequests: {},
       sets: {},
-      contract: {api: 'https://ipfs.dlux.io', id: '1668913215284', test: '', files: '', sigs: {}, s:10485760, t: 0},
+      contract: {
+        api: 'https://ipfs.dlux.io', 
+        id: '1668913215284', 
+        files: '', 
+        fosig: '', //file-owner
+        spsig: '', //service-provider 
+        s:10485760, 
+        t: 0},
       simple:{
         checked: false,
       },
