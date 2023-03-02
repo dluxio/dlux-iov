@@ -811,8 +811,12 @@ var app = new Vue({
           };
           reader.readAsBinaryString(e.target.files[i]);
           var File = e.target.files[i];
-           File.progress = 0;
-          // File.hash = "";
+            File.progress = 0;
+            File.actions = {
+              cancel: true,
+              pause: false,
+              resume: false,
+            }
           // File.md5 = ""
           this.File.push(File);
         }
