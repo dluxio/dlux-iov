@@ -76,14 +76,15 @@ var app = new Vue({
       fileRequests: {},
       sets: {},
       contract: {
-        api: 'https://ipfs.dlux.io', 
-        id: '1668913215284', 
-        files: '', 
+        api: 'https://ipfs.dlux.io',
+        id: '1668913215284',
+        files: '',
         fosig: '', //file-owner
         spsig: '', //service-provider 
-        s:10485760, 
-        t: 0},
-      simple:{
+        s: 10485760,
+        t: 0
+      },
+      simple: {
         checked: false,
       },
       sponsored: {
@@ -447,70 +448,86 @@ var app = new Vue({
       tokenGov: {
         title: "SPK VOTE",
         options: [
-          {id:"spk_cycle_length",
-          range_low: 28800,
-          range_high: 2592000,
-          info: "Time in blocks to complete a power down cycle. 4 cycles to completely divest. 28800 blocks per day.",
-          val: 200000,
-          step: 1,
-          unit: "Blocks",
-          title: "Down Power Period"}, 
-          {id:"dex_fee",
+          {
+            id: "spk_cycle_length",
+            range_low: 28800,
+            range_high: 2592000,
+            info: "Time in blocks to complete a power down cycle. 4 cycles to completely divest. 28800 blocks per day.",
+            val: 200000,
+            step: 1,
+            unit: "Blocks",
+            title: "Down Power Period"
+          },
+          {
+            id: "dex_fee",
             range_low: 0,
             range_high: 0.01,
             info: "Share of DEX completed DEX trades to allocate over the collateral group.",
             val: 0.00505,
             step: 0.000001,
             unit: "",
-            title: "DEX Fee" }, 
-          {id:"dex_max",
+            title: "DEX Fee"
+          },
+          {
+            id: "dex_max",
             range_low: 28800,
             range_high: 2592000,
             info: "Largest open trade size in relation to held collateral.",
             val: 97.38,
             step: 1,
             unit: "%",
-            title: "Max Trade Size" }, 
-          {id:"dex_slope",
+            title: "Max Trade Size"
+          },
+          {
+            id: "dex_slope",
             range_low: 0,
             range_high: 100,
             info: "0 Allows any size buy orders to be placed. 1 will disallow large buy orders at low prices.",
             val: 48.02,
             step: 0.01,
             unit: "%",
-            title: "Max Lowball Trade Size" }, 
-          {id:"spk_rate_ldel",
+            title: "Max Lowball Trade Size"
+          },
+          {
+            id: "spk_rate_ldel",
             range_low: 0.00001, //current lpow
             range_high: 0.0001, //current lgov
             info: "SPK generation rate for delegated LARYNX Power",
             val: 0.00015,
             step: 1,
             unit: "",
-            title: "SPK Gen Rate: Delegated" }, 
-          {id:"spk_rate_lgov",
+            title: "SPK Gen Rate: Delegated"
+          },
+          {
+            id: "spk_rate_lgov",
             range_low: 0.00015, //current ldel
             range_high: 0.01,
             info: "SPK generation rate for Larynx Locked",
             val: 0.001,
             step: 0.000001,
             unit: "",
-            title: "SPK Gen Rate: Locked" }, 
-          {id:"spk_rate_lpow",
+            title: "SPK Gen Rate: Locked"
+          },
+          {
+            id: "spk_rate_lpow",
             range_low: 0.000001,
             range_high: 0.00015, //current ldel
             info: "SPK generation rate for undelegated Larynx Power",
             val: 0.0001,
             step: 0.000001,
             unit: "",
-            title: "Min SPK Gen Rate: Min" }, 
-          {id:"max_coll_members",
+            title: "Min SPK Gen Rate: Min"
+          },
+          {
+            id: "max_coll_members",
             range_low: 25,
             range_high: 79,
             info: "The Max number of accounts that can share DEX fees. The richer half of this group controls outflows from the multisig wallet.",
             val: 25,
             step: 1,
             unit: "Accounts",
-            title: "Size of collateral group"}
+            title: "Size of collateral group"
+          }
         ]
       },
       features: {
@@ -795,53 +812,53 @@ var app = new Vue({
     },
     uploadFile(e) {
       console.log(e)
-        for (var i = 0; i < e.target.files.length; i++) {
-          var reader = new FileReader();
-          reader.File = e.target.files[i]
-          reader.onload = (event) => {
-            const fileContent = event.target.result;
-            for(var i = 0; i < this.File.length; i++){
-              if (
-                this.File[i].name == event.currentTarget.File.name
-                && this.File[i].size == event.currentTarget.File.size
-              ) {
-                Hash.of(fileContent).then((hash) => {
-                  const dict = {hash, index:i, size: event.currentTarget.File.size, name: event.currentTarget.File.name, path:e.target.id, progress: 0}
-                  this.FileInfo[dict.name] = dict
-                  // this.File[i].md5 = hash;
-                  // this.File[i].blob = new Blob([fileContent], event.currentTarget.File.name)
-                  const file = this.File[i];
-                  this.File.splice(i, 1, file);
-                });
-                break
-              }
+      for (var i = 0; i < e.target.files.length; i++) {
+        var reader = new FileReader();
+        reader.File = e.target.files[i]
+        reader.onload = (event) => {
+          const fileContent = event.target.result;
+          for (var i = 0; i < this.File.length; i++) {
+            if (
+              this.File[i].name == event.currentTarget.File.name
+              && this.File[i].size == event.currentTarget.File.size
+            ) {
+              Hash.of(fileContent).then((hash) => {
+                const dict = { hash, index: i, size: event.currentTarget.File.size, name: event.currentTarget.File.name, path: e.target.id, progress: 0 }
+                this.FileInfo[dict.name] = dict
+                // this.File[i].md5 = hash;
+                // this.File[i].blob = new Blob([fileContent], event.currentTarget.File.name)
+                const file = this.File[i];
+                this.File.splice(i, 1, file);
+              });
+              break
             }
-          };
-          reader.readAsBinaryString(e.target.files[i]);
-          var File = e.target.files[i];
-            File.progress = 0;
-            File.actions = {
-              cancel: true,
-              pause: false,
-              resume: false,
-            }
-          // File.md5 = ""
-          this.File.push(File);
+          }
+        };
+        reader.readAsBinaryString(e.target.files[i]);
+        var File = e.target.files[i];
+        File.progress = 0;
+        File.actions = {
+          cancel: true,
+          pause: false,
+          resume: false,
         }
-      },
+        // File.md5 = ""
+        this.File.push(File);
+      }
+    },
     dragFile(e) {
       for (var i = 0; i < e.dataTransfer.files.length; i++) {
         var reader = new FileReader();
         reader.File = e.dataTransfer.files[i]
         reader.onload = (event) => {
           const fileContent = event.target.result;
-          for(var i = 0; i < this.File.length; i++){
+          for (var i = 0; i < this.File.length; i++) {
             if (
               this.File[i].name == event.currentTarget.File.name
               && this.File[i].size == event.currentTarget.File.size
             ) {
-              Hash.of(fileContent).then(hash=>{
-                const dict = {hash, index:i, size: event.currentTarget.File.size, name: event.currentTarget.File.name}
+              Hash.of(fileContent).then(hash => {
+                const dict = { hash, index: i, size: event.currentTarget.File.size, name: event.currentTarget.File.name }
                 this.FileInfo[dict.name] = dict
                 // this.File[i].md5 = hash 
                 // this.File[i].blob = fileContent; 
@@ -860,86 +877,86 @@ var app = new Vue({
         this.File.push(File);
       }
     },
-    togglePin(index){
+    togglePin(index) {
       this.File[index].pin = !this.File[index].pin;
     },
-    deleteImg (index){
+    deleteImg(index) {
       this.File.splice(index, 1)
     },
-    getContractMarket(){
+    getContractMarket() {
       //fetch contract market
       fetch(this.sapi)
-      .then(res => res.json())
-      .then(res => {
-        this.contractMarket = res.upload_providers ? res.upload_providers : [{n:'regardspk', u:'https://regardspk.com', }]
-      })
+        .then(res => res.json())
+        .then(res => {
+          this.contractMarket = res.upload_providers ? res.upload_providers : [{ n: 'regardspk', u: 'https://regardspk.com', }]
+        })
     },
-    validPost(){
+    validPost() {
       var valid = true
-      if(!this.postPermlink)valid = false
+      if (!this.postPermlink) valid = false
       if (!this.postTitle) valid = false;
       if (!this.postBody) valid = false;
       if (!this.postCustom_json.assets.length) valid = false;
       this.disablePost = !valid
     },
     permlink(text) {
-			if (text) {
-				text.replace(/[\W_]+/g, '-').replace(' ', '-').toLowerCase()
-				text = text.replace(' ', '-')
-				text = text.replace(/[\W_]+/g, '')
-				text = text.toLowerCase()
-				this.postPermlink = text
-			} else {
-				text = this.postTitle
-				text = text.replace(' ', '-')
-				text = text.replace(/[\W_]+/g, '-')
-				text = text.toLowerCase()
-				this.postPermlink = text;
-			}
-		},
+      if (text) {
+        text.replace(/[\W_]+/g, '-').replace(' ', '-').toLowerCase()
+        text = text.replace(' ', '-')
+        text = text.replace(/[\W_]+/g, '')
+        text = text.toLowerCase()
+        this.postPermlink = text
+      } else {
+        text = this.postTitle
+        text = text.replace(' ', '-')
+        text = text.replace(/[\W_]+/g, '-')
+        text = text.toLowerCase()
+        this.postPermlink = text;
+      }
+    },
     post() {
-			var tags = this.postTags.toLowerCase().split(',')
-			this.postCustom_json.tags = ['dlux']
-			for (i = 0; i < tags.length; i++) {
-				if (tags[i] != 'dlux') {
-					this.postCustom_json.tags.push(tags[i].replace(/[\W_]+/g, "-"));
-				}
-			}
-			console.log(custom_json.tags)
-			if (this.account) {
-				const operations = [["comment",
-					{
-						"parent_author": "",
-						"parent_permlink": "dlux",
-						"author": this.account,
-						"permlink": this.postPermlink,
-						"title": this.postTitle,
-						"body": simplemde.value() + `\n***\n#### [View in VR @ dlux.io](https://dlux.io/dlux/@${this.account}/${this.postPermlink})\n`,
-						"json_metadata": JSON.stringify(this.postCustom_json)
-					}],
-				["comment_options",
-					{
-						"author": this.account,
-						"permlink": this.postPermlink,
-						"max_accepted_payout": "1000000.000 HBD",
-						"percent_hbd": 10000,
-						"allow_votes": true,
-						"allow_curation_rewards": true,
-						"extensions":
-							[[0,
-								{
-									"beneficiaries":
-										[{
-											"account": "dlux-io",
-											"weight": 1000
-										}]
-								}]]
-					}]]
-				hive_keychain.requestBroadcast(localStorage.getItem('user'), operations, 'active', function (response) {
-					console.log(response);
-				});
-			}
-		},
+      var tags = this.postTags.toLowerCase().split(',')
+      this.postCustom_json.tags = ['dlux']
+      for (i = 0; i < tags.length; i++) {
+        if (tags[i] != 'dlux') {
+          this.postCustom_json.tags.push(tags[i].replace(/[\W_]+/g, "-"));
+        }
+      }
+      console.log(custom_json.tags)
+      if (this.account) {
+        const operations = [["comment",
+          {
+            "parent_author": "",
+            "parent_permlink": "dlux",
+            "author": this.account,
+            "permlink": this.postPermlink,
+            "title": this.postTitle,
+            "body": simplemde.value() + `\n***\n#### [View in VR @ dlux.io](https://dlux.io/dlux/@${this.account}/${this.postPermlink})\n`,
+            "json_metadata": JSON.stringify(this.postCustom_json)
+          }],
+        ["comment_options",
+          {
+            "author": this.account,
+            "permlink": this.postPermlink,
+            "max_accepted_payout": "1000000.000 HBD",
+            "percent_hbd": 10000,
+            "allow_votes": true,
+            "allow_curation_rewards": true,
+            "extensions":
+              [[0,
+                {
+                  "beneficiaries":
+                    [{
+                      "account": "dlux-io",
+                      "weight": 1000
+                    }]
+                }]]
+          }]]
+        hive_keychain.requestBroadcast(localStorage.getItem('user'), operations, 'active', function (response) {
+          console.log(response);
+        });
+      }
+    },
     getSetDetailsColors(script) {
       let r = "chartreuse,lawngreen";
       const s = this.baseScript[script];
@@ -953,9 +970,9 @@ var app = new Vue({
       }
       return `linear-gradient(${r})`;
     },
-    update: _.debounce(function(e) {
-            this.postBody = e.target.value;
-          }, 300),
+    update: _.debounce(function (e) {
+      this.postBody = e.target.value;
+    }, 300),
     breakIt(it, reset) {
       if (reset) {
         this.SL = [];
@@ -1027,14 +1044,14 @@ var app = new Vue({
     },
     signText(challenge) {
       return new Promise((res, rej) => {
-          this.toSign = {
-            type: "sign_headers",
-            challenge,
-            key: "posting",
-            ops: [],
-            callbacks: [res, rej],
-            txid: "Sign Auth Headers",
-          };
+        this.toSign = {
+          type: "sign_headers",
+          challenge,
+          key: "posting",
+          ops: [],
+          callbacks: [res, rej],
+          txid: "Sign Auth Headers",
+        };
       });
     },
     signNUpload() {
@@ -1042,217 +1059,229 @@ var app = new Vue({
       var header = `${this.contract.id}`
       var body = ""
       var names = Object.keys(this.FileInfo)
-      for(var i = 0; i < names.length; i++){
+      for (var i = 0; i < names.length; i++) {
         body += `,${this.FileInfo[names[i]].hash}`
       }
       this.contract.files = body
-      this.signText(header + body).then(res=>{
-        console.log({res})
+      this.signText(header + body).then(res => {
+        console.log({ res })
         this.contract.fosig = res.split(":")[1]
-        for(var i = 0; i < names.length; i++){
+        for (var i = 0; i < names.length; i++) {
           this.upload(this.FileInfo[names[i]].hash, this.contract)
         }
       })
-    }, 
-    upload(cid = ['QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3'], contract = {api: 'https://ipfs.dlux.io', id: '1668913215284', sigs: {}, s:10485760, t: 0}){
-   
+    },
+    upload(cids = ['QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3'], contract = { api: 'https://ipfs.dlux.io', id: '1668913215284', sigs: {}, s: 10485760, t: 0 }) {
+      var files = []
+      for (var name in this.FileInfo) {
+        for (var i = 0; i < cids.length; i++) {
+          if (this.FileInfo[name].hash == cids[i]) {
+            this.File[this.FileInfo[name].index].cid = cids[i]
+            files.push(this.File[this.FileInfo[name].index])
+            break;
+          }
+        }
+      }
       const ENDPOINTS = {
-          UPLOAD: `${contract.api}/upload`,
-          UPLOAD_STATUS: `${contract.api}/upload-check`,
-          UPLOAD_REQUEST: `${contract.api}/upload-authorize`
+        UPLOAD: `${contract.api}/upload`,
+        UPLOAD_STATUS: `${contract.api}/upload-check`,
+        UPLOAD_REQUEST: `${contract.api}/upload-authorize`
       };
       const defaultOptions = {
-          url: ENDPOINTS.UPLOAD,
-          startingByte: 0,
-          cid,
-          onAbort() {
-            // const fileObj = files.get(file);
-		
-            // fileObj.status = FILE_STATUS.PAUSED;
-                
-            // updateFileElement(fileObj);
-          },
-          onProgress() {
-            // const fileObj = files.get(file);
-		
-            // fileObj.status = FILE_STATUS.UPLOADING;
-            // fileObj.percentage = e.percentage;
-            // fileObj.uploadedChunkSize = e.loaded;
-                
-            // updateFileElement(fileObj);
-          },
-          onError() {
-            // const fileObj = files.get(file);
-		
-            // fileObj.status = FILE_STATUS.FAILED;
-            // fileObj.percentage = 100;
-                
-            // updateFileElement(fileObj);
-          },
-          onComplete() {
-            const fileObj = files.get(file);
-		
-            fileObj.status = FILE_STATUS.COMPLETED;
-            fileObj.percentage = 100;
-                
-            updateFileElement(fileObj);
-          }
+        url: ENDPOINTS.UPLOAD,
+        startingByte: 0,
+        cid,
+        onAbort() {
+          // const fileObj = files.get(file);
+
+          // fileObj.status = FILE_STATUS.PAUSED;
+
+          // updateFileElement(fileObj);
+        },
+        onProgress() {
+          // const fileObj = files.get(file);
+
+          // fileObj.status = FILE_STATUS.UPLOADING;
+          // fileObj.percentage = e.percentage;
+          // fileObj.uploadedChunkSize = e.loaded;
+
+          // updateFileElement(fileObj);
+        },
+        onError() {
+          // const fileObj = files.get(file);
+
+          // fileObj.status = FILE_STATUS.FAILED;
+          // fileObj.percentage = 100;
+
+          // updateFileElement(fileObj);
+        },
+        onComplete() {
+          const fileObj = files.get(file);
+
+          fileObj.status = FILE_STATUS.COMPLETED;
+          fileObj.percentage = 100;
+
+          updateFileElement(fileObj);
+        }
       };
       const uploadFileChunks = (file, options) => {
         const formData = new FormData();
         const req = new XMLHttpRequest();
         const chunk = file.slice(options.startingByte);
-        
-        formData.append('chunk', chunk, file.name);
-        formData.append('', options.cid);
-        
+
+        formData.append('chunk', chunk);
+
         req.open('POST', options.url, true);
         req.setRequestHeader(
-          'Content-Range',    `bytes=${options.startingByte}-${options.startingByte+chunk.size}/${file.size}`
+          'Content-Range', `bytes=${options.startingByte}-${options.startingByte + chunk.size}/${file.size}`
         );
         req.setRequestHeader('X-Cid', options.cid);
         req.setRequestHeader('X-Contract', options.contract.id);
         req.setRequestHeader('X-Sig', options.contract.fosig);
         req.setRequestHeader('X-Account', this.account);
-        
+
 
         req.onload = (e) => {
-              if (req.status === 200) {
-                  options.onComplete(e, file);
-              } else {
-                  options.onError(e, file);
-              }
-            };
-        
+          if (req.status === 200) {
+            options.onComplete(e, file);
+          } else {
+            options.onError(e, file);
+          }
+        };
+
         req.upload.onprogress = (e) => {
           const loaded = options.startingByte + e.loaded;
-          options.onProgress({...e,
+          options.onProgress({
+            ...e,
             loaded,
             total: file.size,
             percentage: loaded * 100 / file.size
           }, file);
         };
-        
+
         req.ontimeout = (e) => options.onError(e, file);
-        
+
         req.onabort = (e) => options.onAbort(e, file);
-        
+
         req.onerror = (e) => options.onError(e, file);
-        
+
         this.fileRequests[cid].request = req;
-        
+
         req.send(formData);
       };
       const uploadFile = (file, options) => {
+        console.log('Uploading', options.cid)
         return fetch(ENDPOINTS.UPLOAD_REQUEST, {
           method: 'GET',
           headers: {
+            'Content-Type': 'application/json',
+            'sig': contract.sigfo,
+            'account': this.account,
+            'contract': contract.id,
+            'cid': cid
+          }
+        })
+          .then(res => res.json())
+          .then(res => {
+            options = { ...options, ...res };
+            this.fileRequests[cid] = { request: null, options }
+            uploadFileChunks(file, options);
+          })
+          .catch(e => {
+            options.onError({ ...e, file })
+          })
+      };
+      const abortFileUpload = (file) => {
+        const fileReq = fileRequests.get(file);
+
+        if (fileReq && fileReq.request) {
+          fileReq.request.abort();
+          return true;
+        }
+
+        return false;
+      };
+      const retryFileUpload = (file) => {
+        const fileReq = fileRequests.get(file);
+
+        if (fileReq) {
+          // try to get the status just in case it failed mid upload
+          return fetch(
+            `${ENDPOINTS.UPLOAD_STATUS}?fileName=${file.name}&fileId=${fileReq.options.fileId}`)
+            .then(res => res.json())
+            .then(res => {
+              // if uploaded we continue
+              uploadFileChunks(
+                file,
+                {
+                  ...fileReq.options,
+                  startingByte: Number(res.totalChunkUploaded)
+                }
+              );
+            })
+            .catch(() => {
+              // if never uploaded we start
+              uploadFileChunks(file, fileReq.options)
+            })
+        }
+      };
+      const clearFileUpload = (file) => {
+        const fileReq = fileRequests.get(file);
+
+        if (fileReq) {
+          abortFileUpload(file)
+          fileRequests.delete(file);
+
+          return true;
+        }
+
+        return false;
+      };
+      const resumeFileUpload = (file) => {
+        const fileReq = this.fileRequests[cid];
+
+        if (fileReq) {
+          return fetch(
+            `${ENDPOINTS.UPLOAD_STATUS}`, {
+            method: 'GET',
+            headers: {
               'Content-Type': 'application/json',
-              'sig': contract.sigfo,
+              'sig': contract.fosig,
               'account': this.account,
               'contract': contract.id,
               'cid': cid
             }
           })
-          .then(res => res.json())
-          .then(res => {
-              options = {...options, ...res};
-              this.fileRequests[cid] =  {request: null, options}
-              uploadFileChunks(file, options);
-          })
-          .catch(e => {
-              options.onError({...e, file})
-      })
-   };
-   const abortFileUpload = (file) => {
-    const fileReq = fileRequests.get(file);
-		
-    if (fileReq && fileReq.request) {
-	fileReq.request.abort();
-	return true;
-    }
-		
-    return false;
-   };
-   const retryFileUpload = (file) => {
-    const fileReq = fileRequests.get(file);
-		
-    if (fileReq) {
-        // try to get the status just in case it failed mid upload
-	return fetch(
-           `${ENDPOINTS.UPLOAD_STATUS}?fileName=${file.name}&fileId=${fileReq.options.fileId}`)
-	.then(res => res.json())
-	.then(res => { 
-            // if uploaded we continue
-            uploadFileChunks(
-               file, 
-               {
-                  ...fileReq.options, 
+            .then(res => res.json())
+            .then(res => {
+              uploadFileChunks(
+                file,
+                {
+                  ...fileReq.options,
                   startingByte: Number(res.totalChunkUploaded)
-               }
-            );
-	})
-	.catch(() => { 
-            // if never uploaded we start
-            uploadFileChunks(file, fileReq.options)
-	})
-    }
-   };
-   const clearFileUpload = (file) => {
-    const fileReq = fileRequests.get(file);
-		
-    if (fileReq) {
-	abortFileUpload(file)
-	fileRequests.delete(file);
-			
-	return true;
-    }
-		
-    return false;
-   };
-   const resumeFileUpload = (file) => {
-      const fileReq = this.fileRequests[cid];
-		
-        if (fileReq) {
-      return fetch(
-              `${ENDPOINTS.UPLOAD_STATUS}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'sig': contract.sigs[cid],
-                    'account': this.account,
-                    'contract': contract.id,
-                    'cid': cid
-                  }
-                })
-      .then(res => res.json())
-      .then(res => {
-                uploadFileChunks(
-                  file, 
-                  {
-                      ...fileReq.options, 
-                      startingByte: Number(res.totalChunkUploaded)
-                  }
-                );
-      })
-      .catch(e => {
-                fileReq.options.onError({...e, file})
-      })
-    }
-   };
-   return (files, options = defaultOptions) => {
-      [...files]
-        .forEach(file => {
-            uploadFile(file, {...defaultOptions, ...options})
-        });
-		
-	return {
-	    abortFileUpload,
-            retryFileUpload,
-	    clearFileUpload,
-	    resumeFileUpload
-	};
-   }
+                }
+              );
+            })
+            .catch(e => {
+              fileReq.options.onError({ ...e, file })
+            })
+        }
+      };
+      console.log({files})
+      return (files, options = defaultOptions) => {
+        [...files]
+          .forEach(file => {
+            options.cid = file.cid
+            uploadFile(file, options)
+          });
+
+        return {
+          abortFileUpload,
+          retryFileUpload,
+          clearFileUpload,
+          resumeFileUpload
+        };
+      }
     },
     uploadAndTrack(name, contract) {
       this.signText().then((headers) => {
@@ -1260,21 +1289,21 @@ var app = new Vue({
         const setFileElement = (file) => {
           // create file element here
         }
-        const onProgress = (e, file) => {};
-        const onError = (e, file) => {};
-        const onAbort = (e, file) => {};
-        const onComplete = (e, file) => {};
+        const onProgress = (e, file) => { };
+        const onError = (e, file) => { };
+        const onAbort = (e, file) => { };
+        const onComplete = (e, file) => { };
         return (uploadedFiles) => {
           [...uploadedFiles].forEach(setFileElement);
-      
-        //append progress box
-        uploader = uploadFiles(uploadedFiles, {
+
+          //append progress box
+          uploader = uploadFiles(uploadedFiles, {
             onProgress,
             onError,
             onAbort,
             onComplete
-        });
-      }
+          });
+        }
         // var formdata = new FormData();
         // console.log(this.FileInfo[name].path)
         // console.log(document.getElementById(this.FileInfo[name].path))
@@ -1377,11 +1406,9 @@ function giveFT(setname, to, qty, callback){
         type: "cja",
         cj: cja,
         id: `${this.prefix}ft_transfer`,
-        msg: `Trying to give ${parseInt(this.giveFTqty)} ${
-          this.mint_detail.set
-        } mint token${parseInt(this.giveFTqty) > 1 ? "s" : ""} to ${
-          this.giveFTusername
-        }`,
+        msg: `Trying to give ${parseInt(this.giveFTqty)} ${this.mint_detail.set
+          } mint token${parseInt(this.giveFTqty) > 1 ? "s" : ""} to ${this.giveFTusername
+          }`,
         ops: ["getTokenUser", "getUserNFTs"],
         api: this.apiFor(this.prefix),
         txid: `${this.prefix} _ft_transfer`,
@@ -1485,8 +1512,8 @@ function tradeFTreject(setname, uid, callback){
 
     openFT(item) {
       var cja = {
-          set: item.set,
-        },
+        set: item.set,
+      },
         type = "cja";
       this.toSign = {
         type,
@@ -1501,9 +1528,9 @@ function tradeFTreject(setname, uid, callback){
 
     acceptFT(item) {
       var cja = {
-          set: item.set,
-          uid: item.uid,
-        },
+        set: item.set,
+        uid: item.uid,
+      },
         type = "cja";
       this.toSign = {
         type,
@@ -1519,9 +1546,9 @@ function tradeFTreject(setname, uid, callback){
     rejectFT(item) {
       console.log({ item });
       var cja = {
-          set: item.set,
-          uid: item.uid,
-        },
+        set: item.set,
+        uid: item.uid,
+      },
         type = "cja";
       this.toSign = {
         type,
@@ -1543,27 +1570,27 @@ function tradeFTreject(setname, uid, callback){
           profile_image: `${this.dataAPI}/pfp/${this.account}?${item.setname}-${item.uid}`,
         };
       var cja = [
-          [
-            "custom_json",
-            {
-              required_auths: [],
-              required_posting_auths: [this.account],
-              id: `${this.prefix}nft_pfp`,
-              json: JSON.stringify({
-                set: item.setname,
-                uid: item.uid,
-              }),
-            },
-          ],
-          [
-            "account_update2",
-            {
-              account: this.account,
-              json_metadata: "",
-              posting_json_metadata: JSON.stringify(pjm),
-            },
-          ],
+        [
+          "custom_json",
+          {
+            required_auths: [],
+            required_posting_auths: [this.account],
+            id: `${this.prefix}nft_pfp`,
+            json: JSON.stringify({
+              set: item.setname,
+              uid: item.uid,
+            }),
+          },
         ],
+        [
+          "account_update2",
+          {
+            account: this.account,
+            json_metadata: "",
+            posting_json_metadata: JSON.stringify(pjm),
+          },
+        ],
+      ],
         type = "raw";
       this.toSign = {
         type,
@@ -1584,9 +1611,9 @@ function tradeFTreject(setname, uid, callback){
     },
     meltNFT(item) {
       var cja = {
-          set: item.setname,
-          uid: item.uid,
-        },
+        set: item.setname,
+        uid: item.uid,
+      },
         type = "cja";
       this.toSign = {
         type,
@@ -1601,10 +1628,10 @@ function tradeFTreject(setname, uid, callback){
     giveNFT(item) {
       if (this.nftTradeAllowed) {
         var cja = {
-            set: item.setname,
-            uid: item.uid,
-            to: this.nftTradeTabTo,
-          },
+          set: item.setname,
+          uid: item.uid,
+          to: this.nftTradeTabTo,
+        },
           type = "cja";
         this.toSign = {
           type,
@@ -1620,12 +1647,12 @@ function tradeFTreject(setname, uid, callback){
     tradeNFT(item) {
       if (this.nftTradeAllowed) {
         var cja = {
-            set: item.setname,
-            uid: item.uid,
-            price: parseInt(this.nftTradeTabPrice * 1000),
-            type: this.nftTradeTabToken,
-            to: this.nftTradeTabTo,
-          },
+          set: item.setname,
+          uid: item.uid,
+          price: parseInt(this.nftTradeTabPrice * 1000),
+          type: this.nftTradeTabToken,
+          to: this.nftTradeTabTo,
+        },
           type = "cja";
         this.toSign = {
           type,
@@ -1640,11 +1667,11 @@ function tradeFTreject(setname, uid, callback){
     },
     sellNFT(item) {
       var cja = {
-          set: item.setname,
-          uid: item.uid,
-          price: parseInt(this.nftSellTabPrice * 1000),
-          type: this.nftSellTabToken,
-        },
+        set: item.setname,
+        uid: item.uid,
+        price: parseInt(this.nftSellTabPrice * 1000),
+        type: this.nftSellTabToken,
+      },
         type = "cja";
       this.toSign = {
         type,
@@ -1658,9 +1685,9 @@ function tradeFTreject(setname, uid, callback){
     },
     cancelNFT(item) {
       var cja = {
-          set: item.set,
-          uid: item.uid,
-        },
+        set: item.set,
+        uid: item.uid,
+      },
         type = "cja";
       this.toSign = {
         type,
@@ -1674,9 +1701,9 @@ function tradeFTreject(setname, uid, callback){
     },
     cancelFT(item) {
       var cja = {
-          set: item.set,
-          uid: item.uid,
-        },
+        set: item.set,
+        uid: item.uid,
+      },
         type = "cja";
       this.toSign = {
         type,
@@ -1690,10 +1717,10 @@ function tradeFTreject(setname, uid, callback){
     },
     buyNFT(item) {
       var cja = {
-          set: item.set,
-          uid: item.uid,
-          price: item.price.amount,
-        },
+        set: item.set,
+        uid: item.uid,
+        price: item.price.amount,
+      },
         type = "cja";
       if (item.price.token == "HIVE" || item.price.token == "HBD") {
         type = "xfr";
@@ -1713,14 +1740,14 @@ function tradeFTreject(setname, uid, callback){
     },
     auctionNFT(item) {
       var cja = {
-          set: item.setname,
-          uid: item.uid,
-          price: parseInt(this.nftAuctionTabPrice * 1000),
-          type:
-            this.nftAuctionTabToken != this.TOKEN ? this.nftAuctionTabToken : 0,
-          now: false,
-          time: this.nftAuctionTabTime,
-        },
+        set: item.setname,
+        uid: item.uid,
+        price: parseInt(this.nftAuctionTabPrice * 1000),
+        type:
+          this.nftAuctionTabToken != this.TOKEN ? this.nftAuctionTabToken : 0,
+        now: false,
+        time: this.nftAuctionTabTime,
+      },
         type = "cja";
       this.toSign = {
         type,
@@ -1734,10 +1761,10 @@ function tradeFTreject(setname, uid, callback){
     },
     bidNFT(item) {
       var cja = {
-          set: item.setname,
-          uid: item.uid,
-          bid_amount: parseInt(this.nftAuctionTabPrice * 1000),
-        },
+        set: item.setname,
+        uid: item.uid,
+        bid_amount: parseInt(this.nftAuctionTabPrice * 1000),
+      },
         type = "cja";
       if (this.itemModal.auction.price.token == "HIVE") {
         type = "xfr";
@@ -1839,8 +1866,8 @@ function tradeFTreject(setname, uid, callback){
       var meta = this.posturls[url].edit
         ? this.posturls[url].json_metadata
         : {
-            tags: this.posturls[url].json_metadata.tags,
-          };
+          tags: this.posturls[url].json_metadata.tags,
+        };
       if (this.posturls[url].rating)
         meta.review = { rating: this.posturls[url].rating };
       this.toSign = {
@@ -1881,7 +1908,7 @@ function tradeFTreject(setname, uid, callback){
       if (
         document.documentElement.clientHeight + window.scrollY >
         document.documentElement.scrollHeight -
-          document.documentElement.clientHeight * 2
+        document.documentElement.clientHeight * 2
       ) {
         this.getPosts();
       }
@@ -1932,7 +1959,7 @@ function tradeFTreject(setname, uid, callback){
                   this.posturls[key].replies[i].json_metadata
                 );
                 this.posturls[key].replies[i].edit = false;
-              } catch (e) {}
+              } catch (e) { }
             }
             this.posturls[this.posturls[key].replies[i].url] =
               this.posturls[key].replies[i];
@@ -2165,7 +2192,7 @@ function tradeFTreject(setname, uid, callback){
         i = a[0],
         o = 1 < a.length ? r + a[1] : "";
       if (e)
-        for (var c = /(\d+)(\d{3})/; c.test(i); )
+        for (var c = /(\d+)(\d{3})/; c.test(i);)
           i = i.replace(c, "$1" + e + "$2");
       return (u ? "-" : "") + i + o;
     },
@@ -2263,11 +2290,9 @@ function tradeFTreject(setname, uid, callback){
       ) {
         this.postSelect[this.postSelect.entry].p = true;
         fetch("https://api.hive.blog", {
-          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_blog_entries", "params":["${
-            this.pageAccount
-          }",${this.postSelect[this.postSelect.entry].o},${
-            this.postSelect[this.postSelect.entry].a
-          }], "id":1}`,
+          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_blog_entries", "params":["${this.pageAccount
+            }",${this.postSelect[this.postSelect.entry].o},${this.postSelect[this.postSelect.entry].a
+            }], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
@@ -2285,7 +2310,7 @@ function tradeFTreject(setname, uid, callback){
               res.result[i].type = "Blog";
               if (
                 !this.posturls[
-                  `/@${res.result[i].author}/${res.result[i].permlink}`
+                `/@${res.result[i].author}/${res.result[i].permlink}`
                 ]
               ) {
                 this.posturls[
@@ -2503,7 +2528,7 @@ function tradeFTreject(setname, uid, callback){
       var arr;
       try {
         arr = json.image[0];
-      } catch (e) {}
+      } catch (e) { }
       if (typeof json.image == "string") {
         return json.image;
       } else if (typeof arr == "string") {
@@ -2609,9 +2634,9 @@ function tradeFTreject(setname, uid, callback){
           parseInt(
             this.saccountapi.granted?.t > 0 ? this.saccountapi.granted.t : 0
           ) +
-            parseInt(
-              this.saccountapi.granting?.t > 0 ? this.saccountapi.granting.t : 0
-            ),
+          parseInt(
+            this.saccountapi.granting?.t > 0 ? this.saccountapi.granting.t : 0
+          ),
           t,
           this.sstats.spk_rate_ldel
         );
@@ -2929,7 +2954,7 @@ function tradeFTreject(setname, uid, callback){
           var pfp = "";
           try {
             pfp = this.accountinfo.posting_json_metadata.profile.profile_image;
-          } catch (e) {}
+          } catch (e) { }
           const total_vests =
             parseInt(this.accountinfo.vesting_shares) +
             parseInt(this.accountinfo.received_vesting_shares) -
@@ -2998,9 +3023,8 @@ function tradeFTreject(setname, uid, callback){
     callScript(o) {
       return new Promise((resolve, reject) => {
         if (this.nftscripts[o.script]) {
-          const code = `(//${this.nftscripts[o.script]}\n)("${
-            o.uid ? o.uid : 0
-          }")`;
+          const code = `(//${this.nftscripts[o.script]}\n)("${o.uid ? o.uid : 0
+            }")`;
           var computed = eval(code);
           computed.uid = o.uid || "";
           computed.owner = o.owner || "";
@@ -3204,9 +3228,9 @@ function tradeFTreject(setname, uid, callback){
         return this.smarkets.node[this.account] ? true : false;
       },
     },
-    compiledMarkdown: function() {
-            return marked(this.postBody, { sanitize: true });
-          },
+    compiledMarkdown: function () {
+      return marked(this.postBody, { sanitize: true });
+    },
     voteVal() {
       return (
         (this.accountinfo.rshares / parseInt(this.rewardFund.recent_claims)) *
