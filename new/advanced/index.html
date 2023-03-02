@@ -86,19 +86,19 @@
 											<label for="title">Provider</label>
 											<div class="ms-auto">
 												<div class="btn-group"><input type="radio" name="contractType"
-														id="simple" autocomplete="off" @clicked="sponsored.checked=false;simple.checked=true" checked="checked" v-model="simple.checked"
+														id="simple" autocomplete="off" checked="checked" v-model="simple.checked"
 														class="btn-check"> <label for="simple"
 														class="btn btn-outline-warning">
 														SIMPLE
 													</label> <input type="radio" name="contractType" id="sponsored"
-														autocomplete="off" class="btn-check" @clicked="sponsored.checked=true;simple.checked=false" v-model="sponsored.checked"> <label for="sponsored"
+														autocomplete="off" class="btn-check" v-model="sponsored.checked"> <label for="sponsored"
 														class="btn btn-outline-warning">
 														SPONSORED
 													</label>
 												</div>
 											</div>
 										</div>
-										<div if="simple.checked">
+										<div v-if="simple.checked">
 											<input class="form-control bg-darkg border-secondary text-info" list="datalistOptions" id="simpleContracts"
 												placeholder="Type to search...">
 											<datalist id="datalistOptions">
@@ -109,7 +109,7 @@
 												<option value="Chicago"></option>
 											</datalist>
 										</div>
-										<div class="d-none" if="sponsored.checked">
+										<div v-if="sponsored.checked">
 											<input class="form-control bg-darkg border-secondary text-info" list="datalistOptions" id="sponsoredContracts"
 												placeholder="Type to search...">
 											<datalist id="datalistOptions">
