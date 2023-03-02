@@ -1039,9 +1039,8 @@ var app = new Vue({
     },
     signNUpload() {
       console.log(this.contract.id)
-      var header = this.account
-      header += '|'
-      header += this.account
+      var header = this.contract.id
+      header = this.account + "|" + header
       header += this.contract.id.toString()
       var body = ""
       var names = Object.keys(this.FileInfo)
