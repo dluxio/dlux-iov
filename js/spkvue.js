@@ -1179,6 +1179,7 @@ var app = new Vue({
             'X-Account': this.account,
             'X-Contract': contract.id,
             'X-Cid': options.cid,
+            'X-Files': options.cids,
             'X-Chain': 'HIVE'
           }
         })
@@ -1189,6 +1190,7 @@ var app = new Vue({
             uploadFileChunks(file, options);
           })
           .catch(e => {
+            console.log(e)
             options.onError({ ...e, file })
           })
       };
