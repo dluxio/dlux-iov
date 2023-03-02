@@ -75,6 +75,12 @@ var app = new Vue({
     return {
       fileRequests: {},
       sets: {},
+      simple:{
+        checked: false,
+      },
+      sponsored: {
+        checked: true,
+      },
       disablePost: true,
       File: [],
       FileInfo: {},
@@ -847,6 +853,14 @@ var app = new Vue({
     },
     deleteImg (index){
       this.File.splice(index, 1)
+    },
+    getContractMarket(){
+      //fetch contract market
+      fetch(this.sapi)
+      .then(res => res.json())
+      .then(res => {
+        this.contractMarket = res.upload_providers ? res.upload_providers : [{n:'regardspk', u:'https://regardspk.com', }]
+      })
     },
     validPost(){
       var valid = true
