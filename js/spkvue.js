@@ -1059,16 +1059,16 @@ var app = new Vue({
       var header = `${this.contract.id}`
       var body = ""
       var names = Object.keys(this.FileInfo)
+      var cids = []
       for (var i = 0; i < names.length; i++) {
         body += `,${this.FileInfo[names[i]].hash}`
+        cids.push(this.FileInfo[names[i]].hash)
       }
       this.contract.files = body
       this.signText(header + body).then(res => {
         console.log({ res })
         this.contract.fosig = res.split(":")[1]
-        for (var i = 0; i < names.length; i++) {
-          this.upload(this.FileInfo[names[i]].hash, this.contract)
-        }
+        this.upload(cids, this.contract)
       })
     },
     upload(cids = ['QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3'], contract = { api: 'https://ipfs.dlux.io', id: '1668913215284', sigs: {}, s: 10485760, t: 0 }) {
