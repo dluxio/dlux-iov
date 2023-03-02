@@ -1108,7 +1108,7 @@ var app = new Vue({
           // updateFileElement(fileObj);
         },
         onProgress(e,f) {
-          console.log(e, f, f.name)
+          console.log(e, f, this.FileInfo, this.File)
           this.File[this.FileInfo[f.name].index].actions.pause = true
           this.File[this.FileInfo[f.name].index].actions.resume = false
           this.File[this.FileInfo[f.name].index].actions.cancel = true
