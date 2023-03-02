@@ -1040,7 +1040,7 @@ var app = new Vue({
       this.contract.files = body
       this.signText(body).then(res=>{
         console.log({res})
-        this.contract.fosig = res
+        this.contract.fosig = res.split(":")[1]
         for(var i = 0; i < names.length; i++){
           this.upload(this.FileInfo[names[i]].hash, this.contract)
         }
@@ -1104,6 +1104,7 @@ var app = new Vue({
         );
         req.setRequestHeader('X-Cid', options.cid);
         req.setRequestHeader('X-Contract', options.contract.id);
+        req.setRequestHeader('X-Sig', options.contract.fosig);
         
 
         req.onload = (e) => {
