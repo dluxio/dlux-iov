@@ -1040,7 +1040,7 @@ var app = new Vue({
     signNUpload() {
       console.log(this.contract.id)
       var header = this.account
-      header += '|'
+      header += ':'
       header += this.contract.id.toString()
       var body = ""
       var names = Object.keys(this.FileInfo)
