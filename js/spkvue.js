@@ -1176,11 +1176,11 @@ var app = new Vue({
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'X-Sig': options.contract.sigfo,
+            'X-Sig': options.contract.fosig,
             'X-Account': this.account,
             'X-Contract': options.contract.id,
             'X-Cid': options.cid,
-            'X-Files': options.cids,
+            'X-Files': options.contract.cids,
             'X-Chain': 'HIVE'
           }
         })
