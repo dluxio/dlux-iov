@@ -1034,10 +1034,10 @@ var app = new Vue({
       var header = `${this.account}|${this.contract.id}`, body = ""
       var names = Object.keys(this.FileInfo)
       for(var i = 0; i < names.length; i++){
-        body += `:${this.FileInfo[names[i]].hash}`
+        body += `,${this.FileInfo[names[i]].hash}`
       }
       this.contract.files = body
-      this.signText(text).then(res=>{
+      this.signText(body).then(res=>{
         console.log({res})
         this.contract.fosig = res
         for(var i = 0; i < names.length; i++){
@@ -1095,14 +1095,14 @@ var app = new Vue({
         const chunk = file.slice(options.startingByte);
         
         formData.append('chunk', chunk, file.name);
-        formData.append('cid', options.cid);
+        formData.append('', options.cid);
         
         req.open('POST', options.url, true);
         req.setRequestHeader(
           'Content-Range',    `bytes=${options.startingByte}-${options.startingByte+chunk.size}/${file.size}`
         );
         req.setRequestHeader('X-Cid', options.cid);
-        req.setRequestHeader('X-Cid', options.cid);
+        req.setRequestHeader('X-Contract', options.contract.id);
         
 
         req.onload = (e) => {
