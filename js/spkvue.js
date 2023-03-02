@@ -1176,7 +1176,7 @@ var app = new Vue({
             'sig': contract.sigfo,
             'account': this.account,
             'contract': contract.id,
-            'cid': cid
+            'cid': options.cid
           }
         })
           .then(res => res.json())
