@@ -851,7 +851,7 @@ var app = new Vue({
       for (var i = 0; i < e.dataTransfer.files.length; i++) {
         var reader = new FileReader();
         reader.File = e.dataTransfer.files[i]
-        this.File = [...this.File, ... e.dataTransfer.files]
+        var found = false
         reader.onload = (event) => {
           const fileContent = event.target.result;
           for (var i = 0; i < this.File.length; i++) {
@@ -859,17 +859,20 @@ var app = new Vue({
               this.File[i].name == event.currentTarget.File.name
               && this.File[i].size == event.currentTarget.File.size
             ) {
-              Hash.of(fileContent).then(hash => {
-                console.log('hereasdasd')
-                const dict = { hash, index: i, size: event.currentTarget.File.size, name: event.currentTarget.File.name }
-                this.FileInfo[dict.name] = dict
-                // this.File[i].md5 = hash 
-                // this.File[i].blob = fileContent; 
-                // const file = this.File[i];
-                //  this.File.splice(i, 1, file);
-              })
-              break
+              found = true
             }
+          }
+          if (!found) {
+            Hash.of(fileContent).then(hash => {
+              console.log('hereasdasd')
+              const dict = { hash, index: i, size: event.currentTarget.File.size, name: event.currentTarget.File.name }
+              this.FileInfo[dict.name] = dict
+              // this.File[i].md5 = hash 
+              // this.File[i].blob = fileContent; 
+              // const file = this.File[i];
+              //  this.File.splice(i, 1, file);
+            })
+            
           }
         };
         reader.readAsBinaryString(e.dataTransfer.files[i]);
