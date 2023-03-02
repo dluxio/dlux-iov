@@ -851,6 +851,7 @@ var app = new Vue({
       for (var i = 0; i < e.dataTransfer.files.length; i++) {
         var reader = new FileReader();
         reader.File = e.dataTransfer.files[i]
+        this.File = [...this.File, ... e.dataTransfer.files]
         reader.onload = (event) => {
           const fileContent = event.target.result;
           for (var i = 0; i < this.File.length; i++) {
