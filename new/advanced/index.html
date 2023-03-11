@@ -48,7 +48,24 @@
 							<hr class="bg-light">
 						</div>
 						<div class="mt-2">
+							<!-- Make a form to get a contract -->
 							<form>
+								<div class="input-group">
+
+									<span
+										class="input-group-text bg-darkg border-secondary text-white-50 l-radius-hotfix">@</span>
+
+									<input type="text" class="form-control bg-darkg border-secondary text-info"
+										readonly id="username" v-model="account">
+								</div>
+								<div>
+									<button>
+										Get Test Contract
+										<i class="fas fa-plus"></i>
+									</button>
+								</div>
+							</form>
+							<!-- <form>
 								<ul class="text-center ms-auto me-auto col-md-8 col-lg-6 col-xl-4">
 									<h3><u>Contract Types</u></h3>
 									<li class="text-start">Direct: you pay for hosting now</li>
@@ -130,12 +147,11 @@
 
 
 									<div>
-										<!-- v-if=provider selected -->
 										<h5>Contract: {{contract.id}}</h5>
 										<p class="text-start text-white-50 small">@threespk.voter is placing 1000 BROCA to store up to 10GB of data. You must make a post on the hive blockchain with 10% beneficiary to @threespk.voter with-in 24 hours for this storage contract to be inforce. </p>
 									</div>
 								</div>
-							</form>
+							</form> -->
 						</div>
 					</div>
 				</div>
