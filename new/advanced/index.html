@@ -103,7 +103,7 @@
 												</div>
 											</div>
 										</div>
-										<div v-if="simple.checked">
+										<div v-show="simple.checked">
 											<input class="form-control bg-darkg border-secondary text-info"
 												list="datalistOptions1" id="simpleContracts"
 												placeholder="Type to search direct contracts...">
@@ -114,7 +114,7 @@
 												<option value="Custom"></option>
 											</datalist>
 										</div>
-										<div v-if="sponsored.checked">
+										<div v-show="sponsored.checked">
 											<input class="form-control bg-darkg border-secondary text-info"
 												list="datalistOptions2" id="sponsoredContracts"
 												placeholder="Type to search sponsored contracts...">
