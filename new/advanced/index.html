@@ -552,7 +552,7 @@
                                     </div>
                                 </div>
                             </div>
-							<button @click="showWallet = !showWallet">{{showWallet ? 'Hide Wallet' : 'Show Wallet'}}</button>
+							<button v-if="showWallet" @click="showWallet = !showWallet">{{showWallet ? 'Hide Wallet' : 'Show Wallet'}}</button>
 							<!-- <h1 class="px-4 font-weight-bold">DLUX</h1> -->
 							<h1 class="px-4 font-weight-bold" style="font-variant:small-caps;">File Hosting
 							</h1>

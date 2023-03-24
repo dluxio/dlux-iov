@@ -408,20 +408,18 @@ export default {
           api: "https://token.dlux.io",
           txid: "send",
         };
-      // else if (this.token == "SPK")
-      //   op = {
-      //     type: "cja",
-      //     cj: {
-      //       to: this.to,
-      //       amount: parseInt(this.amount * 1000),
-      //       memo: this.memo,
-      //     },
-      //     id: `${this.spkprefix}_spk_send`,
-      //     msg: `Trying to send ${this.token}...`,
-      //     ops: ["getSapi"],
-      //     api: "https://spkinstant.hivehoneycomb.com",
-      //     txid: "send",
-      //   };
+      else if (this.token == "SPK" && this.func == "Power Up")
+        op = {
+          type: "cja",
+          cj: {
+            amount: parseInt(this.amount * 1000)
+          },
+          id: `${this.spkprefix}_spk_up`,
+          msg: `Trying to power up ${this.token}...`,
+          ops: ["getSapi"],
+          api: "https://spk-test.dlux.io",
+          txid: "spk_power",
+        };
       else if (this.token == "LARYNX" && this.func == "Power Up")
         op = {
           type: "cja",
