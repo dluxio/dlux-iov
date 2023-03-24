@@ -39,7 +39,7 @@
 				<div id="one">
 					<div class="flex-column mb-4 px-3">
 						<div class="flex-row">
-							<button @click="showWallet = !showWallet"></button>
+							<button @click="showWallet = !showWallet">{{showWallet ? 'Hide Wallet' : 'Show Wallet'}}</button>
 							<div v-if="showWallet" role="tabpanel" class="tab-pane fade show " id="spk" aria-labelledby="spktab">
                                 <div class="container">
                                     <div>
