@@ -795,7 +795,7 @@ var app = new Vue({
         items: [],
       },
       authors: {},
-      showWallet: true,
+      showWallet: false,
     };
   },
   components: {
