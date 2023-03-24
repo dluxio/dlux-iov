@@ -807,6 +807,20 @@ var app = new Vue({
     "vue-ratings": Ratings,
   },
   methods: {
+    updatePubkey() {
+      var cja = {
+        pubKey: this.accountinfo.posting.key_auths[0][0]
+      };
+      this.toSign = {
+        type: "cja",
+        cj: cja,
+        id: `spkcc_register_authority`,
+        msg: `Registering: ${this.account}:${this.accountinfo.posting.key_auths[0][0]}`,
+        ops: ["getSapi"],
+        api: sapi,
+        txid: `spkcc_register_authority`,
+      };
+    },
     getSetPhotos(s, c) {
       return s.set ? `https://ipfs.io/ipfs/${s.set[c]}` : "";
     },

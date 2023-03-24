@@ -58,7 +58,13 @@
 									<input type="text" class="form-control bg-darkg border-secondary text-info" readonly
 										id="username" v-model="account">
 								</div>
-								<div>
+								<div v-if="saccountapi.pubKey == 'NA'">
+									<button @click="updatePubkey">
+										Register Account
+										<i class="fas fa-plus"></i>
+									</button>
+								</div>
+								<div v-if="saccountapi.pubKey != 'NA'">
 									<button>
 										Get Test Contract
 										<i class="fas fa-plus"></i>
