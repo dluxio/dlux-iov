@@ -55,8 +55,8 @@
 									<span
 										class="input-group-text bg-darkg border-secondary text-white-50 l-radius-hotfix">@</span>
 
-									<input type="text" class="form-control bg-darkg border-secondary text-info"
-										readonly id="username" v-model="account">
+									<input type="text" class="form-control bg-darkg border-secondary text-info" readonly
+										id="username" v-model="account">
 								</div>
 								<div>
 									<button>
@@ -65,49 +65,33 @@
 									</button>
 								</div>
 							</form>
-							<ul>
-								<li>
-			Files:<br>
-			 - Ready to upload<br>
-            Size Allowed: 10Gb<br>
-            Size: 0 Bytes<br>
-			File Owner: @disregardfiat<br>
-			Sig: ''<br>
-			Service_provider: @dlux-io<br>
-			Service Proivider Sig: ''<br>
-            Sponsor: @3spk<br>
-            Expiration: 24 Hours<br>
-            Price: 1000 Broca<br>
-            Contract ID: R4nD0<br>
-            Status: Waiting for Upload<br> 
-			Not Pinned | No Flags<br>
-								</li>
-								<li>
-									Files:<br>
+							<ul class="text-start">
+								<li>Files:
 									<ul>
-										<li>QmZdEnRooHj4fN3RVYSeWQjPvMNUryQsJGcPHydoqWYRQQ<br>
-										100 Bytes</li>
-										<li> - Ready to upload</li>
+										<li>QmZdEnRooHj4fN3RVYSeWQjPvMNUryQsJGcPHydoqWYRQQ</li>
+										<li>100 Bytes</li>
+										<li>- Ready to upload</li>
 									</ul>
-									Size Allowed: 10Gb<br>
-									Size: 100 Bytes<br>
-									File Owner: @disregardfiat<br>
-									Sig: 'ikswdjfbkWIJHVGBFLWEg'<br>
-									Service_provider: @dlux-io<br>
-									Service Proivider Sig: 'jdasFVKJSWADHFBVLAKGBHF'<br>
-									Sponsor: @3spk<br>
-									Expiration: jUNE 24TH<br>
-									Price: 1000 Broca<br>
-									Contract ID: R4nD0<br>
-									Status: Waiting for distributed Storage<br>
-									Pinned By
+								<li>Size Allowed: 10Gb</li>
+								<li>Size: 100 Bytes</li>
+								<li>File Owner: @disregardfiat</li>
+								<li>Sig: 'ikswdjfbkWIJHVGBFLWEg'</li>
+								<li>Service_provider: @dlux-io</li>
+								<li>Service Proivider Sig: 'jdasFVKJSWADHFBVLAKGBHF'</li>
+								<li>Sponsor: @3spk</li>
+								<li>Expiration: June 24th 14:00 UTC</li>
+								<li>Price: 1000 Broca</li>
+								<li>Contract ID: R4nD0</li>
+								<li>Status: Waiting for Upload | Waiting for distributed storage</li>
+								<li>Not Pinned</li>
+								<li>Pinned By:
 									<ul>
 										<li>@darby</li>
 										<li>@doofus</li>
 										<li> ... pending</li>
 									</ul>
-									No Flags<br>
-									</li>
+								</li>
+								<li>No Flags</li>
 							</ul>
 							<!-- <form>
 								<ul class="text-center ms-auto me-auto col-md-8 col-lg-6 col-xl-4">
@@ -204,7 +188,8 @@
 						<div style="border-style:solid;">
 							<form>
 								<input id="fileInput" type="file" @change="uploadFile" multiple />
-								<div style="background-color:green;margin-bottom:10px;padding:10px;" id="img-well" @drop="dragFile($event)" >
+								<div style="background-color:green;margin-bottom:10px;padding:10px;" id="img-well"
+									@drop="dragFile($event)">
 									Or drag the file here
 								</div>
 							</form>
@@ -254,10 +239,13 @@
 										</div>
 									</div>
 									<div v-if="File.length">
-										<button v-if="file.actions.pause" @click="fileRequest[file.index].resumeFileUpload()">Pause</button>
-										<button v-if="file.actions.resume" @click="fileRequest[file.index].resumeFileUpload()">Resume</button>
-										<button v-if="file.actions.cancel" @click="fileRequest[file.index].resumeFileUpload()">Cancel</button>
-										<h5 >{{FileInfo[file.name].status}}</h5>
+										<button v-if="file.actions.pause"
+											@click="fileRequest[file.index].resumeFileUpload()">Pause</button>
+										<button v-if="file.actions.resume"
+											@click="fileRequest[file.index].resumeFileUpload()">Resume</button>
+										<button v-if="file.actions.cancel"
+											@click="fileRequest[file.index].resumeFileUpload()">Cancel</button>
+										<h5>{{FileInfo[file.name].status}}</h5>
 									</div>
 								</div>
 							</div>
