@@ -414,7 +414,7 @@ export default {
           cj: {
             amount: parseInt(this.amount * 1000)
           },
-          id: `${this.spkprefix}_spk_up`,
+          id: `spkcc_spk_up`,
           msg: `Trying to power up ${this.token}...`,
           ops: ["getSapi"],
           api: "https://spk-test.dlux.io",
@@ -480,6 +480,7 @@ export default {
       //     msg: `Trying to send ${this.token}...`,
       //     ops: ["getHiveUser"],
       //   };
+      console.log(1, {op})
       if (op) {
         this.$emit("modalsign", op);
       }
