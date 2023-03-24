@@ -164,8 +164,8 @@
                                                             aria-expanded="false"></button>
                                                         <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                                             aria-labelledby="btnGroupDrop1">
-                                                            <modal-vue type="power" token="LARYNX" func="Power Up"
-                                                                :balance="saccountapi.balance" :account="account"
+                                                            <modal-vue type="power" token="SPK" func="Power Up"
+                                                                :balance="saccountapi.spk" :account="account"
                                                                 @modalsign="sendIt($event)">
                                                                 <button class="dropdown-item" slot="trigger"
                                                                     type="button"><i
@@ -552,6 +552,7 @@
                                     </div>
                                 </div>
                             </div>
+							<button @click="showWallet = !showWallet">{{showWallet ? 'Hide Wallet' : 'Show Wallet'}}</button>
 							<!-- <h1 class="px-4 font-weight-bold">DLUX</h1> -->
 							<h1 class="px-4 font-weight-bold" style="font-variant:small-caps;">File Hosting
 							</h1>
