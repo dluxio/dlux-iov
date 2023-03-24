@@ -9,7 +9,7 @@ import Ratings from "/js/ratings.js";
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "",
-  sapi = "https://https://spktest.dlux.io";
+  sapi = "https://spktest.dlux.io";
 if (location.search) {
   const string = location.search.replace("?", "");
   let params = string.split("&");
