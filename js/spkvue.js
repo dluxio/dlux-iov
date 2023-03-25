@@ -940,7 +940,7 @@ var app = new Vue({
     },
     broca_calc(last){
       const last_calc = this.Base64toNumber(last.split(',')[1])
-    const accured = parseInt((parseFloat(this.sstats.broca_refill) * (this.sstats.head_block - last_calc))/(pow * 1000))
+    const accured = parseInt((parseFloat(this.sstats.broca_refill) * (this.sstats.head_block - last_calc))/(this.saccountapi.spk_power * 1000))
     var total = parseInt(last.split(',')[0]) + accured
     if(total > (this.saccountapi.spk_power * 1000))total = (this.saccountapi.spk_power * 1000)
     return total
