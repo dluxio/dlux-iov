@@ -317,7 +317,9 @@ var app = new Vue({
       },
       saccountapi: {
         balance: 0,
+        broca: '0,0',
         spk: 0,
+        spk_power: 0,
         gov: 0,
         tick: 0.01,
         claim: 0,
@@ -935,6 +937,13 @@ var app = new Vue({
         text = text.toLowerCase()
         this.postPermlink = text;
       }
+    },
+    broca_calc(last){
+      const last_calc = this.Base64toNumber(last.split(',')[1])
+    const accured = parseInt((parseFloat(this.sstats.broca_refill) * (this.sstats.head_block - last_calc))/(pow * 1000))
+    var total = parseInt(last.split(',')[0]) + accured
+    if(total > (this.saccountapi.spk_power * 1000))total = (this.saccountapi.spk_power * 1000)
+    return total
     },
     post() {
       var tags = this.postTags.toLowerCase().split(',')
