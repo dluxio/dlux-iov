@@ -180,6 +180,52 @@
                                                 </div>
                                             </div>
                                         </div>
+										<!-- SPK Power -->
+										<div class="d-flex align-items-center border-bottom border-secondary py-5">
+                                            <div>
+                                                <div class="d-flex align-items-start">
+                                                    <h4 class="m-0">SPK Power</h4>
+                                                </div>
+                                                <p class="text-white-50 m-0">Powered SPK for Voting, BROCA enabled {{'1000000 BROCA'}}.
+                                                </p>
+                                            </div>
+                                            <div class="ms-auto text-end">
+                                                <h5>
+                                                    {{formatNumber((saccountapi.spk_power)/1000, 3, '.', ',')}}
+                                                    SPK
+                                                </h5>
+                                                <div class="btn-group" role="group" aria-label="Power Actions">
+                                                    <button type="button" class="btn btn-info p-0">
+                                                        <modal-vue type="vote" token="SPK Power" :balance="saccountapi.spk"
+                                                            :account="account" @modalsign="sendIt($event)">
+                                                            <span slot="trigger" class="p-2"><i
+                                                                    class="fas fa-paper-plane me-2"></i>Vote</span>
+                                                        </modal-vue>
+                                                    </button>
+                                                    <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                        disabled></button>
+                                                    <div class="btn-group" role="group" v-if="me">
+                                                        <button type="button" class="btn btn-info dropdown-toggle"
+                                                            data-bs-toggle="dropdown" aria-haspopup="true"
+                                                            aria-expanded="false"></button>
+                                                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
+                                                            aria-labelledby="btnGroupDrop1">
+                                                            <modal-vue type="power" token="SPK" func="Power Down"
+                                                                :balance="saccountapi.spk_power" :account="account"
+                                                                @modalsign="sendIt($event)">
+                                                                <button class="dropdown-item" slot="trigger"
+                                                                    type="button"><i
+                                                                        class="fas fa-angle-double-up fa-fw me-2"></i>Power
+                                                                    Down</button>
+                                                            </modal-vue>
+                                                            <div class="dropdown-divider"></div>
+                                                            <a class="dropdown-item" href="/dex/#larynx" id="buylink"><i
+                                                                    class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <!--claim larynx airdrop-->
                                         <div id="larynxclaimdiv"
                                             class="d-flex align-items-center border-bottom border-secondary py-5"
