@@ -677,17 +677,18 @@
 									</button>
 								</div>
 							</form>
-							<div v-for="sponsor in saccountapi.channels"></div>
-							<ul class="text-start" v-for="channel in sponsor">
-								<li>Size Allowed: {{channel.a}} bytes</li>
-								<li>File Owner: @{{channel.t}}</li>
-								<li>Service_provider: @{{channel.b}}</li>
-								<li>Sponsor: @{{channel.f}}</li>
-								<li>Expiration: {{channel.e}}</li>
-								<li>Price: {{channel.r}} Broca</li>
-								<li>Contract ID: {{channel.i}}</li>
-								<li>Status: {{channel.c == 0 ? 'Waiting For Upload' : 'Uploaded'}}</li>
-							</ul>
+							<div v-for="sponsor in saccountapi.channels">
+								<ul class="text-start" v-for="channel in sponsor">
+									<li>Size Allowed: {{channel.a}} bytes</li>
+									<li>File Owner: @{{channel.t}}</li>
+									<li>Service_provider: @{{channel.b}}</li>
+									<li>Sponsor: @{{channel.f}}</li>
+									<li>Expiration: {{channel.e}}</li>
+									<li>Price: {{channel.r}} Broca</li>
+									<li>Contract ID: {{channel.i}}</li>
+									<li>Status: {{channel.c == 0 ? 'Waiting For Upload' : 'Uploaded'}}</li>
+								</ul>
+							</div>
 							<!-- <form>
 								<ul class="text-center ms-auto me-auto col-md-8 col-lg-6 col-xl-4">
 									<h3><u>Contract Types</u></h3>
