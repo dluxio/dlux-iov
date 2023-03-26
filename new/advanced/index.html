@@ -232,11 +232,11 @@
                                                 <p class="text-white-50 m-0">Resource Credits for the SPK network.
                                                 </p>
 												<p>
-                                                    Current cost to store: ??? / Mb
+                                                    Current cost to store: 1 BROCA per {{sstats.channel_bytes}} Bytes.
                                                 </p>
 												<p>
-                                                    Recharge Rate: ???
-													Time Until Full: ???
+                                                    Recharge Rate: {{formatNumber((sstats.broca_refill / 28800), 2, '.', ',')}} Days to Recharge.
+													Time Until Full: {{formatNumber(broca_calc(1 - (saccountapi.broca)/(saccountapi.spk_power * 1000)) * (sstats.broca_refill / 28800), 2, '.', ',')}} Days until full.
                                                 </p>
                                             </div>
                                             <div class="ms-auto text-end">
