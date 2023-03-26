@@ -236,7 +236,7 @@
                                                 </p>
 												<p>
                                                     Recharge Rate: {{formatNumber((sstats.broca_refill / 28800), 2, '.', ',')}} Days to Recharge.
-													Time Until Full: {{formatNumber(broca_calc(1 - (saccountapi.broca)/(saccountapi.spk_power * 1000)) * (sstats.broca_refill / 28800), 2, '.', ',')}} Days until full.
+													Time Until Full: {{formatNumber((1 - (broca_calc(saccountapi.broca))/(saccountapi.spk_power * 1000)) * (sstats.broca_refill / 28800), 2, '.', ',')}} Days until full.
                                                 </p>
                                             </div>
                                             <div class="ms-auto text-end">
