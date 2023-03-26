@@ -677,33 +677,16 @@
 									</button>
 								</div>
 							</form>
-							<ul class="text-start">
-								<li>Files:
-									<ul>
-										<li>QmZdEnRooHj4fN3RVYSeWQjPvMNUryQsJGcPHydoqWYRQQ</li>
-										<li>100 Bytes</li>
-										<li>- Ready to upload</li>
-									</ul>
-								<li>Size Allowed: 10Gb</li>
-								<li>Size: 100 Bytes</li>
-								<li>File Owner: @disregardfiat</li>
-								<li>Sig: 'ikswdjfbkWIJHVGBFLWEg'</li>
-								<li>Service_provider: @dlux-io</li>
-								<li>Service Proivider Sig: 'jdasFVKJSWADHFBVLAKGBHF'</li>
-								<li>Sponsor: @3spk</li>
-								<li>Expiration: June 24th 14:00 UTC</li>
-								<li>Price: 1000 Broca</li>
-								<li>Contract ID: R4nD0</li>
-								<li>Status: Waiting for Upload | Waiting for distributed storage</li>
-								<li>Not Pinned</li>
-								<li>Pinned By:
-									<ul>
-										<li>@darby</li>
-										<li>@doofus</li>
-										<li> ... pending</li>
-									</ul>
-								</li>
-								<li>No Flags</li>
+							<div v-for="sponsor in saccountapi.channels"></div>
+							<ul class="text-start" v-for="channel in sponsor">
+								<li>Size Allowed: {{channel.a}} bytes</li>
+								<li>File Owner: @{{channel.t}}</li>
+								<li>Service_provider: @{{channel.b}}</li>
+								<li>Sponsor: @{{channel.f}}</li>
+								<li>Expiration: {{channel.e}}</li>
+								<li>Price: {{channel.r}} Broca</li>
+								<li>Contract ID: {{channel.i}}</li>
+								<li>Status: {{channel.c == 0 ? 'Waiting For Upload' : 'Uploaded'}}</li>
 							</ul>
 							<!-- <form>
 								<ul class="text-center ms-auto me-auto col-md-8 col-lg-6 col-xl-4">
