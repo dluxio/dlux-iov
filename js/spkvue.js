@@ -76,8 +76,8 @@ var app = new Vue({
       fileRequests: {},
       sets: {},
       contract: {
-        api: 'https://ipfs.dlux.io',
-        id: '1668913215284',
+        api: '',
+        id: '',
         files: '',
         fosig: '', //file-owner
         spsig: '', //service-provider 
@@ -1084,6 +1084,14 @@ var app = new Vue({
           txid: "Sign Auth Headers",
         };
       });
+    },
+    selectContract(id, broker){
+      this.contract.id = id
+      fetch(`${sapi}/user_services/${broker}`)
+      .then(r=> r.json())
+      .then(res=>{
+        this.contract.api = res.a
+      })
     },
     signNUpload() {
       console.log(this.contract.id)

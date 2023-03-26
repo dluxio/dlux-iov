@@ -681,12 +681,14 @@
 								<ul class="text-start" v-for="channel in sponsor">
 									<li>Size Allowed: {{channel.a}} bytes</li>
 									<li>File Owner: @{{channel.t}}</li>
-									<li>Service_provider: @{{channel.b}}</li>
+									<li>Service Provider: @{{channel.b}}</li>
 									<li>Sponsor: @{{channel.f}}</li>
 									<li>Expiration: {{channel.e}}</li>
 									<li>Price: {{channel.r}} Broca</li>
 									<li>Contract ID: {{channel.i}}</li>
+									<li>Terms: 10% Bennificiary to @dlux-io</li>
 									<li>Status: {{channel.c == 0 ? 'Waiting For Upload' : 'Uploaded'}}</li>
+									<button @click="selectContract(channel.i, channel.b)"></button>
 								</ul>
 							</div>
 							<!-- <form>
@@ -779,7 +781,7 @@
 						</div>
 					</div>
 				</div>
-				<div id="two">
+				<div id="two" v-if="contract.id">
 					<div class="flex-column flex-shrink mx-3">
 						<div style="border-style:solid;">
 							<form>
