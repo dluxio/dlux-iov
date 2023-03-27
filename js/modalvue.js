@@ -108,6 +108,11 @@ export default {
                                         min="0.001" placeholder="1.000" v-model="amount">
                                         <span class="input-group-text text-secondary border-dark bg-dark">{{token}}</span>
                                 </div>
+                                <label for="api" class="small">Location (https://ipfs.dlux.io)</label>
+                                <div class="input-group mb-3" id="api">
+                                    <input class="form-control text-white border-dark bg-dark" type="text" v-model="api">
+                                        
+                                </div>
                             </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -384,6 +389,20 @@ export default {
           api: "https://spkinstant.hivehoneycomb.com",
           txid: "send",
         };
+      else if (this.token == "LARYNX" && this.func == "Register A Service")
+        op = {
+          type: "cja",
+          cj: {
+            amount: parseInt(this.amount * 1000),
+            type: "IPFS",
+            api: this.api,
+          },
+          id: `spkcc_register_service`,
+          msg: `Trying to register a service...`,
+          ops: ["getSapi"],
+          api: "https://spktest.dlux.io",
+          txid: "register_service",
+        }
       else if (this.token == "DLUX" && this.func == "Unlock")
         op = {
           type: "cja",
@@ -417,7 +436,7 @@ export default {
           id: `spkcc_spk_up`,
           msg: `Trying to power up ${this.token}...`,
           ops: ["getSapi"],
-          api: "https://spk-test.dlux.io",
+          api: "https://spktest.dlux.io",
           txid: "spk_power",
         };
       else if (this.token == "LARYNX" && this.func == "Power Up")
@@ -546,6 +565,9 @@ export default {
     },
     amount: {
       default: 0.001,
+    },
+    api: {
+      default: 'https://ipfs.example.com',
     },
     valid: {
       default: false,

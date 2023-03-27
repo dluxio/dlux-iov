@@ -74,6 +74,10 @@ var app = new Vue({
   data() {
     return {
       fileRequests: {},
+      register:{
+        amount: 0,
+        api: '',
+      },
       sets: {},
       contract: {
         api: '',
@@ -1426,13 +1430,6 @@ function buyFT(setname, uid, price, type,  callback){
         txid: `${set}:${uid}_ft_buy`,
       };
     },
-    /*
-function bidFT(setname, uid, callback){
-    var bid_amount = document.getElementById(`${setname}-${uid}-bid`).value
-    bid_amount = parseInt(bid_amount * 1000)
-    broadcastCJA({set: setname, uid, bid_amount}, 'dlux_ft_bid', `Trying to bid on ${setname} mint token.`) 
- }
-    */
     bidFT(uid, set, price, type) {
       bid_amount = parseInt(price * 1000);
       var cja = {
