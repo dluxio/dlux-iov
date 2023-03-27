@@ -391,7 +391,7 @@ export default {
           api: "https://spkinstant.hivehoneycomb.com",
           txid: "send",
         };
-      else if (this.token == "LARYNX" && this.func == "Register A Service")
+      else if (this.token == "LARYNX" && this.func == "Register a Service")
         op = {
           type: "cja",
           cj: {
