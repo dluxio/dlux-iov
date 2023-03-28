@@ -238,7 +238,7 @@
                                                                     </div>
                                                                 </label>
                                                                 <div class="input-group">
-                                                                    <input type="number" v-model="opt.val"
+                                                                    <input type="range" v-model="opt.val"
                                                                         class="form-control bg-darkg border-secondary text-info"
                                                                         :id="opt.id" :max="opt.range_high"
                                                                         :min="opt.range_low" :step="opt.step" />
@@ -264,10 +264,9 @@
                                                                     </div>
                                                                 </div>
                                                                 <ul class="small">
-                                                                    <li>Voting will drain VP to 0%</li>
-                                                                    <li>Full Recharge: {{formatNumber(spkStats.spk_cycle_length * 4, '', ',', 0)}} blocks</li>
                                                                     <li>Recharge rate: 14 days</li>
-
+                                                                    <li>Voting will drain VP to 0%</li>
+                                                                    <li>Full Recharge: {{formatNumber((spkStats.spk_cycle_length * 4)/28800, '.', ',', 2)}} days</li>
                                                                 </ul>
                                                             </div>
                                                         </form>
