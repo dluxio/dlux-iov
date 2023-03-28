@@ -814,6 +814,21 @@ var app = new Vue({
     "vue-ratings": Ratings,
   },
   methods: {
+    saveNodeSettings(){
+      var cja = {};
+      for (var i = 0; i < this.tokenGov.options.length; i++){
+        cja[this.tokenGov.options[i].id] = this.tokenGov.options[i].value
+      }
+      this.toSign = {
+        type: "cja",
+        cj: cja,
+        id: `spkcc_spk_vote`,
+        msg: `Voting...`,
+        ops: ["getSapi"],
+        api: sapi,
+        txid: `spkcc_spk_vote`,
+      };
+    },
     updatePubkey() {
       var cja = {
         pubKey: this.accountinfo.posting.key_auths[0][0]
