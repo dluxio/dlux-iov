@@ -101,21 +101,20 @@ export default {
                     </div>
                     <form name="power">
                         <div class="modal-body">
-                                <label for="poweramount" class="small">Amount (Balance: <a href="#/"
-                                        @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
-                                <div class="input-group mb-3" id="poweramount">
-                                    <input class="form-control text-white border-dark bg-dark" type="number" step="0.001"
-                                        :min="min" placeholder="1.000" v-model="amount">
-                                        <span class="input-group-text text-secondary border-dark bg-dark">{{token}}</span>
-                                </div>
-                                <div v-if="func = 'Register a Service'">
-                                <label for="api" class="small">Location (https://ipfs.dlux.io)</label>
-                                <div class="input-group mb-3" id="api">
-                                    <input class="form-control text-white border-dark bg-dark" type="text" v-model="api">
-                                        
-                                </div>
-                                <div>
+                            <label for="poweramount" class="small">Amount (Balance: <a href="#/"
+                                    @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
+                            <div class="input-group mb-3" id="poweramount">
+                                <input class="form-control text-white border-dark bg-dark" type="number" step="0.001"
+                                    :min="min" placeholder="1.000" v-model="amount">
+                                    <span class="input-group-text text-secondary border-dark bg-dark">{{token}}</span>
                             </div>
+                            <div v-if="func = 'Register a Service'">
+                              <label for="api" class="small">Location (https://ipfs.dlux.io)</label>
+                              <div class="input-group mb-3" id="api">
+                                  <input class="form-control text-white border-dark bg-dark" type="text" v-model="api">
+                                      
+                              </div>
+                            <div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
