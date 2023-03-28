@@ -43,7 +43,7 @@ if (location.search) {
 //     }
 // }
 if (!lapi) {
-  lapi = "https://token.dlux.io";
+  lapi = "https://spktest.dlux.io";
 }
 console.log(lapi);
 if (
@@ -2263,7 +2263,7 @@ function tradeFTreject(setname, uid, callback){
       }
       let api =
         url ||
-        prompt("Please enter your API", "https://spkinstant.hivehoneycomb.com");
+        prompt("Please enter your API", "https://spktest.dlux.io");
       if (url.indexOf("https://") == -1) {
         alert("https is required");
         return;
@@ -2732,6 +2732,7 @@ function tradeFTreject(setname, uid, callback){
           this.multisig = data.multisig;
           this.jsontoken = data.jsontoken;
           this.TOKEN = data.jsontoken.toUpperCase();
+          if(data.votable)this.votable = data.votable;
           //location.hash = data.jsontoken;
           this.node = data.node;
           this.features = data.features ? data.features : this.features;
@@ -2948,6 +2949,12 @@ function tradeFTreject(setname, uid, callback){
         .then((data) => {
           console.log(data);
           this.spkStats = data.result;
+          for (var i = 0; i < this.tokenGov.options.length; i++) {
+            this.tokenGov.options[i].val = data.result[this.tokenGov.options[i].id]
+            this.tokenGov.options[i].range_high = parseFloat(this.tokenGov.options[i].val * 1.01).toFixed(6)
+            this.tokenGov.options[i].range_low = parseFloat(this.tokenGov.options[i].val * 0.99).toFixed(6)
+            this.tokenGov.options[i].step = "0.000001"
+          }
         });
     },
     getSapi(user = this.account, fu) {
