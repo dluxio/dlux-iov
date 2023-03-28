@@ -41,6 +41,7 @@ export default {
                                         placeholder="Include a memo (optional)" v-model="memo">
                                 </div>
                         </div>
+                        </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button :disabled="!valid" type="submit" class="btn btn-primary" @click="send" data-bs-dismiss="modal">Send</button>
