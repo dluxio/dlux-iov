@@ -111,8 +111,7 @@ export default {
                             <div v-if="func == 'Register a Service'">
                               <label for="api" class="small">Location (https://ipfs.dlux.io)</label>
                               <div class="input-group mb-3" id="api">
-                                  <input class="form-control text-white border-dark bg-dark" type="text" v-model="api">
-                                      
+                                  <input class="form-control text-white border-dark bg-dark" type="text" v-model="api">     
                               </div>
                             <div>
                         </div>
@@ -144,7 +143,8 @@ export default {
             </div>
         </div>
         <slot name="trigger"></slot>
-    </div>`,
+    </div>
+  </div>`,
   methods: {
     accountCheck() {
       fetch("https://anyx.io", {
