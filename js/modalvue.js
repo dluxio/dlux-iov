@@ -105,7 +105,7 @@ export default {
                                         @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
                                 <div class="input-group mb-3" id="poweramount">
                                     <input class="form-control text-white border-dark bg-dark" type="number" step="0.001"
-                                        min="0.001" placeholder="1.000" v-model="amount">
+                                        :min="min" placeholder="1.000" v-model="amount">
                                         <span class="input-group-text text-secondary border-dark bg-dark">{{token}}</span>
                                 </div>
                                 <div v-if="func = 'Register a Service'">
@@ -207,6 +207,27 @@ export default {
             txid: "cancel power down",
           };
       }
+      if (op) {
+        this.$emit("modalsign", op);
+      }
+    },
+    build() {
+      var op;
+        op = {
+          type: "cja",
+          cj: {
+            broca: this.amount,
+            broker: this.broker,
+            to: this.to,
+            contract: this.contract,
+            slots: this.slots,
+          },
+          id: `spkcc_channel_open`,
+          msg: `Building Contract...`,
+          ops: ["getSapi"],
+          api: "https://spktest.dlux.io",
+          txid: "build_contract",
+        };
       if (op) {
         this.$emit("modalsign", op);
       }
@@ -560,6 +581,12 @@ export default {
       default: "",
     },
     memo: {
+      default: "",
+    },
+    min: {
+      default: "0.001",
+    },
+    max: {
       default: "",
     },
     balance: {
