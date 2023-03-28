@@ -817,6 +817,7 @@ var app = new Vue({
     saveNodeSettings(){
       var cja = {};
       for (var i = 0; i < this.tokenGov.options.length; i++){
+        console.log(this.tokenGov.options[i].id, this.tokenGov.options[i].value)
         cja[this.tokenGov.options[i].id] = this.tokenGov.options[i].value
       }
       this.toSign = {
