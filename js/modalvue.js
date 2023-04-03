@@ -7,144 +7,82 @@ export default {
     };
   },
   template: `
-    <div>
-        <div class="modal fade" id="send" :tabindex="i" role="dialog" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content bg-darker text-white">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Send {{token}}</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form name="sendhive">
-                        <div class="modal-body">
-                                <label class="small" for="sendhivefrom">From:</label>
-                                <div class="input-group mb-3">
-                                        <span class="input-group-text bg-dark border-dark text-secondary">@</span>
-                                    <input class="form-control text-white bg-dark border-dark" type="text" placeholder="Please login" :value="account"
-                                        readonly>
-                                </div>
-                                <label class="small" for="sendhiveto">To:</label>
-                                <div class="input-group mb-3">
-                                        <span class="input-group-text bg-dark border-dark text-secondary">@</span>
-                                    <input @blur="accountCheck" class="form-control text-white bg-dark border-dark" type="text" placeholder="Payment recipient" v-model="to">
-                                </div>
-                                <label class="small" for="sendAmount">Amount (Balance: <a href="#/"
-                                        @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
-                                <div class="input-group mb-3">
-                                    <input class="form-control text-white bg-dark border-dark" id="sendAmount" type="number" step="0.001"
-                                        min="0.001" placeholder="Enter amount" v-model="amount">
-                                        <span class="input-group-text bg-dark border-dark text-secondary">{{token}}</span>
-                                </div>
-                                <label class="small" for="sendhivememo">Memo:</label>
-                                <div class="input-group mb-3">
-                                    <input class="form-control text-white bg-dark border-dark" type="text"
-                                        placeholder="Include a memo (optional)" v-model="memo">
-                                </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button :disabled="!valid" type="submit" class="btn btn-primary" @click="send" data-bs-dismiss="modal">Send</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div class="modal fade" id="delegate" :tabindex="i" role="dialog" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content bg-darker text-white">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Delegate {{token}}</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form name="sendhive">
-                        <div class="modal-body">
-                                <label for="sendhivefrom" class="small">From:</label>
-                                <div class="input-group mb-3">
-                                        <div class="input-group-text bg-dark border-secondary text-secondary">@</div>
-                                    <input class="form-control bg-dark border-secondary text-white" type="text" placeholder="Please login" :value="account"
-                                        readonly>
-                                </div>
-                                <label for="sendhiveto" class="small">To:</label>
-                                <div class="input-group mb-3" v-if="token == 'LARYNX'">
-                                  <span class="input-group-text bg-dark border-secondary text-secondary">@</span>
-                                  <select class="form-select text-white bg-dark border-secondary" id="datalistOptions" v-model="to">
-                                    <option value="" disabled selected>Select node operator</option>
-                                     <option v-for="node in smarkets" :value="node.self">{{node.lastGood >= stats.head_block - 1200 ? '🟩': node.lastGood > stats.head_block - 28800  ? '🟨' : '🟥'}} {{node.self}}</option>
-                                  </select>
-                                </div>
-                                <div class="input-group mb-3" v-if="token == 'DLUX'">
-                                        <span class="input-group-text bg-dark border-secondary text-secondary">@</span>
-                                    <input @blur="accountCheck" class="form-control bg-dark border-secondary text-white" type="text" placeholder="Recipient" v-model="to">
-                                </div>
-                                <label for="delAmount" class="small">Amount (Balance: <a href="#/"
-                                        @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
-                                <div class="input-group mb-3">
-                                    <input class="form-control bg-dark border-secondary text-white" type="number" step="0.001" id="delAmount" 
-                                        min="0.001" placeholder="Enter amount" v-model="amount">
-                                        <span class="input-group-text bg-dark border-secondary text-secondary">{{token}}</span>
-                                </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button :disabled="!to" type="submit" class="btn btn-primary" @click="delegate" data-bs-dismiss="modal">Confirm</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div class="modal fade" id="power" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content bg-darker text-white">
-                    <div class="modal-header">
-                        <h5 class="modal-title">{{func}} {{token}}</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form name="power">
-                        <div class="modal-body">
-                            <label for="poweramount" class="small">Amount (Balance: <a href="#/"
-                                    @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
-                            <div class="input-group mb-3" id="poweramount">
-                                <input class="form-control text-white border-dark bg-dark" type="number" step="0.001"
-                                    :min="min" placeholder="1.000" v-model="amount">
-                                    <span class="input-group-text text-secondary border-dark bg-dark">{{token}}</span>
-                            </div>
-                            <div v-if="func == 'Register a Service'">
-                              <label for="api" class="small">Location (https://ipfs.dlux.io)</label>
-                              <div class="input-group mb-3" id="api">
-                                  <input class="form-control text-white border-dark bg-dark" type="text" v-model="api">     
-                              </div>
-                            <div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div class="modal fade" id="confirm" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content bg-darker text-white">
-                    <div class="modal-header">
-                        <h5 v-if="func == 'powercancel'" class="modal-title">Cancel Power Down?</h5>
-                        <h5 v-if="func == 'delcancel'" class="modal-title">Remove Delegation</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p v-if="func == 'delcancel'">Do you really want to remove the delegation to @dlux-io?</p>
-                        <p v-if="func == 'powercancel'">This will cancel the current power down request. Are you sure?</p>
-                    </div>
-                    <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-primary" @click="confirm" data-bs-dismiss="modal">Continue</button>
-                        </div>
-                </div>
-            </div>
-        </div>
-        <slot name="trigger"></slot>
-    </div>
-  </div>`,
+  <div>
+  <div class="modal fade" id="send" :tabindex="i" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content bg-darker text-white">
+              <div class="modal-header">
+                  <h5 class="modal-title">Send {{token}}</h5> <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <form name="sendhive">
+                  <div class="modal-body"> <label class="small" for="sendhivefrom">From:</label>
+                      <div class="input-group mb-3"> <span class="input-group-text bg-dark border-dark text-secondary">@</span> <input class="form-control text-white bg-dark border-dark" type="text" placeholder="Please login" :value="account" readonly> </div> <label class="small" for="sendhiveto">To:</label>
+                      <div class="input-group mb-3"> <span class="input-group-text bg-dark border-dark text-secondary">@</span> <input @blur="accountCheck" class="form-control text-white bg-dark border-dark" type="text" placeholder="Payment recipient" v-model="to"> </div> <label class="small" for="sendAmount">Amount (Balance: <a href="#/" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
+                      <div class="input-group mb-3"> <input class="form-control text-white bg-dark border-dark" id="sendAmount" type="number" step="0.001" min="0.001" placeholder="Enter amount" v-model="amount"> <span class="input-group-text bg-dark border-dark text-secondary">{{token}}</span> </div> <label class="small" for="sendhivememo">Memo:</label>
+                      <div class="input-group mb-3"> <input class="form-control text-white bg-dark border-dark" type="text" placeholder="Include a memo (optional)" v-model="memo"> </div>
+                  </div>
+                  <div class="modal-footer"> <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> <button :disabled="!valid" type="submit" class="btn btn-primary" @click="send" data-bs-dismiss="modal">Send</button> </div>
+              </form>
+          </div>
+      </div>
+  </div>
+  <div class="modal fade" id="delegate" :tabindex="i" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content bg-darker text-white">
+              <div class="modal-header">
+                  <h5 class="modal-title">Delegate {{token}}</h5> <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <form name="sendhive">
+                  <div class="modal-body"> <label for="sendhivefrom" class="small">From:</label>
+                      <div class="input-group mb-3">
+                          <div class="input-group-text bg-dark border-secondary text-secondary">@</div> <input class="form-control bg-dark border-secondary text-white" type="text" placeholder="Please login" :value="account" readonly>
+                      </div> <label for="sendhiveto" class="small">To:</label>
+                      <div class="input-group mb-3" v-if="token == 'LARYNX'"> <span class="input-group-text bg-dark border-secondary text-secondary">@</span> <select class="form-select text-white bg-dark border-secondary" id="datalistOptions" v-model="to">
+                              <option value="" disabled selected>Select node operator</option>
+                              <option v-for="node in smarkets" :value="node.self">{{node.lastGood >= stats.head_block - 1200 ? '🟩': node.lastGood > stats.head_block - 28800  ? '🟨' : '🟥'}} {{node.self}}</option>
+                          </select> </div>
+                      <div class="input-group mb-3" v-if="token == 'DLUX'"> <span class="input-group-text bg-dark border-secondary text-secondary">@</span> <input @blur="accountCheck" class="form-control bg-dark border-secondary text-white" type="text" placeholder="Recipient" v-model="to"> </div> <label for="delAmount" class="small">Amount (Balance: <a href="#/" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
+                      <div class="input-group mb-3"> <input class="form-control bg-dark border-secondary text-white" type="number" step="0.001" id="delAmount" min="0.001" placeholder="Enter amount" v-model="amount"> <span class="input-group-text bg-dark border-secondary text-secondary">{{token}}</span> </div>
+                  </div>
+                  <div class="modal-footer"> <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> <button :disabled="!to" type="submit" class="btn btn-primary" @click="delegate" data-bs-dismiss="modal">Confirm</button> </div>
+              </form>
+          </div>
+      </div>
+  </div>
+  <div class="modal fade" id="power" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content bg-darker text-white">
+              <div class="modal-header">
+                  <h5 class="modal-title">{{func}} {{token}}</h5> <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <form name="power">
+                  <div class="modal-body"> <label for="poweramount" class="small">Amount (Balance: <a href="#/" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
+                      <div class="input-group mb-3" id="poweramount"> <input class="form-control text-white border-dark bg-dark" type="number" step="0.001" :min="min" placeholder="1.000" v-model="amount"> <span class="input-group-text text-secondary border-dark bg-dark">{{token}}</span> </div>
+                      <div v-if="func == 'Register a Service'"> <label for="api" class="small">Location (https://ipfs.dlux.io)</label>
+                          <div class="input-group mb-3" id="api"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="api"> </div>
+                          <div> </div>
+                          <div class="modal-footer"> <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button> </div>
+              </form>
+          </div>
+      </div>
+  </div>
+  <div class="modal fade" id="confirm" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content bg-darker text-white">
+              <div class="modal-header">
+                  <h5 v-if="func == 'powercancel'" class="modal-title">Cancel Power Down?</h5>
+                  <h5 v-if="func == 'delcancel'" class="modal-title">Remove Delegation</h5> <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                  <p v-if="func == 'delcancel'">Do you really want to remove the delegation to @dlux-io?</p>
+                  <p v-if="func == 'powercancel'">This will cancel the current power down request. Are you sure?</p>
+              </div>
+              <div class="modal-footer"> <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> <button type="button" class="btn btn-primary" @click="confirm" data-bs-dismiss="modal">Continue</button> </div>
+          </div>
+      </div>
+  </div>
+  <slot name="trigger"></slot>
+</div>`,
   methods: {
     accountCheck() {
       fetch("https://anyx.io", {
