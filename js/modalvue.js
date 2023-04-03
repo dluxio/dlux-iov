@@ -61,7 +61,8 @@ export default {
                       <div v-if="func == 'Register a Service'"> <label for="api" class="small">Location (https://ipfs.dlux.io)</label>
                           <div class="input-group mb-3" id="api"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="api"> </div>
                           <div class="modal-footer"> <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button> </div>
-                      </div>    
+                      </div>
+                  </div>    
               </form>
           </div>
       </div>
