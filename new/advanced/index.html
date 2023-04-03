@@ -2,45 +2,46 @@
 <html lang="en" class="h-100">
 
 <head>
-	<title>DLUX SPK Hosting</title>
-	<meta charset="UTF-8" />
-	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<link rel="manifest" href="/manifest.webmanifest">
-	<link rel="apple-touch-icon" href="/img/dlux-icon-192.png">
-	<meta name="apple-mobile-web-app-status-bar-style" content="default">
-	<meta name="apple-mobile-web-app-title" content="DLUX">
-	<meta name="theme-color" content="#111222" />
-	<link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
-	<!-- Bootstrap -->
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
-		integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" />
-	<link href="/css/custom.css" rel="stylesheet" />
-	<link href="/css/smde.css" rel="stylesheet" />
-	<script src="https://cdn.jsdelivr.net/npm/@hiveio/hive-js/dist/hive.min.js"></script>
-	<script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
-	<script src="https://unpkg.com/marked@0.3.6"></script>
-	<script src="https://unpkg.com/lodash@4.16.0"></script>
-	<script type="text/javascript" src="/js/onlyhash.js"></script>
-	<script src="/js/buffer.js"></script>
-	<script src="/js/drag-drop.js"></script>
-	<script type="module" src="/js/spkvue.js"></script>
+    <title>DLUX SPK Hosting</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/img/dlux-icon-192.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="DLUX">
+    <meta name="theme-color" content="#111222" />
+    <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" />
+    <link href="/css/custom.css" rel="stylesheet" />
+    <link href="/css/smde.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@hiveio/hive-js/dist/hive.min.js"></script>
+    <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/marked@0.3.6"></script>
+    <script src="https://unpkg.com/lodash@4.16.0"></script>
+    <script type="text/javascript" src="/js/onlyhash.js"></script>
+    <script src="/js/buffer.js"></script>
+    <script src="/js/drag-drop.js"></script>
+    <script type="module" src="/js/spkvue.js"></script>
 </head>
 
 <body class="container h-100 padme-t70 text-center text-white">
-	<div id="app" @dragover.prevent @drop.prevent>
-		<div>
-			<nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event)"
-				@logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
-				:lapi="lapi" />
-		</div>
-		<main role="main" class="p-3 flex-shrink-0">
-			<section class="flex">
-				<div id="one">
-					<div class="flex-column mb-4 px-3">
-						<div class="flex-row">
-							<button @click="showWallet = !showWallet">{{showWallet ? 'Hide Wallet' : 'Show Wallet'}}</button>
-							<div v-if="showWallet" role="tabpanel" class="tab-pane fade show " id="spk" aria-labelledby="spktab">
+    <div id="app" @dragover.prevent @drop.prevent>
+        <div>
+            <nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event)"
+                @logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
+                :lapi="lapi" />
+        </div>
+        <main role="main" class="p-3 flex-shrink-0">
+            <section class="flex">
+                <div id="one">
+                    <div class="flex-column mb-4 px-3">
+                        <div class="flex-row">
+                            <button @click="showWallet = !showWallet">{{showWallet ? 'Hide Wallet' : 'Show Wallet'}}</button>
+                            <div v-if="showWallet" role="tabpanel" class="tab-pane fade show " id="spk"
+                                aria-labelledby="spktab">
                                 <div class="container">
                                     <div>
                                         <div class="d-flex align-items-center mt-4 mb-2">
@@ -180,13 +181,20 @@
                                                 </div>
                                             </div>
                                         </div>
-										<!-- SPK Power -->
-										<div class="d-flex align-items-center border-bottom border-secondary py-5">
-                                            <div>
+                                        <!-- SPK Power -->
+                                        <div class="d-flex align-items-center border-bottom border-secondary py-5">
+                                            <div class="text-start">
                                                 <div class="d-flex align-items-start">
                                                     <h4 class="m-0">SPK Power</h4>
                                                 </div>
-                                                <p class="text-white-50 m-0">Powered SPK for Voting. Enabled {{formatNumber((saccountapi.spk_power * 1000 ), 0, '', ',')}} BROCA.
+                                                <p class="text-white-50">Powered SPK for Voting.</p>
+                                                <p class="text-white-50">Benefits of SPK Power:</p>
+                                                    <ul class="text-white-50">
+                                                        <li>Enables voting</li>
+                                                        <li>Instant Power Up | 4 Week Power Down</li>
+                                                        <li>Grants BROCA at 1:1,000,000</li>
+                                                        <li>Your BROCA: {{formatNumber((saccountapi.spk_power * 1000 ), 0, '', ',')}}</li>
+                                                    </ul>
                                                 </p>
                                             </div>
                                             <div class="ms-auto text-end">
@@ -195,83 +203,81 @@
                                                     SPK
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="Power Actions">
-                                                    <!-- <button type="button" class="btn btn-info p-0">
-                                                        <modal-vue type="vote" token="SPK Power" :balance="saccountapi.spk"
-                                                            :account="account" @modalsign="sendIt($event)">
-                                                            <span slot="trigger" class="p-2"><i
-                                                                    class="fas fa-paper-plane me-2"></i>Vote</span>
-                                                        </modal-vue>
-                                                    </button> -->
-                                                    <a class="dropdown btn btn-info p-0"
-                                                    data-bs-auto-close="outside" href="#" role="button"
-                                                    id="settingsDropdownBtn" data-bs-toggle="dropdown"
-                                                    aria-expanded="false">
-                                                    Vote<i class="ms-2 fa-solid fa-person-booth"></i></a>
-                                                <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black dropdown-menu-end"
-                                                    aria-labelledby="settingsDropdownBtn" style="width: 300px">
-                                                    <li>
-                                                        <h6 class="dropdown-header text-center">
-                                                            {{tokenGov.title}}
-                                                        </h6>
-                                                    </li>
-                                                    <li>
-                                                        <h4 class="text-center text-white-50">@{{account}}</h4>
-                                                    </li>
-                                                    <li>
-                                                        <form name="nodeSettings" class="needs-validation" novalidate>
-                                                            <div class="row mb-3" v-for="opt in tokenGov.options">
-                                                                <label :for="opt.json"
-                                                                    class="form-label d-flex">{{opt.title}}: {{opt.val}} {{opt.unit}}
-                                                                    <div
-                                                                        class="dropdown show d-flex align-items-center p-0 m-0">
-                                                                        <a class="text-white" href="#" role="button"
-                                                                            data-bs-toggle="dropdown"
-                                                                            aria-haspopup="true" aria-expanded="false">
-                                                                            <h5 class="m-0"><i
-                                                                                    class="fas fa-info-circle ms-2"></i>
-                                                                            </h5>
-                                                                        </a>
+                                                    <button class="dropdown btn btn-info p-2" data-bs-auto-close="outside"
+                                                        href="#" role="button" id="settingsDropdownBtn"
+                                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                                        <i class="me-2 fa-solid fa-person-booth"></i>Vote</button>
+                                                    <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black dropdown-menu-end"
+                                                        aria-labelledby="settingsDropdownBtn" style="width: 300px">
+                                                        <li>
+                                                            <h6 class="dropdown-header text-center">
+                                                                {{tokenGov.title}}
+                                                            </h6>
+                                                        </li>
+                                                        <li>
+                                                            <h4 class="text-center text-white-50">@{{account}}</h4>
+                                                        </li>
+                                                        <li>
+                                                            <form name="nodeSettings" class="needs-validation"
+                                                                novalidate>
+                                                                <div class="row mb-3" v-for="opt in tokenGov.options">
+                                                                    <label :for="opt.json"
+                                                                        class="form-label d-flex">{{opt.title}}:
+                                                                        {{opt.val}} {{opt.unit}}
                                                                         <div
-                                                                            class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
-                                                                            <p>{{opt.info}}</p>
+                                                                            class="dropdown show d-flex align-items-center p-0 m-0">
+                                                                            <a class="text-white" href="#" role="button"
+                                                                                data-bs-toggle="dropdown"
+                                                                                aria-haspopup="true"
+                                                                                aria-expanded="false">
+                                                                                <h5 class="m-0"><i
+                                                                                        class="fas fa-info-circle ms-2"></i>
+                                                                                </h5>
+                                                                            </a>
+                                                                            <div
+                                                                                class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
+                                                                                <p>{{opt.info}}</p>
+                                                                            </div>
+                                                                        </div>
+                                                                    </label>
+                                                                    <div class="input-group">
+                                                                        <input type="range" v-model="opt.val"
+                                                                            class="slider form-control bg-darkg border-secondary text-info"
+                                                                            :id="opt.id" :max="opt.range_high"
+                                                                            :min="opt.range_low" :step="opt.step" />
+                                                                        <span v-if="opt.unit"
+                                                                            class="input-group-text bg-darkg border-secondary text-secondary">{{opt.unit}}</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="text-center mt-3">
+                                                                    <button id="saveSettingsBtn" type="button"
+                                                                        class="btn btn-primary mb-2"
+                                                                        @click="saveNodeSettings()">
+                                                                        Vote<i
+                                                                            class="ms-2 fa-solid fa-check-to-slot"></i>
+                                                                    </button>
+                                                                    <p class="small">Your vote cannot be changed or
+                                                                        cancelled once submitted.</p>
+                                                                </div>
+                                                                <div class="text-start">
+                                                                    <p class="lead mb-1 text-center">VOTE POWER (VP)</p>
+                                                                    <div class="progress mb-2" role="progressbar"
+                                                                        aria-label="Vote Power" aria-valuenow="75"
+                                                                        aria-valuemin="0" aria-valuemax="100">
+                                                                        <div class="progress-bar" style="width: 75%">75%
                                                                         </div>
                                                                     </div>
-                                                                </label>
-                                                                <div class="input-group">
-                                                                    <input type="range" v-model="opt.val"
-                                                                        class="slider form-control bg-darkg border-secondary text-info"
-                                                                        :id="opt.id" :max="opt.range_high"
-                                                                        :min="opt.range_low" :step="opt.step" />
-                                                                    <span v-if="opt.unit"
-                                                                        class="input-group-text bg-darkg border-secondary text-secondary">{{opt.unit}}</span>
+                                                                    <ul class="small">
+                                                                        <li>Recharge rate: 14 days</li>
+                                                                        <li>Voting will drain VP to 0%</li>
+                                                                        <li>Full Recharge:
+                                                                            {{formatNumber((spkStats.spk_cycle_length *
+                                                                            4)/28800, '.', ',', 2)}} days</li>
+                                                                    </ul>
                                                                 </div>
-                                                            </div>
-                                                            <div class="text-center mt-3">
-                                                                <button id="saveSettingsBtn" type="button"
-                                                                    class="btn btn-primary mb-2"
-                                                                    @click="saveNodeSettings()">
-                                                                    Vote<i class="ms-2 fa-solid fa-check-to-slot"></i>
-                                                                </button>
-                                                                <p class="small">Your vote cannot be changed or
-                                                                    cancelled once submitted.</p>
-                                                            </div>
-                                                            <div class="text-start">
-                                                                <p class="lead mb-1 text-center">VOTE POWER (VP)</p>
-                                                                <div class="progress mb-2" role="progressbar"
-                                                                    aria-label="Vote Power" aria-valuenow="75"
-                                                                    aria-valuemin="0" aria-valuemax="100">
-                                                                    <div class="progress-bar" style="width: 75%">75%
-                                                                    </div>
-                                                                </div>
-                                                                <ul class="small">
-                                                                    <li>Recharge rate: 14 days</li>
-                                                                    <li>Voting will drain VP to 0%</li>
-                                                                    <li>Full Recharge: {{formatNumber((spkStats.spk_cycle_length * 4)/28800, '.', ',', 2)}} days</li>
-                                                                </ul>
-                                                            </div>
-                                                        </form>
-                                                    </li>
-                                                </ul>
+                                                            </form>
+                                                        </li>
+                                                    </ul>
                                                     <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                                                         disabled></button>
                                                     <div class="btn-group" role="group" v-if="me">
@@ -285,7 +291,7 @@
                                                                 @modalsign="sendIt($event)">
                                                                 <button class="dropdown-item" slot="trigger"
                                                                     type="button"><i
-                                                                        class="fas fa-angle-double-up fa-fw me-2"></i>Power
+                                                                        class="fas fa-angle-double-down fa-fw me-2"></i>Power
                                                                     Down</button>
                                                             </modal-vue>
                                                         </ul>
@@ -293,21 +299,24 @@
                                                 </div>
                                             </div>
                                         </div>
-										<!-- Broca -->
-										<div v-if="saccountapi.spk_power" class="d-flex align-items-center border-bottom border-secondary py-5">
-                                            <div>
+                                        <!-- Broca -->
+                                        <div v-if="saccountapi.spk_power"
+                                            class="d-flex align-items-center border-bottom border-secondary py-5">
+                                            <div class="text-start">
                                                 <div class="d-flex align-items-start">
                                                     <h4 class="m-0">BROCA</h4>
                                                 </div>
-                                                <p class="text-white-50 m-0">Resource Credits for the SPK network.
-                                                </p>
-												<p>
-                                                    Current cost to store: 1 BROCA per {{sstats.channel_bytes}} Bytes for 30 days.
-                                                </p>
-												<p>
-                                                    Recharge Rate: {{formatNumber((sstats.broca_refill / 28800), 2, '.', ',')}} Days to Recharge.
-													Time Until Full: {{formatNumber((1 - (broca_calc(saccountapi.broca))/(saccountapi.spk_power * 1000)) * (sstats.broca_refill / 28800), 2, '.', ',')}} Days until full.
-                                                </p>
+                                                <p class="text-white-50">Resource Credits for the SPK network.</p>
+                                                <p class="text-white-50">BROCA stats:</p>
+                                                <ul class="text-white-50">
+                                                    <li>Current cost to store: 1 BROCA per {{sstats.channel_bytes}} Bytes
+                                                        for 30 days.</li>
+                                                    <li>Recharge Rate: {{formatNumber((sstats.broca_refill / 28800), 2, '.',
+                                                        ',')}} Days to Recharge.</li>
+                                                    <li>Time Until Full: {{formatNumber((1 -
+                                                        (broca_calc(saccountapi.broca))/(saccountapi.spk_power * 1000)) *
+                                                        (sstats.broca_refill / 28800), 2, '.', ',')}} Days until full.</li>
+                                                </ul>
                                             </div>
                                             <div class="ms-auto text-end">
                                                 <h5>
@@ -316,8 +325,9 @@
 
                                                 <div class="btn-group" role="group" aria-label="Power Actions">
                                                     <button type="button" class="btn btn-info p-0">
-                                                        <modal-vue type="vote" token="SPK Power" :balance="saccountapi.spk"
-                                                            :account="account" @modalsign="sendIt($event)">
+                                                        <modal-vue type="vote" token="SPK Power"
+                                                            :balance="saccountapi.spk" :account="account"
+                                                            @modalsign="sendIt($event)">
                                                             <span slot="trigger" class="p-2"><i
                                                                     class="fas fa-paper-plane me-2"></i>Contracts</span>
                                                         </modal-vue>
@@ -335,7 +345,7 @@
                                                                 @modalsign="sendIt($event)">
                                                                 <button class="dropdown-item" slot="trigger"
                                                                     type="button"><i
-                                                                        class="fas fa-angle-double-up fa-fw me-2"></i>Market</button>
+                                                                    class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a></button>
                                                             </modal-vue>
                                                         </ul>
                                                     </div>
@@ -453,12 +463,14 @@
                                                                     Liquidity</button>
                                                             </modal-vue>
                                                             <modal-vue type="power" token="LARYNX"
-                                                                func="Register a Service" :balance="saccountapi.balance" :min="sstats.IPFSRate/1000"
-                                                                :account="account" @modalsign="sendIt($event)">
-                                                                <button class="dropdown-item"
-                                                                    slot="trigger" type="button"><i
-                                                                        class="fa fa-network-wired fa-fw me-2"></i>Register A Service
-                                                                    </button>
+                                                                func="Register a Service" :balance="saccountapi.balance"
+                                                                :min="sstats.IPFSRate/1000" :account="account"
+                                                                @modalsign="sendIt($event)">
+                                                                <button class="dropdown-item" slot="trigger"
+                                                                    type="button"><i
+                                                                        class="fa fa-network-wired fa-fw me-2"></i>Register
+                                                                    A Service
+                                                                </button>
                                                             </modal-vue>
                                                             <div class="dropdown-divider"></div>
                                                             <a class="dropdown-item" href="/dex/larynx" id="buylink"><i
@@ -480,11 +492,10 @@
                                                     and earn rewards for node runners</p>
                                                 <p class="text-white-50">Benefits of LARYNX Locked:</p>
                                                 <ul class="text-white-50">
-                                                    <li>Proof of Stake Consensus</li>
-                                                    <li>Collateral for DEX transactions</li>
+                                                    <li>Provides collateral for DEX transactions and proof-of-stake consensus</li>
                                                     <li>Instant Lock | 4 Week Unlock</li>
                                                     <li>Requires an operating LARYNX node</li>
-                                                    <li>Earns {{toFixed(parseFloat(spkStats.spk_rate_lgov) *
+                                                    <li>LARYNX LOCKED (LL) earns SPK tokens at {{toFixed(parseFloat(spkStats.spk_rate_lgov) *
                                                         100,3)}}%</li>
                                                 </ul>
                                             </div>
@@ -539,10 +550,9 @@
                                                     <p class="text-white-50">Powered tokens used to mine SPK</p>
                                                     <p class="text-white-50">Benefits of LARYNX Power:</p>
                                                     <ul class="text-white-50">
-                                                        <li>Earns SPK governance tokens</li>
-                                                        <li>Instant Lock | 4 Week Unlock</li>
                                                         <li>Delegate to node service accounts to build consensus (DPoS)
                                                         </li>
+                                                        <li>Instant Power Up | 4 Week Power Down</li>
                                                         <li>LARYNX POWER (LP) earns SPK tokens at
                                                             {{toFixed(parseFloat(spkStats.spk_rate_lpow) * 100,3)}}%
                                                         </li>
@@ -706,7 +716,8 @@
                                             </div>
                                         </div>
                                         <!--account value-->
-                                        <div class="d-flex text-start align-items-center border-bottom border-secondary py-5">
+                                        <div
+                                            class="d-flex text-start align-items-center border-bottom border-secondary py-5">
                                             <div class="">
                                                 <h4>Estimated Account Value</h4>
                                                 <p class="text-white-50">The approximate US Dollar value for all SPK
@@ -722,54 +733,54 @@
                                     </div>
                                 </div>
                             </div>
-							<button v-if="showWallet" @click="showWallet = !showWallet">{{showWallet ? 'Hide Wallet' : 'Show Wallet'}}</button>
-							<!-- <h1 class="px-4 font-weight-bold">DLUX</h1> -->
-							<h1 class="px-4 font-weight-bold" style="font-variant:small-caps;">File Hosting
-							</h1>
-							<p class="lead">Upload your assets here, and select an available SPK hosting contract to pin
-								your files on IPFS.</p>
+                            <button v-if="showWallet" @click="showWallet = !showWallet">{{showWallet ? 'Hide Wallet' : 'Show Wallet'}}</button>
+                            <!-- <h1 class="px-4 font-weight-bold">DLUX</h1> -->
+                            <h1 class="px-4 font-weight-bold" style="font-variant:small-caps;">File Hosting
+                            </h1>
+                            <p class="lead">Upload your assets here, and select an available SPK hosting contract to pin
+                                your files on IPFS.</p>
 
-							<hr class="bg-light">
-						</div>
-						<div class="mt-2">
-							<!-- Make a form to get a contract -->
-							<form>
-								<div class="input-group">
+                            <hr class="bg-light">
+                        </div>
+                        <div class="mt-2">
+                            <!-- Make a form to get a contract -->
+                            <form>
+                                <div class="input-group">
 
-									<span
-										class="input-group-text bg-darkg border-secondary text-white-50 l-radius-hotfix">@</span>
+                                    <span
+                                        class="input-group-text bg-darkg border-secondary text-white-50 l-radius-hotfix">@</span>
 
-									<input type="text" class="form-control bg-darkg border-secondary text-info" readonly
-										id="username" v-model="account">
-								</div>
-								<div v-if="saccountapi.pubKey == 'NA'">
-									<button @click="updatePubkey">
-										Register Account
-										<i class="fas fa-plus"></i>
-									</button>
-								</div>
-								<div v-if="saccountapi.pubKey != 'NA'">
-									<button>
-										Get Test Contract
-										<i class="fas fa-plus"></i>
-									</button>
-								</div>
-							</form>
-							<div v-for="sponsor in saccountapi.channels">
-								<ul class="text-start" v-for="channel in sponsor">
-									<li>Size Allowed: {{channel.a}} bytes</li>
-									<li>File Owner: @{{channel.t}}</li>
-									<li>Service Provider: @{{channel.b}}</li>
-									<li>Sponsor: @{{channel.f}}</li>
-									<li>Expiration: {{channel.e}}</li>
-									<li>Price: {{channel.r}} Broca</li>
-									<li>Contract ID: {{channel.i}}</li>
-									<li>Terms: 10% Bennificiary to @dlux-io</li>
-									<li>Status: {{channel.c == 0 ? 'Waiting For Upload' : 'Uploaded'}}</li>
-									<button @click="selectContract(channel.i, channel.b)">Select Provider</button>
-								</ul>
-							</div>
-							<!-- <form>
+                                    <input type="text" class="form-control bg-darkg border-secondary text-info" readonly
+                                        id="username" v-model="account">
+                                </div>
+                                <div v-if="saccountapi.pubKey == 'NA'">
+                                    <button @click="updatePubkey">
+                                        Register Account
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                                <div v-if="saccountapi.pubKey != 'NA'">
+                                    <button>
+                                        Get Test Contract
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </form>
+                            <div v-for="sponsor in saccountapi.channels">
+                                <ul class="text-start" v-for="channel in sponsor">
+                                    <li>Size Allowed: {{channel.a}} bytes</li>
+                                    <li>File Owner: @{{channel.t}}</li>
+                                    <li>Service Provider: @{{channel.b}}</li>
+                                    <li>Sponsor: @{{channel.f}}</li>
+                                    <li>Expiration: {{channel.e}}</li>
+                                    <li>Price: {{channel.r}} Broca</li>
+                                    <li>Contract ID: {{channel.i}}</li>
+                                    <li>Terms: 10% Bennificiary to @dlux-io</li>
+                                    <li>Status: {{channel.c == 0 ? 'Waiting For Upload' : 'Uploaded'}}</li>
+                                    <button @click="selectContract(channel.i, channel.b)">Select Provider</button>
+                                </ul>
+                            </div>
+                            <!-- <form>
 								<ul class="text-center ms-auto me-auto col-md-8 col-lg-6 col-xl-4">
 									<h3><u>Contract Types</u></h3>
 									<li class="text-start">Direct: you pay for hosting now</li>
@@ -856,231 +867,231 @@
 									</div>
 								</div>
 							</form> -->
-						</div>
-					</div>
-				</div>
-				<div id="two" v-if="contract.id">
-					<div class="flex-column flex-shrink mx-3">
-						<div style="border-style:solid;">
-							<form>
-								<input id="fileInput" type="file" @change="uploadFile" multiple />
-								<div style="background-color:green;margin-bottom:10px;padding:10px;" id="img-well"
-									@drop="dragFile($event)">
-									Or drag the file here
-								</div>
-							</form>
-							<div v-if="File.length">
-								<button @click="signNUpload()">Sign and Upload</button>
-							</div>
-						</div>
-						<div id="listOfImgs" v-for="file in File">
-							<div class="p-3 mb-3 bg-dark" style="border-radius: 10px;">
-								<div class="d-flex align-items-center flex-row pb-2 mb-2"
-									style="border-bottom-style: solid; border-bottom-color: #909090">
-									<div class="d-flex">
-										<h6>{{file.name}}</h6>
-									</div>
-									<div class="ml-auto"><button type="button" @click="togglePin(index)"
-											class="btn ${btnclass} btn-sm mr-2" data-toggle="tooltip"
-											data-placement="top" title="Asset Pinned to IPFS"><i
-												class="fas fa-fw fa-thumbtack"></i></button><button
-											class="btn btn-danger btn-sm" @click="deleteImg(index)"
-											data-toggle="tooltip" data-placement="top" title="Delete Asset"><i
-												class="fas fa-fw fa-trash-alt"></i></button></div>
-								</div>
-								<div class="d-flex flex-row">
-									<div>
-										<div class="small">
-											<ul>
-												<li>Bytes: {{file.size}}</li>
-												<li>CID: {{FileInfo[file.name].hash}}</li>
-												<li>
-													<div class="progress" role="progressbar"
-														aria-label="Example with label" aria-valuenow="25"
-														aria-valuemin="0" aria-valuemax="100">
-														<div class="progress-bar"
-															:style="'width: ' + FileInfo[file.name].progress + '%'">
-															{{file.progress}}%</div>
-													</div>
-												</li>
-											</ul>
-										</div>
-									</div>
-									<div v-if="FileInfo[file.name].uploaded">
-										<div><img :src="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
-												width="100%" /></div>
-										<div class="small"><a
-												:href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
-												target="_blank">https://ipfs.io/ipfs/{{FileInfo[file.name].hash}}</a>
-										</div>
-									</div>
-									<div v-if="File.length">
-										<button v-if="file.actions.pause"
-											@click="fileRequest[file.index].resumeFileUpload()">Pause</button>
-										<button v-if="file.actions.resume"
-											@click="fileRequest[file.index].resumeFileUpload()">Resume</button>
-										<button v-if="file.actions.cancel"
-											@click="fileRequest[file.index].resumeFileUpload()">Cancel</button>
-										<h5>{{FileInfo[file.name].status}}</h5>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</section>
-		</main>
-	</div>
-	<script src="/js/img-ipfs.js"></script>
+                        </div>
+                    </div>
+                </div>
+                <div id="two" v-if="contract.id">
+                    <div class="flex-column flex-shrink mx-3">
+                        <div style="border-style:solid;">
+                            <form>
+                                <input id="fileInput" type="file" @change="uploadFile" multiple />
+                                <div style="background-color:green;margin-bottom:10px;padding:10px;" id="img-well"
+                                    @drop="dragFile($event)">
+                                    Or drag the file here
+                                </div>
+                            </form>
+                            <div v-if="File.length">
+                                <button @click="signNUpload()">Sign and Upload</button>
+                            </div>
+                        </div>
+                        <div id="listOfImgs" v-for="file in File">
+                            <div class="p-3 mb-3 bg-dark" style="border-radius: 10px;">
+                                <div class="d-flex align-items-center flex-row pb-2 mb-2"
+                                    style="border-bottom-style: solid; border-bottom-color: #909090">
+                                    <div class="d-flex">
+                                        <h6>{{file.name}}</h6>
+                                    </div>
+                                    <div class="ml-auto"><button type="button" @click="togglePin(index)"
+                                            class="btn ${btnclass} btn-sm mr-2" data-toggle="tooltip"
+                                            data-placement="top" title="Asset Pinned to IPFS"><i
+                                                class="fas fa-fw fa-thumbtack"></i></button><button
+                                            class="btn btn-danger btn-sm" @click="deleteImg(index)"
+                                            data-toggle="tooltip" data-placement="top" title="Delete Asset"><i
+                                                class="fas fa-fw fa-trash-alt"></i></button></div>
+                                </div>
+                                <div class="d-flex flex-row">
+                                    <div>
+                                        <div class="small">
+                                            <ul>
+                                                <li>Bytes: {{file.size}}</li>
+                                                <li>CID: {{FileInfo[file.name].hash}}</li>
+                                                <li>
+                                                    <div class="progress" role="progressbar"
+                                                        aria-label="Example with label" aria-valuenow="25"
+                                                        aria-valuemin="0" aria-valuemax="100">
+                                                        <div class="progress-bar"
+                                                            :style="'width: ' + FileInfo[file.name].progress + '%'">
+                                                            {{file.progress}}%</div>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div v-if="FileInfo[file.name].uploaded">
+                                        <div><img :src="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
+                                                width="100%" /></div>
+                                        <div class="small"><a
+                                                :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
+                                                target="_blank">https://ipfs.io/ipfs/{{FileInfo[file.name].hash}}</a>
+                                        </div>
+                                    </div>
+                                    <div v-if="File.length">
+                                        <button v-if="file.actions.pause"
+                                            @click="fileRequest[file.index].resumeFileUpload()">Pause</button>
+                                        <button v-if="file.actions.resume"
+                                            @click="fileRequest[file.index].resumeFileUpload()">Resume</button>
+                                        <button v-if="file.actions.cancel"
+                                            @click="fileRequest[file.index].resumeFileUpload()">Cancel</button>
+                                        <h5>{{FileInfo[file.name].status}}</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="/js/img-ipfs.js"></script>
 
-	<script>
-		// Example starter JavaScript for disabling form submissions if there are invalid fields
-		(function () {
-			"use strict";
-			window.addEventListener(
-				"load",
-				function () {
-					// Fetch all the forms we want to apply custom Bootstrap validation styles to
-					var forms = document.getElementsByClassName("needs-validation");
-					// Loop over them and prevent submission
-					var validation = Array.prototype.filter.call(forms, function (form) {
-						form.addEventListener(
-							"submit",
-							function (event) {
-								console.log("button");
-								if (
-									document.getElementById("validationCustomDescription")
-										.innerHTML == "Sign In"
-								) {
-									sendLink("/auth");
-								}
-								var tagField = document.getElementById(
-									"validationCustomReferal"
-								).value;
-								var tags = tagField.split(",").map(item => item.trim());
-								let otherTags = tags.slice(0, 4);
-								var customJSON = JSON.stringify({
-									tags: otherTags,
-									subApp: "SuperCraftLoader/v0.1",
-									xr: false,
-									vrHash: "QmTzKnzxEm3ZXcqFMxytt3fnJZvSSvtRnMCZTuzzMxwG7y",
-									superCraft: document.getElementById(
-										"validationCustomLoader"
-									).value
-								});
-								var postData = {
-									title: document.getElementById("validationCustomTitle")
-										.value,
-									message: document.getElementById(
-										"validationCustomDescription"
-									).value,
-									customJSON: customJSON
-								};
-								console.log(postData);
-								if (form.checkValidity() === false) {
-									event.preventDefault();
-									event.stopPropagation();
-								} else {
-									window.parent.postMessage(
-										{
-											func: "advPost",
-											message: postData
-										},
-										"*"
-									);
-								}
-								form.classList.add("was-validated");
-							},
-							false
-						);
-					});
-				},
-				false
-			);
-		})();
+    <script>
+        // Example starter JavaScript for disabling form submissions if there are invalid fields
+        (function () {
+            "use strict";
+            window.addEventListener(
+                "load",
+                function () {
+                    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                    var forms = document.getElementsByClassName("needs-validation");
+                    // Loop over them and prevent submission
+                    var validation = Array.prototype.filter.call(forms, function (form) {
+                        form.addEventListener(
+                            "submit",
+                            function (event) {
+                                console.log("button");
+                                if (
+                                    document.getElementById("validationCustomDescription")
+                                        .innerHTML == "Sign In"
+                                ) {
+                                    sendLink("/auth");
+                                }
+                                var tagField = document.getElementById(
+                                    "validationCustomReferal"
+                                ).value;
+                                var tags = tagField.split(",").map(item => item.trim());
+                                let otherTags = tags.slice(0, 4);
+                                var customJSON = JSON.stringify({
+                                    tags: otherTags,
+                                    subApp: "SuperCraftLoader/v0.1",
+                                    xr: false,
+                                    vrHash: "QmTzKnzxEm3ZXcqFMxytt3fnJZvSSvtRnMCZTuzzMxwG7y",
+                                    superCraft: document.getElementById(
+                                        "validationCustomLoader"
+                                    ).value
+                                });
+                                var postData = {
+                                    title: document.getElementById("validationCustomTitle")
+                                        .value,
+                                    message: document.getElementById(
+                                        "validationCustomDescription"
+                                    ).value,
+                                    customJSON: customJSON
+                                };
+                                console.log(postData);
+                                if (form.checkValidity() === false) {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                } else {
+                                    window.parent.postMessage(
+                                        {
+                                            func: "advPost",
+                                            message: postData
+                                        },
+                                        "*"
+                                    );
+                                }
+                                form.classList.add("was-validated");
+                            },
+                            false
+                        );
+                    });
+                },
+                false
+            );
+        })();
       //onpageloaded();
-	</script>
-	<script>
+    </script>
+    <script>
 
-		var custom_json = {
-			"app": "dlux/0.0.9",
-			"xr": true,
-			"Hash360": "",
-			"format": "markdown",
-			"assets": [
-			],
-			"tags": [
-				"dlux"
-			],
-			"vrHash": "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16"
-		},
-			permlink
-		function saveToIpfs(ar, pin, is360, newAsset) {
-			console.log(`You've requested to upload and pin(${pin}) 360(${is360}) image(s) and create assets(${newAsset})\nIPFS maky take some time to upload...`)
-			var ipfsIP = []
-			var info = []
-			for (var name in ar) {
-				ipfsIP.push({ 'path': `${ar[name][1]}`, 'content': ar[name][0] })
-				info.push([name, ar[name][1]])
-			}
-			ipfs.add(ipfsIP, (err, ipfsReturn) => {
-				if (!err) {
-					iloaded(ipfsReturn, info)
-				} else {
-					console.log('IPFS Upload Failed', err)
-				}
-			})
-		}
-		function iloaded(assets, info) {
-			if (assets) {
-				for (var i = 0; i < assets.length; i++) {
-					custom_json.assets.push({
-						hash: assets[i].hash,
-						name: assets[i].path,
-						size: assets[i].size,
-						pin: true,
-						type: "ts",
-						thumbHash: assets[i].hash
-					})
-					if (!custom_json.Hash360) {
-						custom_json.Hash360 = assets[i].hash
-					}
-				}
-			}
-			hive.api.getContent('markegiles', 'dlux-vr-tutorial-sm-test', function (err, result) {
-				result.json_metadata = JSON.stringify(custom_json)
-				var target = document.getElementById('aframePreview').contentWindow
-				var un = 'Guest'
-				if (localStorage.getItem('user')) { un = localStorage.getItem('user') }
-				target.postMessage({
-					'func': 'iAm',
-					'message': un,
-				}, "*");
-				target.postMessage({
-					'func': 'key',
-					'message': 'markegiles/dlux-vr-tutorial-sm-test',
-				}, "*");
-				target.postMessage({
-					'func': 'hiveState',
-					'message': result,
-				}, "*");
-			})
-			buildList()
-		}
-		function buildList() {
-			document.getElementById('listOfImgs').innerHTML = ``
-			for (var i = 0; i < custom_json.assets.length; i++) {
-				const img = custom_json.assets[i]
-				if (img.type == 'ts') {
-					var btnclass = 'btn-primary'
-					if (!img.pin) {
-						btnclass = 'btn-outline-primary'
-					}
-					var item = document.createElement('div')
-					item.id = `item${i}`
-					item.class = `p-3 mb-3 bg-dark`
-					item.setAttribute('style', 'border-radius', '10px')
-					item.innerHTML = `
+        var custom_json = {
+            "app": "dlux/0.0.9",
+            "xr": true,
+            "Hash360": "",
+            "format": "markdown",
+            "assets": [
+            ],
+            "tags": [
+                "dlux"
+            ],
+            "vrHash": "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16"
+        },
+            permlink
+        function saveToIpfs(ar, pin, is360, newAsset) {
+            console.log(`You've requested to upload and pin(${pin}) 360(${is360}) image(s) and create assets(${newAsset})\nIPFS maky take some time to upload...`)
+            var ipfsIP = []
+            var info = []
+            for (var name in ar) {
+                ipfsIP.push({ 'path': `${ar[name][1]}`, 'content': ar[name][0] })
+                info.push([name, ar[name][1]])
+            }
+            ipfs.add(ipfsIP, (err, ipfsReturn) => {
+                if (!err) {
+                    iloaded(ipfsReturn, info)
+                } else {
+                    console.log('IPFS Upload Failed', err)
+                }
+            })
+        }
+        function iloaded(assets, info) {
+            if (assets) {
+                for (var i = 0; i < assets.length; i++) {
+                    custom_json.assets.push({
+                        hash: assets[i].hash,
+                        name: assets[i].path,
+                        size: assets[i].size,
+                        pin: true,
+                        type: "ts",
+                        thumbHash: assets[i].hash
+                    })
+                    if (!custom_json.Hash360) {
+                        custom_json.Hash360 = assets[i].hash
+                    }
+                }
+            }
+            hive.api.getContent('markegiles', 'dlux-vr-tutorial-sm-test', function (err, result) {
+                result.json_metadata = JSON.stringify(custom_json)
+                var target = document.getElementById('aframePreview').contentWindow
+                var un = 'Guest'
+                if (localStorage.getItem('user')) { un = localStorage.getItem('user') }
+                target.postMessage({
+                    'func': 'iAm',
+                    'message': un,
+                }, "*");
+                target.postMessage({
+                    'func': 'key',
+                    'message': 'markegiles/dlux-vr-tutorial-sm-test',
+                }, "*");
+                target.postMessage({
+                    'func': 'hiveState',
+                    'message': result,
+                }, "*");
+            })
+            buildList()
+        }
+        function buildList() {
+            document.getElementById('listOfImgs').innerHTML = ``
+            for (var i = 0; i < custom_json.assets.length; i++) {
+                const img = custom_json.assets[i]
+                if (img.type == 'ts') {
+                    var btnclass = 'btn-primary'
+                    if (!img.pin) {
+                        btnclass = 'btn-outline-primary'
+                    }
+                    var item = document.createElement('div')
+                    item.id = `item${i}`
+                    item.class = `p-3 mb-3 bg-dark`
+                    item.setAttribute('style', 'border-radius', '10px')
+                    item.innerHTML = `
 				<div id="image${i}" class="p-3 mb-3 bg-dark" style="border-radius: 10px;">
 				<div class="d-flex align-items-center flex-row pb-2 mb-2" style="border-bottom-style: solid; border-bottom-color: #909090">
 					<div class="d-flex"><input id="nameOf${img.hash}" class="form-control form-control-sm mr-2" type="text" value="${img.name}" disabled><button onclick="toggleNameEdit('${img.hash}')" class="btn btn-secondary btn-sm ml-auto" data-toggle="tooltip" data-placement="top" title="Edit Name"><i id="editName${img.hash}" class="fas fa-fw fa-pencil-alt"></i></button></div>
@@ -1093,88 +1104,88 @@
 		  		</div>
 			</div>
 				`
-					document.getElementById('listOfImgs').appendChild(item)
-				}
-			}
-		}
-		function togglePin(hash) {
-			for (var i = 0; i < custom_json.assets.length; i++) {
-				const img = custom_json.assets[i]
-				if (img.hash == hash) {
-					if (img.pin) { custom_json.assets[i].pin = false }
-					else { custom_json.assets[i].pin = true }
-				}
-			}
-			buildList()
-		}
-		function deleteImg(hash) {
-			for (var i = 0; i < custom_json.assets.length; i++) {
-				const img = custom_json.assets[i]
-				if (img.hash == hash) {
-					custom_json.assets.splice(i, 1)
-				}
-			}
-			//buildList ()
-			iloaded()
-		}
-		function toggleNameEdit(hash) {
-			var enabled = document.getElementById(`nameOf${hash}`).disabled
-			document.getElementById(`nameOf${hash}`).disabled = !enabled
-			document.getElementById(`editName${hash}`).setAttribute('class', 'fas fa-fw fa-check')
-			console.log(enabled)
-			if (!enabled) {
-				//document.getElementById(`editName${hash}`).addClass('fa-pencil-alt')
-				//document.getElementById(`editName${hash}`).removeClass('fa-check')
-				for (var i = 0; i < custom_json.assets.length; i++) {
-					const img = custom_json.assets[i]
-					if (img.hash == hash) {
-						custom_json.assets[i].name = document.getElementById(`nameOf${hash}`).value
-						break;
-					}
-				}
-				//buildList()
-				iloaded()
-			}
-		}
+                    document.getElementById('listOfImgs').appendChild(item)
+                }
+            }
+        }
+        function togglePin(hash) {
+            for (var i = 0; i < custom_json.assets.length; i++) {
+                const img = custom_json.assets[i]
+                if (img.hash == hash) {
+                    if (img.pin) { custom_json.assets[i].pin = false }
+                    else { custom_json.assets[i].pin = true }
+                }
+            }
+            buildList()
+        }
+        function deleteImg(hash) {
+            for (var i = 0; i < custom_json.assets.length; i++) {
+                const img = custom_json.assets[i]
+                if (img.hash == hash) {
+                    custom_json.assets.splice(i, 1)
+                }
+            }
+            //buildList ()
+            iloaded()
+        }
+        function toggleNameEdit(hash) {
+            var enabled = document.getElementById(`nameOf${hash}`).disabled
+            document.getElementById(`nameOf${hash}`).disabled = !enabled
+            document.getElementById(`editName${hash}`).setAttribute('class', 'fas fa-fw fa-check')
+            console.log(enabled)
+            if (!enabled) {
+                //document.getElementById(`editName${hash}`).addClass('fa-pencil-alt')
+                //document.getElementById(`editName${hash}`).removeClass('fa-check')
+                for (var i = 0; i < custom_json.assets.length; i++) {
+                    const img = custom_json.assets[i]
+                    if (img.hash == hash) {
+                        custom_json.assets[i].name = document.getElementById(`nameOf${hash}`).value
+                        break;
+                    }
+                }
+                //buildList()
+                iloaded()
+            }
+        }
 
-		function post() {
-			const operations = [["comment",
-				{
-					"parent_author": "",
-					"parent_permlink": "dlux",
-					"author": localStorage.getItem('user'),
-					"permlink": permlink,
-					"title": document.getElementById('title').value,
-					"body": simplemde.value() + `\n***\n#### [View in VR @ dlux.io](https://dlux.io/dlux/@${localStorage.getItem('user')}/${permlink})\n`,
-					"json_metadata": JSON.stringify(custom_json)
-				}],
-			["comment_options",
-				{
-					"author": localStorage.getItem('user'),
-					"permlink": permlink,
-					"max_accepted_payout": "1000000.000 HBD",
-					"percent_hbd": 10000,
-					"allow_votes": true,
-					"allow_curation_rewards": true,
-					"extensions":
-						[[0,
-							{
-								"beneficiaries":
-									[{
-										"account": "dlux-io",
-										"weight": 1000
-									}]
-							}]]
-				}]]
-			hive_keychain.requestBroadcast(localStorage.getItem('user'), operations, 'active', function (response) {
-				console.log(response);
-			});
+        function post() {
+            const operations = [["comment",
+                {
+                    "parent_author": "",
+                    "parent_permlink": "dlux",
+                    "author": localStorage.getItem('user'),
+                    "permlink": permlink,
+                    "title": document.getElementById('title').value,
+                    "body": simplemde.value() + `\n***\n#### [View in VR @ dlux.io](https://dlux.io/dlux/@${localStorage.getItem('user')}/${permlink})\n`,
+                    "json_metadata": JSON.stringify(custom_json)
+                }],
+            ["comment_options",
+                {
+                    "author": localStorage.getItem('user'),
+                    "permlink": permlink,
+                    "max_accepted_payout": "1000000.000 HBD",
+                    "percent_hbd": 10000,
+                    "allow_votes": true,
+                    "allow_curation_rewards": true,
+                    "extensions":
+                        [[0,
+                            {
+                                "beneficiaries":
+                                    [{
+                                        "account": "dlux-io",
+                                        "weight": 1000
+                                    }]
+                            }]]
+                }]]
+            hive_keychain.requestBroadcast(localStorage.getItem('user'), operations, 'active', function (response) {
+                console.log(response);
+            });
 
-		}
-	</script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-		integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
-		crossorigin="anonymous"></script>
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
 </body>
 
 </html>
