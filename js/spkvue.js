@@ -2767,7 +2767,6 @@ function tradeFTreject(setname, uid, callback){
       this.getHiveStats();
       this.getQuotes();
       this.getSNodes();
-      this.getPosts();
       this.getProtocol();
       this.getSpkStats();
       this.getRewardFund();
