@@ -1685,184 +1685,6 @@ function tradeFTreject(setname, uid, callback){
       if (prefix == "duat_") return "https://duat.hivehoneycomb.com";
       else return "";
     },
-    meltNFT(item) {
-      var cja = {
-        set: item.setname,
-        uid: item.uid,
-      },
-        type = "cja";
-      this.toSign = {
-        type,
-        cj: cja,
-        id: `${this.prefix}nft_delete`,
-        msg: `Melting: ${item.setname}:${item.uid}`,
-        ops: ["getUserNFTs"],
-        api: this.apiFor(this.prefix),
-        txid: `${item.setname}:${item.uid}_nft_delete`,
-      };
-    },
-    giveNFT(item) {
-      if (this.nftTradeAllowed) {
-        var cja = {
-          set: item.setname,
-          uid: item.uid,
-          to: this.nftTradeTabTo,
-        },
-          type = "cja";
-        this.toSign = {
-          type,
-          cj: cja,
-          id: `${this.prefix}nft_transfer`,
-          msg: `Giving: ${item.setname}:${item.uid}`,
-          ops: ["getUserNFTs"],
-          api: this.apiFor(this.prefix),
-          txid: `${item.setname}:${item.uid}_nft_transfer`,
-        };
-      }
-    },
-    tradeNFT(item) {
-      if (this.nftTradeAllowed) {
-        var cja = {
-          set: item.setname,
-          uid: item.uid,
-          price: parseInt(this.nftTradeTabPrice * 1000),
-          type: this.nftTradeTabToken,
-          to: this.nftTradeTabTo,
-        },
-          type = "cja";
-        this.toSign = {
-          type,
-          cj: cja,
-          id: `${this.prefix}nft_reserve_transfer`,
-          msg: `Proposing Trade: ${item.setname}:${item.uid}`,
-          ops: ["getUserNFTs"],
-          api: this.apiFor(this.prefix),
-          txid: `${item.setname}:${item.uid}_nft_reserve_transfer`,
-        };
-      }
-    },
-    sellNFT(item) {
-      var cja = {
-        set: item.setname,
-        uid: item.uid,
-        price: parseInt(this.nftSellTabPrice * 1000),
-        type: this.nftSellTabToken,
-      },
-        type = "cja";
-      this.toSign = {
-        type,
-        cj: cja,
-        id: `${this.prefix}nft_sell`,
-        msg: `Selling: ${item.setname}:${item.uid}`,
-        ops: ["getUserNFTs"],
-        api: this.apiFor(this.prefix),
-        txid: `${item.setname}:${item.uid}_nft_sell`,
-      };
-    },
-    cancelNFT(item) {
-      var cja = {
-        set: item.set,
-        uid: item.uid,
-      },
-        type = "cja";
-      this.toSign = {
-        type,
-        cj: cja,
-        id: `${item.token}_nft_sell_cancel`,
-        msg: `Canceling: ${item.set}:${item.uid}`,
-        ops: ["getUserNFTs"],
-        api: this.apiFor(item.token),
-        txid: `${item.set}:${item.uid}_nft_sell_cancel`,
-      };
-    },
-    cancelFT(item) {
-      var cja = {
-        set: item.set,
-        uid: item.uid,
-      },
-        type = "cja";
-      this.toSign = {
-        type,
-        cj: cja,
-        id: `${item.token}_ft_sell_cancel`,
-        msg: `Canceling: ${item.set}:${item.uid}`,
-        ops: ["getUserNFTs"],
-        api: this.apiFor(item.token),
-        txid: `${item.set}:${item.uid}_ft_sell_cancel`,
-      };
-    },
-    buyNFT(item) {
-      var cja = {
-        set: item.set,
-        uid: item.uid,
-        price: item.price.amount,
-      },
-        type = "cja";
-      if (item.price.token == "HIVE" || item.price.token == "HBD") {
-        type = "xfr";
-        cja.memo = `NFTbuy ${item.set}:${item.uid}`;
-        cja[`${item.price.token.toLowerCase()}`] = item.price.amount;
-        cja.to = this.multisig;
-      }
-      this.toSign = {
-        type,
-        cj: cja,
-        id: `${this.prefix}nft_buy`,
-        msg: `Purchasing: ${item.set}:${item.uid}`,
-        ops: ["getTokenUser", "getUserNFTs", "getHiveUser"],
-        api: this.apiFor(this.prefix),
-        txid: `${item.set}:${item.uid}_nft_buy`,
-      };
-    },
-    auctionNFT(item) {
-      var cja = {
-        set: item.setname,
-        uid: item.uid,
-        price: parseInt(this.nftAuctionTabPrice * 1000),
-        type:
-          this.nftAuctionTabToken != this.TOKEN ? this.nftAuctionTabToken : 0,
-        now: false,
-        time: this.nftAuctionTabTime,
-      },
-        type = "cja";
-      this.toSign = {
-        type,
-        cj: cja,
-        id: `${this.prefix}nft_${cja.type ? "h" : ""}auction`,
-        msg: `Auctioning: ${item.setname}:${item.uid}`,
-        ops: ["getUserNFTs"],
-        api: this.apiFor(this.prefix),
-        txid: `${item.setname}:${item.uid}_nft_${cja.type ? "h" : ""}auction`,
-      };
-    },
-    bidNFT(item) {
-      var cja = {
-        set: item.setname,
-        uid: item.uid,
-        bid_amount: parseInt(this.nftAuctionTabPrice * 1000),
-      },
-        type = "cja";
-      if (this.itemModal.auction.price.token == "HIVE") {
-        type = "xfr";
-        cja.memo = `NFTbid ${item.setname}:${item.uid}`;
-        cja.hive = cja.bid_amount;
-        cja.to = this.multisig;
-      } else if (this.itemModal.auction.price.token == "HBD") {
-        type = "xfr";
-        cja.memo = `NFTbid ${item.setname}:${item.uid}`;
-        cja.hive = cja.bid_amount;
-        cja.to = this.multisig;
-      }
-      this.toSign = {
-        type,
-        cj: cja,
-        id: `${this.prefix}nft_bid`,
-        msg: `Bidding on: ${item.setname}:${item.uid}`,
-        ops: ["getUserNFTs"],
-        api: this.apiFor(this.prefix),
-        txid: `${item.setname}:${item.uid}_nft_bid`,
-      };
-    },
     precision(num, precision) {
       return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
     },
@@ -1895,32 +1717,6 @@ function tradeFTreject(setname, uid, callback){
       //remove trailing zeros
       out = out.replace(/\.?0+$/, "");
       return out + post;
-    },
-    vote(url) {
-      this.toSign = {
-        type: "vote",
-        cj: {
-          author: url.split("/@")[1].split("/")[0],
-          permlink: url.split("/@")[1].split("/")[1],
-          weight:
-            this.posturls[url].slider * (this.posturls[url].flag ? -1 : 1),
-        },
-        msg: `Voting ...`,
-        ops: [""],
-        txid: "vote",
-      };
-    },
-    dropClaim(prefix, claim_id) {
-      this.toSign = {
-        type: "cja",
-        cj: {
-          claim: true,
-        },
-        id: `${prefix}_${claim_id}`,
-        msg: `Claiming...`,
-        ops: ["getTokenUser"],
-        txid: "claim",
-      };
     },
     rewardClaim(prefix, rewards_id, gov = false) {
       this.toSign = {
@@ -1989,64 +1785,6 @@ function tradeFTreject(setname, uid, callback){
         this.getPosts();
       }
     },
-    modalNext(modal, kind) {
-      if (
-        kind == "item" ||
-        this.postSelect.VR.checked ||
-        this.postSelect.AR.checked ||
-        this.postSelect.XR.checked ||
-        this.postSelect.Blog.checked ||
-        this.postSelect.sort == "payout" ||
-        this.postSelect.searchTerm
-      ) {
-        this[modal].index = (this[modal].index + 1) % this[modal].items.length;
-        this[modal].item = this[modal].items[this[modal].index];
-      } else if (this[modal].index < this[modal].items.length - 1) {
-        this[modal].index++;
-        this[modal].item = this[modal].items[this[modal].index];
-      } else if (this[modal].index < this.allPosts.length - 1) {
-        this.selectPosts([modal, this[modal].index + 1]);
-      } else {
-        this[modal].index = 0;
-        this[modal].item = this[modal].items[this[modal].index];
-      }
-    },
-    modalPrev(modal) {
-      if (this[modal].index) this[modal].index--;
-      else this[modal].index = this[modal].items.length - 1;
-      this[modal].item = this[modal].items[this[modal].index];
-    },
-    modalSelect(key) {
-      this.displayPost.index = key;
-      this.displayPost.item = this.posturls[key];
-      if (
-        this.displayPost.item.children &&
-        !this.displayPost.item.replies.length
-      )
-        this.getReplies(
-          this.displayPost.item.author,
-          this.displayPost.item.permlink
-        ).then((r) => {
-          this.posturls[key].replies = r.result;
-          for (let i = 0; i < this.posturls[key].replies.length; i++) {
-            if (this.posturls[key].replies[i].json_metadata) {
-              try {
-                this.posturls[key].replies[i].json_metadata = JSON.parse(
-                  this.posturls[key].replies[i].json_metadata
-                );
-                this.posturls[key].replies[i].edit = false;
-              } catch (e) { }
-            }
-            this.posturls[this.posturls[key].replies[i].url] =
-              this.posturls[key].replies[i];
-            if (this.posturls[key].replies[i].slider < 0) {
-              this.posturls[key].replies[i].flag = true;
-              this.posturls[key].replies[i].slider =
-                this.posturls[key].replies[i].slider * -1;
-            }
-          }
-        });
-    },
     getRewardFund() {
       fetch(this.hapi, {
         body: `{"jsonrpc":"2.0", "method":"condenser_api.get_reward_fund", "params":["post"], "id":1}`,
@@ -2072,23 +1810,6 @@ function tradeFTreject(setname, uid, callback){
         .then((r) => {
           this.feedPrice = r.result;
         });
-    },
-    modalIndex(modal, index, source = "displayNFTs") {
-      if (source != "displayNFTs") {
-        source.HTML = source.comp.HTML;
-        source.setname = source.set;
-        this[modal].index = 0;
-        this[modal].items = [source];
-        this[modal].item = source;
-        return;
-      }
-      var i = 0;
-      for (i; i < this[source].length; i++) {
-        if (`${this[source][i].setname}:${this[source][i].uid}` == index) break;
-      }
-      this[modal].index = i;
-      this[modal].items = [...this[source]];
-      this[modal].item = this[modal].items[i];
     },
     printProps(obj) {
       return Object.keys(obj)
@@ -2131,25 +1852,6 @@ function tradeFTreject(setname, uid, callback){
       if (this.toSign.txid == txid) {
         this.toSign = {};
       }
-    },
-    getReplies(a, p, k) {
-      return new Promise((resolve, reject) => {
-        fetch(this.hapi, {
-          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content_replies", "params":["${a}","${p}"], "id":1}`,
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          method: "POST",
-        })
-          .then((res) => res.json())
-          .then((r) => {
-            if (k) r.key = k;
-            resolve(r);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
     },
     run(op) {
       if (typeof this[op] == "function" && this.account != "GUEST") {
@@ -2414,113 +2116,6 @@ function tradeFTreject(setname, uid, callback){
           });
       }
     },
-    selectPosts(modal) {
-      var arr = [];
-      for (var i = 0; i < this[this.postSelect.entry].length; i++) {
-        if (this.posturls[this[this.postSelect.entry][i]])
-          arr.push(this.posturls[this[this.postSelect.entry][i]]);
-      }
-      this.displayPosts = arr;
-      if (modal) {
-        this[modal[0]].items = this.displayPosts;
-        this[modal[0]].item = this[modal[0]].items[modal[1]];
-        this[modal[0]].index = modal[1];
-      }
-    },
-    getContent(a, p) {
-      if (a && p) {
-        fetch(this.hapi, {
-          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content", "params":["${a}", "${p}"], "id":1}`,
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          method: "POST",
-        })
-          .then((r) => r.json())
-          .then((res) => {
-            if (res.result) {
-              res.result.url = `/@${res.result.author}/${res.result.permlink}`;
-              this.posturls[res.result.url] = {
-                ...this.posturls[res.result.url],
-                ...res.result,
-                slider: 10000,
-                flag: false,
-                upVotes: 0,
-                downVotes: 0,
-                edit: false,
-                hasVoted: false,
-              };
-              for (
-                var i = 0;
-                i < this.posturls[res.result.url].active_votes.length;
-                i++
-              ) {
-                if (this.posturls[res.result.url].active_votes[i].percent > 0)
-                  this.posturls[res.result.url].upVotes++;
-                else this.posturls[res.result.url].downVotes++;
-                if (
-                  this.posturls[res.result.url].active_votes[i].voter ==
-                  this.account
-                ) {
-                  this.posturls[res.result.url].slider =
-                    this.posturls[res.result.url].active_votes[i].percent;
-                  this.posturls[res.result.url].hasVoted = true;
-                }
-              }
-              var type = "Blog";
-              try {
-                this.posturls[res.result.url].json_metadata = JSON.parse(
-                  this.posturls[res.result.url].json_metadata
-                );
-                this.posturls[res.result.url].pic = this.picFind(
-                  this.posturls[res.result.url].json_metadata
-                );
-
-                if (
-                  "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
-                  this.posturls[res.result.url].json_metadata.vrHash
-                )
-                  type = "360";
-                else if (this.posturls[res.result.url].json_metadata.vrHash)
-                  type = "VR";
-                else if (this.posturls[res.result.url].json_metadata.arHash)
-                  type = "AR";
-                else if (this.posturls[res.result.url].json_metadata.appHash)
-                  type = "APP";
-                else if (this.posturls[res.result.url].json_metadata.audHash)
-                  type = "Audio";
-                else if (this.posturls[res.result.url].json_metadata.vidHash)
-                  type = "Video";
-              } catch (e) {
-                console.log(res.result.url, e, "no JSON?");
-              }
-              this.posturls[res.result.url].type = type;
-              if (type != "Blog")
-                this.posturls[res.result.url].url =
-                  "/dlux" + this.posturls[res.result.url].url;
-              else
-                this.posturls[res.result.url].url =
-                  "/blog" + this.posturls[res.result.url].url;
-              this.posturls[res.result.url].rep = "...";
-              this.rep(res.result.url);
-              if (this.posturls[res.result.url].slider < 0) {
-                this.posturls[res.result.url].slider =
-                  this.posturls[res.result.url].slider * -1;
-                this.posturls[res.result.url].flag = true;
-              }
-              this.posturls[res.result.url].preview = this.removeMD(
-                this.posturls[res.result.url].body
-              ).substr(0, 250);
-              this.posturls[res.result.url].ago = this.timeSince(
-                this.posturls[res.result.url].created
-              );
-              this.selectPosts();
-            }
-          });
-      } else {
-        console.log("no author or permlink", a, p);
-      }
-    },
     imgUrlAlt(event) {
       event.target.src = "/img/dlux-logo-icon.png";
     },
@@ -2622,15 +2217,6 @@ function tradeFTreject(setname, uid, callback){
                     */
         return "/img/dluxdefault.svg";
       }
-    },
-    getMint(set, item) {
-      for (let i = 0; i < this.rNFTs.length; i++) {
-        if (this.rNFTs[i].set == set) {
-          if (item) return this.rNFTs[i][item];
-          return this.rNFTs[i];
-        }
-      }
-      return 0;
     },
     readRep(rep2) {
       function log10(str) {
@@ -3309,6 +2895,11 @@ function tradeFTreject(setname, uid, callback){
     isNode: {
       get() {
         return this.smarkets.node[this.account] ? true : false;
+      },
+    },
+    isValidator: {
+      get() {
+        return this.smarkets.node?.[this.account]?.val_code ? true : false;
       },
     },
     compiledMarkdown: function () {

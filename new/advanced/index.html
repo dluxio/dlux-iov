@@ -132,8 +132,7 @@
                                         </div>
                                         <div class="border-bottom border-secondary text-start">
                                             <div style="color:#FF0000">
-                                                <small><span class="badge ms-1 me-2 text-bg-warning">TEST</span></small>
-                                                <h3>!! Some Wallet action here effect your real balances !!</h3>
+                                                <h3>!! Some Wallet action here effect your REAL balances !!</h3>
                                                 <p>This wallet represent a "mirror network". All SPK token send operations are real. If sending tokens for test ensure they go to an account you own. </p>
                                                 <p>LARYNX actions are also real except registering a service or validator.</p>
                                             </div>
@@ -483,6 +482,15 @@
                                                                     type="button"><i
                                                                         class="fa fa-network-wired fa-fw me-2"></i>Register
                                                                     A Service
+                                                                </button>
+                                                            </modal-vue>
+                                                            <modal-vue v-if="isNode" type="power" token="LARYNX"
+                                                                func="Register a Validator" :balance="saccountapi.balance"
+                                                                :min="isValidator ? '0.001' :sstats.IPFSRate/1000" :account="account"
+                                                                @modalsign="sendIt($event)">
+                                                                <button class="dropdown-item" slot="trigger"
+                                                                    type="button"><i
+                                                                        class="fa fa-network-wired fa-fw me-2"></i>{{isValidator ? 'Burn LARYNX to your Validator' : 'Register a Validator'}}
                                                                 </button>
                                                             </modal-vue>
                                                             <div class="dropdown-divider"></div>

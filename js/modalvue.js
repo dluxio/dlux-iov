@@ -26,6 +26,17 @@ export default {
           </div>
       </div>
   </div>
+  <div class="modal fade" id="elect" :tabindex="i" role="dialog" aria-hidden="true">
+    <ul class="sortable-list">
+      <li class="item" draggable="true">
+        <div class="details">
+          <img src="images/img-1.jpg">
+          <span>Kristina Zasiadko</span>
+        </div>
+        <i class="uil uil-draggabledots"></i>
+      </li>
+    </ul>
+  </div>
   <div class="modal fade" id="delegate" :tabindex="i" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content bg-darker text-white">
@@ -60,6 +71,12 @@ export default {
                       <div class="input-group mb-3" id="poweramount"> <input class="form-control text-white border-dark bg-dark" type="number" step="0.001" :min="min" placeholder="1.000" v-model="amount"> <span class="input-group-text text-secondary border-dark bg-dark">{{token}}</span> </div>
                       <div v-if="func == 'Register a Service'"> <label for="api" class="small">Location (https://ipfs.dlux.io)</label>
                           <div class="input-group mb-3" id="api"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="api"> </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
+                          </div>
+                      </div>
+                      <div v-if="func == 'Register a Validator'"> 
                           <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
@@ -322,6 +339,21 @@ export default {
         this.$emit("modalsign", op);
       }
     },
+    vote(){
+      var op
+      if (this.token == "SPK" && this.func == "Election")
+        op = {
+          type: "cja",
+          cj: {
+            amount: parseInt(this.amount * 1000),
+          },
+          id: `${this.token.toLowerCase()}_gov_down`,
+          msg: `Trying to unlock ${this.token}...`,
+          ops: ["getTokenUser"],
+          api: "https://token.dlux.io",
+          txid: "send",
+        };
+    },
     power() {
       var op;
       if (this.token == "DLUX" && this.func == "Power Up")
@@ -374,7 +406,19 @@ export default {
           api: "https://spktest.dlux.io",
           txid: "register_service",
         }
-      else if (this.token == "DLUX" && this.func == "Unlock")
+        else if (this.token == "LARYNX" && this.func == "Register a Validator")
+        op = {
+          type: "cja",
+          cj: {
+            amount: parseInt(this.amount * 1000),
+          },
+          id: `spkcc_validator_burn`,
+          msg: `Trying to build validator brand...`,
+          ops: ["getSapi"],
+          api: "https://spktest.dlux.io",
+          txid: "validator_burn",
+        }
+        else if (this.token == "DLUX" && this.func == "Unlock")
         op = {
           type: "cja",
           cj: {
