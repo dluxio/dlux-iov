@@ -131,6 +131,9 @@
                                             </div>
                                         </div>
                                         <div class="border-bottom border-secondary text-start">
+                                            <span
+                                                class="badge ms-1 me-2 text-bg-warning">TEST</span>
+                                                <h3>!! Some Wallet action here effect your real balances !!</h3>
                                             <p class="lead">Decentralized and incentivized network infrastructure,
                                                 rewarding
                                                 providers with SPK governance and BROCA gas tokens.</p>
@@ -193,7 +196,7 @@
                                                         <li>Enables voting</li>
                                                         <li>Instant Power Up | 4 Week Power Down</li>
                                                         <li>Grants BROCA at 1:1,000,000</li>
-                                                        <li>Your BROCA: {{formatNumber((saccountapi.spk_power * 1000 ), 0, '', ',')}}</li>
+                                                        <li>Your max BROCA: {{formatNumber((saccountapi.spk_power * 1000 ), 0, '', ',')}}</li>
                                                     </ul>
                                                 </p>
                                             </div>
@@ -293,6 +296,13 @@
                                                                     type="button"><i
                                                                         class="fas fa-angle-double-down fa-fw me-2"></i>Power
                                                                     Down</button>
+                                                            </modal-vue>
+                                                            <modal-vue type="vote" token="SPK" func="Election"
+                                                                :balance="saccountapi.spk_power" :account="account"
+                                                                @modalsign="sendIt($event)">
+                                                                <button class="dropdown-item" slot="trigger"
+                                                                    type="button"><i
+                                                                        class="fas fa-angle-double-down fa-fw me-2"></i>Elect Validators</button>
                                                             </modal-vue>
                                                         </ul>
                                                     </div>
