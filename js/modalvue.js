@@ -26,7 +26,7 @@ export default {
           </div>
       </div>
   </div>
-  <div class="modal fade" id="elect" :tabindex="i" role="dialog" aria-hidden="true">
+  <!-- <div class="modal fade" id="elect" :tabindex="i" role="dialog" aria-hidden="true">
     <ul class="sortable-list">
       <li class="item" draggable="true">
         <div class="details">
@@ -36,7 +36,7 @@ export default {
         <i class="uil uil-draggabledots"></i>
       </li>
     </ul>
-  </div>
+  </div> -->
   <div class="modal fade" id="delegate" :tabindex="i" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content bg-darker text-white">
