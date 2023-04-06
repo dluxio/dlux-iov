@@ -115,7 +115,7 @@ export default {
                       <div class="input-group mb-3" id="ben_to"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="ben_to"> </div>
                       <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Propose</button>
+                        <button type="button" class="btn btn-primary" @click="build" data-bs-dismiss="modal">Propose</button>
                       </div>
                       
                   </div>  
