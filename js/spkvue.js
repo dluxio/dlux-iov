@@ -1129,7 +1129,7 @@ var app = new Vue({
       this.contract.files = body
       this.signText(header + body).then(res => {
         console.log({ res })
-        this.contract.fosig = res.split(":")[1]
+        this.contract.fosig = res.split(":")[3]
         this.upload(cids, this.contract)
       })
     },
