@@ -337,11 +337,11 @@
 
                                                 <div class="btn-group" role="group" aria-label="Power Actions">
                                                     <button type="button" class="btn btn-info p-0">
-                                                        <modal-vue type="vote" token="SPK Power"
-                                                            :balance="saccountapi.spk" :account="account"
+                                                        <modal-vue type="build" token="BROCA"
+                                                            :balance="saccountapi.spk * 1000" :account="account"
                                                             @modalsign="sendIt($event)">
                                                             <span slot="trigger" class="p-2"><i
-                                                                    class="fas fa-paper-plane me-2"></i>Contracts</span>
+                                                                    class="fas fa-paper-plane me-2"></i>Build Contract</span>
                                                         </modal-vue>
                                                     </button>
                                                     <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"

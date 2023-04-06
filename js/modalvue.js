@@ -95,6 +95,34 @@ export default {
           </div>
       </div>
   </div>
+  <div class="modal fade" id="build" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content bg-darker text-white">
+              <div class="modal-header">
+                  <h5 class="modal-title">{{token}} | {{func}}</h5> <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <form name="contract">
+                  <div class="modal-body"> <label for="broca" class="small">Dynamic Balance:</label>
+                      <div class="input-group mb-3" id="broca"> <input class="form-control text-white border-dark bg-dark" type="number" step="0.001" :min="min" :max="formatNumber((balance)/1000, 3, '.', ',')" placeholder="1.000" v-model="amount"> <span class="input-group-text text-secondary border-dark bg-dark">{{token}}</span> </div>
+                      
+                      <label for="c_to" class="small">Account to Upload File</label>
+                      <div class="input-group mb-3" id="c_to"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="to"> </div>
+                      <label for="broker" class="small">IPFS Service Provider (Dynamic List)</label>
+                      <div class="input-group mb-3" id="broker"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="broker"> </div>
+                      <label for="ben" class="small">Requested Benificary Amount</label>
+                      <div class="input-group mb-3" id="ben"> <input class="form-control text-white border-dark bg-dark" type="number" step="0.01" :min="0" :max="100" v-model="ben_amount"> </div>
+                      <label for="ben_to" class="small">Benificiary Account</label>
+                      <div class="input-group mb-3" id="ben_to"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="ben_to"> </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Propose</button>
+                      </div>
+                      
+                  </div>  
+              </form>
+          </div>
+      </div>
+  </div>
   <div class="modal fade" id="confirm" tabindex="-1" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content bg-darker text-white">
@@ -180,14 +208,16 @@ export default {
     },
     build() {
       var op;
+        if (this.ben_amount){
+
+        }
         op = {
           type: "cja",
           cj: {
             broca: this.amount,
             broker: this.broker,
             to: this.to,
-            contract: this.contract,
-            slots: this.slots,
+            contract: "0",
           },
           id: `spkcc_channel_open`,
           msg: `Building Contract...`,
@@ -195,6 +225,10 @@ export default {
           api: "https://spktest.dlux.io",
           txid: "build_contract",
         };
+        if (this.ben_amount){
+          op.cj.contract = "1"
+          op.cj.slots = `${this.ben_to},${parseInt(this.ben_amount * 100)}`
+        }
       if (op) {
         this.$emit("modalsign", op);
       }
@@ -592,6 +626,15 @@ export default {
     },
     amount: {
       default: 0.001,
+    },
+    ben_amount: {
+      default: "10.00",
+    },
+    broker: {
+      default: "",
+    },
+    ben_to: {
+      default: '',
     },
     api: {
       default: 'https://ipfs.example.com',
