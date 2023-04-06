@@ -403,6 +403,7 @@ var app = new Vue({
           },
         },
       },
+      validators: {},
       sstats: {
         spk_rate_lgov: "0.001",
         spk_rate_lpow: "0.0001",
@@ -2197,8 +2198,17 @@ function tradeFTreject(setname, uid, callback){
         .then((response) => response.json())
         .then((data) => {
           this.smarkets = data.markets;
+          this.validator_totals = data.validators;
           this.sstats = data.stats;
           this.sstats.head_block = data.head_block;
+          let validators = {}
+          for (var node in this.sstats.nodes) {
+            if(this.sstats.nodes[node].val_code) {
+              validators[node] = this.sstats.nodes[node]
+              validators[node].votes = this.sstats.nodes[node].val_code
+            }
+          }
+          this.validators = validators
         });
     },
     reward_spk() {
