@@ -1107,11 +1107,12 @@ var app = new Vue({
         };
       });
     },
-    selectContract(id, broker){
+    selectContract(id, broker){  //needs PeerID of broker
       this.contract.id = id
       fetch(`${sapi}/user_services/${broker}`)
       .then(r=> r.json())
       .then(res=>{
+        console.log(res)
         this.contract.api = res.a
       })
     },
@@ -1144,9 +1145,9 @@ var app = new Vue({
         }
       }
       const ENDPOINTS = {
-        UPLOAD: `${contract.api}/upload`,
-        UPLOAD_STATUS: `${contract.api}/upload-check`,
-        UPLOAD_REQUEST: `${contract.api}/upload-authorize`
+        UPLOAD: `${this.contract.api}/upload`,
+        UPLOAD_STATUS: `${this.contract.api}/upload-check`,
+        UPLOAD_REQUEST: `${this.contract.api}/upload-authorize`
       };
       const defaultOptions = {
         url: ENDPOINTS.UPLOAD,
@@ -2840,6 +2841,11 @@ function tradeFTreject(setname, uid, callback){
         return this.smarkets.node?.[this.account]?.val_code ? true : false;
       },
     },
+    // hasService: {
+    //   get() {
+    //     return this.smarkets.node?.[this.account]?.val_code ? true : false;
+    //   },
+    // },
     compiledMarkdown: function () {
       return marked(this.postBody, { sanitize: true });
     },
