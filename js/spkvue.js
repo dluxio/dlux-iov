@@ -1113,7 +1113,7 @@ var app = new Vue({
       .then(r=> r.json())
       .then(res=>{
         console.log(res)
-        this.contract.api = res.a
+        this.contract.api = res.services.IPFS[Object.keys(res.services.IPFS)[0]].a
       })
     },
     signNUpload() {
