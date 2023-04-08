@@ -969,8 +969,6 @@ var app = new Vue({
           return item[0]
           break;
       } index
-    }
-
     },
     broca_calc(last = '0,0'){
       console.log(last)
