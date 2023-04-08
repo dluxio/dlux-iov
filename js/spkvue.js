@@ -959,6 +959,19 @@ var app = new Vue({
         this.postPermlink = text;
       }
     },
+    slotDecode(slot, index) {
+      var item = slot.split(',')
+      switch (index) {
+        case 1:
+          return parseFloat(item[1]/100).toFixed(2)
+          break;
+        default:
+          return item[0]
+          break;
+      } index
+    }
+
+    },
     broca_calc(last = '0,0'){
       console.log(last)
       const last_calc = this.Base64toNumber(last.split(',')[1])
