@@ -789,7 +789,8 @@
                             </form>
                             <div v-for="sponsor in saccountapi.channels">
                                 <ul class="text-start" v-for="channel in sponsor">
-                                    <li>Size Allowed: {{channel.a}} bytes</li>
+                                    <li v-if="!contract.u">Size Allowed: {{channel.a}} bytes</li>
+                                    <li v-if="contract.u">Size: {{channel.u}} bytes</li>
                                     <li>File Owner: @{{channel.t}}</li>
                                     <li>Service Provider: @{{channel.b}}</li>
                                     <li>Sponsor: @{{channel.f}}</li>
