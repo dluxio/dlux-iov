@@ -225,7 +225,7 @@ export default {
           api: "https://spktest.dlux.io",
           txid: "build_contract",
         };
-        if (this.ben_amount){
+        if (this.ben_amount > 0 && this.ben_to){
           op.cj.contract = "1"
           op.cj.slots = `${this.ben_to},${parseInt(this.ben_amount * 100)}`
         }
