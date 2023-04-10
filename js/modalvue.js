@@ -37,10 +37,10 @@ export default {
     <ul class="sortable-list">
       <li v-for="node in smarkets" class="item" draggable="true">
         <div v-if="typeof node.val_code == 'string'">
-        <div class="details">
-          <span>{{node.self}}</span>
-        </div>
-        <i class="uil uil-draggabledots"></i>
+          <div class="details">
+            <span>{{node.self}}</span>
+          </div>
+          <i class="uil uil-draggabledots"></i>
         </div>
       </li>
     </ul>
