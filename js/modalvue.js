@@ -392,6 +392,21 @@ export default {
         this.$emit("modalsign", op);
       }
     },
+    elect(){
+      var op
+      if (this.token == "SPK" && this.func == "Election")
+        op = {
+          type: "cja",
+          cj: {
+            amount: parseInt(this.amount * 1000), //TODO
+          },
+          id: `${this.token.toLowerCase()}_val_vote`,
+          msg: `Trying to unlock ${this.token}...`,
+          ops: ["getTokenUser"],
+          api: "https://token.dlux.io",
+          txid: "send",
+        };
+    },
     vote(){
       var op
       if (this.token == "SPK" && this.func == "Election")
