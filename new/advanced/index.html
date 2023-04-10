@@ -25,7 +25,7 @@
     <script type="text/javascript" src="/js/onlyhash.js"></script>
     <script src="/js/buffer.js"></script>
     <script src="/js/drag-drop.js"></script>
-    <script src="/js/drag-sort.js"></script>
+    <!--<script src="/js/drag-sort.js"></script>-->
     <script type="module" src="/js/spkvue.js"></script>
 </head>
 
@@ -781,17 +781,27 @@
                                     <input type="text" class="form-control bg-darkg border-secondary text-info" readonly
                                         id="username" v-model="account">
                                 </div>
-                                <div v-if="saccountapi.pubKey == 'NA'">
-                                    <button @click="updatePubkey">
+                                <div class="text-center my-2">
+                                
+                                    <button v-if="saccountapi.pubKey == 'NA'" type="button" class="btn btn-info me-2" @click="updatePubkey">
                                         Register Account
                                         <i class="fas fa-plus"></i>
                                     </button>
-                                </div>
-                                <div v-if="saccountapi.pubKey != 'NA'">
-                                    <button @click="petitionForContract">
-                                        Get Test Contract
+                                
+                                <button type="button" class="btn btn-info me-2">
+                                    <modal-vue type="build" token="BROCA"
+                                        :balance="saccountapi.spk * 1000" :account="account"
+                                        @modalsign="sendIt($event)">
+                                        <span slot="trigger" class="p-2"><i
+                                                class="fa-solid fa-file-contract fa-fw me-2"></i>Create A Contract</span>
+                                    </modal-vue>
+                                </button>
+
+                                    <button v-if="saccountapi.pubKey != 'NA'" type="button" class="btn btn-info" @click="petitionForContract">
+                                        <i class="fa-solid fa-wand-magic-sparkles fa-fw me-2"></i>Free 100 KB Contract
                                     </button>
-                                </div>
+
+                            </div>
                             </form>
                             <div v-for="sponsor in saccountapi.channels">
                                 <ul class="text-start" v-for="channel in sponsor">
