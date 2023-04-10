@@ -95,18 +95,7 @@ export default {
                           </div>
                       </div>
                       <div v-if="func == 'Election'">
-                      <h3>Validators</h3>
-                        <ul class="sortable-list text-dark ms-auto me-auto">
-                          <div v-for="node in smarkets">
-                            <li v-if="typeof node.val_code == 'string'" class="item" draggable="true">
-                              <div class="details">
-                                <span>{{node.self}}</span>
-                              </div>
-                              <i @click="add(node)" class="fa-solid fa-plus"></i>
-                            </li>
-                          </div>
-                        </ul>
-                        <h3>Elected Validators</h3>
+                      <h3>Chosen Validators</h3>
                         <ul class="sortable-list text-dark ms-auto me-auto">
                           <div v-for="node in smarkets">
                             <li v-if="typeof node.val_code == 'string'" class="item" draggable="true">
@@ -118,6 +107,18 @@ export default {
                             </li>
                           </div>
                         </ul>
+                      <h3>Validators</h3>
+                        <ul class="sortable-list text-dark ms-auto me-auto">
+                          <div v-for="node in smarkets">
+                            <li v-if="typeof node.val_code == 'string'" class="item" draggable="true">
+                              <div class="details">
+                                <span>@{{node.self}}</span>
+                              </div>
+                              <i @click="add(node)" class="fa-solid fa-plus"></i>
+                            </li>
+                          </div>
+                        </ul>
+          
                       </div>
                       <div v-if="func == 'Register a Validator'"> 
                           <div class="modal-footer">
