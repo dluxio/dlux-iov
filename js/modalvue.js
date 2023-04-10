@@ -623,13 +623,6 @@ export default {
     account: {
       default: "Not Logged In",
     },
-    options: {
-      default: {
-        "a-node":{
-          self: "a-node",
-        }
-      },
-    },
     current: {
       default: 'bad',
     },
