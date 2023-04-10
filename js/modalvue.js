@@ -95,7 +95,8 @@ export default {
                           </div>
                       </div>
                       <div v-if="func == 'Election'">
-                        <ul class="sortable-list text-dark">
+                      <h3>Validators</h3>
+                        <ul class="sortable-list text-dark ms-auto me-auto">
                           <div v-for="node in smarkets">
                             <li v-if="typeof node.val_code == 'string'" class="item" draggable="true">
                               <div class="details">
@@ -105,15 +106,15 @@ export default {
                             </li>
                           </div>
                         </ul>
-                        
-                        <ul class="sortable-list text-dark">
+                        <h3>Elected Validators</h3>
+                        <ul class="sortable-list text-dark ms-auto me-auto">
                           <div v-for="node in smarkets">
                             <li v-if="typeof node.val_code == 'string'" class="item" draggable="true">
-                              <div class="details">
+                            <i class="fa-solid fa-grip-lines"></i>  
+                            <div class="details">
                                 <span>@{{node.self}}</span>
                               </div>
                               <i @click="sub(node)" class="fa-solid fa-minus"></i>
-                              <i class="fa-solid fa-grip-lines"></i>
                             </li>
                           </div>
                         </ul>
