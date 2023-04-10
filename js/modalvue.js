@@ -21,7 +21,7 @@ export default {
                       <div class="input-group mb-3"> <input class="form-control text-white bg-dark border-dark" id="sendAmount" type="number" step="0.001" min="0.001" placeholder="Enter amount" v-model="amount"> <span class="input-group-text bg-dark border-dark text-secondary">{{token}}</span> </div> <label class="small" for="sendhivememo">Memo:</label>
                       <div class="input-group mb-3"> <input class="form-control text-white bg-dark border-dark" type="text" placeholder="Include a memo (optional)" v-model="memo"> </div>
                   </div>
-                  <button v-if="token == 'SPK' || token == 'LARYNX'" type="checkbox" v-model="test">Mirror Network Only</button>
+                  <input v-if="token == 'SPK' || token == 'LARYNX'" type="checkbox" v-model="test">Mirror Network Only</input>
                   <div class="modal-footer"> <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> <button :disabled="!valid" type="submit" class="btn btn-primary" @click="send" data-bs-dismiss="modal">Send</button> </div>
               </form>
           </div>
