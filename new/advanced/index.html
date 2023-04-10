@@ -158,7 +158,7 @@
                                                     <button type="button" class="btn btn-info p-0">
                                                         <modal-vue type="send" token="SPK" :balance="saccountapi.spk"
                                                             :account="account" @modalsign="sendIt($event)">
-                                                            <span slot="trigger" class="p-2"><i
+                                                            <span slot="trigger" class="p-2" :test="lapi == 'https://spktest.dlux.io' ? true : false"><i
                                                                     class="fas fa-paper-plane me-2"></i>Send</span>
                                                         </modal-vue>
                                                     </button>
@@ -445,7 +445,7 @@
                                                     <button type="button" class="btn btn-info p-0">
                                                         <modal-vue type="send" token="LARYNX"
                                                             :balance="saccountapi.balance" :account="account"
-                                                            @modalsign="sendIt($event)">
+                                                            @modalsign="sendIt($event)" :test="lapi == 'https://spktest.dlux.io' ? true : false">
                                                             <span slot="trigger" class="p-2"><i
                                                                     class="fas fa-paper-plane me-2"></i>Send</span>
                                                         </modal-vue>
@@ -460,7 +460,7 @@
                                                             aria-labelledby="btnGroupDrop1">
                                                             <modal-vue type="power" token="LARYNX" func="Power Up"
                                                                 :balance="saccountapi.balance" :account="account"
-                                                                @modalsign="sendIt($event)">
+                                                                @modalsign="sendIt($event)" :test="lapi == 'https://spktest.dlux.io' ? true : false">
                                                                 <button class="dropdown-item" slot="trigger"
                                                                     type="button"><i
                                                                         class="fas fa-angle-double-up fa-fw me-2"></i>Power
@@ -468,7 +468,7 @@
                                                             </modal-vue>
                                                             <modal-vue type="power" :dis="!isNode" token="LARYNX"
                                                                 func="Lock Liquidity" :balance="saccountapi.balance"
-                                                                :account="account" @modalsign="sendIt($event)">
+                                                                :account="account" @modalsign="sendIt($event)" :test="lapi == 'https://spktest.dlux.io' ? true : false">
                                                                 <button class="dropdown-item" :disabled="!isNode"
                                                                     slot="trigger" type="button"><i
                                                                         class="fas fa-lock fa-fw me-2"></i>Lock
@@ -547,7 +547,7 @@
                                                         <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                                             aria-labelledby="btnGroupDrop1">
                                                             <modal-vue type="power" token="LARYNX"
-                                                                func="Unlock Liquidity" :balance="saccountapi.gov"
+                                                                func="Unlock Liquidity" :balance="saccountapi.gov" :test="lapi == 'https://spktest.dlux.io' ? true : false"
                                                                 :account="account" @modalsign="sendIt($event)">
                                                                 <button class="dropdown-item" slot="trigger"
                                                                     type="button"><i
@@ -565,7 +565,7 @@
                                                 <div>
                                                     <div class="d-flex align-items-start">
                                                         <h4 class="m-0">LARYNX Power</h4>
-                                                        <small><span
+                                                        <small v-if="lapi == 'https://spktest.dlux.io'"><span
                                                                 class="badge ms-1 me-2 bg-warning">TEST</span></small>
                                                     </div>
                                                     <p class="text-white-50">Powered tokens used to mine SPK</p>
@@ -633,7 +633,7 @@
                                                             <modal-vue type="delegate" :smarkets="smarkets.node"
                                                                 token="LARYNX" func="Lock Liquidity" :stats="sstats"
                                                                 :balance="saccountapi.poweredUp" :account="account"
-                                                                @modalsign="sendIt($event)"><span slot="trigger"
+                                                                @modalsign="sendIt($event)" :test="lapi == 'https://spktest.dlux.io' ? true : false"><span slot="trigger"
                                                                     class="p-2">
                                                                     <i
                                                                         class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
@@ -651,7 +651,7 @@
                                                                 aria-labelledby="btnGroupDrop1">
                                                                 <modal-vue type="power" token="LARYNX" func="Power Down"
                                                                     :balance="saccountapi.poweredUp" :account="account"
-                                                                    @modalsign="sendIt($event)">
+                                                                    @modalsign="sendIt($event)" :test="lapi == 'https://spktest.dlux.io' ? true : false">
                                                                     <button :disabled="!saccountapi.poweredUp"
                                                                         class="dropdown-item" slot="trigger"
                                                                         type="button"><i
@@ -660,7 +660,7 @@
                                                                 </modal-vue>
                                                                 <modal-vue v-show="when(saccountapi.powerDowns)"
                                                                     type="confirm" token="LARYNX" func="powercancel"
-                                                                    :account="account" @modalsign="sendIt($event)">
+                                                                    :account="account" @modalsign="sendIt($event)" :test="lapi == 'https://spktest.dlux.io' ? true : false">
                                                                     <button class="dropdown-item" slot="trigger"
                                                                         type="button">
                                                                         <i
@@ -680,7 +680,7 @@
                                                     ({{saccountapi.powerDowns.length}} installments remaining)</b><small
                                                     class="ms-2">
                                                     <modal-vue type="confirm" token="LARYNX" func="powercancel"
-                                                        :account="account" @modalsign="sendIt($event)">
+                                                        :account="account" @modalsign="sendIt($event)" :test="lapi == 'https://spktest.dlux.io' ? true : false">
                                                         <button class="btn btn-sm btn-outline-danger" slot="trigger"
                                                             type="button">
                                                             STOP</button>
@@ -704,14 +704,14 @@
                                                                 <modal-vue type="delegate" :smarkets="smarkets.node"
                                                                     token="LARYNX" :to="b" :amount="a" :stats="sstats"
                                                                     :balance="saccountapi.poweredUp" :account="account"
-                                                                    @modalsign="sendIt($event)">
+                                                                    @modalsign="sendIt($event)" :test="lapi == 'https://spktest.dlux.io' ? true : false">
                                                                     <button slot="trigger" type="button"
                                                                         class="ms-1 btn btn-secondary"><i
                                                                             class="fas fa-fw fa-user-edit"></i></button>
                                                                 </modal-vue>
                                                                 <modal-vue type="delegate" :smarkets="smarkets.node"
                                                                     token="LARYNX" :to="b" amount="0" :stats="sstats"
-                                                                    :balance="saccountapi.poweredUp" :account="account"
+                                                                    :balance="saccountapi.poweredUp" :account="account" :test="lapi == 'https://spktest.dlux.io' ? true : false"
                                                                     @modalsign="sendIt($event)">
                                                                     <button class="ms-1 btn btn-danger ms-1"
                                                                         slot="trigger" type="button"><i
