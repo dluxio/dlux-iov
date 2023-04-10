@@ -77,11 +77,11 @@ export default {
       <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content bg-darker text-white">
               <div class="modal-header">
-                  <h5 class="modal-title">{{func}} {{token}}</h5> <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                  <h5 class="modal-title">{{func}} {{token}}  {{func == 'Election' ? 'Validators' : ''}}</h5> <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <form name="power">
                   <div class="modal-body"> <label for="poweramount" class="small">Amount (Balance: <a href="#/" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
-                      <div class="input-group mb-3" id="poweramount"> <input class="form-control text-white border-dark bg-dark" type="number" step="0.001" :min="min" :max="formatNumber((balance)/1000, 3, '.', ',')" placeholder="1.000" v-model="amount"> <span class="input-group-text text-secondary border-dark bg-dark">{{token}}</span> </div>
+                      <div v-if="func != 'Election'" class="input-group mb-3" id="poweramount"> <input class="form-control text-white border-dark bg-dark" type="number" step="0.001" :min="min" :max="formatNumber((balance)/1000, 3, '.', ',')" placeholder="1.000" v-model="amount"> <span class="input-group-text text-secondary border-dark bg-dark">{{token}}</span> </div>
                       <div v-if="func == 'Register a Service'"> <label for="api" class="small">Location (https://ipfs.dlux.io)</label>
                           <div class="input-group mb-3" id="api"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="api"> </div>
                           <label for="peerid" class="small">IPFS PeerID</label>
@@ -90,6 +90,18 @@ export default {
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
                           </div>
+                      </div>
+                      <div>
+                        <ul v-if="func == Election" class="sortable-list">
+                          <li v-for="node in smarkets" class="item" draggable="true">
+                            <div v-if="typeof node.val_code == 'string'">
+                              <div class="details">
+                                <span>{{node.self}}</span>
+                              </div>
+                              <i class="uil uil-draggabledots"></i>
+                            </div>
+                          </li>
+                        </ul>
                       </div>
                       <div v-if="func == 'Register a Validator'"> 
                           <div class="modal-footer">
