@@ -105,6 +105,18 @@ export default {
                             </li>
                           </div>
                         </ul>
+                        
+                        <ul class="sortable-list text-dark">
+                          <div v-for="node in smarkets">
+                            <li v-if="typeof node.val_code == 'string'" class="item" draggable="true">
+                              <div class="details">
+                                <span>@{{node.self}}</span>
+                              </div>
+                              <i @click="sub(node)" class="fa-solid fa-minus"></i>
+                              <i class="fa-solid fa-grip-lines"></i>
+                            </li>
+                          </div>
+                        </ul>
                       </div>
                       <div v-if="func == 'Register a Validator'"> 
                           <div class="modal-footer">
