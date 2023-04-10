@@ -96,14 +96,14 @@ export default {
                       </div>
                       <div v-if="func == 'Election'">
                         <ul class="sortable-list">
-                          <li v-for="node in smarkets" class="item" draggable="true">
-                            <div v-if="typeof node.val_code == 'string'">
+                          <div v-for="node in smarkets">
+                            <li v-if="typeof node.val_code == 'string'" class="item" draggable="true">
                               <div class="details">
                                 <span>{{node.self}}</span>
                               </div>
                               <i class="uil uil-draggabledots"></i>
-                            </div>
-                          </li>
+                            </li>
+                          </div>
                         </ul>
                       </div>
                       <div v-if="func == 'Register a Validator'"> 
