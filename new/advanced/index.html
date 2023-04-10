@@ -304,7 +304,7 @@
                                                                     Down</button>
                                                             </modal-vue>
                                                             <modal-vue type="vote" token="SPK" func="Election"
-                                                                :balance="saccountapi.spk_power" :account="account" :options="smarkets.node" :current="saccountapi.spk_vote"
+                                                                :balance="saccountapi.spk_power" :account="account" :smarkets="smarkets.node" :current="saccountapi.spk_vote"
                                                                 @modalsign="sendIt($event)">
                                                                 <button class="dropdown-item" slot="trigger"
                                                                     type="button"><i

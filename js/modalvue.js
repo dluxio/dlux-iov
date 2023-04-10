@@ -35,7 +35,7 @@ export default {
   </div>
   <div class="modal fade" id="elect" :tabindex="i" role="dialog" aria-hidden="true">
     <ul class="sortable-list">
-      <li v-for="node in options" class="item" draggable="true">
+      <li v-for="node in smarkets" class="item" draggable="true">
         <div v-if="typeof node.val_code == 'string'">
         <div class="details">
           <span>{{node.self}}</span>
@@ -622,13 +622,6 @@ export default {
     },
     account: {
       default: "Not Logged In",
-    },
-    options: {
-      default: {
-        "a-node":{
-          self: "a-node",
-        }
-      },
     },
     current: {
       default: 'bad',
