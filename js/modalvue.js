@@ -88,7 +88,7 @@ export default {
                       </div>
                       <div v-if="func == 'Power Up'">
                           <div class="modal-footer">
-                          <input v-if="token == 'LARYNX'" type="checkbox" v-model="test">Mirror Network Only</input>
+                            <input v-if="token == 'LARYNX'" type="checkbox" v-model="test">{{token == 'LARYNX' ? 'Mirror Network Only' : ''}}</input>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
                           </div>
