@@ -33,17 +33,18 @@ export default {
           </div>
       </div>
   </div>
-  <!-- <div class="modal fade" id="elect" :tabindex="i" role="dialog" aria-hidden="true">
+  <div class="modal fade" id="elect" :tabindex="i" role="dialog" aria-hidden="true">
     <ul class="sortable-list">
-      <li class="item" draggable="true">
+      <li v-for="node in options" class="item" draggable="true">
+        <div v-if="typeof node.val_code == 'string'">
         <div class="details">
-          <img src="images/img-1.jpg">
-          <span>Kristina Zasiadko</span>
+          <span>{{node.self}}</span>
         </div>
         <i class="uil uil-draggabledots"></i>
+        </div>
       </li>
     </ul>
-  </div> -->
+  </div>
   <div class="modal fade" id="delegate" :tabindex="i" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content bg-darker text-white">
@@ -621,6 +622,12 @@ export default {
     },
     account: {
       default: "Not Logged In",
+    },
+    options: {
+      default: {},
+    },
+    current: {
+      default: {},
     },
     token: {
       default: "Dlux",
