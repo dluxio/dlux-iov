@@ -101,7 +101,7 @@ export default {
                               <div class="details">
                                 <span>{{node.self}}</span>
                               </div>
-                              <i class="fa-solid fa-grip-lines"></i>
+                              <i @click="add(node)" class="fa-solid fa-plus"></i>
                             </li>
                           </div>
                         </ul>
