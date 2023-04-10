@@ -1174,7 +1174,7 @@ var app = new Vue({
         contract: contract,
         cid: null,
         cids: `,${cids.join(',')}`,
-        onAbort(e,f) {
+        onAbort: (e,f) => {
           console.log('options.onAbort')
           // const fileObj = files.get(file);
           this.File = []
@@ -1182,7 +1182,7 @@ var app = new Vue({
           this.fileRequests = {}
           // updateFileElement(fileObj);
         },
-        onProgress(e,f) {
+        onProgress: (e,f) => {
           console.log(e, f, this.FileInfo, this.File)
           this.File[this.FileInfo[f.name].index].actions.pause = true
           this.File[this.FileInfo[f.name].index].actions.resume = false
@@ -1196,7 +1196,7 @@ var app = new Vue({
 
           // updateFileElement(fileObj);
         },
-        onError(e,f) {
+        onError: (e,f) => {
           console.log('options.onError', e, f)
           // const fileObj = files.get(file);
           this.FileInfo[f.name].status = '!!ERROR!!'
@@ -1207,7 +1207,7 @@ var app = new Vue({
           this.File[this.FileInfo[f.name].index].actions.cancel = true
           // updateFileElement(fileObj);
         },
-        onComplete(e,f) {
+        onComplete: (e,f) => {
           console.log('options.onComplete', e, f)
           this.File[this.FileInfo[f.name].index].actions.pause = false
           this.File[this.FileInfo[f.name].index].actions.resume = false
