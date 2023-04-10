@@ -95,13 +95,13 @@ export default {
                           </div>
                       </div>
                       <div v-if="func == 'Election'">
-                        <ul class="sortable-list">
+                        <ul class="sortable-list text-dark">
                           <div v-for="node in smarkets">
                             <li v-if="typeof node.val_code == 'string'" class="item" draggable="true">
                               <div class="details">
                                 <span>{{node.self}}</span>
                               </div>
-                              <i class="uil uil-draggabledots"></i>
+                              <i class="fa-solid fa-grip-lines"></i>
                             </li>
                           </div>
                         </ul>
