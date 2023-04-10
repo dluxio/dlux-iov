@@ -797,9 +797,10 @@
                                     <li>Expiration: {{channel.e}}</li>
                                     <li>Price: {{channel.r}} Broca</li>
                                     <li>Redundancy: {{channel.p}}</li>
-                                    <li v-if="channel.d">Stored by:<p v-for="acc in channel.d">@{{acc}} </p></li>
                                     <li v-if="channel.s">Terms: {{slotDecode(channel.s, 1)}}% Bennificiary to @{{slotDecode(channel.s, 0)}}</li>
                                     <li>Status: {{channel.c == 1 ? 'Waiting For Upload' : 'Uploaded'}}</li>
+                                    <li v-if="channel.df">Files:<p v-for="file in channel.df">{{file}} </p></li>
+                                    <li v-if="channel.n">Stored by:<p v-for="acc in channel.n">@{{acc}} </p></li>
                                     <button v-if="channel.c == 1" @click="selectContract(channel.i, channel.b)">Select Provider</button>
                                 </ul>
                             </div>
