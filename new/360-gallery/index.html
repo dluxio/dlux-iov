@@ -99,10 +99,10 @@
 								</div>
 								<div class="form-group">
 									<label for="title">Title</label>
-									<input type="text" class="form-control" id="title" onfocusout="keyupwrap()"
-										placeholder="Enter an attention grabbing title">
+									<input type="text" class="form-control" id="title" @blur="buildPermlink"
+										placeholder="Enter an attention grabbing title" v-model="postTitle">
 									<small id="permlinkPreview" class="form-text text-muted d-flex"><span id="permlink"
-											class="mr-auto">Permlink: build-permlink-here</span><a href="#"
+											class="mr-auto">Permlink: {{postPermlink}}</span><a href="#"
 											class="ml-auto">Edit Permlink</a></small>
 								</div>
 								<div class="form-group">
