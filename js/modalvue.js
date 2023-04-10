@@ -21,6 +21,7 @@ export default {
                       <div class="input-group mb-3"> <input class="form-control text-white bg-dark border-dark" id="sendAmount" type="number" step="0.001" min="0.001" placeholder="Enter amount" v-model="amount"> <span class="input-group-text bg-dark border-dark text-secondary">{{token}}</span> </div> <label class="small" for="sendhivememo">Memo:</label>
                       <div class="input-group mb-3"> <input class="form-control text-white bg-dark border-dark" type="text" placeholder="Include a memo (optional)" v-model="memo"> </div>
                   </div>
+                  <button v-if="token == 'SPK' || token == 'LARYNX'" type="checkbox" v-model="test">Mirror Network Only</button>
                   <div class="modal-footer"> <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> <button :disabled="!valid" type="submit" class="btn btn-primary" @click="send" data-bs-dismiss="modal">Send</button> </div>
               </form>
           </div>
@@ -55,6 +56,7 @@ export default {
                       <div class="input-group mb-3" v-if="token == 'DLUX'"> <span class="input-group-text bg-dark border-secondary text-secondary">@</span> <input @blur="accountCheck" class="form-control bg-dark border-secondary text-white" type="text" placeholder="Recipient" v-model="to"> </div> <label for="delAmount" class="small">Amount (Balance: <a href="#/" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
                       <div class="input-group mb-3"> <input class="form-control bg-dark border-secondary text-white" type="number" step="0.001" id="delAmount" min="0.001" placeholder="Enter amount" v-model="amount"> <span class="input-group-text bg-dark border-secondary text-secondary">{{token}}</span> </div>
                   </div>
+                  <button v-if="token == 'SPK' || token == 'LARYNX'" type="checkbox" v-model="test">Mirror Network Only</button>
                   <div class="modal-footer"> <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> <button :disabled="!to" type="submit" class="btn btn-primary" @click="delegate" data-bs-dismiss="modal">Confirm</button> </div>
               </form>
           </div>
@@ -86,6 +88,7 @@ export default {
                       </div>
                       <div v-if="func == 'Power Up'">
                           <div class="modal-footer">
+                            <button v-if="token == 'SPK' || token == 'LARYNX'" type="checkbox" v-model="test">Mirror Network Only</button>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
                           </div>
@@ -181,7 +184,7 @@ export default {
             cj: {
               amount: 0,
             },
-            id: `${this.spkprefix}_power_down`,
+            id: `${this.spkprefix}_${this.test ? 'T' : ''}power_down`,
             msg: `Canceling Power Down...`,
             ops: ["getSapi"],
             api: "https://spkinstant.hivehoneycomb.com",
@@ -195,7 +198,7 @@ export default {
               to: this.account,
               amount: 0,
             },
-            id: `${this.spkprefix}_power_grant`,
+            id: `${this.spkprefix}_${this.test ? 'T' : ''}power_grant`,
             msg: `Canceling Power Down...`,
             ops: ["getSapi"],
             api: "https://spkinstant.hivehoneycomb.com",
@@ -257,7 +260,7 @@ export default {
             amount: parseInt(this.amount * 1000),
             memo: this.memo,
           },
-          id: `${this.spkprefix}_spk_send`,
+          id: `${this.spkprefix}_${this.test ? 'T' : ''}spk_send`,
           msg: `Trying to send ${this.token}...`,
           ops: ["getSapi"],
           api: "https://spkinstant.hivehoneycomb.com",
@@ -271,7 +274,7 @@ export default {
             amount: parseInt(this.amount * 1000),
             memo: this.memo,
           },
-          id: `${this.spkprefix}_send`,
+          id: `${this.spkprefix}_${this.test ? 'T' : ''}send`,
           msg: `Trying to send ${this.token}...`,
           ops: ["getSapi"],
           api: "https://spkinstant.hivehoneycomb.com",
@@ -341,7 +344,7 @@ export default {
             to: this.to,
             amount: parseInt(this.amount * 1000),
           },
-          id: `${this.spkprefix}_power_grant`,
+          id: `${this.spkprefix}_${this.test ? 'T' : ''}power_grant`,
           msg: `Trying to delegate ${this.token}...`,
           ops: ["getSapi"],
           api: "https://spkinstant.hivehoneycomb.com",
@@ -381,9 +384,9 @@ export default {
         op = {
           type: "cja",
           cj: {
-            amount: parseInt(this.amount * 1000),
+            amount: parseInt(this.amount * 1000), //TODO
           },
-          id: `${this.token.toLowerCase()}_gov_down`,
+          id: `${this.token.toLowerCase()}_val_vote`,
           msg: `Trying to unlock ${this.token}...`,
           ops: ["getTokenUser"],
           api: "https://token.dlux.io",
@@ -422,7 +425,7 @@ export default {
           cj: {
             amount: parseInt(this.amount * 1000),
           },
-          id: `spkcc_power_down`,
+          id: `spkcc_${this.test ? 'T' : ''}power_down`,
           msg: `Trying to power down ${this.token}...`,
           ops: ["getSapi"],
           api: "https://spkinstant.hivehoneycomb.com",
@@ -497,7 +500,7 @@ export default {
           cj: {
             amount: parseInt(this.amount * 1000),
           },
-          id: `${this.spkprefix}_power_up`,
+          id: `${this.spkprefix}${this.test ? 'T' : ''}_power_up`,
           msg: `Trying to power up ${this.token}...`,
           ops: ["getSapi"],
           api: "https://spkinstant.hivehoneycomb.com",
@@ -509,7 +512,7 @@ export default {
           cj: {
             amount: parseInt(this.amount * 1000),
           },
-          id: `${this.spkprefix}_gov_down`,
+          id: `${this.spkprefix}${this.test ? 'T' : ''}_gov_down`,
           msg: `Trying to unlock ${this.token}...`,
           ops: ["getSapi"],
           api: "https://spkinstant.hivehoneycomb.com",
@@ -521,7 +524,7 @@ export default {
           cj: {
             amount: parseInt(this.amount * 1000),
           },
-          id: `${this.spkprefix}_gov_up`,
+          id: `${this.spkprefix}${this.test ? 'T' : ''}_gov_up`,
           msg: `Trying to lock ${this.token}...`,
           ops: ["getSapi"],
           api: "https://spkinstant.hivehoneycomb.com",
@@ -640,6 +643,9 @@ export default {
       default: 'https://ipfs.example.com',
     },
     valid: {
+      default: false,
+    },
+    test:{
       default: false,
     },
     customClass: {
