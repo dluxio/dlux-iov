@@ -930,7 +930,9 @@ var app = new Vue({
       .then(r=>r.json())
       .then(json =>{
         console.log(json)
-        this.getSapi(this.account, false)
+        setTimeout(() => {
+          this.getSapi(this.account, false)
+        }, 5000).bind(this)
       })
     },
     deleteImg(index) {
