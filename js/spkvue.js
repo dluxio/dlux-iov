@@ -2501,6 +2501,9 @@ function tradeFTreject(setname, uid, callback){
           }
         });
     },
+    exp_to_time(exp){
+      return this.when([parseInt(exp.split(':')[0])])
+    },
     getSpkStats() {
       fetch(this.sapi + "/stats")
         .then((response) => response.json())
