@@ -624,10 +624,14 @@ export default {
       default: "Not Logged In",
     },
     options: {
-      default: {},
+      default: {
+        "a-node":{
+          self: "a-node",
+        }
+      },
     },
     current: {
-      default: {},
+      default: 'bad',
     },
     token: {
       default: "Dlux",
