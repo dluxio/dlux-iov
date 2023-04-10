@@ -782,7 +782,7 @@
                                     <li>Redundancy: {{contract.p}}</li>
                                     <li v-if="contract.s">Terms: {{slotDecode(contract.s, 1)}}% Bennificiary to @{{slotDecode(contract.s, 0)}}</li>
                                     <li>Status: {{contract.c == 2 ? 'Waiting For Post' : 'Decentralizing'}}</li>
-                                    <li v-if="contract.df">Files:<p v-for="file in contract.df"><a :href="'https://ipfs.io/ipfs/' + file">{{file}}</a></p></li>
+                                    <li v-if="contract.df">Files:<p v-for="file in contract.df"><a :href="'https://ipfs.io/ipfs/' + file" target="_blank">{{file}}</a></p></li>
                                     <li v-if="contract.n">Stored by:<p v-for="acc in contract.n">@{{acc}} </p></li>
                                     <button v-if="contract.c == 2" @click="">Finalize with Post</button>
                                     <button @click="">Include in Post</button>
