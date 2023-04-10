@@ -769,6 +769,25 @@
 
                             <hr class="bg-light">
                         </div>
+                        <div>
+                            <div v-for="sponsor in saccountapi.file_contracts">
+                                <ul class="text-start" v-for="channel in sponsor">
+                                    <li>Contract ID: {{channel.i}}</li>
+                                    <li >Size: {{channel.u}} bytes</li>
+                                    <li>File Owner: @{{channel.t}}</li>
+                                    <li>Service Provider: @{{channel.b}}</li>
+                                    <li>Sponsor: @{{channel.f}}</li>
+                                    <li>Expiration: {{channel.e}}</li>
+                                    <li>Price: {{channel.r}} Broca</li>
+                                    <li>Redundancy: {{channel.p}}</li>
+                                    <li v-if="channel.s">Terms: {{slotDecode(channel.s, 1)}}% Bennificiary to @{{slotDecode(channel.s, 0)}}</li>
+                                    <li>Status: {{channel.c == 2 ? 'Waiting For Post' : 'Decentralizing'}}</li>
+                                    <li v-if="channel.df">Files:<p v-for="file in channel.df">{{file}} </p></li>
+                                    <li v-if="channel.n">Stored by:<p v-for="acc in channel.n">@{{acc}} </p></li>
+                                    <button @click="">Extend Contract</button>
+                                </ul>
+                            </div>
+                        </div>
                         <div class="mt-2">
                             <!-- Make a form to get a contract -->
                             <form>
