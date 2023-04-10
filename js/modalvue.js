@@ -88,7 +88,10 @@ export default {
                       </div>
                       <div v-if="func == 'Power Up'">
                           <div class="modal-footer">
-                            <input v-if="token == 'LARYNX'" type="checkbox" v-model="test">{{token == 'LARYNX' ? 'Mirror Network Only' : ''}}</input>
+                          <div class="me-auto btn-group border border-info rounded px-2 py-1" role="group" aria-label="Transact on Mirror Network Only" v-if="token == 'LARYNX'">
+                            <input id="pwrupmirror" type="checkbox" v-model="test" class="me-2">
+                            <label for="pwrupmirror">Mirror Network Only</label>
+                          </div>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
                           </div>
