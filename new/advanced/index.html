@@ -784,7 +784,9 @@
                                     <li>Status: {{contract.c == 2 ? 'Waiting For Post' : 'Decentralizing'}}</li>
                                     <li v-if="contract.df">Files:<p v-for="file in contract.df">{{file}} </p></li>
                                     <li v-if="contract.n">Stored by:<p v-for="acc in contract.n">@{{acc}} </p></li>
-                                    <button @click="">Extend Contract</button>
+                                    <button v-if="contract.c == 2" @click="">Finalize with Post</button>
+                                    <button @click="">Include in Post</button>
+                                    <button v-if="contract.c == 3" @click="">Extend Contract</button>
                                 </ul>
                             </div>
                         </div>
