@@ -925,6 +925,14 @@ var app = new Vue({
     togglePin(index) {
       this.File[index].pin = !this.File[index].pin;
     },
+    petitionForContract(){
+      fetch(`https://ipfs.dlux.io/upload-contract?user=${this.account}`)
+      .then(r=>r.json())
+      .then(json =>{
+        console.log(json)
+        this.getSapi(this.account, false)
+      })
+    },
     deleteImg(index) {
       this.File.splice(index, 1)
     },
