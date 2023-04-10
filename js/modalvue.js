@@ -56,7 +56,7 @@ export default {
                       <div class="input-group mb-3" v-if="token == 'DLUX'"> <span class="input-group-text bg-dark border-secondary text-secondary">@</span> <input @blur="accountCheck" class="form-control bg-dark border-secondary text-white" type="text" placeholder="Recipient" v-model="to"> </div> <label for="delAmount" class="small">Amount (Balance: <a href="#/" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
                       <div class="input-group mb-3"> <input class="form-control bg-dark border-secondary text-white" type="number" step="0.001" id="delAmount" min="0.001" placeholder="Enter amount" v-model="amount"> <span class="input-group-text bg-dark border-secondary text-secondary">{{token}}</span> </div>
                   </div>
-                  <button v-if="token == 'SPK' || token == 'LARYNX'" type="checkbox" v-model="test">Mirror Network Only</button>
+                  <input v-if="token == 'SPK' || token == 'LARYNX'" type="checkbox" v-model="test">Mirror Network Only</input>
                   <div class="modal-footer"> <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> <button :disabled="!to" type="submit" class="btn btn-primary" @click="delegate" data-bs-dismiss="modal">Confirm</button> </div>
               </form>
           </div>
@@ -88,7 +88,7 @@ export default {
                       </div>
                       <div v-if="func == 'Power Up'">
                           <div class="modal-footer">
-                            <button v-if="token == 'SPK' || token == 'LARYNX'" type="checkbox" v-model="test">Mirror Network Only</button>
+                          <input v-if="token == 'LARYNX'" type="checkbox" v-model="test">Mirror Network Only</input>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
                           </div>
