@@ -918,15 +918,18 @@
                                                     <li class="">CID: {{FileInfo[file.name].hash}}</li>
                                                     <li class=""><a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
                                                         target="_blank">https://ipfs.io/ipfs/{{FileInfo[file.name].hash}}<i class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a></li>
-                                                    <li class="d-flex">
-                                                        <div class="progress" role="progressbar" aria-label="Upload progress"
-                                                            aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
-                                                            <div class="progress-bar"
-                                                                :style="'width: ' + FileInfo[file.name].progress + '%'">
-                                                                {{file.progress}}%
+                                                    <li class="">
+                                                        <div class="d-flex">
+                                                            <div class="flex-grow">
+                                                                <div class="progress" role="progressbar" aria-label="Upload progress"
+                                                                    aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                                                                    <div class="progress-bar"
+                                                                        :style="'width: ' + FileInfo[file.name].progress + '%'">
+                                                                        {{file.progress}}%
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="" v-if="File.length">
+                                                        <div class="flex-shrink" v-if="File.length">
                                                             <button type="button" class="btn btn-secondary" v-if="file.actions.pause"
                                                             @click="fileRequest[file.index].resumeFileUpload()">Pause</button>
                                                             <button type="button" class="btn btn-secondary" v-if="file.actions.resume"
@@ -934,6 +937,7 @@
                                                             <button type="button" class="btn btn-secondary" v-if="file.actions.cancel"
                                                             @click="fileRequest[file.index].resumeFileUpload()">Cancel</button>
                                                         </div>
+                                                    </div>
                                                     </li>
                                                     <li class=""><h5>{{FileInfo[file.name].status}}</h5></li>
                                                 </ul>
