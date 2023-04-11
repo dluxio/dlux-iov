@@ -935,12 +935,7 @@
                                                 </ul>
                                             </div>
                                         </div>
-                                        <div>
-
-                                            <div class="small">
-                                            </div>
-                                        </div>
-                                        <div v-if="File.length">
+                                        <div class="d-flex" v-if="File.length">
                                             <button v-if="file.actions.pause"
                                                 @click="fileRequest[file.index].resumeFileUpload()">Pause</button>
                                             <button v-if="file.actions.resume"
