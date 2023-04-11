@@ -148,7 +148,7 @@ export default {
                   <h5 class="modal-title">Create Contract</h5> <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <form name="contract">
-                  <div class="modal-body"> <label for="broca" class="small">Balance: {{formatNumber((balance), 3, '', ',')}}</label>
+                  <div class="modal-body"> <label for="broca" class="small">Balance: {{formatNumber((balance), 0, '', ',')}}</label>
                       <div class="input-group mb-3" id="broca"> <input class="form-control text-white border-dark bg-dark" type="number" step="1" :min="1" :max="balance" placeholder="1.000" v-model="amount"> <span class="input-group-text text-secondary border-dark bg-dark">{{token}}</span> </div>
                       
                       <label for="c_to" class="small">Account to Upload File</label>
