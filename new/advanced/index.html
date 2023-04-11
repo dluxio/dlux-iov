@@ -807,7 +807,7 @@
                                         <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Allowed Storage"><i class="fa-solid fa-database fa-fw me-2"></i>{{channel.a/1000000}} MB</div>
                                         <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Service Provider"><i class="fa-solid fa-network-wired fa-fw me-2"></i>@{{channel.b}}</div>
                                         <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Sponsor"><i class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>@{{channel.f}}</div>
-                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Benefactor" v-if="channel.s"><i class="fa-solid fa-circle-dollar-to-slot fa-fw me-2"></i>@{{slotDecode(channel.s, 0)}} ({{slotDecode(channel.s, 1)}}%)</div>
+                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Beneficiary" v-if="channel.s"><i class="fa-solid fa-circle-dollar-to-slot fa-fw me-2"></i>@{{slotDecode(channel.s, 0)}} ({{slotDecode(channel.s, 1)}}%)</div>
                                         <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Expiration"><i class="fa-solid fa-clock fa-fw me-2"></i>{{exp_to_time(channel.e)}}</div>
                                         <div class="btn-group ms-auto" role="group" aria-label="LARYNX Actions">
                                         <button type="button" class="btn btn-secondary" @click="selectContract(channel.i, channel.b)"><i class="fa-solid fa-file-import fa-fw me-2"></i>Select</button>
@@ -949,7 +949,7 @@
                 </div>
                 <div id="two" v-if="contract.id">
                     <div class="flex-column flex-shrink mx-3">
-                        <div style="border-style:solid;">
+                        <div class="rounded border border-secondary">
                             <form>
                                 <input id="fileInput" type="file" @change="uploadFile" multiple />
                                 <div style="background-color:green;margin-bottom:10px;padding:10px;" id="img-well"
@@ -958,7 +958,7 @@
                                 </div>
                             </form>
                             <div v-if="File.length">
-                                <button @click="signNUpload()">Sign and Upload</button>
+                                <button type="button" class="btn btn-info" @click="signNUpload()"><i class="fa-solid fa-file-signature fa-fw me-2"></i>Sign and Upload</button>
                             </div>
                         </div>
                         <div id="listOfImgs" v-for="file in File">
