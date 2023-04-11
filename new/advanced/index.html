@@ -804,22 +804,25 @@
                             </div>
                             </form>
                             <div v-for="sponsor in saccountapi.channels">
-                                <ul class="text-start" v-for="channel in sponsor">
+                                <div class="rounded border border-info my-2 p-3" v-for="channel in sponsor">
+                                    <div><i class="fa-solid fa-network-wired fa-fw me-2"></i>@{{channel.b}}</div>
+                                <ul class="text-start" >
                                     <li>Contract ID: {{channel.i}}</li>
                                     <li v-if="channel.c == 1">Size Allowed: {{channel.a}} bytes</li>
                                     <li v-if="channel.c == 2">Size: {{channel.u}} bytes</li>
                                     <li>File Owner: @{{channel.t}}</li>
                                     <li>Service Provider: @{{channel.b}}</li>
                                     <li>Sponsor: @{{channel.f}}</li>
-                                    <li>Expiration: {{channel.e}}</li>
+                                    <li>Expiration: {{exp_to_time(channel.e)}}</li>
                                     <li>Price: {{channel.r}} Broca</li>
                                     <li>Redundancy: {{channel.p}}</li>
                                     <li v-if="channel.s">Terms: {{slotDecode(channel.s, 1)}}% Bennificiary to @{{slotDecode(channel.s, 0)}}</li>
                                     <li>Status: {{channel.c == 1 ? 'Waiting For Upload' : 'Uploaded'}}</li>
                                     <li v-if="channel.df">Files:<p v-for="file in channel.df">{{file}} </p></li>
                                     <li v-if="channel.n">Stored by:<p v-for="acc in channel.n">@{{acc}} </p></li>
-                                    <button v-if="channel.c == 1" @click="selectContract(channel.i, channel.b)">Select Provider</button>
+                                    <button type="button" class="btn btn-info" v-if="channel.c == 1" @click="selectContract(channel.i, channel.b)">Select Provider</button>
                                 </ul>
+                            </div>
                             </div>
                             <!-- <form>
 								<ul class="text-center ms-auto me-auto col-md-8 col-lg-6 col-xl-4">
@@ -918,7 +921,7 @@
                                     <li>File Owner: @{{contract.t}}</li>
                                     <li>Service Provider: @{{contract.b}}</li>
                                     <li>Sponsor: @{{contract.f}}</li>
-                                    <li>Expiration: {{contract.e}}</li>
+                                    <li>Expiration: {{exp_to_time(contract.e)}}</li>
                                     <li>Price: {{contract.r}} Broca</li>
                                     <li>Redundancy: {{contract.p}}</li>
                                     <li v-if="contract.s">Terms: {{slotDecode(contract.s, 1)}}% Bennificiary to @{{slotDecode(contract.s, 0)}}</li>
