@@ -816,6 +816,9 @@ var app = new Vue({
     "vue-ratings": Ratings,
   },
   methods: {
+    buildTags(){
+      this.postTags = this.postTags.replace(/#/g, "");
+    },
     saveNodeSettings(){
       var cja = {};
       for (var i = 0; i < this.tokenGov.options.length; i++){

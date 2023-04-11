@@ -18,6 +18,9 @@
 	<link href="/css/custom.css" rel="stylesheet" />
 	<link href="/css/smde.css" rel="stylesheet" />
 	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script type="text/javascript" src="/js/onlyhash.js"></script>
+    <script src="/js/buffer.js"></script>
+    <script src="/js/drag-drop.js"></script>
 	<script type="module" src="/js/spkvue.js"></script>
 	<script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
 	<style>
@@ -125,6 +128,9 @@
 				</div>
 				<div id="two">
 					<div class="flex-column flex-shrink mx-3">
+						<button v-if="saccountapi.pubKey != 'NA'" type="button" class="btn btn-info" @click="petitionForContract">
+							<i class="fa-solid fa-wand-magic-sparkles fa-fw me-2"></i>Free 100 KB Contract
+						</button>
 						<h3>Awaiting Post</h3>
 						<div v-for="sponsor in saccountapi.channels">
 							<div class="rounded border border-info my-2 p-3" v-for="channel in sponsor">
@@ -137,6 +143,7 @@
 												'Remove' : 'Append'}}</button><a
 												:href="'https://ipfs.io/ipfs/' + file">{{file}}</a></p>
 									</li>
+									<button v-if="channel.c == 1" @click="selectContract(channel.i, channel.b)">Upload Files</button>
 									<button v-if="channel.c == 2" @click="">Set Post Benificiary</button>
 									<button @click="">Include in Post</button>
 								</ul>
