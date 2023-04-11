@@ -135,8 +135,11 @@
                                         <div class="border-bottom border-secondary text-start">
                                             <div style="color:#FF0000">
                                                 <h3>!! Some Wallet action here effect your REAL balances !!</h3>
-                                                <p>This wallet represent a "mirror network". All SPK token send operations are real. If sending tokens for test ensure they go to an account you own. </p>
-                                                <p>LARYNX actions are also real except registering a service or validator.</p>
+                                                <p>This wallet represent a "mirror network". All SPK token send
+                                                    operations are real. If sending tokens for test ensure they go to an
+                                                    account you own. </p>
+                                                <p>LARYNX actions are also real except registering a service or
+                                                    validator.</p>
                                             </div>
                                             <p class="lead">Decentralized and incentivized network infrastructure,
                                                 rewarding
@@ -146,8 +149,9 @@
                                         <div class="d-flex align-items-center border-bottom border-secondary py-5">
                                             <div>
                                                 <div class="d-flex align-items-start">
-                                                    <h4 class="m-0">SPK Token</h4><small v-if="lapi == 'https://spktest.dlux.io'"><span
-                                                        class="badge ms-1 me-2 bg-warning">TEST</span></small>
+                                                    <h4 class="m-0">SPK Token</h4><small
+                                                        v-if="lapi == 'https://spktest.dlux.io'"><span
+                                                            class="badge ms-1 me-2 bg-warning">TEST</span></small>
                                                 </div>
                                                 <p class="text-white-50 m-0">The governance token for the SPK network.
                                                 </p>
@@ -161,7 +165,8 @@
                                                     <button type="button" class="btn btn-info p-0">
                                                         <modal-vue type="send" token="SPK" :balance="saccountapi.spk"
                                                             :account="account" @modalsign="sendIt($event)">
-                                                            <span slot="trigger" class="p-2" :test="lapi == 'https://spktest.dlux.io' ? true : false"><i
+                                                            <span slot="trigger" class="p-2"
+                                                                :test="lapi == 'https://spktest.dlux.io' ? true : false"><i
                                                                     class="fas fa-paper-plane me-2"></i>Send</span>
                                                         </modal-vue>
                                                     </button>
@@ -193,17 +198,19 @@
                                         <div class="d-flex align-items-center border-bottom border-secondary py-5">
                                             <div class="text-start">
                                                 <div class="d-flex align-items-start">
-                                                    <h4 class="m-0">SPK Power</h4><small v-if="lapi == 'https://spktest.dlux.io'"><span
-                                                        class="badge ms-1 me-2 bg-warning">TEST</span></small>
+                                                    <h4 class="m-0">SPK Power</h4><small
+                                                        v-if="lapi == 'https://spktest.dlux.io'"><span
+                                                            class="badge ms-1 me-2 bg-warning">TEST</span></small>
                                                 </div>
                                                 <p class="text-white-50">Powered SPK for Voting.</p>
                                                 <p class="text-white-50">Benefits of SPK Power:</p>
-                                                    <ul class="text-white-50">
-                                                        <li>Enables voting</li>
-                                                        <li>Instant Power Up | 4 Week Power Down</li>
-                                                        <li>Grants BROCA at 1:1,000,000</li>
-                                                        <li>Your max BROCA: {{formatNumber((saccountapi.spk_power * 1000 ), 0, '', ',')}}</li>
-                                                    </ul>
+                                                <ul class="text-white-50">
+                                                    <li>Enables voting</li>
+                                                    <li>Instant Power Up | 4 Week Power Down</li>
+                                                    <li>Grants BROCA at 1:1,000,000</li>
+                                                    <li>Your max BROCA: {{formatNumber((saccountapi.spk_power * 1000 ),
+                                                        0, '', ',')}}</li>
+                                                </ul>
                                                 </p>
                                             </div>
                                             <div class="ms-auto text-end">
@@ -212,9 +219,10 @@
                                                     SPK
                                                 </h5>
                                                 <div class="btn-group" role="group" aria-label="Power Actions">
-                                                    <button class="dropdown btn btn-info p-2" data-bs-auto-close="outside"
-                                                        href="#" role="button" id="settingsDropdownBtn"
-                                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <button class="dropdown btn btn-info p-2"
+                                                        data-bs-auto-close="outside" href="#" role="button"
+                                                        id="settingsDropdownBtn" data-bs-toggle="dropdown"
+                                                        aria-expanded="false">
                                                         <i class="me-2 fa-solid fa-person-booth"></i>Vote</button>
                                                     <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black dropdown-menu-end"
                                                         aria-labelledby="settingsDropdownBtn" style="width: 300px">
@@ -304,11 +312,14 @@
                                                                     Down</button>
                                                             </modal-vue>
                                                             <modal-vue type="power" token="SPK" func="Election"
-                                                                :balance="saccountapi.spk_power" :account="account" :smarkets="smarkets.node" :current="saccountapi.spk_vote"
+                                                                :balance="saccountapi.spk_power" :account="account"
+                                                                :smarkets="smarkets.node"
+                                                                :current="saccountapi.spk_vote"
                                                                 @modalsign="sendIt($event)">
                                                                 <button class="dropdown-item" slot="trigger"
                                                                     type="button"><i
-                                                                        class="fa-solid fa-plug fa-fw me-2"></i>Elect Validators</button>
+                                                                        class="fa-solid fa-plug fa-fw me-2"></i>Elect
+                                                                    Validators</button>
                                                             </modal-vue>
                                                         </ul>
                                                     </div>
@@ -320,19 +331,24 @@
                                             class="d-flex align-items-center border-bottom border-secondary py-5">
                                             <div class="text-start">
                                                 <div class="d-flex align-items-start">
-                                                    <h4 class="m-0">BROCA</h4><small v-if="lapi == 'https://spktest.dlux.io'"><span
-                                                        class="badge ms-1 me-2 bg-warning">TEST</span></small>
+                                                    <h4 class="m-0">BROCA</h4><small
+                                                        v-if="lapi == 'https://spktest.dlux.io'"><span
+                                                            class="badge ms-1 me-2 bg-warning">TEST</span></small>
                                                 </div>
                                                 <p class="text-white-50">Resource Credits for the SPK network.</p>
                                                 <p class="text-white-50">BROCA stats:</p>
                                                 <ul class="text-white-50">
-                                                    <li>Current cost to store: 1 BROCA per {{sstats.channel_bytes}} Bytes
+                                                    <li>Current cost to store: 1 BROCA per {{sstats.channel_bytes}}
+                                                        Bytes
                                                         for 30 days.</li>
-                                                    <li>Recharge Rate: {{formatNumber((sstats.broca_refill / 28800), 2, '.',
+                                                    <li>Recharge Rate: {{formatNumber((sstats.broca_refill / 28800), 2,
+                                                        '.',
                                                         ',')}} Days to Recharge.</li>
                                                     <li>Time Until Full: {{formatNumber((1 -
-                                                        (broca_calc(saccountapi.broca))/(saccountapi.spk_power * 1000)) *
-                                                        (sstats.broca_refill / 28800), 2, '.', ',')}} Days until full.</li>
+                                                        (broca_calc(saccountapi.broca))/(saccountapi.spk_power * 1000))
+                                                        *
+                                                        (sstats.broca_refill / 28800), 2, '.', ',')}} Days until full.
+                                                    </li>
                                                 </ul>
                                             </div>
                                             <div class="ms-auto text-end">
@@ -346,7 +362,8 @@
                                                             :balance="saccountapi.spk * 1000" :account="account"
                                                             @modalsign="sendIt($event)">
                                                             <span slot="trigger" class="p-2"><i
-                                                                    class="fa-solid fa-file-contract fa-fw me-2"></i>Build Contract</span>
+                                                                    class="fa-solid fa-file-contract fa-fw me-2"></i>Build
+                                                                Contract</span>
                                                         </modal-vue>
                                                     </button>
                                                     <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
@@ -362,7 +379,8 @@
                                                                 @modalsign="sendIt($event)">
                                                                 <button class="dropdown-item" slot="trigger"
                                                                     type="button"><i
-                                                                    class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a></button>
+                                                                        class="fas fa-coins fa-fw me-2"></i>Buy /
+                                                                    Sell</a></button>
                                                             </modal-vue>
                                                         </ul>
                                                     </div>
@@ -438,8 +456,9 @@
                                         <div class="d-flex align-items-center border-bottom border-secondary py-5">
                                             <div>
                                                 <div class="d-flex align-items-start">
-                                                    <h4 class="m-0">LARYNX Token</h4><small v-if="lapi == 'https://spktest.dlux.io'"><span
-                                                        class="badge ms-1 me-2 bg-warning">TEST</span></small>
+                                                    <h4 class="m-0">LARYNX Token</h4><small
+                                                        v-if="lapi == 'https://spktest.dlux.io'"><span
+                                                            class="badge ms-1 me-2 bg-warning">TEST</span></small>
                                                 </div>
                                                 <p class="text-white-50">The mining token for the SPK network.</p>
                                             </div>
@@ -451,7 +470,8 @@
                                                     <button type="button" class="btn btn-info p-0">
                                                         <modal-vue type="send" token="LARYNX"
                                                             :balance="saccountapi.balance" :account="account"
-                                                            @modalsign="sendIt($event)" :test="lapi == 'https://spktest.dlux.io' ? true : false">
+                                                            @modalsign="sendIt($event)"
+                                                            :test="lapi == 'https://spktest.dlux.io' ? true : false">
                                                             <span slot="trigger" class="p-2"><i
                                                                     class="fas fa-paper-plane me-2"></i>Send</span>
                                                         </modal-vue>
@@ -466,7 +486,8 @@
                                                             aria-labelledby="btnGroupDrop1">
                                                             <modal-vue type="power" token="LARYNX" func="Power Up"
                                                                 :balance="saccountapi.balance" :account="account"
-                                                                @modalsign="sendIt($event)" :test="lapi == 'https://spktest.dlux.io' ? true : false">
+                                                                @modalsign="sendIt($event)"
+                                                                :test="lapi == 'https://spktest.dlux.io' ? true : false">
                                                                 <button class="dropdown-item" slot="trigger"
                                                                     type="button"><i
                                                                         class="fas fa-angle-double-up fa-fw me-2"></i>Power
@@ -474,7 +495,8 @@
                                                             </modal-vue>
                                                             <modal-vue type="power" :dis="!isNode" token="LARYNX"
                                                                 func="Lock Liquidity" :balance="saccountapi.balance"
-                                                                :account="account" @modalsign="sendIt($event)" :test="lapi == 'https://spktest.dlux.io' ? true : false">
+                                                                :account="account" @modalsign="sendIt($event)"
+                                                                :test="lapi == 'https://spktest.dlux.io' ? true : false">
                                                                 <button class="dropdown-item" :disabled="!isNode"
                                                                     slot="trigger" type="button"><i
                                                                         class="fas fa-lock fa-fw me-2"></i>Lock
@@ -491,9 +513,10 @@
                                                                 </button>
                                                             </modal-vue>
                                                             <modal-vue v-if="isNode" type="power" token="LARYNX"
-                                                                func="Register a Validator" :balance="saccountapi.balance"
-                                                                :min="isValidator ? '0.001' :sstats.IPFSRate/1000" :account="account"
-                                                                @modalsign="sendIt($event)">
+                                                                func="Register a Validator"
+                                                                :balance="saccountapi.balance"
+                                                                :min="isValidator ? '0.001' :sstats.IPFSRate/1000"
+                                                                :account="account" @modalsign="sendIt($event)">
                                                                 <button class="dropdown-item" slot="trigger"
                                                                     type="button"><i
                                                                         class="fa fa-network-wired fa-fw me-2"></i>{{isValidator ? 'Burn LARYNX to your Validator' : 'Register a Validator'}}
@@ -519,10 +542,12 @@
                                                     and earn rewards for node runners</p>
                                                 <p class="text-white-50">Benefits of LARYNX Locked:</p>
                                                 <ul class="text-white-50">
-                                                    <li>Provides collateral for DEX transactions and proof-of-stake consensus</li>
+                                                    <li>Provides collateral for DEX transactions and proof-of-stake
+                                                        consensus</li>
                                                     <li>Instant Lock | 4 Week Unlock</li>
                                                     <li>Requires an operating LARYNX node</li>
-                                                    <li>LARYNX LOCKED (LL) earns SPK tokens at {{toFixed(parseFloat(spkStats.spk_rate_lgov) *
+                                                    <li>LARYNX LOCKED (LL) earns SPK tokens at
+                                                        {{toFixed(parseFloat(spkStats.spk_rate_lgov) *
                                                         100,3)}}%</li>
                                                 </ul>
                                             </div>
@@ -553,7 +578,8 @@
                                                         <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                                             aria-labelledby="btnGroupDrop1">
                                                             <modal-vue type="power" token="LARYNX"
-                                                                func="Unlock Liquidity" :balance="saccountapi.gov" :test="lapi == 'https://spktest.dlux.io' ? true : false"
+                                                                func="Unlock Liquidity" :balance="saccountapi.gov"
+                                                                :test="lapi == 'https://spktest.dlux.io' ? true : false"
                                                                 :account="account" @modalsign="sendIt($event)">
                                                                 <button class="dropdown-item" slot="trigger"
                                                                     type="button"><i
@@ -639,8 +665,9 @@
                                                             <modal-vue type="delegate" :smarkets="smarkets.node"
                                                                 token="LARYNX" func="Lock Liquidity" :stats="sstats"
                                                                 :balance="saccountapi.poweredUp" :account="account"
-                                                                @modalsign="sendIt($event)" :test="lapi == 'https://spktest.dlux.io' ? true : false"><span slot="trigger"
-                                                                    class="p-2">
+                                                                @modalsign="sendIt($event)"
+                                                                :test="lapi == 'https://spktest.dlux.io' ? true : false"><span
+                                                                    slot="trigger" class="p-2">
                                                                     <i
                                                                         class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
                                                             </modal-vue>
@@ -657,7 +684,8 @@
                                                                 aria-labelledby="btnGroupDrop1">
                                                                 <modal-vue type="power" token="LARYNX" func="Power Down"
                                                                     :balance="saccountapi.poweredUp" :account="account"
-                                                                    @modalsign="sendIt($event)" :test="lapi == 'https://spktest.dlux.io' ? true : false">
+                                                                    @modalsign="sendIt($event)"
+                                                                    :test="lapi == 'https://spktest.dlux.io' ? true : false">
                                                                     <button :disabled="!saccountapi.poweredUp"
                                                                         class="dropdown-item" slot="trigger"
                                                                         type="button"><i
@@ -666,7 +694,8 @@
                                                                 </modal-vue>
                                                                 <modal-vue v-show="when(saccountapi.powerDowns)"
                                                                     type="confirm" token="LARYNX" func="powercancel"
-                                                                    :account="account" @modalsign="sendIt($event)" :test="lapi == 'https://spktest.dlux.io' ? true : false">
+                                                                    :account="account" @modalsign="sendIt($event)"
+                                                                    :test="lapi == 'https://spktest.dlux.io' ? true : false">
                                                                     <button class="dropdown-item" slot="trigger"
                                                                         type="button">
                                                                         <i
@@ -686,7 +715,8 @@
                                                     ({{saccountapi.powerDowns.length}} installments remaining)</b><small
                                                     class="ms-2">
                                                     <modal-vue type="confirm" token="LARYNX" func="powercancel"
-                                                        :account="account" @modalsign="sendIt($event)" :test="lapi == 'https://spktest.dlux.io' ? true : false">
+                                                        :account="account" @modalsign="sendIt($event)"
+                                                        :test="lapi == 'https://spktest.dlux.io' ? true : false">
                                                         <button class="btn btn-sm btn-outline-danger" slot="trigger"
                                                             type="button">
                                                             STOP</button>
@@ -710,14 +740,16 @@
                                                                 <modal-vue type="delegate" :smarkets="smarkets.node"
                                                                     token="LARYNX" :to="b" :amount="a" :stats="sstats"
                                                                     :balance="saccountapi.poweredUp" :account="account"
-                                                                    @modalsign="sendIt($event)" :test="lapi == 'https://spktest.dlux.io' ? true : false">
+                                                                    @modalsign="sendIt($event)"
+                                                                    :test="lapi == 'https://spktest.dlux.io' ? true : false">
                                                                     <button slot="trigger" type="button"
                                                                         class="ms-1 btn btn-secondary"><i
                                                                             class="fas fa-fw fa-user-edit"></i></button>
                                                                 </modal-vue>
                                                                 <modal-vue type="delegate" :smarkets="smarkets.node"
                                                                     token="LARYNX" :to="b" amount="0" :stats="sstats"
-                                                                    :balance="saccountapi.poweredUp" :account="account" :test="lapi == 'https://spktest.dlux.io' ? true : false"
+                                                                    :balance="saccountapi.poweredUp" :account="account"
+                                                                    :test="lapi == 'https://spktest.dlux.io' ? true : false"
                                                                     @modalsign="sendIt($event)">
                                                                     <button class="ms-1 btn btn-danger ms-1"
                                                                         slot="trigger" type="button"><i
@@ -779,44 +811,65 @@
                                     <input type="text" class="form-control bg-darkg border-secondary text-info" readonly
                                         id="username" v-model="account">
                                 </div>
-                                <div class="rounded py-2 px-3 my-2 bg-darkg border border-secondary">
-                                <div class="d-flex align-items-center my-3">
-                                <h3 class="m-0">Available Contracts</h3>
-                                <div class="ms-auto">
-                                    <button v-if="saccountapi.pubKey == 'NA'" type="button" class="btn btn-info me-2" @click="updatePubkey">
-                                        Register Account
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                <button type="button" class="btn btn-info me-2">
-                                    <modal-vue type="build" token="BROCA"
-                                        :balance="saccountapi.spk * 1000" :account="account"
-                                        @modalsign="sendIt($event)">
-                                        <span slot="trigger" class="p-2"><i
-                                                class="fa-solid fa-file-contract fa-fw me-2"></i>Create A Contract</span>
-                                    </modal-vue>
-                                </button>
-                                    <button v-if="saccountapi.pubKey != 'NA'" type="button" class="btn btn-info" @click="petitionForContract">
-                                        <i class="fa-solid fa-wand-magic-sparkles fa-fw me-2"></i>Free 100 KB Contract
-                                    </button>
-                            </div>
-                        </div>
+                                <div class="rounded py-2 px-3 my-5 bg-darkg border border-secondary">
+                                    <div class="d-flex flex-wrap align-items-center my-3">
+                                        <h3 class="my-0 mx-2">Available Contracts</h3>
+                                        <div class="ms-auto">
+                                            <button v-if="saccountapi.pubKey == 'NA'" type="button"
+                                                class="btn btn-info m-2" @click="updatePubkey">
+                                                Register Account
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-info m-2">
+                                                <modal-vue type="build" token="BROCA" :balance="saccountapi.spk * 1000"
+                                                    :account="account" @modalsign="sendIt($event)">
+                                                    <span slot="trigger" class="p-2"><i
+                                                            class="fa-solid fa-file-contract fa-fw me-2"></i>Create A
+                                                        Contract</span>
+                                                </modal-vue>
+                                            </button>
+                                            <button v-if="saccountapi.pubKey != 'NA'" type="button" class="btn btn-info m-2"
+                                                @click="petitionForContract">
+                                                <i class="fa-solid fa-wand-magic-sparkles fa-fw me-2"></i>Free 100 KB
+                                                Contract
+                                            </button>
+                                        </div>
+                                    </div>
                             </form>
                             <div v-for="sponsor in saccountapi.channels">
-                                <div class="border-top border-secondary my-2 p-3" v-for="channel in sponsor" v-if="channel.c == 1">
+                                <div class="border-top border-secondary my-2 p-3" v-for="channel in sponsor"
+                                    v-if="channel.c == 1">
                                     <div class="d-flex flex-wrap">
-                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Allowed Storage"><i class="fa-solid fa-database fa-fw me-2"></i>{{channel.a/1000000}} MB</div>
-                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Service Provider"><i class="fa-solid fa-network-wired fa-fw me-2"></i>@{{channel.b}}</div>
-                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Sponsor"><i class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>@{{channel.f}}</div>
-                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Beneficiary" v-if="channel.s"><i class="fa-solid fa-circle-dollar-to-slot fa-fw me-2"></i>@{{slotDecode(channel.s, 0)}} ({{slotDecode(channel.s, 1)}}%)</div>
-                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Expiration"><i class="fa-solid fa-clock fa-fw me-2"></i>{{exp_to_time(channel.e)}}</div>
+                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white"
+                                            title="Allowed Storage"><i
+                                                class="fa-solid fa-database fa-fw me-2"></i>{{channel.a/1000000}} MB
+                                        </div>
+                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white"
+                                            title="Service Provider"><i
+                                                class="fa-solid fa-network-wired fa-fw me-2"></i>@{{channel.b}}</div>
+                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Sponsor"><i
+                                                class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>@{{channel.f}}
+                                        </div>
+                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Beneficiary"
+                                            v-if="channel.s"><i
+                                                class="fa-solid fa-circle-dollar-to-slot fa-fw me-2"></i>@{{slotDecode(channel.s,
+                                            0)}} ({{slotDecode(channel.s, 1)}}%)</div>
+                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Expiration"><i
+                                                class="fa-solid fa-clock fa-fw me-2"></i>{{exp_to_time(channel.e)}}
+                                        </div>
                                         <div class="btn-group ms-auto" role="group" aria-label="LARYNX Actions">
-                                        <button type="button" class="btn btn-secondary" @click="selectContract(channel.i, channel.b)"><i class="fa-solid fa-file-import fa-fw me-2"></i>Select</button>
-                                        <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
-                                        <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" :data-bs-target="'#' + replace(channel.i)" ><i class="fa-solid fa-magnifying-glass fa-fw me-2"></i>Details</button>
+                                            <button type="button" class="btn btn-secondary"
+                                                @click="selectContract(channel.i, channel.b)"><i
+                                                    class="fa-solid fa-file-import fa-fw me-2"></i>Select</button>
+                                            <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                disabled></button>
+                                            <button type="button" class="btn btn-secondary" data-bs-toggle="collapse"
+                                                :data-bs-target="'#' + replace(channel.i)"><i
+                                                    class="fa-solid fa-magnifying-glass fa-fw me-2"></i>Details</button>
                                         </div>
                                     </div>
                                     <div class="collapse" :id="replace(channel.i)">
-                                        <ul class="text-start" >
+                                        <ul class="text-start">
                                             <li>Contract ID: {{channel.i}}</li>
                                             <li v-if="channel.c == 1">Size Allowed: {{channel.a}} bytes</li>
                                             <li v-if="channel.c == 2">Size: {{channel.u}} bytes</li>
@@ -826,198 +879,158 @@
                                             <li>Expiration: {{exp_to_time(channel.e)}}</li>
                                             <li>Price: {{channel.r}} Broca</li>
                                             <li>Redundancy: {{channel.p}}</li>
-                                            <li v-if="channel.s">Terms: {{slotDecode(channel.s, 1)}}% Bennificiary to @{{slotDecode(channel.s, 0)}}</li>
+                                            <li v-if="channel.s">Terms: {{slotDecode(channel.s, 1)}}% Bennificiary to
+                                                @{{slotDecode(channel.s, 0)}}</li>
                                             <li>Status: {{channel.c == 1 ? 'Waiting For Upload' : 'Uploaded'}}</li>
-                                            <li v-if="channel.df">Files:<p v-for="file in channel.df">{{file}} </p></li>
-                                            <li v-if="channel.n">Stored by:<p v-for="acc in channel.n">@{{acc}} </p></li>
+                                            <li v-if="channel.df">Files:<p v-for="file in channel.df">{{file}} </p>
+                                            </li>
+                                            <li v-if="channel.n">Stored by:<p v-for="acc in channel.n">@{{acc}} </p>
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                            <!-- <form>
-								<ul class="text-center ms-auto me-auto col-md-8 col-lg-6 col-xl-4">
-									<h3><u>Contract Types</u></h3>
-									<li class="text-start">Direct: you pay for hosting now</li>
-									<li class="text-start">Sponsored: free hosting with beneficiary
-										fee</li>
-								</ul>
-								<div class="col-md-6 ms-auto me-auto">
-
-									<div class="form-group mb-3">
-										<div class="d-flex align-items-center mb-3">
-											<label for="username">Client</label>
-											<div class="ms-auto" style="visibility: hidden;">
-												<div class="btn-group"><input type="radio" name="" id=""
-														autocomplete="off" checked="checked" class="btn-check">
-													<label for="" class="btn btn-outline-warning">
-														SIMPLE
-													</label> <input type="radio" name="" id="" autocomplete="off"
-														class="btn-check"> <label for=""
-														class="btn btn-outline-warning">
-														SPONSORED
-													</label>
-												</div>
-											</div>
-										</div>
-										<div class="input-group">
-
-											<span
-												class="input-group-text bg-darkg border-secondary text-white-50 l-radius-hotfix">@</span>
-
-											<input type="text" class="form-control bg-darkg border-secondary text-info"
-												readonly id="username" v-model="account">
-										</div>
-									</div>
-
-									<div class="form-group mb-3">
-										<div class="d-flex align-items-center mb-3">
-											<label for="title">Provider</label>
-											<div class="ms-auto">
-												<div class="btn-group"><input type="radio" name="contractType"
-														@click="simple.checked = true; sponsored.checked = false"
-														id="simple" autocomplete="off" checked="checked"
-														class="btn-check" :checked="simple.checked"> <label for="simple"
-														class="btn btn-outline-warning">
-														DIRECT
-													</label> <input type="radio" name="contractType" id="sponsored"
-														@click="simple.checked = false; sponsored.checked = true"
-														autocomplete="off" class="btn-check"
-														:checked="sponsored.checked"> <label for="sponsored"
-														class="btn btn-outline-warning">
-														SPONSORED
-													</label>
-												</div>
-											</div>
-										</div>
-										<div v-show="simple.checked">
-											<input class="form-control bg-darkg border-secondary text-info"
-												list="datalistOptions1" id="simpleContracts"
-												placeholder="Type to search direct contracts...">
-											<datalist id="datalistOptions1">
-												<option value="High"></option>
-												<option value="Average"></option>
-												<option value="Low"></option>
-												<option value="Custom"></option>
-											</datalist>
-										</div>
-										<div v-show="sponsored.checked">
-											<input class="form-control bg-darkg border-secondary text-info"
-												list="datalistOptions2" id="sponsoredContracts"
-												placeholder="Type to search sponsored contracts...">
-											<datalist id="datalistOptions2">
-												<option value="threespk.voter"></option>
-												<option value="dlux-io"></option>
-												<option value="someguy321"></option>
-												<option value="daffy"></option>
-												<option value="dolly"></option>
-											</datalist>
-										</div>
-									</div>
-
-
-									<div>
-										<h5>Contract: {{contract.id}}</h5>
-										<p class="text-start text-white-50 small">@threespk.voter is placing 1000 BROCA to store up to 10GB of data. You must make a post on the hive blockchain with 10% beneficiary to @threespk.voter with-in 24 hours for this storage contract to be inforce. </p>
-									</div>
-								</div>
-							</form> -->
+                    </div>
+                    <div class="rounded py-2 px-3 my-5 bg-darkg border border-secondary">
+                        <div class="d-flex align-items-center my-3">
+                            <h3 class="my-0 mx-2">Your Contracts</h3>
+                            <div class="ms-auto"></div>
                         </div>
+                        <div v-for="contract in saccountapi.file_contracts" class="border-top border-secondary my-2 p-3">
+                            <div class="d-flex flex-wrap">
+                                <div class="rounded bg-primary px-2 py-1 m-2 text-white"
+                                    title="Allowed Storage"><i
+                                        class="fa-solid fa-database fa-fw me-2"></i>{{contract.u/1000000}} MB
+                                </div>
+                                <div class="rounded bg-primary px-2 py-1 m-2 text-white"
+                                    title="Service Provider"><i
+                                        class="fa-solid fa-network-wired fa-fw me-2"></i>@{{contract.b}}</div>
+                                <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Sponsor"><i
+                                        class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>@{{contract.f}}
+                                </div>
+                                <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Beneficiary"
+                                    v-if="contract.s"><i
+                                        class="fa-solid fa-circle-dollar-to-slot fa-fw me-2"></i>@{{slotDecode(contract.s,
+                                    0)}} ({{slotDecode(contract.s, 1)}}%)</div>
+                                <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Expiration"><i
+                                        class="fa-solid fa-clock fa-fw me-2"></i>{{exp_to_time(contract.e)}}
+                                </div>
+                                <div class="btn-group ms-auto" role="group" aria-label="LARYNX Actions">
+                                    <button v-if="contract.c == 3" type="button" class="btn btn-secondary"
+                                        @click=""><i
+                                            class="fa-solid fa-clock-rotate-left fa-fw me-2"></i>Extend</button>
+                                    <button v-if="contract.c == 2" type="button" class="btn btn-secondary"
+                                            @click=""><i
+                                                class="fa-solid fa-file-pen fa-fw me-2"></i>Finalize</button>
+                                    <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                        disabled></button>
+                                    <button type="button" class="btn btn-secondary"
+                                        @click=""><i
+                                            class="fa-solid fa-pen-to-square fa-fw me-2"></i>Post</button>
+                                    <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                        disabled></button>
+                                    <button type="button" class="btn btn-secondary" data-bs-toggle="collapse"
+                                        :data-bs-target="'#' + replace(contract.i)"><i
+                                            class="fa-solid fa-magnifying-glass fa-fw me-2"></i>Details</button>
+                                </div>
+                            </div>
+                            <div class="collapse" :id="replace(contract.i)">
+                            <ul class="text-start">
+                                <li>Contract ID: {{contract.i}}</li>
+                                <li>Size: {{contract.u}} bytes</li>
+                                <li>File Owner: @{{contract.t}}</li>
+                                <li>Service Provider: @{{contract.b}}</li>
+                                <li>Sponsor: @{{contract.f}}</li>
+                                <li>Expiration: {{exp_to_time(contract.e)}}</li>
+                                <li>Price: {{contract.r}} Broca</li>
+                                <li>Redundancy: {{contract.p}}</li>
+                                <li v-if="contract.s">Terms: {{slotDecode(contract.s, 1)}}% Bennificiary to
+                                    @{{slotDecode(contract.s, 0)}}</li>
+                                <li>Status: {{contract.c == 2 ? 'Waiting For Post' : 'Decentralizing'}}</li>
+                                <li v-if="contract.df">Files:<p v-for="file in contract.df"><a
+                                            :href="'https://ipfs.io/ipfs/' + file">{{file}}</a></p>
+                                </li>
+                                <li v-if="contract.n">Stored by:<p v-for="acc in contract.n">@{{acc}} </p>
+                                </li>
+                                <button v-if="contract.c == 2" @click="">Finalize with Post</button>
+                                <button @click="">Include in Post</button>
+                                <button v-if="contract.c == 3" @click="">Extend Contract</button>
+                            </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    </div>
+    <div id="two" v-if="contract.id">
+        <div class="flex-column flex-shrink mx-3">
+            <div class="rounded border border-secondary">
+                <form>
+                    <input id="fileInput" type="file" @change="uploadFile" multiple />
+                    <div style="background-color:green;margin-bottom:10px;padding:10px;" id="img-well"
+                        @drop="dragFile($event)">
+                        Or drag the file here
+                    </div>
+                </form>
+                <div v-if="File.length">
+                    <button type="button" class="btn btn-info" @click="signNUpload()"><i
+                            class="fa-solid fa-file-signature fa-fw me-2"></i>Sign and Upload</button>
+                </div>
+            </div>
+            <div id="listOfImgs" v-for="file in File">
+                <div class="p-3 mb-3 bg-dark" style="border-radius: 10px;">
+                    <div class="d-flex align-items-center flex-row pb-2 mb-2"
+                        style="border-bottom-style: solid; border-bottom-color: #909090">
+                        <div class="d-flex">
+                            <h6>{{file.name}}</h6>
+                        </div>
+                        <div class="ml-auto"><button type="button" @click="togglePin(index)"
+                                class="btn ${btnclass} btn-sm mr-2" data-toggle="tooltip" data-placement="top"
+                                title="Asset Pinned to IPFS"><i class="fas fa-fw fa-thumbtack"></i></button><button
+                                class="btn btn-danger btn-sm" @click="deleteImg(index)" data-toggle="tooltip"
+                                data-placement="top" title="Delete Asset"><i
+                                    class="fas fa-fw fa-trash-alt"></i></button></div>
+                    </div>
+                    <div class="d-flex flex-row">
                         <div>
-                            <h3>Current File Storage</h3>
-                            <div v-for="contract in saccountapi.file_contracts">
-                                <ul class="text-start">
-                                    <li>Contract ID: {{contract.i}}</li>
-                                    <li >Size: {{contract.u}} bytes</li>
-                                    <li>File Owner: @{{contract.t}}</li>
-                                    <li>Service Provider: @{{contract.b}}</li>
-                                    <li>Sponsor: @{{contract.f}}</li>
-                                    <li>Expiration: {{exp_to_time(contract.e)}}</li>
-                                    <li>Price: {{contract.r}} Broca</li>
-                                    <li>Redundancy: {{contract.p}}</li>
-                                    <li v-if="contract.s">Terms: {{slotDecode(contract.s, 1)}}% Bennificiary to @{{slotDecode(contract.s, 0)}}</li>
-                                    <li>Status: {{contract.c == 2 ? 'Waiting For Post' : 'Decentralizing'}}</li>
-                                    <li v-if="contract.df">Files:<p v-for="file in contract.df"><a :href="'https://ipfs.io/ipfs/' + file">{{file}}</a></p></li>
-                                    <li v-if="contract.n">Stored by:<p v-for="acc in contract.n">@{{acc}} </p></li>
-                                    <button v-if="contract.c == 2" @click="">Finalize with Post</button>
-                                    <button @click="">Include in Post</button>
-                                    <button v-if="contract.c == 3" @click="">Extend Contract</button>
+                            <div class="small">
+                                <ul>
+                                    <li>Bytes: {{file.size}}</li>
+                                    <li>CID: {{FileInfo[file.name].hash}}</li>
+                                    <li>
+                                        <div class="progress" role="progressbar" aria-label="Example with label"
+                                            aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                                            <div class="progress-bar"
+                                                :style="'width: ' + FileInfo[file.name].progress + '%'">
+                                                {{file.progress}}%</div>
+                                        </div>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div id="two" v-if="contract.id">
-                    <div class="flex-column flex-shrink mx-3">
-                        <div class="rounded border border-secondary">
-                            <form>
-                                <input id="fileInput" type="file" @change="uploadFile" multiple />
-                                <div style="background-color:green;margin-bottom:10px;padding:10px;" id="img-well"
-                                    @drop="dragFile($event)">
-                                    Or drag the file here
-                                </div>
-                            </form>
-                            <div v-if="File.length">
-                                <button type="button" class="btn btn-info" @click="signNUpload()"><i class="fa-solid fa-file-signature fa-fw me-2"></i>Sign and Upload</button>
+                        <div v-if="FileInfo[file.name].uploaded">
+                            <div><img :src="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash" width="100%" />
+                            </div>
+                            <div class="small"><a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
+                                    target="_blank">https://ipfs.io/ipfs/{{FileInfo[file.name].hash}}</a>
                             </div>
                         </div>
-                        <div id="listOfImgs" v-for="file in File">
-                            <div class="p-3 mb-3 bg-dark" style="border-radius: 10px;">
-                                <div class="d-flex align-items-center flex-row pb-2 mb-2"
-                                    style="border-bottom-style: solid; border-bottom-color: #909090">
-                                    <div class="d-flex">
-                                        <h6>{{file.name}}</h6>
-                                    </div>
-                                    <div class="ml-auto"><button type="button" @click="togglePin(index)"
-                                            class="btn ${btnclass} btn-sm mr-2" data-toggle="tooltip"
-                                            data-placement="top" title="Asset Pinned to IPFS"><i
-                                                class="fas fa-fw fa-thumbtack"></i></button><button
-                                            class="btn btn-danger btn-sm" @click="deleteImg(index)"
-                                            data-toggle="tooltip" data-placement="top" title="Delete Asset"><i
-                                                class="fas fa-fw fa-trash-alt"></i></button></div>
-                                </div>
-                                <div class="d-flex flex-row">
-                                    <div>
-                                        <div class="small">
-                                            <ul>
-                                                <li>Bytes: {{file.size}}</li>
-                                                <li>CID: {{FileInfo[file.name].hash}}</li>
-                                                <li>
-                                                    <div class="progress" role="progressbar"
-                                                        aria-label="Example with label" aria-valuenow="25"
-                                                        aria-valuemin="0" aria-valuemax="100">
-                                                        <div class="progress-bar"
-                                                            :style="'width: ' + FileInfo[file.name].progress + '%'">
-                                                            {{file.progress}}%</div>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    <div v-if="FileInfo[file.name].uploaded">
-                                        <div><img :src="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
-                                                width="100%" /></div>
-                                        <div class="small"><a
-                                                :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
-                                                target="_blank">https://ipfs.io/ipfs/{{FileInfo[file.name].hash}}</a>
-                                        </div>
-                                    </div>
-                                    <div v-if="File.length">
-                                        <button v-if="file.actions.pause"
-                                            @click="fileRequest[file.index].resumeFileUpload()">Pause</button>
-                                        <button v-if="file.actions.resume"
-                                            @click="fileRequest[file.index].resumeFileUpload()">Resume</button>
-                                        <button v-if="file.actions.cancel"
-                                            @click="fileRequest[file.index].resumeFileUpload()">Cancel</button>
-                                        <h5>{{FileInfo[file.name].status}}</h5>
-                                    </div>
-                                </div>
-                            </div>
+                        <div v-if="File.length">
+                            <button v-if="file.actions.pause"
+                                @click="fileRequest[file.index].resumeFileUpload()">Pause</button>
+                            <button v-if="file.actions.resume"
+                                @click="fileRequest[file.index].resumeFileUpload()">Resume</button>
+                            <button v-if="file.actions.cancel"
+                                @click="fileRequest[file.index].resumeFileUpload()">Cancel</button>
+                            <h5>{{FileInfo[file.name].status}}</h5>
                         </div>
                     </div>
                 </div>
-            </section>
-        </main>
+            </div>
+        </div>
+    </div>
+    </section>
+    </main>
     </div>
     <script src="/js/img-ipfs.js"></script>
 
