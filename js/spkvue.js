@@ -899,33 +899,38 @@ var app = new Vue({
         reader.File = e.dataTransfer.files[i]
         reader.onload = (event) => {
           const fileContent = event.target.result;
-          for (var i = 0; i < this.File.length; i++) {
-            if (
-              this.File[i].name == event.currentTarget.File.name
-              && this.File[i].size == event.currentTarget.File.size
-            ) {
-              Hash.of(buffer.Buffer(fileContent)).then(hash => {
-                console.log('hereasdasd')
-                const dict = { hash, index: i, size: event.currentTarget.File.size, name: event.currentTarget.File.name }
-                this.FileInfo[dict.name] = dict
-                // this.File[i].md5 = hash 
-                // this.File[i].blob = fileContent; 
-                // const file = this.File[i];
-                //  this.File.splice(i, 1, file);
-              })
+          // for (var i = 0; i < this.File.length; i++) {
+          //   if (
+          //     this.File[i].name == event.currentTarget.File.name
+          //     && this.File[i].size == event.currentTarget.File.size
+          //   ) {
+          Hash.of(buffer.Buffer(fileContent)).then(hash => {
+            console.log('hereasdasd')
+            const dict = { hash, index: this.File.length, size: event.currentTarget.File.size, name: event.currentTarget.File.name }
+            this.FileInfo[dict.name] = dict
+            // var File = e.dataTransfer.files[i];
+            var File = event.currentTarget.File
+            File.progress = 0;
+            File.actions = {
+              cancel: true,
+              pause: false,
+              resume: false,
             }
-          }
+            this.File.push(File);
+          })
+          //   }
+          // }
           
         };
         reader.readAsArrayBuffer(e.dataTransfer.files[i]);
-        var File = e.dataTransfer.files[i];
-        File.progress = 0;
-        File.actions = {
-          cancel: true,
-          pause: false,
-          resume: false,
-        }
-        this.File.push(File);
+        // var File = e.dataTransfer.files[i];
+        // File.progress = 0;
+        // File.actions = {
+        //   cancel: true,
+        //   pause: false,
+        //   resume: false,
+        // }
+        // this.File.push(File);
       }
     },
     togglePin(index) {
