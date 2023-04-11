@@ -154,7 +154,12 @@ export default {
                       <label for="c_to" class="small">Account to Upload File</label>
                       <div class="input-group mb-3" id="c_to"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="to"> </div>
                       <label for="broker" class="small">IPFS Service Provider (Dynamic List)</label>
-                      <div class="input-group mb-3" id="broker"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="broker"> </div>
+                      <div class="input-group mb-3" id="broker"> <input class="form-control bg-dark border-dark text-white"
+                      list="datalistOptions2" id="sponsoredContracts"
+                      v-model="broker">
+                    <datalist id="datalistOptions2">
+                      <option v-for="(account, key) in ipfsProviders" :value="key"></option>
+                    </datalist> </div>
                       <label for="ben" class="small">Requested Benificary Amount</label>
                       <div class="input-group mb-3" id="ben"> <input class="form-control text-white border-dark bg-dark" type="number" step="0.01" :min="0" :max="100" v-model="ben_amount"> </div>
                       <label for="ben_to" class="small">Benificiary Account</label>
