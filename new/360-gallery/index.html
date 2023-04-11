@@ -125,8 +125,47 @@
 				</div>
 				<div id="two">
 					<div class="flex-column flex-shrink mx-3">
-						
-						
+						<h3>Awaiting Post</h3>
+						<div v-for="sponsor in saccountapi.channels">
+							<div class="rounded border border-info my-2 p-3" v-for="channel in sponsor">
+								<div><i class="fa-solid fa-network-wired fa-fw me-2"></i>@{{channel.b}}</div>
+								<ul class="text-start">
+									<li>Expiration: {{exp_to_time(channel.e)}}</li>
+									<li v-if="channel.s">Terms: {{slotDecode(channel.s, 1)}}% Bennificiary to
+										@{{slotDecode(channel.s, 0)}}</li>
+									<li v-if="channel.df">Files:<p v-for="file in channel.df"><button @click="appendFile(file, channel.i)">{{files[file] ?
+												'Remove' : 'Append'}}</button><a
+												:href="'https://ipfs.io/ipfs/' + file">{{file}}</a></p>
+									</li>
+									<button v-if="channel.c == 2" @click="">Set Post Benificiary</button>
+									<button @click="">Include in Post</button>
+								</ul>
+							</div>
+						</div>
+						<h3>Current File Storage</h3>
+						<div v-for="contract in saccountapi.file_contracts">
+							<ul class="text-start">
+								<li>Contract ID: {{contract.i}}</li>
+								<li>Size: {{contract.u}} bytes</li>
+								<li>File Owner: @{{contract.t}}</li>
+								<li>Service Provider: @{{contract.b}}</li>
+								<li>Sponsor: @{{contract.f}}</li>
+								<li>Expiration: {{contract.e}}</li>
+								<li>Price: {{contract.r}} Broca</li>
+								<li>Redundancy: {{contract.p}}</li>
+								<li v-if="contract.s">Terms: {{slotDecode(contract.s, 1)}}% Bennificiary to
+									@{{slotDecode(contract.s, 0)}}</li>
+								<li>Status: {{contract.c == 2 ? 'Waiting For Post' : 'Decentralizing'}}</li>
+								<li v-if="contract.df">Files:<p v-for="file in contract.df"><a
+											:href="'https://ipfs.io/ipfs/' + file">{{file}}</a></p>
+								</li>
+								<li v-if="contract.n">Stored by:<p v-for="acc in contract.n">@{{acc}} </p>
+								</li>
+								<button v-if="contract.c == 2" @click="">Finalize with Post</button>
+								<button @click="">Include in Post</button>
+								<button v-if="contract.c == 3" @click="">Extend Contract</button>
+							</ul>
+						</div>
 					</div>
 				</div>
 				<div id="three">
@@ -279,7 +318,7 @@
 			})
 			buildList()
 		}
-		
+
 		function permlink(text) {
 			if (text) {
 				text.replace(/[\W_]+/g, '-').replace(' ', '-').toLowerCase()
@@ -348,7 +387,9 @@
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
 		integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
 		crossorigin="anonymous"></script>
-		<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+		integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+		crossorigin="anonymous"></script>
 
 </body>
 
