@@ -264,6 +264,7 @@ var app = new Vue({
         showDeleted: false,
         searching: false,
       },
+      ipfsProviders: {},
       accountRNFTs: [],
       accountNFTs: [],
       displayNFTs: [],
@@ -2529,6 +2530,7 @@ function tradeFTreject(setname, uid, callback){
           }
         });
     },
+    checkAccountKey(acc){},
     getSapi(user = this.account, fu) {
       fetch(this.sapi + "/@" + user)
         .then((response) => response.json())
@@ -2557,6 +2559,13 @@ function tradeFTreject(setname, uid, callback){
           } else {
             this.focussaccountapi = data;
           }
+        });
+    },
+    getIPFSproviders() {
+      fetch(this.sapi + "/services/IPFS")
+        .then((response) => response.json())
+        .then((data) => {
+          this.ipfsProviders = data.providers
         });
     },
     when(arr) {
@@ -2838,6 +2847,7 @@ function tradeFTreject(setname, uid, callback){
     this.getSpkStats();
     this.getRewardFund();
     this.getFeedPrice();
+    this.getIPFSproviders();
     this.getSapi(this.pageAccount, false);
     this.getTokenUser(this.pageAccount, false);
     //this.getNFTs();

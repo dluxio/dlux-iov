@@ -102,27 +102,12 @@
 												</div>
 											</div>
 										</div>
-										<div v-show="simple.checked">
-											<input class="form-control bg-darkg border-secondary text-info"
-												list="datalistOptions1" id="simpleContracts"
-												placeholder="Type to search direct contracts...">
-											<datalist id="datalistOptions1">
-												<option value="High"></option>
-												<option value="Average"></option>
-												<option value="Low"></option>
-												<option value="Custom"></option>
-											</datalist>
-										</div>
-										<div v-show="sponsored.checked">
+										<div>
 											<input class="form-control bg-darkg border-secondary text-info"
 												list="datalistOptions2" id="sponsoredContracts"
 												placeholder="Type to search sponsored contracts...">
 											<datalist id="datalistOptions2">
-												<option value="threespk.voter"></option>
-												<option value="dlux-io"></option>
-												<option value="someguy321"></option>
-												<option value="daffy"></option>
-												<option value="dolly"></option>
+												<option v-for="(account, key) in ipfsProviders" value="key">{{key}}</option>
 											</datalist>
 										</div>
 									</div>
