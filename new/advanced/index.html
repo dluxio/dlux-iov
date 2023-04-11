@@ -806,8 +806,8 @@
                                     <div class="d-flex flex-wrap">
                                         <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Allowed Storage"><i class="fa-solid fa-database fa-fw me-2"></i>{{channel.a/1000000}} MB</div>
                                         <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Service Provider"><i class="fa-solid fa-network-wired fa-fw me-2"></i>@{{channel.b}}</div>
-                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Sponsor"><i class="fa-solid fa-user-tie fa-fw me-2"></i>@{{channel.f}}</div>
-                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Benefactor" v-if="channel.s"><i class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>@{{slotDecode(channel.s, 0)}} ({{slotDecode(channel.s, 1)}}%)</div>
+                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Sponsor"><i class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>@{{channel.f}}</div>
+                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Benefactor" v-if="channel.s"><i class="fa-solid fa-circle-dollar-to-slot fa-fw me-2"></i>@{{slotDecode(channel.s, 0)}} ({{slotDecode(channel.s, 1)}}%)</div>
                                         <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Expiration"><i class="fa-solid fa-clock fa-fw me-2"></i>{{exp_to_time(channel.e)}}</div>
                                         <div class="btn-group ms-auto" role="group" aria-label="LARYNX Actions">
                                         <button type="button" class="btn btn-secondary" @click="selectContract(channel.i, channel.b)"><i class="fa-solid fa-file-import fa-fw me-2"></i>Select</button>
