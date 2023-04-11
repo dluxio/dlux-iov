@@ -2910,6 +2910,11 @@ function tradeFTreject(setname, uid, callback){
         return Object.keys(this.saccountapi.file_contracts).length
       }
     },
+    fileInfoLength: {
+      get() {
+        return Object.keys(this.FileInfo).length
+      }
+    },
     compiledMarkdown: function () {
       return marked(this.postBody, { sanitize: true });
     },
