@@ -811,7 +811,7 @@
                                         <div class="btn-group ms-auto" role="group" aria-label="LARYNX Actions">
                                         <button type="button" class="btn btn-secondary" v-if="channel.c == 1" @click="selectContract(channel.i, channel.b)"><i class="fa-solid fa-cart-shopping fa-fw me-2"></i>Select</button>
                                         <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
-                                        <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#channel.i" ><i class="fa-solid fa-magnifying-glass fa-fw me-2"></i>Details</button>
+                                        <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" :data-bs-target="'#' + channel.i" ><i class="fa-solid fa-magnifying-glass fa-fw me-2"></i>Details</button>
                                         </div>
                                     </div>
                                     <div class="collapse" :id="channel.i">
