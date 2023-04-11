@@ -372,13 +372,12 @@
 
                                                 <div class="btn-group" role="group" aria-label="Power Actions">
                                                     <button type="button" class="btn btn-info p-0">
-                                                        <modal-vue type="build" token="BROCA"
-                                                            :balance="broca_calc(saccountapi.broca)" :account="account" :ipfsProviders="ipfsProviders"
-                                                            @modalsign="sendIt($event)">
-                                                            <span slot="trigger" class="p-2"><i
-                                                                    class="fa-solid fa-file-contract fa-fw me-2"></i>Build
-                                                                Contract</span>
-                                                        </modal-vue>
+                                                        <modal-vue type="build" token="BROCA" :balance="broca_calc(saccountapi.broca)"
+                                                    :account="account" @modalsign="sendIt($event)" :ipfsProviders="ipfsProviders">
+                                                    <span slot="trigger" class="p-2"><i
+                                                            class="fa-solid fa-file-contract fa-fw me-2"></i>Create A
+                                                        Contract</span>
+                                                </modal-vue>
                                                     </button>
                                                     <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                                                         disabled></button>
