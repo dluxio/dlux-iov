@@ -158,7 +158,7 @@ export default {
                       list="datalistOptions2" id="sponsoredContracts"
                       v-model="broker">
                     <datalist id="datalistOptions2">
-                      <option v-for="(account, key) in ipfsProviders" :value="key"></option>
+                      <option v-for="(account, key) in ipfsproviders" :value="key"></option>
                     </datalist> </div>
                       <label for="ben" class="small">Requested Benificary Amount</label>
                       <div class="input-group mb-3" id="ben"> <input class="form-control text-white border-dark bg-dark" type="number" step="0.01" :min="0" :max="100" v-model="ben_amount"> </div>
