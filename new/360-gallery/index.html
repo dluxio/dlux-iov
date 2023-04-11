@@ -133,11 +133,11 @@
 									<li>Expiration: {{exp_to_time(channel.e)}}</li>
 									<li v-if="channel.s">Terms: {{slotDecode(channel.s, 1)}}% Bennificiary to
 										@{{slotDecode(channel.s, 0)}}</li>
-									<li v-if="channel.df">Files:<p v-for="file in channel.df"><button @click="appendFile(file, channel.i)">{{files[files] ?
-												'Include' : 'Remove'}}</button><a
+									<li v-if="channel.df">Files:<p v-for="file in channel.df"><button @click="appendFile(file, channel.i)">{{files[file] ?
+												'Remove' : 'Append'}}</button><a
 												:href="'https://ipfs.io/ipfs/' + file">{{file}}</a></p>
 									</li>
-									<button v-if="contract.c == 2" @click="">Set Post Benificiary</button>
+									<button v-if="channel.c == 2" @click="">Set Post Benificiary</button>
 									<button @click="">Include in Post</button>
 								</ul>
 							</div>
