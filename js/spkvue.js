@@ -2530,7 +2530,27 @@ function tradeFTreject(setname, uid, callback){
           }
         });
     },
-    checkAccountKey(acc){},
+    checkAccountKey(location){
+      var val = ''
+      var drill = this[location[0]]
+      for (var i = 1; i < location.length; i++){
+        if (typeof drill == 'string'){
+          val = drill
+          if (i != location.length - 1){
+            location = location.slice(0, i)
+          }
+          break
+        } else val = drill[location[i]]
+      }
+      fetch(this.sapi + "/@" + val)
+        .then((response) => response.json())
+        .then((data) => {
+          if(data.pubKey == 'NA'){
+            const accessor = `this.${location.join('.')}`
+            eval(accessor + ' = "Account has not registered a public key yet."')
+          }
+        })
+    },
     getSapi(user = this.account, fu) {
       fetch(this.sapi + "/@" + user)
         .then((response) => response.json())

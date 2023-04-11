@@ -153,7 +153,7 @@ export default {
                       
                       <label for="c_to" class="small">Account to Upload File</label>
                       <div class="input-group mb-3" id="c_to"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="to"> </div>
-                      <label for="broker" class="small">IPFS Service Provider (Dynamic List)</label>
+                      <label for="broker" class="small">IPFS Service Provider</label>
                       <div class="input-group mb-3" id="broker"> <input class="form-control bg-dark border-dark text-white"
                       list="datalistOptions2" id="sponsoredContracts"
                       v-model="broker">
@@ -647,6 +647,13 @@ export default {
     },
     dis: {
       default: false,
+    },
+    ipfsProviders: {
+      default: function () {
+        return {
+          "dlux-io": "12D3KooWMJQEzggotBCznPM1cVohMQx2puLuKTgLU8z9SzKLG6fa",
+        };
+      },
     },
     smarkets: {
       default: function () {
