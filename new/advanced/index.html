@@ -887,7 +887,7 @@
                     <div id="two" v-if="contract.id">
                         <div class="flex-column flex-shrink mx-3">
                             <div class="rounded border border-secondary">
-                                <button type="button" class="btn-close btn-close-white" @click="contract = {}" aria-label="Close"></button>
+                                <button type="button" class="btn-close btn-close-white" @click="contract.id = ''; contract.api = ''" aria-label="Close"></button>
                                 <form>
                                     <input id="fileInput" type="file" @change="uploadFile" multiple />
                                     <div style="background-color:green;margin-bottom:10px;padding:10px;" id="img-well"
