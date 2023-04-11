@@ -373,7 +373,7 @@
                                                 <div class="btn-group" role="group" aria-label="Power Actions">
                                                     <button type="button" class="btn btn-info p-0">
                                                         <modal-vue type="build" token="BROCA"
-                                                            :balance="saccountapi.spk * 1000" :account="account"
+                                                            :balance="saccountapi.spk * 1000" :account="account" :ipfsProviders="ipfsProviders"
                                                             @modalsign="sendIt($event)">
                                                             <span slot="trigger" class="p-2"><i
                                                                     class="fa-solid fa-file-contract fa-fw me-2"></i>Build
