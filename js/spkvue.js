@@ -78,6 +78,7 @@ var app = new Vue({
         amount: 0,
         api: '',
       },
+      files: {},
       sets: {},
       contract: {
         api: '',
@@ -1382,6 +1383,10 @@ var app = new Vue({
           resumeFileUpload
         };
       }
+    },
+    appendFile(file, id){
+      if(this.files[file])delete this.files[file]
+      else this.files[file] = id
     },
     uploadAndTrack(name, contract) {
       this.signText().then((headers) => {
