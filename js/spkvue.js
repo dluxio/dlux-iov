@@ -817,7 +817,7 @@ var app = new Vue({
   },
   methods: {
     buildTags(){
-      this.postTags = this.postTags.
+      this.postTags = this.postTags.replace(/#/g, "");
     },
     saveNodeSettings(){
       var cja = {};
