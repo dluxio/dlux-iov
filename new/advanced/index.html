@@ -44,18 +44,105 @@
                             <h1 class="px-4 font-weight-bold">File Hosting
                             </h1>
                             <p class="lead">Select or create a SPK hosting contract to pin
-                                your files on IPFS.</p>
+                                your files on IPFS</p>
                             <hr class="bg-light">
                         </div>
+                         <form>
+								<ul class="text-center ms-auto me-auto col-md-8 col-lg-6 col-xl-4">
+									<h3><u>Contract Types</u></h3>
+									<li class="text-start">Direct: you pay for hosting now</li>
+									<li class="text-start">Sponsored: free hosting with beneficiary
+										fee</li>
+								</ul>
+								<div class="col-md-6 ms-auto me-auto">
+
+									<div class="form-group mb-3">
+										<div class="d-flex align-items-center mb-3">
+											<label for="username">Client</label>
+											<div class="ms-auto" style="visibility: hidden;">
+												<div class="btn-group"><input type="radio" name="" id=""
+														autocomplete="off" checked="checked" class="btn-check">
+													<label for="" class="btn btn-outline-warning">
+														SIMPLE
+													</label> <input type="radio" name="" id="" autocomplete="off"
+														class="btn-check"> <label for=""
+														class="btn btn-outline-warning">
+														SPONSORED
+													</label>
+												</div>
+											</div>
+										</div>
+										<div class="input-group">
+
+											<span
+												class="input-group-text bg-darkg border-secondary text-white-50 l-radius-hotfix">@</span>
+
+											<input type="text" class="form-control bg-darkg border-secondary text-info"
+												readonly id="username" v-model="account">
+										</div>
+									</div>
+
+									<div class="form-group mb-3">
+										<div class="d-flex align-items-center mb-3">
+											<label for="title">Provider</label>
+											<div class="ms-auto">
+												<div class="btn-group"><input type="radio" name="contractType"
+														@click="simple.checked = true; sponsored.checked = false"
+														id="simple" autocomplete="off" checked="checked"
+														class="btn-check" :checked="simple.checked"> <label for="simple"
+														class="btn btn-outline-warning">
+														DIRECT
+													</label> <input type="radio" name="contractType" id="sponsored"
+														@click="simple.checked = false; sponsored.checked = true"
+														autocomplete="off" class="btn-check"
+														:checked="sponsored.checked"> <label for="sponsored"
+														class="btn btn-outline-warning">
+														SPONSORED
+													</label>
+												</div>
+											</div>
+										</div>
+										<div v-show="simple.checked">
+											<input class="form-control bg-darkg border-secondary text-info"
+												list="datalistOptions1" id="simpleContracts"
+												placeholder="Type to search direct contracts...">
+											<datalist id="datalistOptions1">
+												<option value="High"></option>
+												<option value="Average"></option>
+												<option value="Low"></option>
+												<option value="Custom"></option>
+											</datalist>
+										</div>
+										<div v-show="sponsored.checked">
+											<input class="form-control bg-darkg border-secondary text-info"
+												list="datalistOptions2" id="sponsoredContracts"
+												placeholder="Type to search sponsored contracts...">
+											<datalist id="datalistOptions2">
+												<option value="threespk.voter"></option>
+												<option value="dlux-io"></option>
+												<option value="someguy321"></option>
+												<option value="daffy"></option>
+												<option value="dolly"></option>
+											</datalist>
+										</div>
+									</div>
+
+
+									<div>
+										<h5>Contract: {{contract.id}}</h5>
+										<p class="text-start text-white-50 small">@threespk.voter is placing 1000 BROCA to store up to 10GB of data. You must make a post on the hive blockchain with 10% beneficiary to @threespk.voter with-in 24 hours for this storage contract to be inforce. </p>
+									</div>
+								</div>
+							</form>
                         <div class="my-5">
                             <div class="input-group">
                                     <span
                                         class="input-group-text bg-darkg border-secondary text-white-50 l-radius-hotfix">@</span>
                                     <input type="text" class="form-control bg-darkg border-secondary text-info" readonly
                                         id="username" v-model="account">
-                                        <button class="btn btn-info" @click="showWallet = !showWallet"><i class="fa-solid fa-wallet fa-fw me-2"></i>{{showWallet ? 'Hide Wallet' : 'Show Wallet'}}</button>
+                                        <button type="button" class="btn btn-info" data-bs-toggle="collapse" data-bs-target="#spkwallet" aria-expanded="false" aria-controls="SPK Wallet"><i class="fa-solid fa-wallet fa-fw me-2"></i>Wallet</button>
                                 </div>
-                            <div v-if="showWallet" role="tabpanel" class="tab-pane fade show " id="spk"
+                            <div class="collapse" id="spkwallet"
                                 aria-labelledby="spktab">
                                 <div class="container">
                                     <div>
@@ -733,8 +820,9 @@
                                         </div>
                                     </div>
                                 </div>
+                                <button class="btn btn-info my-2" type="button" data-bs-toggle="collapse" data-bs-target="#spkwallet"><i class="fa-solid fa-angles-up fa-fw me-2"></i>Hide Wallet</button>
+                            
                             </div>
-                            <button class="btn btn-info my-2" v-if="showWallet" @click="showWallet = !showWallet"><i class="fa-solid fa-angles-up fa-fw me-2"></i>{{showWallet ? 'Hide Wallet' : 'Show Wallet'}}</button>
                             
                                 <div class="rounded py-2 px-3 my-5 bg-darkg border border-secondary">
                                     <div class="d-flex flex-wrap align-items-center my-3">
