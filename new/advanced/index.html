@@ -914,11 +914,11 @@
                                     </div>
                                     <div class="d-flex w-100">
                                                 <ul class="text-start list-group w-100">
-                                                    <li class="list-group-item bg-darker text-white border-secondary">Bytes: {{file.size}}</li>
-                                                    <li class="list-group-item bg-darker text-white border-secondary">CID: {{FileInfo[file.name].hash}}</li>
-                                                    <li class="list-group-item bg-darker text-white border-secondary"><a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
+                                                    <li class="list-group-item bg-darker text-white border-secondary border-start-0 border-end-0 border-top-0">Bytes: {{file.size}}</li>
+                                                    <li class="list-group-item bg-darker text-white border-secondary border-start-0 border-end-0 border-top-0">CID: {{FileInfo[file.name].hash}}</li>
+                                                    <li class="list-group-item bg-darker text-white border-secondary border-start-0 border-end-0 border-top-0"><a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
                                                         target="_blank">https://ipfs.io/ipfs/{{FileInfo[file.name].hash}}<i class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a></li>
-                                                    <li class="list-group-item bg-darker text-white border-secondary">
+                                                    <li class="list-group-item bg-darker text-white border-secondary border-start-0 border-end-0 border-top-0">
                                                         <div class="progress" role="progressbar" aria-label="Example with label"
                                                             aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
                                                             <div class="progress-bar"
@@ -926,7 +926,7 @@
                                                                 {{file.progress}}%</div>
                                                         </div>
                                                     </li>
-                                                    <li class="list-group-item bg-darker text-white border-secondary"><div class="d-flex" v-if="File.length">
+                                                    <li class="list-group-item bg-darker text-white border-secondary border-start-0 border-end-0 border-top-0"><div class="d-flex" v-if="File.length">
                                                         <button type="button" class="btn btn-secondary" v-if="file.actions.pause"
                                                             @click="fileRequest[file.index].resumeFileUpload()">Pause</button>
                                                         <button type="button" class="btn btn-secondary" v-if="file.actions.resume"
@@ -934,7 +934,7 @@
                                                         <button type="button" class="btn btn-secondary" v-if="file.actions.cancel"
                                                             @click="fileRequest[file.index].resumeFileUpload()">Cancel</button>
                                                     </div></li>
-                                                    <li class="list-group-item bg-darker text-white border-secondary"><h5>{{FileInfo[file.name].status}}</h5></li>
+                                                    <li class="list-group-item bg-darker text-white border-secondary border-0"><h5>{{FileInfo[file.name].status}}</h5></li>
                                                 </ul>
                                         </div>
                                     </div>
