@@ -853,7 +853,7 @@ var app = new Vue({
     getDetails(id){
       if (!id) return {}
       else {
-        const search = this.saccountsapi[id.split(':')[0]]
+        const search = this.saccountsapi.channels[id.split(':')[0]]
         var item = {}
         for(var i = 0; i < search.length; i++){
           if (search[i].i == id){
