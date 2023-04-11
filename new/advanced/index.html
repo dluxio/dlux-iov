@@ -885,9 +885,14 @@
                         </div>
                     </div>
                     <div id="two" v-if="contract.id">
-                        <div class="flex-column flex-shrink mx-3">
-                            <div class="rounded border border-secondary">
-                                <button type="button" class="btn-close btn-close-white" @click="contract.id = ''; contract.api = ''" aria-label="Close"></button>
+                        <div class="rounded py-2 px-3 my-5 bg-darkg border border-secondary">
+                            <div class="d-flex pb-2 mb-2 border-bottom border-secondary">
+                                <div v-for="contract.id">
+                                    {{channel.a/1000000}} MB
+                                </div>
+                                <h3 class="mt-3 mx-2">File Upload</h3>
+                                <button type="button" class="ms-auto mt-2 btn-lg btn-close btn-close-white" @click="contract.id = ''; contract.api = ''" aria-label="Close"></button>
+                            </div>
                                 <form>
                                     <input id="fileInput" type="file" @change="uploadFile" multiple />
                                     <div style="background-color:green;margin-bottom:10px;padding:10px;" id="img-well"
