@@ -850,19 +850,6 @@ var app = new Vue({
         txid: `spkcc_register_authority`,
       };
     },
-    getDetails(id){
-      if (!id) return {}
-      else {
-        const search = this.saccountapi.channels[id.split(':')[0]]
-        var item = {}
-        for(var i = 0; i < search.length; i++){
-          if (search[i].i == id){
-            item = search[i]
-            return item
-          }
-        }
-      }
-    },
     getSetPhotos(s, c) {
       return s.set ? `https://ipfs.io/ipfs/${s.set[c]}` : "";
     },
