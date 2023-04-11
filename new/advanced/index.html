@@ -829,9 +829,9 @@
                                         </div>
                                     </div>
                             <div v-for="sponsor in saccountapi.channels">
-                                <div class="border-top border-secondary my-2 p-3" v-for="channel in sponsor"
+                                <div v-for="channel in sponsor"
                                     v-if="channel.c == 1">
-                                    <div class="d-flex flex-wrap" v-if="!contract.id || contract.id == channel.i">
+                                    <div class="d-flex flex-wrap border-top border-secondary my-2 p-3" v-if="!contract.id || contract.id == channel.i">
                                         <div class="rounded bg-primary px-2 py-1 m-2 text-white"
                                             title="Allowed Storage"><i
                                                 class="fa-solid fa-database fa-fw me-2"></i>{{channel.a/1000000}} MB
@@ -931,7 +931,7 @@
                                                 </ul>
                                             </div>
                                         </div>
-                                        <div v-if="FileInfo[file.name].uploaded">
+                                        <div v-if="FileInfo[file.name].hash">
                                             <div><img :src="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash" width="100%" />
                                             </div>
                                             <div class="small"><a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
