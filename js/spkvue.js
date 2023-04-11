@@ -1385,7 +1385,7 @@ var app = new Vue({
       }
     },
     replace(string, char = ':'){
-      return string.replace(char, '_')
+      return string.replaceAll(char, '_')
     },
     appendFile(file, id){
       if(this.files[file])delete this.files[file]
