@@ -648,7 +648,7 @@ export default {
     dis: {
       default: false,
     },
-    ipfsProviders: {
+    ipfsproviders: {
       default: function () {
         return {
           "dlux-io": "12D3KooWMJQEzggotBCznPM1cVohMQx2puLuKTgLU8z9SzKLG6fa",
