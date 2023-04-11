@@ -945,7 +945,7 @@
                                     @{{slotDecode(contract.s, 0)}}</li>
                                 <li>Status: {{contract.c == 2 ? 'Waiting For Post' : 'Decentralizing'}}</li>
                                 <li v-if="contract.df">Files:<p v-for="file in contract.df"><a
-                                            :href="'https://ipfs.io/ipfs/' + file">{{file}}</a></p>
+                                            :href="'https://ipfs.io/ipfs/' + file" target="_blank">{{file}}<i class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a></p>
                                 </li>
                                 <li v-if="contract.n">Stored by:<p v-for="acc in contract.n">@{{acc}} </p>
                                 </li>
