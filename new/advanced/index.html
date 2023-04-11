@@ -920,6 +920,14 @@
                                         <div>
                                             <div class="small">
                                                 <ul>
+                                                    <li><div class="d-flex" v-if="File.length">
+                                                        <button type="button" class="btn btn-secondary" v-if="file.actions.pause"
+                                                            @click="fileRequest[file.index].resumeFileUpload()">Pause</button>
+                                                        <button type="button" class="btn btn-secondary" v-if="file.actions.resume"
+                                                            @click="fileRequest[file.index].resumeFileUpload()">Resume</button>
+                                                        <button type="button" class="btn btn-secondary" v-if="file.actions.cancel"
+                                                            @click="fileRequest[file.index].resumeFileUpload()">Cancel</button>
+                                                    </div></li>
                                                     <li>Bytes: {{file.size}}</li>
                                                     <li>CID: {{FileInfo[file.name].hash}}</li>
                                                     <li><a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
@@ -932,18 +940,11 @@
                                                                 {{file.progress}}%</div>
                                                         </div>
                                                     </li>
+                                                    <li><h5>{{FileInfo[file.name].status}}</h5></li>
                                                 </ul>
                                             </div>
                                         </div>
-                                        <div class="d-flex" v-if="File.length">
-                                            <button v-if="file.actions.pause"
-                                                @click="fileRequest[file.index].resumeFileUpload()">Pause</button>
-                                            <button v-if="file.actions.resume"
-                                                @click="fileRequest[file.index].resumeFileUpload()">Resume</button>
-                                            <button v-if="file.actions.cancel"
-                                                @click="fileRequest[file.index].resumeFileUpload()">Cancel</button>
-                                            <h5>{{FileInfo[file.name].status}}</h5>
-                                        </div>
+                                        
                                     </div>
                                 </div>
                             </div>
