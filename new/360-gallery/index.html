@@ -107,11 +107,11 @@
 								<div class="form-group">
 									<label for="description">Post Body</label>
 									<textarea class="form-control" rows="2" id="validationCustomDescription"
-										placeholder="Add a comment" required></textarea>
+										placeholder="Add a comment" required v-model="postBody"></textarea>
 								</div>
 								<div class="form-group">
 									<label for="title">Tags</label>
-									<input type="text" class="form-control" id="tags" placeholder="tags,look-like,this">
+									<input type="text" class="form-control" id="tags" placeholder="tags,look-like,this" v-model="postTags">
 									<small id="tagsHelp" class="form-text text-muted">Add up to 4 tags, comma separated,
 										no spaces</small>
 								</div>
