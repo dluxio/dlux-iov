@@ -2905,6 +2905,11 @@ function tradeFTreject(setname, uid, callback){
     //     return this.smarkets.node?.[this.account]?.val_code ? true : false;
     //   },
     // },
+    hasFiles: {
+      get() {
+        return Object.keys(this.saccountapi.file_contracts).length
+      }
+    },
     compiledMarkdown: function () {
       return marked(this.postBody, { sanitize: true });
     },
