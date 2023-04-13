@@ -132,79 +132,6 @@
                             <p class="lead">SPK Network</p>
                             <hr class="bg-light">
                         </div>
-                         <!--<form>
-								<ul class="text-center ms-auto me-auto col-md-8 col-lg-6 col-xl-4">
-									<h3><u>Contract Types</u></h3>
-									<li class="text-start">Direct: you pay for hosting now</li>
-									<li class="text-start">Sponsored: free hosting with beneficiary
-										fee</li>
-								</ul>
-								<div class="col-md-6 ms-auto me-auto">
-
-									<div class="form-group mb-3">
-										<div class="d-flex align-items-center mb-3">
-											<label for="username">Client</label>
-											<div class="ms-auto" style="visibility: hidden;">
-												<div class="btn-group"><input type="radio" name="" id=""
-														autocomplete="off" checked="checked" class="btn-check">
-													<label for="" class="btn btn-outline-warning">
-														SIMPLE
-													</label> <input type="radio" name="" id="" autocomplete="off"
-														class="btn-check"> <label for=""
-														class="btn btn-outline-warning">
-														SPONSORED
-													</label>
-												</div>
-											</div>
-										</div>
-										<div class="input-group">
-
-											<span
-												class="input-group-text bg-darkg border-secondary text-white-50 l-radius-hotfix">@</span>
-
-											<input type="text" class="form-control bg-darkg border-secondary text-info"
-												readonly id="username" v-model="account">
-										</div>
-									</div>
-                                    
-									<div class="form-group mb-3">
-										<div class="d-flex align-items-center mb-3">
-											<label for="title">Provider</label>
-											<div class="ms-auto">
-												<div class="btn-group"><input type="radio" name="contractType"
-														@click="simple.checked = true; sponsored.checked = false"
-														id="simple" autocomplete="off" checked="checked"
-														class="btn-check" :checked="simple.checked"> <label for="simple"
-														class="btn btn-outline-warning">
-														DIRECT
-													</label> <input type="radio" name="contractType" id="sponsored"
-														@click="simple.checked = false; sponsored.checked = true"
-														autocomplete="off" class="btn-check"
-														:checked="sponsored.checked"> <label for="sponsored"
-														class="btn btn-outline-warning">
-														SPONSORED
-													</label>
-												</div>
-											</div>
-										</div>
-										<div>
-											<input class="form-control bg-darkg border-secondary text-info"
-												list="datalistOptions2" id="sponsoredContracts"
-												placeholder="Registered IPFS Upload Providers">
-											<datalist id="datalistOptions2">
-												<option v-for="(account, key) in ipfsProviders" :value="key"></option>
-											</datalist>
-										</div>
-									</div>
-
-
-									<div>
-										<h5>Contract: {{contract.id}}</h5>
-										<p class="text-start text-white-50 small">@threespk.voter is placing 1000 BROCA to store up to 10GB of data. You must make a post on the hive blockchain with 10% beneficiary to @threespk.voter with-in 24 hours for this storage contract to be inforce. </p>
-									</div>
-								</div>
-							</form>-->
-                        
                             <div class="input-group">
                                     <span
                                         class="input-group-text bg-darkg border-secondary text-white-50 l-radius-hotfix">@</span>
@@ -1086,7 +1013,7 @@
                                 <li v-if="contract.s">Terms: {{slotDecode(contract.s, 1)}}% Bennificiary to
                                     @{{slotDecode(contract.s, 0)}}</li>
                                 <li>Status: {{contract.c == 2 ? 'Waiting For Post' : 'Decentralizing'}}</li>
-                                <li v-if="contract.df">Files:<p v-for="file in contract.df">{{file}}<button v-if="publishPage" @click="addAsset(file)">Add to dApp</button><a
+                                <li v-if="contract.df">Files:<p v-for="file in contract.df">{{file}}<button v-if="publishPage" @click="addAsset(file, contract.i)">Add to dApp</button><a
 									:href="'https://ipfs.io/ipfs/' + file" target="_blank"><i class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a></p>
                                 </li>
                                 <li v-if="contract.n">Stored by:<p v-for="acc in contract.n">@{{acc}} </p>
@@ -1096,6 +1023,26 @@
                         </div>
                     </div>
                 </div>
+				<!-- Asset Manager -->
+				<div>
+					<div class="d-flex align-items-center my-3">
+						<h3 class="my-0 mx-2">Asset Manager</h3>
+						<div class="ms-auto"></div>
+					</div>
+					<h6>Assets</h6>
+					<div v-for="asset in postCustom_json.assets">
+						<form onsubmit="return false;">
+							<p>CID: {{asset.hash}}</p>
+							<p>In: {{asset.contract}}</p>
+							<input type="text" v-model="asset.name" placeholder="Picture Name">
+							<input type="text" v-model="asset.thumbHash" placeholder="Thumbnail IPFS Hash">
+							<button @click="addAsset(asset.hash, asset.contract, asset.name, asset.thumbHash)">Refresh dApp</button>
+							<button @click="delAsset(asset.hash, asset.contract, asset.name, asset.thumbHash)">Delete Asset</button>
+							<button @click="moveAsset(asset.hash, 'up')"><i class="fa-solid fa-up-long"></i></button>
+							<button @click="moveAsset(asset.hash, 'down')"><i class="fa-solid fa-down-long"></i></button>
+						</form>
+					</div>
+				</div>
 				<div id="three">
 					<h3>Preview</h3>
 					<div class="flex-column flex-fill h-100 ml-3">

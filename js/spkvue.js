@@ -1007,7 +1007,7 @@ var app = new Vue({
     if(total > (this.saccountapi.spk_power * 1000))total = (this.saccountapi.spk_power * 1000)
     return total
     },
-    addAsset(cid, name = '', type = 'ts', thumbHash) {
+    addAsset(cid, contract, name = '', thumbHash, type = 'ts') {
       var found = -1
       if(!cid)return false
       for (var i = 0; i < this.postCustom_json.assets.length; i++) {
@@ -1023,8 +1023,37 @@ var app = new Vue({
           hash: cid,
           name: name,
           type: type,
+          contract: contract,
           thumbHash: thumbHash
         })
+      }
+      this.dluxMock()
+    },
+    delAsset(cid) {
+      var found = -1
+      if(!cid)return false
+      for (var i = 0; i < this.postCustom_json.assets.length; i++) {
+        if (this.postCustom_json.assets[i].hash == cid) {
+          found = i
+        }
+      }
+      if (found >= 0) {
+        this.postCustom_json.assets.splice(found, 1)
+      }
+      this.dluxMock()
+    },
+    moveAsset(cid, dir = 'up') {
+      var found = -1
+      if(!cid)return false
+      for (var i = 0; i < this.postCustom_json.assets.length; i++) {
+        if (this.postCustom_json.assets[i].hash == cid) {
+          found = i
+        }
+      }
+      if ((found >= 1 && dir == 'up') || (found < this.postCustom_json.assets.length - 1 && dir == 'down')) {
+        const asset = this.postCustom_json.assets[found]
+        this.postCustom_json.assets.splice(found, 1)
+        this.postCustom_json.assets.splice(dir == 'up' ? found - 1 : found, 0, asset)
       }
       this.dluxMock()
     },
@@ -2592,7 +2621,7 @@ function tradeFTreject(setname, uid, callback){
           }
         });
     },
-    exp_to_time(exp){
+    exp_to_time(exp = '0:0'){
       return this.when([parseInt(exp.split(':')[0])])
     },
     getSpkStats() {
