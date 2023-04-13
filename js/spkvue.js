@@ -338,6 +338,7 @@ var app = new Vue({
         balance: 0,
         broca: '0,0',
         spk: 0,
+        channels: [],
         file_contracts: [],
         spk_power: 0,
         gov: 0,
