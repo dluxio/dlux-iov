@@ -950,7 +950,12 @@ var app = new Vue({
     togglePin(index) {
       this.File[index].pin = !this.File[index].pin;
     },
-    petitionForContract(){
+    petitionForContract(provider = 'dlux-io', ){
+      fetch(`https://spktest.dlux.io/user_services/${provider}`)
+      .then(r=>r.json())
+      .then(json =>{
+        console.log(json)
+      })
       fetch(`https://ipfs.dlux.io/upload-contract?user=${this.account}`)
       .then(r=>r.json())
       .then(json =>{
