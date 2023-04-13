@@ -128,6 +128,15 @@
 					</div>
 				</div>
 				<div id="two">
+					<h3>Preview</h3>
+					<div class="flex-column flex-fill h-100 ml-3">
+						<iframe ref="aframePreview" id="aframePreview" src="https://turnkey-360-gallery.glitch.me/post.html" width="100%"
+							height="100%" frameborder="0"
+							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+							allowfullscreen></iframe>
+					</div>
+				</div>
+				<div id="three">
 					<div class="flex-column mb-4 px-3">
                         <div class="flex-row">
                             <h2 class="px-4 font-weight-bold">File Hosting</h2>
@@ -1045,15 +1054,6 @@
 							<button @click="moveAsset(asset.hash, 'up')"><i class="fa-solid fa-up-long"></i></button>
 							<button @click="moveAsset(asset.hash, 'down')"><i class="fa-solid fa-down-long"></i></button>
 						</form>
-					</div>
-				</div>
-				<div id="three">
-					<h3>Preview</h3>
-					<div class="flex-column flex-fill h-100 ml-3">
-						<iframe ref="aframePreview" id="aframePreview" src="https://turnkey-360-gallery.glitch.me/post.html" width="100%"
-							height="100%" frameborder="0"
-							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-							allowfullscreen></iframe>
 					</div>
 				</div>
 			</section>
