@@ -3076,6 +3076,11 @@ function tradeFTreject(setname, uid, callback){
         return Object.keys(this.saccountapi.file_contracts).length
       }
     },
+    numChannels: {
+      get() {
+        return Object.keys(this.saccountapi.channels).length
+      }
+    },
     isntDlux: {
       get() {
         for (var i = 0; i < this.postBens.length; i++) {
