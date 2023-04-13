@@ -66,8 +66,6 @@
 		}
 	</style>
 
-	<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
-	<!-- <script type="module" src="/js/vueme.js"></script> -->
 </head>
 
 <body class="d-flex flex-column h-100 padme-t70 text-center text-white">
@@ -119,7 +117,7 @@
 										no spaces</small>
 								</div>
 								<div class="text-center">
-									<button type="button" @keyUp="buildTags()" class="btn btn-primary" data-toggle="tooltip"
+									<button ref="publishButton" type="button" @keyUp="buildTags()" class="btn btn-primary" data-toggle="tooltip"
 										data-placement="top" title="Publish Gallery to HIVE">Publish</button>
 								</div>
 							</form>
@@ -972,7 +970,7 @@
                             </div>
                         
                          </div>
-                    <div id="two" v-if="contract.id">
+                    <div v-if="contract.id">
                         <div class="rounded py-2 px-2 mb-3 bg-darker">
                                 <form>
                                     <div class="d-flex justify-content-between align-items-center">
@@ -1088,8 +1086,8 @@
                                 <li v-if="contract.s">Terms: {{slotDecode(contract.s, 1)}}% Bennificiary to
                                     @{{slotDecode(contract.s, 0)}}</li>
                                 <li>Status: {{contract.c == 2 ? 'Waiting For Post' : 'Decentralizing'}}</li>
-                                <li v-if="contract.df">Files:<p v-for="file in contract.df"><a
-                                            :href="'https://ipfs.io/ipfs/' + file" target="_blank">{{file}}<i class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a></p>
+                                <li v-if="contract.df">Files:<p v-for="file in contract.df">{{file}}<button v-if="publishPage" @click="addAsset(file)">Add to dApp</button><a
+									:href="'https://ipfs.io/ipfs/' + file" target="_blank"><i class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a></p>
                                 </li>
                                 <li v-if="contract.n">Stored by:<p v-for="acc in contract.n">@{{acc}} </p>
                                 </li>
@@ -1101,7 +1099,7 @@
 				<div id="three">
 					<h3>Preview</h3>
 					<div class="flex-column flex-fill h-100 ml-3">
-						<iframe id="aframePreview" src="https://turnkey-360-gallery.glitch.me/post.html" width="100%"
+						<iframe ref="aframePreview" id="aframePreview" src="https://turnkey-360-gallery.glitch.me/post.html" width="100%"
 							height="100%" frameborder="0"
 							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
 							allowfullscreen></iframe>
@@ -1110,210 +1108,6 @@
 			</section>
 		</main>
 	</div>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.3.5/split.min.js"></script>
-	<script>
-		const GUTTER_SIZE = 100;
-
-		const gutterStyle = dimension => ({
-			'flex-basis': `${GUTTER_SIZE}px`,
-		});
-
-		const elementStyle = (dimension, size) => ({
-			'flex-basis': `calc(${size}% - ${GUTTER_SIZE}px)`,
-		})
-
-		Split(['#one', '#two', '#three'], {
-			sizes: [350, 350, 600],
-			minSize: 200,
-			elementStyle,
-			gutterStyle
-		});</script>
-	<script>
-		var simplemde = new SimpleMDE({
-			element: document.getElementById("validationCustomDescription")
-		});
-		// Example starter JavaScript for disabling form submissions if there are invalid fields
-		(function () {
-			"use strict";
-			window.addEventListener(
-				"load",
-				function () {
-					// Fetch all the forms we want to apply custom Bootstrap validation styles to
-					var forms = document.getElementsByClassName("needs-validation");
-					// Loop over them and prevent submission
-					var validation = Array.prototype.filter.call(forms, function (form) {
-						form.addEventListener(
-							"submit",
-							function (event) {
-								console.log("button");
-								if (
-									document.getElementById("validationCustomDescription")
-										.innerHTML == "Sign In"
-								) {
-									sendLink("/auth");
-								}
-								var tagField = document.getElementById(
-									"validationCustomReferal"
-								).value;
-								var tags = tagField.split(",").map(item => item.trim());
-								let otherTags = tags.slice(0, 4);
-								var customJSON = JSON.stringify({
-									tags: otherTags,
-									subApp: "SuperCraftLoader/v0.1",
-									xr: false,
-									vrHash: "QmTzKnzxEm3ZXcqFMxytt3fnJZvSSvtRnMCZTuzzMxwG7y",
-									superCraft: document.getElementById(
-										"validationCustomLoader"
-									).value
-								});
-								var postData = {
-									title: document.getElementById("validationCustomTitle")
-										.value,
-									message: document.getElementById(
-										"validationCustomDescription"
-									).value,
-									customJSON: customJSON
-								};
-								console.log(postData);
-								if (form.checkValidity() === false) {
-									event.preventDefault();
-									event.stopPropagation();
-								} else {
-									window.parent.postMessage(
-										{
-											func: "advPost",
-											message: postData
-										},
-										"*"
-									);
-								}
-								form.classList.add("was-validated");
-							},
-							false
-						);
-					});
-				},
-				false
-			);
-		})();
-      //onpageloaded();
-	</script>
-	<script>
-
-		var custom_json = {
-			"app": "dlux/0.0.9",
-			"xr": true,
-			"Hash360": "",
-			"format": "markdown",
-			"assets": [
-			],
-			"tags": [
-				"dlux"
-			],
-			"vrHash": "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16"
-		},
-			permlink
-		function iloaded(assets, info) {
-			if (assets) {
-				for (var i = 0; i < assets.length; i++) {
-					custom_json.assets.push({
-						hash: assets[i].hash,
-						name: assets[i].path,
-						size: assets[i].size,
-						pin: true,
-						type: "ts",
-						thumbHash: assets[i].hash
-					})
-					if (!custom_json.Hash360) {
-						custom_json.Hash360 = assets[i].hash
-					}
-				}
-			}
-			hive.api.getContent('markegiles', 'dlux-vr-tutorial-sm-test', function (err, result) {
-				result.json_metadata = JSON.stringify(custom_json)
-				var target = document.getElementById('aframePreview').contentWindow
-				var un = 'Guest'
-				if (localStorage.getItem('user')) { un = localStorage.getItem('user') }
-				target.postMessage({
-					'func': 'iAm',
-					'message': un,
-				}, "*");
-				target.postMessage({
-					'func': 'key',
-					'message': 'markegiles/dlux-vr-tutorial-sm-test',
-				}, "*");
-				target.postMessage({
-					'func': 'hiveState',
-					'message': result,
-				}, "*");
-			})
-			buildList()
-		}
-
-		function permlink(text) {
-			if (text) {
-				text.replace(/[\W_]+/g, '-').replace(' ', '-').toLowerCase()
-				text = text.replace(' ', '-')
-				text = text.replace(/[\W_]+/g, '')
-				text = text.toLowerCase()
-				document.getElementById('permlink').innerText = `permlink: ${text}`
-				permlink = text
-			} else {
-				text = document.getElementById('title').value
-				text = text.replace(' ', '-')
-				text = text.replace(/[\W_]+/g, '-')
-				text = text.toLowerCase()
-				document.getElementById('permlink').innerText = `permlink: ${text}`
-				permlink = text
-			}
-		}
-
-		function post() {
-			var tags = document.getElementById('tags').value.toLowerCase().split(',')
-			custom_json.tags = ['dlux']
-			for (i = 0; i < tags.length; i++) {
-				if (tags[i] != 'dlux') {
-					custom_json.tags.push(tags[i].replace(/[\W_]+/g, '-'))
-				}
-			}
-			console.log(custom_json.tags)
-			if (localStorage.getItem('user')) {
-				const operations = [["comment",
-					{
-						"parent_author": "",
-						"parent_permlink": "dlux",
-						"author": localStorage.getItem('user'),
-						"permlink": permlink,
-						"title": document.getElementById('title').value,
-						"body": simplemde.value() + `\n***\n#### [View in VR @ dlux.io](https://dlux.io/dlux/@${localStorage.getItem('user')}/${permlink})\n`,
-						"json_metadata": JSON.stringify(custom_json)
-					}],
-				["comment_options",
-					{
-						"author": localStorage.getItem('user'),
-						"permlink": permlink,
-						"max_accepted_payout": "1000000.000 HBD",
-						"percent_hbd": 10000,
-						"allow_votes": true,
-						"allow_curation_rewards": true,
-						"extensions":
-							[[0,
-								{
-									"beneficiaries":
-										[{
-											"account": "dlux-io",
-											"weight": 1000
-										}]
-								}]]
-					}]]
-				hive_keychain.requestBroadcast(localStorage.getItem('user'), operations, 'active', function (response) {
-					console.log(response);
-				});
-			} else {
-				alert('Please Log In')
-			}
-		}
-	</script>
 	<!-- Bootstrap -->
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
 		integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"

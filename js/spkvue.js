@@ -108,11 +108,22 @@ var app = new Vue({
         "Hash360": "",
         "format": "markdown",
         "assets": [
+          // {"hash":"",
+          //   "name":"",
+          //   "type":"ts",
+          //   "thumbHash":""
+          // }
         ],
         "tags": [
           "dlux"
         ],
-        "vrHash": "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16"
+        "vrHash": ""
+      },
+      customJsonDefaults:{
+        "app": "dlux/0.0.10",
+        "vrHash":{
+          "360viewer": "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16"
+        }
       },
       nftTradeTabTo: "",
       nftTradeTabToken: "",
@@ -995,6 +1006,68 @@ var app = new Vue({
     var total = parseInt(last.split(',')[0]) + accured
     if(total > (this.saccountapi.spk_power * 1000))total = (this.saccountapi.spk_power * 1000)
     return total
+    },
+    addAsset(cid, name = '', type = 'ts', thumbHash) {
+      var found = -1
+      if(!cid)return false
+      for (var i = 0; i < this.postCustom_json.assets.length; i++) {
+        if (this.postCustom_json.assets[i].hash == cid) {
+          found = i
+        }
+      }
+      if (found >= 0) {
+        this.postCustom_json.assets[found].name = name || this.postCustom_json.assets[found].name
+        this.postCustom_json.assets[found].thumbHash = thumbHash || cid
+      } else {
+        this.postCustom_json.assets.push({
+          hash: cid,
+          name: name,
+          type: type,
+          thumbHash: thumbHash
+        })
+      }
+      this.dluxMock()
+    },
+    dluxMock(){
+      // if (this.postCustom_json.assets) {
+			// 	for (var i = 0; i < this.postCustom_json.assets.length; i++) {
+			// 		this.postCustom_json.assets.push({
+			// 			hash: assets[i].hash,
+			// 			name: assets[i].path,
+			// 			size: assets[i].size,
+			// 			pin: true,
+			// 			type: "ts",
+			// 			thumbHash: assets[i].hash
+			// 		})
+			// 		if (!custom_json.Hash360) {
+			// 			custom_json.Hash360 = assets[i].hash
+			// 		}
+			// 	}
+			// }
+      var result = {
+        author: this.account,
+        permlink: this.postPermlink,
+        title: this.postTitle,
+        body: this.postBody,
+        json_metadata: JSON.stringify(this.postCustom_json),
+        parent_author: '',
+        parent_permlink: 'dlux',
+      }
+				var target = this.$refs.aframePreview.contentWindow
+				var un = 'Guest'
+				if (this.account) { un = this.account }
+				target.postMessage({
+					'func': 'iAm',
+					'message': un,
+				}, "*");
+				target.postMessage({
+					'func': 'key',
+					'message': `markegiles/dlux-vr-tutorial-sm-test`,
+				}, "*");
+				target.postMessage({
+					'func': 'hiveState',
+					'message': result,
+				}, "*");
     },
     post() {
       var tags = this.postTags.toLowerCase().split(',')
@@ -2895,6 +2968,15 @@ function tradeFTreject(setname, uid, callback){
       get() {
         return location;
       },
+    },
+    publishPage:{
+      get(){
+        if(this.$refs.publishButton){
+          return true
+        } else {
+          return false
+        }
+      }
     },
     isNode: {
       get() {
