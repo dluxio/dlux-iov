@@ -1,4 +1,4 @@
-import Vue from "https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.esm.browser.js";
+import Vue from "https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.esm.browser.js";
 import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
@@ -102,6 +102,7 @@ var app = new Vue({
       postBody: "",
       postTags: "",
       postPermlink: "",
+      postBens: [],
       postCustom_json: {
         "app": "dlux/0.1.0",
         "xr": true,
@@ -1098,6 +1099,50 @@ var app = new Vue({
 					'message': result,
 				}, "*");
     },
+    addBen(acc, weight){
+      weight = this.parseInt(weight)
+      var found = -1
+      var total = 0
+      if(!acc)return false
+      for (var i = 0; i < this.postBens.length; i++) {
+        if (this.postBens[i].account == acc) {
+          found = i
+        } else {
+          total += this.postBens[i].weight
+        }
+      }
+      if (total + weight > 10000)return
+      if (found >= 0) {
+        this.postBens[found].weight = weight
+      } else {
+        // sort by account 
+        for (var i = 0; i < this.postBens.length; i++) {
+          if (this.postBens[i].account > acc) {
+            this.postBens.splice(i, 0, {
+              account: acc,
+              weight: weight
+            })
+            return
+          }
+        }
+        this.postBens.push({
+          account: acc,
+          weight: weight
+        })
+      }
+    },
+    delBen(acc){
+      var found = -1
+      if(!acc)return false
+      for (var i = 0; i < this.postBens.length; i++) {
+        if (this.postBens[i].account == acc) {
+          found = i
+        }
+      }
+      if (found >= 0) {
+        this.postBens.splice(found, 1)
+      }
+    },
     post() {
       var tags = this.postTags.toLowerCase().split(',')
       this.postCustom_json.tags = ['dlux']
@@ -1130,10 +1175,7 @@ var app = new Vue({
               [[0,
                 {
                   "beneficiaries":
-                    [{
-                      "account": "dlux-io",
-                      "weight": 1000
-                    }]
+                    this.postBens
                 }]]
           }]]
         hive_keychain.requestBroadcast(localStorage.getItem('user'), operations, 'active', function (response) {
@@ -3025,6 +3067,16 @@ function tradeFTreject(setname, uid, callback){
     hasFiles: {
       get() {
         return Object.keys(this.saccountapi.file_contracts).length
+      }
+    },
+    isntDlux: {
+      get() {
+        for (var i = 0; i < this.postBens.length; i++) {
+          if(this.postBens[i].account == "dlux-io"){
+            return true
+          }
+        }
+        return false
       }
     },
     fileInfoLength: {
