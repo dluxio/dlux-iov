@@ -334,6 +334,7 @@ var app = new Vue({
         spk_rate_lgov: "0.001",
         spk_rate_lpow: "0.0001",
       },
+      preview: true,
       saccountapi: {
         balance: 0,
         broca: '0,0',
