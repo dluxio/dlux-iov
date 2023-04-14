@@ -34,10 +34,10 @@ export default {
         delimiters: ",| ",
         transformTag: this.transformTag,
     })
-    // this.tagify.on('add', function(e){
-    //     var tags = this.tagify.value.map(tag => tag.value)
+    this.tagify.on('add', function(e){
+        var tags = this.tagify.value.map(tag => tag.value)
         
-    //     this.$emit("data", tags)
-    // })
+        this.$emit("data", tags)
+    })
   }
 };
