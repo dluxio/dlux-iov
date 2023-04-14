@@ -118,7 +118,7 @@
                                             <div class="text-center">
                                                 <button ref="publishButton" type="button" @keyUp="buildTags()"
                                                     class="btn btn-primary" data-toggle="tooltip" data-placement="top"
-                                                    title="Publish Gallery to HIVE" :disable="!validPost">Publish</button>
+                                                    title="Publish Gallery to HIVE" :disable="!validPost" @click="post()">Publish</button>
                                             </div>
                                         </form>
                                     </div>
