@@ -20,7 +20,7 @@ export default {
     mounted() {
       this.mde = new SimpleMDE({ element: this.$refs.mde });
       console.log(this.mde)
-      this.mde.codemirror.on("change", function(){
+      this.mde.codemirror.on("change", () => {
         this.$emit("data", this.mde.value())
     });
     }
