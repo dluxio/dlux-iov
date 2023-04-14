@@ -546,7 +546,7 @@ export default {
                 function () {
                   this.cleanOps(txid);
                 }.bind(this),
-                30000
+                3000
               );
             } else {
               for (var i = 0; i < this.ops.length; i++) {
@@ -567,7 +567,7 @@ export default {
                 function () {
                   this.cleanOps(txid);
                 }.bind(this),
-                30000
+                3000
               );
             }
           } else {
