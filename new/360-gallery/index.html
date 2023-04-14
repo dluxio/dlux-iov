@@ -97,7 +97,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label for="tags">Tags</label>
-												<tagify @data="postTags = $event" id="tags"/>
+												<tagify :value="postTags" @data="postTags = $event" id="tags"/>
                                             </div>
                                             <ul v-if="postBens.length">
                                                 <h6>Benificiaries: </h6>
