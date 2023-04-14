@@ -228,12 +228,12 @@ export default {
     sign(op) {
       return new Promise((resolve, reject) => {
         if (this.HKC) {
-          console.log("HKC");
+          console.log("HKC", op);
           this.HKCsign(op)
             .then((r) => resolve(r))
             .catch((e) => reject(e));
         } else if (this.HAS) {
-          console.log({ op });
+          console.log( op );
           this.HASsign(op);
           reject("No TXID");
         } else {
