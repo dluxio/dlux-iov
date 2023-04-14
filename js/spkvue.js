@@ -114,14 +114,13 @@ var app = new Vue({
         "assets": [
           // {"hash":"",
           //   "name":"",
-          //   "type":"ts",
+          //   "type":"ts", //ts - threesixty
           //   "thumbHash":""
           // }
         ],
         "tags": [
           "dlux"
-        ],
-        "vrHash": ""
+        ]
       },
       customJsonDefaults:{
         "app": "dlux/0.0.10",
