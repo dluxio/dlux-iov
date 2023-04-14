@@ -30,6 +30,7 @@ export default {
     this.tagify = new Tagify(this.$el, {
         pattern: /^[0-9a-z\-]{2,15}$/,
         maxTags: 9,
+        trim: false,
         keepInvalidTags: false,
         delimiters: ",| ",
         transformTag: this.transformTag,
