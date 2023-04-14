@@ -835,7 +835,7 @@ var app = new Vue({
     "vue-ratings": Ratings,
     "vue-showdown": VueShowdownComponent,
     "tagify": Tagify,
-    "markdown-editor": MarkdownEditor,
+    "mde": MarkdownEditor,
   },
   methods: {
     buildTags(){
