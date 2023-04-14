@@ -1150,6 +1150,7 @@ var app = new Vue({
     },
     post() {
       this.postCustom_json.tags = ['dlux']
+      console.log(this.postTags)
       for (var i = 0; i < this.postTags.length; i++) {
         if (this.postTags[i] != 'dlux') {
           this.postCustom_json.tags.push(this.postTags[i]);
