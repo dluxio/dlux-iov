@@ -1148,7 +1148,12 @@ var app = new Vue({
         this.postBens.splice(found, 1)
       }
     },
-    post() {
+    post(customJsonArr) {
+      for(var i = 0; i < customJsonArr.length; i++){
+        if(customJsonArr[i].id == 'dlux'){
+          this.postCustom_json[customJsonArr[i][0]] = customJsonArr[i][1]
+        }
+      }
       this.postCustom_json.tags = ['dlux']
       console.log(this.postTags)
       for (var i = 0; i < this.postTags.length; i++) {
