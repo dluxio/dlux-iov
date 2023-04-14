@@ -102,7 +102,7 @@ var app = new Vue({
       FileInfo: {},
       postTitle: "",
       postBody: "",
-      postTags: "",
+      postTags: ["dlux"],
       postPermlink: "",
       postBens: [],
       postCustom_json: {
