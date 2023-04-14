@@ -1355,11 +1355,11 @@ var app = new Vue({
           // updateFileElement(fileObj);
         },
         onProgress: (e,f) => {
-          console.log('options.onProgress', e, f, this.FileInfo, this.File)
+          console.log('options.onProgress', e, f, this.FileInfo, this.File, this.File[this.FileInfo[f.name].index])
           this.File[this.FileInfo[f.name].index].actions.pause = true
           this.File[this.FileInfo[f.name].index].actions.resume = false
           this.File[this.FileInfo[f.name].index].actions.cancel = true
-          this.File[this.FileInfo[f.name].index].progress = e.loaded / e.total
+          this.File[this.FileInfo[f.name].index].progress = e.loaded / e.total * 100
           // const fileObj = files.get(file);
           this.FileInfo[f.name].status = 'uploading'
           // fileObj.status = FILE_STATUS.UPLOADING;
