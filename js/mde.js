@@ -2,7 +2,7 @@ export default {
     name: "MDE",
     template: `
       <div>
-            <textarea/>
+            <textarea ref="mde"/>
       </div>
     `,
     props: {
@@ -18,7 +18,7 @@ export default {
       
     },
     mounted() {
-      this.mde = new SimpleMDE({ element: this.$el });
+      this.mde = new SimpleMDE({ element: this.$refs.mde });
       simplemde.codemirror.on("change", function(){
         this.$emit("data", simplemde.value())
     });
