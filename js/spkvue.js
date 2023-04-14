@@ -1152,7 +1152,7 @@ var app = new Vue({
       this.postCustom_json.tags = ['dlux']
       for (var i = 0; i < this.postTags.length; i++) {
         if (this.postTags[i] != 'dlux') {
-          this.postCustom_json.tags.push(tags[i].replace(/[\W_]+/g, "-"));
+          this.postCustom_json.tags.push(this.postTags[i]);
         }
       }
       if (this.account) {
