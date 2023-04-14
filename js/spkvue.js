@@ -979,14 +979,6 @@ var app = new Vue({
           this.contractMarket = res.upload_providers ? res.upload_providers : [{ n: 'regardspk', u: 'https://regardspk.com', }]
         })
     },
-    validPost() {
-      var valid = true
-      if (!this.postPermlink) valid = false
-      if (!this.postTitle) valid = false;
-      if (!this.postBody) valid = false;
-      if (!this.postCustom_json.assets.length) valid = false;
-      this.disablePost = !valid
-    },
     permlink(text) {
       if (text) {
         text.replace(/[\W_]+/g, '-').replace(' ', '-').toLowerCase()
@@ -1164,7 +1156,6 @@ var app = new Vue({
           this.postCustom_json.tags.push(tags[i].replace(/[\W_]+/g, "-"));
         }
       }
-      console.log(custom_json.tags)
       if (this.account) {
         const operations = [["comment",
           {
@@ -1173,7 +1164,7 @@ var app = new Vue({
             "author": this.account,
             "permlink": this.postPermlink,
             "title": this.postTitle,
-            "body": simplemde.value() + `\n***\n#### [View in VR @ dlux.io](https://dlux.io/dlux/@${this.account}/${this.postPermlink})\n`,
+            "body": this.postBody + `\n***\n#### [View in VR @ dlux.io](https://dlux.io/dlux/@${this.account}/${this.postPermlink})\n`,
             "json_metadata": JSON.stringify(this.postCustom_json)
           }],
         ["comment_options",
@@ -1191,9 +1182,15 @@ var app = new Vue({
                     this.postBens
                 }]]
           }]]
-        hive_keychain.requestBroadcast(localStorage.getItem('user'), operations, 'active', function (response) {
-          console.log(response);
-        });
+          this.toSign = {
+            type: "raw",
+            op: operations,
+            key: `posting`,
+            msg: `Posting...`,
+            ops: ["checkAccount"],
+            api: this.apiFor(this.prefix),
+            txid: `Posting @${this.account}/${this.permlink}`,
+          }
       }
     },
     getSetDetailsColors(script) {
@@ -3052,6 +3049,16 @@ function tradeFTreject(setname, uid, callback){
       get() {
         return location;
       },
+    },
+    validPost: {
+      get() {
+        var valid = true
+        if (!this.postPermlink) valid = false
+        if (!this.postTitle) valid = false;
+        if (!this.postBody) valid = false;
+        if (!this.postCustom_json.assets.length) valid = false;
+        return valid
+      }
     },
     publishPage:{
       get(){
