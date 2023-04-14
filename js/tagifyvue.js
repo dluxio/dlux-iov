@@ -29,7 +29,7 @@ export default {
   mounted() {
     this.tagify = new Tagify(this.$el, {
         pattern: /^[0-9a-z\-]{2,15}$/,
-        maxTags: 10,
+        maxTags: 9,
         keepInvalidTags: false,
         delimiters: ",| ",
         transformTag: this.transformTag,
