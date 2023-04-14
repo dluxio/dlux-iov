@@ -2,6 +2,7 @@ export default {
     name: "MDE",
     template: `
       <div>
+            <textarea/>
       </div>
     `,
     props: {
