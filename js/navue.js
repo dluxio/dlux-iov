@@ -536,7 +536,7 @@ export default {
     statusPinger(txid, api, r) {
       if (r > 30) return;
       fetch(api + "/api/status/" + txid)
-        .then((r) => r.json())
+        .then((re) => re.json())
         .then((json) => {
           console.log(json, json.status.slice(0, 20));
           if (json.status.slice(0, 20) != "This TransactionID e") {
@@ -567,7 +567,7 @@ export default {
                 function () {
                   this.cleanOps(txid);
                 }.bind(this),
-                3000
+                30000
               );
             }
           } else {
