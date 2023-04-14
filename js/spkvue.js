@@ -1151,7 +1151,7 @@ var app = new Vue({
     post() {
       var tags = this.postTags.toLowerCase().split(',')
       this.postCustom_json.tags = ['dlux']
-      for (i = 0; i < tags.length; i++) {
+      for (var i = 0; i < tags.length; i++) {
         if (tags[i] != 'dlux') {
           this.postCustom_json.tags.push(tags[i].replace(/[\W_]+/g, "-"));
         }
