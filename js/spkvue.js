@@ -8,7 +8,7 @@ import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
 import VueShowdownComponent from "/js/showdown.js";
 import Tagify from "/js/tagifyvue.js";
-import MarkdownEditor from "https://unpkg.com/v-markdown-editor/dist/v-markdown-editor.min.js";
+import { MarkdownEditor } from "https://unpkg.com/v-markdown-editor/dist/v-markdown-editor.min.js";
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "",
