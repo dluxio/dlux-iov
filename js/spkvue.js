@@ -7,6 +7,7 @@ import Modals from "/js/modalvue.js";
 import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
 import VueShowdownComponent from "/js/showdown.js";
+import Tagify from "/js/tagifyvue.js";
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "",
@@ -832,6 +833,7 @@ var app = new Vue({
     "vue-markdown": Marker,
     "vue-ratings": Ratings,
     "vue-showdown": VueShowdownComponent,
+    "tagify": Tagify,
   },
   methods: {
     buildTags(){
