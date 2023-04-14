@@ -63,7 +63,7 @@
                     <div class="text-center">
                         <h2>DLUX 360 Image Gallery</h2>
                     </div>
-                    <div class="col-xl-6">
+                    <div class="col-xl-6 my-2">
                         <h3>Build</h3>
                         <div class="accordion text-start" id="360accordion">
                             <div class="accordion-item">
@@ -76,34 +76,32 @@
                                 <div id="postDetails" class="accordion-collapse collapse show">
                                     <div class="accordion-body">
                                         <form onsubmit="return false;">
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label for="username">Author</label>
                                                 <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <div class="input-group-text">@</div>
-                                                    </div>
-                                                    <input type="text" class="form-control" readonly id="username"
+                                                    <span class="input-group-text bg-darkg border-secondary text-white-50">@</span>
+                                                    <input type="text" class="form-control bg-darkg border-secondary text-info" readonly id="username"
                                                         v-model="account">
                                                 </div>
                                             </div>
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label for="title">Title</label>
-                                                <input type="text" class="form-control" id="title"
+                                                <input type="text" class="form-control bg-darkg border-secondary text-white" id="title"
                                                     placeholder="Enter an attention grabbing title" v-model="postTitle"
                                                     @blur="permlink()">
                                                 <small id="permlinkPreview" class="form-text text-muted d-flex"><span
-                                                        id="permlink" class="mr-auto">Permlink: {{postPermlink}}</span>
+                                                        id="permlink" class="mr-auto">Permlink: https://dlux.io/@{{account}}/{{postPermlink}}</span>
                                                     <!-- <a href="#" class="ml-auto"> Edit Permlink</a> -->
                                                 </small>
                                             </div>
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label for="body">Post Body</label>
                                                 <mde id="body" @data="postBody = $event"/>
                                                 
                                             </div>
-                                            <div class="form-group">
-                                                <label for="tags">Tags</label>
-												<tagify @data="postTags = $event" id="tags"/>
+                                            <div class="form-group mb-3">
+                                                <label for="tags">Tags</label><br>
+												<tagify class="rounded bg-darkg border-secondary w-100" @data="postTags = $event" id="tags"/>
                                             </div>
                                             <ul v-if="postBens.length">
                                                 <h6>Benificiaries: </h6>
@@ -128,7 +126,7 @@
                                 <h2 class="accordion-header">
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                         data-bs-target="#fileHosting" aria-expanded="false" aria-controls="fileHosting">
-                                        File Upload | SPK Network
+                                        360 Upload via SPK Network
                                     </button>
                                 </h2>
                                 <div id="fileHosting" class="accordion-collapse collapse">
@@ -139,7 +137,7 @@
                                                     <button class="accordion-button" type="button"
                                                         data-bs-toggle="collapse" data-bs-target="#newContract"
                                                         aria-expanded="true" aria-controls="newContract">
-                                                        1) Create A Contract For File Hosting
+                                                        FIRST: Create A Contract For File Hosting
                                                     </button>
                                                 </h2>
                                                 <div id="newContract" class="accordion-collapse collapse show">
@@ -1180,7 +1178,7 @@
                                                     <button class="accordion-button collapsed" type="button"
                                                         data-bs-toggle="collapse" data-bs-target="#availableContracts"
                                                         aria-expanded="false" aria-controls="availableContracts">
-                                                        2) Available Contracts For File Upload ({{numChannels}})
+                                                        SECOND: Upload Files To A Contract ({{numChannels}})
                                                     </button>
                                                 </h2>
                                                 <div id="availableContracts" class="accordion-collapse collapse">
@@ -1192,7 +1190,7 @@
                                                                     <div v-for="channel in sponsor"
                                                                         v-if="channel.c == 1">
                                                                         <div class="d-flex flex-wrap border-secondary my-2 p-3"
-                                                                         v-bind:class="{'border-bottom': channel in sponsor > 1}"
+                                                                         v-bind:class="{'border-bottom': numChannels > 1}"
                                                                             v-if="!contract.id || contract.id == channel.i">
                                                                             <div class="rounded bg-primary px-2 py-1 m-2 text-white"
                                                                                 title="Allowed Storage"><i
@@ -1367,7 +1365,7 @@
                                                         data-bs-target="#executedContracts"
                                                         aria-expanded="false"
                                                         aria-controls="executedContracts">
-                                                        3) Executed Contracts Containing Files ({{hasFiles}})
+                                                        THIRD: Add Files From A Contract ({{hasFiles}})
                                                     </button>
                                                 </h2>
                                                 <div id="executedContracts"
@@ -1473,7 +1471,7 @@
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                         data-bs-target="#assetManager" aria-expanded="false"
                                         aria-controls="assetManager">
-                                        Asset Manager
+                                        360 Asset Manager
                                     </button>
                                 </h2>
                                 <div id="assetManager" class="accordion-collapse collapse">
@@ -1511,20 +1509,39 @@
                         </div>
 
                     </div>
-                    <div class="col-xl-6">
-                        <h3><button type="button" @click="preview=true">dApp</button>|<button type="button" @click="preview=false">Post</button></h3>
-                        <div class="flex-column flex-fill h-100 ml-3" v-show="preview">
-                            <iframe ref="aframePreview" id="aframePreview"
-                                src="https://turnkey-360-gallery.glitch.me/post.html" width="100%" height="100%"
-                                frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowfullscreen></iframe>
-                        </div>
-						<div class="flex-column flex-fill h-100 ml-3" v-show="!preview">
-                            <vue-showdown :markdown="postBody" />
-                        </div>
-
-
+                    <div class="col-xl-6 my-2">
+                        <h3>Preview</h3>
+                        <div class="accordion" id="previewCol">
+                            <div class="accordion-item">
+                              <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#preview360" aria-expanded="true" aria-controls="preview360">
+                                  360 Preview
+                                </button>
+                              </h2>
+                              <div id="preview360" class="accordion-collapse collapse show">
+                                <div class="accordion-body p-0">
+                                    <div class="ratio ratio-1x1">
+                                    <iframe ref="aframePreview" id="aframePreview"
+                                    src="https://turnkey-360-gallery.glitch.me/post.html"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen></iframe></div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="accordion-item">
+                              <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#previewPost" aria-expanded="true" aria-controls="previewPost">
+                                  Post Preview
+                                </button>
+                              </h2>
+                              <div id="previewPost" class="accordion-collapse collapse show">
+                                <div class="accordion-body text-start">
+                                    <vue-showdown :markdown="postBody"/>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                     </div>
                 </div>
             </section>
