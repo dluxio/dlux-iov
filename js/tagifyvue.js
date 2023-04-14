@@ -28,16 +28,19 @@ export default {
   },
   mounted() {
     this.tagify = new Tagify(this.$el, {
-        pattern: /^[0-9a-z\-]{3,15}$/,
+        pattern: /^[0-9a-z\-]{2,15}$/,
         maxTags: 10,
         keepInvalidTags: false,
         delimiters: ",| ",
         transformTag: this.transformTag,
-    })
-    this.tagify.on('add', function(e){
-        var tags = this.tagify.value.map(tag => tag.value)
-        
-        this.$emit("data", tags)
+        callbacks: {
+            add: (e) => {
+                this.$emit("data", this.tagify.value.map(tag => tag.value))
+            },
+            remove: (e) => {
+                this.$emit("data", this.tagify.value.map(tag => tag.value))
+            }
+        }
     })
   }
 };
