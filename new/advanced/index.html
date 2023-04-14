@@ -894,7 +894,7 @@
                                         <button type="button" class="btn-lg btn-close btn-close-white" @click="contract.id = ''; contract.api = ''" aria-label="Close"></button>
                                     </div>
                                     <div class="bg-success rounded border border-success p-4 mt-2" id="img-well"
-                                        @drop="dragFile($event)">
+                                        @drop="dragFile($event)" @dragenter.prevent @dragover.prevent>
                                         Or drag the file(s) here
                                     </div>
                                 </form>
