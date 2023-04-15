@@ -1441,7 +1441,7 @@ var app = new Vue({
         req.send(formData);
       };
       const uploadFile = (file, options) => {
-        console.log('Uploading', options.contract)
+        console.log('Uploading', options, file)
         return fetch(ENDPOINTS.UPLOAD_REQUEST, {
           method: 'GET',
           headers: {
@@ -1543,7 +1543,6 @@ var app = new Vue({
       };
       [...files]
           .forEach(file => {
-            console.log(file.cid, file)
             let options = defaultOptions
             options.cid = file.cid
             uploadFile(file, options)
