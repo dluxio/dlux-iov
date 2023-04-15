@@ -1303,14 +1303,14 @@
                                                                                 </li>
                                                                                 <li class=""><a
                                                                                         :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
-                                                                                        target="_blank">https://ipfs.io/ipfs/{{FileInfo[file.name].hash}}<i
+                                                                                        target="_blank">{{FileInfo[file.name].hash}}<i
                                                                                             class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a>
                                                                                 </li>
                                                                             </ul>
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                                <div v-if="File.length">
+                                                                <div v-if="File.length" class="text-center">
                                                                     <button type="button" class="btn btn-info mb-2"
                                                                         @click="signNUpload()"><i
                                                                             class="fa-solid fa-file-signature fa-fw me-2"></i>Sign
