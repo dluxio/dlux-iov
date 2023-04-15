@@ -974,7 +974,13 @@ var app = new Vue({
         }, 7000)
       })
     },
-    deleteImg(index) {
+    deleteImg(index, name) {
+      delete this.fileInfo[name]
+      for (var item in this.fileInfo) {
+        if(this.fileInfo[item].index > index) {
+          this.fileInfo[item].index--
+        }
+      }
       this.File.splice(index, 1)
     },
     getContractMarket() {
