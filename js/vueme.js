@@ -2432,6 +2432,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
 
                 if (
                   "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
+                  this.posturls[res.result.url].json_metadata.vrHash ||
+                  "newhashhere" ==
                   this.posturls[res.result.url].json_metadata.vrHash
                 )
                   type = "360";
