@@ -1184,10 +1184,18 @@
                                                                                 <td class="border-0 text-end" v-for="channel in sponsor" v-if="channel.c == 1">
                                                                                     
                                                                                         <button type="button"
-                                                                                            class="btn m-1"
-                                                                                            v-bind:class="{'btn-outline-success': !contract.id, 'btn-success': contract.id == channel.i, 'invisible': contract.id && contract.id != channel.i}"
+                                                                                            class="btn btn-outline-success m-1"
+                                                                                            v-bind:class="{'invisible': contract.id}"
                                                                                             @click="selectContract(channel.i, channel.b)"><i
                                                                                                 class="fa-solid fa-file-import fa-fw"></i></button>
+
+                                                                                                <button type="button"
+                                                                                            class="btn btn-success m-1"
+                                                                                            v-bind:class="{'d-none': !contract.id || contract.id != channel.i}"
+                                                                                            @click="contract.id = ''; contract.api = ''"><i
+                                                                                                class="fa-solid fa-file-import fa-fw"></i></button>
+
+                                                                                                
                                                                                            
                                                                                         <a class="collapsed"
                                                                                             data-bs-toggle="collapse"
