@@ -1310,15 +1310,16 @@
                                                                         </div>
                                                                     </div>
                                                                 </div>
+                                                                <div v-if="File.length">
+                                                                    <button type="button" class="btn btn-info mb-2"
+                                                                        @click="signNUpload()"><i
+                                                                            class="fa-solid fa-file-signature fa-fw me-2"></i>Sign
+                                                                        and
+                                                                        Upload</button>
+                                                                </div>
                                                             </div>
                                                         </Transition>
-                                                            <div v-if="File.length">
-                                                                <button type="button" class="btn btn-info mb-2"
-                                                                    @click="signNUpload()"><i
-                                                                        class="fa-solid fa-file-signature fa-fw me-2"></i>Sign
-                                                                    and
-                                                                    Upload</button>
-                                                            </div>
+                                                            
                                                         </div>
                                                     </div>
                                                 </div>
