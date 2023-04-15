@@ -113,10 +113,12 @@
                                             <button v-if="!isntDlux" type="button"
                                                 @click="addBen('dlux-io', 1000)">Include in
                                                 DLUX Ecosystem</button>
+                                            <button v-for="item in isntBenned" type="button"
+                                                @click="addBen(item.account, item.weight)">Include Contract {{item.contract}}</button>
                                             <div class="text-center">
                                                 <button ref="publishButton" type="button" @keyUp="buildTags()"
                                                     class="btn btn-primary" data-toggle="tooltip" data-placement="top"
-                                                    title="Publish Gallery to HIVE" :disable="!validPost" @click="post([['vrHash', QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16]])">Publish</button>
+                                                    title="Publish Gallery to HIVE" :disable="!validPost" @click="post([['vrHash', 'QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16']])">Publish</button>
                                             </div>
                                         </form>
                                     </div>

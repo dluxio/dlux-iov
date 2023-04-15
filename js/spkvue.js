@@ -1036,7 +1036,7 @@ var app = new Vue({
           name: name,
           type: type,
           contract: contract,
-          thumbHash: thumbHash
+          thumbHash
         })
       }
       this.dluxMock()
@@ -1156,9 +1156,7 @@ var app = new Vue({
     },
     post(customJsonArr) {
       for(var i = 0; i < customJsonArr.length; i++){
-        if(customJsonArr[i].id == 'dlux'){
-          this.postCustom_json[customJsonArr[i][0]] = customJsonArr[i][1]
-        }
+        this.postCustom_json[customJsonArr[i][0]] = customJsonArr[i][1]
       }
       this.postCustom_json.tags = ['dlux']
       console.log(this.postTags)
@@ -3113,6 +3111,23 @@ function tradeFTreject(setname, uid, callback){
           }
         }
         return false
+      }
+    },
+    isntBenned: {
+      get() {
+        var unbenned = [], benned = {}
+        for (var i = 0; i < this.postBens.length; i++) {
+          benned[this.postBens[i].account] = this.postBens[i].weight
+        }
+        for (var i = 0; i < this.saccountapi.file_contracts.length; i++) {
+          if(!benned[this.saccountapi.file_contracts[i].s.split(',')[0]] || benned[this.saccountapi.file_contracts[i].s.split(',')[0]] < this.saccountapi.file_contracts[i].s.split(',')[1]){
+            unbenned.push({
+              contract:this.saccountapi.file_contracts[i].i,
+              account:this.saccountapi.file_contracts[i].s.split(',')[0],
+              weight:this.saccountapi.file_contracts[i].s.split(',')[1]
+          })
+        }
+        return unbenned
       }
     },
     fileInfoLength: {
