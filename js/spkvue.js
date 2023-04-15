@@ -975,10 +975,10 @@ var app = new Vue({
       })
     },
     deleteImg(index, name) {
-      delete this.fileInfo[name]
-      for (var item in this.fileInfo) {
-        if(this.fileInfo[item].index > index) {
-          this.fileInfo[item].index--
+      delete this.FileInfo[name]
+      for (var item in this.FileInfo) {
+        if(this.FileInfo[item].index > index) {
+          this.FileInfo[item].index--
         }
       }
       this.File.splice(index, 1)
