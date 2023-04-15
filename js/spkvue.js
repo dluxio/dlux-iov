@@ -3125,7 +3125,8 @@ function tradeFTreject(setname, uid, callback){
               contract:this.saccountapi.file_contracts[i].i,
               account:this.saccountapi.file_contracts[i].s.split(',')[0],
               weight:this.saccountapi.file_contracts[i].s.split(',')[1]
-          })
+             })
+          }
         }
         return unbenned
       }
