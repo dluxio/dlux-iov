@@ -1369,7 +1369,7 @@
                                         </div>
                                         <div class="w-100" v-if="contract.df">
                                             <h5>Files:</h5>
-                                            <div class="d-flex align-items-center" v-for="file in contract.df">
+                                            <div class="d-flex align-items-center" v-for="(size, file) in contract.df">
                                                 <div class="me-2"><a class="m-0" :href="'https://ipfs.io/ipfs/' + file"
                                                         target="_blank">{{file}}<i
                                                             class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a>
