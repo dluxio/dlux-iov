@@ -1543,26 +1543,26 @@ var app = new Vue({
       };
       [...files]
           .forEach(file => {
-            console.log(file)
+            console.log(file.cid, file)
             let options = defaultOptions
             options.cid = file.cid
             uploadFile(file, options)
           });
-      return (files, options = defaultOptions) => {
-        [...files]
-          .forEach(file => {
-            console.log(file)
-            options.cid = file.cid
-            uploadFile(file, options)
-          });
+      // return (files, options = defaultOptions) => {
+      //   [...files]
+      //     .forEach(file => {
+      //       console.log(file)
+      //       options.cid = file.cid
+      //       uploadFile(file, options)
+      //     });
 
-        return {
-          abortFileUpload,
-          retryFileUpload,
-          clearFileUpload,
-          resumeFileUpload
-        };
-      }
+      //   return {
+      //     abortFileUpload,
+      //     retryFileUpload,
+      //     clearFileUpload,
+      //     resumeFileUpload
+      //   };
+      // }
     },
     replace(string, char = ':'){
       return string.replaceAll(char, '_')
