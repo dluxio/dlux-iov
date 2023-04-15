@@ -1547,7 +1547,7 @@ var app = new Vue({
           .forEach(file => {
             let options = defaultOptions
             options.cid = file.cid
-            uploadFile(file, options)
+            uploadFile(file, options, file.cid)
           });
       // return (files, options = defaultOptions) => {
       //   [...files]
