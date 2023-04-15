@@ -47,6 +47,9 @@
             --bs-accordion-active-bg: #001D4C;
 
         }
+        .selected-div {background:#434851;
+                        border: 0;}
+        .hover-div:hover {background: #434851;}
     </style>
 
 </head>
@@ -77,7 +80,7 @@
                                 <div id="fileHosting" class="accordion-collapse collapse show">
                                     <div class="accordion-body">
 
-                                                        <div class="input-group mb-1">
+                                                        <div class="input-group">
                                                             <span
                                                                 class="input-group-text bg-darkg border-secondary text-white-50 l-radius-hotfix">@</span>
                                                             <input type="text"
@@ -1126,33 +1129,35 @@
 
                                                             <div>
                                                                 <div>
-                                                                    <table class="table table-dark table-striped">
+                                                                    <!--<table class="table table-dark table-striped table-hover align-middle">
                                                                         <thead>
                                                                             <tr>
-                                                                                <th scope="col">#</th>
-                                                                                <th scope="col">First</th>
-                                                                                <th scope="col">Last</th>
-                                                                                <th scope="col">Handle</th>
+                                                                                <th scope="col">Sponsor</th>
+                                                                                <th scope="col">MAX Storage</th>
+                                                                                <th scope="col">Expiration</th>
+                                                                                <th scope="col">Actions</th>
                                                                             </tr>
                                                                         </thead>
-                                                                        <tbody
-                                                                            v-for="(sponsor, key, index) in saccountapi.channels">
-                                                                            <tr v-for="channel in sponsor"
-                                                                                v-if="channel.c == 1">
-                                                                                <th scope="row">1</th>
-                                                                                <td><i
+                                                                        <tbody>
+                                                                            <tr class="clickable" v-for="(sponsor, key, index) in saccountapi.channels" >
+                                                                                <td colspan="4" class="p-0">
+                                                                                    <table class="table text-white align-middle mb-0">
+                                                                                        <tbody>
+                                                                                        <tr>
+                                                                                            <th class="border-0" scope="row" v-for="channel in sponsor" v-if="channel.c == 1">@{{channel.f}}</th>
+                                                                                <td  class="border-0" v-for="channel in sponsor" v-if="channel.c == 1"><i
                                                                                         class="fa-solid fa-database fa-fw me-2"></i>{{channel.a/1000000}}
                                                                                     MB</td>
-                                                                                <td><i
+                                                                                <td class="border-0" v-for="channel in sponsor" v-if="channel.c == 1"><i
                                                                                         class="fa-solid fa-clock fa-fw me-2"></i>{{exp_to_time(channel.e)}}
                                                                                 </td>
-                                                                                <td>
+                                                                                <td class="border-0" v-for="channel in sponsor" v-if="channel.c == 1">
                                                                                     <div class="btn-group" role="group"
                                                                                         aria-label="Contract Actions">
                                                                                         <button type="button"
                                                                                             class="btn btn-secondary"
                                                                                             @click="selectContract(channel.i, channel.b)"><i
-                                                                                                class="fa-solid fa-file-import fa-fw me-2"></i>Select</button>
+                                                                                                class="fa-solid fa-file-import fa-fw"></i></button>
                                                                                         <button type="button"
                                                                                             class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                                                                                             disabled></button>
@@ -1160,25 +1165,72 @@
                                                                                             class="btn btn-secondary"
                                                                                             data-bs-toggle="collapse"
                                                                                             :data-bs-target="'#' + replace(channel.i)"><i
-                                                                                                class="fa-solid fa-magnifying-glass fa-fw me-2"></i>Details</button>
+                                                                                                class="fa-solid fa-magnifying-glass fa-fw"></i></button>
                                                                                     </div>
+                                                                                    
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                        <tr>
+                                                                                            <td class="collapse" colspan="4" :id="replace(channel.i)" v-for="channel in sponsor" v-if="channel.c == 1">
+                                                                                                <ul class="text-start">
+                                                                                                    <li>Contract ID: {{channel.i}}</li>
+                                                                                                    <li v-if="channel.c == 1">Size Allowed:
+                                                                                                        {{channel.a}} bytes</li>
+                                                                                                    <li v-if="channel.c == 2">Size:
+                                                                                                        {{channel.u}} bytes
+                                                                                                    </li>
+                                                                                                    <li>File Owner: @{{channel.t}}</li>
+                                                                                                    <li>Service Provider: @{{channel.b}}
+                                                                                                    </li>
+                                                                                                    <li>Sponsor: @{{channel.f}}</li>
+                                                                                                    <li>Expiration:
+                                                                                                        {{exp_to_time(channel.e)}}</li>
+                                                                                                    <li>Price: {{channel.r}} Broca</li>
+                                                                                                    <li>Redundancy: {{channel.p}}</li>
+                                                                                                    <li v-if="channel.s">Terms:
+                                                                                                        {{slotDecode(channel.s,
+                                                                                                        1)}}%
+                                                                                                        Bennificiary to
+                                                                                                        @{{slotDecode(channel.s, 0)}}</li>
+                                                                                                    <li>Status: {{channel.c == 1 ? 'Waiting For Upload' : 'Uploaded'}}
+                                                                                                    </li>
+                                                                                                    <li v-if="channel.df">Files:<p
+                                                                                                            v-for="file in channel.df">
+                                                                                                            {{file}}
+                                                                                                        </p>
+                                                                                                    </li>
+                                                                                                    <li v-if="channel.n">Stored by:<p
+                                                                                                            v-for="acc in channel.n">
+                                                                                                            @{{acc}}
+                                                                                                        </p>
+                                                                                                    </li>
+                                                                                                </ul>
+                                                                                                </td>
+                                                                                        </tr>
+                                                                                    </tbody>
+                                                                                    </table>
                                                                                 </td>
+                                                                                
+                                                                                
+                                                                                
                                                                             </tr>
+                                                                       
 
                                                                         </tbody>
-                                                                    </table>
-                                                                    <div v-for="channel in sponsor"
-                                                                        v-if="channel.c == 1">
-                                                                        <div class="d-flex flex-wrap border-secondary justify-content-between my-2 p-3"
-                                                                            v-bind:class="{'border-bottom': index < numChannels - 1}"
+                                                                    </table>-->
+                                                                    <div v-for="(sponsor, key, index) in saccountapi.channels" class="hover-div" >
+                                                                    <div  v-for="channel in sponsor" v-if="channel.c == 1" v-bind:class="{'selected-div': contract.id == channel.i}">
+                                                                        <div class="border-secondary justify-content-between"
+                                                                            v-bind:class="{'border-bottom': index < numChannels - 1 && !contract.id}"
                                                                             v-if="!contract.id || contract.id == channel.i">
-                                                                            <div class="d-flex">
+                                                                            <div class="d-flex flex-row align-items-center">
+                                                                                <div class="d-flex flex-wrap h-100 flex-grow-1 p-3" type="button" @click="selectContract(channel.i, channel.b)">
                                                                                 <div class="rounded bg-primary px-2 py-1 m-2 text-white"
-                                                                                    title="Allowed Storage"><i
+                                                                                    title="MAX Storage"><i
                                                                                         class="fa-solid fa-database fa-fw me-2"></i>{{channel.a/1000000}}
                                                                                     MB
                                                                                 </div>
-                                                                                <!--<div class="rounded bg-primary px-2 py-1 m-2 text-white"
+                                                                                <div class="rounded bg-primary px-2 py-1 m-2 text-white"
                                                                                 title="Service Provider"><i
                                                                                     class="fa-solid fa-network-wired fa-fw me-2"></i>@{{channel.b}}
                                                                             </div>
@@ -1190,50 +1242,59 @@
                                                                                 title="Beneficiary" v-if="channel.s"><i
                                                                                     class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>@{{slotDecode(channel.s,
                                                                                 0)}} ({{slotDecode(channel.s, 1)}}%)
-                                                                            </div>-->
+                                                                            </div>
                                                                                 <div class="rounded bg-primary px-2 py-1 m-2 text-white"
                                                                                     title="Expiration"><i
                                                                                         class="fa-solid fa-clock fa-fw me-2"></i>{{exp_to_time(channel.e)}}
 
                                                                                 </div>
                                                                             </div>
+                                                                                <div class="d-flex flex-shrink-1">
+                                                                                                <button type="button"
+                                                                                            class="btn btn-secondary m-2"
+                                                                                            data-bs-toggle="collapse"
+                                                                                            :data-bs-target="'#' + replace(channel.i)"><i
+                                                                                                class="fa-solid fa-magnifying-glass fa-fw"></i></button>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="collapse" colspan="4" :id="replace(channel.i)" v-for="channel in sponsor" v-if="channel.c == 1">
+                                                                                                <ul class="text-start">
+                                                                                                    <li>Contract ID: {{channel.i}}</li>
+                                                                                                    <li v-if="channel.c == 1">Size Allowed:
+                                                                                                        {{channel.a}} bytes</li>
+                                                                                                    <li v-if="channel.c == 2">Size:
+                                                                                                        {{channel.u}} bytes
+                                                                                                    </li>
+                                                                                                    <li>File Owner: @{{channel.t}}</li>
+                                                                                                    <li>Service Provider: @{{channel.b}}
+                                                                                                    </li>
+                                                                                                    <li>Sponsor: @{{channel.f}}</li>
+                                                                                                    <li>Expiration:
+                                                                                                        {{exp_to_time(channel.e)}}</li>
+                                                                                                    <li>Price: {{channel.r}} Broca</li>
+                                                                                                    <li>Redundancy: {{channel.p}}</li>
+                                                                                                    <li v-if="channel.s">Terms:
+                                                                                                        {{slotDecode(channel.s,
+                                                                                                        1)}}%
+                                                                                                        Bennificiary to
+                                                                                                        @{{slotDecode(channel.s, 0)}}</li>
+                                                                                                    <li>Status: {{channel.c == 1 ? 'Waiting For Upload' : 'Uploaded'}}
+                                                                                                    </li>
+                                                                                                    <li v-if="channel.df">Files:<p
+                                                                                                            v-for="file in channel.df">
+                                                                                                            {{file}}
+                                                                                                        </p>
+                                                                                                    </li>
+                                                                                                    <li v-if="channel.n">Stored by:<p
+                                                                                                            v-for="acc in channel.n">
+                                                                                                            @{{acc}}
+                                                                                                        </p>
+                                                                                                    </li>
+                                                                                                </ul>
+                                                                                            </div>
 
                                                                         </div>
-                                                                        <div class="collapse" :id="replace(channel.i)">
-                                                                            <ul class="text-start">
-                                                                                <li>Contract ID: {{channel.i}}</li>
-                                                                                <li v-if="channel.c == 1">Size Allowed:
-                                                                                    {{channel.a}} bytes</li>
-                                                                                <li v-if="channel.c == 2">Size:
-                                                                                    {{channel.u}} bytes
-                                                                                </li>
-                                                                                <li>File Owner: @{{channel.t}}</li>
-                                                                                <li>Service Provider: @{{channel.b}}
-                                                                                </li>
-                                                                                <li>Sponsor: @{{channel.f}}</li>
-                                                                                <li>Expiration:
-                                                                                    {{exp_to_time(channel.e)}}</li>
-                                                                                <li>Price: {{channel.r}} Broca</li>
-                                                                                <li>Redundancy: {{channel.p}}</li>
-                                                                                <li v-if="channel.s">Terms:
-                                                                                    {{slotDecode(channel.s,
-                                                                                    1)}}%
-                                                                                    Bennificiary to
-                                                                                    @{{slotDecode(channel.s, 0)}}</li>
-                                                                                <li>Status: {{channel.c == 1 ? 'Waiting For Upload' : 'Uploaded'}}
-                                                                                </li>
-                                                                                <li v-if="channel.df">Files:<p
-                                                                                        v-for="file in channel.df">
-                                                                                        {{file}}
-                                                                                    </p>
-                                                                                </li>
-                                                                                <li v-if="channel.n">Stored by:<p
-                                                                                        v-for="acc in channel.n">
-                                                                                        @{{acc}}
-                                                                                    </p>
-                                                                                </li>
-                                                                            </ul>
-                                                                        </div>
+                                                                    </div>
                                                                     </div>
                                                                 </div>
 
@@ -1369,7 +1430,7 @@
                                         </div>
                                         <div class="w-100" v-if="contract.df">
                                             <h5>Files:</h5>
-                                            <div class="d-flex align-items-center" v-for="(size, file) in contract.df">
+                                            <div class="d-flex align-items-center" v-for="file in contract.df">
                                                 <div class="me-2"><a class="m-0" :href="'https://ipfs.io/ipfs/' + file"
                                                         target="_blank">{{file}}<i
                                                             class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a>
