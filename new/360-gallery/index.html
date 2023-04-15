@@ -1152,7 +1152,7 @@
                                                                                 <td class="border-0" v-for="channel in sponsor" v-if="channel.c == 1"><i
                                                                                         class="fa-solid fa-clock fa-fw me-2"></i>{{exp_to_time(channel.e)}}
                                                                                 </td>
-                                                                                <td class="border-0" scope="row" v-for="channel in sponsor" v-if="channel.c == 1 && channel.s">@{{decodeSlot(channel.s, 0)}} | {{decodeSlot(channel.s, 1)}}%</td>
+                                                                                <td class="border-0" scope="row" v-for="channel in sponsor" v-if="channel.c == 1 && channel.s">@{{slotDecode(channel.s, 0)}} | {{slotDecode(channel.s, 1)}}%</td>
                                                                                 <td class="border-0" scope="row" v-for="channel in sponsor" v-if="channel.c == 1 && !channel.s"></td>
                                                                                 <td class="border-0" v-for="channel in sponsor" v-if="channel.c == 1">
                                                                                     <div class="btn-group" role="group"
