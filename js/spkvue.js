@@ -1339,6 +1339,7 @@ var app = new Vue({
           }
         }
       }
+      console.log({cids}, files)
       const ENDPOINTS = {
         UPLOAD: `${this.contract.api}/upload`,
         UPLOAD_STATUS: `${this.contract.api}/upload-check`,
@@ -1349,7 +1350,7 @@ var app = new Vue({
         startingByte: 0,
         contract: contract,
         cid: null,
-        cids: `,${cids.join(',')}`,
+        cids: `${cids.join(',')}`,
         onAbort: (e,f) => {
           console.log('options.onAbort')
           // const fileObj = files.get(file);
@@ -1425,7 +1426,7 @@ var app = new Vue({
             ...e,
             loaded,
             total: file.size,
-            percentage: loaded * 100 / file.size
+            percentage: loaded  / file.size * 100
           }, file);
         };
 
