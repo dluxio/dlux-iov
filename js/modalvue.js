@@ -94,6 +94,15 @@ export default {
                             <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
                           </div>
                       </div>
+                      <div v-if="func == 'Register a Service Type'"> <label for="type" class="small">Short Name for Service (IPFS)</label>
+                          <div class="input-group mb-3" id="api"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="api"> </div>
+                          <label for="peerid" class="small">Full Name for Service (InterPlanetary File System)</label>
+                          <div class="input-group mb-3" id="peerid"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="id"> </div>  
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
+                          </div>
+                      </div>
                       <div v-if="func == 'Election'">
                       <h3>Chosen Validators</h3>
                         <ul class="sortable-list text-dark ms-auto me-auto">
@@ -508,6 +517,20 @@ export default {
           ops: ["getSapi"],
           api: "https://spktest.dlux.io",
           txid: "register_service",
+        }
+        else if (this.token == "LARYNX" && this.func == "Register a Service Type")
+        op = {
+          type: "cja",
+          cj: {
+            amount: parseInt(this.amount * 1000),
+            type: this.api,
+            Long_Name: this.id,
+          },
+          id: `spkcc_register_service_type`,
+          msg: `Trying to register a service...`,
+          ops: ["getSapi"],
+          api: "https://spktest.dlux.io",
+          txid: "register_service_type",
         }
         else if (this.token == "LARYNX" && this.func == "Register a Validator")
         op = {

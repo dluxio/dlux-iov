@@ -774,6 +774,21 @@
                                                                                                 A Service
                                                                                             </button>
                                                                                         </modal-vue>
+                                                                                        <modal-vue type="power"
+                                                                                            token="LARYNX"
+                                                                                            func="Register a Service Type"
+                                                                                            :balance="saccountapi.balance"
+                                                                                            :min="sstats.IPFSRate/1000"
+                                                                                            :account="account"
+                                                                                            @modalsign="sendIt($event)">
+                                                                                            <button
+                                                                                                class="dropdown-item"
+                                                                                                slot="trigger"
+                                                                                                type="button"><i
+                                                                                                    class="fa fa-network-wired fa-fw me-2"></i>Register
+                                                                                                A Service Type
+                                                                                            </button>
+                                                                                        </modal-vue>
                                                                                         <modal-vue v-if="isNode"
                                                                                             type="power" token="LARYNX"
                                                                                             func="Register a Validator"
