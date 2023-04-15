@@ -87,8 +87,10 @@ export default {
                       </div>
                       <div v-if="func == 'Register a Service'"> <label for="api" class="small">Location (https://ipfs.dlux.io)</label>
                           <div class="input-group mb-3" id="api"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="api"> </div>
-                          <label for="peerid" class="small">IPFS PeerID</label>
+                          <label for="peerid" class="small">Unique ID</label>
                           <div class="input-group mb-3" id="peerid"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="id"> </div>
+                          <label for="peerid" class="small">Service Type</label>
+                          <div class="input-group mb-3" id="type"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="to"> </div>
                           <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
@@ -508,7 +510,7 @@ export default {
           type: "cja",
           cj: {
             amount: parseInt(this.amount * 1000),
-            type: "IPFS",
+            type: this.to,
             id: this.id,
             api: this.api,
           },
