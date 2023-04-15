@@ -1202,10 +1202,10 @@
                                                         <div v-if="numChannels" class="rounded py-2 px-3 bg-darkg border border-secondary">
                                                             <div>
                                                                 <div v-for="sponsor in saccountapi.channels">
-                                                                    <div v-for="(channel, index) in sponsor"
+                                                                    <div v-for="(channel, key, index) in sponsor"
                                                                         v-if="channel.c == 1">
                                                                         <div class="d-flex flex-wrap border-secondary my-2 p-3"
-                                                                         v-bind:class="{'border-bottom': index < sponsor.length - 1}"
+                                                                         v-bind:class="{'border-bottom': index < numChannels - 1}"
                                                                             v-if="!contract.id || contract.id == channel.i">
                                                                             <div class="d-flex">
                                                                             <div class="rounded bg-primary px-2 py-1 m-2 text-white"
