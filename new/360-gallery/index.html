@@ -139,7 +139,7 @@
                                                     <button class="accordion-button collapsed" type="button"
                                                         data-bs-toggle="collapse" data-bs-target="#newContract"
                                                         aria-expanded="false" aria-controls="newContract">
-                                                        FIRST: Create A Contract For File Hosting
+                                                        Create A File Hosting Contract
                                                     </button>
                                                 </h2>
                                                 <div id="newContract" class="accordion-collapse collapse">
@@ -156,10 +156,10 @@
                                                                     data-bs-target="#spkwallet" aria-expanded="false"
                                                                     aria-controls="SPK Wallet"><i
                                                                         class="fa-solid fa-wallet fa-fw me-2"></i>Wallet</button>
-                                                                <button type="button"
+                                                                <button type="button" v-if="saccountapi.pubKey != 'NA'"
                                                                     class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                                                                     disabled></button>
-                                                                <button type="button" class="btn btn-info">
+                                                                <button v-if="saccountapi.pubKey != 'NA'" type="button" class="btn btn-info">
                                                                     <modal-vue type="build" token="BROCA"
                                                                         :balance="broca_calc(saccountapi.broca)"
                                                                         :account="account" @modalsign="sendIt($event)"
@@ -174,8 +174,7 @@
                                                                     disabled></button>
                                                                 <button v-if="saccountapi.pubKey == 'NA'" type="button"
                                                                     class="btn btn-info" @click="updatePubkey">
-                                                                    Register Account
-                                                                    <i class="fas fa-plus"></i>
+                                                                    <i class="fas fa-plus fa-fw me-2"></i>Register Account
                                                                 </button>
                                                                 <button v-if="saccountapi.pubKey != 'NA'" type="button"
                                                                     class="btn btn-info" @click="petitionForContract">
@@ -1192,13 +1191,15 @@
                                                     <button class="accordion-button collapsed" type="button"
                                                         data-bs-toggle="collapse" data-bs-target="#availableContracts"
                                                         aria-expanded="false" aria-controls="availableContracts">
-                                                        SECOND: Upload Files To A Contract ({{numChannels}})
+                                                        Upload Your Files ({{numChannels}})
                                                     </button>
                                                 </h2>
                                                 <div id="availableContracts" class="accordion-collapse collapse">
                                                     <div class="accordion-body">
-                                                        <div
-                                                            class="rounded py-2 px-3 bg-darkg border border-secondary">
+                                                        <div v-if="!numChannels">
+                                                            <p class="m-0">You have no available SPK Network contracts for file hosting. Create a hosting contract to upload files.</p>
+                                                        </div>
+                                                        <div v-if="numChannels" class="rounded py-2 px-3 bg-darkg border border-secondary">
                                                             <div>
                                                                 <div v-for="sponsor in saccountapi.channels">
                                                                     <div v-for="(channel, index) in sponsor"
@@ -1206,30 +1207,33 @@
                                                                         <div class="d-flex flex-wrap border-secondary my-2 p-3"
                                                                          v-bind:class="{'border-bottom': index < sponsor.length - 1}"
                                                                             v-if="!contract.id || contract.id == channel.i">
+                                                                            <div class="d-flex">
                                                                             <div class="rounded bg-primary px-2 py-1 m-2 text-white"
                                                                                 title="Allowed Storage"><i
                                                                                     class="fa-solid fa-database fa-fw me-2"></i>{{channel.a/1000000}}
                                                                                 MB
                                                                             </div>
-                                                                            <div class="rounded bg-primary px-2 py-1 m-2 text-white"
+                                                                            <!--<div class="rounded bg-primary px-2 py-1 m-2 text-white"
                                                                                 title="Service Provider"><i
                                                                                     class="fa-solid fa-network-wired fa-fw me-2"></i>@{{channel.b}}
                                                                             </div>
                                                                             <div class="rounded bg-primary px-2 py-1 m-2 text-white"
                                                                                 title="Sponsor"><i
-                                                                                    class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>@{{channel.f}}
+                                                                                    class="fa-solid fa-circle-dollar-to-slot fa-fw me-2"></i>@{{channel.f}}
                                                                             </div>
                                                                             <div class="rounded bg-primary px-2 py-1 m-2 text-white"
                                                                                 title="Beneficiary" v-if="channel.s"><i
-                                                                                    class="fa-solid fa-circle-dollar-to-slot fa-fw me-2"></i>@{{slotDecode(channel.s,
+                                                                                    class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>@{{slotDecode(channel.s,
                                                                                 0)}} ({{slotDecode(channel.s, 1)}}%)
-                                                                            </div>
+                                                                            </div>-->
                                                                             <div class="rounded bg-primary px-2 py-1 m-2 text-white"
                                                                                 title="Expiration"><i
                                                                                     class="fa-solid fa-clock fa-fw me-2"></i>{{exp_to_time(channel.e)}}
+                                                                            
                                                                             </div>
-                                                                            <div class="btn-group ms-auto" role="group"
-                                                                                aria-label="LARYNX Actions">
+                                                                        </div>
+                                                                            <div class="btn-group" role="group"
+                                                                                aria-label="Contract Actions">
                                                                                 <button type="button"
                                                                                     class="btn btn-secondary"
                                                                                     @click="selectContract(channel.i, channel.b)"><i
@@ -1378,12 +1382,15 @@
                                                         data-bs-target="#executedContracts"
                                                         aria-expanded="false"
                                                         aria-controls="executedContracts">
-                                                        THIRD: Add Files From A Contract ({{hasFiles}})
+                                                        Select Your Files ({{hasFiles}})
                                                     </button>
                                                 </h2>
                                                 <div id="executedContracts"
                                                     class="accordion-collapse collapse">
                                                     <div class="accordion-body">
+                                                        <div v-if="!hasFiles">
+                                                            <p class="m-0">You don't have any active SPK Network hosting contracts. If you have not yet created a contract, do that first. If you have created a contract, upload files and execute the contract. If your contract has expired, extend the contract.</p>
+                                                        </div>
                                                         <div v-if="hasFiles"
                                                 class="rounded py-2 px-3 bg-darkg border border-secondary">
 
