@@ -50,6 +50,16 @@
         .selected-div {background:#434851;
                         border: 0;}
         .hover-div:hover {background: #434851;}
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+
     </style>
 
 </head>
@@ -78,15 +88,18 @@
                                     </button>
                                 </h2>
                                 <div id="fileHosting" class="accordion-collapse collapse show">
-                                    <div class="accordion-body">
-
+                                    <div class="accordion-body p-0">
+                                        <div class="d-flex flex-wrap justify-content-between p-2 bg-darkg">
+                                            <div class="flex-column m-1">
                                                         <div class="input-group">
-                                                            <span
-                                                                class="input-group-text bg-darkg border-secondary text-white-50 l-radius-hotfix">@</span>
+                                                            <span class="input-group-text bg-darkg border-secondary text-white-50">@</span>
                                                             <input type="text"
                                                                 class="form-control bg-darkg border-secondary text-info"
                                                                 readonly id="username" v-model="account">
-
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-column m-1">
+                                                        <div class="btn-group">
                                                             <button type="button" class="btn btn-info"
                                                                 data-bs-toggle="collapse" data-bs-target="#spkwallet"
                                                                 aria-expanded="false" aria-controls="SPK Wallet"><i
@@ -101,8 +114,7 @@
                                                                     :account="account" @modalsign="sendIt($event)"
                                                                     :ipfsproviders="ipfsProviders">
                                                                     <span slot="trigger" class="p-2"><i
-                                                                            class="fa-solid fa-file-contract fa-fw me-2"></i>New
-                                                                        Contract</span>
+                                                                            class="fa-solid fa-file-contract fa-fw me-2"></i>Contract</span>
                                                                 </modal-vue>
                                                             </button>
                                                             <button type="button"
@@ -117,7 +129,8 @@
                                                                 <i
                                                                     class="fa-solid fa-wand-magic-sparkles fa-fw me-2"></i>{{petitionStatus}}
                                                             </button>
-
+                                                        </div>
+                                                    </div>
                                                         </div>
                                                         <div class="collapse" id="spkwallet" aria-labelledby="spktab">
                                                             <div class="container">
@@ -1119,57 +1132,51 @@
                                                                     Wallet</button>
                                                             </div>
                                                         </div>
+                                                        <!--no contracts message-->
                                                         <div v-if="!numChannels">
-
                                                             <p class="mt-2 mb-0">You have no available SPK Network
                                                                 contracts for file hosting. Create a hosting contract to
                                                                 upload files.</p>
                                                         </div>
+                                                        <!--table of available contracts-->
                                                         <div v-if="numChannels" class="">
-
-                                                            <div>
-                                                                <div>
-                                                                    <table class="table table-dark table-striped table-hover align-middle">
+                                                                    <table class="table table-dark table-striped table-hover text-center align-middle mb-0">
                                                                         <thead>
                                                                             <tr>
                                                                                 
-                                                                                <th scope="col">MAX Storage</th>
-                                                                                <th scope="col">Expiration</th>
-                                                                                <th scope="col">Benificiaries</th>
-                                                                                <th scope="col">Actions</th>
+                                                                                <th scope="col"><i class="fa-solid fa-database fa-fw me-2"></i>Storage</th>
+                                                                                <th scope="col"><i class="fa-solid fa-clock fa-fw me-2"></i>Expiration</th>
+                                                                                <th scope="col"><i class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>Benificiary</th>
+                                                                                <th scope="col"></th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
-                                                                            <tr class="clickable" v-for="(sponsor, key, index) in saccountapi.channels" >
+                                                                            <Transition>
+                                                                            <tr v-for="(sponsor, key, index) in saccountapi.channels">
                                                                                 <td colspan="4" class="p-0">
+                                                                                    <div class="table-responsive">
                                                                                     <table class="table text-white align-middle mb-0">
                                                                                         <tbody>
                                                                                         <tr>
-                                                                                    
-                                                                                <th  class="border-0" v-for="channel in sponsor" v-if="channel.c == 1"><i
-                                                                                        class="fa-solid fa-database fa-fw me-2"></i>{{channel.a/1000000}}
+                                                                                <th  class="border-0" v-for="channel in sponsor" v-if="channel.c == 1">{{channel.a/1000000}}
                                                                                     MB</th>
-                                                                                <td class="border-0" v-for="channel in sponsor" v-if="channel.c == 1"><i
-                                                                                        class="fa-solid fa-clock fa-fw me-2"></i>{{exp_to_time(channel.e)}}
+                                                                                <td class="border-0" v-for="channel in sponsor" v-if="channel.c == 1">{{exp_to_time(channel.e)}}
                                                                                 </td>
-                                                                                <td class="border-0" scope="row" v-for="channel in sponsor" v-if="channel.c == 1 && channel.s">@{{slotDecode(channel.s, 0)}} | {{slotDecode(channel.s, 1)}}%</td>
+                                                                                <td class="border-0" scope="row" v-for="channel in sponsor" v-if="channel.c == 1 && channel.s">@{{slotDecode(channel.s, 0)}} ({{slotDecode(channel.s, 1)}}%)</td>
                                                                                 <td class="border-0" scope="row" v-for="channel in sponsor" v-if="channel.c == 1 && !channel.s"></td>
-                                                                                <td class="border-0" v-for="channel in sponsor" v-if="channel.c == 1">
-                                                                                    <div class="btn-group" role="group"
-                                                                                        aria-label="Contract Actions">
+                                                                                <td class="border-0 text-end" v-for="channel in sponsor" v-if="channel.c == 1">
+                                                                                    
                                                                                         <button type="button"
-                                                                                            class="btn btn-secondary"
+                                                                                            class="btn btn-outline-success m-1"
                                                                                             @click="selectContract(channel.i, channel.b)"><i
                                                                                                 class="fa-solid fa-file-import fa-fw"></i></button>
+                                                                                        
                                                                                         <button type="button"
-                                                                                            class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                                                                                            disabled></button>
-                                                                                        <button type="button"
-                                                                                            class="btn btn-secondary"
+                                                                                            class="btn btn-outline-primary m-1"
                                                                                             data-bs-toggle="collapse"
                                                                                             :data-bs-target="'#' + replace(channel.i)"><i
                                                                                                 class="fa-solid fa-magnifying-glass fa-fw"></i></button>
-                                                                                    </div>
+                                                                                   
                                                                                     
                                                                                             </td>
                                                                                         </tr>
@@ -1212,17 +1219,20 @@
                                                                                         </tr>
                                                                                     </tbody>
                                                                                     </table>
+                                                                                </div>
                                                                                 </td>
                                                                                 
                                                                                 
                                                                                 
                                                                             </tr>
-                                                                       
+                                                                        </Transition>
 
                                                                         </tbody>
                                                                     </table>
-                                                                </div>
-                                                            </div>
+                                                                
+
+                                                                <!--file uploader-->
+                                                                <Transition>
                                                             <div v-if="contract.id">
                                                                 <div class="rounded py-2 px-2 mb-3 bg-darker">
                                                                     <form onsubmit="return false;">
@@ -1255,7 +1265,7 @@
                                                                                     aria-valuenow="25" aria-valuemin="0"
                                                                                     aria-valuemax="100">
                                                                                     <div class="progress-bar"
-                                                                                        :style="'width: ' + FileInfo[file.name].progress + '%'">
+                                                                                        :style="'width: ' + file.progress + '%'">
                                                                                         {{file.progress}}%
                                                                                     </div>
                                                                                 </div>
@@ -1293,21 +1303,23 @@
                                                                                 </li>
                                                                                 <li class=""><a
                                                                                         :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
-                                                                                        target="_blank">https://ipfs.io/ipfs/{{FileInfo[file.name].hash}}<i
+                                                                                        target="_blank">{{FileInfo[file.name].hash}}<i
                                                                                             class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a>
                                                                                 </li>
                                                                             </ul>
                                                                         </div>
                                                                     </div>
                                                                 </div>
+                                                                <div v-if="File.length" class="text-center">
+                                                                    <button type="button" class="btn btn-info mb-2"
+                                                                        @click="signNUpload()"><i
+                                                                            class="fa-solid fa-file-signature fa-fw me-2"></i>Sign
+                                                                        and
+                                                                        Upload</button>
+                                                                </div>
                                                             </div>
-                                                            <div v-if="File.length">
-                                                                <button type="button" class="btn btn-info mb-2"
-                                                                    @click="signNUpload()"><i
-                                                                        class="fa-solid fa-file-signature fa-fw me-2"></i>Sign
-                                                                    and
-                                                                    Upload</button>
-                                                            </div>
+                                                        </Transition>
+                                                            
                                                         </div>
                                                     </div>
                                                 </div>
