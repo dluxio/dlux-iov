@@ -1204,10 +1204,10 @@
                                                                 <div v-for="sponsor in saccountapi.channels">
                                                                     <div v-for="channel in sponsor"
                                                                         v-if="channel.c == 1">
-                                                                        <div class="d-flex flex-wrap justify-content-center border-secondary my-2 p-3"
+                                                                        <div class="d-flex flex-wrap justify-content-between border-secondary my-2 p-3"
                                                                          v-bind:class="{'border-bottom': numChannels > 1}"
                                                                             v-if="!contract.id || contract.id == channel.i">
-                                                                            <div class="d-flex ms-auto">
+                                                                            <div class="d-flex">
                                                                             <div class="rounded bg-primary px-2 py-1 m-2 text-white"
                                                                                 title="Allowed Storage"><i
                                                                                     class="fa-solid fa-database fa-fw me-2"></i>{{channel.a/1000000}}
