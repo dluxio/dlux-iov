@@ -1440,8 +1440,8 @@ var app = new Vue({
 
         req.send(formData);
       };
-      const uploadFile = (file, options) => {
-        console.log('Uploading', options, file)
+      const uploadFile = (file, options, cid) => {
+        console.log('Uploading', cid, options, file)
         return fetch(ENDPOINTS.UPLOAD_REQUEST, {
           method: 'GET',
           headers: {
@@ -1449,7 +1449,7 @@ var app = new Vue({
             'X-Sig': options.contract.fosig,
             'X-Account': this.account,
             'X-Contract': options.contract.id,
-            'X-Cid': options.cid,
+            'X-Cid': cid,
             'X-Files': options.contract.files,
             'X-Chain': 'HIVE'
           }
@@ -1458,7 +1458,8 @@ var app = new Vue({
           .then(res => {
             console.log('Chunking', options, file)
             options = { ...options, ...res };
-            this.fileRequests[options.cid] = { request: null, options }
+            options.cid = cid
+            this.fileRequests[cid] = { request: null, options }
             uploadFileChunks(file, options);
           })
           .catch(e => {
