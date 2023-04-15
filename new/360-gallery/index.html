@@ -131,18 +131,17 @@
                                 </h2>
                                 <div id="fileHosting" class="accordion-collapse collapse">
                                     <div class="accordion-body">
-                                        <div class="accordion" id="accordionPanelsStayOpenExample">
+                                        <div class="accordion" id="spkHosting">
                                             <div class="accordion-item">
                                                 <h2 class="accordion-header">
-                                                    <button class="accordion-button" type="button"
+                                                    <button class="accordion-button collapsed" type="button"
                                                         data-bs-toggle="collapse" data-bs-target="#newContract"
-                                                        aria-expanded="true" aria-controls="newContract">
+                                                        aria-expanded="false" aria-controls="newContract">
                                                         FIRST: Create A Contract For File Hosting
                                                     </button>
                                                 </h2>
-                                                <div id="newContract" class="accordion-collapse collapse show">
+                                                <div id="newContract" class="accordion-collapse collapse">
                                                     <div class="accordion-body">
-
                                                             <div class="input-group">
                                                                 <span
                                                                     class="input-group-text bg-darkg border-secondary text-white-50 l-radius-hotfix">@</span>
@@ -1375,29 +1374,12 @@
                                                     class="border-secondary my-2 p-3"  v-bind:class="{'border-bottom': hasFiles > 1}">
                                                     <div class="d-flex flex-wrap">
                                                         <div class="rounded bg-primary px-2 py-1 m-2 text-white"
-                                                            title="Allowed Storage"><i
+                                                            title="Contract Size"><i
                                                                 class="fa-solid fa-database fa-fw me-2"></i>{{contract.u/1000000}}
                                                             MB
                                                         </div>
-                                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white"
-                                                            title="Service Provider"><i
-                                                                class="fa-solid fa-network-wired fa-fw me-2"></i>@{{contract.b}}
-                                                        </div>
-                                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white"
-                                                            title="Sponsor"><i
-                                                                class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>@{{contract.f}}
-                                                        </div>
-                                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white"
-                                                            title="Beneficiary" v-if="contract.s"><i
-                                                                class="fa-solid fa-circle-dollar-to-slot fa-fw me-2"></i>@{{slotDecode(contract.s,
-                                                            0)}} ({{slotDecode(contract.s, 1)}}%)</div>
-                                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white"
-                                                            title="Expiration"><i
-                                                                class="fa-solid fa-clock fa-fw me-2"></i>{{exp_to_time(contract.e)}}
-                                                        </div>
                                                         <div class="btn-group ms-auto" role="group"
-                                                            aria-label="LARYNX Actions">
-                                                            
+                                                            aria-label="LARYNX Actions"> 
                                                             <button v-if="contract.c == 3" type="button"
                                                                 class="btn btn-secondary" @click=""><i
                                                                     class="fa-solid fa-clock-rotate-left fa-fw me-2"></i>Extend</button>
@@ -1409,7 +1391,7 @@
                                                                 class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                                                                 disabled></button>
                                                             <button type="button" class="btn btn-secondary" @click=""><i
-                                                                    class="fa-solid fa-pen-to-square fa-fw me-2"></i>Post</button>
+                                                                class="fa-solid fa-pen-to-square fa-fw me-2"></i>Post</button>
                                                             <button type="button"
                                                                 class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                                                                 disabled></button>
@@ -1418,11 +1400,21 @@
                                                                 :data-bs-target="'#' + replace(contract.i)"><i
                                                                     class="fa-solid fa-magnifying-glass fa-fw me-2"></i>Details</button>
                                                         </div>
+                                                        <div class="w-100" v-if="contract.df">
+                                                            <h5>Files:</h5>
+                                                            <div class="d-flex align-items-center" v-for="file in contract.df">
+                                                                 <div class="me-2"><a class="m-0" :href="'https://ipfs.io/ipfs/' + file"
+                                                                        target="_blank">{{file}}<i
+                                                                            class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a></div>
+                                                                <div class="ms-auto"><button type="button" class="btn btn-primary" v-if="publishPage"
+                                                                    @click="addAsset(file, contract.i)"><i class="fa-solid fa-square-plus"></i></button></div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                     <div class="collapse" :id="replace(contract.i)">
                                                         <ul class="text-start">
                                                             <li>Contract ID: {{contract.i}}</li>
-                                                            <li>Size: {{contract.u}} bytes</li>
+                                                            <li>Size: {{contract.u/1000000}} MB</li>
                                                             <li>File Owner: @{{contract.t}}</li>
                                                             <li>Service Provider: @{{contract.b}}</li>
                                                             <li>Sponsor: @{{contract.f}}</li>
@@ -1434,16 +1426,7 @@
                                                                 @{{slotDecode(contract.s, 0)}}</li>
                                                             <li>Status: {{contract.c == 2 ? 'Waiting For Post' :
                                                                 'Decentralizing'}}</li>
-                                                            <li v-if="contract.df">Files:<p v-for="file in contract.df">
-                                                                    {{file}}<button v-if="publishPage"
-                                                                        @click="addAsset(file, contract.i)">Add to
-                                                                        dApp</button><a
-                                                                        :href="'https://ipfs.io/ipfs/' + file"
-                                                                        target="_blank"><i
-                                                                            class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a>
-                                                                </p>
-                                                            </li>
-                                                            <li v-if="contract.n">Stored by:<p
+                                                                <li v-if="contract.n">Stored by:<p
                                                                     v-for="acc in contract.n">@{{acc}} </p>
                                                             </li>
                                                         </ul>
