@@ -1025,7 +1025,7 @@ var app = new Vue({
     if(total > (this.saccountapi.spk_power * 1000))total = (this.saccountapi.spk_power * 1000)
     return total
     },
-    addAsset(cid, contract, name = '', thumbHash, type = 'ts') {
+    addAsset(cid, contract, name = '', thumbHash, type = 'ts', rot) {
       var found = -1
       if(!cid)return false
       for (var i = 0; i < this.postCustom_json.assets.length; i++) {
@@ -1042,7 +1042,8 @@ var app = new Vue({
           name: name,
           type: type,
           contract: contract,
-          thumbHash
+          thumbHash,
+          r: rot
         })
       }
       this.dluxMock()
