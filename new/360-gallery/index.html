@@ -1379,7 +1379,7 @@ iframe {
                             <div v-if="hasFiles" style="background-color: #16191C;" class="p-2">
                                 
 
-                                <div v-for="contract in saccountapi.file_contracts" class="bg-darkg rounded my-2 p-2"
+                                <div v-for="(contract, key, index) in saccountapi.file_contracts" class="bg-darkg rounded my-2 p-2"
                                 v-bind:class="{'border-bottom': index < hasFiles - 1 }">
                                     <div class="d-flex flex-wrap align-items-center p-2">
                                         <div class="rounded bg-info px-2 py-1 me-2 text-black" title="Contract Size">
