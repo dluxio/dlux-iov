@@ -1379,8 +1379,7 @@ iframe {
                             <div v-if="hasFiles" style="background-color: #16191C;" class="p-2">
                                 
 
-                                <div v-for="(contract, key, index) in saccountapi.file_contracts" class="bg-darkg rounded my-2 p-2"
-                                v-bind:class="{'border-bottom': index < hasFiles - 1 }">
+                                <div v-for="(contract, key, index) in saccountapi.file_contracts" class="bg-darkg rounded my-2 p-2">
                                     <div class="d-flex flex-wrap align-items-center p-2">
                                         <div class="rounded bg-info px-2 py-1 me-2 text-black" title="Contract Size">
                                             <i class="fa-solid fa-database fa-fw me-2"></i>{{contract.u/1000000}}
@@ -1399,8 +1398,7 @@ iframe {
                                             <button v-if="contract.c == 2" type="button" class="btn btn-warning" @click="addBen(slotDecode(contract.s,
                                         0), slotDecode(contract.s, 1) * 100)"><i
                                                     class="fa-solid fa-file-pen fa-fw me-2"></i>Finalize</button>
-                                            <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                                                disabled></button>
+                                            
                                             <button type="button" class="btn btn-secondary" data-bs-toggle="collapse"
                                                 :data-bs-target="'#' + replace(contract.i)"><i
                                                     class="fa-solid fa-magnifying-glass fa-fw me-2"></i>Details</button>
@@ -1462,25 +1460,69 @@ iframe {
                                                 <form onsubmit="return false;">
                                                     <p>CID: {{asset.hash}}</p>
                                                     <p>In: {{asset.contract}}</p>
-                                                    <input type="text" v-model="asset.name" placeholder="Picture Name">
-                                                    <input type="text" v-model="asset.thumbHash"
+                                            <div class="d-flex p-2 justify-content-between align-items-center">
+                                                <div class="m-2">
+                                                    <div class="input-group m-2">
+                                                    <input type="text" class="form-control bg-darkg border-secondary text-white" v-model="asset.name" placeholder="Picture Name">
+                                                    </div>
+                                                    <div class="input-group m-2">
+                                                    <input type="text" class="form-control bg-darkg border-secondary text-white" v-model="asset.thumbHash"
                                                         placeholder="Thumbnail IPFS Hash">
-                                                    <label for="rx">X Rotation (between 0 and 359):</label>
-                                                    <input type="range" id="rx" v-model="asset.rx" @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])" min="0" max="359" step="1">
-                                                    <label for="ry">Y Rotation (between 0 and 359):</label>
-                                                    <input type="range" id="ry" v-model="asset.ry" @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])" min="0" max="359" step="1">
-                                                    <label for="rz">Z Rotation (between 0 and 359):</label>
-                                                    <input type="range" id="rz" v-model="asset.rz" @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])" min="0" max="359" step="1">
-                                                    <button
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex flex-column p-2 m-2">
+                                                    <div class="row g-3 align-items-center">
+                                                        <div class="col-auto me-auto">
+                                                            <label for="ry" class="col-form-label"><i class="fa-solid fa-arrows-left-right me-2"></i>Pan:</label>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <input type="range" class="form-range" id="ry" v-model="asset.ry" @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])" min="-180" max="180" step="1">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row g-3 align-items-center">
+                                                        <div class="col-auto me-auto">
+                                                            <label for="rx" class="col-form-label"><i class="fa-solid fa-arrows-up-down me-2"></i>Tilt:</label>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <input type="range" class="form-range" id="rx" v-model="asset.rx" @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])" min="-180" max="180" step="1">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row g-3 align-items-center">
+                                                        <div class="col-auto me-auto">
+                                                            <label for="rz" class="col-form-label"><i class="fa-solid fa-arrows-rotate me-2"></i>Roll:</label>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <input type="range" class="form-range" id="rz" v-model="asset.rz" @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])" min="-180" max="180" step="1">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex flex-column">
+                                                <div class="m-2 btn-group">
+                                                    <button class="btn btn-primary"
                                                         @click="addAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, asset.r)">Refresh
                                                         dApp</button>
-                                                    <button
+                                                        <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                disabled></button>
+                                                    <button class="btn btn-primary"
                                                         @click="delAsset(asset.hash, asset.contract, asset.name, asset.thumbHash)">Delete
                                                         Asset</button>
-                                                    <button @click="moveAsset(asset.hash, 'up')"><i
+                                                        <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                disabled></button>
+                                                    <button class="btn btn-primary" @click="moveAsset(asset.hash, 'up')"><i
                                                             class="fa-solid fa-up-long"></i></button>
-                                                    <button @click="moveAsset(asset.hash, 'down')"><i
+                                                            <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                disabled></button>
+                                                    <button class="btn btn-primary" @click="moveAsset(asset.hash, 'down')"><i
                                                             class="fa-solid fa-down-long"></i></button>
+                                                </div>
+                                                <div class="form-check ms-auto me-auto">
+                                                    <input class="form-check-input" type="checkbox" value="" id="firstImage" checked>
+                                                    <label class="form-check-label" for="firstImage">
+                                                      Initial Image
+                                                    </label>
+                                                  </div>
+                                                </div>
+                                            </div>
                                                 </form>
                                             </div>
                                         </div>
@@ -1535,7 +1577,7 @@ iframe {
                                                     2, '.')}}% <button type="button"
                                                         @click="delBen(ben.account)">Remove</button></li>
                                             </ul>
-                                            <button v-if="!isntDlux" type="button"
+                                            <button class="btn btn-outline-primary" v-if="!isntDlux" type="button"
                                                 @click="addBen('dlux-io', 1000)">Include in
                                                 DLUX Ecosystem</button>
                                             <button v-for="item in isntBenned" type="button"
