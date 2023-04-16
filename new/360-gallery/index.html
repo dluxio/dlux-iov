@@ -54,7 +54,16 @@
 .v-leave-active {
   transition: opacity .0s ease;
 }
-
+iframe {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  iframe img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
 .v-enter-from,
 .v-leave-to {
   opacity: 0;
@@ -101,7 +110,7 @@
                                 <h2 class="accordion-header">
                                     <button class="accordion-button" type="button" data-bs-toggle="collapse"
                                         data-bs-target="#fileHosting" aria-expanded="true" aria-controls="fileHosting">
-                                        360 Upload via SPK Network
+                                        Image Upload via SPK Network
                                     </button>
                                 </h2>
                                 <div id="fileHosting" class="accordion-collapse collapse show">
@@ -1150,13 +1159,13 @@
                                                             </div>
                                                         </div>
                                                         <!--no contracts message-->
-                                                        <div v-if="!numChannels" class="p-3">
+                                                        <div v-if="numChannels <= 1" class="p-3">
                                                             <p class="m-0">You have no available SPK Network
-                                                                contracts for file hosting. Once your account is registered, create a hosting contract to
+                                                                contracts for file hosting. After your account is registered, create a hosting contract to
                                                                 upload files.</p>
                                                         </div>
                                                         <!--table of available contracts-->
-                                                        <div v-if="numChannels" class="">
+                                                        <div v-if="numChannels > 1" class="">
                                                                     <table class="table table-dark table-striped table-hover text-center align-middle mb-0">
                                                                         <thead>
                                                                             <tr>
@@ -1357,60 +1366,33 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#executedContracts" aria-expanded="false" aria-controls="executedContracts">
-                            Select Your Files ({{hasFiles}})
+                            Your Hosted Images
                         </button>
                     </h2>
                     <div id="executedContracts" class="accordion-collapse collapse">
-                        <div class="accordion-body">
+                        <div class="accordion-body p-0">
                             <div v-if="!hasFiles">
                                 <p class="m-0">You don't have any active SPK Network hosting contracts. If you have not
                                     yet created a contract, do that first. If you have created a contract, upload files
                                     and execute the contract. If your contract has expired, extend the contract.</p>
                             </div>
-                            <div v-if="hasFiles">
-                                <div class="table-responsive d-none">
-                                <table class="table table-dark table-striped m-0">
-                                    <thead>
-                                        <th scope="col">File</th>
-                                        <th scope="col">Size</th>
-                                        <th scope="col">Add</th>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-for="contract in saccountapi.file_contracts">
-                                            <td colspan="3">
-                                                <div class="table-responsive">
-                                            <table class="table table-dark m-0">
-                                                <tbody>
-                                                    <tr v-for="(size, file) in contract.df">
-                                                        <td><iframe :src="'https://ipfs.io/ipfs/' + file"></iframe><a class="m-0 text-break" :href="'https://ipfs.io/ipfs/' + file"
-                                                            target="_blank">{{file}}<i
-                                                                class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a></td>
-                                                        <td>
-                                                            {{size/1000000}} MB
-                                                        </td>
-                                                        <td>
-                                                            <button type="button" class="btn btn-primary"
-                                                            v-if="publishPage" @click="addAsset(file, contract.i)"><i
-                                                                class="fa-solid fa-square-plus"></i></button>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                            <div v-if="hasFiles" style="background-color: #16191C;" class="p-2">
+                                
 
-                                <div v-for="contract in saccountapi.file_contracts" class="border-secondary my-2 p-3"
-                                    v-bind:class="{'border-bottom': hasFiles > 1}">
-                                    <div class="d-flex flex-wrap">
-                                        <div class="rounded bg-primary px-2 py-1 m-2 text-white" title="Contract Size">
+                                <div v-for="contract in saccountapi.file_contracts" class="bg-darkg rounded my-2 p-2"
+                                v-bind:class="{'border-bottom': index < hasFiles - 1 }">
+                                    <div class="d-flex flex-wrap align-items-center p-2">
+                                        <div class="rounded bg-info px-2 py-1 me-2 text-black" title="Contract Size">
                                             <i class="fa-solid fa-database fa-fw me-2"></i>{{contract.u/1000000}}
                                             MB
                                         </div>
-                                        <div class="btn-group ms-auto" role="group" aria-label="LARYNX Actions">
+                                        <div class="rounded bg-info px-2 py-1 me-2 text-black" title="Expiration">
+                                            <i class="fa-solid fa-clock fa-fw me-2"></i>{{exp_to_time(contract.e)}}
+                                        </div>
+                                        <div v-if="contract.s" class="rounded bg-warning px-2 py-1 me-2 text-black" title="Beneficiary">
+                                            <i class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>@{{slotDecode(contract.s, 0)}} ({{slotDecode(contract.s, 1)}}%)
+                                        </div>
+                                        <div class="btn-group ms-auto" role="group" aria-label="Contract Actions">
                                             <button v-if="contract.c == 3" type="button" class="btn btn-secondary"
                                                 @click=""><i
                                                     class="fa-solid fa-clock-rotate-left fa-fw me-2"></i>Extend</button>
@@ -1423,40 +1405,37 @@
                                                 :data-bs-target="'#' + replace(contract.i)"><i
                                                     class="fa-solid fa-magnifying-glass fa-fw me-2"></i>Details</button>
                                         </div>
-                                        <div class="w-100" v-if="contract.df">
-
-
-                                                <div class="d-flex align-items-center my-2" v-for="(size, file) in contract.df">
-                                                    <div class="me-2"><a class="m-0" :href="'https://ipfs.io/ipfs/' + file"
-                                                            target="_blank">{{file}}<i
-                                                                class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a>
-                                                    </div>
-                                                    <div class="ms-auto"><button type="button" class="btn btn-primary"
-                                                            v-if="publishPage" @click="addAsset(file, contract.i)"><i
-                                                                class="fa-solid fa-square-plus"></i></button></div>
-                                                </div>
-                                          
                                         </div>
-                                    </div>
-                                    <div class="collapse" :id="replace(contract.i)">
-                                        <ul class="text-start">
-                                            <li>Contract ID: {{contract.i}}</li>
-                                            <li>Size: {{contract.u/1000000}} MB</li>
-                                            <li>File Owner: @{{contract.t}}</li>
-                                            <li>Service Provider: @{{contract.b}}</li>
-                                            <li>Sponsor: @{{contract.f}}</li>
-                                            <li>Expiration: {{exp_to_time(contract.e)}}</li>
-                                            <li>Price: {{contract.r}} Broca</li>
-                                            <li>Redundancy: {{contract.p}}</li>
-                                            <li v-if="contract.s">Terms: {{slotDecode(contract.s, 1)}}%
-                                                Bennificiary to
-                                                @{{slotDecode(contract.s, 0)}}</li>
-                                            <li>Status: {{contract.c == 2 ? 'Waiting For Post' :
-                                                'Decentralizing'}}</li>
-                                            <li v-if="contract.n">Stored by:<p v-for="acc in contract.n">@{{acc}} </p>
-                                            </li>
-                                        </ul>
-                                    </div>
+                                        <div class="collapse" :id="replace(contract.i)">
+                                            <ul class="text-start">
+                                                <li>Contract ID: {{contract.i}}</li>
+                                                <li>Size: {{contract.u/1000000}} MB</li>
+                                                <li>File Owner: @{{contract.t}}</li>
+                                                <li>Service Provider: @{{contract.b}}</li>
+                                                <li>Sponsor: @{{contract.f}}</li>
+                                                <li>Expiration: {{exp_to_time(contract.e)}}</li>
+                                                <li>Price: {{contract.r}} Broca</li>
+                                                <li>Redundancy: {{contract.p}}</li>
+                                                <li v-if="contract.s">Terms: {{slotDecode(contract.s, 1)}}%
+                                                    Bennificiary to
+                                                    @{{slotDecode(contract.s, 0)}}</li>
+                                                <li>Status: {{contract.c == 2 ? 'Waiting For Post' :
+                                                    'Decentralizing'}}</li>
+                                                <li v-if="contract.n">Stored by:<p v-for="acc in contract.n">@{{acc}} </p>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div v-if="contract.df">
+                                            <div class="d-flex flex-wrap">
+                                                <div v-for="(size, file) in contract.df" class="d-flex flex-column p-2 rounded m-1" style="background-color: #000000;">
+                                                    <a :href="'https://ipfs.io/ipfs/' + file"
+                                                              target="_blank"><img :src="'https://ipfs.io/ipfs/' + file" class="img-fluid" style="max-width: 300px;" :alt="file"></a>
+                                                    <button type="button" class="btn btn-primary mt-2"
+                                                              v-if="publishPage" @click="addAsset(file, contract.i)"><i
+                                                                  class="fa-solid fa-square-plus me-2"></i>Add</button>
+                                                </div>
+                                            </div>
+                                        </div>
                                 </div>
                             </div>
                         </div>
