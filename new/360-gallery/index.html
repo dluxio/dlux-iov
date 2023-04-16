@@ -1367,9 +1367,9 @@
                                     yet created a contract, do that first. If you have created a contract, upload files
                                     and execute the contract. If your contract has expired, extend the contract.</p>
                             </div>
-                            <div v-if="hasFiles" class="rounded py-2 px-3 bg-darkg border border-secondary">
-
-                                <table class="table table-dark table-striped">
+                            <div v-if="hasFiles">
+                                <div class="table-responsive">
+                                <table class="table table-dark table-striped m-0">
                                     <thead>
                                         <th scope="col">File</th>
                                         <th scope="col">Size</th>
@@ -1379,16 +1379,14 @@
                                         <tr v-for="contract in saccountapi.file_contracts">
                                             <td colspan="3">
                                                 <div class="table-responsive">
-                                            <table class="table table-dark">
+                                            <table class="table table-dark m-0">
                                                 <tbody>
                                                     <tr v-for="(size, file) in contract.df">
-                                                        <td>
-                                                            <a class="m-0 text-break" :href="'https://ipfs.io/ipfs/' + file"
+                                                        <td><iframe :src="'https://ipfs.io/ipfs/' + file"></iframe><a class="m-0 text-break" :href="'https://ipfs.io/ipfs/' + file"
                                                             target="_blank">{{file}}<i
-                                                                class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a>
-                                                        </td>
+                                                                class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a></td>
                                                         <td>
-                                                            size
+                                                            {{size/1000000}} MB
                                                         </td>
                                                         <td>
                                                             <button type="button" class="btn btn-primary"
@@ -1403,7 +1401,7 @@
                                         </tr>
                                     </tbody>
                                 </table>
-
+                            </div>
                                 <div v-for="contract in saccountapi.file_contracts" class="border-secondary my-2 p-3"
                                     v-bind:class="{'border-bottom': hasFiles > 1}">
                                     <div class="d-flex flex-wrap">
