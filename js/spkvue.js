@@ -1047,6 +1047,7 @@ var app = new Vue({
           rx: rot[0],
           ry: rot[1],
           rz: rot[2],
+          f: 1
         })
       }
       this.dluxMock()
