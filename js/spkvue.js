@@ -1043,7 +1043,7 @@ var app = new Vue({
           type: type,
           contract: contract,
           thumbHash,
-          r: rot,
+          r: rot.join(' '),
           rx: rot[0],
           ry: rot[1],
           rz: rot[2],
