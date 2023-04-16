@@ -1368,7 +1368,7 @@
                                     and execute the contract. If your contract has expired, extend the contract.</p>
                             </div>
                             <div v-if="hasFiles">
-                                <div class="table-responsive">
+                                <div class="table-responsive d-none">
                                 <table class="table table-dark table-striped m-0">
                                     <thead>
                                         <th scope="col">File</th>
@@ -1402,6 +1402,7 @@
                                     </tbody>
                                 </table>
                             </div>
+
                                 <div v-for="contract in saccountapi.file_contracts" class="border-secondary my-2 p-3"
                                     v-bind:class="{'border-bottom': hasFiles > 1}">
                                     <div class="d-flex flex-wrap">
@@ -1418,16 +1419,12 @@
                                                     class="fa-solid fa-file-pen fa-fw me-2"></i>Finalize</button>
                                             <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                                                 disabled></button>
-                                            <button type="button" class="btn btn-secondary" @click=""><i
-                                                    class="fa-solid fa-pen-to-square fa-fw me-2"></i>Post</button>
-                                            <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                                                disabled></button>
                                             <button type="button" class="btn btn-secondary" data-bs-toggle="collapse"
                                                 :data-bs-target="'#' + replace(contract.i)"><i
                                                     class="fa-solid fa-magnifying-glass fa-fw me-2"></i>Details</button>
                                         </div>
                                         <div class="w-100" v-if="contract.df">
-                                            <h5>Files:</h5>
+
 
                                                 <div class="d-flex align-items-center my-2" v-for="(size, file) in contract.df">
                                                     <div class="me-2"><a class="m-0" :href="'https://ipfs.io/ipfs/' + file"
