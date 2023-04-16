@@ -1369,6 +1369,41 @@
                             </div>
                             <div v-if="hasFiles" class="rounded py-2 px-3 bg-darkg border border-secondary">
 
+                                <table class="table table-dark table-striped">
+                                    <thead>
+                                        <th scope="col">File</th>
+                                        <th scope="col">Size</th>
+                                        <th scope="col">Add</th>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="contract in saccountapi.file_contracts">
+                                            <td colspan="3">
+                                                <div class="table-responsive">
+                                            <table class="table table-dark">
+                                                <tbody>
+                                                    <tr v-for="(size, file) in contract.df">
+                                                        <td>
+                                                            <a class="m-0 text-break" :href="'https://ipfs.io/ipfs/' + file"
+                                                            target="_blank">{{file}}<i
+                                                                class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a>
+                                                        </td>
+                                                        <td>
+                                                            size
+                                                        </td>
+                                                        <td>
+                                                            <button type="button" class="btn btn-primary"
+                                                            v-if="publishPage" @click="addAsset(file, contract.i)"><i
+                                                                class="fa-solid fa-square-plus"></i></button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
                                 <div v-for="contract in saccountapi.file_contracts" class="border-secondary my-2 p-3"
                                     v-bind:class="{'border-bottom': hasFiles > 1}">
                                     <div class="d-flex flex-wrap">
@@ -1395,9 +1430,8 @@
                                         </div>
                                         <div class="w-100" v-if="contract.df">
                                             <h5>Files:</h5>
-                                            <div class="w-100" v-if="contract.df">
-                                                <h5>Files:</h5>
-                                                <div class="d-flex align-items-center" v-for="(size, file) in contract.df">
+
+                                                <div class="d-flex align-items-center my-2" v-for="(size, file) in contract.df">
                                                     <div class="me-2"><a class="m-0" :href="'https://ipfs.io/ipfs/' + file"
                                                             target="_blank">{{file}}<i
                                                                 class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a>
@@ -1406,7 +1440,7 @@
                                                             v-if="publishPage" @click="addAsset(file, contract.i)"><i
                                                                 class="fa-solid fa-square-plus"></i></button></div>
                                                 </div>
-                                            </div>
+                                          
                                         </div>
                                     </div>
                                     <div class="collapse" :id="replace(contract.i)">
