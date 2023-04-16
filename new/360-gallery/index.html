@@ -1465,14 +1465,12 @@ iframe {
                                                     <input type="text" v-model="asset.name" placeholder="Picture Name">
                                                     <input type="text" v-model="asset.thumbHash"
                                                         placeholder="Thumbnail IPFS Hash">
-                                                    <input type="text" v-model="asset.r"
-                                                        placeholder="0 0 0">
-                                                        <label for="rx">X Rotation (between -179 and 180):</label>
-                                                        <input type="range" id="rx" v-model="asset.rx" @change="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])" min="-179" max="180" step="1">
-                                                        <label for="ry">Y Rotation (between -179 and 180):</label>
-                                                        <input type="range" id="ry" v-model="asset.ry" @change="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])" min="-179" max="180" step="1">
-                                                        <label for="rz">Z Rotation (between -179 and 180):</label>
-                                                        <input type="range" id="rz" v-model="asset.rz" @change="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])" min="-179" max="180" step="1">
+                                                    <label for="rx">X Rotation (between -179 and 180):</label>
+                                                    <input type="range" id="rx" v-model="asset.rx" @change="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])" min="-179" max="180" step="1">
+                                                    <label for="ry">Y Rotation (between -179 and 180):</label>
+                                                    <input type="range" id="ry" v-model="asset.ry" @change="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])" min="-179" max="180" step="1">
+                                                    <label for="rz">Z Rotation (between -179 and 180):</label>
+                                                    <input type="range" id="rz" v-model="asset.rz" @change="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])" min="-179" max="180" step="1">
                                                     <button
                                                         @click="addAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, asset.r)">Refresh
                                                         dApp</button>
