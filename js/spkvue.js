@@ -1053,6 +1053,7 @@ var app = new Vue({
       return values[i]
     },
     focusAsset(cid, contract, name = '', thumbHash, type = 'ts', rot = ['0', '0', '0']) {
+      console.log(rot)
       var found = -1
       if(!cid)return false
       for (var i = 0; i < this.postCustom_json.assets.length; i++) {
