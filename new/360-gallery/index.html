@@ -52,7 +52,7 @@
         .hover-div:hover {background: #434851;}
 .v-enter-active,
 .v-leave-active {
-  transition: opacity .35s ease;
+  transition: opacity .0s ease;
 }
 
 .v-enter-from,
@@ -1150,9 +1150,9 @@
                                                             </div>
                                                         </div>
                                                         <!--no contracts message-->
-                                                        <div v-if="!numChannels">
-                                                            <p class="mt-2 mb-0">You have no available SPK Network
-                                                                contracts for file hosting. Create a hosting contract to
+                                                        <div v-if="!numChannels" class="p-3">
+                                                            <p class="m-0">You have no available SPK Network
+                                                                contracts for file hosting. Once your account is registered, create a hosting contract to
                                                                 upload files.</p>
                                                         </div>
                                                         <!--table of available contracts-->
