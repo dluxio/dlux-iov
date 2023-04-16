@@ -1052,8 +1052,7 @@ var app = new Vue({
       var values = value.split(delimter)
       return values[i]
     },
-    focusAsset(cid, contract, name = '', thumbHash, type = 'ts', rot = ['0', '0', '0']) {
-      console.log(rot)
+    focusAsset(cid, contract, name = '', thumbHash, type = 'ts') {
       var found = -1
       if(!cid)return false
       for (var i = 0; i < this.postCustom_json.assets.length; i++) {
@@ -1065,7 +1064,7 @@ var app = new Vue({
       if (found >= 0) {
         this.postCustom_json.assets[found].name = name || this.postCustom_json.assets[found].name
         this.postCustom_json.assets[found].thumbHash = thumbHash || cid
-        this.postCustom_json.assets[found].r = rot.join(' ')
+        this.postCustom_json.assets[found].r = `${this.postCustom_json.assets[found].rx || 0} ${this.postCustom_json.assets[found].ry || 0} ${this.postCustom_json.assets[found].rz || 0}`
         this.postCustom_json.assets[found].f = 1
       } else {
         this.postCustom_json.assets.push({
@@ -1074,7 +1073,7 @@ var app = new Vue({
           type: type,
           contract: contract,
           thumbHash,
-          r: rot.join(' '),
+          r: `${this.postCustom_json.assets[found].rx || 0} ${this.postCustom_json.assets[found].ry || 0} ${this.postCustom_json.assets[found].rz || 0}`,
           f: 1
         })
       }
