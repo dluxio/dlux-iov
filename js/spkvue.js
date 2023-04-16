@@ -1028,6 +1028,7 @@ var app = new Vue({
       var found = -1
       if(!cid)return false
       for (var i = 0; i < this.postCustom_json.assets.length; i++) {
+        this.postCustom_json.assets[i].f = 0
         if (this.postCustom_json.assets[i].hash == cid) {
           found = i
         }
@@ -1201,6 +1202,7 @@ var app = new Vue({
         delete customJsonArr[i][1].rx
         delete customJsonArr[i][1].ry
         delete customJsonArr[i][1].rz
+        if(!customJsonArr[i][1].f)delete customJsonArr[i][1].f
         this.postCustom_json[customJsonArr[i][0]] = customJsonArr[i][1]
       }
       this.postCustom_json.tags = ['dlux']
