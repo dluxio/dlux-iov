@@ -1486,6 +1486,8 @@
                                                     <input type="text" v-model="asset.name" placeholder="Picture Name">
                                                     <input type="text" v-model="asset.thumbHash"
                                                         placeholder="Thumbnail IPFS Hash">
+                                                    <input type="text" v-model="asset.r"
+                                                        placeholder="0 0 0">
                                                     <button
                                                         @click="addAsset(asset.hash, asset.contract, asset.name, asset.thumbHash)">Refresh
                                                         dApp</button>
