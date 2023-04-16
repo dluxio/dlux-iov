@@ -1197,6 +1197,9 @@ var app = new Vue({
     },
     post(customJsonArr) {
       for(var i = 0; i < customJsonArr.length; i++){
+        delete customJsonArr[i][1].rx
+        delete customJsonArr[i][1].ry
+        delete customJsonArr[i][1].rz
         this.postCustom_json[customJsonArr[i][0]] = customJsonArr[i][1]
       }
       this.postCustom_json.tags = ['dlux']
