@@ -1036,6 +1036,7 @@ var app = new Vue({
       if (found >= 0) {
         this.postCustom_json.assets[found].name = name || this.postCustom_json.assets[found].name
         this.postCustom_json.assets[found].thumbHash = thumbHash || cid
+        this.postCustom_json.assets[found].r = rot.join(' ')
       } else {
         this.postCustom_json.assets.push({
           hash: cid,
@@ -1044,6 +1045,37 @@ var app = new Vue({
           contract: contract,
           thumbHash,
           r: rot
+        })
+      }
+      this.dluxMock()
+    },
+    splitValues(value, i, delimter = ' ') {
+      var values = value.split(delimter)
+      return values[i]
+    },
+    focusAsset(cid, contract, name = '', thumbHash, type = 'ts', rot = ['0', '0', '0']) {
+      var found = -1
+      if(!cid)return false
+      for (var i = 0; i < this.postCustom_json.assets.length; i++) {
+        this.postCustom_json.assets[i].f = 0
+        if (this.postCustom_json.assets[i].hash == cid) {
+          found = i
+        }
+      }
+      if (found >= 0) {
+        this.postCustom_json.assets[found].name = name || this.postCustom_json.assets[found].name
+        this.postCustom_json.assets[found].thumbHash = thumbHash || cid
+        this.postCustom_json.assets[found].r = rot.join(' ')
+        this.postCustom_json.assets[found].f = 1
+      } else {
+        this.postCustom_json.assets.push({
+          hash: cid,
+          name: name,
+          type: type,
+          contract: contract,
+          thumbHash,
+          r: rot.join(' '),
+          f: 1
         })
       }
       this.dluxMock()
