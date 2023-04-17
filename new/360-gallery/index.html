@@ -1473,7 +1473,7 @@ iframe {
                                                 <div class="d-flex flex-column p-2 m-2">
                                                     <div class="row g-3 align-items-center">
                                                         <div class="col-auto me-auto">
-                                                            <label for="ry" class="col-form-label"><i class="fa-solid fa-arrows-left-right me-2"></i>Pan Y:</label>
+                                                            <label for="ry" class="col-form-label"><i class="fa-solid fa-arrows-left-right me-2"></i>Pan Y:{{asset.ry}}</label>
                                                         </div>
                                                         <div class="col-auto">
                                                             <input type="range" class="form-range" id="ry" v-model="asset.ry" @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])" min="-180" max="180" step="1">
@@ -1481,7 +1481,7 @@ iframe {
                                                     </div>
                                                     <div class="row g-3 align-items-center">
                                                         <div class="col-auto me-auto">
-                                                            <label for="rx" class="col-form-label"><i class="fa-solid fa-arrows-rotate me-2"></i>Roll X:</label>
+                                                            <label for="rx" class="col-form-label"><i class="fa-solid fa-arrows-rotate me-2"></i>Roll X:{{asset.rx}}</label>
                                                         </div>
                                                         <div class="col-auto">
                                                             <input type="range" class="form-range" id="rx" v-model="asset.rx" @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])" min="-180" max="180" step="1">
@@ -1489,7 +1489,7 @@ iframe {
                                                     </div>
                                                     <div class="row g-3 align-items-center">
                                                         <div class="col-auto me-auto">
-                                                            <label for="rz" class="col-form-label"><i class="fa-solid fa-arrows-rotate me-2"></i>Roll Z:</label>
+                                                            <label for="rz" class="col-form-label"><i class="fa-solid fa-arrows-rotate me-2"></i>Roll Z:{{asset.rz}}</label>
                                                         </div>
                                                         <div class="col-auto">
                                                             <input type="range" class="form-range" id="rz" v-model="asset.rz" @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])" min="-180" max="180" step="1">
