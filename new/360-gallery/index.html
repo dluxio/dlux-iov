@@ -1458,9 +1458,9 @@ iframe {
                                             <h6>Assets</h6>
                                             <div v-for="asset in postCustom_json.assets">
                                                 <form onsubmit="return false;">
-                                                    <p>CID: {{asset.hash}}</p>
+                                                    <p class="text-break">CID: {{asset.hash}}</p>
                                                     <p>In: {{asset.contract}}</p>
-                                            <div class="d-flex p-2 justify-content-between align-items-center">
+                                            <div class="d-flex p-2 justify-content-between align-items-center flex-wrap">
                                                 <div class="m-2">
                                                     <div class="input-group m-2">
                                                     <input type="text" class="form-control bg-darkg border-secondary text-white" v-model="asset.name" placeholder="Picture Name">
