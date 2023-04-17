@@ -1458,9 +1458,9 @@ iframe {
                                             <h6>Assets</h6>
                                             <div v-for="(asset, index) in postCustom_json.assets">
                                                 <form onsubmit="return false;">
-                                                    <p>CID: {{asset.hash}}</p>
+                                                    <p class="text-break">CID: {{asset.hash}}</p>
                                                     <p>In: {{asset.contract}}</p>
-                                            <div class="d-flex p-2 justify-content-between align-items-center">
+                                            <div class="d-flex p-2 justify-content-between align-items-center flex-wrap">
                                                 <div class="m-2">
                                                     <div class="input-group m-2">
                                                     <input type="text" class="form-control bg-darkg border-secondary text-white" v-model="asset.name" placeholder="Picture Name">
@@ -1473,7 +1473,7 @@ iframe {
                                                 <div class="d-flex flex-column p-2 m-2">
                                                     <div class="row g-3 align-items-center">
                                                         <div class="col-auto me-auto">
-                                                            <label for="ry" class="col-form-label"><i class="fa-solid fa-arrows-left-right me-2"></i>Pan:</label>
+                                                            <label for="ry" class="col-form-label"><i class="fa-solid fa-arrows-left-right me-2"></i>Pan Y:</label>
                                                         </div>
                                                         <div class="col-auto">
                                                             <input type="range" class="form-range" id="ry" v-model="asset.ry" @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])" min="-180" max="180" step="1">
@@ -1481,7 +1481,7 @@ iframe {
                                                     </div>
                                                     <div class="row g-3 align-items-center">
                                                         <div class="col-auto me-auto">
-                                                            <label for="rx" class="col-form-label"><i class="fa-solid fa-arrows-up-down me-2"></i>Tilt:</label>
+                                                            <label for="rx" class="col-form-label"><i class="fa-solid fa-arrows-rotate me-2"></i>Roll X:</label>
                                                         </div>
                                                         <div class="col-auto">
                                                             <input type="range" class="form-range" id="rx" v-model="asset.rx" @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])" min="-180" max="180" step="1">
@@ -1489,7 +1489,7 @@ iframe {
                                                     </div>
                                                     <div class="row g-3 align-items-center">
                                                         <div class="col-auto me-auto">
-                                                            <label for="rz" class="col-form-label"><i class="fa-solid fa-arrows-rotate me-2"></i>Roll:</label>
+                                                            <label for="rz" class="col-form-label"><i class="fa-solid fa-arrows-rotate me-2"></i>Roll Z:</label>
                                                         </div>
                                                         <div class="col-auto">
                                                             <input type="range" class="form-range" id="rz" v-model="asset.rz" @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])" min="-180" max="180" step="1">
