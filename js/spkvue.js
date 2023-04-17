@@ -1108,7 +1108,7 @@ var app = new Vue({
       if ((found >= 1 && dir == 'up') || (found < this.postCustom_json.assets.length - 1 && dir == 'down')) {
         const asset = this.postCustom_json.assets[found]
         this.postCustom_json.assets.splice(found, 1)
-        this.postCustom_json.assets.splice(dir == 'up' ? found - 1 : found, 0, asset)
+        this.postCustom_json.assets.splice(dir == 'up' ? found - 1 : found + 1, 0, asset)
       }
       this.dluxMock()
     },

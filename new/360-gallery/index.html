@@ -1456,7 +1456,7 @@ iframe {
                                             add them to your 360 post and they will appear here.</div>
                                         <div v-if="postCustom_json.assets.length">
                                             <h6>Assets</h6>
-                                            <div v-for="asset in postCustom_json.assets">
+                                            <div v-for="(asset, index) in postCustom_json.assets">
                                                 <form onsubmit="return false;">
                                                     <p>CID: {{asset.hash}}</p>
                                                     <p>In: {{asset.contract}}</p>
@@ -1497,6 +1497,7 @@ iframe {
                                                     </div>
                                                 </div>
                                                 <div class="d-flex flex-column">
+                                                    <div class="d-flex" style="justify-content: center;"><img :src="'https://ipfs.io/ipfs/' + asset.hash" class="img-fluid" style="max-width: 300px;" :alt="asset.hash"></div>
                                                 <div class="m-2 btn-group">
                                                     <button class="btn btn-primary"
                                                         @click="addAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, asset.r)">Refresh
@@ -1508,11 +1509,11 @@ iframe {
                                                         Asset</button>
                                                         <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                                                 disabled></button>
-                                                    <button class="btn btn-primary" @click="moveAsset(asset.hash, 'up')"><i
+                                                    <button class="btn btn-primary" :disabled="index == 0" @click="moveAsset(asset.hash, 'up')"><i
                                                             class="fa-solid fa-up-long"></i></button>
                                                             <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                                                 disabled></button>
-                                                    <button class="btn btn-primary" @click="moveAsset(asset.hash, 'down')"><i
+                                                    <button class="btn btn-primary" :disabled="index == postCustom_json.assets.length - 1" @click="moveAsset(asset.hash, 'down')"><i
                                                             class="fa-solid fa-down-long"></i></button>
                                                 </div>
                                                 <div class="form-check ms-auto me-auto">
