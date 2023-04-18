@@ -54,6 +54,17 @@
 .v-leave-active {
   transition: opacity .0s ease;
 }
+.scroll {
+    padding-top: 70px;
+    padding-bottom: 20px;
+}
+@media (min-width: 1200px) {
+.scroll {
+    overflow-y: scroll;
+    height: 100%;
+    
+}
+}
 iframe {
     width: 100%;
     height: 100%;
@@ -90,20 +101,21 @@ iframe {
 
 </head>
 
-<body class="d-flex flex-column h-100 padme-t70 text-center text-white">
+<body class="d-flex flex-column text-center text-white">
     <div id="app">
         <div>
             <nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event)"
                 @logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
                 :lapi="lapi" />
         </div>
-        <main role="main" class="p-3 flex-shrink-0">
+        <main role="main" class="px-3 flex-shrink-0">
             <section class="flex">
-                <div class="row w-100">
-                    <div class="text-center">
+                
+                <div class="row w-100" style="height: 100vh;">
+                    <div class="text-center d-none padme-t70">
                         <h2>DLUX 360 Image Gallery</h2>
                     </div>
-                    <div class="col-xl-6 my-2">
+                    <div class="col-xl-6 scroll">
                         <h3>Build</h3>
                         <div class="accordion text-start" id="360accordion">
                             <div class="accordion-item">
@@ -121,7 +133,7 @@ iframe {
                                                             <span class="input-group-text bg-darkg border-secondary text-white-50">@</span>
                                                             <input type="text"
                                                                 class="form-control bg-darkg border-secondary text-info"
-                                                                readonly id="username" v-model="account">
+                                                                readonly id="username" v-model="account" placeholder="Please login">
                                                         </div>
                                                     </div>
                                                     <div class="flex-column m-1">
@@ -1362,16 +1374,16 @@ iframe {
                                                     </div>
                                                 </div>
                                             </div>
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
+                        <div class="accordion-item">
+                        <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#executedContracts" aria-expanded="false" aria-controls="executedContracts">
                             Your Hosted Images
                         </button>
-                    </h2>
-                    <div id="executedContracts" class="accordion-collapse collapse">
+                        </h2>
+                        <div id="executedContracts" class="accordion-collapse collapse">
                         <div class="accordion-body p-0">
-                            <div v-if="!hasFiles">
+                            <div v-if="!hasFiles" class="p-3">
                                 <p class="m-0">You don't have any active SPK Network hosting contracts. If you have not
                                     yet created a contract, do that first. If you have created a contract, upload files
                                     and execute the contract. If your contract has expired, extend the contract.</p>
@@ -1436,9 +1448,9 @@ iframe {
                                         </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
+                            </div>
+                            </div>
+                         </div>
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -1597,7 +1609,7 @@ iframe {
                         </div>
 
                     </div>
-                    <div class="col-xl-6 my-2">
+                    <div class="col-xl-6 scroll">
                         <h3>Preview</h3>
                         <div class="accordion" id="previewCol">
                             <div class="accordion-item">
