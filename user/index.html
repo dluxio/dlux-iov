@@ -32,7 +32,7 @@
 let url = location.href.replace(/\/$/, '');
 if (location.hash) {
   const hash = url.split('#');
-  const currentTab = document.querySelector('#myTab a[href="#' + hash[1] + '"]');
+  const currentTab = document.querySelector('#menuItems a[href="#' + hash[1] + '"]');
   const curTab = new bootstrap.Tab(currentTab);
   curTab.show();
   url = location.href.replace(/\/#/, '#');
@@ -48,7 +48,7 @@ selectableTabList.forEach((selectableTab) => {
   selectableTab.addEventListener('click', function () {
     var newUrl;
     const hash = selectableTab.getAttribute('href');
-    if (hash == '#home-tab') {
+    if (hash == '#blog') {
       newUrl = url.split('#')[0];
     } else {
       newUrl = url.split('#')[0] + hash;
