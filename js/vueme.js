@@ -67,6 +67,10 @@ Vue.directive("scroll", {
   },
 });
 
+function showTab(str) {
+  $('#usertabs a[href="#'+str+'"]').tab("show");
+}
+
 // createApp({ // vue 3
 var app = new Vue({
   // vue 2
