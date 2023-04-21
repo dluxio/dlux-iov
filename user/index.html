@@ -26,37 +26,6 @@
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
     <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
     <script type="module" src="/js/vueme.js"></script>
-    <script>
-
-// deep linking - load tab on refresh
-let url = location.href.replace(/\/$/, '');
-if (location.hash) {
-  const hash = url.split('#');
-  const currentTab = document.querySelector('#menuItems a[href="#' + hash[1] + '"]');
-  const curTab = new bootstrap.Tab(currentTab);
-  curTab.show();
-  url = location.href.replace(/\/#/, '#');
-  history.replaceState(null, null, url);
-  setTimeout(() => {
-    window.scrollTop = 0;
-  }, 400);
-}
-// change url based on selected tab
-const selectableTabList = [].slice.call(document.querySelectorAll('a[data-bs-toggle="tab"]'));
-selectableTabList.forEach((selectableTab) => {
-  const selTab = new bootstrap.Tab(selectableTab);
-  selectableTab.addEventListener('click', function () {
-    var newUrl;
-    const hash = selectableTab.getAttribute('href');
-    if (hash == '#blog') {
-      newUrl = url.split('#')[0];
-    } else {
-      newUrl = url.split('#')[0] + hash;
-    }
-    history.replaceState(null, null, newUrl);
-  });
-});
-    </script>
 </head>
 
 <body class="d-flex flex-column h-100 padme-t70 text-white" id="explore">

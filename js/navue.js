@@ -745,7 +745,7 @@ export default {
             <img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light cover"></a>
 		        <a class="nav-link dropdown-toggle dropdown-bs-toggle text-white-50" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
 			      <span id="userName" class="me-1">{{user}}</span></a>
-            <ul id="menuItems" role="tablist" class="dropdown-menu dropdown-menu-dark dropdown-menu-end pt-0" aria-labelledby="userDropdown">
+            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end pt-0" aria-labelledby="userDropdown">
 			        <li class=""><a class="dropdown-item" :href="'/me#blog/'" onClick="showTab('blog')"><i class="fas fa-user fa-fw me-2"></i>Profile</a></li>
 			        <li class=""><a class="dropdown-item" :href="'/me#wallet/'" onClick="showTab('wallet')"><i class="fas fa-wallet fa-fw me-2"></i>Wallet</a></li>
 			        <li class=""><a class="dropdown-item" :href="'/me#inventory/'" onClick="showTab('inventory')"><i class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
