@@ -1120,6 +1120,10 @@ function reqsign(op, req) { //requests keychain to sign and broadcast
     })
 }
 
+function showTab(str) {
+    $('#usertabs a[href="#'+str+'"]').tab("show");
+}
+
 // function voteProp(props, user) {
 //     reqsign([
 //             "update_proposal_votes",
