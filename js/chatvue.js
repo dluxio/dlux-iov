@@ -44,7 +44,7 @@ export default {
                 model: 'gpt-3.5-turbo',
                 auth: {
                   username: this.uname || prompt('Username:'),
-                  password: pass || prompt('Password:'),
+                  password: this.pass || prompt('Password:'),
                 },
                 messages: [{
                     role: 'user',
