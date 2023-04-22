@@ -9,6 +9,8 @@ import Ratings from "/js/ratings.js";
 import VueShowdownComponent from "/js/showdown.js";
 import Tagify from "/js/tagifyvue.js";
 import MDE from "/js/mde.js";
+import ChatVue from "/js/chatvue.js";
+
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "",
@@ -836,6 +838,7 @@ var app = new Vue({
     "vue-showdown": VueShowdownComponent,
     "tagify": Tagify,
     "mde": MDE,
+    "chat-vue": ChatVue,
   },
   methods: {
     buildTags(){
