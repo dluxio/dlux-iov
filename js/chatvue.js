@@ -16,7 +16,7 @@ export default {
           <div class="ms-auto me-auto d-flex" style="max-width: 768px;">
             <div class="chat-icon">
               <img v-if="message.role == 'bot'" class="chatgpt-icon me-4 " src="/img/chatgpt-icon.png" />
-              <img v-if="message.role == 'user'" class="chatgpt-icon me-4" :src="'https://images.hive.blog/u/' + pageAccount + '/avatar'" />
+              <img v-if="message.role == 'user'" class="chatgpt-icon me-4" :src="'https://images.hive.blog/u/' + account + '/avatar'" />
             </div>
             <div class="chat-txt">
               {{message.text}}
