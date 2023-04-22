@@ -5,6 +5,7 @@ export default {
             inputMessage: '',
             uname: '',
             pass: '',
+            account: '',
         };
     },
     template: `
