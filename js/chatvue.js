@@ -5,8 +5,10 @@ export default {
             inputMessage: '',
             uname: '',
             pass: '',
-            account: '',
         };
+    },
+    props: {
+      account: '',
     },
     template: `
     <div class="content p-0 flex-grow-1 row position-relative">
