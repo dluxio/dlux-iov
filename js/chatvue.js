@@ -3,6 +3,8 @@ export default {
         return {
             messages: [],
             inputMessage: '',
+            uname: '',
+            pass: '',
         };
     },
     template: `
@@ -35,21 +37,15 @@ export default {
       </div>
     </div>
   </div>`,
-    created() {
-        // Log the available models to the console
-        axios.get('https://gpt.dlux.io/v1/models', {})
-            .then(response => {
-                console.log(response.data.data);
-            })
-            .catch(error => {
-                console.error(error);
-            });
-    },
     methods: {
         async sendMessage() {
 
             const response = await axios.post('https://gpt.dlux.io/v1/chat/completions', {
                 model: 'gpt-3.5-turbo',
+                auth: {
+                  username: this.uname || prompt('Username:'),
+                  password: pass || prompt('Password:'),
+                },
                 messages: [{
                     role: 'user',
                     content: this.inputMessage,
