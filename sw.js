@@ -20,7 +20,6 @@ var urlsToCache = [
   "/docs/README.md",
   "/docs/release.md",
   "/docs/token-actions.md",
-  "/hub/Crater.glb",
   "/hub/index.html",
   "/img/dex-vr-comp.jpg",
   "/img/dlux-icon-192.png",
