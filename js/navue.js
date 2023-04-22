@@ -892,7 +892,7 @@ export default {
         <div class="input-group">
           <span class="input-group-text bg-darkg border-dark text-white-50">@</span>
           <input v-model="filterUsers" autocapitalize="off" placeholder="search" @keyup="searchRecents()" class="text-center form-control bg-darkg border-dark text-info">
-          <span class="input-group-text bg-darkg border-dark"><a href="#/" @click="setValue('filterUsers', '')" v-if="filterUsers"><i class="fa-solid fa-xmark"></i></a></span>
+          <span class="input-group-text bg-darkg border-dark"><a href="#/" @click="filterUsers=''" v-if="filterUsers"><i class="fa-solid fa-xmark"></i></a></span>
         </div>
       </div>
       <div class="d-flex justify-content-between align-items-center m-3 pb-3 border-dark border-bottom" v-if="!filterUsers" v-for="name in recentUsers">
