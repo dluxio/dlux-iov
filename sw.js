@@ -37,7 +37,7 @@ var urlsToCache = [
   "/js/footvue.js",
   "/js/indexvue.js",
   "/js/navue.js",
-  "/js/nftvue.js",
+  "/js/nftsvue.js",
   "/js/toastvue.js",
   "/js/trading-vue.min.js",
   "/nfts/index.html",
