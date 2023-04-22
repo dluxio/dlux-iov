@@ -43,10 +43,6 @@ export default {
 
             const response = await axios.post('https://gpt.dlux.io/v1/chat/completions', {
                 model: 'gpt-3.5-turbo',
-                auth: {
-                  username: this.uname || this.setValue('uname'),
-                  password: this.pass || this.setValue('pass'),
-                },
                 messages: [{
                     role: 'user',
                     content: this.inputMessage,
@@ -57,6 +53,10 @@ export default {
             }, {
                 headers: {
                     'Content-Type': 'application/json',
+                },
+                auth: {
+                  username: this.uname || this.setValue('uname'),
+                  password: this.pass || this.setValue('pass'),
                 },
             });
 
