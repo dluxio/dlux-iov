@@ -37,9 +37,9 @@ export default {
   </div>`,
     created() {
         // Log the available models to the console
-        axios.get('https://api.openai.com/v1/models', {
+        axios.get('https://gpt.dlux.io/v1/models', {
             headers: {
-                'Authorization': 'Bearer API-KEY'
+                'Authorization': 'Something something'
             }
         })
             .then(response => {
@@ -52,7 +52,7 @@ export default {
     methods: {
         async sendMessage() {
 
-            const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+            const response = await axios.post('https://gpt.dlux.io/v1/chat/completions', {
                 // prompt: this.currentMessage,
                 max_tokens: 50,
                 temperature: 0.5,
@@ -64,7 +64,7 @@ export default {
             }, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer API-KEY'
+                    'Authorization': 'Something something'
                 },
             });
 

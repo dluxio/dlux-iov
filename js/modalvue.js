@@ -107,25 +107,25 @@ export default {
                       </div>
                       <div v-if="func == 'Election'">
                       <h3>Chosen Validators</h3>
-                        <ul class="sortable-list text-dark ms-auto me-auto">
-                          <div v-for="node in smarkets">
-                            <li v-if="typeof node.val_code == 'string'" class="item" draggable="true">
+                        <ul class="sortable-list  ms-auto me-auto">
+                          <div v-for="node in valWorkable">
+                            <li class="item" draggable="true">
                             <i class="fa-solid fa-grip-lines"></i>  
                             <div class="details">
                                 <span>@{{node.self}}</span>
                               </div>
-                              <i @click="sub(node)" class="fa-solid fa-minus"></i>
+                              <button @click="sub(node)" type="button"><i class="fa-solid fa-minus"></i></button>
                             </li>
                           </div>
                         </ul>
                       <h3>Validators</h3>
-                        <ul class="sortable-list text-dark ms-auto me-auto">
+                        <ul class="sortable-list ms-auto me-auto">
                           <div v-for="node in smarkets">
-                            <li v-if="typeof node.val_code == 'string'" class="item" draggable="true">
+                            <li v-if="isVal(node)">
                               <div class="details">
                                 <span>@{{node.self}}</span>
                               </div>
-                              <i @click="add(node)" class="fa-solid fa-plus"></i>
+                              <button @click="add(node)" type="button"><i class="fa-solid fa-plus"></i></button>
                             </li>
                           </div>
                         </ul>
@@ -218,6 +218,42 @@ export default {
           if (re.result.length) this.valid = true;
           else this.valid = false;
         });
+    },
+    isVal(node){
+      console.log(node, typeof node.val_code == 'string' ? true : false)
+      return typeof node.val_code == 'string' ? true : false
+    },
+    add(node){
+      this.valWorkable.push(node)
+    },
+    sub(node){
+      for(var acc in this.valWorkable){
+        if(acc == node.self){
+          this.valWorkable.splice(acc, 1)
+        }
+      }
+    },
+    move(node, index){
+      const old = node.i
+      for(var acc in this.valWorkable){
+        if(acc == node.self){
+          this.valWorkable[acc].i = index
+        }else if(old > index && this.valWorkable[acc].i >= index && this.valWorkable[acc].i < old){
+          this.valWorkable[acc].i = this.valWorkable[acc].i + 1
+        } else if (old < index && this.valWorkable[acc].i <= index && this.valWorkable[acc].i > old){
+          this.valWorkable[acc].i = this.valWorkable[acc].i - 1
+        }
+      }
+    },
+    buildWorkVotes(){
+      const arr = this.valvotes.split('')
+      for(var i = 0; i < arr.length; i++){
+        this.workVotes.push(`${arr[i]}${arr[i+1]}`)
+        i++
+      }
+    },
+    packageWorkVotes(){
+      this.valvotes = this.workVotes.join('')
     },
     formatNumber(t, n, r, e) {
       if (typeof t != "number") t = parseFloat(t);
@@ -660,6 +696,14 @@ export default {
           head_block: 0,
         };
       },
+    },
+    valvotes: {
+      default: ''
+    },
+    valWorkable:{
+      default: function () {
+        return [];
+      }
     },
     trigger: {
       default: "click",
