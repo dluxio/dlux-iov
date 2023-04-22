@@ -39,7 +39,8 @@ export default {
     </div>
   </div>`,
     methods: {
-      setValue(value) {this[value] = prompt(value);return this[value];},
+      setValuePrompt(value) {this[value] = prompt(value);return this[value];},
+      setValue(key, value) {this[key] = value},
         async sendMessage() {
 
             const response = await axios.post('https://gpt.dlux.io/v1/chat/completions', {
@@ -56,8 +57,8 @@ export default {
                     'Content-Type': 'application/json',
                 },
                 auth: {
-                  username: this.uname || this.setValue('uname'),
-                  password: this.pass || this.setValue('pass'),
+                  username: this.uname || this.setValuePrompt('uname'),
+                  password: this.pass || this.setValuePrompt('pass'),
                 },
             });
 
