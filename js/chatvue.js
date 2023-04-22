@@ -38,13 +38,14 @@ export default {
     </div>
   </div>`,
     methods: {
+      setValue(value) {this[value] = prompt(value);return this[value];},
         async sendMessage() {
 
             const response = await axios.post('https://gpt.dlux.io/v1/chat/completions', {
                 model: 'gpt-3.5-turbo',
                 auth: {
-                  username: this.uname || prompt('Username:'),
-                  password: this.pass || prompt('Password:'),
+                  username: this.uname || this.setValue('uname'),
+                  password: this.pass || this.setValue('pass'),
                 },
                 messages: [{
                     role: 'user',
