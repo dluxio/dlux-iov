@@ -37,11 +37,7 @@ export default {
   </div>`,
     created() {
         // Log the available models to the console
-        axios.get('https://gpt.dlux.io/v1/models', {
-            headers: {
-                'Authorization': 'Something something'
-            }
-        })
+        axios.get('https://gpt.dlux.io/v1/models', {})
             .then(response => {
                 console.log(response.data.data);
             })
@@ -64,7 +60,6 @@ export default {
             }, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Something something'
                 },
             });
 
