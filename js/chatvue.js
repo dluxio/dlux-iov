@@ -49,14 +49,14 @@ export default {
         async sendMessage() {
 
             const response = await axios.post('https://gpt.dlux.io/v1/chat/completions', {
-                // prompt: this.currentMessage,
-                max_tokens: 50,
-                temperature: 0.5,
-                model: 'gpt-3.5-turbo', // Use the GPT-3.5 Turbo model
+                model: 'gpt-3.5-turbo',
                 messages: [{
                     role: 'user',
                     content: this.inputMessage,
                 }],
+                temperature: 0.5,
+                n: 1,
+                max_tokens: 50,
             }, {
                 headers: {
                     'Content-Type': 'application/json',
