@@ -176,8 +176,8 @@
 <body class="text-white">
   <div id="app">
     <div>
-      <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
-        @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" />
+      <nav-vue @login="account=$event;getTokenUser($event);getHiveUser($event)"
+        @logout="account='';removeUser()" @ack="removeOp($event)" />
     </div>
     <main>
       <!-- START MAIN CONTAINER -->
