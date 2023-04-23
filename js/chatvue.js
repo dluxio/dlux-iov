@@ -7,6 +7,7 @@ export default {
       pass: '',
       responseTokens: 0,
       completionTokens: 0,
+      show_tokens: false,
     };
   },
   props: {
@@ -44,7 +45,7 @@ export default {
     },
     show_tokens: {
         default: false
-    }
+    },
   },
   template: `
     <div class="content p-0 flex-grow-1 row position-relative">
