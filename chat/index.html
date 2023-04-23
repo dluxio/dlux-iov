@@ -224,11 +224,11 @@
                   <p class="form-label">Temperature</p>
                 </div>
                 <div class="col-9">
-                  <input type="range" class="form-range w-100" min="0" max="1" step="0.1" id="gpt-temperature"
+                  <input type="range" class="form-range w-100" min="0" max="2" step="0.1" id="gpt-temperature"
                     name="gpt-temperature" v-model="temp" value="0" />
                 </div>
                 <div class="col-3 text-end">
-                  <output for="gpt-temperature">0</output>
+                  <output for="gpt-temperature">{{temp}}</output>
                 </div>
               </div>
 
@@ -238,16 +238,16 @@
                   <p class="form-label">Maximum Length</p>
                 </div>
                 <div class="col-9">
-                  <input type="range" class="form-range w-100" min="0" max="2048" step="13" id="gpt-max-len"
+                  <input type="range" class="form-range w-100" min="0" max="8000" step="13" id="gpt-max-len"
                     name="gpt-max-len" v-model="max_len" value="1500" />
                 </div>
                 <div class="col-3 text-end">
-                  <output for="gpt-max-len">1500</output>
+                  <output for="gpt-max-len">{{max_len}}</output>
                 </div>
               </div>
 
               <!-- START TOP P -->
-              <div class="row m-2">
+              <div class="row m-2" v-show="false">
                 <div class="col-12 m-2">
                   <p class="form-label">TopP</p>
                 </div>
@@ -266,11 +266,11 @@
                   <p class="form-label">Frequency Penalty</p>
                 </div>
                 <div class="col-9">
-                  <input type="range" class="form-range w-100" min="0" max="2" step="0.01" id="gpt-frequency"
+                  <input type="range" class="form-range w-100" min="-2" max="2" step="0.01" id="gpt-frequency"
                     name="gpt-frequency" value="1"  v-model="f_penalty"/>
                 </div>
                 <div class="col-3 text-end">
-                  <output for="gpt-frequency">1</output>
+                  <output for="gpt-frequency">{{f_penalty}}</output>
                 </div>
               </div>
 
@@ -280,11 +280,11 @@
                   <p class="form-label">Presence Penalty</p>
                 </div>
                 <div class="col-9">
-                  <input type="range" class="form-range w-100" min="0" max="2" step="0.01" id="gpt-precence"
+                  <input type="range" class="form-range w-100" min="-2" max="2" step="0.01" id="gpt-precence"
                     name="gpt-precence" value="0.5" v-model="p_penalty" />
                 </div>
                 <div class="col-3 text-end">
-                  <output for="gpt-precence">0.5</output>
+                  <output for="gpt-precence">{{p_penalty}}</output>
                 </div>
               </div>
 

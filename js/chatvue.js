@@ -124,16 +124,15 @@ export default {
           role: 'user', // required for v1/chat/completions endpoint
           content: this.inputMessage,
         }],
-        temperature: 1, // range is 0 to 2, higher is more random
-        top_p: 1, // recommended to use only temp or top_p, not both
-        n: 1, // number of completion choices returned
+        temperature: this.temp, // range is 0 to 2, higher is more random
+        n: this.n, // number of completion choices returned
         stream: false, // sends partial message deltas
         stop: null, // up to 4 sequences that stop the API
-        max_tokens: 50, // max input + completion tokens
-        presence_penalty: 0, // range is -2 to 2, positive promotes new topics
-        frequency_penalty: 0, // range is -2 to 2, positive decreases verbatim repeats
+        max_tokens: this.max_tokens, // max input + completion tokens
+        presence_penalty: this.p_penalty, // range is -2 to 2, positive promotes new topics
+        frequency_penalty: this.f_penalty, // range is -2 to 2, positive decreases verbatim repeats
         //logit_bias: [0.0], // range is -100 to 100, manipulates likelihood of selection and banning
-        user: '', // end user to monitor and detect abuse
+        user: this.account, // end user to monitor and detect abuse
       }, {
         headers: {
           'Content-Type': 'application/json',
