@@ -47,10 +47,19 @@ export default {
       <!-- START CHAT -->
         <div v-for="(message, index) in messages" :key="index" v-bind:class="{'gpt-chat-box': message.role == 'bot'}" class="row chat-box">
           <div class="ms-auto me-auto d-flex" style="max-width: 768px;">
-            <div class="chat-icon">
-              <img v-if="message.role == 'bot'" class="chatgpt-icon me-4 " src="/img/chatgpt-icon.png" />
-              <p v-if="responseTokens">{{ responseTokens }}</p>
-              <img v-if="message.role == 'user'" class="chatgpt-icon me-4" :src="'https://images.hive.blog/u/' + account + '/avatar'" />
+            <div class="chat-icon position-relative me-4" v-if="message.role == 'bot'">
+              <img class="chatgpt-icon" src="/img/chatgpt-icon.png" />
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {{ responseTokens }}
+                <span class="visually-hidden">Prompt Tokens</span>
+              </span>
+            </div>
+            <div class="chat-icon position-relative me-4" v-if="message.role == 'user'">
+              <img class="chatgpt-icon" :src="'https://images.hive.blog/u/' + account + '/avatar'" />
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              {{ completionTokens }}
+                <span class="visually-hidden">Prompt Tokens</span>
+              </span>
             </div>
             <div class="chat-txt">
               {{message.text}}
@@ -69,7 +78,7 @@ export default {
               </button></div>
           </form>
         </div>
-        <p class="text-center">Prompt: {{ promptTokens }} Tokens | Completion: ~{{ estimatedCompletionTokens }} Tokens</p>
+        <p class="text-center">Prompt: {{ estimatedPromptTokens }} Tokens | Completion: ~{{ estimatedCompletionTokens }} Tokens</p>
       </div>
     </div>
   </div>`,
@@ -78,33 +87,27 @@ export default {
     //this.getModels();
   },
   computed: {
-    promptTokens() {
+    estimatedPromptTokens() {
       return this.inputMessage.trim().split(' ').length;
     },
     estimatedCompletionTokens() {
       // Estimate the number of completion tokens based on the length of the prompt
-      const promptTokens = this.promptTokens;
+      const estimatedPromptTokens = this.estimatedPromptTokens;
       let estimatedTokens;
 
-      if (promptTokens <= 4) {
+      if (estimatedPromptTokens <= 4) {
         estimatedTokens = 10;
-      } else if (promptTokens <= 10) {
+      } else if (estimatedPromptTokens <= 10) {
         estimatedTokens = 25;
-      } else if (promptTokens <= 20) {
+      } else if (estimatedPromptTokens <= 20) {
         estimatedTokens = 50;
-      } else if (promptTokens <= 40) {
+      } else if (estimatedPromptTokens <= 40) {
         estimatedTokens = 75;
       } else {
         estimatedTokens = 100;
       }
 
       return estimatedTokens;
-    },
-    responseTokens() {
-      if (this.messages.length > 0 && this.messages[this.messages.length - 1].role === 'bot') {
-        return this.messages[this.messages.length - 1].tokens;
-      }
-      return null;
     },
     maxTokensInt() {
       return parseInt(this.max_tokens)
@@ -171,7 +174,8 @@ export default {
       this.inputMessage = '';
 
       // Get the number of tokens in the response
-      //const responseTokens = response.data.choices[0].tokens.length;
+      const responseTokens = response.data.usage.prompt_tokens;
+      const completionTokens = response.data.usage.completion_tokens;
       console.log(response.data.usage.prompt_tokens, response.data.usage.completion_tokens, response.data.usage.total_tokens)
 
       // Scroll to the bottom of the chat window
