@@ -7,7 +7,7 @@ export default {
       pass: '',
       promptTokens: 0,
       completionTokens: 0,
-      show_tokens: true,
+
     };
   },
   props: {
@@ -84,7 +84,7 @@ export default {
               </button></div>
           </form>
         </div>
-        <p class="text-center">Prompt: {{ estimatedPromptTokens }} Tokens | Completion: ~{{ estimatedCompletionTokens }} Tokens</p>
+        <p class="text-center">Estimated Tokens: ~{{ estimatedPromptTokens }} Prompt | ~{{ estimatedCompletionTokens }} Completion</p>
       </div>
     </div>
   </div>`,
