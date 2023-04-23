@@ -60,7 +60,7 @@ export default {
               </span>
             </div>
             <div class="chat-icon position-relative me-4" v-if="message.role == 'user'">
-              <img class="chatgpt-icon" :src="'https://images.hive.blog/u/' + account + '/avatar'" />
+              <img class="chatgpt-icon rounded" :src="'https://images.hive.blog/u/' + account + '/avatar'" />
               <span v-if="show_tokens" class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-dark">
               {{ message.tokens }}
                 <span class="visually-hidden">Completion Tokens</span>
