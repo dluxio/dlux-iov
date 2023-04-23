@@ -29,6 +29,7 @@ export default {
       default: 1000
     },
     max_tokens: {
+      type: Number,
       default: 50
     },
     top_p: {
