@@ -797,7 +797,7 @@ var app = new Vue({
         },
       },
       temp: 0.5,
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-3.5-turbo-0301',
       models: ['gpt-3.5-turbo','gpt-3.5-turbo-0301'],
       n: 1,
       max_len: 1000,
