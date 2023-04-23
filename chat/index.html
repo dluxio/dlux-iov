@@ -246,6 +246,20 @@
                 </div>
               </div>
 
+              <!-- START MAXIMUM TOKENS -->
+              <div class="row m-2">
+                <div class="col-12 m-2">
+                  <p class="form-label">Maximum Tokens</p>
+                </div>
+                <div class="col-9">
+                  <input type="range" class="form-range w-100" min="0" max="8000" step="13" id="gpt-max-token"
+                    name="gpt-max-token" v-model="max_tokens" value="1000" />
+                </div>
+                <div class="col-3 text-end">
+                  <output for="gpt-max-token">{{max_tokens}}</output>
+                </div>
+              </div>
+
               <!-- START TOP P -->
               <div class="row m-2" v-show="false">
                 <div class="col-12 m-2">
