@@ -59,7 +59,7 @@ export default {
                 max_tokens: 50, // max input + completion tokens
                 presence_penalty: 0, // range is -2 to 2, positive promotes new topics
                 frequency_penalty: 0, // range is -2 to 2, positive decreases verbatim repeats
-                logit_bias: [], // range is -100 to 100, manipulates likelihood of selection and banning
+                logit_bias: 0, // range is -100 to 100, manipulates likelihood of selection and banning
                 user: '', // end user to monitor and detect abuse
             }, {
                 headers: {
