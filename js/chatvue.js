@@ -7,7 +7,6 @@ export default {
       pass: '',
       promptTokens: 0,
       completionTokens: 0,
-      show_tokens: this.show_tokens,
     };
   },
   props: {
@@ -44,7 +43,7 @@ export default {
       default: 0.5
     },
     show_tokens: {
-      default: false
+      default: true
     },
   },
   template: `
