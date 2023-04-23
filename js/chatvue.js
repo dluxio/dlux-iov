@@ -113,7 +113,7 @@ export default {
     getModels(){
       fetch('https://api.openai.com/v1/models').then(response => response.json()).then(data => {
 
-        this.emits("data", data);
+        this.$emit("data", data);
       })
     },
     async sendMessage() {
