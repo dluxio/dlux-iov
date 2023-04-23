@@ -45,6 +45,9 @@ export default {
       setValue(key, value) {this[key] = value},
         async sendMessage() {
 
+             // Get the number of tokens in the prompt
+            const promptTokens = this.inputMessage.text.split(' ').length;
+
             const response = await axios.post('https://gpt.dlux.io/v1/chat/completions', {
                 model: 'gpt-3.5-turbo', // gpt-3.5-turbo or gpt-3.5-turbo-0301 for v1/chat/completions endpoint
                 messages: [{
@@ -94,6 +97,13 @@ export default {
 
             // Clear the input message
             this.inputMessage = '';
+
+            // Get the number of tokens in the response
+            const responseTokens = chatGptMessage.text.split(' ').length;
+
+            console.log(`Prompt tokens: ${promptTokens}`);
+            console.log(`Response tokens: ${responseTokens}`);
+
             // Scroll to the bottom of the chat window
             this.$nextTick(() => {
                 const container = this.$refs.chatContentArea;
