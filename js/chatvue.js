@@ -20,7 +20,7 @@ export default {
       default: ''
     },
     model: {
-      default: 'davinci'
+      default: 'gpt-3.5-turbo'
     },
     n: {
       default: 1
@@ -122,7 +122,7 @@ export default {
     async sendMessage() {
 
       const response = await axios.post('https://gpt.dlux.io/v1/chat/completions', {
-        model: 'gpt-3.5-turbo', // gpt-3.5-turbo or gpt-3.5-turbo-0301 for v1/chat/completions endpoint
+        model: this.model, // gpt-3.5-turbo or gpt-3.5-turbo-0301 for v1/chat/completions endpoint
         messages: [...this.messages,{
           role: 'user', // required for v1/chat/completions endpoint
           content: this.inputMessage,
