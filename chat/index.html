@@ -213,13 +213,7 @@
                 <label for="gpt-model" class="form-label">Model</label>
                 <select v-model="model" name="gpt-model" id="gpt-model"
                   class="border-secondary text-light gpt-model btn form-select text-start">
-                  <option value="davinci">davinci</option>
-                  <option value="curie">curie</option>
-                  <option value="babbage">babbage</option>
-                  <option value="ada">ada</option>
-                  <option value="davinci-instruct-beta">davinci-instruct-beta</option>
-                  <option value="curie-instruct-beta">curie-instruct-beta</option>
-                  <option value="davinci-codex">davinci-codex</option>
+                  <option v-for="model in models" value="model.id">{{model.id}}</option>
                 </select>
               </div>
 
