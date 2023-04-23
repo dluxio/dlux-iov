@@ -8,16 +8,38 @@ export default {
     };
   },
   props: {
-    account: '',
-    temp: '0.5',
-    model: 'davinci',
-    models: [],
-    n: 1,
-    max_len: 0,
-    max_tokens: 0,
-    top_p: 0,
-    f_penalty: 1,
-    p_penalty: '0.5',
+    models: {
+      default: function () {
+        return [];
+      },
+    },
+    account: {
+      default: ''
+    },
+    temp: {
+      default: ''
+    },
+    model: {
+      default: 'davinci'
+    },
+    n: {
+      default: 1
+    },
+    max_len: {
+      default: 1000
+    },
+    max_tokens: {
+      default: 50
+    },
+    top_p: {
+      default: 0
+    },
+    f_penalty: {
+      default: 1
+    },
+    p_penalty: {
+      default: 0.5
+    }
   },
   template: `
     <div class="content p-0 flex-grow-1 row position-relative">
