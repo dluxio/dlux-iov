@@ -9,6 +9,15 @@ export default {
   },
   props: {
     account: '',
+    temp: 0.5,
+    model: 'davinci',
+    models: [],
+    n: 1,
+    max_len: 0,
+    max_tokens: 0,
+    TopP: 0,
+    f_penalty: 1,
+    p_penalty: 0.5,
   },
   template: `
     <div class="content p-0 flex-grow-1 row position-relative">
@@ -42,6 +51,10 @@ export default {
       </div>
     </div>
   </div>`,
+  emits: ["data"],
+  mounted() {
+    this.getModels();
+  },
   computed: {
     promptTokens() {
       return this.inputMessage.trim().split(' ').length;

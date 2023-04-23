@@ -79,7 +79,7 @@ var app = new Vue({
   data() {
     return {
       fileRequests: {},
-      register:{
+      register: {
         amount: 0,
         api: '',
       },
@@ -125,9 +125,9 @@ var app = new Vue({
           "dlux"
         ]
       },
-      customJsonDefaults:{
+      customJsonDefaults: {
         "app": "dlux/0.0.10",
-        "vrHash":{
+        "vrHash": {
           "360viewer": "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16"
         }
       },
@@ -796,6 +796,15 @@ var app = new Vue({
           },
         },
       },
+      temp: 0.5,
+      model: 'davinci',
+      models: [],
+      n: 1,
+      max_len: 0,
+      max_tokens: 0,
+      top_p: 0,
+      f_penalty: 1,
+      p_penalty: 0.5,
       displayPosts: [],
       displayPost: {
         index: 0,
@@ -841,12 +850,12 @@ var app = new Vue({
     "chat-vue": ChatVue,
   },
   methods: {
-    buildTags(){
+    buildTags() {
       this.postTags = this.postTags.replace(/#/g, "");
     },
-    saveNodeSettings(){
+    saveNodeSettings() {
       var cja = {};
-      for (var i = 0; i < this.tokenGov.options.length; i++){
+      for (var i = 0; i < this.tokenGov.options.length; i++) {
         console.log(this.tokenGov.options[i].id, this.tokenGov.options[i].val)
         cja[this.tokenGov.options[i].id] = this.tokenGov.options[i].val
       }
@@ -889,7 +898,7 @@ var app = new Vue({
               this.File[i].name == event.currentTarget.File.name
               && this.File[i].size == event.currentTarget.File.size
             ) {
-              Hash.of(buffer.Buffer(fileContent), {unixfs: 'UnixFS'}).then((hash) => {
+              Hash.of(buffer.Buffer(fileContent), { unixfs: 'UnixFS' }).then((hash) => {
                 const dict = { hash, index: i, size: event.currentTarget.File.size, name: event.currentTarget.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
                 this.FileInfo[dict.name] = dict
                 // this.File[i].md5 = hash;
@@ -901,7 +910,7 @@ var app = new Vue({
             }
           }
         };
-        
+
         reader.readAsArrayBuffer(e.target.files[i])
         var File = e.target.files[i];
         File.progress = 0;
@@ -943,7 +952,7 @@ var app = new Vue({
           })
           //   }
           // }
-          
+
         };
         reader.readAsArrayBuffer(e.dataTransfer.files[i]);
         // var File = e.dataTransfer.files[i];
@@ -959,7 +968,7 @@ var app = new Vue({
     togglePin(index) {
       this.File[index].pin = !this.File[index].pin;
     },
-    petitionForContract(provider = 'dlux-io', ){
+    petitionForContract(provider = 'dlux-io',) {
       this.petitionStatus = 'Preparing'
       // fetch(`https://spktest.dlux.io/user_services/${provider}`)
       // .then(r=>r.json())
@@ -967,20 +976,20 @@ var app = new Vue({
       //   console.log(json)
       // })
       fetch(`https://ipfs.dlux.io/upload-contract?user=${this.account}`)
-      .then(r=>r.json())
-      .then(json =>{
-        this.petitionStatus = 'Sending'
-        console.log(json)
-        setTimeout(()=>{
-          this.getSapi()
-          this.petitionStatus = 'Recieved'
-        }, 7000)
-      })
+        .then(r => r.json())
+        .then(json => {
+          this.petitionStatus = 'Sending'
+          console.log(json)
+          setTimeout(() => {
+            this.getSapi()
+            this.petitionStatus = 'Recieved'
+          }, 7000)
+        })
     },
     deleteImg(index, name) {
       delete this.FileInfo[name]
       for (var item in this.FileInfo) {
-        if(this.FileInfo[item].index > index) {
+        if (this.FileInfo[item].index > index) {
           this.FileInfo[item].index--
         }
       }
@@ -1013,23 +1022,23 @@ var app = new Vue({
       var item = slot.split(',')
       switch (index) {
         case 1:
-          return parseFloat(item[1]/100).toFixed(2)
+          return parseFloat(item[1] / 100).toFixed(2)
           break;
         default:
           return item[0]
           break;
       } index
     },
-    broca_calc(last = '0,0'){
+    broca_calc(last = '0,0') {
       const last_calc = this.Base64toNumber(last.split(',')[1])
-    const accured = parseInt((parseFloat(this.sstats.broca_refill) * (this.sstats.head_block - last_calc))/(this.saccountapi.spk_power * 1000))
-    var total = parseInt(last.split(',')[0]) + accured
-    if(total > (this.saccountapi.spk_power * 1000))total = (this.saccountapi.spk_power * 1000)
-    return total
+      const accured = parseInt((parseFloat(this.sstats.broca_refill) * (this.sstats.head_block - last_calc)) / (this.saccountapi.spk_power * 1000))
+      var total = parseInt(last.split(',')[0]) + accured
+      if (total > (this.saccountapi.spk_power * 1000)) total = (this.saccountapi.spk_power * 1000)
+      return total
     },
-    addAsset(cid, contract, name = '', thumbHash, type = 'ts', rot = [ 0, 0, 0 ]) {
+    addAsset(cid, contract, name = '', thumbHash, type = 'ts', rot = [0, 0, 0]) {
       var found = -1
-      if(!cid)return false
+      if (!cid) return false
       for (var i = 0; i < this.postCustom_json.assets.length; i++) {
         this.postCustom_json.assets[i].f = 0
         if (this.postCustom_json.assets[i].hash == cid) {
@@ -1062,7 +1071,7 @@ var app = new Vue({
     },
     focusAsset(cid, contract, name = '', thumbHash, type = 'ts') {
       var found = -1
-      if(!cid)return false
+      if (!cid) return false
       for (var i = 0; i < this.postCustom_json.assets.length; i++) {
         this.postCustom_json.assets[i].f = 0
         if (this.postCustom_json.assets[i].hash == cid) {
@@ -1089,7 +1098,7 @@ var app = new Vue({
     },
     delAsset(cid) {
       var found = -1
-      if(!cid)return false
+      if (!cid) return false
       for (var i = 0; i < this.postCustom_json.assets.length; i++) {
         if (this.postCustom_json.assets[i].hash == cid) {
           found = i
@@ -1102,7 +1111,7 @@ var app = new Vue({
     },
     moveAsset(cid, dir = 'up') {
       var found = -1
-      if(!cid)return false
+      if (!cid) return false
       for (var i = 0; i < this.postCustom_json.assets.length; i++) {
         if (this.postCustom_json.assets[i].hash == cid) {
           found = i
@@ -1115,22 +1124,22 @@ var app = new Vue({
       }
       this.dluxMock()
     },
-    dluxMock(){
+    dluxMock() {
       // if (this.postCustom_json.assets) {
-			// 	for (var i = 0; i < this.postCustom_json.assets.length; i++) {
-			// 		this.postCustom_json.assets.push({
-			// 			hash: assets[i].hash,
-			// 			name: assets[i].path,
-			// 			size: assets[i].size,
-			// 			pin: true,
-			// 			type: "ts",
-			// 			thumbHash: assets[i].hash
-			// 		})
-			// 		if (!custom_json.Hash360) {
-			// 			custom_json.Hash360 = assets[i].hash
-			// 		}
-			// 	}
-			// }
+      // 	for (var i = 0; i < this.postCustom_json.assets.length; i++) {
+      // 		this.postCustom_json.assets.push({
+      // 			hash: assets[i].hash,
+      // 			name: assets[i].path,
+      // 			size: assets[i].size,
+      // 			pin: true,
+      // 			type: "ts",
+      // 			thumbHash: assets[i].hash
+      // 		})
+      // 		if (!custom_json.Hash360) {
+      // 			custom_json.Hash360 = assets[i].hash
+      // 		}
+      // 	}
+      // }
       var result = {
         author: this.account,
         permlink: this.postPermlink,
@@ -1140,27 +1149,27 @@ var app = new Vue({
         parent_author: '',
         parent_permlink: 'dlux',
       }
-				var target = this.$refs.aframePreview.contentWindow
-				var un = 'Guest'
-				if (this.account) { un = this.account }
-				target.postMessage({
-					'func': 'iAm',
-					'message': un,
-				}, "*");
-				target.postMessage({
-					'func': 'key',
-					'message': `markegiles/dlux-vr-tutorial-sm-test`,
-				}, "*");
-				target.postMessage({
-					'func': 'hiveState',
-					'message': result,
-				}, "*");
+      var target = this.$refs.aframePreview.contentWindow
+      var un = 'Guest'
+      if (this.account) { un = this.account }
+      target.postMessage({
+        'func': 'iAm',
+        'message': un,
+      }, "*");
+      target.postMessage({
+        'func': 'key',
+        'message': `markegiles/dlux-vr-tutorial-sm-test`,
+      }, "*");
+      target.postMessage({
+        'func': 'hiveState',
+        'message': result,
+      }, "*");
     },
-    addBen(acc, weight){
+    addBen(acc, weight) {
       weight = this.parseInt(weight)
       var found = -1
       var total = 0
-      if(!acc)return false
+      if (!acc) return false
       for (var i = 0; i < this.postBens.length; i++) {
         if (this.postBens[i].account == acc) {
           found = i
@@ -1168,7 +1177,7 @@ var app = new Vue({
           total += this.postBens[i].weight
         }
       }
-      if (total + weight > 10000)return
+      if (total + weight > 10000) return
       if (found >= 0) {
         this.postBens[found].weight = weight
       } else {
@@ -1188,9 +1197,9 @@ var app = new Vue({
         })
       }
     },
-    delBen(acc){
+    delBen(acc) {
       var found = -1
-      if(!acc)return false
+      if (!acc) return false
       for (var i = 0; i < this.postBens.length; i++) {
         if (this.postBens[i].account == acc) {
           found = i
@@ -1201,11 +1210,11 @@ var app = new Vue({
       }
     },
     post(customJsonArr) {
-      for(var i = 0; i < customJsonArr.length; i++){
+      for (var i = 0; i < customJsonArr.length; i++) {
         delete customJsonArr[i][1].rx
         delete customJsonArr[i][1].ry
         delete customJsonArr[i][1].rz
-        if(!customJsonArr[i][1].f)delete customJsonArr[i][1].f
+        if (!customJsonArr[i][1].f) delete customJsonArr[i][1].f
         this.postCustom_json[customJsonArr[i][0]] = customJsonArr[i][1]
       }
       this.postCustom_json.tags = ['dlux']
@@ -1241,15 +1250,15 @@ var app = new Vue({
                     this.postBens
                 }]]
           }]]
-          this.toSign = {
-            type: "raw",
-            op: operations,
-            key: `posting`,
-            msg: `Posting...`,
-            ops: ["checkAccount"],
-            api: this.apiFor(this.prefix),
-            txid: `Posting @${this.account}/${this.permlink}`,
-          }
+        this.toSign = {
+          type: "raw",
+          op: operations,
+          key: `posting`,
+          msg: `Posting...`,
+          ops: ["checkAccount"],
+          api: this.apiFor(this.prefix),
+          txid: `Posting @${this.account}/${this.permlink}`,
+        }
       }
     },
     getSetDetailsColors(script) {
@@ -1346,14 +1355,14 @@ var app = new Vue({
         };
       });
     },
-    selectContract(id, broker){  //needs PeerID of broker
+    selectContract(id, broker) {  //needs PeerID of broker
       this.contract.id = id
       fetch(`${sapi}/user_services/${broker}`)
-      .then(r=> r.json())
-      .then(res=>{
-        console.log(res)
-        this.contract.api = res.services.IPFS[Object.keys(res.services.IPFS)[0]].a
-      })
+        .then(r => r.json())
+        .then(res => {
+          console.log(res)
+          this.contract.api = res.services.IPFS[Object.keys(res.services.IPFS)[0]].a
+        })
     },
     signNUpload() {
       console.log(this.contract.id)
@@ -1383,7 +1392,7 @@ var app = new Vue({
           }
         }
       }
-      console.log({cids}, files)
+      console.log({ cids }, files)
       const ENDPOINTS = {
         UPLOAD: `${this.contract.api}/upload`,
         UPLOAD_STATUS: `${this.contract.api}/upload-check`,
@@ -1395,7 +1404,7 @@ var app = new Vue({
         contract: contract,
         cid: null,
         cids: `${cids.join(',')}`,
-        onAbort: (e,f) => {
+        onAbort: (e, f) => {
           console.log('options.onAbort')
           // const fileObj = files.get(file);
           this.File = []
@@ -1403,7 +1412,7 @@ var app = new Vue({
           this.fileRequests = {}
           // updateFileElement(fileObj);
         },
-        onProgress: (e,f) => {
+        onProgress: (e, f) => {
           console.log('options.onProgress', e, f, this.FileInfo, this.File, this.File[this.FileInfo[f.name].index])
           this.File[this.FileInfo[f.name].index].actions.pause = true
           this.File[this.FileInfo[f.name].index].actions.resume = false
@@ -1417,7 +1426,7 @@ var app = new Vue({
 
           // updateFileElement(fileObj);
         },
-        onError: (e,f) => {
+        onError: (e, f) => {
           console.log('options.onError', e, f)
           // const fileObj = files.get(file);
           this.FileInfo[f.name].status = '!!ERROR!!'
@@ -1428,14 +1437,14 @@ var app = new Vue({
           this.File[this.FileInfo[f.name].index].actions.cancel = true
           // updateFileElement(fileObj);
         },
-        onComplete: (e,f) => {
+        onComplete: (e, f) => {
           console.log('options.onComplete', e, f)
           this.File[this.FileInfo[f.name].index].actions.pause = false
           this.File[this.FileInfo[f.name].index].actions.resume = false
           this.File[this.FileInfo[f.name].index].actions.cancel = false
           this.FileInfo[f.name].progress = 1
           this.FileInfo[f.name].status = 'done'
-          
+
         }
       };
       const uploadFileChunks = (file, options) => {
@@ -1470,7 +1479,7 @@ var app = new Vue({
             ...e,
             loaded,
             total: file.size,
-            percentage: loaded  / file.size * 100
+            percentage: loaded / file.size * 100
           }, file);
         };
 
@@ -1588,11 +1597,11 @@ var app = new Vue({
         }
       };
       [...files]
-          .forEach(file => {
-            let options = defaultOptions
-            options.cid = file.cid
-            uploadFile(file, options, file.cid)
-          });
+        .forEach(file => {
+          let options = defaultOptions
+          options.cid = file.cid
+          uploadFile(file, options, file.cid)
+        });
       // return (files, options = defaultOptions) => {
       //   [...files]
       //     .forEach(file => {
@@ -1609,11 +1618,11 @@ var app = new Vue({
       //   };
       // }
     },
-    replace(string, char = ':'){
+    replace(string, char = ':') {
       return string.replaceAll(char, '_')
     },
-    appendFile(file, id){
-      if(this.files[file])delete this.files[file]
+    appendFile(file, id) {
+      if (this.files[file]) delete this.files[file]
       else this.files[file] = id
     },
     uploadAndTrack(name, contract) {
@@ -2452,7 +2461,7 @@ function tradeFTreject(setname, uid, callback){
           this.sstats.head_block = data.head_block;
           let validators = {}
           for (var node in this.sstats.nodes) {
-            if(this.sstats.nodes[node].val_code) {
+            if (this.sstats.nodes[node].val_code) {
               validators[node] = this.sstats.nodes[node]
               validators[node].votes = this.sstats.nodes[node].val_code
             }
@@ -2523,7 +2532,7 @@ function tradeFTreject(setname, uid, callback){
           this.multisig = data.multisig;
           this.jsontoken = data.jsontoken;
           this.TOKEN = data.jsontoken.toUpperCase();
-          if(data.votable)this.votable = data.votable;
+          if (data.votable) this.votable = data.votable;
           //location.hash = data.jsontoken;
           this.node = data.node;
           this.features = data.features ? data.features : this.features;
@@ -2734,7 +2743,7 @@ function tradeFTreject(setname, uid, callback){
           }
         });
     },
-    exp_to_time(exp = '0:0'){
+    exp_to_time(exp = '0:0') {
       return this.when([parseInt(exp.split(':')[0])])
     },
     getSpkStats() {
@@ -2751,13 +2760,13 @@ function tradeFTreject(setname, uid, callback){
           }
         });
     },
-    checkAccountKey(location){
+    checkAccountKey(location) {
       var val = ''
       var drill = this[location[0]]
-      for (var i = 1; i < location.length; i++){
-        if (typeof drill == 'string'){
+      for (var i = 1; i < location.length; i++) {
+        if (typeof drill == 'string') {
           val = drill
-          if (i != location.length - 1){
+          if (i != location.length - 1) {
             location = location.slice(0, i)
           }
           break
@@ -2766,7 +2775,7 @@ function tradeFTreject(setname, uid, callback){
       fetch(this.sapi + "/@" + val)
         .then((response) => response.json())
         .then((data) => {
-          if(data.pubKey == 'NA'){
+          if (data.pubKey == 'NA') {
             const accessor = `this.${location.join('.')}`
             eval(accessor + ' = "Account has not registered a public key yet."')
           }
@@ -3121,9 +3130,9 @@ function tradeFTreject(setname, uid, callback){
         return valid
       }
     },
-    publishPage:{
-      get(){
-        if(this.$refs.publishButton){
+    publishPage: {
+      get() {
+        if (this.$refs.publishButton) {
           return true
         } else {
           return false
@@ -3158,7 +3167,7 @@ function tradeFTreject(setname, uid, callback){
     isntDlux: {
       get() {
         for (var i = 0; i < this.postBens.length; i++) {
-          if(this.postBens[i].account == "dlux-io"){
+          if (this.postBens[i].account == "dlux-io") {
             return true
           }
         }
@@ -3172,12 +3181,12 @@ function tradeFTreject(setname, uid, callback){
           benned[this.postBens[i].account] = this.postBens[i].weight
         }
         for (var i = 0; i < this.saccountapi.file_contracts.length; i++) {
-          if(!benned[this.saccountapi.file_contracts[i].s.split(',')[0]] || benned[this.saccountapi.file_contracts[i].s.split(',')[0]] < this.saccountapi.file_contracts[i].s.split(',')[1]){
+          if (!benned[this.saccountapi.file_contracts[i].s.split(',')[0]] || benned[this.saccountapi.file_contracts[i].s.split(',')[0]] < this.saccountapi.file_contracts[i].s.split(',')[1]) {
             unbenned.push({
-              contract:this.saccountapi.file_contracts[i].i,
-              account:this.saccountapi.file_contracts[i].s.split(',')[0],
-              weight:this.saccountapi.file_contracts[i].s.split(',')[1]
-             })
+              contract: this.saccountapi.file_contracts[i].i,
+              account: this.saccountapi.file_contracts[i].s.split(',')[0],
+              weight: this.saccountapi.file_contracts[i].s.split(',')[1]
+            })
           }
         }
         return unbenned
