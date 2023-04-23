@@ -1,27 +1,4 @@
 export default {
-<<<<<<< HEAD
-    data() {
-        return {
-            messages: [],
-            inputMessage: '',
-            uname: '',
-            pass: '',
-        };
-    },
-    props: {
-      account: '',
-      temp: 0.5,
-      model: 'davinci',
-      models: [],
-      n: 1,
-      max_len: 0,
-      max_tokens: 0,
-      TopP: 0,
-      f_penalty: 1,
-      p_penalty: 0.5,
-    },
-    template: `
-=======
   data() {
     return {
       messages: [],
@@ -32,9 +9,17 @@ export default {
   },
   props: {
     account: '',
+    temp: 0.5,
+    model: 'davinci',
+    models: [],
+    n: 1,
+    max_len: 0,
+    max_tokens: 0,
+    TopP: 0,
+    f_penalty: 1,
+    p_penalty: 0.5,
   },
   template: `
->>>>>>> d22639f6fee6db2f6262438907adc235f94ceb02
     <div class="content p-0 flex-grow-1 row position-relative">
     <div class="chat-content-area d-flex flex-column" ref="chatContentArea">
       <!-- START CHAT -->
@@ -65,74 +50,13 @@ export default {
       </div>
     </div>
   </div>`,
-<<<<<<< HEAD
-    mounted() {
-      this.getModels();
-    },
-    methods: {
-      setValuePrompt(value) {this[value] = prompt(value);return this[value];},
-      setValue(key, value) {this[key] = value},
-      getModels(){
-        fetch('https://gpt.dlux.io/v1/models').then(res => res.json()).then(data => {
-          this.models = data;
-        })
-      },
-        async sendMessage() {
-
-            const response = await axios.post('https://gpt.dlux.io/v1/chat/completions', {
-                model: 'gpt-3.5-turbo',
-                messages: [{
-                    role: 'user',
-                    content: this.inputMessage,
-                }],
-                temperature: 0.5,
-                n: 1,
-                max_tokens: 50,
-            }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                auth: {
-                  username: this.uname || this.setValuePrompt('uname'),
-                  password: this.pass || this.setValuePrompt('pass'),
-                },
-            });
-
-            // Retrieve the message from the first choice and add it to the messages array
-            const message = response.data.choices[0].message.content.trim();
-            console.log(message); // Log the message to the console for debugging
-
-            // Add the user role to the messages array based on whether the input message is empty or not
-            if (this.inputMessage.trim() === '') {
-                this.messages.push({
-                    text: message,
-                    role: 'bot'
-                });
-            } else {
-                this.messages.push({
-                    text: this.inputMessage,
-                    role: 'user'
-                });
-                this.messages.push({
-                    text: message,
-                    role: 'bot'
-                });
-            }
-
-            // Clear the input message
-            this.inputMessage = '';
-            // Scroll to the bottom of the chat window
-            this.$nextTick(() => {
-                const container = this.$refs.chatContentArea;
-                container.scrollTop = container.scrollHeight;
-            });
-
-        },
-=======
+  emits: ["data"],
+  mounted() {
+    this.getModels();
+  },
   computed: {
     promptTokens() {
       return this.inputMessage.trim().split(' ').length;
->>>>>>> d22639f6fee6db2f6262438907adc235f94ceb02
     },
     estimatedCompletionTokens() {
       // Estimate the number of completion tokens based on the length of the prompt
