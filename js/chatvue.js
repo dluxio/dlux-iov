@@ -44,7 +44,7 @@ export default {
       default: 0.5
     },
     show_tokens: {
-      default: true
+      default: false
     },
   },
   template: `
