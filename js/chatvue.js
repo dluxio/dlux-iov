@@ -7,7 +7,7 @@ export default {
       pass: '',
       promptTokens: 0,
       completionTokens: 0,
-
+      show_tokens: this.show_tokens,
     };
   },
   props: {
