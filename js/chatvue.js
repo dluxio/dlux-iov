@@ -41,6 +41,9 @@ export default {
     },
     p_penalty: {
       default: 0.5
+    },
+    show_tokens: {
+        default: false
     }
   },
   template: `
@@ -51,14 +54,14 @@ export default {
           <div class="ms-auto me-auto d-flex" style="max-width: 768px;">
             <div class="chat-icon position-relative me-4" v-if="message.role == 'bot'">
               <img class="chatgpt-icon" src="/img/chatgpt-icon.png" />
-              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              <span v-if="show_tokens" class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-dark">
                 {{ responseTokens }}
                 <span class="visually-hidden">Prompt Tokens</span>
               </span>
             </div>
             <div class="chat-icon position-relative me-4" v-if="message.role == 'user'">
               <img class="chatgpt-icon" :src="'https://images.hive.blog/u/' + account + '/avatar'" />
-              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              <span v-if="show_tokens" class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-dark">
               {{ completionTokens }}
                 <span class="visually-hidden">Prompt Tokens</span>
               </span>

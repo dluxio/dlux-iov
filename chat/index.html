@@ -302,9 +302,20 @@
                 </div>
               </div>
 
+              <!-- START SHOW TOKENS -->
+              <div class="row m-2">
+                <div class="col-12">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="gpt-show-tokens" name="gpt-show-tokens" v-model="show-tokens">
+                    <label class="form-check-label" for="gpt-show-tokens">Show Response Tokens</label>
+                  </div>
+                </div>
+              </div>
+
+
               <hr />
 
-              <div class="row">
+              <div class="row d-none">
                 <div class="col-12">
                   <ul class="list-unstyled">
 
@@ -347,6 +358,7 @@
           :top_p="top_p"
           :f_penalty="f_penalty"
           :p_penalty="p_penalty"
+          :show_tokens="show_tokens"
           @data="models=$event"
         />
 
