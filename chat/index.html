@@ -329,7 +329,18 @@
         </div>
 
         <!-- START CONTENT -->
-        <chat-vue :account="account"/>
+        <chat-vue 
+          :account="account"
+          :temp="temp"
+          :model="model"
+          :n="1"
+          :max_len="max_len"
+          :max_tokens="max_tokens"
+          :top_p="TopP"
+          :f_penalty="f_penalty"
+          :p_penalty="p_penalty"
+          @data="models=$event"
+        />
 
       </div>
     </main>
