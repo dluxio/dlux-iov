@@ -5,6 +5,8 @@ export default {
       inputMessage: '',
       uname: '',
       pass: '',
+      responseTokens: 0,
+      completionTokens: 0,
     };
   },
   props: {
@@ -175,7 +177,9 @@ export default {
 
       // Get the number of tokens in the response
       const responseTokens = response.data.usage.prompt_tokens;
+      this.responseTokens = responseTokens;
       const completionTokens = response.data.usage.completion_tokens;
+      this.completionTokens = completionTokens;
       console.log(response.data.usage.prompt_tokens, response.data.usage.completion_tokens, response.data.usage.total_tokens)
 
       // Scroll to the bottom of the chat window
