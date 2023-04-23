@@ -101,7 +101,7 @@ export default {
         n: 1, // number of completion choices returned
         stream: false, // sends partial message deltas
         stop: null, // up to 4 sequences that stop the API
-        max_tokens: 50, // max input + completion tokens
+        max_tokens: 50, // max prompt + completion tokens
         presence_penalty: 0, // range is -2 to 2, positive promotes new topics
         frequency_penalty: 0, // range is -2 to 2, positive decreases verbatim repeats
         //logit_bias: [0.0], // range is -100 to 100, manipulates likelihood of selection and banning
@@ -141,8 +141,9 @@ export default {
       this.inputMessage = '';
 
       // Get the number of tokens in the response
-      const responseTokens = response.data.choices[0].tokens.length;
-
+      //const responseTokens = response.data.choices[0].tokens.length;
+      console.log(response.data.usage)
+      console.log(response.data)
       // Scroll to the bottom of the chat window
       this.$nextTick(() => {
         const container = this.$refs.chatContentArea;
