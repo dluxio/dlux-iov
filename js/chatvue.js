@@ -45,6 +45,25 @@ export default {
     promptTokens() {
       return this.inputMessage.trim().split(' ').length;
     },
+    estimatedCompletionTokens() {
+      // Estimate the number of completion tokens based on the length of the prompt
+      const promptTokens = this.promptTokens;
+      let estimatedTokens;
+
+      if (promptTokens <= 4) {
+        estimatedTokens = 10;
+      } else if (promptTokens <= 10) {
+        estimatedTokens = 25;
+      } else if (promptTokens <= 20) {
+        estimatedTokens = 50;
+      } else if (promptTokens <= 40) {
+        estimatedTokens = 75;
+      } else {
+        estimatedTokens = 100;
+      }
+
+      return estimatedTokens;
+    }
   },
   methods: {
     setValuePrompt(value) { this[value] = prompt(value); return this[value]; },
@@ -104,7 +123,6 @@ export default {
       // Get the number of tokens in the response
       const responseTokens = message.text.split(' ').length;
 
-      console.log(`Prompt tokens: ${promptTokens}`);
       console.log(`Response tokens: ${responseTokens}`);
 
       // Scroll to the bottom of the chat window
