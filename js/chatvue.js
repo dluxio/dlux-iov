@@ -29,7 +29,6 @@ export default {
       default: 1000
     },
     max_tokens: {
-      type: Number,
       default: 50
     },
     top_p: {
@@ -107,6 +106,9 @@ export default {
       }
       return null;
     },
+    maxTokensInt() {
+      return parseInt(this.max_tokens)
+    }
   },
   methods: {
     setValuePrompt(value) { this[value] = prompt(value); return this[value]; },
@@ -129,7 +131,7 @@ export default {
         n: this.n, // number of completion choices returned
         stream: false, // sends partial message deltas
         stop: null, // up to 4 sequences that stop the API
-        max_tokens: this.max_tokens, // max input + completion tokens
+        max_tokens: this.maxTokensInt, // max input + completion tokens
         presence_penalty: this.p_penalty, // range is -2 to 2, positive promotes new topics
         frequency_penalty: this.f_penalty, // range is -2 to 2, positive decreases verbatim repeats
         //logit_bias: [0.0], // range is -100 to 100, manipulates likelihood of selection and banning
