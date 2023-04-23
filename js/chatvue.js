@@ -1,4 +1,5 @@
 export default {
+<<<<<<< HEAD
     data() {
         return {
             messages: [],
@@ -20,6 +21,20 @@ export default {
       p_penalty: 0.5,
     },
     template: `
+=======
+  data() {
+    return {
+      messages: [],
+      inputMessage: '',
+      uname: '',
+      pass: '',
+    };
+  },
+  props: {
+    account: '',
+  },
+  template: `
+>>>>>>> d22639f6fee6db2f6262438907adc235f94ceb02
     <div class="content p-0 flex-grow-1 row position-relative">
     <div class="chat-content-area d-flex flex-column" ref="chatContentArea">
       <!-- START CHAT -->
@@ -46,9 +61,11 @@ export default {
               </button></div>
           </form>
         </div>
+        <p>Number of tokens in prompt: {{ promptTokens }}</p>
       </div>
     </div>
   </div>`,
+<<<<<<< HEAD
     mounted() {
       this.getModels();
     },
@@ -111,5 +128,99 @@ export default {
             });
 
         },
+=======
+  computed: {
+    promptTokens() {
+      return this.inputMessage.trim().split(' ').length;
+>>>>>>> d22639f6fee6db2f6262438907adc235f94ceb02
     },
+    estimatedCompletionTokens() {
+      // Estimate the number of completion tokens based on the length of the prompt
+      const promptTokens = this.promptTokens;
+      let estimatedTokens;
+
+      if (promptTokens <= 4) {
+        estimatedTokens = 10;
+      } else if (promptTokens <= 10) {
+        estimatedTokens = 25;
+      } else if (promptTokens <= 20) {
+        estimatedTokens = 50;
+      } else if (promptTokens <= 40) {
+        estimatedTokens = 75;
+      } else {
+        estimatedTokens = 100;
+      }
+
+      return estimatedTokens;
+    }
+  },
+  methods: {
+    setValuePrompt(value) { this[value] = prompt(value); return this[value]; },
+    setValue(key, value) { this[key] = value },
+    async sendMessage() {
+
+      const response = await axios.post('https://gpt.dlux.io/v1/chat/completions', {
+        model: 'gpt-3.5-turbo', // gpt-3.5-turbo or gpt-3.5-turbo-0301 for v1/chat/completions endpoint
+        messages: [{
+          role: 'user', // required for v1/chat/completions endpoint
+          content: this.inputMessage,
+        }],
+        temperature: 1, // range is 0 to 2, higher is more random
+        top_p: 1, // recommended to use only temp or top_p, not both
+        n: 1, // number of completion choices returned
+        stream: false, // sends partial message deltas
+        stop: null, // up to 4 sequences that stop the API
+        max_tokens: 50, // max input + completion tokens
+        presence_penalty: 0, // range is -2 to 2, positive promotes new topics
+        frequency_penalty: 0, // range is -2 to 2, positive decreases verbatim repeats
+        //logit_bias: [0.0], // range is -100 to 100, manipulates likelihood of selection and banning
+        user: '', // end user to monitor and detect abuse
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        auth: {
+          username: this.uname || this.setValuePrompt('uname'),
+          password: this.pass || this.setValuePrompt('pass'),
+        },
+      });
+
+      // Retrieve the message from the first choice and add it to the messages array
+      const message = response.data.choices[0].message.content.trim();
+      console.log(message); // Log the message to the console for debugging
+
+      // Add the user role to the messages array based on whether the input message is empty or not
+      if (this.inputMessage.trim() === '') {
+        this.messages.push({
+          text: message,
+          role: 'bot'
+        });
+      } else {
+        this.messages.push({
+          text: this.inputMessage,
+          role: 'user'
+        });
+        this.messages.push({
+          text: message,
+          role: 'bot'
+        });
+      }
+
+      // Clear the input message
+      this.inputMessage = '';
+
+      // Get the number of tokens in the response
+      const responseTokens = message.text.split(' ').length;
+
+      console.log(`Response tokens: ${responseTokens}`);
+
+      // Scroll to the bottom of the chat window
+      this.$nextTick(() => {
+        const container = this.$refs.chatContentArea;
+        container.scrollTop = container.scrollHeight;
+      });
+
+    },
+  },
+
 };

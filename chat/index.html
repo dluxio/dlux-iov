@@ -211,7 +211,7 @@
               <div class="row m-2">
 
                 <label for="gpt-model" class="form-label">Model</label>
-                <select name="gpt-model" id="gpt-model"
+                <select v-model="model" name="gpt-model" id="gpt-model"
                   class="border-secondary text-light gpt-model btn form-select text-start">
                   <option value="davinci">davinci</option>
                   <option value="curie">curie</option>
@@ -231,7 +231,7 @@
                 </div>
                 <div class="col-9">
                   <input type="range" class="form-range w-100" min="0" max="1" step="0.1" id="gpt-temperature"
-                    name="gpt-temperature" value="0" />
+                    name="gpt-temperature" v-model="temp" value="0" />
                 </div>
                 <div class="col-3 text-end">
                   <output for="gpt-temperature">0</output>
@@ -245,7 +245,7 @@
                 </div>
                 <div class="col-9">
                   <input type="range" class="form-range w-100" min="0" max="2048" step="13" id="gpt-max-len"
-                    name="gpt-max-len" value="1500" />
+                    name="gpt-max-len" v-model="max_len" value="1500" />
                 </div>
                 <div class="col-3 text-end">
                   <output for="gpt-max-len">1500</output>
@@ -259,7 +259,7 @@
                 </div>
                 <div class="col-9">
                   <input type="range" class="form-range w-100" min="0" max="1" step="0.01" id="gpt-topP" name="gpt-topP"
-                    value="0.07" />
+                    value="0.07"  v-model="TopP"/>
                 </div>
                 <div class="col-3 text-end">
                   <output for="gpt-topP">0.07</output>
@@ -273,7 +273,7 @@
                 </div>
                 <div class="col-9">
                   <input type="range" class="form-range w-100" min="0" max="2" step="0.01" id="gpt-frequency"
-                    name="gpt-frequency" value="1" />
+                    name="gpt-frequency" value="1"  v-model="f_penalty"/>
                 </div>
                 <div class="col-3 text-end">
                   <output for="gpt-frequency">1</output>
@@ -287,7 +287,7 @@
                 </div>
                 <div class="col-9">
                   <input type="range" class="form-range w-100" min="0" max="2" step="0.01" id="gpt-precence"
-                    name="gpt-precence" value="0.5" />
+                    name="gpt-precence" value="0.5" v-model="p_penalty" />
                 </div>
                 <div class="col-3 text-end">
                   <output for="gpt-precence">0.5</output>
