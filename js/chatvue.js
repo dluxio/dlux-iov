@@ -60,7 +60,7 @@ export default {
                 presence_penalty: 0, // range is -2 to 2, positive promotes new topics
                 frequency_penalty: 0, // range is -2 to 2, positive decreases verbatim repeats
                 logit_bias: null, // range is -100 to 100, manipulates likelihood of selection and banning
-                user: null, // end user to monitor and detect abuse
+                user: '', // end user to monitor and detect abuse
             }, {
                 headers: {
                     'Content-Type': 'application/json',
