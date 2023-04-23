@@ -7,7 +7,7 @@ export default {
       pass: '',
       promptTokens: 0,
       completionTokens: 0,
-      show_tokens: false,
+      show_tokens: true,
     };
   },
   props: {
@@ -42,6 +42,9 @@ export default {
     },
     p_penalty: {
       default: 0.5
+    },
+    show_tokens: {
+      default: true
     },
   },
   template: `
