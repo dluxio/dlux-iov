@@ -88,6 +88,11 @@ export default {
   methods: {
     setValuePrompt(value) { this[value] = prompt(value); return this[value]; },
     setValue(key, value) { this[key] = value },
+    getModels(){
+      fetch('https://gpt.dlux.io/v1/models').then(response => response.json()).then(data => {
+        this.emits("data", data);
+      })
+    },
     async sendMessage() {
 
       const response = await axios.post('https://gpt.dlux.io/v1/chat/completions', {
