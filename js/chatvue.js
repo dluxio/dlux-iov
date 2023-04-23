@@ -9,6 +9,15 @@ export default {
     },
     props: {
       account: '',
+      temp: 0.5,
+      model: 'davinci',
+      models: [],
+      n: 1,
+      max_len: 0,
+      max_tokens: 0,
+      TopP: 0,
+      f_penalty: 1,
+      p_penalty: 0.5,
     },
     template: `
     <div class="content p-0 flex-grow-1 row position-relative">
@@ -40,9 +49,17 @@ export default {
       </div>
     </div>
   </div>`,
+    mounted() {
+      this.getModels();
+    },
     methods: {
       setValuePrompt(value) {this[value] = prompt(value);return this[value];},
       setValue(key, value) {this[key] = value},
+      getModels(){
+        fetch('https://gpt.dlux.io/v1/models').then(res => res.json()).then(data => {
+          this.models = data;
+        })
+      },
         async sendMessage() {
 
             const response = await axios.post('https://gpt.dlux.io/v1/chat/completions', {
