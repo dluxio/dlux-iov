@@ -168,8 +168,9 @@ export default {
       this.inputMessage = '';
 
       // Get the number of tokens in the response
-      const responseTokens = response.data.choices[0].tokens.length;
-
+      //const responseTokens = response.data.choices[0].tokens.length;
+      console.log(response.data.usage)
+      console.log(response.data)
       // Scroll to the bottom of the chat window
       this.$nextTick(() => {
         const container = this.$refs.chatContentArea;
