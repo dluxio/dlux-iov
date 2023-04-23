@@ -797,7 +797,7 @@ var app = new Vue({
         },
       },
       temp: 0.5,
-      model: 'davinci',
+      model: 'gpt-3.5-turbo',
       models: [],
       n: 1,
       max_len: 0,
@@ -805,6 +805,7 @@ var app = new Vue({
       top_p: 0,
       f_penalty: 1,
       p_penalty: 0.5,
+      show_tokens: true,
       displayPosts: [],
       displayPost: {
         index: 0,
