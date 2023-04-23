@@ -129,7 +129,7 @@ export default {
     },
     async sendMessage() {
 
-      const apiurl = this.model === 'gpt-3.5-turbo' || 'gpt-3.5-turbo-0301' ? 'https://gpt.dlux.io/v1/chat/completions' : 'https://gpt.dlux.io/v1/completions';
+      const apiurl = 'https://gpt.dlux.io/v1/chat/completions';
 
       const response = await axios.post(this.apiurl, {
         model: this.model, // gpt-3.5-turbo or gpt-3.5-turbo-0301 for v1/chat/completions endpoint
