@@ -172,7 +172,7 @@ export default {
 
       // Get the number of tokens in the response
       //const responseTokens = response.data.choices[0].tokens.length;
-      console.log(response.data.usage.prompt_tokens + response.data.usage.completion_tokens + response.data.usage.total_tokens)
+      console.log(response.data.usage.prompt_tokens, response.data.usage.completion_tokens, response.data.usage.total_tokens)
 
       // Scroll to the bottom of the chat window
       this.$nextTick(() => {
