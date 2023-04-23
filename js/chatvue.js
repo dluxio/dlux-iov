@@ -5,9 +5,9 @@ export default {
       inputMessage: '',
       uname: '',
       pass: '',
-      responseTokens: 0,
+      promptTokens: 0,
       completionTokens: 0,
-      show_tokens: true,
+      show_tokens: false,
     };
   },
   props: {
@@ -53,7 +53,7 @@ export default {
             <div class="chat-icon position-relative me-4" v-if="message.role == 'bot'">
               <img class="chatgpt-icon" src="/img/chatgpt-icon.png" />
               <span v-if="show_tokens" class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-dark">
-                {{ responseTokens }}
+                {{ promptTokens }}
                 <span class="visually-hidden">Prompt Tokens</span>
               </span>
             </div>
@@ -61,7 +61,7 @@ export default {
               <img class="chatgpt-icon" :src="'https://images.hive.blog/u/' + account + '/avatar'" />
               <span v-if="show_tokens" class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-dark">
               {{ completionTokens }}
-                <span class="visually-hidden">Prompt Tokens</span>
+                <span class="visually-hidden">Completion Tokens</span>
               </span>
             </div>
             <div class="chat-txt">
@@ -177,8 +177,8 @@ export default {
       this.inputMessage = '';
 
       // Get the number of tokens in the response
-      const responseTokens = response.data.usage.prompt_tokens;
-      this.responseTokens = responseTokens;
+      const promptTokens = response.data.usage.prompt_tokens;
+      this.promptTokens = promptTokens;
       const completionTokens = response.data.usage.completion_tokens;
       this.completionTokens = completionTokens;
       console.log(response.data.usage.prompt_tokens, response.data.usage.completion_tokens, response.data.usage.total_tokens)
