@@ -253,7 +253,7 @@
                 </div>
                 <div class="col-9">
                   <input type="range" class="form-range w-100" min="0" max="1" step="0.01" id="gpt-topP" name="gpt-topP"
-                    value="0.07"  v-model="TopP"/>
+                    value="0.07"  v-model="top_p"/>
                 </div>
                 <div class="col-3 text-end">
                   <output for="gpt-topP">0.07</output>
@@ -330,7 +330,7 @@
           :n="1"
           :max_len="max_len"
           :max_tokens="max_tokens"
-          :top_p="TopP"
+          :top_p="top_p"
           :f_penalty="f_penalty"
           :p_penalty="p_penalty"
           @data="models=$event"
