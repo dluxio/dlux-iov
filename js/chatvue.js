@@ -56,14 +56,14 @@ export default {
             <div class="chat-icon position-relative me-4" v-if="message.role == 'bot'">
               <img class="chatgpt-icon" src="/img/chatgpt-icon.png" />
               <span v-if="show_tokens" class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-dark">
-                {{ promptTokens }}
+                {{ message.tokens }}
                 <span class="visually-hidden">Prompt Tokens</span>
               </span>
             </div>
             <div class="chat-icon position-relative me-4" v-if="message.role == 'user'">
               <img class="chatgpt-icon" :src="'https://images.hive.blog/u/' + account + '/avatar'" />
               <span v-if="show_tokens" class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-dark">
-              {{ completionTokens }}
+              {{ message.tokens }}
                 <span class="visually-hidden">Completion Tokens</span>
               </span>
             </div>
@@ -158,34 +158,36 @@ export default {
       // Retrieve the message from the first choice and add it to the messages array
       const message = response.data.choices[0].message.content.trim();
       console.log(message); // Log the message to the console for debugging
+      // Get the number of tokens in the response
+      const promptTokens = response.data.usage.prompt_tokens;
+      const completionTokens = response.data.usage.completion_tokens;
+      console.log(response.data.usage.prompt_tokens, response.data.usage.completion_tokens, response.data.usage.total_tokens)
+
 
       // Add the user role to the messages array based on whether the input message is empty or not
       if (this.inputMessage.trim() === '') {
         this.messages.push({
           text: message,
-          role: 'bot'
+          role: 'bot',
+          tokens: completionTokens,
         });
       } else {
         this.messages.push({
           text: this.inputMessage,
-          role: 'user'
+          role: 'user',
+          tokens: promptTokens,
         });
         this.messages.push({
           text: message,
-          role: 'bot'
+          role: 'bot',
+          tokens: completionTokens,
         });
       }
 
       // Clear the input message
       this.inputMessage = '';
 
-      // Get the number of tokens in the response
-      const promptTokens = response.data.usage.prompt_tokens;
-      this.promptTokens = promptTokens;
-      const completionTokens = response.data.usage.completion_tokens;
-      this.completionTokens = completionTokens;
-      console.log(response.data.usage.prompt_tokens, response.data.usage.completion_tokens, response.data.usage.total_tokens)
-
+      
       // Scroll to the bottom of the chat window
       this.$nextTick(() => {
         const container = this.$refs.chatContentArea;
