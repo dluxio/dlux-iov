@@ -117,15 +117,6 @@ export default {
     maxTokensInt() {
       return parseInt(this.max_tokens)
     },
-    apiURL() {
-      if (this.model === 'gpt-3.5-turbo' || 'gpt-3.5-turbo-0301') {
-        return 'https://gpt.dlux.io/v1/chat/completions';
-      } else if (this.model === 'text-davinci-003') {
-        return 'https://gpt.dlux.io/v1/completions';
-      } else {
-        return null;
-      }
-    },
   },
   methods: {
     setValuePrompt(value) { this[value] = prompt(value); return this[value]; },
@@ -138,9 +129,9 @@ export default {
     },
     async sendMessage() {
 
+      const apiurl = this.model === 'gpt-3.5-turbo' || 'gpt-3.5-turbo-0301' ? 'https://gpt.dlux.io/v1/chat/completions' : 'https://gpt.dlux.io/v1/completions';
 
-
-      const response = await axios.post(this.apiURL, {
+      const response = await axios.post(this.apiurl, {
         model: this.model, // gpt-3.5-turbo or gpt-3.5-turbo-0301 for v1/chat/completions endpoint
         messages: [{
           role: 'user', // required for v1/chat/completions endpoint
