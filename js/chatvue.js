@@ -8,16 +8,38 @@ export default {
     };
   },
   props: {
-    account: '',
-    temp: 0.5,
-    model: 'davinci',
-    models: [],
-    n: 1,
-    max_len: 0,
-    max_tokens: 0,
-    TopP: 0,
-    f_penalty: 1,
-    p_penalty: 0.5,
+    models: {
+      default: function () {
+        return [];
+      },
+    },
+    account: {
+      default: ''
+    },
+    temp: {
+      default: ''
+    },
+    model: {
+      default: 'davinci'
+    },
+    n: {
+      default: 1
+    },
+    max_len: {
+      default: 1000
+    },
+    max_tokens: {
+      default: 50
+    },
+    top_p: {
+      default: 0
+    },
+    f_penalty: {
+      default: 1
+    },
+    p_penalty: {
+      default: 0.5
+    }
   },
   template: `
     <div class="content p-0 flex-grow-1 row position-relative">
@@ -53,7 +75,7 @@ export default {
   </div>`,
   emits: ["data"],
   mounted() {
-    this.getModels();
+    //this.getModels();
   },
   computed: {
     promptTokens() {
@@ -88,24 +110,29 @@ export default {
   methods: {
     setValuePrompt(value) { this[value] = prompt(value); return this[value]; },
     setValue(key, value) { this[key] = value },
+    getModels(){
+      fetch('https://gpt.dlux.io/v1/models').then(response => response.json()).then(data => {
+
+        this.emits("data", data);
+      })
+    },
     async sendMessage() {
 
       const response = await axios.post('https://gpt.dlux.io/v1/chat/completions', {
         model: 'gpt-3.5-turbo', // gpt-3.5-turbo or gpt-3.5-turbo-0301 for v1/chat/completions endpoint
-        messages: [{
+        messages: [...this.messages,{
           role: 'user', // required for v1/chat/completions endpoint
           content: this.inputMessage,
         }],
-        temperature: 1, // range is 0 to 2, higher is more random
-        top_p: 1, // recommended to use only temp or top_p, not both
-        n: 1, // number of completion choices returned
+        temperature: this.temp, // range is 0 to 2, higher is more random
+        n: this.n, // number of completion choices returned
         stream: false, // sends partial message deltas
         stop: null, // up to 4 sequences that stop the API
-        max_tokens: 50, // max prompt + completion tokens
-        presence_penalty: 0, // range is -2 to 2, positive promotes new topics
-        frequency_penalty: 0, // range is -2 to 2, positive decreases verbatim repeats
+        max_tokens: this.max_tokens, // max input + completion tokens
+        presence_penalty: this.p_penalty, // range is -2 to 2, positive promotes new topics
+        frequency_penalty: this.f_penalty, // range is -2 to 2, positive decreases verbatim repeats
         //logit_bias: [0.0], // range is -100 to 100, manipulates likelihood of selection and banning
-        user: '', // end user to monitor and detect abuse
+        user: this.account, // end user to monitor and detect abuse
       }, {
         headers: {
           'Content-Type': 'application/json',
