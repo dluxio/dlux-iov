@@ -75,7 +75,7 @@ export default {
   </div>`,
   emits: ["data"],
   mounted() {
-    this.getModels();
+    //this.getModels();
   },
   computed: {
     promptTokens() {
