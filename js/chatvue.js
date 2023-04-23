@@ -99,7 +99,7 @@ export default {
             this.inputMessage = '';
 
             // Get the number of tokens in the response
-            const responseTokens = chatGptMessage.text.split(' ').length;
+            const responseTokens = message.text.split(' ').length;
 
             console.log(`Prompt tokens: ${promptTokens}`);
             console.log(`Response tokens: ${responseTokens}`);
@@ -112,4 +112,5 @@ export default {
 
         },
     },
+
 };
