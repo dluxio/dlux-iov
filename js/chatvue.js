@@ -37,7 +37,7 @@ export default {
               </button></div>
           </form>
         </div>
-        <p>Number of tokens in prompt: {{ promptTokens }}</p>
+        <p class="text-center">Number of tokens in prompt: {{ promptTokens }} | Estimated tokesn to complete: {{ estimatedCompletionTokens }}</p>
       </div>
     </div>
   </div>`,
