@@ -37,7 +37,7 @@ export default {
               </button></div>
           </form>
         </div>
-        <p class="text-center">Number of tokens in prompt: {{ promptTokens }} | Estimated tokesn to complete: {{ estimatedCompletionTokens }}</p>
+        <p class="text-center">Prompt: {{ promptTokens }} Tokens | Completion: ~{{ estimatedCompletionTokens }} Tokens</p>
       </div>
     </div>
   </div>`,
@@ -63,7 +63,13 @@ export default {
       }
 
       return estimatedTokens;
-    }
+    },
+    responseTokens() {
+      if (this.messages.length > 0 && this.messages[this.messages.length - 1].role === 'bot') {
+          return this.messages[this.messages.length - 1].tokens;
+      }
+      return null;
+  },
   },
   methods: {
     setValuePrompt(value) { this[value] = prompt(value); return this[value]; },
@@ -121,9 +127,7 @@ export default {
       this.inputMessage = '';
 
       // Get the number of tokens in the response
-      const responseTokens = message.text.split(' ').length;
-
-      console.log(`Response tokens: ${responseTokens}`);
+      const responseTokens = response.data.choices[0].tokens.length;
 
       // Scroll to the bottom of the chat window
       this.$nextTick(() => {
