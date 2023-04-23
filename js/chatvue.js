@@ -17,7 +17,7 @@ export default {
     max_tokens: 0,
     top_p: 0,
     f_penalty: 1,
-    p_penalty: 0.5,
+    p_penalty: '0.5',
   },
   template: `
     <div class="content p-0 flex-grow-1 row position-relative">
