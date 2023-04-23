@@ -75,7 +75,7 @@ export default {
   </div>`,
   emits: ["data"],
   mounted() {
-    this.getModels();
+    //this.getModels();
   },
   computed: {
     promptTokens() {
@@ -112,6 +112,7 @@ export default {
     setValue(key, value) { this[key] = value },
     getModels(){
       fetch('https://gpt.dlux.io/v1/models').then(response => response.json()).then(data => {
+
         this.emits("data", data);
       })
     },
