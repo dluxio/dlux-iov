@@ -106,14 +106,18 @@ export default {
                           </div>
                       </div>
                       <div v-if="func == 'Election'">
-                      <div v-if="valWorkable.length">
-                      <h3 class="mb-3">Chosen Validators</h3>
-                      <h5 class="m-0"> Node </h5> | <h5 class="m-0">Vote Weight</h5>
+                      <div v-if="valWorkable.length mb-3">
+                      <h3 class="mb-2">Chosen Validators</h3>
+                      <div class="d-flex mx-5 justify-content-between align-items-center border-bottom border-secondary py-2 mb-3">
+                      <button class="btn btn-success invisible" type="button">Save</button>
+                        <h5 class="m-0"> Node (Weight)</h5>
+                        <button class="btn btn-success" type="button">Save</button>
+                      </div> 
                         <ul class="mx-5 p-0">
                           <div v-for="(node, index) in valWorkable">
                             <li @dragstart="pick($event, node, index)" @dragover.prevent @dragenter.prevent @drop="move($event, node, index)" class="border border-secondary rounded d-flex align-items-center justify-content-between p-2 my-2 drop-zone" draggable="true" style="cursor: move;">
                               <i class="fa-solid fa-grip-lines"></i>  
-                              <h5 class="m-0">@{{node.self}}  |  {{formatNumber(((30 - index )/ 30)* 100, 1,  '.', ',')}}%</h5>
+                              <h5 class="m-0">@{{node.self}} ({{formatNumber(((30 - index )/ 30)* 100, 1,  '.', ',')}}%)</h5>
                               <button class="btn btn-primary" @click="sub(node)" type="button"><i class="fa-solid fa-minus"></i></button>
                             </li>
                           </div>
