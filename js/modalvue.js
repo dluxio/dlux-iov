@@ -223,12 +223,12 @@ export default {
       return typeof node.val_code == 'string' ? true : false
     },
     add(node){
-      this.valWorkable.push(node)
+      if (this.valWorkable.indexOf(node) == -1)this.valWorkable.push(node)
     },
     sub(node){
-      for(var acc in this.valWorkable){
-        if(acc == node.self){
-          this.valWorkable.splice(acc, 1)
+      for(var i = 0; i < this.valWorkable.length; i++){
+        if(this.valWorkable[i].self == node.self){
+          this.valWorkable.splice(i, 1)
         }
       }
     },
