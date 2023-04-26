@@ -106,7 +106,7 @@ export default {
                           </div>
                       </div>
                       <div v-if="func == 'Election'">
-                      <div v-if="valWorkable.length mb-3">
+                      <div v-if="valWorkable.length" class="mb-5">
                       <h3 class="mb-2">Chosen Validators</h3>
                       <div class="d-flex mx-5 justify-content-between align-items-center border-bottom border-secondary py-2 mb-3">
                       <button class="btn btn-success invisible" type="button">Save</button>
