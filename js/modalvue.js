@@ -107,7 +107,7 @@ export default {
                       </div>
                       <div v-if="func == 'Election'">
                       
-                      <h3 class="mb-2">Chosen Validators</h3>
+                      <h3 class="mb-2">Chosen Validators ({{valWorkable.length}}/30)</h3>
                       <div class="d-flex mx-5 justify-content-between align-items-center border-bottom border-secondary py-2 mb-3">
                         <button class="btn btn-success invisible" type="button">Save</button>
                         <h5 class="m-0"> Node (Weight)</h5>
@@ -133,7 +133,7 @@ export default {
                             <li v-if="isVal(node)" class="border border-secondary rounded d-flex align-items-center justify-content-between p-2 my-2">
                               <button class="btn btn-primary invisible" type="button"><i class="fa-solid fa-plus"></i></button>
                               <h5 class="m-0">@{{node.self}}</h5>
-                              <button class="btn btn-primary" @click="add(node)" type="button"><i class="fa-solid fa-plus"></i></button>
+                              <button :disable="valWorkable.length == 30" class="btn btn-primary" @click="add(node)" type="button"><i class="fa-solid fa-plus"></i></button>
                             </li>
                           </div>
                         </ul>
