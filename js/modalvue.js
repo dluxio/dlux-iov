@@ -809,7 +809,7 @@ export default {
   computed:{
     difVote: {
       get() {
-        return typeof this.saccounts.spk_vote == 'string' ? this.saccounts.spk_vote.split(',')[0] : '' == this.voteString ? false : true
+        return typeof this.current == 'string' ? this.current.split(',')[0] : '' == this.voteString ? false : true
       }
     },
     voteString: {
