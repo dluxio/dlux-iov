@@ -2477,7 +2477,7 @@ function tradeFTreject(setname, uid, callback){
         c = 0,
         t = 0,
         diff = (this.saccountapi.head_block ? this.saccountapi.head_block : this.sstats.lastIBlock) - this.saccountapi.spk_block;
-        console.log(diff, this.saccountapi.head_block , this.sstats.lastIBlock)
+        console.log(diff, this.saccountapi.head_block , this.sstats)
         if (!this.saccountapi.spk_block) {
         console.log("No SPK seconds");
         return 0;
