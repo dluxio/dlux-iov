@@ -110,7 +110,7 @@ export default {
                       <h3 class="mb-3">Chosen Validators</h3>
                         <ul class="mx-5 p-0">
                           <div v-for="(node, index) in valWorkable">
-                            <li @dragstart="pick($event, node, index)" @drop="move($event, node, index)" class="border border-secondary rounded d-flex align-items-center justify-content-between p-2 my-2" draggable="true" style="cursor: move;">
+                            <li @dragstart="pick($event, node, index)" @dragover.prevent @dragenter.prevent @drop="move($event, node, index)" class="border border-secondary rounded d-flex align-items-center justify-content-between p-2 my-2 drop-zone" draggable="true" style="cursor: move;">
                               <i class="fa-solid fa-grip-lines"></i>  
                               <h5 class="m-0">@{{node.self}}</h5>|<h5>{{formatNumber(((30 - index )/ 30)* 100, 1,  '.', ',')}}%</h5>
                               <button class="btn btn-primary" @click="sub(node)" type="button"><i class="fa-solid fa-minus"></i></button>
