@@ -1078,14 +1078,14 @@
                                             </div>
                                         </div>
                                         <!--no contracts message-->
-                                        <div v-show="!numChannels" class="p-3">
+                                        <div v-show="numChannels" class="p-3">
                                             <p class="m-0">You have no available SPK Network
                                                 contracts for file hosting. After your account is registered, create a
                                                 hosting contract to
                                                 upload files.</p>
                                         </div>
                                         <!--table of available contracts-->
-                                        <div v-show="numChannels" class="">
+                                        <div v-show="!numChannels" class="">
                                             <table
                                                 class="table table-dark table-striped table-hover text-center align-middle mb-0">
                                                 <thead>
