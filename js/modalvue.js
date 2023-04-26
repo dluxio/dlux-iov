@@ -112,7 +112,7 @@ export default {
                           <div v-for="(node, index) in valWorkable">
                             <li class="border border-secondary rounded d-flex align-items-center justify-content-between p-2 my-2" draggable="true" style="cursor: move;">
                               <i class="fa-solid fa-grip-lines"></i>  
-                              <h5 class="m-0">@{{node.self}}</h5>|<h5>{{formatNumber(((30 - index )/ 30)* 100, '.', '', 2)}}%</h5>
+                              <h5 class="m-0">@{{node.self}}</h5>|<h5>{{formatNumber(((30 - index )/ 30)* 100, 1,  ',', '.')}}%</h5>
                               <button class="btn btn-primary" @click="sub(node)" type="button"><i class="fa-solid fa-minus"></i></button>
                             </li>
                           </div>
