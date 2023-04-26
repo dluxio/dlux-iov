@@ -110,7 +110,7 @@ export default {
                       <h3 class="mb-3">Chosen Validators</h3>
                         <ul class="mx-5 p-0">
                           <div v-for="(node, index) in valWorkable">
-                            <li @dragstart="log($event, node)" @drop="log($event, node)" class="border border-secondary rounded d-flex align-items-center justify-content-between p-2 my-2" draggable="true" style="cursor: move;">
+                            <li @dragstart="pick($event, node, index)" @drop="move($event, node, index)" class="border border-secondary rounded d-flex align-items-center justify-content-between p-2 my-2" draggable="true" style="cursor: move;">
                               <i class="fa-solid fa-grip-lines"></i>  
                               <h5 class="m-0">@{{node.self}}</h5>|<h5>{{formatNumber(((30 - index )/ 30)* 100, 1,  '.', ',')}}%</h5>
                               <button class="btn btn-primary" @click="sub(node)" type="button"><i class="fa-solid fa-minus"></i></button>
@@ -202,8 +202,8 @@ export default {
   <slot name="trigger"></slot>
 </div>`,
   methods: {
-    log(event){
-      console.log(event)
+    log(event, item){
+      console.log(event, item)
     },
     accountCheck() {
       fetch("https://anyx.io", {
@@ -235,7 +235,14 @@ export default {
         }
       }
     },
-    move(node, index){
+    pick(evt, node){
+      console.log(evt, node)
+      evt.dataTransfer.dropEffect = 'move'
+      evt.dataTransfer.effectAllowed = 'move'
+      evt.dataTransfer.setData('itemID', node.self)
+    },
+    move(evt, node, index){
+      console.log(evt, node, index)
       const old = node.i
       for(var acc in this.valWorkable){
         if(acc == node.self){
