@@ -235,24 +235,15 @@ export default {
         }
       }
     },
-    pick(evt, node){
-      console.log(evt, node)
+    pick(evt, node, index){
+      console.log(evt, node, index)
       evt.dataTransfer.dropEffect = 'move'
       evt.dataTransfer.effectAllowed = 'move'
-      evt.dataTransfer.setData('itemID', node.self)
+      evt.dataTransfer.setData('itemID', index)
     },
     move(evt, node, index){
       console.log(evt, node, index)
-      const old = node.i
-      for(var acc in this.valWorkable){
-        if(acc == node.self){
-          this.valWorkable[acc].i = index
-        }else if(old > index && this.valWorkable[acc].i >= index && this.valWorkable[acc].i < old){
-          this.valWorkable[acc].i = this.valWorkable[acc].i + 1
-        } else if (old < index && this.valWorkable[acc].i <= index && this.valWorkable[acc].i > old){
-          this.valWorkable[acc].i = this.valWorkable[acc].i - 1
-        }
-      }
+      this.valWorkable.splice(index, 0, this.valWorkable.splice(evt.dataTransfer.getData('itemID'), 1)[0])
     },
     buildWorkVotes(){
       const arr = this.valvotes.split('')
