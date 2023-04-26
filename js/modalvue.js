@@ -109,9 +109,9 @@ export default {
                       
                       <h3 class="mb-2">Chosen Validators</h3>
                       <div class="d-flex mx-5 justify-content-between align-items-center border-bottom border-secondary py-2 mb-3">
-                        <button v-show="difVote" class="btn btn-success invisible" type="button">Save</button>
+                        <button class="btn btn-success invisible" type="button">Save</button>
                         <h5 class="m-0"> Node (Weight)</h5>
-                        <button class="btn btn-success" type="button">Save</button>
+                        <button v-show="difVote" class="btn btn-success" type="button" @click="valVote()">Save</button>
                       </div>
                       <div class="mb-5">
                       <div v-if="!valWorkable.length">
@@ -213,6 +213,23 @@ export default {
   methods: {
     log(event, item){
       console.log(event, item)
+    },
+    valVote(){
+      var op 
+      if(this.difVote)op = {
+        type: "cja",
+        cj: {
+          votes: this.voteString,
+        },
+        id: `${this.spkprefix}_val_vote`,
+        msg: `Voting for Validators...`,
+        ops: ["getSapi"],
+        api: "https://spkinstant.hivehoneycomb.com",
+        txid: "val_vote",
+      };
+      if (op) {
+        this.$emit("modalsign", op);
+      }
     },
     accountCheck() {
       fetch("https://anyx.io", {
