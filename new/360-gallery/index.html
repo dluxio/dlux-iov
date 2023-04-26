@@ -731,14 +731,13 @@
                                                                         <modal-vue v-if="isNode" type="power"
                                                                             token="LARYNX" func="Register a Validator"
                                                                             :balance="saccountapi.balance"
-                                                                            :min="isValidator ? '0.001' :sstats.IPFSRate/1000"
+                                                                            :min="isValidator ? '0.001' : sstats.IPFSRate/1000"
                                                                             :account="account"
                                                                             @modalsign="sendIt($event)">
                                                                             <button class="dropdown-item" slot="trigger"
                                                                                 type="button"><i
                                                                                     class="fa fa-network-wired fa-fw me-2"></i>
-                                                                                {{isValidator ? 'Burn LARYNX to your
-                                                                                Validator' : 'Register a Validator'}}
+                                                                                {{isValidator ? 'Burn LARYNX to your Validator' : 'Register a Validator'}}
                                                                             </button>
                                                                         </modal-vue>
                                                                         <div class="dropdown-divider">
