@@ -170,96 +170,6 @@
     [data-bs-toggle="collapse"]:not(.collapsed) .if-collapsed {
       display: none;
     }
-  
-    .custom-range {
-  height: 38px;
-  -webkit-appearance: none;
-  margin: 10px 0;
-  width: 100%;
-}
-.custom-range:focus {
-  outline: none;
-}
-.custom-range::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 10px;
-  cursor: pointer;
-  animate: 0.2s;
-  box-shadow: 1px 1px 1px #000000;
-  background: #3071A9;
-  border-radius: 5px;
-  border: 1px solid #000000;
-}
-.custom-range::-webkit-slider-thumb {
-  box-shadow: 1px 1px 1px #000000;
-  border: 1px solid #000000;
-  height: 30px;
-  width: 15px;
-  border-radius: 5px;
-  background: #FFFFFF;
-  cursor: pointer;
-  -webkit-appearance: none;
-  margin-top: -11px;
-}
-.custom-range:focus::-webkit-slider-runnable-track {
-  background: #3071A9;
-}
-.custom-range::-moz-range-track {
-  width: 100%;
-  height: 10px;
-  cursor: pointer;
-  animate: 0.2s;
-  box-shadow: 1px 1px 1px #000000;
-  background: #3071A9;
-  border-radius: 5px;
-  border: 1px solid #000000;
-}
-.custom-range::-moz-range-thumb {
-  box-shadow: 1px 1px 1px #000000;
-  border: 1px solid #000000;
-  height: 30px;
-  width: 15px;
-  border-radius: 5px;
-  background: #FFFFFF;
-  cursor: pointer;
-}
-.custom-range::-ms-track {
-  width: 100%;
-  height: 10px;
-  cursor: pointer;
-  animate: 0.2s;
-  background: transparent;
-  border-color: transparent;
-  color: transparent;
-}
-.custom-range::-ms-fill-lower {
-  background: #3071A9;
-  border: 1px solid #000000;
-  border-radius: 10px;
-  box-shadow: 1px 1px 1px #000000;
-}
-.custom-range::-ms-fill-upper {
-  background: #3071A9;
-  border: 1px solid #000000;
-  border-radius: 10px;
-  box-shadow: 1px 1px 1px #000000;
-}
-.custom-range::-ms-thumb {
-  margin-top: 1px;
-  box-shadow: 1px 1px 1px #000000;
-  border: 1px solid #000000;
-  height: 30px;
-  width: 15px;
-  border-radius: 5px;
-  background: #FFFFFF;
-  cursor: pointer;
-}
-.custom-range:focus::-ms-fill-lower {
-  background: #3071A9;
-}
-.custom-range:focus::-ms-fill-upper {
-  background: #3071A9;
-}
 
   </style>
 </head>
@@ -329,7 +239,7 @@
                   <p class="form-label">Maximum Length</p>
                 </div>
                 <div class="col-9">
-                  <input type="range" class="form-range w-100" min="0" max="8000" step="13" id="gpt-max-len"
+                  <input type="range" class="custom-range w-100" min="0" max="8000" step="13" id="gpt-max-len"
                     name="gpt-max-len" v-model="max_len" value="1500" />
                 </div>
                 <div class="col-3 text-end">
@@ -343,7 +253,7 @@
                   <p class="form-label">Maximum Tokens</p>
                 </div>
                 <div class="col-9">
-                  <input type="range" class="form-range w-100" min="1" max="4096" step="13" id="gpt-max-token"
+                  <input type="range" class="custom-range w-100" min="1" max="4096" step="13" id="gpt-max-token"
                     name="gpt-max-token" v-model="max_tokens" value="50" />
                 </div>
                 <div class="col-3 text-end">
@@ -357,7 +267,7 @@
                   <p class="form-label">TopP</p>
                 </div>
                 <div class="col-9">
-                  <input type="range" class="form-range w-100" min="0" max="1" step="0.01" id="gpt-topP" name="gpt-topP"
+                  <input type="range" class="custom-range w-100" min="0" max="1" step="0.01" id="gpt-topP" name="gpt-topP"
                     value="0.07" v-model="top_p" />
                 </div>
                 <div class="col-3 text-end">
@@ -371,7 +281,7 @@
                   <p class="form-label">Frequency Penalty</p>
                 </div>
                 <div class="col-9">
-                  <input type="range" class="form-range w-100" min="-2" max="2" step="0.01" id="gpt-frequency"
+                  <input type="range" class="custom-range w-100" min="-2" max="2" step="0.01" id="gpt-frequency"
                     name="gpt-frequency" value="1" v-model="f_penalty" />
                 </div>
                 <div class="col-3 text-end">
@@ -385,7 +295,7 @@
                   <p class="form-label">Presence Penalty</p>
                 </div>
                 <div class="col-9">
-                  <input type="range" class="form-range w-100" min="-2" max="2" step="0.01" id="gpt-precence"
+                  <input type="range" class="custom-range w-100" min="-2" max="2" step="0.01" id="gpt-precence"
                     name="gpt-precence" value="0.5" v-model="p_penalty" />
                 </div>
                 <div class="col-3 text-end">
