@@ -97,6 +97,15 @@ iframe {
 #img-well.drag {
 			background: #8ED2C9;
 		}
+        .overlay {
+  z-index: 1;  
+  background-color: transparent;
+  border: 5px solid red;
+}
+.frame-360 {
+  position: relative; 
+  z-index: 0;
+}
     </style>
 
 </head>
@@ -1621,11 +1630,14 @@ iframe {
                                 </h2>
                                 <div id="preview360" class="accordion-collapse collapse show">
                                     <div class="accordion-body p-0">
-                                        <div class="ratio ratio-1x1">
+                                        <div class="position-relative">
+                                        <hr class="overlay m-0 w-100 position-absolute top-50 start-0 translate-middle-y" />
+                                        <div class="ratio ratio-1x1 frame-360">
                                             <iframe ref="aframePreview" id="aframePreview"
                                                 src="https://turnkey-360-gallery.glitch.me/post.html" frameborder="0"
                                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                                 allowfullscreen></iframe>
+                                        </div>
                                         </div>
                                     </div>
                                 </div>
