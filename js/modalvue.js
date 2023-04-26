@@ -109,7 +109,7 @@ export default {
                       
                       <h3 class="mb-2">Chosen Validators</h3>
                       <div class="d-flex mx-5 justify-content-between align-items-center border-bottom border-secondary py-2 mb-3">
-                        <button class="btn btn-success invisible" type="button">Save</button>
+                        <button v-show="difVote" class="btn btn-success invisible" type="button">Save</button>
                         <h5 class="m-0"> Node (Weight)</h5>
                         <button class="btn btn-success" type="button">Save</button>
                       </div>
@@ -805,6 +805,18 @@ export default {
     html: {
       default: true,
     },
+  },
+  computed:{
+    difVote: {
+      get() {
+        return typeof this.saccounts.spk_vote == 'string' ? this.saccounts.spk_vote.split(',')[0] : '' == this.voteString ? false : true
+      }
+    },
+    voteString: {
+      get() {
+        return this.valWorkable.length > 0 ? this.valWorkable.map(v => v.val_code).join('') : ''
+      }
+    }
   },
   mounted() {
     var options = this.$props;
