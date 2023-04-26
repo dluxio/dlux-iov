@@ -111,7 +111,7 @@ export default {
                       <div class="d-flex mx-5 justify-content-between align-items-center border-bottom border-secondary py-2 mb-3">
                         <button class="btn btn-success invisible" type="button">Save</button>
                         <h5 class="m-0"> Node (Weight)</h5>
-                        <button v-show="difVote" class="btn btn-success" type="button" @click="valVote()">Save</button>
+                        <button :class="{'invisible': !difVote}" class="btn btn-success" type="button" @click="valVote()">Save</button>
                       </div>
                       <div class="mb-5">
                       <div v-if="!valWorkable.length">
