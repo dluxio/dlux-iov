@@ -106,26 +106,25 @@ export default {
                           </div>
                       </div>
                       <div v-if="func == 'Election'">
-                      <h3>Chosen Validators</h3>
-                        <ul class="sortable-list  ms-auto me-auto">
+                      <div v-if="valWorkable.length">
+                      <h3 class="mb-3">Chosen Validators</h3>
+                        <ul class="mx-5 p-0">
                           <div v-for="node in valWorkable">
-                            <li class="item" draggable="true">
-                            <i class="fa-solid fa-grip-lines"></i>  
-                            <div class="details">
-                                <span>@{{node.self}}</span>
-                              </div>
-                              <button @click="sub(node)" type="button"><i class="fa-solid fa-minus"></i></button>
+                            <li class="border border-secondary rounded d-flex align-items-center justify-content-between p-2 my-2" draggable="true" style="cursor: move;">
+                              <i class="fa-solid fa-grip-lines"></i>  
+                              <h5 class="m-0">@{{node.self}}</h5>
+                              <button class="btn btn-primary" @click="sub(node)" type="button"><i class="fa-solid fa-minus"></i></button>
                             </li>
                           </div>
                         </ul>
-                      <h3>Validators</h3>
-                        <ul class="sortable-list ms-auto me-auto">
+                        </div>
+                      <h3 class="mb-3">Validators</h3>
+                        <ul class="mx-5 p-0">
                           <div v-for="node in smarkets">
-                            <li v-if="isVal(node)">
-                              <div class="details">
-                                <span>@{{node.self}}</span>
-                              </div>
-                              <button @click="add(node)" type="button"><i class="fa-solid fa-plus"></i></button>
+                            <li v-if="isVal(node)" class="border border-secondary rounded d-flex align-items-center justify-content-between p-2 my-2">
+                              <i class="fa-solid fa-grip-lines invisible"></i>
+                              <h5 class="m-0">@{{node.self}}</h5>
+                              <button class="btn btn-primary" @click="add(node)" type="button"><i class="fa-solid fa-plus"></i></button>
                             </li>
                           </div>
                         </ul>
