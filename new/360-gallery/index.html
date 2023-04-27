@@ -35,6 +35,11 @@
     <link href="/css/custom.css" rel="stylesheet" />
 
     <style>
+        .form-switch.form-switch-lg .form-check-input {
+  height: 2rem;
+  width: calc(3rem + 0.75rem);
+  border-radius: 4rem;
+}
         .accordion {
             --bs-accordion-color: rgb(173, 181, 189);
             --bs-accordion-bg: #212529;
@@ -100,7 +105,6 @@ iframe {
         .overlay {
   z-index: 1;  
   background-color: transparent;
-  border: 5px solid red;
 }
 .frame-360 {
   position: relative; 
@@ -1631,7 +1635,13 @@ iframe {
                                 <div id="preview360" class="accordion-collapse collapse show">
                                     <div class="accordion-body p-0">
                                         <div class="position-relative">
-                                        <hr class="overlay m-0 w-100 position-absolute top-50 start-0 translate-middle-y" />
+                                        <div class="d-flex w-100 justify-content-end p-2 overlay position-absolute top-0 start-50 translate-middle-x">
+                                            <div class="form-check form-switch form-switch-lg me-2" style="height: 100%;">
+                                                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked title="Horizon Line">
+                                              </div>
+                                            <button class="btn btn-secondary" title="Reset Camera"><i class="fa-solid fa-camera-rotate"></i></button>
+                                        </div>
+                                        <hr style="border: 5px solid red;" class="overlay m-0 w-100 position-absolute top-50 start-0 translate-middle-y" />
                                         <div class="ratio ratio-1x1 frame-360">
                                             <iframe ref="aframePreview" id="aframePreview"
                                                 src="https://turnkey-360-gallery.glitch.me/post.html" frameborder="0"
