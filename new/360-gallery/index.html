@@ -1621,11 +1621,11 @@
                                         <div class="position-relative">
                                         <div class="d-flex w-100 justify-content-end p-2 overlay position-absolute top-0 start-50 translate-middle-x">
                                             <div class="form-check form-switch form-switch-lg me-2">
-                                                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked title="Horizon Line">
+                                                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" v-model="showLine" title="Horizon Line">
                                               </div>
-                                            <button class="btn btn-secondary" title="Reset Camera"><i class="fa-solid fa-camera-rotate"></i></button>
+                                            <button class="btn btn-secondary" title="Reset Camera" @click="resetCamera()"><i class="fa-solid fa-camera-rotate"></i></button>
                                         </div>
-                                        <hr style="border: 5px solid red;" class="overlay m-0 w-100 position-absolute top-50 start-0 translate-middle-y" />
+                                        <hr style="border: 5px solid red;" :class="{'invisible': showLine}" class="overlay m-0 w-100 position-absolute top-50 start-0 translate-middle-y" />
                                         <div class="ratio ratio-1x1 frame-360">
                                             <iframe ref="aframePreview" id="aframePreview"
                                                 src="https://turnkey-360-gallery.glitch.me/post.html" frameborder="0"

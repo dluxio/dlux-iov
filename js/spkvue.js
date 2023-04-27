@@ -102,6 +102,7 @@ var app = new Vue({
         checked: true,
       },
       disablePost: true,
+      showLine: true,
       File: [],
       FileInfo: {},
       postTitle: "",
@@ -2286,6 +2287,13 @@ function tradeFTreject(setname, uid, callback){
       if (reload) {
         location.reload();
       }
+    },
+    resetCamera(){
+      var target = this.$refs.aframePreview.contentWindow
+      target.postMessage({
+        'func': 'resetCamera',
+        'message': null,
+      }, "*");
     },
     sort(item, key, method) {
       switch (method) {
