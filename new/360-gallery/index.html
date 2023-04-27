@@ -106,12 +106,12 @@
         }
 
         #img-well {
-            color: #FF7A5A;
-            background: #FCF4D9;
+            color: #0041C3;
+            background: #d9f7fc;
             border-style: solid;
             border-radius: 10px;
-            border-width: 3px;
-            border-color: #FFAB96;
+            border-width: 5px;
+            border-color: #0041C3;
         }
 
         #img-well.drag {
@@ -1236,7 +1236,11 @@
                                                             <div
                                                                 class="d-flex justify-content-between align-items-center">
                                                                 <h5 class="mb-0 ms-2">Upload Files</h5>
-                                                                <input type="file" @change="uploadFile" multiple />
+                                                                <div class="flex-column m-1">
+                                                                    <input type="file" @change="uploadFile" multiple class="form-control bg-darkg border-secondary text-white-50" />
+                                                                </div>
+                                                                <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                        disabled></button>
                                                                 <button type="button"
                                                                     class="btn-lg btn-close btn-close-white"
                                                                     @click="contract.id = ''; contract.api = ''"
@@ -1364,7 +1368,8 @@
                                                             class="btn btn-warning" @click="addBen(slotDecode(contract.s,
                                         0), slotDecode(contract.s, 1) * 100)"><i
                                                                 class="fa-solid fa-file-pen fa-fw me-2"></i>Finalize</button>
-
+                                                                <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                                disabled></button>
                                                         <button type="button" class="btn btn-secondary"
                                                             data-bs-toggle="collapse"
                                                             :data-bs-target="'#' + replace(contract.i)"><i
@@ -1617,7 +1622,7 @@
                                     <div class="accordion-body p-0">
                                         <div class="position-relative">
                                         <div class="d-flex w-100 justify-content-end p-2 overlay position-absolute top-0 start-50 translate-middle-x">
-                                            <div class="form-check form-switch form-switch-lg me-2" style="height: 100%;">
+                                            <div class="form-check form-switch form-switch-lg me-2">
                                                 <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked title="Horizon Line">
                                               </div>
                                             <button class="btn btn-secondary" title="Reset Camera"><i class="fa-solid fa-camera-rotate"></i></button>
