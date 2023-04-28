@@ -630,6 +630,7 @@ var app = new Vue({
       },
       posturls: {},
       new: [],
+      theirs: [],
       trending: [],
       promoted: [],
       search: [],
@@ -637,7 +638,7 @@ var app = new Vue({
         sort: "time",
         searchTerm: "",
         bitMask: 0,
-        entry: "new",
+        entry: "theirs",
         search: {
           a: 10,
           o: 0,
@@ -657,6 +658,12 @@ var app = new Vue({
           p: false,
         },
         promoted: {
+          a: 10,
+          o: 0,
+          e: false,
+          p: false,
+        },
+        theirs: {
           a: 10,
           o: 0,
           e: false,
@@ -2376,9 +2383,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       }
     },
     selectPosts(modal, reset) {
-      var arr = !reset ? this.displayPosts : []
+      var arr = [];
       for (var i = 0; i < this[this.postSelect.entry].length; i++) {
-        console.log(modal, this.posturls[this[this.postSelect.entry][i]])
         if (this.posturls[this[this.postSelect.entry][i]])
           arr.push(this.posturls[this[this.postSelect.entry][i]]);
       }
