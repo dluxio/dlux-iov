@@ -1,4 +1,4 @@
-this.version = 1.0;
+this.version = 1.1;
 
 console.log(
   "SW:" + this.version + " - online."
