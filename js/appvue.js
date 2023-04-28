@@ -496,7 +496,7 @@ var app = new Vue({
       else this[modal].index = this[modal].items.length - 1;
       this[modal].item = this[modal].items[this[modal].index];
     },
-    goback(){
+    goBack(){
       window.history.back();
     },
     modalSelect(key) {
