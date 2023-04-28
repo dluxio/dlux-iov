@@ -19,7 +19,7 @@ export default {
                 <div class="input-group mb-3"> <span class="input-group-text bg-dark border-dark text-secondary">@</span> <input class="form-control text-white bg-dark border-dark" type="text" placeholder="Please login" :value="account" readonly> </div> <label class="small" for="sendhiveto">Increase Decentralization:</label>
                 <div class="input-group mb-3"> <input class="form-check-input" type="checkbox" role="switch" v-model="up"> </div> <label class="small" for="sendAmount">Amount (Balance: <a href="#/" @click="amount = balance">{{formatNumber(balance, 0, '', ',')}}</a> {{token}}):</label>
                 <div class="input-group mb-3"> <input class="form-control text-white bg-dark border-dark" id="sendAmount" type="number" step="1" :min="contract.r" placeholder="Enter amount" v-model="amount"> <span class="input-group-text bg-dark border-dark text-secondary">{{token}}</span> </div> <label class="small" for="sendhivememo">Memo:</label>
-                <div class="input-group mb-3"> <input class="form-control text-white bg-dark border-dark" type="text" placeholder="Include a memo (optional)" v-model="memo"> </div>
+                
             </div>
             <div class="modal-footer"> 
             
@@ -560,7 +560,7 @@ export default {
             broca: this.amount,
             id: this.contract.i,
             file_owner: this.contract.t,
-            power: up
+            power: this.up ? 1 : 0,
           },
           id: `spkcc_extend`,
           msg: `Trying to unlock ${this.token}...`,
