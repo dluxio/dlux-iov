@@ -746,7 +746,7 @@ export default {
     ipfsproviders: {
       default: function () {
         return {
-          "dlux-io": "12D3KooWMJQEzggotBCznPM1cVohMQx2puLuKTgLU8z9SzKLG6fa",
+          "na": "na",
         };
       },
     },

@@ -1211,13 +1211,12 @@ var app = new Vue({
         this.postBens.splice(found, 1)
       }
     },
-    post(customJsonArr) {
-      for (var i = 0; i < customJsonArr.length; i++) {
-        delete customJsonArr[i][1].rx
-        delete customJsonArr[i][1].ry
-        delete customJsonArr[i][1].rz
-        if (!customJsonArr[i][1].f) delete customJsonArr[i][1].f
-        this.postCustom_json[customJsonArr[i][0]] = customJsonArr[i][1]
+    post() {
+      for (var i = 0; i < this.postCustom_json.assets.length; i++) {
+        delete this.postCustom_json.assets[i].rx
+        delete this.postCustom_json.assets[i].ry
+        delete this.postCustom_json.assets[i].rz
+        if (!this.postCustom_json.assets[i].f) delete this.postCustom_json.assets[i].f
       }
       this.postCustom_json.tags = ['dlux']
       console.log(this.postTags)
@@ -1226,7 +1225,7 @@ var app = new Vue({
           this.postCustom_json.tags.push(this.postTags[i]);
         }
       }
-      if (this.account) {
+      if (this.account && this.postPermlink && this.postTitle && this.postBody) {
         const operations = [["comment",
           {
             "parent_author": "",
@@ -1236,8 +1235,9 @@ var app = new Vue({
             "title": this.postTitle,
             "body": this.postBody + `\n***\n#### [View in VR @ dlux.io](https://dlux.io/dlux/@${this.account}/${this.postPermlink})\n`,
             "json_metadata": JSON.stringify(this.postCustom_json)
-          }],
-        ["comment_options",
+          }]]
+        if (this.postBens.length > 0) {
+          operations.push(["comment_options",
           {
             "author": this.account,
             "permlink": this.postPermlink,
@@ -1251,7 +1251,8 @@ var app = new Vue({
                   "beneficiaries":
                     this.postBens
                 }]]
-          }]]
+          }])
+        }
         this.toSign = {
           type: "raw",
           op: operations,
