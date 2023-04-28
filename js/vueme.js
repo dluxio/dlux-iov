@@ -1572,7 +1572,7 @@ function setPFP(setname, uid, callback){
     apiFor(prefix) {
       if (prefix == "dlux_") return "https://token.dlux.io";
       if (prefix == "spkcc_") return "https://spkinstant.hivehoneycomb.com";
-      if (prefix == "duat_") return "https://duat.hivehoneycomb.com";
+      if (prefix == "duat_") return "https://inconceivable.hivehoneycomb.com";
       else return "";
     },
     meltNFT(item) {
