@@ -339,13 +339,7 @@
                                         <form id="commentForm">
                                             <!--input with buttons and preview-->
                                             <mde id="body" @settext="pending(displayPost.item.url, $event)" />
-                                            
-                                            <!--<vue-markdown @settext="pending(displayPost.item.url, $event)">
-                                            </vue-markdown>-->
-                                            <!--input star rating-->
-                                           
                                         </form>
-                                        
                                     </div>
                                     <div class="d-flex align-items-center">
                                         <vue-ratings vote="true" @rating="setRating(displayPost.item.url, $event)">
