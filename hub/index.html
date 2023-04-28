@@ -17,8 +17,11 @@
         integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" />
     <link href="/css/custom.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
     <script type="module" src="/js/appvue.js"></script>
+    <link href="/css/smde.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
 
     <script>
         navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -336,8 +339,8 @@
                                         <form id="commentForm">
                                             <!--input with buttons and preview-->
                                             <mde id="body" @settext="pending(displayPost.item.url, $event)" />
-                                            <vue-markdown @settext="pending(displayPost.item.url, $event)">
-                                            </vue-markdown>
+                                            <!--<vue-markdown @settext="pending(displayPost.item.url, $event)">
+                                            </vue-markdown>-->
                                             <!--input star rating-->
                                             <vue-ratings vote="true" @rating="setRating(displayPost.item.url, $event)">
                                             </vue-ratings>
