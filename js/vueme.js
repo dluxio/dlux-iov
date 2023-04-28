@@ -276,6 +276,7 @@ var app = new Vue({
         max: 0,
       },
       pageAccount: "",
+      pagePermlink: "",
       pfp: {
         set: "",
         uid: "",
@@ -2471,6 +2472,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 this.posturls[res.result.url].created
               );
               this.selectPosts();
+              if(this.pagePermlink)this.modalSelect(res.result.url)
             }
           });
       } else {
@@ -3217,27 +3219,35 @@ function bidNFT(setname, uid, bid_amount, type, callback){
   mounted() {
     console.log(location.pathname.split("/@")[1]);
     if (location.pathname.split("/@")[1]) {
-      this.pageAccount = location.pathname.split("/@")[1];
+      this.pageAccount = location.pathname.split("/@")[1]
+      if (this.pageAccount.indexOf('/') > -1) {
+        this.pageAccount = this.pageAccount.split('/')[0]
+        this.pagePermlink = this.pageAccount.split('/')[1]
+      }
     } else {
       this.pageAccount = this.account;
       this.me = true;
     }
     if (this.pageAccount == this.account) this.me = true;
-    this.focus.account = this.pageAccount;
-    this.sapi = sapi;
-    this.checkAccount("pageAccount", "focus");
-    this.getHiveStats();
-    this.getQuotes();
-    this.getSNodes();
-    this.getPosts();
-    this.getProtocol();
-    this.getSpkStats();
-    this.getRewardFund();
-    this.getFeedPrice();
-    this.getSapi(this.pageAccount, false);
-    this.getTokenUser(this.pageAccount, false);
-    this.getNFTs();
-    //deepLink();
+    if(this.pagePermlink){
+      this.getContent(this.pageAccount, this.pagePermlink)
+    } else {
+      this.focus.account = this.pageAccount;
+      this.sapi = sapi;
+      this.checkAccount("pageAccount", "focus");
+      this.getHiveStats();
+      this.getQuotes();
+      this.getSNodes();
+      this.getPosts();
+      this.getProtocol();
+      this.getSpkStats();
+      this.getRewardFund();
+      this.getFeedPrice();
+      this.getSapi(this.pageAccount, false);
+      this.getTokenUser(this.pageAccount, false);
+      this.getNFTs();
+      //deepLink();
+    }
   },
   watch: {
     postSelect(a, b) {
