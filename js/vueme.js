@@ -1972,7 +1972,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     modalSelect(key) {
       this.displayPost.index = key;
       this.displayPost.item = this.posturls[key];
-      window.history.pushState("Blog Modal", this.displayPost.item.title, "/blog/@" + key.split('/@')[1]);
+      //window.history.pushState("Blog Modal", this.displayPost.item.title, "/blog/@" + key.split('/@')[1]);
       if (
         this.displayPost.item.children &&
         !this.displayPost.item.replies.length
