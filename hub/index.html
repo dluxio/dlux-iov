@@ -339,14 +339,19 @@
                                         <form id="commentForm">
                                             <!--input with buttons and preview-->
                                             <mde id="body" @settext="pending(displayPost.item.url, $event)" />
-                                            <button class="ms-auto btn btn-outline-primary">Post Comment</button>
+                                            
                                             <!--<vue-markdown @settext="pending(displayPost.item.url, $event)">
                                             </vue-markdown>-->
                                             <!--input star rating-->
-                                            <vue-ratings vote="true" @rating="setRating(displayPost.item.url, $event)">
-                                            </vue-ratings>
+                                           
                                         </form>
+                                        
                                     </div>
+                                    <div class="d-flex align-items-center">
+                                        <vue-ratings vote="true" @rating="setRating(displayPost.item.url, $event)">
+                                        </vue-ratings>
+                                        <button class="ms-auto btn btn-outline-primary">Post Comment</button>
+                                        </div>
                                     <!--modal vote collapse-->
                                     <div class="collapse"
                                         :id="'vote-modal-' + displayPost.item.author + '-' + displayPost.item.permlink">
