@@ -71,7 +71,7 @@ self.addEventListener("fetch", function (event) {
 
         if(!(event.request.url.startsWith('http'))){
         caches.open(CACHE_NAME).then(function (cache) {
-          if (!/^https?:$/i.test(new URL(request.url).protocol)) return;
+          if (!/^https?:$/i.test(new URL(event.request.url).protocol)) return;
           cache.put(event.request, responseToCache);
         });
       }
