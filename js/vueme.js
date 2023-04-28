@@ -1958,6 +1958,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         this[modal].index++;
         this[modal].item = this[modal].items[this[modal].index];
       } else if (this[modal].index < this.allPosts.length - 1) {
+        console.log('there')
         this.selectPosts([modal, this[modal].index + 1]);
       } else {
         this[modal].index = 0;
@@ -2365,6 +2366,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               }
               authors.push(this.posturls[post].author);
             }
+            console.log('where')
             if (!called) this.selectPosts();
             authors = [...new Set(authors)];
             this.getHiveAuthors(authors);
@@ -2473,6 +2475,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               this.posturls[res.result.url].ago = this.timeSince(
                 this.posturls[res.result.url].created
               );
+              console.log('here')
               this.selectPosts();
               if(modal)this.modalSelect(res.result.url)
             }
