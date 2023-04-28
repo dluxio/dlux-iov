@@ -3224,6 +3224,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       if (this.pageAccount.indexOf('/') > -1) {
         this.pageAccount = this.pageAccount.split('/')[0]
         this.pagePermlink = this.pageAccount.split('/')[1]
+        console.log('good If', this.pageAccount, this.pagePermlink)
       }
     } else {
       this.pageAccount = this.account;
