@@ -1380,9 +1380,9 @@
                                                         <modal-vue type="extend" token="BROCA" v-if="contract.c == 3"
                                                                         :balance="saccountapi.broca" :account="account"
                                                                         @modalsign="sendIt($event)">
-                                                                        <span slot="trigger" class="btn btn-secondary"
+                                                                        <button slot="trigger" class="btn btn-secondary"
                                                                             :test="lapi == 'https://spktest.dlux.io' ? true : false"><i
-                                                                            class="fa-solid fa-clock-rotate-left fa-fw me-2"></i>Extend</span></modal-vue>
+                                                                            class="fa-solid fa-clock-rotate-left fa-fw me-2"></i>Extend</button></modal-vue>
                                                         <!-- <button type="button"
                                                             class="btn btn-secondary" @click=""><i
                                                                 class="fa-solid fa-clock-rotate-left fa-fw me-2"></i>Extend</button> -->
