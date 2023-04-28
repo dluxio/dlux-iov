@@ -2382,7 +2382,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         this[modal[0]].index = modal[1];
       }
     },
-    getContent(a, p) {
+    getContent(a, p, modal) {
       if (a && p) {
         fetch(this.hapi, {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content", "params":["${a}", "${p}"], "id":1}`,
@@ -2472,7 +2472,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 this.posturls[res.result.url].created
               );
               this.selectPosts();
-              if(this.pagePermlink)this.modalSelect(res.result.url)
+              if(modal)this.modalSelect(res.result.url)
             }
           });
       } else {
@@ -3217,14 +3217,11 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
   },
   mounted() {
-    console.log(location.pathname.split("/@")[1]);
     if (location.pathname.split("/@")[1]) {
       this.pageAccount = location.pathname.split("/@")[1]
-      console.log(this.pageAccount)
       if (this.pageAccount.indexOf('/') > -1) {
         this.pagePermlink = this.pageAccount.split('/')[1]
         this.pageAccount = this.pageAccount.split('/')[0]
-        console.log('good If', this.pageAccount, this.pagePermlink)
       }
     } else {
       this.pageAccount = this.account;
@@ -3232,8 +3229,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     }
     if (this.pageAccount == this.account) this.me = true;
     if(this.pagePermlink){
-      console.log('Getting Post', this.pageAccount, this.pagePermlink)
-      this.getContent(this.pageAccount, this.pagePermlink)
+      this.getContent(this.pageAccount, this.pagePermlink, true)
     } else {
       this.focus.account = this.pageAccount;
       this.sapi = sapi;
