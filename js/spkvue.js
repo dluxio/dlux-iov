@@ -904,7 +904,7 @@ var app = new Vue({
             ) {
               Hash.of(buffer.Buffer(fileContent), { unixfs: 'UnixFS' }).then((hash) => {
                 console.log(fileContent)
-                const dict = { fileContent, hash, index: i, size: event.currentTarget.File.size, name: event.currentTarget.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
+                const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash, index: i, size: event.currentTarget.File.size, name: event.currentTarget.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
                 this.FileInfo[dict.name] = dict
                 // this.File[i].md5 = hash;
                 // this.File[i].blob = new Blob([fileContent], event.currentTarget.File.name)
@@ -943,7 +943,7 @@ var app = new Vue({
           //   ) {
           Hash.of(buffer.Buffer(fileContent)).then(hash => {
             console.log('hereasdasd')
-            const dict = { fileContent, hash, index: this.File.length, size: event.currentTarget.File.size, name: event.currentTarget.File.name, status: 'Pending Signature' }
+            const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash, index: this.File.length, size: event.currentTarget.File.size, name: event.currentTarget.File.name, status: 'Pending Signature' }
             this.FileInfo[dict.name] = dict
             // var File = e.dataTransfer.files[i];
             var File = event.currentTarget.File
