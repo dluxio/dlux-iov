@@ -1377,7 +1377,7 @@
                                                     </div>
                                                     <div class="btn-group ms-auto" role="group"
                                                         aria-label="Contract Actions">
-                                                        <modal-vue type="extend" token="BROCA" v-if="contract.c == 3"
+                                                        <modal-vue type="extend" token="BROCA" :contract="contract" v-if="contract.c == 3"
                                                                         :balance="saccountapi.broca" :account="account"
                                                                         @modalsign="sendIt($event)">
                                                                         <button slot="trigger" class="btn btn-secondary"

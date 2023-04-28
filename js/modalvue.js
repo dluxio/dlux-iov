@@ -8,6 +8,28 @@ export default {
   },
   template: `
 <div>
+<div class="modal fade" id="extend" :tabindex="i" role="dialog" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content bg-darker text-white">
+        <div class="modal-header">
+            <h5 class="modal-title">Extend {{contract.i}}</h5> <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form name="sendhive">
+            <div class="modal-body"> <label class="small" for="sendhivefrom">From:</label>
+                <div class="input-group mb-3"> <span class="input-group-text bg-dark border-dark text-secondary">@</span> <input class="form-control text-white bg-dark border-dark" type="text" placeholder="Please login" :value="account" readonly> </div> <label class="small" for="sendhiveto">Increase Decentralization:</label>
+                <div class="input-group mb-3"> <input class="form-check-input" type="checkbox" role="switch" v-model="up"> </div> <label class="small" for="sendAmount">Amount (Balance: <a href="#/" @click="amount = balance">{{formatNumber(balance, 0, '', ',')}}</a> {{token}}):</label>
+                <div class="input-group mb-3"> <input class="form-control text-white bg-dark border-dark" id="sendAmount" type="number" step="1" :min="contract.r" placeholder="Enter amount" v-model="amount"> <span class="input-group-text bg-dark border-dark text-secondary">{{token}}</span> </div> <label class="small" for="sendhivememo">Memo:</label>
+                <div class="input-group mb-3"> <input class="form-control text-white bg-dark border-dark" type="text" placeholder="Include a memo (optional)" v-model="memo"> </div>
+            </div>
+            <div class="modal-footer"> 
+            
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> 
+            <button type="submit" class="btn btn-primary" @click="extend" data-bs-dismiss="modal">Extend</button> 
+            </div>
+        </form>
+    </div>
+</div>
+</div>
   <div class="modal fade" id="send" :tabindex="i" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content bg-darker text-white">
@@ -529,6 +551,24 @@ export default {
           txid: "send",
         };
     },
+    extend(){
+      var op
+      if (this.token == "BROCA")
+        op = {
+          type: "cja",
+          cj: {
+            broca: this.amount,
+            id: this.contract.i,
+            file_owner: this.contract.t,
+            power: up
+          },
+          id: `spkcc_extend`,
+          msg: `Trying to unlock ${this.token}...`,
+          ops: ["getTokenUser"],
+          api: "https://token.dlux.io",
+          txid: "send",
+        };
+    },
     power() {
       var op;
       if (this.token == "DLUX" && this.func == "Power Up")
@@ -722,6 +762,14 @@ export default {
           head_block: 0,
         };
       },
+    },
+    contract: {
+      default: function () {
+        return {};
+      },
+    },
+    up: {
+      default: 0,
     },
     valvotes: {
       default: ''
