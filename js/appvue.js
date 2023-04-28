@@ -496,6 +496,9 @@ var app = new Vue({
       else this[modal].index = this[modal].items.length - 1;
       this[modal].item = this[modal].items[this[modal].index];
     },
+    goback(){
+      window.history.back();
+    },
     modalSelect(key) {
       this.displayPost.index = key;
       this.displayPost.item = this.posturls[key];
