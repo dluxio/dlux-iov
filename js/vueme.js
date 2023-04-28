@@ -2476,7 +2476,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 this.posturls[res.result.url].created
               );
               console.log('here')
-              this.selectPosts();
+              //this.selectPosts();
               if(modal)this.modalSelect(res.result.url)
             }
           });
