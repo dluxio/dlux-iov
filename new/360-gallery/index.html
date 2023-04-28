@@ -1598,7 +1598,7 @@
 
                                                 <li v-for="ben in postBens">@{{ben.account}}: {{formatNumber(ben.weight
                                                     / 100,
-                                                    2, '.')}}% <button type="button" class="btn btn-sm btn-outline-danger"
+                                                    2, '.')}}% <button type="button" class="btn btn-outline-danger btn-sm"
                                                         @click="delBen(ben.account)">Remove</button></li>
                                             </ul>
                                             <button class="btn btn-outline-primary" v-if="!isntDlux" type="button"
