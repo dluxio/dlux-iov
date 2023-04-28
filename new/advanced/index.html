@@ -1415,8 +1415,8 @@
                                                             <a :href="'https://ipfs.io/ipfs/' + file"
                                                                 target="_blank"><iframe
                                                                     :src="'https://ipfs.io/ipfs/' + file"
-                                                                    onload="this.style.display='block'"
-                                                                    class="img-fluid" style="max-width: 300px;display: none"
+                                                                    onload="this.style.display='compact'"
+                                                                    class="img-fluid" style="max-width: 300px;display: none;overflow: hidden; border: none;"
                                                                     :alt="file"></iframe></a>
                                                             <button type="button" class="btn btn-primary mt-2"
                                                                 v-if="publishPage"
