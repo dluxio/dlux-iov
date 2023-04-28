@@ -44,7 +44,9 @@ var urlsToCache = [
   "/nfts/set/index.html",
   "/nfts/sets/index.html",
   "/new/360-gallery/index.html",
-  "/new/advanced/index.html"
+  "/new/advanced/index.html",
+  "/blog/index.html",
+  "/dlux/index.html",
 ];
 
 self.addEventListener("install", function (event) {
