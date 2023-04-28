@@ -164,7 +164,7 @@
                                 <h2 class="accordion-header">
                                     <button class="accordion-button" type="button" data-bs-toggle="collapse"
                                         data-bs-target="#fileHosting" aria-expanded="true" aria-controls="fileHosting">
-                                        Image Upload via SPK Network
+                                        Upload via SPK Network
                                     </button>
                                 </h2>
                                 <div id="fileHosting" class="accordion-collapse collapse show">
@@ -1299,6 +1299,10 @@
                                                             </div>
                                                             <div class="d-flex w-100">
                                                                 <ul class="text-start w-100">
+                                                                    <li><button class="btn btn-warning"
+                                                                        @click="appFile(file.data)"
+                                                                        data-toggle="tooltip" data-placement="top"
+                                                                        title="Preview dApp">Preview dApp</button></li>
                                                                     <li class="">Bytes: {{file.size}}</li>
                                                                     <li class="">CID:
                                                                         {{FileInfo[file.name].hash}}</li>
@@ -1415,13 +1419,17 @@
                                                             <a :href="'https://ipfs.io/ipfs/' + file"
                                                                 target="_blank"><iframe
                                                                     :src="'https://ipfs.io/ipfs/' + file"
-                                                                    onload="this.style.display='compact'"
+                                                                    onload="this.style.display='flex'"
                                                                     class="img-fluid" style="max-width: 300px;display: none;overflow: hidden; border: none;"
                                                                     :alt="file"></iframe></a>
                                                             <button type="button" class="btn btn-primary mt-2"
                                                                 v-if="publishPage"
                                                                 @click="addAsset(file, contract.i)"><i
                                                                     class="fa-solid fa-square-plus me-2"></i>Add</button>
+                                                            <button type="button" class="btn btn-primary mt-2"
+                                                                v-if="publishPage"
+                                                                @click="addApp(file, contract.i)"><i
+                                                                class="fa-solid fa-square-plus me-2"></i>Add</button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1632,20 +1640,16 @@
                                 </h2>
                                 <div id="preview360" class="accordion-collapse collapse show">
                                     <div class="accordion-body p-0">
-                                        <div class="position-relative">
-                                        <div class="d-flex w-100 justify-content-end p-2 overlay position-absolute top-0 start-50 translate-middle-x">
-                                            <div class="form-check form-switch form-switch-lg me-2">
-                                                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" v-model="showLine" title="Horizon Line">
-                                              </div>
-                                            <button class="btn btn-secondary" title="Reset Camera" @click="resetCamera()"><i class="fa-solid fa-camera-rotate"></i></button>
-                                        </div>
-                                        <hr style="border: 5px solid red;" :class="{'invisible': !showLine}" class="overlay m-0 w-100 position-absolute top-50 start-0 translate-middle-y" />
                                         <div class="ratio ratio-1x1 frame-360">
-                                            <iframe ref="aframePreview" id="aframePreview"
-                                                src="https://turnkey-360-gallery.glitch.me/post.html" frameborder="0"
+                                            <iframe v-if="frameData" ref="aframePreview" id="aframePreview"
+                                                :src="'data:text/html,' + frameData" frameborder="0"
                                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                                 allowfullscreen></iframe>
-                                        </div>
+                                            <iframe v-if="frameURL && !frameData" ref="aframePreview" id="aframePreview"
+                                                :src="'https://ipfs.io/ipfs/' + frameURL" frameborder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowfullscreen></iframe>
+                                            <h3 v-if="!frameData && !frameURL">Select a file as the base dApp</h3>
                                         </div>
                                     </div>
                                 </div>

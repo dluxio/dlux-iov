@@ -156,6 +156,8 @@ var app = new Vue({
         { api: "https://token.dlux.io", token: "dlux" },
         { api: "https://duat.hivehoneycomb.com", token: "duat" },
       ],
+      frameData: '',
+      frameURL: '',
       scripts: {},
       nftscripts: {},
       baseScript: {},
@@ -1037,6 +1039,31 @@ var app = new Vue({
       var total = parseInt(last.split(',')[0]) + accured
       if (total > (this.saccountapi.spk_power * 1000)) total = (this.saccountapi.spk_power * 1000)
       return total
+    },
+    appFile(data){
+      this.frameData = data
+      this.postCustom_json.vrHash = ''
+      this.frameURL = ''
+      this.dluxMock()
+    },
+    addApp(cid, contract) {
+      var found = -1
+      if (!cid) return false
+      for (var i = 0; i < this.postCustom_json.assets.length; i++) {
+        if (this.postCustom_json.assets[i].hash == cid) {
+          found = i
+        }
+      }
+      if (found == -1) {
+        this.postCustom_json.assets.push({
+          hash: cid,
+          type: 'dApp',
+          contract: contract,
+        })
+      }
+      this.postCustom_json.vrHash = cid
+      this.frameURL = cid
+      this.dluxMock()
     },
     addAsset(cid, contract, name = '', thumbHash, type = 'ts', rot = [0, 0, 0]) {
       var found = -1
