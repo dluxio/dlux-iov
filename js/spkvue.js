@@ -1064,6 +1064,7 @@ var app = new Vue({
       }
       this.postCustom_json.vrHash = cid
       this.frameURL = cid
+      this.frameData = ''
       this.dluxMock()
     },
     addAsset(cid, contract, name = '', thumbHash, type = 'ts', rot = [0, 0, 0]) {
