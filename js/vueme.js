@@ -49,7 +49,7 @@ console.log(lapi);
 if (
   lapi == "https://token.dlux.io" ||
   lapi == "https://spkinstant.hivehoneycomb.com" ||
-  lapi == "https://duat.hivehoneycomb.com"
+  lapi == "https://inconceivable.hivehoneycomb.com"
 ) {
   console.log("using defaults");
   //window.history.replaceState(null, null, "dex");
@@ -116,7 +116,7 @@ var app = new Vue({
       },
       providers: [
         { api: "https://token.dlux.io", token: "dlux" },
-        { api: "https://duat.hivehoneycomb.com", token: "duat" },
+        { api: "https://inconceivable.hivehoneycomb.com", token: "duat" },
       ],
       scripts: {},
       nftscripts: {},
