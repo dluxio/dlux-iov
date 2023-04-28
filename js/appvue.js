@@ -499,7 +499,7 @@ var app = new Vue({
     modalSelect(key) {
       this.displayPost.index = key;
       this.displayPost.item = this.posturls[key];
-      window.location.pathname = "/blog/@" + key.split('/@')[1];
+      window.history.pushState("Blog Modal", this.displayPost.item.title, "/blog/@" + key.split('/@')[1]); = "/blog/@" + key.split('/@')[1];
       if (this.displayPost.item.children && !this.displayPost.item.replies.length)
         this.getReplies(
           this.displayPost.item.author,
