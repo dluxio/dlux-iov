@@ -43,6 +43,7 @@ var urlsToCache = [
   "/nfts/index.html",
   "/nfts/set/index.html",
   "/nfts/sets/index.html",
+  "/new/360-gallery/index.html",
 ];
 
 self.addEventListener("install", function (event) {
