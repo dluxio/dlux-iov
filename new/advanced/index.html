@@ -1642,7 +1642,7 @@
                                     <div class="accordion-body p-0">
                                         <div class="ratio ratio-1x1 frame-360">
                                             <iframe v-if="frameData" ref="aframePreview" id="aframePreview"
-                                                :src="'data:text/html,' + frameData" frameborder="0"
+                                                :srcdoc="frameData" frameborder="0"
                                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                                 allowfullscreen></iframe>
                                             <iframe v-if="frameURL && !frameData" ref="aframePreview" id="aframePreview"
