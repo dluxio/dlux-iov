@@ -3230,6 +3230,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     }
     if (this.pageAccount == this.account) this.me = true;
     if(this.pagePermlink){
+      console.log('Getting Post', this.pageAccount, this.pagePermlink)
       this.getContent(this.pageAccount, this.pagePermlink)
     } else {
       this.focus.account = this.pageAccount;
