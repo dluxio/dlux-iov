@@ -2377,6 +2377,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         if (this.posturls[this[this.postSelect.entry][i]])
           arr.push(this.posturls[this[this.postSelect.entry][i]]);
       }
+      console.log(arr)
       this.displayPosts = arr;
       if (modal) {
         this[modal[0]].items = this.displayPosts;
