@@ -43,7 +43,7 @@ var urlsToCache = [
   "/nfts/index.html",
   "/nfts/set/index.html",
   "/nfts/sets/index.html",
-  "/new/360-gallery/index.html",
+  "/new/360-gallery/index.html"
 ];
 
 self.addEventListener("install", function (event) {
@@ -64,15 +64,16 @@ self.addEventListener("fetch", function (event) {
       }
       var fetchRequest = event.request.clone();
       return fetch(fetchRequest).then(function (response) {
-        if (!response || response.status !== 200 || response.type !== "basic" || !event.request.url.startsWith('http')) {
+        if (!response || response.status !== 200 || response.type !== "basic") {
           return response;
         }
         var responseToCache = response.clone();
 
+        if(!(event.request.url.startsWith('http'))){
         caches.open(CACHE_NAME).then(function (cache) {
           cache.put(event.request, responseToCache);
         });
-
+      }
         return response;
       });
     })
