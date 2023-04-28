@@ -5,6 +5,7 @@ import Cycler from "/js/cycler.js";
 import Popper from "/js/pop.js";
 import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
+import MDE from "/js/mde.js";
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "";
@@ -410,6 +411,7 @@ var app = new Vue({
     "pop-vue": Popper,
     "vue-markdown": Marker,
     "vue-ratings": Ratings,
+    "mde": MDE,
   },
   methods: {
     vote(url){
