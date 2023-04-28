@@ -3220,6 +3220,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     console.log(location.pathname.split("/@")[1]);
     if (location.pathname.split("/@")[1]) {
       this.pageAccount = location.pathname.split("/@")[1]
+      console.log(this.pageAccount)
       if (this.pageAccount.indexOf('/') > -1) {
         this.pageAccount = this.pageAccount.split('/')[0]
         this.pagePermlink = this.pageAccount.split('/')[1]
