@@ -535,6 +535,9 @@ export default {
           api: "https://token.dlux.io",
           txid: "send",
         };
+      if (op) {
+        this.$emit("modalsign", op);
+      }
     },
     vote(){
       var op
@@ -550,6 +553,9 @@ export default {
           api: "https://token.dlux.io",
           txid: "send",
         };
+      if (op) {
+        this.$emit("modalsign", op);
+      }
     },
     extend(){
       var op
@@ -568,6 +574,9 @@ export default {
           api: "https://token.dlux.io",
           txid: "send",
         };
+      if (op) {
+        this.$emit("modalsign", op);
+      }
     },
     power() {
       var op;
