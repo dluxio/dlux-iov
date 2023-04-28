@@ -1041,6 +1041,7 @@ var app = new Vue({
       return total
     },
     appFile(data){
+      console.log(data)
       this.frameData = data
       this.postCustom_json.vrHash = ''
       this.frameURL = ''
