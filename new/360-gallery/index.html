@@ -1594,10 +1594,11 @@
                                                     @data="postTags = $event" id="tags" />
                                             </div>
                                             <ul v-if="postBens.length">
-                                                <h6>Benificiaries: </h6>
+                                                <h6>Benificiaries: ({{postBens.length}}/8) </h6>
+
                                                 <li v-for="ben in postBens">@{{ben.account}}: {{formatNumber(ben.weight
                                                     / 100,
-                                                    2, '.')}}% <button type="button"
+                                                    2, '.')}}% <button type="button" class="btn btn-sm btn-outline-danger"
                                                         @click="delBen(ben.account)">Remove</button></li>
                                             </ul>
                                             <button class="btn btn-outline-primary" v-if="!isntDlux" type="button"
