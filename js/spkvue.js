@@ -903,7 +903,7 @@ var app = new Vue({
               && this.File[i].size == event.currentTarget.File.size
             ) {
               Hash.of(buffer.Buffer(fileContent), { unixfs: 'UnixFS' }).then((hash) => {
-                const dict = { hash, index: i, size: event.currentTarget.File.size, name: event.currentTarget.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
+                const dict = { fileContent, hash, index: i, size: event.currentTarget.File.size, name: event.currentTarget.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
                 this.FileInfo[dict.name] = dict
                 // this.File[i].md5 = hash;
                 // this.File[i].blob = new Blob([fileContent], event.currentTarget.File.name)
