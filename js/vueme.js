@@ -2373,8 +2373,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           });
       }
     },
-    selectPosts(modal) {
-      var arr = [];
+    selectPosts(modal, reset) {
+      var arr = !reset ? this.displayPosts : []
       for (var i = 0; i < this[this.postSelect.entry].length; i++) {
         console.log(modal, this.posturls[this[this.postSelect.entry][i]])
         if (this.posturls[this[this.postSelect.entry][i]])
