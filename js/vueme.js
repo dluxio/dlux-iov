@@ -49,7 +49,7 @@ console.log(lapi);
 if (
   lapi == "https://token.dlux.io" ||
   lapi == "https://spkinstant.hivehoneycomb.com" ||
-  lapi == "https://duat.hivehoneycomb.com"
+  lapi == "https://inconceivable.hivehoneycomb.com"
 ) {
   console.log("using defaults");
   //window.history.replaceState(null, null, "dex");
@@ -116,7 +116,7 @@ var app = new Vue({
       },
       providers: [
         { api: "https://token.dlux.io", token: "dlux" },
-        { api: "https://duat.hivehoneycomb.com", token: "duat" },
+        { api: "https://inconceivable.hivehoneycomb.com", token: "duat" },
       ],
       scripts: {},
       nftscripts: {},
@@ -276,6 +276,7 @@ var app = new Vue({
         max: 0,
       },
       pageAccount: "",
+      pagePermlink: "",
       pfp: {
         set: "",
         uid: "",
@@ -927,9 +928,9 @@ var app = new Vue({
       }
       return `linear-gradient(${r})`;
     },
-    update: _.debounce(function(e) {
-            this.postBody = e.target.value;
-          }, 300),
+    // update: _.debounce(function(e) {
+    //         this.postBody = e.target.value;
+    //       }, 300),
     breakIt(it, reset) {
       if (reset) {
         this.SL = [];
@@ -1571,7 +1572,7 @@ function setPFP(setname, uid, callback){
     apiFor(prefix) {
       if (prefix == "dlux_") return "https://token.dlux.io";
       if (prefix == "spkcc_") return "https://spkinstant.hivehoneycomb.com";
-      if (prefix == "duat_") return "https://duat.hivehoneycomb.com";
+      if (prefix == "duat_") return "https://inconceivable.hivehoneycomb.com";
       else return "";
     },
     meltNFT(item) {
@@ -2471,6 +2472,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 this.posturls[res.result.url].created
               );
               this.selectPosts();
+              if(this.pagePermlink)this.modalSelect(res.result.url)
             }
           });
       } else {
@@ -3217,27 +3219,35 @@ function bidNFT(setname, uid, bid_amount, type, callback){
   mounted() {
     console.log(location.pathname.split("/@")[1]);
     if (location.pathname.split("/@")[1]) {
-      this.pageAccount = location.pathname.split("/@")[1];
+      this.pageAccount = location.pathname.split("/@")[1]
+      if (this.pageAccount.indexOf('/') > -1) {
+        this.pageAccount = this.pageAccount.split('/')[0]
+        this.pagePermlink = this.pageAccount.split('/')[1]
+      }
     } else {
       this.pageAccount = this.account;
       this.me = true;
     }
     if (this.pageAccount == this.account) this.me = true;
-    this.focus.account = this.pageAccount;
-    this.sapi = sapi;
-    this.checkAccount("pageAccount", "focus");
-    this.getHiveStats();
-    this.getQuotes();
-    this.getSNodes();
-    this.getPosts();
-    this.getProtocol();
-    this.getSpkStats();
-    this.getRewardFund();
-    this.getFeedPrice();
-    this.getSapi(this.pageAccount, false);
-    this.getTokenUser(this.pageAccount, false);
-    this.getNFTs();
-    //deepLink();
+    if(this.pagePermlink){
+      this.getContent(this.pageAccount, this.pagePermlink)
+    } else {
+      this.focus.account = this.pageAccount;
+      this.sapi = sapi;
+      this.checkAccount("pageAccount", "focus");
+      this.getHiveStats();
+      this.getQuotes();
+      this.getSNodes();
+      this.getPosts();
+      this.getProtocol();
+      this.getSpkStats();
+      this.getRewardFund();
+      this.getFeedPrice();
+      this.getSapi(this.pageAccount, false);
+      this.getTokenUser(this.pageAccount, false);
+      this.getNFTs();
+      //deepLink();
+    }
   },
   watch: {
     postSelect(a, b) {
