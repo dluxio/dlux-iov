@@ -928,9 +928,9 @@ var app = new Vue({
       }
       return `linear-gradient(${r})`;
     },
-    update: _.debounce(function(e) {
-            this.postBody = e.target.value;
-          }, 300),
+    // update: _.debounce(function(e) {
+    //         this.postBody = e.target.value;
+    //       }, 300),
     breakIt(it, reset) {
       if (reset) {
         this.SL = [];
