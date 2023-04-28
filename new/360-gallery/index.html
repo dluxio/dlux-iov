@@ -1377,9 +1377,15 @@
                                                     </div>
                                                     <div class="btn-group ms-auto" role="group"
                                                         aria-label="Contract Actions">
-                                                        <button v-if="contract.c == 3" type="button"
+                                                        <modal-vue type="extend" token="BROCA" v-if="contract.c == 3"
+                                                                        :balance="saccountapi.broca" :account="account"
+                                                                        @modalsign="sendIt($event)">
+                                                                        <span slot="trigger" class="btn btn-secondary"
+                                                                            :test="lapi == 'https://spktest.dlux.io' ? true : false"><i
+                                                                            class="fa-solid fa-clock-rotate-left fa-fw me-2"></i>Extend</span></modal-vue>
+                                                        <!-- <button type="button"
                                                             class="btn btn-secondary" @click=""><i
-                                                                class="fa-solid fa-clock-rotate-left fa-fw me-2"></i>Extend</button>
+                                                                class="fa-solid fa-clock-rotate-left fa-fw me-2"></i>Extend</button> -->
                                                         <button v-if="contract.c == 2" type="button"
                                                             class="btn btn-warning" @click="addBen(slotDecode(contract.s,
                                         0), slotDecode(contract.s, 1) * 100)"><i
