@@ -209,13 +209,29 @@
                                 </form>
                             </div>
 
+                            <!--contract collapse-->
+                            <div class="collapse bg-darker"
+                                        :id="'contract-' + post.contract.i">
+                                        <form id="contractForm">
+                                            <div class="p-2 d-flex align-items-center text-white-50">
+                                                    <button type="button" class="btn btn-primary me-2"
+                                                        @click="">Extend</button>
+                                                    <button type="button" class="btn btn-secondary me-2"
+                                                        data-bs-toggle="collapse"
+                                                        :data-bs-target="'#contract-' + post.contract.i"><span
+                                                            class="close text-white">×</span></button>
+                                                <p class="my-0 mx-3"><span class="me-1" id="commentVal">More Time?</span><i
+                                                        class="ms-1 fab fa-fw fa-hive"></i></p>
+                                            </div>
+                                        </form>
+                                    </div>
                             <div class="card-footer bg-darkg text-white-50">
                                 <!--footer buttons-->
                                 <div class="d-flex align-items-center my-2">
                                     <a href="#/" class="no-decoration" @click="post.flag = false"
                                         data-bs-toggle="collapse"
                                         :class="{'text-primary': post.hasVoted, 'text-white-50': !post.hasVoted, 'text-danger': post.slider < 0 }"
-                                        :data-bs-target="'#vote-modal-' + post.author + '-' + post.permlink">
+                                        :data-bs-target="'#vote-' + post.author + '-' + post.permlink">
                                         <i class="fas fa-heart fa-fw me-1"></i><span
                                             class="text-white-50">{{post.upVotes}}</span>
                                     </a>
@@ -231,14 +247,14 @@
                                     </a>
                                     <a href="#/" class="no-decoration text-white-50" data-bs-toggle="collapse"
                                         :class="{'text-primary': post.flag > 0}"
-                                        :data-bs-target="'#vote-modal-' + post.author + '-' + post.permlink"
+                                        :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
                                         @click="post.flag = true">
                                         <i class="fa-solid fa-flag ms-2 me-1"></i><span
                                             class="text-white-50">{{post.downVotes ? post.downVotes : ''}}</span>
                                     </a>
                                     <a v-for="contract in post.contract" href="#/" class="no-decoration text-white-50" data-bs-toggle="collapse"
-                                        :data-bs-target="'#contract-' + 'contract.i' ">
-                                        <i class="fa-solid fa-file-contract"></i>
+                                        :data-bs-target="'#contract-' + post.contract.i">
+                                        <i class="fa-solid fa-file-contract ms-2 me-1"></i>
                                     </a>
                                     <div class="ms-auto">
                                         <pop-vue title="Post Earnings"
@@ -350,28 +366,33 @@
                                         <button class="ms-auto btn btn-outline-primary">Post Comment</button>
                                         </div>
                                     <!--modal vote collapse-->
-                                    <div class="collapse"
-                                        :id="'vote-modal-' + displayPost.item.author + '-' + displayPost.item.permlink">
+                                    <div class="collapse bg-darker" :id="'vote-modal-' + displayPost.item.author + '-' + displayPost.item.permlink">
                                         <form id="voteForm">
-                                            <div class="d-flex align-items-center text-white-50">
-                                                <div>
-                                                    <button type="button" class="btn btn-primary"
-                                                        @click="vote(displayPost.item.url)">{{displayPost.item.slider/100}}%</button>
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-toggle="collapse"
-                                                        :data-bs-target="'#vote-modal-' + displayPost.item.author + '-' + displayPost.item.permlink"><span
-                                                            class="close text-white">×</span></button>
+                                            <div class="p-2 d-flex align-items-center text-white-50">
+        
+                                                <button type="button" class="btn me-2"
+                                                    :class="{'btn-success': !displayPost.item.flag, ' btn-danger': displayPost.item.flag}"
+                                                    @click="vote(displayPost.item.url)" style="width: 100px;">{{displayPost.item.flag ? '-' :
+                                                    ''}}{{displayPost.item.slider / 100}}%</button>
+        
+                                                <button type="button" class="btn btn-secondary me-2"
+                                                    :data-bs-target="'#vote-modal-' + displayPost.item.author + '-' + displayPost.item.permlink"
+                                                    data-bs-toggle="collapse"><span class="close text-white">×</span></button>
+        
+                                                <div class="d-flex align-items-center px-3 border rounded" style="height: 38px;"
+                                                    :class="{'border-success': !displayPost.item.flag, 'border-danger': displayPost.item.flag}">
+                                                    <input type="range" class="form-range mx-auto p-0" step="1" value="10000"
+                                                        max="10000" v-model="displayPost.item.slider">
                                                 </div>
-                                                <div class="flex-fill mx-2">
-                                                    <p class="my-1">
-                                                        <input type="range" class="form-control-range" step="1"
-                                                            value="10000" max="10000" min="1"
-                                                            v-model="displayPost.item.slider">
+        
+                                                <div class="ms-auto">
+                                                    <p class="me-1 my-0" id="commentVal"
+                                                        :class="{'text-success': !displayPost.item.flag, 'text-danger': displayPost.item.flag}">
+                                                        {{toFixed(voteVal *
+                                                            displayPost.item.slider/10000,3)}}
+                                                        <i class="me-1 fab fa-fw fa-hive"></i>
                                                     </p>
                                                 </div>
-                                                <p class="my-0"><span class="me-1" id="commentVal">{{toFixed(voteVal *
-                                                        displayPost.item.slider/10000,3)}} HBD</span><i
-                                                        class="ml-1 fab fa-fw fa-hive"></i></p>
                                             </div>
                                         </form>
                                     </div>
@@ -404,6 +425,18 @@
 
                                                 <i class="fas fa-comment ms-2 me-1"></i><span
                                                     class="text-white-50">{{displayPost.item.children}}</span></a>
+
+                                                    <a href="#/" class="no-decoration text-white-50" data-bs-toggle="collapse"
+                                        :class="{'text-primary': displayPost.flag > 0}"
+                                        :data-bs-target="'#vote-modal-' + displayPost.author + '-' + displayPost.permlink"
+                                        @click="displayPost.flag = true">
+                                        <i class="fa-solid fa-flag ms-2 me-1"></i><span
+                                            class="text-white-50">{{displayPost.downVotes ? displayPost.downVotes : ''}}</span>
+                                    </a>
+                                    <a v-for="contract in displayPost.contract" href="#/" class="no-decoration text-white-50" data-bs-toggle="collapse"
+                                        :data-bs-target="'#contract-modal-' + 'contract.i' ">
+                                        <i class="fa-solid fa-file-contract ms-2 me-1"></i>
+                                    </a>
                                         </div>
                                         <div class="ms-auto" id="modal_total_payout"><i
                                                 class="ms-1 fab fa-fw fa-hive text-white-50"></i>
