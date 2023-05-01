@@ -876,6 +876,9 @@ var app = new Vue({
                 downVotes: 0,
                 edit: false,
                 hasVoted: false,
+                contract: {
+
+                }
               };
               for (
                 var i = 0;
@@ -900,6 +903,18 @@ var app = new Vue({
               } catch (e) {
                 console.log(res.result.url, "no JSON?");
               }
+              var contracts = false
+              if(this.posturls[res.result.url].json_metadata.assets){
+                for(var i = 0; i < this.posturls[res.result.url].json_metadata.assets.length; i++){
+                  if(this.posturls[res.result.url].json_metadata.assets[i].contract){
+                    this.posturls[res.result.url].contract[this.posturls[res.result.url].json_metadata.assets[i].contract] = {}
+                    contracts = true
+                  }
+                }
+              }
+              if(contracts){
+                this.getContracts(res.result.url)
+              }
               this.posturls[res.result.url].rep = "...";
               this.rep(res.result.url);
               if (this.posturls[res.result.url].slider < 0){
@@ -918,6 +933,25 @@ var app = new Vue({
           });
       } else {
         console.log("no author or permlink", a, p);
+      }
+    },
+    getContracts(url){
+      var contracts = []
+      for(var contract in this.posturls[url].contract.length){
+        contracts.push(contract)
+      }
+      contracts = [...new Set(contracts)]
+      for(var i = 0; i < contracts.length; i++){
+        getContract(url, contracts[i])
+      }
+      function getContract(url, id){
+        fetch('https://spktest.dlux.io/api/fileContract/' + id)
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.result) {
+              this.posturls[url].contract[id] = res.result
+            }
+          });
       }
     },
     imgUrlAlt(event) {

@@ -236,9 +236,8 @@
                                         <i class="fa-solid fa-flag ms-2 me-1"></i><span
                                             class="text-white-50">{{post.downVotes ? post.downVotes : ''}}</span>
                                     </a>
-                                    <a href="#/" class="no-decoration text-white-50" data-bs-toggle="collapse"
-                                        :class="{'text-primary': post.flag > 0}"
-                                        :data-bs-target="'#contract-' + 'post.contract' ">
+                                    <a v-for="contract in post.contract" href="#/" class="no-decoration text-white-50" data-bs-toggle="collapse"
+                                        :data-bs-target="'#contract-' + 'contract.i' ">
                                         <i class="fa-solid fa-file-contract"></i>
                                     </a>
                                     <div class="ms-auto">
