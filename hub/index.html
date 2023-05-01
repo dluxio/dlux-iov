@@ -215,7 +215,7 @@
                                     <a href="#/" class="no-decoration" @click="post.flag = false"
                                         data-bs-toggle="collapse"
                                         :class="{'text-primary': post.hasVoted, 'text-white-50': !post.hasVoted, 'text-danger': post.slider < 0 }"
-                                        :data-bs-target="'#vote-' + post.author + '-' + post.permlink">
+                                        :data-bs-target="'#vote-modal-' + post.author + '-' + post.permlink">
                                         <i class="fas fa-heart fa-fw me-1"></i><span
                                             class="text-white-50">{{post.upVotes}}</span>
                                     </a>
@@ -231,12 +231,16 @@
                                     </a>
                                     <a href="#/" class="no-decoration text-white-50" data-bs-toggle="collapse"
                                         :class="{'text-primary': post.flag > 0}"
-                                        :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
+                                        :data-bs-target="'#vote-modal-' + post.author + '-' + post.permlink"
                                         @click="post.flag = true">
                                         <i class="fa-solid fa-flag ms-2 me-1"></i><span
                                             class="text-white-50">{{post.downVotes ? post.downVotes : ''}}</span>
                                     </a>
-
+                                    <a href="#/" class="no-decoration text-white-50" data-bs-toggle="collapse"
+                                        :class="{'text-primary': post.flag > 0}"
+                                        :data-bs-target="'#contract-' + 'post.contract' ">
+                                        <i class="fa-solid fa-file-contract"></i>
+                                    </a>
                                     <div class="ms-auto">
                                         <pop-vue title="Post Earnings"
                                             :content="(post.paid ? post.total_payout_value : post.pending_payout_value) + '<br>' + (post.paid ? precision(post.payout, 3) : 0) + ' ' + TOKEN"
@@ -368,6 +372,24 @@
                                                 </div>
                                                 <p class="my-0"><span class="me-1" id="commentVal">{{toFixed(voteVal *
                                                         displayPost.item.slider/10000,3)}} HBD</span><i
+                                                        class="ml-1 fab fa-fw fa-hive"></i></p>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <!--modal contract collapse-->
+                                    <div class="collapse"
+                                        :id="'contract-modal-' + displayPost.item.author + '-' + displayPost.item.permlink">
+                                        <form id="contractForm">
+                                            <div class="d-flex align-items-center text-white-50">
+                                                <div>
+                                                    <button type="button" class="btn btn-primary"
+                                                        @click="">Extend</button>
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-toggle="collapse"
+                                                        :data-bs-target="'#contract-modal-' + displayPost.item.author + '-' + displayPost.item.permlink"><span
+                                                            class="close text-white">×</span></button>
+                                                </div>
+                                                <p class="my-0"><span class="me-1" id="commentVal">More Time?</span><i
                                                         class="ml-1 fab fa-fw fa-hive"></i></p>
                                             </div>
                                         </form>
