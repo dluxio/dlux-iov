@@ -216,7 +216,7 @@
                             <!--contract collapse-->
                             <div class="collapse bg-darker" :id="'contract-' +  post.author + '-' + post.permlink">
                                 <form v-for="(cid, name, index) in post.contract" id="contractForm">
-                                    <p class="text-center my-1"><span class="me-1 text-break">{{fancyBytes(contracts[name].u)}} | {{expIn(contracts[name])}}</span></p>
+                                    <p v-if="contracts[name].u" class="text-center my-1"><span class="me-1 text-break">{{fancyBytes(contracts[name].u)}} | {{expIn(contracts[name])}}</span></p>
                                     <div class="p-2 d-flex align-items-center text-white-50">
                                         <button type="button" class="btn btn-primary me-2" @click="">Extend</button>
                                         <button type="button" class="btn btn-secondary me-2" data-bs-toggle="collapse"
