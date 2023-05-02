@@ -250,7 +250,7 @@
                                         <label class="btn btn-outline-info" for="option4">1Y</label>
                                    
                                         <input type="number" step="1" class="form-control text-center bg-darkg border-info text-info"
-                                            v-model="contracts[name].extend" @change="updateCost(name)" v-bind:class="{'disabled' : !customTime}">
+                                            v-model="contracts[name].extend" @change="updateCost(name)">
                                         <span
                                             class="input-group-text bg-dark border-info text-info">Days</span>
                                     </div>
@@ -288,7 +288,7 @@
                                     <a v-for="contract in post.contract" href="#/" class="no-decoration text-white-50"
                                         data-bs-toggle="collapse"
                                         :data-bs-target="'#contract-' + post.author + '-' + post.permlink">
-                                        <i class="fa-solid fa-file-contract ms-2 me-1"></i>
+                                        <i class="fa-solid fa-file-contract ms-2 me-1 text-success"></i>
                                     </a>
                                     <div class="ms-auto">
                                         <pop-vue title="Post Earnings"
