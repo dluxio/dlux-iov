@@ -940,17 +940,12 @@ var app = new Vue({
     getContracts(url){
       var contracts = [],
         getContract = (u, id) => {
-          console.log(u, id)
           fetch('https://spktest.dlux.io/api/fileContract/' + id)
             .then((r) => r.json())
             .then((res) => {
-              console.log(res.result)
+              res.result.extend = 1
               if (res.result) {
-                console.log(true)
                 this.contracts[id] = res.result
-                this.contracts[id].extend = 1
-                this.contracts[id].extend_broca = 1
-                console.log(this.contracts)
               }
             });
         }
