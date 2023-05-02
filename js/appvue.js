@@ -139,6 +139,7 @@ var app = new Vue({
       recenthive: {},
       recenthbd: {},
       openorders: [],
+      extendcost: {},
       toasts: [],
       features: {
         claim_id: "claim",
