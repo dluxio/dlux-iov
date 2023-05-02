@@ -68,6 +68,7 @@ var app = new Vue({
         set: "",
         uid: "",
       },
+      sstats: {},
       hasDrop: false,
       customTime: false,
       dropnai: "",
@@ -501,15 +502,25 @@ var app = new Vue({
     color_code(name){
       return parseInt(this.contracts[name] ? this.contracts[name].e.split(':')[0] : 0) - this.spkapi.head_block
     },
+    Base64toNumber(chars) {
+      const glyphs =
+        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
+      var result = 0;
+      chars = chars.split("");
+      for (var e = 0; e < chars.length; e++) {
+        result = result * 64 + glyphs.indexOf(chars[e]);
+      }
+      return result;
+    },
     broca_calc(last = '0,0') {
       const last_calc = this.Base64toNumber(last.split(',')[1])
-      const accured = parseInt((parseFloat(this.sstats.broca_refill) * (this.sstats.head_block - last_calc)) / (this.saccountapi.spk_power * 1000))
+      const accured = parseInt((parseFloat(this.sstats.broca_refill) * (this.sstats.head_block - last_calc)) / (this.spkapi.spk_power * 1000))
       var total = parseInt(last.split(',')[0]) + accured
-      if (total > (this.saccountapi.spk_power * 1000)) total = (this.saccountapi.spk_power * 1000)
+      if (total > (this.spkapi.spk_power * 1000)) total = (this.spkapi.spk_power * 1000)
       return total
     },
     extend(contract, amount, up = false){
-      if(amount > this.spkapi.broca.split(',')[0])return
+      if(amount > this.broca_calc(this.spkapi.broca))return
       this.toSign = {
           type: "cja",
           cj: {
@@ -794,6 +805,13 @@ var app = new Vue({
         counter ++
       }
       return `${this.toFixed(bytes, 2)} ${p[counter]}B`
+    },
+    getSPKStats(){
+      fetch('https://spktest.dlux.io/')
+      .then(r => r.json())
+      .then(r => {
+        this.sstats = r
+      })
     },
     expIn(con){
       return `Expires in ${parseInt((parseInt(con.e.split(':')[0]) - this.spkapi.head_block) / 20 / 60) < 24 ? parseInt((parseInt(con.e.split(':')[0]) - this.spkapi.head_block) / 20 / 60) + ' hours' : parseInt((parseInt(con.e.split(':')[0]) - this.spkapi.head_block) / 20 / 60 / 24) + ' days'}`
@@ -1312,6 +1330,7 @@ var app = new Vue({
     // this.getUserNFTs();
     //this.getQuotes();
     //this.getNodes();
+    this.getSPKStats()
     this.getPosts();
     this.getProtocol();
     this.getRewardFund();
