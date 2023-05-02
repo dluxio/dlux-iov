@@ -240,7 +240,7 @@
                                                 type="radio" value="365" v-model="contracts[name].extend">
                                             <label class="btn btn-secondary" for="option4">1Y</label>
                                             <input name="time" @change="updateCost(name)" title="Custom Amount" id="option5" class="btn-check"
-                                                type="radio" value="true" v-model="customTime">
+                                                type="radio" :value="!customTime" v-model="customTime">
                                             <label class="btn btn-secondary" for="option5">Custom</label>
                                         </div>
                                         <div v-if="customTime" class="input-group col">
