@@ -237,25 +237,22 @@
                                         
                                         <input name="time" @change="updateCost(name);customTime = false" title="1 Day" class="btn-check" id="option1" type="radio"
                                             value="1" v-model="contracts[name].extend" checked>
-                                        <label class="btn btn-secondary l-radius-hotfix" for="option1">1D</label>
-                                        <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                                                            disabled></button>
+                                        <label class="btn btn-outline-info l-radius-hotfix" for="option1">1D</label>
+                                        
                                         <input name="time" @change="updateCost(name);customTime = false" title="1 Week" class="btn-check" id="option2"
                                             type="radio" value="7" v-model="contracts[name].extend"><label
-                                            class="btn btn-secondary" for="option2">1W</label><button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                                            disabled></button>
+                                            class="btn btn-outline-info" for="option2">1W</label>
                                         <input name="time" @change="updateCost(name);customTime = false" title="1 Month" class="btn-check" id="option3"
                                             type="radio" value="30" v-model="contracts[name].extend"><label
-                                            class="btn btn-secondary" for="option3">1M</label><button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                                            disabled></button>
+                                            class="btn btn-outline-info" for="option3">1M</label>
                                         <input name="time" @change="updateCost(name);customTime = false" title="1 Year" class="btn-check" id="option4"
                                             type="radio" value="365" v-model="contracts[name].extend">
-                                        <label class="btn btn-secondary" for="option4">1Y</label>
+                                        <label class="btn btn-outline-info" for="option4">1Y</label>
                                    
-                                        <input type="number" step="1" class="form-control text-center bg-darkg border-secondary text-info"
+                                        <input type="number" step="1" class="form-control text-center bg-dark border-info text-info"
                                             v-model="contracts[name].extend" @change="updateCost(name)" v-bind:class="{'disabled' : !customTime}">
                                         <span
-                                            class="input-group-text bg-darkg border-secondary text-white-50">Days</span>
+                                            class="input-group-text bg-dark border-info text-info">Days</span>
                                     </div>
                                 </div>
                                 </div>
