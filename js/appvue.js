@@ -499,7 +499,7 @@ var app = new Vue({
       }
     },
     color_code(name){
-      return parseInt(this.contracts[name].exp.split(':')[0]) - this.spkapi.head_block
+      return parseInt(this.contracts[name] ? this.contracts[name].e.split(':')[0] : 0) - this.spkapi.head_block
     },
     broca_calc(last = '0,0') {
       const last_calc = this.Base64toNumber(last.split(',')[1])
