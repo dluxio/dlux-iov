@@ -937,6 +937,9 @@ var app = new Vue({
         console.log("no author or permlink", a, p);
       }
     },
+    brocaCost(t,c){
+      return parseInt((t/30)*c)
+    },
     getContracts(url){
       var contracts = [],
         getContract = (u, id) => {
