@@ -245,7 +245,7 @@
                                         </div>
                                         <div v-if="customTime" class="input-group col">
                                             <input type="number" step="1" class="form-control bg-darkg border-secondary text-info"
-                                                v-model="contracts[name].extend">
+                                                v-model="contracts[name].extend" @change="updateCost(name)">
                                             <span
                                                 class="input-group-text bg-darkg border-secondary text-white-50">Days</span>
                                         </div>
