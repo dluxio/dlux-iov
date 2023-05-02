@@ -63,6 +63,7 @@ var app = new Vue({
     return {
       toSign: {},
       account: user,
+      spkapi: {},
       pfp: {
         set: "",
         uid: "",
@@ -757,6 +758,17 @@ var app = new Vue({
         if (!this[key]) this[key] = value;
       }
     },
+    fancyBytes(bytes){
+      var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
+      while (bytes > 1024){
+        bytes = bytes / 1024
+        counter ++
+      }
+      return `${this.toFixed(bytes, 2)} ${p[counter]}B`
+    },
+    expIn(con){
+      return `Expires in ${parseInt((parseInt(con.e.split(':')[0]) - this.spkapi.head_block) / 20 / 60) < 24 ? parseInt((parseInt(con.e.split(':')[0]) - this.spkapi.head_block) / 20 / 60) + ' hours' : parseInt((parseInt(con.e.split(':')[0]) - this.spkapi.head_block) / 20 / 60 / 24) + ' days'}`
+    },
     setMem(key, value, reload) {
       if (value.indexOf("https://") == -1) {
         alert("https:// is required for security reasons");
@@ -1199,6 +1211,16 @@ var app = new Vue({
                 data.drop.availible.token
               }`;
             }
+          });
+    },
+    getSPKUser(user) {
+      console.log({user})
+      if (user)
+        fetch("https://spktest.dlux.io/@" + user)
+          .then((response) => response.json())
+          .then((data) => {
+            console.log({data})
+            this.spkapi = data
           });
     },
     getHiveUser(user) {
