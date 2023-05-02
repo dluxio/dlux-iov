@@ -943,7 +943,7 @@ var app = new Vue({
           fetch('https://spktest.dlux.io/api/fileContract/' + id)
             .then((r) => r.json())
             .then((res) => {
-              res.result.extend = "1"
+              res.result.extend = "7"
               if (res.result) {
                 this.contracts[id] = res.result
               }
