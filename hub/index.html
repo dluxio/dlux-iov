@@ -213,6 +213,7 @@
                             <div class="collapse bg-darker"
                                         :id="'contract-' +  post.author + '-' + post.permlink">
                                         <form v-for="(cid, name, index) in post.contract" id="contractForm">
+                                            <p class="text-center my-1"><span class="me-1 text-break">{{contracts[name] ? contracts[name].e : name}}</span></p>
                                             <div class="p-2 d-flex align-items-center text-white-50">
                                                     <button type="button" class="btn btn-primary me-2"
                                                         @click="">Extend</button>
@@ -220,10 +221,17 @@
                                                         data-bs-toggle="collapse"
                                                         :data-bs-target="'#contract-' + post.author + '-' + post.permlink"><span
                                                             class="close text-white">×</span></button>
-                                                <p class="my-0 mx-3"><span class="me-1">{{contracts[name] ? contracts[name].e : name}}</span><i
-                                                        class="ms-1 fab fa-fw fa-hive"></i></p>
+                                                            <div class="btn-group ms-auto me-auto" role="group">
+                                                                <a href="#" title="1 Hour" class="btn btn-primary" type="radio" name="contractRadio" id="contractRadio1">1H</a>
+                                                                <a href="#" title="1 Day" class="btn btn-primary active" type="radio" name="contractRadio" id="contractRadio2" checked>1D</a>
+                                                                <a href="#" title="1 Week" class="btn btn-primary" type="radio" name="contractRadio" id="contractRadio3">1W</a>
+                                                                <a href="#" title="1 Month" class="btn btn-primary" type="radio" name="contractRadio" id="contractRadio4">1M</a>
+                                                                <a href="#" title="1 Year" class="btn btn-primary" type="radio" name="contractRadio" id="contractRadio5">1Y</a>
+                                                            </div>
+                                                            <div class="ms-auto">123.45 SPK<i
+                                                                class="ms-1 fab fa-fw fa-hive"></i></div>
                                             </div>
-                                        </form>
+                                            </form>
                                     </div>
                             <div class="card-footer bg-darkg text-white-50">
                                 <!--footer buttons-->
@@ -407,8 +415,8 @@
                                                     <button type="button" class="btn btn-secondary"
                                                         data-bs-toggle="collapse"
                                                         :data-bs-target="'#contract-modal-' + displayPost.item.author + '-' + displayPost.item.permlink"><span
-                                                            class="close text-white">×</span></button>
-                                                </div>
+                                                            class="close text-white">×</span></button>                                                    
+                                                        </div>
                                                 <p class="my-0"><span class="me-1" id="commentVal">More Time?</span><i
                                                         class="ml-1 fab fa-fw fa-hive"></i></p>
                                             </div>
