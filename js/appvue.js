@@ -952,6 +952,7 @@ var app = new Vue({
     },
     updateCost(id){
       this.extendcost[id] = parseInt(this.contracts[id].extend / 30 * this.contracts[id].r)
+      this.$forceUpdate()
     },
     getContracts(url){
       var contracts = [],
