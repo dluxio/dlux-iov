@@ -69,6 +69,7 @@ var app = new Vue({
         uid: "",
       },
       hasDrop: false,
+      customTime: false,
       dropnai: "",
       balance: "0.000",
       bartoken: "",
