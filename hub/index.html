@@ -220,7 +220,7 @@
                                         
 
                                     <div class="p-2 d-flex align-items-center text-white-50">
-                                        <button type="button" class="btn btn-primary me-2" @click="">Extend</button>
+                                        <button type="button" class="btn btn-primary me-2" @click="extend(contracts[name], extendcost[name])">Extend</button>
                                         <button type="button" class="btn btn-secondary me-2" data-bs-toggle="collapse"
                                             :data-bs-target="'#contract-' + post.author + '-' + post.permlink"><span
                                                 class="close text-white">×</span></button>

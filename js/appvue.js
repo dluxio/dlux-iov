@@ -498,6 +498,22 @@ var app = new Vue({
         this[modal].item = this[modal].items[this[modal].index];
       }
     },
+    extend(contract, amount, up = false){
+      this.toSign = {
+          type: "cja",
+          cj: {
+            broca: amount,
+            id: contract.i,
+            file_owner: contract.t,
+            power: this.up ? 1 : 0,
+          },
+          id: `spkcc_extend`,
+          msg: `Trying to unlock ${this.token}...`,
+          ops: ["getTokenUser"],
+          api: "https://token.dlux.io",
+          txid: "send",
+        }
+    },
     modalPrev(modal) {
       if (this[modal].index) this[modal].index--;
       else this[modal].index = this[modal].items.length - 1;
