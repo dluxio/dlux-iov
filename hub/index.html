@@ -223,7 +223,7 @@
                                         <button type="button" class="btn btn-secondary me-2" data-bs-toggle="collapse"
                                             :data-bs-target="'#contract-' + post.author + '-' + post.permlink"><span
                                                 class="close text-white">×</span></button>
-                                        <div class="btn-group ms-auto me-auto" role="group">
+                                        <div v-if="contracts[name]" class="btn-group ms-auto me-auto" role="group">
                                             <input name="time" title="1 Day" class="btn btn-primary active" type="radio"
                                                 value="1" v-model="contracts[name].extend" checked>1D</input>
                                             <input name="time" title="1 Week" class="btn btn-primary" type="radio" value="7"
