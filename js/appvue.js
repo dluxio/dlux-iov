@@ -530,10 +530,10 @@ var app = new Vue({
             power: this.up ? 1 : 0,
           },
           id: `spkcc_extend`,
-          msg: `Trying to unlock ${this.token}...`,
+          msg: `Extending ${contract}...`,
           ops: ["getTokenUser"],
-          api: "https://token.dlux.io",
-          txid: "send",
+          api: "https://spktest.dlux.io",
+          txid: "extend",
         }
     },
     modalPrev(modal) {
@@ -810,7 +810,8 @@ var app = new Vue({
       fetch('https://spktest.dlux.io/')
       .then(r => r.json())
       .then(r => {
-        this.sstats = r
+        r.result.head_block = r.head_block
+        this.sstats = r.result
       })
     },
     expIn(con){
