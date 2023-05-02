@@ -213,7 +213,7 @@
                             <div class="collapse bg-darker"
                                         :id="'contract-' +  post.author + '-' + post.permlink">
                                         <form v-for="cid in post.contract" id="contractForm">
-                                            <div class="p-2 d-flex align-items-center text-white-50">
+                                            <div v-if="contracts[cid]" class="p-2 d-flex align-items-center text-white-50">
                                                     <button type="button" class="btn btn-primary me-2"
                                                         @click="">Extend</button>
                                                     <button type="button" class="btn btn-secondary me-2"
