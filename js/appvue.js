@@ -76,6 +76,11 @@ var app = new Vue({
       bargov: "",
       barpow: "",
       toSign: {},
+      contracts: {
+        fake: {
+          thing: 'this is a fake contract'
+        }
+      },
       buyFormValid: false,
       sellFormValid: false,
       govFormValid: false,
@@ -936,22 +941,27 @@ var app = new Vue({
       }
     },
     getContracts(url){
-      var contracts = []
-      for(var contract in this.posturls[url].contract.length){
+      var contracts = [],
+        getContract = (u, id) => {
+          console.log(u, id)
+          fetch('https://spktest.dlux.io/api/fileContract/' + id)
+            .then((r) => r.json())
+            .then((res) => {
+              console.log(res.result)
+              if (res.result) {
+                console.log(true)
+                this.contracts[id] = res.result
+                console.log(this.contracts)
+              }
+            });
+        }
+      for(var contract in this.posturls[url].contract){
         contracts.push(contract)
       }
       contracts = [...new Set(contracts)]
+      console.log(contracts)
       for(var i = 0; i < contracts.length; i++){
         getContract(url, contracts[i])
-      }
-      function getContract(url, id){
-        fetch('https://spktest.dlux.io/api/fileContract/' + id)
-          .then((r) => r.json())
-          .then((res) => {
-            if (res.result) {
-              this.posturls[url].contract[id] = res.result
-            }
-          });
       }
     },
     imgUrlAlt(event) {
