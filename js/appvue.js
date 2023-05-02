@@ -937,9 +937,6 @@ var app = new Vue({
         console.log("no author or permlink", a, p);
       }
     },
-    brocaCost(t,c){
-      return parseInt((t/30)*c)
-    },
     getContracts(url){
       var contracts = [],
         getContract = (u, id) => {
@@ -949,6 +946,7 @@ var app = new Vue({
               res.result.extend = "7"
               if (res.result) {
                 this.contracts[id] = res.result
+                this.$forceUpdate()
               }
             });
         }
@@ -1225,6 +1223,9 @@ var app = new Vue({
             const power = ((parseInt(this.accountinfo.voting_power) * 10000) / 10000) / 50;
             this.accountinfo.rshares = (power * final_vest) / 10000;
           });
+    },
+    brocaCost(t,c){
+      return parseInt((t/30)*c)
     },
     getHiveAuthors(users) {
       var q = "";
