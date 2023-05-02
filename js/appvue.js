@@ -498,7 +498,18 @@ var app = new Vue({
         this[modal].item = this[modal].items[this[modal].index];
       }
     },
+    color_code(name){
+      return parseInt(this.contracts[name].exp.split(':')[0]) - this.spkapi.head_block
+    },
+    broca_calc(last = '0,0') {
+      const last_calc = this.Base64toNumber(last.split(',')[1])
+      const accured = parseInt((parseFloat(this.sstats.broca_refill) * (this.sstats.head_block - last_calc)) / (this.saccountapi.spk_power * 1000))
+      var total = parseInt(last.split(',')[0]) + accured
+      if (total > (this.saccountapi.spk_power * 1000)) total = (this.saccountapi.spk_power * 1000)
+      return total
+    },
     extend(contract, amount, up = false){
+      if(amount > this.spkapi.broca.split(',')[0])return
       this.toSign = {
           type: "cja",
           cj: {
