@@ -949,6 +949,9 @@ var app = new Vue({
         console.log("no author or permlink", a, p);
       }
     },
+    updateCost(id){
+      this.extendcost[id] = parseInt(this.contracts[id].extend / 30 * this.contracts[id].r)
+    },
     getContracts(url){
       var contracts = [],
         getContract = (u, id) => {
@@ -958,7 +961,7 @@ var app = new Vue({
               res.result.extend = "7"
               if (res.result) {
                 this.contracts[id] = res.result
-                this.$forceUpdate()
+                this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
               }
             });
         }
