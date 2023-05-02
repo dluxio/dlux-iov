@@ -216,42 +216,48 @@
                             <!--contract collapse-->
                             <div class="collapse bg-darker" :id="'contract-' +  post.author + '-' + post.permlink">
                                 <form v-for="(cid, name, index) in post.contract" id="contractForm">
-                                    <div v-if="contracts[name]">
-                                    <p class="text-center my-1"><span
-                                            class="me-1 text-break">{{fancyBytes(contracts[name].u)}} |
-                                            {{expIn(contracts[name])}}</span></p>
+                                    <div v-if="contracts[name]" class="d-flex flex-column">
+                                        
+
                                     <div class="p-2 d-flex align-items-center text-white-50">
                                         <button type="button" class="btn btn-primary me-2" @click="">Extend</button>
                                         <button type="button" class="btn btn-secondary me-2" data-bs-toggle="collapse"
                                             :data-bs-target="'#contract-' + post.author + '-' + post.permlink"><span
                                                 class="close text-white">×</span></button>
-                                        <div class="btn-group ms-auto me-auto"
-                                            role="group">
-                                            <input name="time" @change="updateCost(name);customTime = false" title="1 Day" class="btn-check" id="option1" type="radio"
-                                                value="1" v-model="contracts[name].extend" checked>
-                                            <label class="btn btn-secondary" for="option1">1D</label>
-                                            <input name="time" @change="updateCost(name);customTime = false" title="1 Week" class="btn-check" id="option2"
-                                                type="radio" value="7" v-model="contracts[name].extend"><label
-                                                class="btn btn-secondary" for="option2">1W</label>
-                                            <input name="time" @change="updateCost(name);customTime = false" title="1 Month" class="btn-check" id="option3"
-                                                type="radio" value="30" v-model="contracts[name].extend"><label
-                                                class="btn btn-secondary" for="option3">1M</label>
-                                            <input name="time" @change="updateCost(name);customTime = false" title="1 Year" class="btn-check" id="option4"
-                                                type="radio" value="365" v-model="contracts[name].extend">
-                                            <label class="btn btn-secondary" for="option4">1Y</label>
-                                            <input name="time" @change="updateCost(name)" title="Custom Amount" id="option5" class="btn-check"
-                                                type="radio" :value="!customTime" v-model="customTime">
-                                            <label class="btn btn-secondary" for="option5">Custom</label>
-                                        </div>
-                                        <div v-if="customTime" class="input-group col">
-                                            <input type="number" step="1" class="form-control bg-darkg border-secondary text-info"
-                                                v-model="contracts[name].extend" @change="updateCost(name)">
-                                            <span
-                                                class="input-group-text bg-darkg border-secondary text-white-50">Days</span>
-                                        </div>
-                                        <div class="ms-auto">{{extendcost[name]}}
-                                            Broca<i class="ms-1 fab fa-fw fa-hive"></i></div>
+                                        
+                                       
+                                        <p class="text-center ms-auto me-auto my-1"><span
+                                            class="me-1 text-break">{{fancyBytes(contracts[name].u)}} |
+                                            {{expIn(contracts[name])}}</span></p>
+                                        <div class="ms-auto text-primary">{{extendcost[name]}}
+                                            Broca</div>
                                     </div>
+                                    <div class="d-flex">
+                                    <div class="input-group m-2">
+                                        
+                                        <input name="time" @change="updateCost(name);customTime = false" title="1 Day" class="btn-check" id="option1" type="radio"
+                                            value="1" v-model="contracts[name].extend" checked>
+                                        <label class="btn btn-secondary l-radius-hotfix" for="option1">1D</label>
+                                        <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                            disabled></button>
+                                        <input name="time" @change="updateCost(name);customTime = false" title="1 Week" class="btn-check" id="option2"
+                                            type="radio" value="7" v-model="contracts[name].extend"><label
+                                            class="btn btn-secondary" for="option2">1W</label><button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                            disabled></button>
+                                        <input name="time" @change="updateCost(name);customTime = false" title="1 Month" class="btn-check" id="option3"
+                                            type="radio" value="30" v-model="contracts[name].extend"><label
+                                            class="btn btn-secondary" for="option3">1M</label><button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                            disabled></button>
+                                        <input name="time" @change="updateCost(name);customTime = false" title="1 Year" class="btn-check" id="option4"
+                                            type="radio" value="365" v-model="contracts[name].extend">
+                                        <label class="btn btn-secondary" for="option4">1Y</label>
+                                   
+                                        <input type="number" step="1" class="form-control text-center bg-darkg border-secondary text-info"
+                                            v-model="contracts[name].extend" @change="updateCost(name)" v-bind:class="{'disabled' : !customTime}">
+                                        <span
+                                            class="input-group-text bg-darkg border-secondary text-white-50">Days</span>
+                                    </div>
+                                </div>
                                 </div>
                                 </form>
                             </div>
