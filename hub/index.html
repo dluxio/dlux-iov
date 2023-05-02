@@ -220,7 +220,7 @@
                                         
 
                                     <div class="p-2 d-flex align-items-center text-white-50">
-                                        <button type="button" class="btn btn-primary me-2" @click="extend(contracts[name], extendcost[name])">Extend</button>
+                                        <button type="button" class="btn btn-primary me-2" @click="extend(contracts[name], extendcost[name])"><i class="fa-solid fa-clock-rotate-left fa-fw me-2"></i>Extend</button>
                                         <button type="button" class="btn btn-secondary me-2" data-bs-toggle="collapse"
                                             :data-bs-target="'#contract-' + post.author + '-' + post.permlink"><span
                                                 class="close text-white">×</span></button>
@@ -249,7 +249,7 @@
                                             type="radio" value="365" v-model="contracts[name].extend">
                                         <label class="btn btn-outline-info" for="option4">1Y</label>
                                    
-                                        <input type="number" step="1" class="form-control text-center bg-dark border-info text-info"
+                                        <input type="number" step="1" class="form-control text-center bg-darkg border-info text-info"
                                             v-model="contracts[name].extend" @change="updateCost(name)" v-bind:class="{'disabled' : !customTime}">
                                         <span
                                             class="input-group-text bg-dark border-info text-info">Days</span>
