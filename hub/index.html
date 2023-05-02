@@ -213,14 +213,14 @@
                             <div class="collapse bg-darker"
                                         :id="'contract-' +  post.author + '-' + post.permlink">
                                         <form v-for="cid in post.contract" id="contractForm">
-                                            <div v-if="contracts[cid]" class="p-2 d-flex align-items-center text-white-50">
+                                            <div class="p-2 d-flex align-items-center text-white-50">
                                                     <button type="button" class="btn btn-primary me-2"
                                                         @click="">Extend</button>
                                                     <button type="button" class="btn btn-secondary me-2"
                                                         data-bs-toggle="collapse"
                                                         :data-bs-target="'#contract-' + post.author + '-' + post.permlink"><span
                                                             class="close text-white">×</span></button>
-                                                <p class="my-0 mx-3"><span class="me-1">{{contracts[cid] ? contracts[cid].e : 'huh?'}}</span><i
+                                                <p class="my-0 mx-3"><span class="me-1">{{contracts[cid] ? contracts[cid].e : cid}}</span><i
                                                         class="ms-1 fab fa-fw fa-hive"></i></p>
                                             </div>
                                         </form>
