@@ -232,15 +232,14 @@
                                                 v-model="contracts[name].extend">1M</input>
                                             <input title="1 Year" class="btn btn-primary" type="radio" value="365"
                                                 v-model="contracts[name].extend">1Y</input>
-                                            <input title="Custom Amount" class="btn btn-primary" type="radio"
-                                                name="contractRadio" id="contractRadio5">Custom</input>
+                                            <input title="Custom Amount" class="btn btn-primary" type="radio">Custom</input>
                                         </div>
-                                        <div class="input-group col">
+                                        <!-- <div class="input-group col">
                                             <input class="form-control bg-darkg border-secondary text-info"
                                                 v-model="contracts[name].extend">
                                             <span
                                                 class="input-group-text bg-darkg border-secondary text-white-50">Days</span>
-                                        </div>
+                                        </div> -->
                                         <div class="ms-auto">{{(contracts[name].extend * contracts[name].r)}}Broca<i
                                                 class="ms-1 fab fa-fw fa-hive"></i></div>
                                     </div>
