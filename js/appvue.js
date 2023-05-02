@@ -77,9 +77,6 @@ var app = new Vue({
       barpow: "",
       toSign: {},
       contracts: {
-        fake: {
-          thing: 'this is a fake contract'
-        }
       },
       buyFormValid: false,
       sellFormValid: false,
@@ -951,6 +948,8 @@ var app = new Vue({
               if (res.result) {
                 console.log(true)
                 this.contracts[id] = res.result
+                this.contracts[id].extend = 1
+                this.contracts[id].extend_broca = 1
                 console.log(this.contracts)
               }
             });

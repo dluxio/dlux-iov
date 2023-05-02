@@ -222,17 +222,17 @@
                                                         :data-bs-target="'#contract-' + post.author + '-' + post.permlink"><span
                                                             class="close text-white">×</span></button>
                                                             <div class="btn-group ms-auto me-auto" role="group">
-                                                                <a href="#" title="1 Day" class="btn btn-primary active" type="radio" name="contractRadio" id="contractRadio1" checked>1D</a>
-                                                                <a href="#" title="1 Week" class="btn btn-primary" type="radio" name="contractRadio" id="contractRadio2">1W</a>
-                                                                <a href="#" title="1 Month" class="btn btn-primary" type="radio" name="contractRadio" id="contractRadio3">1M</a>
-                                                                <a href="#" title="1 Year" class="btn btn-primary" type="radio" name="contractRadio" id="contractRadio4">1Y</a>
+                                                                <a href="#" title="1 Day" class="btn btn-primary active" type="radio" value="1" v-model="contracts[name].extend" checked>1D</a>
+                                                                <a href="#" title="1 Week" class="btn btn-primary" type="radio" value="7" v-model="contracts[name].extend">1W</a>
+                                                                <a href="#" title="1 Month" class="btn btn-primary" type="radio" value="30" v-model="contracts[name].extend">1M</a>
+                                                                <a href="#" title="1 Year" class="btn btn-primary" type="radio" value="365" v-model="contracts[name].extend">1Y</a>
                                                                 <a href="#" title="Custom Amount" class="btn btn-primary" type="radio" name="contractRadio" id="contractRadio5">Custom</a>
                                                             </div>
                                                             <div class="input-group col">
-                                                                <input class="form-control bg-darkg border-secondary text-info">
-                                                                <span class="input-group-text bg-darkg border-secondary text-white-50">SPK</span>
+                                                                <input class="form-control bg-darkg border-secondary text-info" v-model="contracts[name].extend">
+                                                                <span class="input-group-text bg-darkg border-secondary text-white-50">Days</span>
                                                             </div>
-                                                            <div class="ms-auto">123.45 SPK<i
+                                                            <div class="ms-auto">{{(contracts[name].extend * contracts[name].r)}}Broca<i
                                                                 class="ms-1 fab fa-fw fa-hive"></i></div>
                                             </div>
                                             </form>
