@@ -28,18 +28,13 @@
 			border-style: solid;
 		}
 
-		.btn-outline-fusch {
-			color: #FFA300;
-			border-color: #FFA300;
-		}
-
 		.middle-newsroom {
 			border-right: solid;
-			border-right-width: 2.5px;
-			border-right-color: #191C20;
+			border-right-width: 2px;
+			border-right-color: rgba(255, 255, 255, 0.2);
 			border-left: solid;
-			border-left-width: 2.5px;
-			border-left-color: #191C20;
+			border-left-width: 2px;
+			border-left-color: rgba(255, 255, 255, 0.2);
 		}
 
 		@media screen and (max-width: 991px) {
@@ -47,17 +42,17 @@
 				border-right: none;
 				border-left: none;
 				border-top: solid;
-				border-top-width: 2.5px;
-				border-top-color: #191C20;
+				border-top-width: 2px;
+				border-top-color: rgba(255, 255, 255, 0.2);
 				border-bottom: solid;
-				border-bottom-width: 2.5px;
-				border-bottom-color: #191C20;
+				border-bottom-width: 2px;
+				border-bottom-color: rgba(255, 255, 255, 0.2);
 			}
 		}
 	</style>
 </head>
 
-<body class="d-flex flex-column bg-darker padme-t70">
+<body class="d-flex flex-column padme-t70">
 	<div id="app">
 		<div>
 			<nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event)"
@@ -66,7 +61,7 @@
 		</div>
 		<main role="main" class="flex-shrink-0 text-white bg-color h-100">
 			<div class="container-fluid px-0">
-				<div class="container-fluid fixed-top bg-dark" style="margin-top: 66px; z-index: 900;">
+				<div class="container-fluid fixed-top" style="margin-top: 66px; z-index: 900;">
 
 					<nav class="navbar navbar-dark navbar-expand-lg">
 						<div class="m-auto">
@@ -108,13 +103,12 @@
 				<div id="pagecontent" class="tab-content padme-t70 pb-5 text-white">
 
 					<div role="tabpanel" class="tab-pane fade show active" id="about" aria-labelledby="aboutTab">
-						<div class="jumbotron container bg-darker ">
+						<div class="jumbotron container">
 							<h1 class="display-4 text-center">About</h1>
 							<p class="lead text-center">Decentralized Limitless User Experiences</p>
-							<hr class="my-4 bg-light">
+							<hr class="my-4">
 							<h1 class="mb-4">Part Social. Part Crypto. Limitless User Experiences.</h1>
-							<div class="py-3"
-								style="border-bottom: solid; border-bottom-width: 2.5px; border-bottom-color: #191C20;">
+							<div class="py-3 border-bottom border-2">
 								<h3 style="color: #0ED18C;">dApps: Decentralized Applications</h3>
 								<p>DLUX is an open source project built on the Hive blockchain that started as a way for
 									users to build, post, and monetize virtual reality experiences without needing to
@@ -124,8 +118,7 @@
 									the ability to purchase and tip became a reality for VR art galleries, AR menu
 									systems, and 2D web dApps.</p>
 							</div>
-							<div class="py-3"
-								style="border-bottom: solid; border-bottom-width: 2.5px; border-bottom-color: #191C20;">
+							<div class="py-3 border-bottom border-2">
 								<h3 style="color: #FFA300;">DeFi: Decentralized Finance</h3>
 								<p>As the project grew, the need for an oracle arose to control how user assets can be
 									packaged, pinned, and distributed. Now much more than a decentralized metaverse,
@@ -137,8 +130,7 @@
 									orders placed on the DEX are safe. The users maintain consensus in a deterministic
 									way by reading the Hive chain block-by-block and broadcasting their response.</p>
 							</div>
-							<div class="py-3"
-								style="border-bottom: solid; border-bottom-width: 2.5px; border-bottom-color: #191C20;">
+							<div class="py-3 border-bottom border-2">
 								<h3 style="color:#FB00FF">S-NFTs: Smart Non Fungible Tokens</h3>
 								<p>Transcend current media limitations with Smart NFTs, tokens that can be distributed
 									to users that are interactive. Build Generative NFT sets with SVG layers (Scaleable
@@ -146,8 +138,7 @@
 									set their SNFTs as their PFP (ProFile Picture) which are verifiable by any front end
 									choosing to recognize them.</p>
 							</div>
-							<div class="py-3"
-								style="border-bottom: solid; border-bottom-width: 2.5px; border-bottom-color: #191C20;">
+							<div class="py-3 border-bottom border-2">
 								<h3 style="color: #E31337;">Hive: Social Blockchain</h3>
 								<p>Building on the blazing fast blockchain foundation of Hive, DLUX has been first to
 									market with many exciting L2 (layer two) features already in public beta. Updates in
@@ -168,19 +159,18 @@
 									the future, drop into our Discord server and say hi!</p>
 								<a class="btn btn-outline-primary btn-lg col-md-6 mx-auto"
 									href="https://discord.gg/Beeb38j" target="_blank" role="button">Chat on Discord<i
-										class="fab fa-discord fa-fw ml-2"></i></a>
+										class="fab fa-discord fa-fw ms-2"></i></a>
 							</div>
 						</div>
 					</div>
 
 					<div role="tabpanel" class="tab-pane fade show " id="newsroom" aria-labelledby="newsroomTab">
-						<div class="jumbotron container bg-darker  text-center">
+						<div class="jumbotron container  text-center">
 							<h1 class="display-4 text-center">Newsroom</h1>
 							<p class="lead text-center">Project collaborations and interviews</p>
-							<hr class="my-4 bg-light">
+							<hr class="my-4">
 
-							<div class="row align-items-center py-5"
-								style="border-bottom: solid; border-bottom-width: 2.5px; border-bottom-color: #191C20;">
+							<div class="row align-items-center py-5 border-bottom border-2">
 								<div class="col-lg-6 order-lg-2">
 									<div class="embed-responsive embed-responsive-16by9">
 										<iframe width="560" height="315" src="https://www.youtube.com/embed/0uKWQFqtIuA"
@@ -205,8 +195,7 @@
 								</div>
 							</div>
 
-							<div class="row align-items-center py-5"
-								style="border-bottom: solid; border-bottom-width: 2.5px; border-bottom-color: #191C20;">
+							<div class="row align-items-center py-5 border-bottom border-2">
 								<div class="col-lg-6 order-lg-1">
 									<div class="embed-responsive embed-responsive-16by9">
 										<iframe width="560" height="315" src="https://www.youtube.com/embed/w38Je142aF0"
@@ -232,8 +221,7 @@
 								</div>
 							</div>
 
-							<div class="row align-items-center py-5"
-								style="border-bottom: solid; border-bottom-width: 2.5px; border-bottom-color: #191C20;">
+							<div class="row align-items-center py-5 border-bottom border-2">
 								<div class="m-auto">
 									<h3 style="color:#FB00FF">Project Listings</h3>
 								</div>
@@ -330,8 +318,7 @@
 
 								</div>
 							</div>
-							<div class="row align-items-center py-5"
-								style="border-bottom: solid; border-bottom-width: 2.5px; border-bottom-color: #191C20;">
+							<div class="row align-items-center py-5 border-bottom border-2">
 
 								<div class="col-lg-4 order-lg-1 p-5">
 									<h3 style="color:#FB00FF">The Cryptomaniacs</h3>
@@ -368,8 +355,7 @@
 
 							</div>
 
-							<div class="row align-items-center py-5"
-								style="border-bottom: solid; border-bottom-width: 2.5px; border-bottom-color: #191C20;">
+							<div class="row align-items-center py-5">
 
 								<div class="col-lg-4 order-lg-1 p-5">
 									<h3 style="color:#FB00FF">ARK.io</h3>
@@ -405,9 +391,7 @@
 
 							</div>
 
-							<div class="row align-items-center py-5">
-
-
+							<!--<div class="row align-items-center py-5">
 								<div class="col-lg-4 order-lg-1 p-5">
 									<h3 style="color:#FB00FF">Voyage LA</h3>
 									<p class="lead">Introducing...</p>
@@ -418,17 +402,14 @@
 											target="_blank">Read Now</a>
 									</div>
 								</div>
-
-
-
-							</div>
+							</div>-->
 
 
 						</div>
 					</div>
 
 					<div role="tabpanel" class="tab-pane fade show " id="brand" aria-labelledby="brandTab">
-						<div class="jumbotron container bg-darker ">
+						<div class="jumbotron container">
 							<h1 class="display-4 text-center">Brand Kit</h1>
 							<p class="lead text-center">Assets and colorway</p>
 							<hr class="my-4 bg-light">
@@ -482,7 +463,7 @@
 					</div>
 
 					<div role="tabpanel" class="tab-pane fade show" id="privacy" aria-labelledby="privacyTab">
-						<div class="jumbotron container bg-darker ">
+						<div class="jumbotron container">
 							<h1 class="display-4 text-center">Privacy Policy</h1>
 							<p class="lead text-center">We believe in data privacy and transparency</p>
 							<hr class="my-4 bg-light">
@@ -498,13 +479,13 @@
 									and accessed via the Hive blockchain?</p>
 								<a class="btn btn-outline-primary btn-lg col-md-6 mx-auto"
 									href="https://hive.io/whitepaper.pdf" target="_blank" role="button">Hive
-									Whitepaper<i class="fab fa-hive fa-fw ml-2"></i></a>
+									Whitepaper<i class="fab fa-hive fa-fw ms-2"></i></a>
 							</div>
 						</div>
 					</div>
 
 					<div role="tabpanel" class="tab-pane fade show" id="tos" aria-labelledby="tosTab">
-						<div class="jumbotron container bg-darker ">
+						<div class="jumbotron container">
 							<h1 class="display-4 text-center">Terms of Service</h1>
 							<p class="lead text-center">What you can expect from us, and what we expect from you</p>
 							<hr class="my-4 bg-light">
@@ -517,19 +498,18 @@
 									clone the repo, or just have a look around?</p>
 								<a class="btn btn-outline-primary btn-lg col-md-6 mx-auto"
 									href="https://github.com/dluxio/dluxio" target="_blank" role="button">Browse our
-									Code<i class="fab fa-github fa-fw ml-2"></i></a>
+									Code<i class="fab fa-github fa-fw ms-2"></i></a>
 							</div>
 						</div>
 					</div>
 
 					<div role="tabpanel" class="tab-pane fade show" id="tech" aria-labelledby="techTab">
-						<div class="jumbotron container bg-darker ">
+						<div class="jumbotron container">
 							<h1 class="display-4 text-center">Technologies</h1>
 							<p class="lead text-center">Open Source Libraries</p>
 							<hr class="my-4 bg-light">
 
-							<div class="row align-items-center py-5"
-								style="border-bottom: solid; border-bottom-width: 2.5px; border-bottom-color: #191C20;">
+							<div class="row align-items-center py-5 border-bottom border-2">
 								<div class="col-4 col-lg-2 text-center mx-auto my-5"><img src="/img/aframe.png"
 										width="100%"></div>
 								<div class="col-lg-8 px-5">
@@ -543,8 +523,7 @@
 										href="https://aframe.io/" target="_blank">Learn More</a></div>
 							</div>
 
-							<div class="row align-items-center py-5"
-								style="border-bottom: solid; border-bottom-width: 2.5px; border-bottom-color: #191C20;">
+							<div class="row align-items-center py-5 border-bottom border-2">
 								<div class="col-4 col-lg-2 text-center mx-auto my-5"><img src="/img/ipfs-logo.svg"
 										width="100%"></div>
 								<div class="col-lg-8 px-5">
@@ -576,7 +555,7 @@
 					</div>
 
 					<div role="tabpanel" class="tab-pane fade show" id="faq" aria-labelledby="faqTab">
-						<div class="jumbotron container bg-darker ">
+						<div class="jumbotron container">
 							<h1 class="display-4 text-center">FAQ</h1>
 							<p class="lead text-center">Frequently Asked Questions</p>
 							<hr class="my-4 bg-light">
