@@ -13,8 +13,8 @@
     <meta name="theme-color" content="#111222" />
     <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
     <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <!--<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">-->
     <!-- JavaScript Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa"
@@ -37,7 +37,7 @@
         <main role="main" class="flex-shrink-0 text-white" v-cloak>
             <div class="container-fluid px-0 ">
                 <!-- Page header area -->
-                <div class="container-fluid bg-darker border-bottom">
+                <div class="container-fluid border-bottom">
                     <div class="container">
                         <!-- pfp and info -->
                         <div class="row pt-3">
@@ -75,7 +75,8 @@
                             </div>
                         </div>
                         <!-- nav tabs -->
-                        <ul id="usertabs" class="nav nav-tabs bg-darker mx-0 px-0 mt-5 border-bottom-0" role="tablist">
+                        <div class="mt-5 mb-2">
+                        <ul id="usertabs" class="nav nav-tabs" role="tablist">
                             <li class="nav-item"> <a class="nav-link active" id="blogtab" role="tab"
                                     data-bs-toggle="tab" aria-controls="blog" aria-expanded="true" href="#blog">Blog</a>
                             </li>
@@ -83,13 +84,14 @@
                                     aria-controls="wallet" aria-expanded="true" href="#wallet">Wallet</a></li>
                             <li class="nav-item"> <a class="nav-link" id="inventorytab" role="tab" data-bs-toggle="tab"
                                     aria-controls="inventory" aria-expanded="true" href="#inventory">Inventory</a></li>
-                            <li class="nav-item d-none" v-show="me"> <a class="nav-link" id="nodestab" role="tab"
+                            <!--<li class="nav-item d-none" v-show="me"> <a class="nav-link" id="nodestab" role="tab"
                                     data-bs-toggle="tab" aria-controls="nodes" aria-expanded="true"
                                     href="#nodes">Nodes</a></li>
                             <li class="nav-item d-none" v-show="me"> <a class="nav-link" id="settingstab" role="tab"
                                     data-bs-toggle="tab" aria-controls="settings" aria-expanded="true"
-                                    href="#settings">Settings</a></li>
+                                    href="#settings">Settings</a></li>-->
                         </ul>
+                    </div>
                     </div>
                 </div>
                 <!-- page tab content -->
@@ -99,9 +101,9 @@
                         <!-- blog repeat -->
                         <!--main view-->
                         <div class="container-fluid">
-                            <div class="row" data-masonry='{"percentPosition": true , "itemSelector": ".col"}'>
-                                <div class="col-sm-6 col-lg-3 mb-4" v-for="post in displayPosts" :key="post.url">
-                                    <div class="card text-white bg-darkest mt-2 mb-3">
+                            <div class="row" >
+                                <div class="col-sm-6 col-lg-3 my-2" v-for="post in displayPosts" :key="post.url">
+                                    <div class="card text-white">
                                         <div class="card-header">
                                             <div class="d-flex align-items-center ">
                                                 <a :href="'/@' + post.author" class="no-decoration">
@@ -129,7 +131,7 @@
                                                         :class="postSelect.types[post.type].icon"></i>{{post.type}}</span>
                                             </div>
                                         </div>
-                                        <div class="card-body bg-darkg">
+                                        <div class="card-body">
                                             <a href="#detailModal" class="no-decoration" data-bs-toggle="modal"
                                                 @click="modalSelect(post.url)">
                                                 <h3 class="lead text-white truncate1">{{post.title}}</h3>
@@ -138,13 +140,13 @@
                                         </div>
 
                                         <!--featured image with mouseover launch btn-->
-                                        <div class="card bg-darker">
+                                        <div class="card">
                                             <div class="d-flex">
                                                 <a target="_blank" :href="post.url" class="p-0 m-0" type="button">
                                                     <div id="imagesMain">
                                                         <div class="imagebox bg-none">
                                                             <img src="..." alt="Card image cap"
-                                                                class="card-img-top img-fluid image" :src="post.pic"
+                                                                class="img-fluid image" :src="post.pic"
                                                                 @error="imgUrlAlt"
                                                                 style="width: 1500px; height: 360px; object-fit: cover;" />
                                                             <div class="caption text-white w-100 h-100 d-flex">
@@ -164,7 +166,7 @@
                                         </div>
 
                                         <!--vote collapse-->
-                                        <div class="collapse bg-darker"
+                                        <div class="collapse"
                                             :id="'vote-' + post.author + '-' + post.permlink">
                                             <form id="voteForm">
                                                 <div class="p-2 d-flex align-items-center text-white-50">
@@ -199,7 +201,7 @@
                                             </form>
                                         </div>
 
-                                        <div class="card-footer bg-darkg text-white-50">
+                                        <div class="card-footer text-white-50">
                                             <!--footer buttons-->
                                             <div class="d-flex align-items-center my-2">
                                                 <a href="#/" class="no-decoration" @click="post.flag = false"
@@ -247,7 +249,7 @@
                         </div>
                     </div>
                     <!-- wallet tab -->
-                    <div role="tabpanel" class="tab-pane fade show" id="wallet" aria-labelledby="wallettab">
+                    <div role="tabpanel" class="tab-pane fade" id="wallet" aria-labelledby="wallettab">
                         <div class="p-3">
                             <ul id="wallettabs" class="nav nav-pills justify-content-center" role="tablist">
                                 <li class="nav-item"> <a class="nav-link active" href="#dlux" id="dluxtab" role="tab"
@@ -307,9 +309,9 @@
                                                 <div> <span class="small" v-show="!dlux2gov">50% Liquid | 50%
                                                         Power</span> <span class="small" v-show="dlux2gov">50%
                                                         Liquid | 50% Gov</span></div>
-                                                <div v-show="accountapi.gov > 0" class="bg-dark text-white">
+                                                <div v-show="accountapi.gov > 0" class="text-white">
                                                     <div class="input-group my-3">
-                                                        <span class="input-group-text bg-darkg border-info text-info">
+                                                        <span class="input-group-text border-info text-info">
                                                             <div class="form-check form-switch ">
                                                                 <input class="form-check-input" type="checkbox"
                                                                     role="switch" id="flexSwitchCheckDefault"
@@ -588,11 +590,11 @@
                                                                 </label>
                                                                 <div class="input-group">
                                                                     <input type="number" v-model="opt.val"
-                                                                        class="form-control bg-darkg border-secondary text-info"
+                                                                        class="form-control border-secondary text-info"
                                                                         :id="opt.id" :max="opt.range_high"
                                                                         :min="opt.range_low" :step="opt.step" />
                                                                     <span v-if="opt.unit"
-                                                                        class="input-group-text bg-darkg border-secondary text-secondary">{{opt.unit}}</span>
+                                                                        class="input-group-text border-secondary text-secondary">{{opt.unit}}</span>
                                                                 </div>
                                                             </div>
                                                             <div class="text-center mt-3">
@@ -1738,11 +1740,11 @@
                                 <div>
                                     <hr>
                                 </div>
-                                <div class="bg-darker">
+                                <div class="">
                                     <vue-markdown :md="displayPost.item.body" :author="displayPost.item.author"
                                         :permlink="displayPost.item.permlink"></vue-markdown>
                                 </div>
-                                <div class="m-auto bg-darker py-3 text-center">
+                                <div class="m-auto py-3 text-center">
                                     <p><i
                                             :class="postSelect.types[displayPost.item.type].icon"></i>{{postSelect.types[displayPost.item.type].launch}}
                                     </p>
@@ -1750,7 +1752,7 @@
                                             style="border-radius: 5rem;">Launch<i
                                                 class="ms-2 fas fa-external-link-alt"></i></button></a>
                                 </div>
-                                <div class="bg-darker">
+                                <div class="">
                                     <!--leave comment-->
                                     <div
                                         :data-bs-target="'#comment-modal-' + displayPost.item.author + '-' + displayPost.item.permlink">
