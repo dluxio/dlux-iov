@@ -89,6 +89,7 @@ body {
   background-image: linear-gradient(125deg, rgba($white, .3), rgba($white, .2) 70%);
   border: none;
   backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
 .input-group-text {
@@ -284,6 +285,7 @@ body {
 
 .tooltip {
   backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
 .modal-content {
