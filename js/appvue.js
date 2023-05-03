@@ -34,7 +34,6 @@ let lapi = "";
 // if (!lapi) {
     lapi = "https://token.dlux.io";
 // }
-console.log(lapi);
 if (
     lapi == "https://token.dlux.io" ||
     lapi == "https://spkinstant.hivehoneycomb.com" ||
@@ -45,9 +44,6 @@ if (
 }
 let user = localStorage.getItem("user") || "GUEST";
 let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
-console.log({
-    lapi,
-});
 
 // Vue.directive("scroll", {
 //     inserted: function (el, binding) {
@@ -1019,7 +1015,6 @@ createApp({ // vue 3
         contracts.push(contract)
       }
       contracts = [...new Set(contracts)]
-      console.log(contracts)
       for(var i = 0; i < contracts.length; i++){
         getContract(url, contracts[i])
       }
