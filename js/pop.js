@@ -37,6 +37,7 @@ export default {
   mounted() {
     // pass bootstrap popover options from props
     var options = this.$props;
+    if(!this.$slots.default[0])return
     var ele = this.$slots.default[0].elm;
     new Popover(ele, options);
   },

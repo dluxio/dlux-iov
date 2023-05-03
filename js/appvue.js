@@ -3,7 +3,7 @@ import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
 import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
-//import Popper from "/js/pop.js";
+import Popper from "/js/pop.js";
 import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
@@ -415,7 +415,7 @@ createApp({ // vue 3
     "nav-vue": Navue,
     "foot-vue": FootVue,
     "cycle-text": Cycler,
-    //"pop-vue": Popper,
+    "pop-vue": Popper,
     "vue-markdown": Marker,
     "vue-ratings": Ratings,
     "mde": MDE,
