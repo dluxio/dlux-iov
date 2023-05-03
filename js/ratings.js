@@ -22,24 +22,24 @@ export default {
     <p v-show="ratings">{{ratings}} Reviews</p>
     <div v-show="vote" class="text-warning">
     <a @click="rating(1)">
-    <i v-show="votes >= 1"class="fas fa-star"></i>
-    <i v-show="votes < 1"class="far fa-star"></i>
+    <i v-show="votes >= 1" class="fas fa-star"></i>
+    <i v-show="votes < 1" class="far fa-star"></i>
     </a>
     <a @click="rating(2)">
-    <i v-show="votes >= 2"class="fas fa-star"></i>
-    <i v-show="votes < 2"class="far fa-star"></i>
+    <i v-show="votes >= 2" class="fas fa-star"></i>
+    <i v-show="votes < 2" class="far fa-star"></i>
     </a>
     <a @click="rating(3)">
-    <i v-show="votes >= 3"class="fas fa-star"></i>
-    <i v-show="votes < 3"class="far fa-star"></i>
+    <i v-show="votes >= 3" class="fas fa-star"></i>
+    <i v-show="votes < 3" class="far fa-star"></i>
     </a>
     <a @click="rating(4)">
-    <i v-show="votes >= 4"class="fas fa-star"></i>
-    <i v-show="votes < 4"class="far fa-star"></i>
+    <i v-show="votes >= 4" class="fas fa-star"></i>
+    <i v-show="votes < 4" class="far fa-star"></i>
     </a>
     <a @click="rating(5)">
-    <i v-show="votes >= 5"class="fas fa-star"></i>
-    <i v-show="votes < 5"class="far fa-star"></i>
+    <i v-show="votes >= 5" class="fas fa-star"></i>
+    <i v-show="votes < 5" class="far fa-star"></i>
     </a>
     </div>
   </div>`,
