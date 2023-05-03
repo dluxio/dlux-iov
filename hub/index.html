@@ -344,7 +344,7 @@
                                     <div class="d-flex align-items-center justify-content-between">
                                         <a :href="'/@' + displayPost.author" class="no-decoration">
                                             <div class="d-flex align-items-center">
-                                                <img :src="'https://images.hive.blog/u/' + displayPost.item.author + '/avatar'"
+                                                <img v-if="displayPost.item.author" :src="'https://images.hive.blog/u/' + displayPost.item.author + '/avatar'"
                                                     alt=""
                                                     class="rounded-circle bg-light img-fluid me-3 cover author-img"
                                                     style="width: 50px;">
