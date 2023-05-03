@@ -1267,12 +1267,10 @@ createApp({ // vue 3
           });
     },
     getSPKUser(user) {
-      console.log({user})
       if (user)
         fetch("https://spktest.dlux.io/@" + user)
           .then((response) => response.json())
           .then((data) => {
-            console.log({data})
             this.spkapi = data
           });
     },

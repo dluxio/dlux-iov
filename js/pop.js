@@ -2,13 +2,18 @@ const { Popover } = bootstrap;
 
 export default {
   template: `
-    <div>
-        <slot/>
+    <div :id="id">
+        <slot>
+        </slot>
     </div>
         `,
   props: {
     content: {
       required: false,
+      default: "",
+    },
+    id: {
+      required: true,
       default: "",
     },
     title: {
@@ -37,8 +42,7 @@ export default {
   mounted() {
     // pass bootstrap popover options from props
     var options = this.$props;
-    if(!this.$slots.default[0])return
-    var ele = this.$slots.default[0].elm;
+    var ele = document.getElementById(this.id);
     new Popover(ele, options);
   },
 };
