@@ -1,4 +1,4 @@
-//import { createApp } from "https://unpkg.com/vue@3/dist/vue.global.js"
+import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
 // import Vue from "https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.esm.browser.js";
 import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
@@ -55,7 +55,7 @@ console.log({
 //         window.addEventListener("scroll", () => onScrollCallback());
 //     },
 // });
-const { createApp } = Vue
+//const { createApp } = Vue
 createApp({ // vue 3
 //var app = new Vue({
   // vue 2
