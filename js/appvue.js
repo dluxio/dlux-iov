@@ -1,8 +1,9 @@
-import Vue from "https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.esm.browser.js";
+//import { createApp } from "https://unpkg.com/vue@3/dist/vue.global.js"
+// import Vue from "https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.esm.browser.js";
 import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
-import Popper from "/js/pop.js";
+//import Popper from "/js/pop.js";
 import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
@@ -48,17 +49,17 @@ console.log({
     lapi,
 });
 
-Vue.directive("scroll", {
-    inserted: function (el, binding) {
-        const onScrollCallback = binding.value;
-        window.addEventListener("scroll", () => onScrollCallback());
-    },
-});
-
-// createApp({ // vue 3
-var app = new Vue({
+// Vue.directive("scroll", {
+//     inserted: function (el, binding) {
+//         const onScrollCallback = binding.value;
+//         window.addEventListener("scroll", () => onScrollCallback());
+//     },
+// });
+const { createApp } = Vue
+createApp({ // vue 3
+//var app = new Vue({
   // vue 2
-  el: "#app", // vue 2
+  //el: "#app", // vue 2
   data() {
     return {
       toSign: {},
@@ -414,7 +415,7 @@ var app = new Vue({
     "nav-vue": Navue,
     "foot-vue": FootVue,
     "cycle-text": Cycler,
-    "pop-vue": Popper,
+    //"pop-vue": Popper,
     "vue-markdown": Marker,
     "vue-ratings": Ratings,
     "mde": MDE,
@@ -1360,4 +1361,4 @@ var app = new Vue({
         (1/parseFloat(this.feedPrice.base)))
     }
   },
-});
+}).mount('#app')
