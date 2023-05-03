@@ -164,7 +164,7 @@
                                     <a target="_blank" :href="post.url" class="p-0 m-0" type="button">
                                         <div id="imagesMain">
                                             <div class="imagebox bg-none">
-                                                <img src="..." alt="Card image cap" class="card-img-top img-fluid image"
+                                                <img v-if="post.pic" alt="Card image cap" class="card-img-top img-fluid image"
                                                     :src="post.pic" @error="imgUrlAlt"
                                                     style="width: 1500px; height: 360px; object-fit: cover;" />
                                                 <div class="caption text-white w-100 h-100 d-flex">
