@@ -2134,7 +2134,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
     followersAccount(name) {
       fetch("https://anyx.io", {
-        body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_followers\", \"params\":[\"${name}\",\"${this.account}\",\"blog\",1], \"id\":1}`,
+        body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_following\", \"params\":[\"${name}\",\"${this.account}\",\"blog\",1], \"id\":1}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
