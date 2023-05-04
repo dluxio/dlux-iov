@@ -876,6 +876,24 @@ var app = new Vue({
 				this.postPermlink = text;
 			}
 		},
+    follow(acc, what = 'blog'){
+      this.toSign = {
+        type: "raw",
+        key: "posting",
+        ops: [["follow", {follower: this.account, following: acc, what: [what]}]],
+        callbacks: [res],
+        txid: "Sign Auth Headers",
+      }
+    },
+    unfollow(acc,){
+      this.toSign = {
+        type: "raw",
+        key: "posting",
+        ops: [["follow", {follower: this.account, following: acc, what: []}]],
+        callbacks: [],
+        txid: "unfollow:" + acc,
+      }
+    },
     post() {
 			var tags = this.postTags.toLowerCase().split(',')
 			this.postCustom_json.tags = ['dlux']
@@ -3188,6 +3206,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this.focus.account = this.pageAccount;
       this.sapi = sapi;
       this.checkAccount("pageAccount", "focus");
+      this.checkAccount("account", "me");
       this.getHiveStats();
       this.getQuotes();
       this.getSNodes();
@@ -3225,6 +3244,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this.focus.account = this.pageAccount;
       this.sapi = sapi;
       this.checkAccount("pageAccount", "focus");
+      this.checkAccount("account", "me");
       this.getHiveStats();
       this.getQuotes();
       this.getSNodes();
