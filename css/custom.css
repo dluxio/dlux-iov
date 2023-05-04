@@ -12635,17 +12635,25 @@ td {
   max-width: 160px;
 }
 
+.bg-img-none {
+  background-image: none !important;
+}
+
+.bg-blur-none {
+  -webkit-backdrop-filter: blur(0px);
+  backdrop-filter: blur(0px);
+}
+
 .dnav {
   background-color: rgba(42, 48, 54, 0.8);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
-.bg-black-blur {
-  background-color: rgba(0, 0, 0, 0.8);
-  background-image: none !important;
-  -webkit-backdrop-filter: blur(15px);
-  backdrop-filter: blur(15px);
+.modal-content {
+  background-color: rgba(42, 48, 54, 0.8);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
 .nav-blur {
