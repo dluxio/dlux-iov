@@ -194,8 +194,8 @@
                                                     <div class="ms-auto">
                                                         <p class="me-1 my-0" id="commentVal"
                                                             :class="{'text-success': !post.flag, 'text-danger': post.flag}">
-                                                            {{toFixed(voteVal *
-                                                            post.slider/10000,3)}}
+                                                            {{formatNumber(voteVal *
+                                                            post.slider/10000,3, '.', ',')}}
                                                             <i class="me-1 fab fa-fw fa-hive"></i>
                                                         </p>
                                                     </div>
@@ -546,8 +546,8 @@
                                                     your account</p>
                                             </div>
                                             <div id="dluxval" class="ms-auto text-end">
-                                                <h5 id="totaldbal">${{toFixed(dluxval * accountapi.tick *
-                                                    hiveprice.hive.usd,2)}}
+                                                <h5 id="totaldbal">${{formatNumber(dluxval * accountapi.tick *
+                                                    hiveprice.hive.usd,2, '.', ',')}}
                                                 </h5>
                                             </div>
                                         </div>
@@ -841,16 +841,16 @@
                                                     <li>Collateral for DEX transactions</li>
                                                     <li>Instant Lock | 4 Week Unlock</li>
                                                     <li>Requires an operating LARYNX node</li>
-                                                    <li>Earns {{toFixed(parseFloat(spkStats.spk_rate_lgov) *
-                                                        100,3)}}%</li>
+                                                    <li>Earns {{formatNumber(parseFloat(spkStats.spk_rate_lgov) *
+                                                        100,3, '.', ',')}}%</li>
                                                 </ul>
                                             </div>
                                             <div id="larynxgactions" class="ms-auto text-end" v-show="me">
                                                 <div class="d-flex align-items-center mb-2">
                                                     <small class="ms-auto"><span
-                                                            class="badge me-2 text-bg-success">{{toFixed(parseFloat(spkStats.spk_rate_lgov)
+                                                            class="badge me-2 text-bg-success">{{formatNumber(parseFloat(spkStats.spk_rate_lgov)
                                                             *
-                                                            100,3)}}%</span></small>
+                                                            100,3, '.', ',')}}%</span></small>
                                                     <h5 id="govbalance" class="m-0">
                                                         {{formatNumber((saccountapi.gov)/1000, 3, '.', ',')}} LL
                                                     </h5>
@@ -902,22 +902,22 @@
                                                             (DPoS)
                                                         </li>
                                                         <li>LARYNX POWER (LP) earns SPK tokens at
-                                                            {{toFixed(parseFloat(spkStats.spk_rate_lpow) *
-                                                            100,3)}}%
+                                                            {{formatNumber(parseFloat(spkStats.spk_rate_lpow) *
+                                                            100,2, '.', ',')}}%
                                                         </li>
                                                         <li>Delegated LP (DLP) earns SPK tokens for both
                                                             delegator and
                                                             delegatee at
-                                                            {{toFixed(parseFloat(spkStats.spk_rate_ldel) *
-                                                            100,3)}}%
+                                                            {{formatNumber(parseFloat(spkStats.spk_rate_ldel) *
+                                                            100,2, '.', ',')}}%
                                                         </li>
                                                     </ul>
                                                 </div>
                                                 <div id="larynxgactions" class="ms-auto text-end">
                                                     <div class="d-flex align-items-center mb-2">
                                                         <small class="ms-auto"><span
-                                                                class="badge me-2 text-bg-success">{{toFixed(parseFloat(spkStats.spk_rate_lpow)
-                                                                * 100,3)}}%</span></small>
+                                                                class="badge me-2 text-bg-success">{{formatNumber(parseFloat(spkStats.spk_rate_lpow)
+                                                                * 100,3, '.', ',')}}%</span></small>
                                                         <h5 class="m-0">
                                                             {{formatNumber((saccountapi.poweredUp)/1000, 3, '.',
                                                             ',')}}
@@ -932,8 +932,8 @@
                                                             class="text-white d-flex align-items-center "
                                                             style="text-decoration: none">
                                                             <small class="ms-auto"><span
-                                                                    class="badge me-2 text-bg-success">{{toFixed(parseFloat(spkStats.spk_rate_ldel)
-                                                                    * 100,3)}}%</span></small>
+                                                                    class="badge me-2 text-bg-success">{{formatNumber(parseFloat(spkStats.spk_rate_ldel)
+                                                                    * 100,3, '.', ',')}}%</span></small>
                                                             <h5 class="m-0">
                                                                 {{formatNumber((saccountapi.granting.t+saccountapi.granted.t)/1000,
                                                                 3, '.', ',')}}
@@ -1078,8 +1078,8 @@
                                             </div>
                                             <div class="ms-auto text-end">
                                                 <h5 id="totallarynx">
-                                                    ${{toFixed(spkval * saccountapi.tick *
-                                                    hiveprice.hive.usd,2)}}
+                                                    ${{formatNumber(spkval * saccountapi.tick *
+                                                    hiveprice.hive.usd,2, '.', ',')}}
                                                 </h5>
                                             </div>
                                         </div>
@@ -1149,7 +1149,7 @@
                                             </div>
                                             <div id="hivepactions" class="float-right text-end">
                                                 <h5 id="hpbal">
-                                                    {{toFixed(((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares)),3)}}
+                                                    {{formatNumber(((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares)),3, '.', ',')}}
                                                     HP</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info "
@@ -1241,7 +1241,7 @@
                                             </div>
                                             <div id="hiveval" class="float-right text-end">
                                                 <h5 id="totalhivebalance">
-                                                    ${{toFixed((((((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares))+parseFloat(focus.balance))*hiveprice.hive.usd)+((parseFloat(focus.hbd_balance)+parseFloat(focus.savings_hbd_balance))*hbdprice.hive_dollar.usd)),2)}}
+                                                    ${{formatNumber((((((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares))+parseFloat(focus.balance))*hiveprice.hive.usd)+((parseFloat(focus.hbd_balance)+parseFloat(focus.savings_hbd_balance))*hbdprice.hive_dollar.usd)),2, '.', ',')}}
                                                 </h5>
                                             </div>
                                         </div>
@@ -1852,9 +1852,9 @@
                                                                 v-model="displayPost.item.slider">
                                                         </p>
                                                     </div>
-                                                    <p class="my-0"><span class="me-1" id="commentVal">{{toFixed(voteVal
+                                                    <p class="my-0"><span class="me-1" id="commentVal">{{formatNumber(voteVal
                                                             *
-                                                            displayPost.item.slider/10000,3)}} HBD</span><i
+                                                            displayPost.item.slider/10000,3, '.', ',')}} HBD</span><i
                                                             class="ml-1 fab fa-fw fa-hive"></i></p>
                                                 </div>
                                             </form>
