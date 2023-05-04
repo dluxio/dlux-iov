@@ -270,7 +270,6 @@ export default {
         });
     },
     isVal(node){
-      console.log(node, typeof node.val_code == 'string' ? true : false)
       return typeof node.val_code == 'string' ? true : false
     },
     add(node){
@@ -284,13 +283,11 @@ export default {
       }
     },
     pick(evt, node, index){
-      console.log(evt, node, index)
       evt.dataTransfer.dropEffect = 'move'
       evt.dataTransfer.effectAllowed = 'move'
       evt.dataTransfer.setData('itemID', index)
     },
     move(evt, node, index){
-      console.log(evt, node, index)
       this.valWorkable.splice(index, 0, this.valWorkable.splice(evt.dataTransfer.getData('itemID'), 1)[0])
     },
     buildWorkVotes(){
@@ -753,7 +750,6 @@ export default {
       //     msg: `Trying to send ${this.token}...`,
       //     ops: ["getHiveUser"],
       //   };
-      console.log(1, {op})
       if (op) {
         this.$emit("modalsign", op);
       }
@@ -897,7 +893,6 @@ export default {
     var trigger = this.$slots["trigger"][0].elm;
     var target = this.$el.children[options.type];
     document.getElementById("app").appendChild(target);
-    console.log(options.type, target);
     trigger.addEventListener("click", () => {
       var theModal = new Modal(target, () => {});
       theModal.show();
