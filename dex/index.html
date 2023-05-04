@@ -261,7 +261,7 @@
 
                 <!-- power form -->
 
-                <div id="userPwr" class="mx-1" v-if="features.powup_B || features.powdn_B">
+                <div id="userPwr" class="mx-1" v-if="account && (features.powup_B || features.powdn_B)">
                   <a class="dropdown-toggle text-primary no-decoration" data-bs-auto-close="outside" href="#"
                     role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak><span
                       class="me-1" v-cloak>{{formatNumber(barpow,3,'.',',')}} {{TOKEN}}P</span></a>
