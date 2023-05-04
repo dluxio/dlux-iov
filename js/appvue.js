@@ -56,6 +56,9 @@ createApp({ // vue 3
 //var app = new Vue({
   // vue 2
   //el: "#app", // vue 2
+  directives:{
+    scroll
+  },
   data() {
     return {
       toSign: {},
