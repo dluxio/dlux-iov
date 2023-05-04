@@ -43,7 +43,7 @@
                         <div class="row pt-3">
                             <div class="col-md-8 text-white">
                                 <div class="d-flex flex-wrap">
-                                    <div class="d-flex"><img
+                                    <div v-if="pageAccount" class="d-flex"><img
                                             :src="'https://images.hive.blog/u/' + pageAccount + '/avatar'" alt=""
                                             class="rounded-circle bg-light me-4 cover profile-img"></div>
                                     <div class="d-flex flex-column">
@@ -108,7 +108,7 @@
                                             <div class="d-flex align-items-center ">
                                                 <a :href="'/@' + post.author" class="no-decoration">
                                                     <div class="d-flex align-items-center">
-                                                        <img :src="'https://images.hive.blog/u/' + post.author + '/avatar'"
+                                                        <img v-if="post.author" :src="'https://images.hive.blog/u/' + post.author + '/avatar'"
                                                             alt=""
                                                             class="rounded-circle bg-light img-fluid me-3 cover author-img"
                                                             style="width: 50px;">
@@ -145,7 +145,7 @@
                                                 <a target="_blank" :href="post.url" class="p-0 m-0" type="button">
                                                     <div id="imagesMain">
                                                         <div class="imagebox bg-none">
-                                                            <img src="..." alt="Card image cap"
+                                                            <img v-if="post.pic" alt="Card image cap"
                                                                 class="img-fluid image" :src="post.pic"
                                                                 @error="imgUrlAlt"
                                                                 style="width: 1500px; height: 360px; object-fit: cover;" />
@@ -204,7 +204,7 @@
                                         <div class="card-footer text-white-50">
                                             <!--footer buttons-->
                                             <div class="d-flex align-items-center my-2">
-                                                <a href="#/" class="no-decoration" @click="post.flag = false"
+                                                <a href="#!" class="no-decoration" @click="post.flag = false"
                                                     data-bs-toggle="collapse"
                                                     :class="{'text-primary': post.hasVoted, 'text-white-50': !post.hasVoted, 'text-danger': post.slider < 0 }"
                                                     :data-bs-target="'#vote-' + post.author + '-' + post.permlink">
@@ -222,7 +222,7 @@
                                                     <i class="fa-solid fa-star ms-2 me-1"></i><span
                                                         class="text-white-50">{{post.rating}}</span>
                                                 </a>
-                                                <a href="#/" class="no-decoration text-white-50"
+                                                <a href="#!" class="no-decoration text-white-50"
                                                     data-bs-toggle="collapse" :class="{'text-primary': post.flag > 0}"
                                                     :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
                                                     @click="post.flag = true">
@@ -232,7 +232,7 @@
                                                 </a>
 
                                                 <div class="ms-auto">
-                                                    <pop-vue title="Post Earnings"
+                                                    <pop-vue :id="'pop-' + post.author + '-' + post.permlink" title="Post Earnings"
                                                         :content="(post.paid ? post.total_payout_value : post.pending_payout_value) + '<br>' + (post.paid ? precision(post.payout, 3) : 0) + ' ' + TOKEN"
                                                         trigger="hover">
                                                         <button class="btn btn-secondary">
@@ -259,7 +259,7 @@
                                         aria-expanded="true">SPK</a>
                                 </li>
                                 <li class="nav-item" v-show="false"> <a class="nav-link d-flex align-items-center"
-                                        href="#/" id="spktab" role="tab">SOON - SPK</a>
+                                        href="#!" id="spktab" role="tab">SOON - SPK</a>
                                 </li>
                                 <li class="nav-item"> <a class="nav-link" href="#hive" id="hivetab" role="tab"
                                         data-bs-toggle="tab" aria-controls="hive" aria-expanded="true">HIVE</a></li>
@@ -358,7 +358,7 @@
                                                             <modal-vue type="power" token="DLUX" func="Power Up" i="-99"
                                                                 :balance="accountapi.balance" :account="account"
                                                                 @modalsign="sendIt($event)">
-                                                                <a class="dropdown-item" slot="trigger" href="#/">
+                                                                <a class="dropdown-item" slot="trigger" href="#!">
                                                                     <i
                                                                         class="fas fa-angle-double-up fa-fw me-2"></i>Power
                                                                     Up</a>
@@ -366,7 +366,7 @@
                                                             <modal-vue type="power" token="DLUX" func="Lock"
                                                                 :balance="accountapi.balance" :account="account"
                                                                 @modalsign="sendIt($event)">
-                                                                <a class="dropdown-item" slot="trigger" href="#/"><i
+                                                                <a class="dropdown-item" slot="trigger" href="#!"><i
                                                                         class="fas fa-lock fa-fw me-2"></i>Lock GOV</a>
                                                             </modal-vue>
                                                             <div class="dropdown-divider"></div>
@@ -1234,7 +1234,7 @@
                                             <div class="text-center my-auto rounded mx-4 p-2"
                                                 style="background-color: rgba(0,0,0,0.75)">
 
-                                                <img class="rounded img-fluid w-100"
+                                                <img v-if="getAttr(trade.script, 'wrapped')" class="rounded img-fluid w-100"
                                                     :src="'https://ipfs.io/ipfs/' + getAttr(trade.script, 'wrapped')"></img>
 
                                                 <h3 class="mt-3 rainbow-text"
@@ -1402,7 +1402,7 @@
                                         <div class="card-body pb-1">
                                             <div class="px-2 py-5 text-center rounded"
                                                 style="background-color: rgba(0,0,0,0.75)">
-                                                <img class="rounded max-160"
+                                                <img v-if="getAttr(rnft.script, 'wrapped')" class="rounded max-160"
                                                     :src="'https://ipfs.io/ipfs/' + getAttr(rnft.script, 'wrapped')"></img>
                                                 <div>
                                                     <h3 class="my-0 mx-2 p-0 p-2 ms-auto"
@@ -1460,22 +1460,22 @@
                                                         <ul class="dropdown-menu dropdown-menu-dark"
                                                             aria-labelledby="dropdownFilterButton">
                                                             <li><a class="dropdown-item"
-                                                                    :class="{'active':!NFTselect.searchDeep}" href="#/"
+                                                                    :class="{'active':!NFTselect.searchDeep}" href="#!"
                                                                     @click="setValue('NFTselect.searchDeep',false)">Search
                                                                     UIDs and Owners</a></li>
                                                             <li><a class="dropdown-item"
                                                                     :class="{'active':NFTselect.searchDeep && ! NFTselect.searchDeepK}"
-                                                                    href="#/"
+                                                                    href="#!"
                                                                     @click="setValue('NFTselect.searchDeep',true);setValue('NFTselect.searchDeepK', false)">Search
                                                                     Attributes</a></li>
                                                             <li v-if="!focusSetCalc.attributeKeys.length"><a
                                                                     class="dropdown-item"
-                                                                    :class="{'active':NFTselect.searching}" href="#/"
+                                                                    :class="{'active':NFTselect.searching}" href="#!"
                                                                     @click="selectNFTs(true, true);setValue('NFTselect.searchDeepK', true)">Index
                                                                     Set (Pre-Search)</a></li>
                                                             <li v-if="focusSetCalc.attributeKeys.length"><a
                                                                     class="dropdown-item"
-                                                                    :class="{'active':NFTselect.searchDeepK}" href="#/"
+                                                                    :class="{'active':NFTselect.searchDeepK}" href="#!"
                                                                     @click="setValue('NFTselect.searchDeepK', true)">Search
                                                                     in Attribute</a></li>
                                                         </ul>
@@ -1496,7 +1496,7 @@
                                                             <li v-for="k in focusSetCalc.attributeKeys"><a
                                                                     class="dropdown-item"
                                                                     :class="{'active':k == NFTselect.searchDeepKey}"
-                                                                    href="#/"
+                                                                    href="#!"
                                                                     @click="setValue('NFTselect.searchDeepKey',k)">{{k}}</a>
                                                             </li>
                                                         </ul>
@@ -1515,7 +1515,7 @@
                                                             <li
                                                                 v-for="l in focusSetCalc.attributes[NFTselect.searchDeepKey]">
                                                                 <a class="dropdown-item" :class="{'active': includes}"
-                                                                    href="#/"
+                                                                    href="#!"
                                                                     @click="setValue('NFTselect.searchTerm', l);selectNFTs()">{{l}}
                                                                     ({{focusSetCalc.attributesC[NFTselect.searchDeepKey][l]}})</a>
                                                             </li>
@@ -1537,7 +1537,7 @@
                                                     class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix"
                                                     style="width: 42px">
                                                     <span v-if="NFTselect.searchTerm">
-                                                        <a href="#/" class="badge badge-secondary"
+                                                        <a href="#!" class="badge badge-secondary"
                                                             @click="NFTselect.searchTerm ='';displayNFT(1)"><i
                                                                 class="fas fa-times"></i></a>
                                                     </span>
@@ -1565,32 +1565,32 @@
                                             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="sortDropdown">
                                                 <li><a class="dropdown-item"
                                                         :class="{'active':NFTselect.sort == 'uid' && NFTselect.dir == 'asc'}"
-                                                        href="#/"
+                                                        href="#!"
                                                         @click="NFTselect.sort = 'uid'; NFTselect.dir = 'asc';displayNFT(1)">UID:
                                                         Low to High</a></li>
                                                 <li><a class="dropdown-item"
                                                         :class="{'active':NFTselect.sort == 'uid' && NFTselect.dir == 'desc'}"
-                                                        href="#/"
+                                                        href="#!"
                                                         @click="NFTselect.sort = 'uid'; NFTselect.dir = 'desc';displayNFT(1)">UID:
                                                         High to Low</a></li>
                                                 <li><a class="dropdown-item"
                                                         :class="{'active':NFTselect.sort == 'token' && NFTselect.dir == 'asc'}"
-                                                        href="#/"
+                                                        href="#!"
                                                         @click="NFTselect.sort = 'token'; NFTselect.dir = 'asc';displayNFT(1)">Token:
                                                         A to Z</a></li>
                                                 <li><a class="dropdown-item"
                                                         :class="{'active':NFTselect.sort == 'token' && NFTselect.dir == 'desc'}"
-                                                        href="#/"
+                                                        href="#!"
                                                         @click="NFTselect.sort = 'token'; NFTselect.dir = 'desc';displayNFT(1)">Token:
                                                         Z to A</a></li>
                                                 <li><a class="dropdown-item"
                                                         :class="{'active':NFTselect.sort == 'set' && NFTselect.dir == 'asc'}"
-                                                        href="#/"
+                                                        href="#!"
                                                         @click="NFTselect.sort = 'setname'; NFTselect.dir = 'asc';displayNFT(1)">Set:
                                                         Low to High</a></li>
                                                 <li><a class="dropdown-item"
                                                         :class="{'active':NFTselect.sort == 'set' && NFTselect.dir == 'desc'}"
-                                                        href="#/"
+                                                        href="#!"
                                                         @click="NFTselect.sort = 'setname'; NFTselect.dir = 'desc';displayNFT(1)">Set:
                                                         High to Low</a></li>
                                             </ul>
@@ -1708,7 +1708,7 @@
                                     <div class="d-flex align-items-center justify-content-between">
                                         <a :href="'/@' + displayPost.author" class="no-decoration">
                                             <div class="d-flex align-items-center">
-                                                <img :src="'https://images.hive.blog/u/' + displayPost.item.author + '/avatar'"
+                                                <img v-if="displayPost.item.author" :src="'https://images.hive.blog/u/' + displayPost.item.author + '/avatar'"
                                                     alt=""
                                                     class="rounded-circle bg-light img-fluid me-3 cover author-img"
                                                     style="width: 50px;">
@@ -1793,11 +1793,11 @@
                                     </div>
                                     <!--footer buttons-->
                                     <div class="d-flex align-items-center my-2">
-                                        <div><a href="#/" class="no-decoration" data-bs-toggle="collapse"
+                                        <div><a href="#!" class="no-decoration" data-bs-toggle="collapse"
                                                 :data-bs-target="'#vote-modal-' + displayPost.item.author + '-' + displayPost.item.permlink"><i
                                                     class="fas fa-heart me-1"></i><span
                                                     class="text-white-50">{{displayPost.item.upVotes}}</span></a>
-                                            <a href="#/" class="no-decoration" data-bs-toggle="collapse"
+                                            <a href="#!" class="no-decoration" data-bs-toggle="collapse"
                                                 :data-bs-target="'#comment-modal-' + displayPost.item.author + '-' + displayPost.item.permlink">
 
                                                 <i class="fas fa-comment ms-2 me-1"></i><span
@@ -1812,7 +1812,7 @@
                                     <div v-for="post in displayPost.item.replies" :key="post.url">
                                         <div class="card-header">
                                             <div class="float-left">
-                                                <a :href="post.author_url"><img :src="post.author_img"
+                                                <a :href="post.author_url"><img v-if="post.author_img" :src="post.author_img"
                                                         class="rounded-circle bg-light img-fluid mr-2 cover author-img"></a>
                                             </div>
                                             <div class="float-left">
@@ -1822,7 +1822,7 @@
                                                 </p>
                                             </div>
                                             <span>
-                                                <h5>{{post.author}}</h5><a href="#/" v-show="post.author == account"
+                                                <h5>{{post.author}}</h5><a href="#!" v-show="post.author == account"
                                                     @click="post.edit = !post.edit">Edit Post</a>
                                                 <div v-show="!posturls[post.url].edit">
                                                     <vue-ratings class="d-flex"
@@ -2394,7 +2394,7 @@
                                                             <div v-html="itemModal.item.HTML"></div>
                                                             <!--back forward btns-->
                                                             <div class="card-footer d-flex align-items-center">
-                                                                <h2><a class="text-muted p-3" href="#/"
+                                                                <h2><a class="text-muted p-3" href="#!"
                                                                         @click="modalPrev('itemModal')"
                                                                         :class="{'invisible':!itemModal.index}"><i
                                                                             class="fas fa-caret-square-left"></i></a>
@@ -2404,7 +2404,7 @@
                                                                         {{NFTselect.auctionOnly || NFTselect.saleOnly ||
                                                                         NFTselect.sort == 'price' ||
                                                                         itemModal.items.length}}</i></small>
-                                                                <h2 class="ms-auto"><a class="text-muted p-3" href="#/"
+                                                                <h2 class="ms-auto"><a class="text-muted p-3" href="#!"
                                                                         @click="modalNext('itemModal', 'item')"><i
                                                                             class="fas fa-caret-square-right"></i></a>
                                                                 </h2>
@@ -3144,7 +3144,7 @@
                                                                                             type="button"
                                                                                             class="btn btn-warning"
                                                                                             data-bs-toggle="collapse"
-                                                                                            href="#/">Bid </button>
+                                                                                            href="#!">Bid </button>
                                                                                     </form>
                                                                                 </div>
 
@@ -3203,11 +3203,11 @@
                                                                                         type="button"
                                                                                         class="btn btn-warning"
                                                                                         @click="buyNFT(itemModal.sale)"
-                                                                                        href="#/">Buy </button>
+                                                                                        href="#!">Buy </button>
                                                                                     <button v-else type="button"
                                                                                         class="btn btn-warning"
                                                                                         @click="cancelNFT(itemModal.sale)"
-                                                                                        href="#/">Cancel </button>
+                                                                                        href="#!">Cancel </button>
                                                                                 </div>
 
                                                                             </div>
@@ -3249,11 +3249,11 @@
                                         <div class="modal-body row d-flex ">
                                             <div class="order-md-last col-lg-6 px-0 px-sm-2">
                                                 <div class="d-flex align-items-center justify-content-between">
-                                                    <h2><a class="text-muted p-3" href="#/"
+                                                    <h2><a class="text-muted p-3" href="#!"
                                                             @click="modalPrev('itemModal')"><i
                                                                 class="fas fa-caret-square-left"></i></a></h2>
                                                     <h3 style="color:aqua;">{{itemModal.item.uid}}</h3>
-                                                    <h2><a class="text-muted p-3" href="#/"
+                                                    <h2><a class="text-muted p-3" href="#!"
                                                             @click="modalNext('itemModal')"><i
                                                                 class="fas fa-caret-square-right"></i></a></h2>
                                                 </div>
@@ -4307,6 +4307,7 @@
         // NEW CODE FOR BS5
         // deep linking - load tab on refresh
         function deepLink() {
+            console.log('deepLink')
             let url = location.href.replace(/\/$/, '');
             if (location.hash) {
                 const hash = url.split('#');

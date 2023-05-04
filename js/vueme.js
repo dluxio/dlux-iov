@@ -2375,7 +2375,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               }
               authors.push(this.posturls[post].author);
             }
-            console.log('where')
             if (!called) this.selectPosts();
             authors = [...new Set(authors)];
             this.getHiveAuthors(authors);
@@ -3262,7 +3261,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this.getSapi(this.pageAccount, false);
       this.getTokenUser(this.pageAccount, false);
       this.getNFTs();
-      //deepLink();
+      deepLink();
     }
   },
   watch: {

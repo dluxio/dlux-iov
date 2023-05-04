@@ -45,17 +45,7 @@ if (
 let user = localStorage.getItem("user") || "GUEST";
 let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
 
-// Vue.directive("scroll", {
-//     inserted: function (el, binding) {
-//         const onScrollCallback = binding.value;
-//         window.addEventListener("scroll", () => onScrollCallback());
-//     },
-// });
-//const { createApp } = Vue
-createApp({ // vue 3
-//var app = new Vue({
-  // vue 2
-  //el: "#app", // vue 2
+createApp({
   directives:{
     scroll
   },
@@ -1322,17 +1312,15 @@ createApp({ // vue 3
     },
   },
   mounted() {
-    // var setName = location.pathname.split("set/")[1];
-    // if (setName) this.getNFTset(setName);
-    // else this.getNFTsets();
-    // this.getUserNFTs();
-    //this.getQuotes();
-    //this.getNodes();
+    window.addEventListener('scroll', this.handleScroll);
     this.getSPKStats()
     this.getPosts();
     this.getProtocol();
     this.getRewardFund();
     this.getFeedPrice();
+  },
+  unmounted () {
+    window.removeEventListener('scroll', this.handleScroll);
   },
   watch: {
     postSelect(a, b){
