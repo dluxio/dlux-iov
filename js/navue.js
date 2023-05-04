@@ -722,7 +722,7 @@ export default {
   },
   template: `
 <div>
-<header class="navbar navbar-expand-sm navbar-dark fixed-top dnav">
+<header class="navbar navbar-expand-sm navbar-dark fixed-top dnav nav-blur">
   <div class="container-fluid">
     <!--pwa nav toggle-->
     <a class="text-white d-sm-none" style="font-size: 1.5em;" data-bs-toggle="offcanvas" href="#offcanvasNav" role="button" aria-controls="offcanvasExample">

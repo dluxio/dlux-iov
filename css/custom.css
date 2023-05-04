@@ -12637,6 +12637,9 @@ td {
 
 .dnav {
   background-color: rgba(42, 48, 54, 0.8);
+}
+
+.nav-blur {
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
