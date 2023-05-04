@@ -4307,14 +4307,12 @@
         // NEW CODE FOR BS5
         // deep linking - load tab on refresh
         function deepLink(link) {
-            console.log('deepLink')
             if(link)location.hash = link
             let url = location.href.replace(/\/$/, '');
             if (location.hash) {
                 const hash = url.split('#');
 
                 const currentTab = hash[1] == 'dlux' || hash[1] == 'hive' || hash[1] == 'spk' ? document.querySelector('#wallettab a[href="#' + hash[1] + '"]') : document.querySelector('#usertabs a[href="#' + hash[1] + '"]')
-                console.log(currentTab)
                 const curTab = new bootstrap.Tab(currentTab);
                 curTab.show();
                 url = location.href.replace(/\/#/, '#');

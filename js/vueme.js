@@ -46,7 +46,6 @@ if (location.search) {
 if (!lapi) {
   lapi = "https://token.dlux.io";
 }
-console.log(lapi);
 if (
   lapi == "https://token.dlux.io" ||
   lapi == "https://spkinstant.hivehoneycomb.com" ||
@@ -57,9 +56,6 @@ if (
 }
 let user = localStorage.getItem("user") || "GUEST";
 let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
-console.log({
-  lapi,
-});
 
 Vue.directive("scroll", {
   inserted: function (el, binding) {
@@ -790,7 +786,6 @@ var app = new Vue({
       return s.set ? `https://ipfs.io/ipfs/${s.set[c]}` : "";
     },
     uploadFile(e) {
-      console.log(e)
         for (var i = 0; i < e.target.files.length; i++) {
           var reader = new FileReader();
           reader.File = e.target.files[i]
@@ -889,7 +884,6 @@ var app = new Vue({
 					this.postCustom_json.tags.push(tags[i].replace(/[\W_]+/g, "-"));
 				}
 			}
-			console.log(custom_json.tags)
 			if (this.account) {
 				const operations = [["comment",
 					{
@@ -1411,7 +1405,6 @@ function tradeFTreject(setname, uid, callback){
     },
 
     rejectFT(item) {
-      console.log({ item });
       var cja = {
           set: item.set,
           uid: item.uid,
@@ -1967,7 +1960,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         this[modal].index++;
         this[modal].item = this[modal].items[this[modal].index];
       } else if (this[modal].index < this.allPosts.length - 1) {
-        console.log('there')
         this.selectPosts([modal, this[modal].index + 1]);
       } else {
         this[modal].index = 0;
@@ -1980,15 +1972,16 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this[modal].item = this[modal].items[this[modal].index];
     },
     modalSelect(key) {
+      if(key.indexOf('/@') > 0)
+        key = '/@' + key.split('/@')[1];
+      console.log({key, posturls: this.posturls[key]})
       this.displayPost.index = key;
       this.displayPost.item = this.posturls[key];
-      console.log(this.displayPost)
       //window.history.pushState("Blog Modal", this.displayPost.item.title, "/blog/@" + key.split('/@')[1]);
       if (
-        this.displayPost.item.children &&
+        this.displayPost.item?.children &&
         !this.displayPost.item.replies.length
-      )
-        this.getReplies(
+      )this.getReplies(
           this.displayPost.item.author,
           this.displayPost.item.permlink
         ).then((r) => {
@@ -2134,7 +2127,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         })
         .then((re) => {
           var rez = re.result[0];
-          console.log(name, rez, rez.posting_json_metadata);
           try {
             rez.posting_json_metadata = JSON.parse(rez.posting_json_metadata);
           } catch (e) {
@@ -2169,7 +2161,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       } else alert("Username not found");
     },
     sendIt(op) {
-      console.log(op);
       this.toSign = op;
     },
     parseInt(a, b = 10) {
@@ -2483,7 +2474,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               this.posturls[res.result.url].ago = this.timeSince(
                 this.posturls[res.result.url].created
               );
-              console.log('here')
               this.selectPosts();
               if(modal)this.modalSelect(res.result.url)
             }
@@ -2687,14 +2677,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           t,
           this.sstats.spk_rate_ldel
         );
-        console.log({
-          t,
-          a,
-          b,
-          c,
-          d: this.saccountapi.granted?.t > 0 ? this.saccountapi.granted.t : 0,
-          g: this.saccountapi.granting?.t > 0 ? this.saccountapi.granting.t : 0,
-        });
         const i = a + b + c;
         if (i) {
           console.log(i, "Phantom SPK");
@@ -2705,7 +2687,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         }
       }
       function simpleInterest(p, t, r) {
-        console.log({ p, t, r });
         const amount = p * (1 + parseFloat(r) / 365);
         const interest = amount - p;
         return parseInt(interest * t);
@@ -2812,7 +2793,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       fetch(this.providers[i].api + "/api/trades/fts/" + this.account)
         .then((r) => r.json())
         .then((json) => {
-          console.log("FT trades", { json, fts: this.providers[i].api });
           const arr = json.result;
           const token = this.providers[i].token;
           for (var j = 0; j < arr.length; j++) {
@@ -2829,7 +2809,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       fetch(this.providers[i].api + "/api/trades/nfts/" + this.account)
         .then((r) => r.json())
         .then((json) => {
-          console.log("NFT trades", { json, nfts: this.providers[i].api });
           const arr = json.result;
           const token = this.providers[i].token;
           for (var j = 0; j < arr.length; j++) {
@@ -2888,15 +2867,12 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               this.displayNFT(0);
             });
           }
-          console.log(rNFTs);
           for (var j = 0; j < rNFTs.length; j++) {
             rNFTs[j].token = p[i].token;
             scripts[rNFTs[j].script] = 1;
             this.accountRNFTs.push(rNFTs[j]);
-            console.log(j, rNFTs[j], this.accountRNFTs);
           }
           for (var script in scripts) {
-            console.log({ script });
             this.callScript({
               script,
               token: scripts[script].token,
@@ -2933,7 +2909,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       fetch(this.sapi + "/stats")
         .then((response) => response.json())
         .then((data) => {
-          console.log(data);
           this.spkStats = data.result;
         });
     },
@@ -3267,7 +3242,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
   watch: {
     postSelect(a, b) {
       if (a.searchTerm != b.searchTerm || a.bitMask != b.bitMask) {
-        console.log("Watched");
         this.displayPosts = [];
         this[this.postSelect.entry] = [];
         this.postSelect[this.postSelect.entry].o = 0;
