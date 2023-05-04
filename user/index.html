@@ -4307,6 +4307,7 @@
         // NEW CODE FOR BS5
         // deep linking - load tab on refresh
         function deepLink() {
+            console.log('deepLink')
             let url = location.href.replace(/\/$/, '');
             if (location.hash) {
                 const hash = url.split('#');

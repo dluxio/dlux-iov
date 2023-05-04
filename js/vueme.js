@@ -2375,7 +2375,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               }
               authors.push(this.posturls[post].author);
             }
-            console.log('where')
             if (!called) this.selectPosts();
             authors = [...new Set(authors)];
             this.getHiveAuthors(authors);
