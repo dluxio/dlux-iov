@@ -71,6 +71,7 @@ var app = new Vue({
   data() {
     return {
       fileRequests: {},
+      relations: {"follows":false,"ignores":false,"blacklists":false,"follows_blacklists":false,"follows_muted":false},
       sets: {},
       disablePost: true,
       File: [],
