@@ -2753,11 +2753,11 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         );
       }
     },
-    getNFTs() {
+    getNFTs(account) {
       this.accountNFTs = [];
       this.accountRNFTs = [];
       for (var i = 0; i < this.providers.length; i++) {
-        this.NFTsLookUp(this.account, this.providers, i);
+        this.NFTsLookUp(account, this.providers, i);
         this.trades(i);
         this.getSetDetails(i);
       }
@@ -3235,7 +3235,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this.getFeedPrice();
       this.getSapi(this.pageAccount, false);
       this.getTokenUser(this.pageAccount, false);
-      this.getNFTs();
+      this.getNFTs(this.pageAccount);
       deepLink();
     }
   },
