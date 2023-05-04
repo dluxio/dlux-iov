@@ -136,7 +136,7 @@
                                         </div>
                                         <div class="card-body">
                                             <a href="#detailModal" class="no-decoration" data-bs-toggle="modal"
-                                                @click="modalSelect(post.url)" data-bs-target="#detailModal">
+                                                @click="modalSelect(post.url)">
                                                 <h3 class="lead text-white truncate1">{{post.title}}</h3>
                                                 <p class="text-white-50 mb-1 truncate2">{{post.preview}}</p>
                                             </a>
@@ -262,9 +262,9 @@
                                         id="spktab" role="tab" data-bs-toggle="tab" aria-controls="spk"
                                         aria-expanded="true">SPK</a>
                                 </li>
-                                <li class="nav-item" v-show="false"> <a class="nav-link d-flex align-items-center"
+                                <!-- <li class="nav-item" v-show="false"> <a class="nav-link d-flex align-items-center"
                                         href="#/" id="spktab" role="tab">SOON - SPK</a>
-                                </li>
+                                </li> -->
                                 <li class="nav-item"> <a class="nav-link" href="#hive" id="hivetab" role="tab"
                                         data-bs-toggle="tab" aria-controls="hive" aria-expanded="true">HIVE</a>
                                 </li>
@@ -4217,7 +4217,6 @@
             let url = location.href.replace(/\/$/, '');
             if (location.hash) {
                 const hash = url.split('#');
-
                 const currentTab = hash[1] == 'dlux' || hash[1] == 'hive' || hash[1] == 'spk' ? document.querySelector('#wallettab a[href="#' + hash[1] + '"]') : document.querySelector('#usertabs a[href="#' + hash[1] + '"]')
                 const curTab = new bootstrap.Tab(currentTab);
                 curTab.show();
@@ -4236,10 +4235,13 @@
                     const hash = selectableTab.getAttribute('href');
                     if (hash == '#blog') {
                         newUrl = url.split('#')[0];
+                        history.replaceState(null, null, newUrl);
+                    } else if (hash == '#b/'){
+
                     } else {
                         newUrl = url.split('#')[0] + hash;
+                        history.replaceState(null, null, newUrl);
                     }
-                    history.replaceState(null, null, newUrl);
                 });
             });
         }
