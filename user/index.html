@@ -135,7 +135,7 @@
                                             </div>
                                         </div>
                                         <div class="card-body">
-                                            <a href="#detailModal" class="no-decoration" data-bs-toggle="modal"
+                                            <a href="#detailModal" class="no-decoration" data-bs-toggle="detailModal"
                                                 @click="modalSelect(post.url)">
                                                 <h3 class="lead text-white truncate1">{{post.title}}</h3>
                                                 <p class="text-white-50 mb-1 truncate2">{{post.preview}}</p>
@@ -1692,8 +1692,7 @@
                                                 <div class="bg-darker ">
                                                     <div class="d-flex">
                                                         <div>
-                                                            <h3 class="card-title" id="modal_title">
-                                                                {{displayPost.item.title}}</h3>
+                                                            <h3 class="card-title" id="modal_title">{{displayPost.item.title}}</h3>
                                                             <div class="d-flex flex-wrap text-info">
                                                                 <div>
                                                                     <p><i
