@@ -2132,9 +2132,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         this[op](this.account);
       }
     },
-    followersAccount(name) {
+    accountRelations(name) {
       fetch("https://anyx.io", {
-        body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_followers\", \"params\":[\"${name}\",\"${this.account}\",\"blog\",1], \"id\":1}`,
+        body: `{\"jsonrpc\":\"2.0\", \"method\":\"bridge.get_relationship_between_accounts\", \"params\":[\"${this.account}\",\"${name}\"], \"id\":5}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
@@ -2146,7 +2146,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         .then((re) => {
           var rez = re.result
           console.log(rez)
-          this.following = rez == this.account ? true : false;
+          this.relations = rez
         });
     },
     checkAccount(name, key) {
@@ -3261,7 +3261,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this.focus.account = this.pageAccount;
       this.sapi = sapi;
       this.checkAccount("pageAccount", "focus");
-      if(!this.me)this.followersAccount(this.pageAccount);
+      if(!this.me)this.accountRelations(this.pageAccount);
       this.getHiveStats();
       this.getQuotes();
       this.getSNodes();
