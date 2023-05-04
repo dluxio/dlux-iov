@@ -22,7 +22,7 @@
   <script type="module" src="/js/dexvue.js"></script>
 </head>
 
-<body class="d-flex flex-column text-white h-100 padme-t70 bg-img-none" id="index">
+<body class="d-flex flex-column text-white h-100 bg-img-none" id="index" style="padding-top: 150px;">
   <div id="app">
     <div>
       <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
@@ -31,9 +31,9 @@
     </div>
     <main role="main" class="flex-shrink-0 text-white">
       <div class="container-fluid px-0">
-        <div class="container-fluid fixed-top bg-darkg px-0" style="margin-top: 66px; z-index: 900">
-          <div class="d-flex flex-column justify-content-between align-items-center px-3 py-1"
-            style="background-color: black">
+        <div class="container-fluid fixed-top px-0" style="margin-top: 70px; z-index: 900">
+          <div class="d-flex flex-column justify-content-between align-items-center nav-blur px-3 py-1"
+            style="background-color: rgba(0,0,0,0.7)">
             <div class="d-flex align-itmes-center justify-content-between w-100">
               <div class="d-flex align-items-center">
                 <!-- token select -->
@@ -649,7 +649,7 @@
             </div>
           </div>
         </div>
-        <div class="container text-white" style="margin-top: 50px">
+        <div class="container text-white">
           <div v-if="!hidePrompt && !hasHiddenPrompt" class="alert alert-info p-2" role="alert">
             <div class="d-flex align-items-center">
               <div>Help contribute to further development by supporting the <a href="https://peakd.com/proposals/234"
@@ -661,74 +661,58 @@
           <!-- current token tick -->
           <div class="row mb-3">
             <div class="col-6 col-md-4">
-              <div class="rounded p-3 bg-darkg" v-if="buyhive.checked">
-                <div class="d-flex align-items-center" id="tokenHiveTick">
-                  <div>
-                    <b>
+              <div class="rounded p-3 border border-info" style="box-shadow: inset 0px 0px 10px 5px rgba(1, 216, 254, 0.3);" v-if="buyhive.checked">
+                <div class="d-flex align-items-center justify-content-center" id="tokenHiveTick">
                       <h2 class="lead my-0" v-cloak>
                         {{TOKEN}}: ${{toFixed((dexapi.markets ?
                         dexapi.markets.hive.tick : 0) * hiveprice.hive.usd,
                         6)}}
                       </h2>
-                    </b>
-                  </div>
                 </div>
               </div>
-              <div class="rounded p-3 bg-darkg" v-if="buyhbd.checked">
-                <div class="d-flex align-items-center" id="tokenHbdTick">
-                  <div>
-                    <b>
+              <div class="rounded p-3 border border-info" style="box-shadow: inset 0px 0px 10px 5px rgba(1, 216, 254, 0.3);" v-if="buyhbd.checked">
+                <div class="d-flex align-items-center justify-content-center" id="tokenHbdTick">
                       <h2 class="lead my-0" v-cloak>
                         {{TOKEN}}: ${{toFixed((dexapi ?
                         dexapi.markets.hbd.tick : 0 )*
                         hbdprice.hive_dollar.usd, 6)}}
                       </h2>
-                    </b>
-                  </div>
                 </div>
               </div>
             </div>
             <div class="col-4 d-none d-md-block">
-              <div class="rounded p-3 bg-darkg">
-                <div id="hiveTick">
-                  <b>
+              <div class="rounded p-3 border border-danger" style="box-shadow: inset 0px 0px 10px 5px rgba(254, 90, 1, 0.3);">
+                <div  class="d-flex align-items-center justify-content-center" id="hiveTick">
                     <h2 class="lead my-0" v-cloak>
                       HIVE: ${{hiveprice.hive.usd}}
                     </h2>
-                  </b>
                 </div>
               </div>
             </div>
             <div class="col-4 d-none d-md-block">
-              <div class="rounded p-3 bg-darkg">
-                <div id="hbdTick">
-                  <b>
+              <div class="rounded p-3 border border-success" style="box-shadow: inset 0px 0px 10px 5px rgba(1, 254, 31, 0.3);">
+                <div  class="d-flex align-items-center justify-content-center" id="hbdTick">
                     <h2 class="lead my-0" v-cloak>
                       HBD: ${{hbdprice.hive_dollar.usd}}
                     </h2>
-                  </b>
                 </div>
               </div>
             </div>
             <div class="col-6 d-md-none" v-if="buyhive.checked">
-              <div class="rounded p-3 bg-darkg">
-                <div id="hiveTick">
-                  <b>
+              <div class="rounded p-3 border border-danger" style="box-shadow: inset 0px 0px 10px 5px rgba(254, 90, 1, 0.3);">
+                <div  class="d-flex align-items-center justify-content-center" id="hiveTick">
                     <h2 class="lead my-0" v-cloak>
                       HIVE: ${{hiveprice.hive.usd}}
                     </h2>
-                  </b>
                 </div>
               </div>
             </div>
             <div class="col-6 d-md-none" v-if="buyhbd.checked">
-              <div class="rounded p-3 bg-darkg">
-                <div id="hbdTick">
-                  <b>
+              <div class="rounded p-3 border border-success" style="box-shadow: inset 0px 0px 10px 5px rgba(1, 254, 31, 0.3);">
+                <div  class="d-flex align-items-center justify-content-center" id="hbdTick">
                     <h2 class="lead my-0" v-cloak>
                       HBD: ${{hbdprice.hive_dollar.usd}}
                     </h2>
-                  </b>
                 </div>
               </div>
             </div>
@@ -864,7 +848,7 @@
                 <!-- <script type="text/javascript">
     $('#time-scale').multiselect();
 </script>  -->
-                <select id="time-scale" class="form-select bg-darker border-dark text-muted" v-model="barwidth"
+                <select id="time-scale" class="form-select" v-model="barwidth"
                   @change="getHistorical()">
                   <option value="60000">1m</option>
                   <option value="300000">5m</option>
