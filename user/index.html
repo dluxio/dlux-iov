@@ -108,7 +108,7 @@
                                             <div class="d-flex align-items-center ">
                                                 <a :href="'/@' + post.author" class="no-decoration">
                                                     <div class="d-flex align-items-center">
-                                                        <img :src="'https://images.hive.blog/u/' + post.author + '/avatar'"
+                                                        <img v-if="post.author" :src="'https://images.hive.blog/u/' + post.author + '/avatar'"
                                                             alt=""
                                                             class="rounded-circle bg-light img-fluid me-3 cover author-img"
                                                             style="width: 50px;">
@@ -145,7 +145,7 @@
                                                 <a target="_blank" :href="post.url" class="p-0 m-0" type="button">
                                                     <div id="imagesMain">
                                                         <div class="imagebox bg-none">
-                                                            <img src="..." alt="Card image cap"
+                                                            <img v-if="post.pic" alt="Card image cap"
                                                                 class="img-fluid image" :src="post.pic"
                                                                 @error="imgUrlAlt"
                                                                 style="width: 1500px; height: 360px; object-fit: cover;" />
@@ -1234,7 +1234,7 @@
                                             <div class="text-center my-auto rounded mx-4 p-2"
                                                 style="background-color: rgba(0,0,0,0.75)">
 
-                                                <img class="rounded img-fluid w-100"
+                                                <img v-if="getAttr(trade.script, 'wrapped')" class="rounded img-fluid w-100"
                                                     :src="'https://ipfs.io/ipfs/' + getAttr(trade.script, 'wrapped')"></img>
 
                                                 <h3 class="mt-3 rainbow-text"
@@ -1402,7 +1402,7 @@
                                         <div class="card-body pb-1">
                                             <div class="px-2 py-5 text-center rounded"
                                                 style="background-color: rgba(0,0,0,0.75)">
-                                                <img class="rounded max-160"
+                                                <img v-if="getAttr(rnft.script, 'wrapped')" class="rounded max-160"
                                                     :src="'https://ipfs.io/ipfs/' + getAttr(rnft.script, 'wrapped')"></img>
                                                 <div>
                                                     <h3 class="my-0 mx-2 p-0 p-2 ms-auto"
@@ -1708,7 +1708,7 @@
                                     <div class="d-flex align-items-center justify-content-between">
                                         <a :href="'/@' + displayPost.author" class="no-decoration">
                                             <div class="d-flex align-items-center">
-                                                <img :src="'https://images.hive.blog/u/' + displayPost.item.author + '/avatar'"
+                                                <img v-if="displayPost.item.author" :src="'https://images.hive.blog/u/' + displayPost.item.author + '/avatar'"
                                                     alt=""
                                                     class="rounded-circle bg-light img-fluid me-3 cover author-img"
                                                     style="width: 50px;">
@@ -1812,7 +1812,7 @@
                                     <div v-for="post in displayPost.item.replies" :key="post.url">
                                         <div class="card-header">
                                             <div class="float-left">
-                                                <a :href="post.author_url"><img :src="post.author_img"
+                                                <a :href="post.author_url"><img v-if="post.author_img" :src="post.author_img"
                                                         class="rounded-circle bg-light img-fluid mr-2 cover author-img"></a>
                                             </div>
                                             <div class="float-left">
