@@ -1981,8 +1981,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       if (
         this.displayPost.item?.children &&
         !this.displayPost.item.replies.length
-      )
-        this.getReplies(
+      )this.getReplies(
           this.displayPost.item.author,
           this.displayPost.item.permlink
         ).then((r) => {
