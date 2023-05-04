@@ -584,6 +584,10 @@ export default {
           this.statusPinger(txid, api, r + 1);
         });
     },
+    showTab(link){
+      if(!deepLink)return
+      deepLink(link)
+    },
     searchRecents() {
       this.filterRecents = this.recentUsers.reduce((a, b) => {
         console.log(b);
@@ -746,11 +750,11 @@ export default {
 		        <a class="nav-link dropdown-toggle dropdown-bs-toggle text-white-50" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
 			      <span id="userName" class="me-1">{{user}}</span></a>
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black me-1" aria-labelledby="userDropdown">
-			        <li class=""><a class="dropdown-item" :href="'/me#blog/'" onClick="showTab('blog')"><i class="fas fa-user fa-fw me-2"></i>Profile</a></li>
-			        <li class=""><a class="dropdown-item" :href="'/me#wallet/'" onClick="showTab('wallet')"><i class="fas fa-wallet fa-fw me-2"></i>Wallet</a></li>
-			        <li class=""><a class="dropdown-item" :href="'/me#inventory/'" onClick="showTab('inventory')"><i class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
-			        <li class="d-none"><a class="dropdown-item" :href="'/me#node/'" onClick="showTab('node')"><i class="fas fa-robot fa-fw me-2"></i>Node</a></li>
-			        <li class="d-none"><a class="dropdown-item" :href="'/me#settings/'" onClick="showTab('settings')"><i class="fas fa-cog fa-fw me-2"></i>Settings</a></li>
+			        <li class=""><a class="dropdown-item" :href="'/me#blog/'" @click="showTab('blog')"><i class="fas fa-user fa-fw me-2"></i>Profile</a></li>
+			        <li class=""><a class="dropdown-item" :href="'/me#wallet/'" @click="showTab('wallet')"><i class="fas fa-wallet fa-fw me-2"></i>Wallet</a></li>
+			        <li class=""><a class="dropdown-item" :href="'/me#inventory/'" @click="showTab('inventory')"><i class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
+			        <li class="d-none"><a class="dropdown-item" :href="'/me#node/'" @click="showTab('node')"><i class="fas fa-robot fa-fw me-2"></i>Node</a></li>
+			        <li class="d-none"><a class="dropdown-item" :href="'/me#settings/'" @click="showTab('settings')"><i class="fas fa-cog fa-fw me-2"></i>Settings</a></li>
               <li class=""><hr class="dropdown-divider"></li>
 			        <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
               <li class=""><hr class="dropdown-divider"></li>
@@ -772,11 +776,11 @@ export default {
 		        <a class="nav-link dropdown-toggle dropdown-bs-toggle text-white-50 text-end" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
 			      <span id="userName" class="ms-auto me-1"><img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light cover"></span></a>
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black me-1" aria-labelledby="userDropdown" style="position: absolute;">
-			        <li class=""><a class="dropdown-item" :href="'/me#blog/'" onClick="showTab('blog')"><i class="fas fa-user fa-fw me-2"></i>Profile</a></li>
-			        <li class=""><a class="dropdown-item" :href="'/me#wallet/'" onClick="showTab('wallet')"><i class="fas fa-wallet fa-fw me-2"></i>Wallet</a></li>
-			        <li class=""><a class="dropdown-item" :href="'/me#inventory/'" onClick="showTab('inventory')"><i class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
-			        <li class="d-none"><a class="dropdown-item" :href="'/me#node/'" onClick="showTab('node')"><i class="fas fa-robot fa-fw me-2"></i>Node</a></li>
-			        <li class="d-none"><a class="dropdown-item" :href="'/me#settings/'" onClick="showTab('settings')"><i class="fas fa-cog fa-fw me-2"></i>Settings</a></li>
+			        <li class=""><a class="dropdown-item" :href="'/me#blog/'" @click="showTab('blog')"><i class="fas fa-user fa-fw me-2"></i>Profile</a></li>
+			        <li class=""><a class="dropdown-item" :href="'/me#wallet/'" @click="showTab('wallet')"><i class="fas fa-wallet fa-fw me-2"></i>Wallet</a></li>
+			        <li class=""><a class="dropdown-item" :href="'/me#inventory/'" @click="showTab('inventory')"><i class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
+			        <li class="d-none"><a class="dropdown-item" :href="'/me#node/'" @click="showTab('node')"><i class="fas fa-robot fa-fw me-2"></i>Node</a></li>
+			        <li class="d-none"><a class="dropdown-item" :href="'/me#settings/'" @click="showTab('settings')"><i class="fas fa-cog fa-fw me-2"></i>Settings</a></li>
               <li class=""><hr class="dropdown-divider"></li>
 			        <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
               <li class=""><hr class="dropdown-divider"></li>
