@@ -65,8 +65,8 @@
                                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions<i
                                         class="fas fa-ellipsis-h ms-2"></i></button>
                                 <div class="dropdown-menu dropdown-menu-dark nav-item dropdown-menu-right"> <a
-                                        class="dropdown-item" type="button" @click="follow(pageAccount)" v-if="!relations.follow">Follow</a> <a class="dropdown-item"
-                                        type="button" @click="unfollow(pageAccount)" v-if="relations.follow">Unfollow</a>
+                                        class="dropdown-item" type="button" @click="follow(pageAccount)" v-if="!relations.follows">Follow</a> <a class="dropdown-item"
+                                        type="button" @click="unfollow(pageAccount)" v-if="relations.follows">Unfollow</a>
                                     <modal-vue type="send" token="DLUX" :balance="accountapi.balance" :account="account"
                                         @modalsign="sendIt($event)">
                                         <a slot="trigger" class="dropdown-item" type="button">Send DLUX</a>
