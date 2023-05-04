@@ -1973,7 +1973,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
     modalSelect(key) {
       if(key.indexOf('/@') > 0)
-        key = key.split('/@')[1];
+        key = '/@' + key.split('/@')[1];
       console.log({key, posturls: this.posturls[key]})
       this.displayPost.index = key;
       this.displayPost.item = this.posturls[key];
