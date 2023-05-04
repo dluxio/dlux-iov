@@ -3224,7 +3224,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this.focus.account = this.pageAccount;
       this.sapi = sapi;
       this.checkAccount("pageAccount", "focus");
-      this.checkAccount("account", "me");
       this.getHiveStats();
       this.getQuotes();
       this.getSNodes();
