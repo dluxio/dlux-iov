@@ -187,6 +187,9 @@ td {
       #07b39b,
       #6fba82) 1;
 }
+.btn-rb::after{
+  border-radius: 20px;
+}
 
 .border-rb {
   border-style: solid;
