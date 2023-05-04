@@ -261,9 +261,9 @@
                                         id="spktab" role="tab" data-bs-toggle="tab" aria-controls="spk"
                                         aria-expanded="true">SPK</a>
                                 </li>
-                                <li class="nav-item" v-show="false"> <a class="nav-link d-flex align-items-center"
+                                <!-- <li class="nav-item" v-show="false"> <a class="nav-link d-flex align-items-center"
                                         href="#/" id="spktab" role="tab">SOON - SPK</a>
-                                </li>
+                                </li> -->
                                 <li class="nav-item"> <a class="nav-link" href="#hive" id="hivetab" role="tab"
                                         data-bs-toggle="tab" aria-controls="hive" aria-expanded="true">HIVE</a></li>
                             </ul>
@@ -4350,10 +4350,13 @@
                     const hash = selectableTab.getAttribute('href');
                     if (hash == '#blog') {
                         newUrl = url.split('#')[0];
+                        history.replaceState(null, null, newUrl);
+                    } else if (hash == '#b/'){
+
                     } else {
                         newUrl = url.split('#')[0] + hash;
+                        history.replaceState(null, null, newUrl);
                     }
-                    history.replaceState(null, null, newUrl);
                 });
             });
         }
