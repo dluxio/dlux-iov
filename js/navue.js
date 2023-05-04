@@ -769,7 +769,7 @@ export default {
         <ul class="navbar-nav" id="loginMenu" v-show="!user">
           <li class="nav-item d-none"><a class="nav-link" href="/about/">About</a></li>
           <li class="nav-item"></li>
-          <li class="nav-item"><button class="btn btn-primary ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button></li>
+          <li class="nav-item"><button class="btn btn-sm btn-primary ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button></li>
         </ul>
         <ul class="navbar-nav d-sm-none" v-show="user">
           <li>
