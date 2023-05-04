@@ -2133,8 +2133,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       }
     },
     accountRelations(name) {
-      fetch("https://anyx.io", {
-        body: `{\"jsonrpc\":\"2.0\", \"method\":\"bridge.get_relationship_between_accounts\", \"params\":[\"${name}\",\"${this.account}\"], \"id\":5}`,
+      fetch("https://api.hive.blog", {
+        body: `{\"jsonrpc\":\"2.0\", \"method\":\"bridge.get_relationship_between_accounts\", \"params\":[\"${this.account}\",\"${name}\"], \"id\":5}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
