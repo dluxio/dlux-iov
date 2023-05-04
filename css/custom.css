@@ -12595,13 +12595,13 @@ td {
   background: linear-gradient(45deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  border-style: solid;
+  border: double 1em transparent;
+  border-radius: 30px;
+  background-image: linear-gradient(white, white), linear-gradient(to right, green, gold);
+  background-origin: border-box;
+  background-clip: content-box, border-box;
   border-width: 1px;
   border-image: linear-gradient(45deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82) 1;
-}
-
-.btn-rb::after {
-  border-radius: 20px;
 }
 
 .border-rb {

@@ -157,7 +157,7 @@
                                                                     <p><i
                                                                             :class="postSelect.types[post.type].icon"></i>{{postSelect.types[post.type].launch}}
                                                                     </p>
-                                                                    <button class="btn btn-lg btn-info px-4"
+                                                                    <button class="btn btn-lg btn-primary px-4"
                                                                         style="border-radius: 5rem;">Launch<i
                                                                             class="ms-2 fas fa-external-link-alt"></i></button>
                                                                 </div>
@@ -1727,14 +1727,14 @@
                     @blur="goBack()">
                     <div class="modal-dialog modal-full modal-xl modal-dialog-centered" style="max-width: 1000px;"
                         role="document">
-                        <div class="modal-content bg-dark text-white">
-                            <div class="card text-white bg-dark">
+                        <div class="modal-content bg-img-none text-white">
+                            <div class="card text-white bg-img-none bg-blur-none">
                                 <div class="ms-auto">
-                                    <button type="button" class="btn-close btn-close-white mt-3 me-3"
+                                    <button type="button" class="btn-close mt-3 me-3"
                                         data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="ms-auto me-auto px-2" style="max-width: 750px">
-                                    <div class="bg-darker ">
+                                    <div class="">
                                         <div class="d-flex">
                                             <div>
                                                 <h3 class="card-title" id="modal_title">
@@ -1802,7 +1802,7 @@
                                         <p><i
                                                 :class="postSelect.types[displayPost.item.type].icon"></i>{{postSelect.types[displayPost.item.type].launch}}
                                         </p>
-                                        <a :href="displayPost.item.url"><button class="btn btn-lg btn-info px-4"
+                                        <a :href="displayPost.item.url"><button class="btn btn-lg btn-primary px-4"
                                                 style="border-radius: 5rem;">Launch<i
                                                     class="ms-2 fas fa-external-link-alt"></i></button></a>
                                     </div>
