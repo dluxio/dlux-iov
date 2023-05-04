@@ -1089,7 +1089,7 @@
                             <!-- hive wallet tab-->
                             <div role="tabpanel" class="tab-pane fade show" id="hive" aria-labelledby="hivetab">
                                 <div class="container">
-                                    <div class="jumbotron pt-4 bg-darker">
+                                    <div class="jumbotron pt-4">
                                         <h1 class="display-5">HIVE</h1>
                                         <p class="lead ">A proof-of-stake blockchain built for censorship
                                             resistant
@@ -1106,19 +1106,26 @@
                                             <div id="hiveactions" class="float-right text-end">
                                                 <h5 id="hivebalance">{{focus.balance}}</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
+                                                    <button type="button" class="btn btn-info">
                                                     <modal-vue type="send" token="HIVE"
                                                         :balance="parseFloat(focus.balance) * 1000" :account="account"
                                                         @modalsign="sendIt($event)">
-                                                        <button slot="trigger" type="button" class="btn btn-info "><i
-                                                                class="fas fa-paper-plane me-2"></i>Send</button>
-                                                    </modal-vue>
+                                                        <span slot="trigger"><i
+                                                                class="fas fa-paper-plane me-2"></i>Send</span>
+                                                    </modal-vue></button>
+                                                    <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                    disabled></button>
                                                     <div class="btn-group" role="group" v-if="me">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
+                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                                             aria-labelledby="btnGroupDrop1">
+                                                            <a
+                                                            class="dropdown-item disabled" href="#"><i
+                                                                class="fas fa-angle-double-up fa-fw me-2"></i>Power
+                                                            Up</a>
                                                             <div class="dropdown-divider"></div>
                                                             <a class="dropdown-item" href="/dex#dlux"><i
                                                                     class="fas fa-store fa-fw me-2"></i>Trade</a>
@@ -1148,12 +1155,14 @@
                                                     <button type="button" class="btn btn-info "
                                                         style="pointer-events: none;" disabled><i
                                                             class="fas fa-user-friends me-2"></i>Delegate</button>
+                                                            <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                            disabled></button>
                                                     <div class="btn-group" role="group" v-if="me">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
+                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                                             aria-labelledby="btnGroupDrop1"> <a
                                                                 class="dropdown-item disabled" href="#"><i
                                                                     class="fas fa-angle-double-down fa-fw me-2"></i>Power
@@ -1179,18 +1188,21 @@
                                             <div id="hbdactions" class="float-right text-end">
                                                 <h5 id="hbdbalance">{{focus.hbd_balance}}</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
+                                                    <button type="button" class="btn btn-info">
                                                     <modal-vue type="send" token="HBD"
                                                         :balance="parseFloat(focus.hbd_balance) * 1000"
                                                         :account="account" @modalsign="sendIt($event)">
-                                                        <button slot="trigger" type="button" class="btn btn-info "><i
-                                                                class="fas fa-paper-plane me-2"></i>Send</button>
-                                                    </modal-vue>
+                                                        <span slot="trigger"><i
+                                                                class="fas fa-paper-plane me-2"></i>Send</span>
+                                                    </modal-vue></button>
+                                                    <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                            disabled></button>
                                                     <div class="btn-group" role="group" v-if="me">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
-                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-right text-white"
+                                                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                                             aria-labelledby="btnGroupDrop1"> <a
                                                                 class="dropdown-item disabled" href="#"><i
                                                                     class="fas fa-random fa-fw me-2"></i>Convert
@@ -1234,7 +1246,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div id="hivetransactions" class="jumbotron pt-3 bg-darker text-white">
+                                    <div id="hivetransactions" class="jumbotron pt-3 text-white">
                                     </div>
                                 </div>
                             </div>
