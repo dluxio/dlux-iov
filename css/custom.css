@@ -12641,6 +12641,13 @@ td {
   backdrop-filter: blur(10px);
 }
 
+.bg-black-blur {
+  background-color: rgba(0, 0, 0, 0.8);
+  background-image: none !important;
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+}
+
 .nav-blur {
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
