@@ -138,7 +138,7 @@
 
               <div class="d-flex align-items-center">
                 <!-- claim tokens form -->
-                <div v-if="hasDrop || accountapi.claim" id="userToken" class="mx-4">
+                <div v-if="hasDrop || accountapi.claim" id="userToken" class="mx-1">
                   <a class="dropdown btn btn-sm btn-rb no-decoration" data-bs-auto-close="outside" href="#"
                     role="button" id="claimDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">Claim <i
                       class="fas fa-gift"></i></a>
@@ -201,7 +201,7 @@
               <div class="d-flex align-items-center text-white-50">
                 <!-- send token form -->
 
-                <div v-if="account" id="userSendToken" class="mx-4" v-if="features.send_B">
+                <div v-if="account" id="userSendToken" class="mx-1" v-if="features.send_B">
                   <a class="dropdown-toggle text-warning no-decoration" data-bs-auto-close="outside" href="#"
                     role="button" id="sendDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false" v-cloak>
                     <span class="me-1" v-cloak>{{formatNumber(bartoken,3,'.',',')}} {{TOKEN}}</span></a>
@@ -261,7 +261,7 @@
 
                 <!-- power form -->
 
-                <div id="userPwr" class="mx-4" v-if="features.powup_B || features.powdn_B">
+                <div id="userPwr" class="mx-1" v-if="features.powup_B || features.powdn_B">
                   <a class="dropdown-toggle text-primary no-decoration" data-bs-auto-close="outside" href="#"
                     role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak><span
                       class="me-1" v-cloak>{{formatNumber(barpow,3,'.',',')}} {{TOKEN}}P</span></a>
@@ -337,7 +337,7 @@
 
                 <!-- gov form -->
 
-                <div id="userGov" class="mx-4" v-if="isnode && (features.govup_B || features.govdn_B)">
+                <div id="userGov" class="mx-1" v-if="isnode && (features.govup_B || features.govdn_B)">
                   <a class="dropdown-toggle text-info no-decoration" href="#" data-bs-auto-close="outside" role="button"
                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak><span class="me-1"
                       v-cloak>{{formatNumber(bargov,3,'.',',')}} {{TOKEN}}G</span></a>
@@ -420,7 +420,7 @@
 
                 <!-- send hive form -->
 
-                <div v-if="account" id="userHive" class="mx-4">
+                <div v-if="account" id="userHive" class="mx-1">
                   <a class="dropdown-toggle text-danger no-decoration" data-bs-auto-close="outside" href="#"
                     role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
                     <span class="me-1" v-cloak>{{formatNumber(barhive,3,'.',',')}} HIVE</span></a>
@@ -479,7 +479,7 @@
 
                 <!-- send hbd form -->
 
-                <div v-if="account" id="userHbd" class="mx-4">
+                <div v-if="account" id="userHbd" class="mx-1">
                   <a class="dropdown-toggle text-success no-decoration" data-bs-auto-close="outside" href="#"
                     role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
                     <span class="me-1" v-cloak>{{formatNumber(barhbd,3,'.',',')}} HBD</span></a>
