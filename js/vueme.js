@@ -886,7 +886,7 @@ var app = new Vue({
         txid: "Sign Auth Headers",
       }
     },
-    unfollow(acc,){
+    unfollow(acc){
       this.toSign = {
         type: "raw",
         key: "posting",
