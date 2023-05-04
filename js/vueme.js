@@ -881,7 +881,7 @@ var app = new Vue({
       this.toSign = {
         type: "raw",
         key: "posting",
-        ops: [["follow", {follower: this.account, following: acc, what: [what]}]],
+        op: [["follow", {follower: this.account, following: acc, what: [what]}]],
         callbacks: [res],
         txid: "Sign Auth Headers",
       }
@@ -890,7 +890,7 @@ var app = new Vue({
       this.toSign = {
         type: "raw",
         key: "posting",
-        ops: [["follow", {follower: this.account, following: acc, what: []}]],
+        op: [["follow", {follower: this.account, following: acc, what: []}]],
         callbacks: [],
         txid: "unfollow:" + acc,
       }
