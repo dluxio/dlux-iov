@@ -55,8 +55,7 @@
                           @click="setApi('https://spkinstant.hivehoneycomb.com')">LARYNX</a>
                       </li>
                       <li>
-                        <a class="dropdown-item" href="#/"
-                          @click="setApi('https://duat.hivehoneycomb.com')">DUAT</a>
+                        <a class="dropdown-item" href="#/" @click="setApi('https://duat.hivehoneycomb.com')">DUAT</a>
                       </li>
                       <li>
                         <hr class="dropdown-divider" />
@@ -653,10 +652,11 @@
         <div class="container text-white" style="margin-top: 50px">
           <div v-if="!hidePrompt && !hasHiddenPrompt" class="alert alert-info p-2" role="alert">
             <div class="d-flex align-items-center">
-            <div>Help contribute to further development by supporting the <a href="https://peakd.com/proposals/234" target="_blank">HoneyComb Improvement Proposal</a></div>
-            <button @click="voteProposal(234)" class="btn btn-primary ms-auto">Vote Now</button>
-            <button @click="banishPrompt" class="btn btn-secondary ms-2">Maybe Later</button>
-          </div>
+              <div>Help contribute to further development by supporting the <a href="https://peakd.com/proposals/234"
+                  target="_blank">HoneyComb Improvement Proposal</a></div>
+              <button @click="voteProposal(234)" class="btn btn-primary ms-auto">Vote Now</button>
+              <button @click="banishPrompt" class="btn btn-secondary ms-2">Maybe Later</button>
+            </div>
           </div>
           <!-- current token tick -->
           <div class="row mb-3">
@@ -737,13 +737,13 @@
           <div id="market" class="row mb-3 text-center">
             <div class="col-6 col-lg-3">
               <div class="d-flex align-items-center justify-content-center">
-              <h5 class="m-0">Market</h5>
+                <h5 class="m-0">Market</h5>
                 <div class="dropdown show d-flex align-items-center p-0 m-0">
-                  <a class="text-white" href="#" role="button" data-bs-toggle="dropdown"
-                    aria-haspopup="true" aria-expanded="false">
-                    <h5 class="m-0"><i class="fas fa-info-circle ms-2"></i></h5></a>
-                  <div
-                    class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
+                  <a class="text-white" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                    aria-expanded="false">
+                    <h5 class="m-0"><i class="fas fa-info-circle ms-2"></i></h5>
+                  </a>
+                  <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
                     <h6 class="dropdown-header">{{TOKEN}} STATS</h6>
                     <div class="dropdown-divider bg-light"></div>
                     <p class="mb-0">Supply:</p>
@@ -1080,20 +1080,21 @@
                     </legend>
                     <div tabindex="-1" role="group" class="col">
                       <div class="input-group">
-                        <input type="number" v-on:keyup="bcalc('t')" ref="buyQty" required  :class="{'text-info':!bform.tl, ' text-white-50':bform.tl}"
-                          class="form-control" v-model="buyQuantity" id="buyQuantity"
-                          placeholder="0" :min="minbuy" step="0.001" aria-required="true" :readonly="bform.tl" />
-                          <span class="input-group-text">
-                            {{TOKEN}}
-                            <a href="#/" class="ms-3 text-secondary" @click="block('t')"><i class="fas"
-                                :class="{'fa-lock':bform.tl, 'fa-unlock-alt':!bform.tl, 'text-info':bform.tl}"></i></a>
-                            </span>
-                        </div>
-                        <div class="invalid-feedback">
-                          Minimum quantity is {{minbuy}}
-                        </div>
+                        <input type="number" v-on:keyup="bcalc('t')" ref="buyQty" required
+                          :class="{'text-info':!bform.tl, ' text-white-50':bform.tl}" class="form-control"
+                          v-model="buyQuantity" id="buyQuantity" placeholder="0" :min="minbuy" step="0.001"
+                          aria-required="true" :readonly="bform.tl" />
+                        <span class="input-group-text">
+                          {{TOKEN}}
+                          <a href="#/" class="ms-3 text-secondary" @click="block('t')"><i class="fas"
+                              :class="{'fa-lock':bform.tl, 'fa-unlock-alt':!bform.tl, 'text-info':bform.tl}"></i></a>
+                        </span>
+                      </div>
+                      <div class="invalid-feedback">
+                        Minimum quantity is {{minbuy}}
                       </div>
                     </div>
+                  </div>
 
                   <div class="row mb-3" v-if="buylimit.checked">
                     <legend tabindex="-1" class="col-sm-4 col-form-label" for="buyPrice">
@@ -1102,20 +1103,21 @@
                     <div tabindex="-1" role="group" class="col">
                       <div class="input-group">
                         <input id="buyPrice" type="number" v-on:keyup="bcalc('p')" v-model="buyPrice" placeholder="0"
-                          required step="0.000001" min="0.000001" aria-required="true"  :class="{'text-info':!bform.pl, ' text-white-50':bform.pl}"
-                          class="form-control" :readonly="bform.pl" />
-                          <span class="input-group-text">
-                            <span v-if="buyhive.checked">HIVE</span>
-                            <span v-if="buyhbd.checked">HBD</span> /{{TOKEN}}
-                            <a href="#/" class="ms-3 text-secondary" @click="block('p')"><i class="fas"
-                                :class="{'fa-lock':bform.pl, 'fa-unlock-alt':!bform.pl, 'text-info':bform.pl}"></i></a>
-                            </span>
-                        </div>
-                        <div class="invalid-feedback">
-                          Minimum price is 0.000001
-                        </div>
+                          required step="0.000001" min="0.000001" aria-required="true"
+                          :class="{'text-info':!bform.pl, ' text-white-50':bform.pl}" class="form-control"
+                          :readonly="bform.pl" />
+                        <span class="input-group-text">
+                          <span v-if="buyhive.checked">HIVE</span>
+                          <span v-if="buyhbd.checked">HBD</span> /{{TOKEN}}
+                          <a href="#/" class="ms-3 text-secondary" @click="block('p')"><i class="fas"
+                              :class="{'fa-lock':bform.pl, 'fa-unlock-alt':!bform.pl, 'text-info':bform.pl}"></i></a>
+                        </span>
+                      </div>
+                      <div class="invalid-feedback">
+                        Minimum price is 0.000001
                       </div>
                     </div>
+                  </div>
 
                   <div class="row mb-3" v-if="buyhive.checked">
                     <legend tabindex="-1" class="col-sm-4 col-form-label" id="buy-hive-total-label">
@@ -1123,23 +1125,24 @@
                     </legend>
                     <div tabindex="-1" role="group" class="col">
                       <div class="input-group">
-                        <input type="number" class="form-control" :readonly="bform.cl" :class="{'text-info':!bform.cl, ' text-white-50':bform.cl}"
-                          v-model="buyHiveTotal" id="buyHiveTotal" required v-on:keyup="bcalc('c')" placeholder="0"
-                          :min="minbuy" step="0.001"
+                        <input type="number" class="form-control" :readonly="bform.cl"
+                          :class="{'text-info':!bform.cl, ' text-white-50':bform.cl}" v-model="buyHiveTotal"
+                          id="buyHiveTotal" required v-on:keyup="bcalc('c')" placeholder="0" :min="minbuy" step="0.001"
                           :max="parseFloat(barhive) < parseFloat(maxhbuy) ? toFixed(parseFloat(barhive),3) : maxhbuy"
                           aria-required="true" />
-                          <span class="input-group-text">
-                            HIVE
-                            <a href="#/" class="ms-3 text-secondary" @click="block('c')" v-if="buylimit.checked"><i
-                                class="fas" :class="{'fa-lock':bform.cl, 'fa-unlock-alt':!bform.cl, 'text-info':bform.cl}"></i></a>
-                            </span>
-                        </div>
-                        <div class="invalid-feedback">
-                          Your balance is {{barhive}} - minimum: {{minbuy}} -
-                          max: {{parseFloat(barhive) < parseFloat(maxhbuy) ? toFixed(parseFloat(barhive),3) :
-                            maxhbuy}}{{parseFloat(barhive) < parseFloat(maxhbuy) ? '' : '(Liquidity)' }} </div>
-                        </div>
+                        <span class="input-group-text">
+                          HIVE
+                          <a href="#/" class="ms-3 text-secondary" @click="block('c')" v-if="buylimit.checked"><i
+                              class="fas"
+                              :class="{'fa-lock':bform.cl, 'fa-unlock-alt':!bform.cl, 'text-info':bform.cl}"></i></a>
+                        </span>
                       </div>
+                      <div class="invalid-feedback">
+                        Your balance is {{barhive}} - minimum: {{minbuy}} -
+                        max: {{parseFloat(barhive) < parseFloat(maxhbuy) ? toFixed(parseFloat(barhive),3) :
+                          maxhbuy}}{{parseFloat(barhive) < parseFloat(maxhbuy) ? '' : '(Liquidity)' }} </div>
+                      </div>
+                    </div>
 
                     <div class="row mb-3" v-if="buyhbd.checked">
                       <legend tabindex="-1" class="col-sm-4 col-form-label" for="buyHbdTotal">
@@ -1147,16 +1150,17 @@
                       </legend>
                       <div tabindex="-1" role="group" class="col">
                         <div role="group" class="input-group">
-                          <input type="number" class="form-control bg-darkg border-dark" :readonly="bform.cl" :class="{'text-info':!bform.cl, ' text-white-50':bform.cl}"
-                            v-model="buyHbdTotal" id="buyHbdTotal" required v-on:keyup="bcalc('c')" placeholder="0"
-                            :min="minbuy" step="0.001"
+                          <input type="number" class="form-control bg-darkg border-dark" :readonly="bform.cl"
+                            :class="{'text-info':!bform.cl, ' text-white-50':bform.cl}" v-model="buyHbdTotal"
+                            id="buyHbdTotal" required v-on:keyup="bcalc('c')" placeholder="0" :min="minbuy" step="0.001"
                             :max="parseFloat(barhbd) < parseFloat(maxdbuy) ? toFixed(parseFloat(barhbd),3) : maxdbuy"
                             aria-required="true" />
                           <div class="input-group-append">
                             <div class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix">
                               HBD
                               <a href="#/" class="ms-3 text-secondary" @click="block('c')" v-if="buylimit.checked"><i
-                                  class="fas" :class="{'fa-lock':bform.cl, 'fa-unlock-alt':!bform.cl, 'text-info':!bform.cl}"></i></a>
+                                  class="fas"
+                                  :class="{'fa-lock':bform.cl, 'fa-unlock-alt':!bform.cl, 'text-info':!bform.cl}"></i></a>
                             </div>
                           </div>
                           <div class="invalid-feedback">
@@ -1174,17 +1178,16 @@
                         <div tabindex="-1" role="group" class="col">
                           <div class="input-group">
                             <input id="buyHours" v-model="buyHours" type="number" required step="1" min="1" max="720"
-                              aria-required="true" class="form-control text-info"
-                              :readonly="buymarket.checked" />
-                              <span class="input-group-text">
-                                HOURS
-                              </span>
-                            </div>
-                            <div class="invalid-feedback">
-                              Expiration must be between 1 and 720 hours
-                            </div>
+                              aria-required="true" class="form-control text-info" :readonly="buymarket.checked" />
+                            <span class="input-group-text">
+                              HOURS
+                            </span>
+                          </div>
+                          <div class="invalid-feedback">
+                            Expiration must be between 1 and 720 hours
                           </div>
                         </div>
+                      </div>
 
 
                       <div class="row mb-3">
@@ -1236,23 +1239,23 @@
                     </legend>
                     <div tabindex="-1" role="group" class="col">
                       <div class="input-group">
-                        <input type="number" v-on:keyup="scalc('t')" required
-                          class="form-control bg-darkg border-dark" v-model="sellQuantity" id="sellQuantity"
-                          placeholder="0" :min="minsell" step="0.001" :readonly="sform.tl"  :class="{'text-info':!sform.tl, ' text-white-50':sform.tl}" aria-required="true"
-                          :max="parseFloat(bartoken)" />
+                        <input type="number" v-on:keyup="scalc('t')" required class="form-control"
+                          v-model="sellQuantity" id="sellQuantity" placeholder="0" :min="minsell" step="0.001"
+                          :readonly="sform.tl" :class="{'text-info':!sform.tl, ' text-white-50':sform.tl}"
+                          aria-required="true" :max="parseFloat(bartoken)" />
 
-                          <span class="input-group-text">
-                            {{TOKEN}}<a href="#/" class="ms-3 text-secondary" @click="slock('t')"
-                              v-if="selllimit.checked"><i class="fas"
-                                :class="{'fa-lock':sform.tl, 'fa-unlock-alt':!sform.tl, 'text-info':sform.tl}"></i></a>
-                          </span>
-                        </div>
-                        <div class="invalid-feedback">
-                          Your balance is {{(accountapi.balance/1000)}} -
-                          minimum quantity is {{minsell}}
-                        </div>
+                        <span class="input-group-text">
+                          {{TOKEN}}<a href="#/" class="ms-3 text-secondary" @click="slock('t')"
+                            v-if="selllimit.checked"><i class="fas"
+                              :class="{'fa-lock':sform.tl, 'fa-unlock-alt':!sform.tl, 'text-info':sform.tl}"></i></a>
+                        </span>
+                      </div>
+                      <div class="invalid-feedback">
+                        Your balance is {{(accountapi.balance/1000)}} -
+                        minimum quantity is {{minsell}}
                       </div>
                     </div>
+                  </div>
 
 
                   <div class="row mb-3" v-if="!sellmarket.checked">
@@ -1262,42 +1265,44 @@
                     <div tabindex="-1" role="group" class="col">
                       <div class="input-group">
                         <input id="sellPrice" v-on:keyup="scalc('p')" v-model="sellPrice" type="number" placeholder="0"
-                          required step="0.000001" min="0.000001" aria-required="true"
-                          class="form-control bg-darkg border-dark" :readonly="sform.pl"  :class="{'text-info':!sform.pl, ' text-white-50':sform.pl}"/>
-                          <span class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix">
-                            <span v-if="buyhive.checked">HIVE</span><span v-if="buyhbd.checked">HBD</span>/{{TOKEN}}<a
-                              href="#/" class="ms-3 text-secondary" @click="slock('p')" v-if="selllimit.checked"><i
-                                class="fas" :class="{'fa-lock':sform.pl, 'fa-unlock-alt':!sform.pl, 'text-info':sform.pl}"></i></a>
-                          </span>
-                        </div>
-                        <div class="invalid-feedback">
-                          Minimum price is 0.000001
-                        </div>
+                          required step="0.000001" min="0.000001" aria-required="true" class="form-control"
+                          :readonly="sform.pl" :class="{'text-info':!sform.pl, ' text-white-50':sform.pl}" />
+                        <span class="input-group-text">
+                          <span v-if="buyhive.checked">HIVE</span><span v-if="buyhbd.checked">HBD</span>/{{TOKEN}}<a
+                            href="#/" class="ms-3 text-secondary" @click="slock('p')" v-if="selllimit.checked"><i
+                              class="fas"
+                              :class="{'fa-lock':sform.pl, 'fa-unlock-alt':!sform.pl, 'text-info':sform.pl}"></i></a>
+                        </span>
+                      </div>
+                      <div class="invalid-feedback">
+                        Minimum price is 0.000001
                       </div>
                     </div>
+                  </div>
 
                   <div class="row mb-3" v-if="buyhive.checked && selllimit.checked">
                     <legend tabindex="-1" class="col-sm-4 col-form-label" for="sellHiveTotal">
                       Total
                     </legend>
                     <div tabindex="-1" role="group" class="col">
-                      <div role="group" class="input-group">
-                        <input type="number" class="form-control bg-darkg border-dark" :readonly="sform.cl" :class="{'text-info':!sform.cl, ' text-white-50':sform.cl}"
-                          id="sellHiveTotal" required v-model="sellHiveTotal" v-on:keyup="scalc('c')" placeholder="0"
-                          min="0.001" step="0.001" aria-required="true" />
-                        <div class="input-group-append">
-                          <div class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix">
-                            HIVE<a href="#/" class="ms-3 text-secondary" @click="slock('c')" v-if="selllimit.checked"><i
-                                class="fas" :class="{'fa-lock':sform.cl, 'fa-unlock-alt':!sform.cl, 'text-info':sform.cl}"></i></a>
-                          </div>
-                        </div>
-                        <div class="invalid-feedback">
-                          Minimum total is 0.001 - increase the Price or use
-                          Market Type.
-                        </div>
+                      <div class="input-group">
+                        <input type="number" class="form-control" :readonly="sform.cl"
+                          :class="{'text-info':!sform.cl, ' text-white-50':sform.cl}" id="sellHiveTotal" required
+                          v-model="sellHiveTotal" v-on:keyup="scalc('c')" placeholder="0" min="0.001" step="0.001"
+                          aria-required="true" />
+                        <span class="input-group-text">
+                          HIVE<a href="#/" class="ms-3 text-secondary" @click="slock('c')" v-if="selllimit.checked"><i
+                              class="fas"
+                              :class="{'fa-lock':sform.cl, 'fa-unlock-alt':!sform.cl, 'text-info':sform.cl}"></i></a>
+                        </span>
+                      </div>
+                      <div class="invalid-feedback">
+                        Minimum total is 0.001 - increase the Price or use
+                        Market Type.
                       </div>
                     </div>
                   </div>
+
 
                   <div class="row mb-3" v-if="buyhbd.checked && selllimit.checked">
                     <legend tabindex="-1" class="col-sm-4 col-form-label" for="sellHbdTotal">
@@ -1305,14 +1310,15 @@
                     </legend>
                     <div tabindex="-1" role="group" class="col">
                       <div role="group" class="input-group">
-                        <input type="number" class="form-control bg-darkg border-dark" :readonly="sform.cl" :class="{'text-info':!sform.cl, ' text-white-50':sform.cl}"
-                          id="sellHbdTotal" v-model="sellHbdTotal" required placeholder="0" min="0.001" step="0.001"
+                        <input type="number" class="form-control" :readonly="sform.cl"
+                          :class="{'text-info':!sform.cl, ' text-white-50':sform.cl}" id="sellHbdTotal"
+                          v-model="sellHbdTotal" required placeholder="0" min="0.001" step="0.001"
                           aria-required="true" />
-                        <div class="input-group-append">
-                          <div class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix">
+                          <span class="input-group-text">
                             HBD<a href="#/" class="ms-3 text-secondary" @click="slock('c')" v-if="selllimit.checked"><i
-                                class="fas" :class="{'fa-lock':sform.cl, 'fa-unlock-alt':!sform.cl, 'text-info':sform.cl}"></i></a>
-                          </div>
+                                class="fas"
+                                :class="{'fa-lock':sform.cl, 'fa-unlock-alt':!sform.cl, 'text-info':sform.cl}"></i></a>
+                            </span>
                         </div>
                         <div class="invalid-feedback">
                           Minimum total is 0.001 - increase the Price or use
@@ -1320,28 +1326,26 @@
                         </div>
                       </div>
                     </div>
-                  </div>
+
 
                   <div class="row mb-3" v-if="!sellmarket.checked">
                     <legend tabindex="-1" class="col-sm-4 col-form-label" for="sellHours">
                       Expiration
                     </legend>
                     <div tabindex="-1" role="group" class="col">
-                      <div role="group" class="input-group">
+                      <div class="input-group">
                         <input id="sellHours" v-on:keyup="scalc('c')" v-model="sellHours" type="number" required
                           step="1" min="1" max="720" aria-required="true"
-                          class="form-control bg-darkg border-dark text-info" :readonly="sellmarket.checked" />
-                        <div class="input-group-append">
-                          <div class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix">
+                          class="form-control text-info" :readonly="sellmarket.checked" />
+                          <span class="input-group-text">
                             HOURS
-                          </div>
+                          </span>
                         </div>
                         <div class="invalid-feedback">
                           Expiration must be between 1 and 720 hours
                         </div>
                       </div>
                     </div>
-                  </div>
 
                   <div class="row mb-3">
                     <div class="text-end">
@@ -1360,9 +1364,9 @@
               <div class="row">
                 <div class="mt-3 col-md-6">
                   <h4>Buy Orders</h4>
-                  <div class="table-responsive">
+                  <div class="table-responsive table-blur rounded border">
                     <table role="table" aria-busy="false" aria-colcount="4"
-                      class="table table-dark bg-darkger text-white table-striped table-hover table-borderless"
+                      class="table table-striped table-hover"
                       id="hivebuyordertable">
                       <thead role="rowgroup">
                         <tr role="row">
@@ -1684,6 +1688,9 @@
   });
 </script>
 <!-- <script type="text/javascript" src="/js/chart.js"></script> -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
+  integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
+  crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
+
 </html>

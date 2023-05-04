@@ -252,6 +252,12 @@ td {
   backdrop-filter: blur(10px);
 }
 
+.table-blur {
+  background-color: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
 .modal-content {
   background-color: rgba(42, 48, 54, 0.8);
   -webkit-backdrop-filter: blur(10px);
