@@ -309,7 +309,7 @@
                 </div>
             </div>
             <!--detail view-->
-            <div class="modal fade" id="detailModal" tabindex="11" role="dialog" aria-hidden="true" @blur="goBack()">
+            <div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-hidden="true" @blur="goBack()">
                 <div class="modal-dialog modal-full modal-xl modal-dialog-centered" style="max-width: 1000px;"
                     role="document">
                     <div class="modal-content bg-img-none text-white">
@@ -460,17 +460,17 @@
                                     </div>
                                     <!--footer buttons-->
                                     <div class="d-flex align-items-center my-2">
-                                        <div><a href="#/" class="no-decoration" data-bs-toggle="collapse"
+                                        <div><a role="button" class="no-decoration" data-bs-toggle="collapse"
                                                 :data-bs-target="'#vote-modal-' + displayPost.item.author + '-' + displayPost.item.permlink"><i
                                                     class="fas fa-heart me-1"></i><span
                                                     class="text-white-50">{{displayPost.item.upVotes}}</span></a>
-                                            <a href="#/" class="no-decoration" data-bs-toggle="collapse"
+                                            <a role="button" class="no-decoration" data-bs-toggle="collapse"
                                                 :data-bs-target="'#comment-modal-' + displayPost.item.author + '-' + displayPost.item.permlink">
 
                                                 <i class="fas fa-comment ms-2 me-1"></i><span
                                                     class="text-white-50">{{displayPost.item.children}}</span></a>
 
-                                            <a href="#/" class="no-decoration text-white-50" data-bs-toggle="collapse"
+                                            <a role="button" class="no-decoration text-white-50" data-bs-toggle="collapse"
                                                 :class="{'text-primary': displayPost.flag > 0}"
                                                 :data-bs-target="'#vote-modal-' + displayPost.author + '-' + displayPost.permlink"
                                                 @click="displayPost.flag = true">
@@ -478,7 +478,7 @@
                                                     class="text-white-50">{{displayPost.downVotes ?
                                                     displayPost.downVotes : ''}}</span>
                                             </a>
-                                            <a v-for="contract in displayPost.contract" href="#/"
+                                            <a role="button" v-for="contract in displayPost.contract"
                                                 class="no-decoration text-white-50" data-bs-toggle="collapse"
                                                 :data-bs-target="'#contract-modal-' + 'contract.i' ">
                                                 <i class="fa-solid fa-file-contract ms-2 me-1"></i>
