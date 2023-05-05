@@ -1878,7 +1878,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           author: url.split("/@")[1].split("/")[0],
           permlink: url.split("/@")[1].split("/")[1],
           weight:
-            this.posturls[url].slider * (this.posturls[url].flag ? -1 : 1),
+            this.posturls[key].slider * (this.posturls[key].flag ? -1 : 1),
         },
         msg: `Voting ...`,
         ops: [""],
