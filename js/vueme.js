@@ -1871,6 +1871,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       return out + post;
     },
     vote(url) {
+      const key = `/@${url.split("/@")[1].split("/")[0]}/${url.split("/@")[1].split("/")[1]}`
       this.toSign = {
         type: "vote",
         cj: {
@@ -2257,7 +2258,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
     formatNumber(t, n, r, e) { // number, decimals, decimal separator, thousands separator
       if (typeof t != "number") {
-        const parts = t.split(" ");
+        const parts = t ? t.split(" ") : []
         var maybe = 0
         for (i = 0; i < parts.length; i++) {
           if (parseFloat(parts[i])>0){
