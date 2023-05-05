@@ -735,8 +735,24 @@ createApp({
     toUpperCase(value) {
       return value.toUpperCase();
     },
+    gt(a,b){
+      return parseFloat(a)>parseFloat(b);
+    },
     formatNumber(t, n, r, e) {
-      if (typeof t != "number") t = parseFloat(t);
+      if (typeof t != "number") {
+        const parts = t.split(" ");
+        var maybe = 0
+        for (i = 0; i < parts.length; i++) {
+          if (parseFloat(parts[i])>0){
+            maybe += parseFloat(parts[i])
+          }
+        }
+        if (maybe>parseFloat(t)){
+          t = maybe
+        } else {
+          t = parseFloat(t)
+        }
+      }
       if (isNaN(t)) return "Invalid Number";
       if (!isFinite(t)) return (t < 0 ? "-" : "") + "infinite";
       (r = r || "."), (e = e || "");
@@ -795,6 +811,14 @@ createApp({
         counter ++
       }
       return `${this.toFixed(bytes, 2)} ${p[counter]}B`
+    },
+    getStats(){
+      fetch('https://token.dlux.io/')
+      .then(r => r.json())
+      .then(r => {
+        r.result.head_block = r.head_block
+        this.stats = r.result
+      })
     },
     getSPKStats(){
       fetch('https://spktest.dlux.io/')
@@ -1313,6 +1337,7 @@ createApp({
   },
   mounted() {
     window.addEventListener('scroll', this.handleScroll);
+    this.getStats()
     this.getSPKStats()
     this.getPosts();
     this.getProtocol();

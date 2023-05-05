@@ -2249,8 +2249,24 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     toUpperCase(value) {
       return value.toUpperCase();
     },
+    gt(a,b){
+      return parseFloat(a)>parseFloat(b);
+    },
     formatNumber(t, n, r, e) { // number, decimals, decimal separator, thousands separator
-      if (typeof t != "number") t = parseFloat(t);
+      if (typeof t != "number") {
+        const parts = t.split(" ");
+        var maybe = 0
+        for (i = 0; i < parts.length; i++) {
+          if (parseFloat(parts[i])>0){
+            maybe += parseFloat(parts[i])
+          }
+        }
+        if (maybe>parseFloat(t)){
+          t = maybe
+        } else {
+          t = parseFloat(t)
+        }
+      }
       if (isNaN(t)) return "Invalid Number";
       if (!isFinite(t)) return (t < 0 ? "-" : "") + "infinite";
       (r = r || "."), (e = e || "");
