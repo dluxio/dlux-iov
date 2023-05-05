@@ -1367,7 +1367,7 @@ createApp({
     voteVal(){
       return ((this.accountinfo.rshares / parseInt(this.rewardFund.recent_claims)) *
         parseFloat(this.rewardFund.reward_balance) *
-        (1/parseFloat(this.feedPrice.base)))
+        (parseFloat(this.feedPrice.base)))
     }
   },
 }).mount('#app')
