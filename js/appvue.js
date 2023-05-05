@@ -423,6 +423,9 @@ createApp({
         txid: "vote",
       };
     },
+    setRating(url, rating){
+      this.posturls[url].rating = rating;
+    },
     pending(url, text){
       this.posturls[url].comment = text;
       this.comment(url)

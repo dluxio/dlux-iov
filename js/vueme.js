@@ -1912,6 +1912,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this.posturls[url].comment = text;
       this.comment(url);
     },
+    setRating(url, rating){
+      this.posturls[url].rating = rating;
+    },
     comment(url) {
       var meta = this.posturls[url].edit
         ? this.posturls[url].json_metadata
