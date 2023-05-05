@@ -2398,7 +2398,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             for (var i = 0; i < res.result.length; i++) {
               res.result[i].type = "Blog";
               if(this.postSelect[this.postSelect.entry].o != res.result[i].entry_id - this.postSelect[this.postSelect.entry].a){
-                this.postSelect[this.postSelect.entry].o = res.result[i].entry_id - this.postSelect[this.postSelect.entry].a;
+                this.postSelect[this.postSelect.entry].o = res.result[i].entry_id - 1;
               }
               if (
                 !this.posturls[
