@@ -240,7 +240,7 @@
                                                         :content="(post.paid ? post.total_payout_value : post.pending_payout_value) + '<br>' + (post.paid ? precision(post.payout, 3) : 0) + ' ' + TOKEN"
                                                         trigger="hover">
                                                         <button class="btn btn-secondary">
-                                                            {{post.paid ? sigFig(post.total_payout_value * 2, 2) :
+                                                            {{post.paid ? sigFig(post.total_payout_value, 2) :
                                                             sigFig(post.pending_payout_value, 2)}}
                                                         </button>
                                                     </pop-vue>
