@@ -403,7 +403,7 @@
                                     <div class="d-flex align-items-center">
                                         <vue-ratings vote="true" @rating="setRating(displayPost.item.url, $event)">
                                         </vue-ratings>
-                                        <button class="ms-auto btn btn-outline-primary">Post Comment</button>
+                                        <button class="ms-auto btn btn-outline-primary" @click="comment(displayPost.item.url)">Post Comment</button>
                                     </div>
                                     <!--modal vote collapse-->
                                     <div class="collapse"
