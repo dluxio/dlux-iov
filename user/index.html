@@ -237,11 +237,11 @@
                                                 <div class="ms-auto">
                                                     <pop-vue :id="'pop-' + post.author + '-' + post.permlink"
                                                         title="Post Earnings"
-                                                        :content="(post.paid ? post.total_payout_value : post.pending_payout_value) + '<br>' + (post.paid ? precision(post.payout, 3) : 0) + ' ' + TOKEN"
+                                                        :content="(gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') + ' HBD' : post.pending_payout_value ? post.pending_payout_value : '') + '<br>' + (post.paid ? precision(post.payout, 3) : 0) + ' ' + TOKEN"
                                                         trigger="hover">
                                                         <button class="btn btn-secondary">
-                                                            {{post.paid ? sigFig(post.total_payout_value, 2) :
-                                                            sigFig(post.pending_payout_value, 2)}}
+                                                            {{gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') :
+                                                formatNumber(post.pending_payout_value, 3, '.',',')}} HBD
                                                         </button>
                                                     </pop-vue>
                                                 </div>
