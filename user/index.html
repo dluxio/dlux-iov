@@ -109,151 +109,20 @@
                         <div class="container-fluid">
                             <div class="row">
                                 <div class="col-sm-6 col-lg-3 my-2" v-for="post in displayPosts" :key="post.url">
-                                    <div class="card text-white">
-                                        <div class="card-header">
-                                            <div class="d-flex align-items-center ">
-                                                <a :href="'/@' + post.author" class="no-decoration">
-                                                    <div class="d-flex align-items-center">
-                                                        <img v-if="post.author"
-                                                            :src="'https://images.hive.blog/u/' + post.author + '/avatar'"
-                                                            alt=""
-                                                            class="rounded-circle bg-light img-fluid me-3 cover author-img"
-                                                            style="width: 50px;">
-                                                        <div>
-                                                            <div class="d-flex align-items-center">
-                                                                <h3 class="m-0 text-white">{{post.author}}</h3>
-                                                                <div>
-                                                                    <span style="font-size: .5em;"
-                                                                        class="ms-2 badge small rounded-pill text-white"
-                                                                        :class="{'bg-danger': post.rep < 25, 'bg-warning': post.rep >= 25 && post.rep < 50, 'bg-success': post.rep >= 50}">
-                                                                        {{post.rep}}
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <span class="small text-muted">{{post.ago}}</span>
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                                <span class="badge bg-primary ms-auto"><i
-                                                        :class="postSelect.types[post.type].icon"></i>{{post.type}}</span>
-                                            </div>
-                                        </div>
-                                        <div class="card-body">
-                                            <a href="#detailModal" class="no-decoration" data-bs-toggle="modal"
-                                                @click="modalSelect(post.url)">
-                                                <h3 class="lead text-white truncate1">{{post.title}}</h3>
-                                                <p class="text-white-50 mb-1 truncate2">{{post.preview}}</p>
-                                            </a>
-                                        </div>
-
-                                        <!--featured image with mouseover launch btn-->
-                                        <div class="card">
-                                            <div class="d-flex">
-                                                <a target="_blank" :href="post.url" class="p-0 m-0" type="button">
-                                                    <div id="imagesMain">
-                                                        <div class="imagebox bg-none">
-                                                            <img v-if="post.pic" alt="Card image cap"
-                                                                class="img-fluid image" :src="post.pic"
-                                                                @error="imgUrlAlt"
-                                                                style="width: 1500px; height: 360px; object-fit: cover;" />
-                                                            <div class="caption text-white w-100 h-100 d-flex">
-                                                                <div class="m-auto p-3 text-center">
-                                                                    <p><i
-                                                                            :class="postSelect.types[post.type].icon"></i>{{postSelect.types[post.type].launch}}
-                                                                    </p>
-                                                                    <button class="btn btn-lg btn-primary px-4"
-                                                                        style="border-radius: 5rem;">Launch<i
-                                                                            class="ms-2 fas fa-external-link-alt"></i></button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </div>
-                                        </div>
-
-                                        <!--vote collapse-->
-                                        <div class="collapse" :id="'vote-' + post.author + '-' + post.permlink">
-                                            <form id="voteForm">
-                                                <div class="p-2 d-flex align-items-center text-white-50">
-
-                                                    <button type="button" class="btn me-2"
-                                                        :class="{'btn-success': !post.flag, ' btn-danger': post.flag}"
-                                                        @click="vote(post.url)" style="width: 100px;">{{post.flag ? '-'
-                                                        :
-                                                        ''}}{{post.slider / 100}}%</button>
-
-                                                    <button type="button" class="btn btn-secondary me-2"
-                                                        :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
-                                                        data-bs-toggle="collapse"><span
-                                                            class="close text-white">×</span></button>
-
-                                                    <div class="d-flex align-items-center px-3 border rounded"
-                                                        style="height: 38px;"
-                                                        :class="{'border-success': !post.flag, 'border-danger': post.flag}">
-                                                        <input type="range" class="form-range mx-auto p-0" step="1"
-                                                            value="10000" max="10000" v-model="post.slider">
-                                                    </div>
-
-                                                    <div class="ms-auto">
-                                                        <p class="me-1 my-0" id="commentVal"
-                                                            :class="{'text-success': !post.flag, 'text-danger': post.flag}">
-                                                            {{formatNumber(voteVal *
-                                                            post.slider/10000,3, '.', ',')}}
-                                                            <i class="me-1 fab fa-fw fa-hive"></i>
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                        </div>
-
-                                        <div class="card-footer text-white-50">
-                                            <!--footer buttons-->
-                                            <div class="d-flex align-items-center my-2">
-                                                <a href="#/" class="no-decoration" @click="post.flag = false"
-                                                    data-bs-toggle="collapse"
-                                                    :class="{'text-primary': post.hasVoted, 'text-white-50': !post.hasVoted, 'text-danger': post.slider < 0 }"
-                                                    :data-bs-target="'#vote-' + post.author + '-' + post.permlink">
-                                                    <i class="fas fa-heart fa-fw me-1"></i><span
-                                                        class="text-white-50">{{post.upVotes}}</span>
-                                                </a>
-                                                <a href="#detailModal" class="no-decoration text-white-50"
-                                                    data-bs-toggle="modal" @click="modalSelect(post.url)"><i
-                                                        class="fas fa-comment fa-fw ms-2 me-1"></i><span
-                                                        class="text-white-50">{{post.children}}</span>
-                                                </a>
-                                                <a v-show="post.rating" href="#detailModal"
-                                                    class="no-decoration text-white-50" data-bs-toggle="modal"
-                                                    @click="modalSelect(post.url)">
-                                                    <i class="fa-solid fa-star ms-2 me-1"></i><span
-                                                        class="text-white-50">{{post.rating}}</span>
-                                                </a>
-                                                <a href="#/" class="no-decoration text-white-50"
-                                                    data-bs-toggle="collapse" :class="{'text-primary': post.flag > 0}"
-                                                    :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
-                                                    @click="post.flag = true">
-                                                    <i class="fa-solid fa-flag ms-2 me-1"></i><span
-                                                        class="text-white-50">{{post.downVotes ? post.downVotes
-                                                        :
-                                                        ''}}</span>
-                                                </a>
-
-                                                <div class="ms-auto">
-                                                    <pop-vue :id="'pop-' + post.author + '-' + post.permlink"
-                                                        title="Post Earnings"
-                                                        :content="(gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') + ' HBD' : post.pending_payout_value ? post.pending_payout_value : '') + '<br>' + (post.paid ? precision(post.payout, 3) : 0) + ' ' + TOKEN"
-                                                        trigger="hover">
-                                                        <button class="btn btn-secondary">
-                                                            {{gt(post.total_payout_value, post.pending_payout_value) ?
-                                                            formatNumber(post.total_payout_value + ' ' +
-                                                            post.curator_payout_value, 3, '.',',') :
-                                                            formatNumber(post.pending_payout_value, 3, '.',',')}} HBD
-                                                        </button>
-                                                    </pop-vue>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <card-vue 
+                                        :post="post" 
+                                        :account="account" 
+                                        :post_select="postSelect" 
+                                        :voteval="voteVal" 
+                                        :head_block="sstats.head_block"
+                                        :broca_refill="sstats.broca_refill"
+                                        :broca="spkapi.broca"
+                                        :spk_power="spkapi.spk_power"
+                                        :contracts="contracts"
+                                        :extendcost="extendcost"
+                                        @tosign="toSign=$event"
+                                        @modalselect="modalSelect($event)" 
+                                        @vote="vote($event)"></card-vue>
                                 </div>
                             </div>
                         </div>

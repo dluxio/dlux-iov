@@ -8,6 +8,7 @@ import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
 import Replies from "/js/replies.js";
+import CardVue from "./cardvue.js";
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "",
@@ -771,6 +772,9 @@ var app = new Vue({
         items: [],
       },
       authors: {},
+      spkapi: {},
+      extendcost: {},
+      contracts: {},
     };
   },
   components: {
@@ -783,10 +787,19 @@ var app = new Vue({
     "vue-ratings": Ratings,
     "mde": MDE,
     "replies": Replies,
+    "card-vue": CardVue,
   },
   methods: {
     getSetPhotos(s, c) {
       return s.set ? `https://ipfs.io/ipfs/${s.set[c]}` : "";
+    },
+    getSPKUser(user) {
+      if (user)
+        fetch("https://spktest.dlux.io/@" + user)
+          .then((response) => response.json())
+          .then((data) => {
+            this.spkapi = data
+          });
     },
     uploadFile(e) {
         for (var i = 0; i < e.target.files.length; i++) {
@@ -2017,7 +2030,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     modalSelect(key) {
       if(key.indexOf('/@') > 0)
         key = '/@' + key.split('/@')[1];
-      console.log({key, posturls: this.posturls[key]})
       this.displayPost.index = key;
       this.displayPost.item = this.posturls[key];
       window.history.pushState("Blog Modal", this.displayPost.item.title, "/blog/@" + key.split('/@')[1]);
@@ -2482,9 +2494,10 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           .then((r) => r.json())
           .then((res) => {
             if (res.result) {
-              res.result.url = `/@${res.result.author}/${res.result.permlink}`;
-              this.posturls[res.result.url] = {
-                ...this.posturls[res.result.url],
+              const key = `/@${res.result.author}/${res.result.permlink}`
+              res.result.url = key;
+              this.posturls[key] = {
+                ...this.posturls[key],
                 ...res.result,
                 slider: 10000,
                 flag: false,
@@ -2492,79 +2505,112 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 downVotes: 0,
                 edit: false,
                 hasVoted: false,
+                contract: {}
               };
               for (
                 var i = 0;
-                i < this.posturls[res.result.url].active_votes.length;
+                i < this.posturls[key].active_votes.length;
                 i++
               ) {
-                if (this.posturls[res.result.url].active_votes[i].percent > 0)
-                  this.posturls[res.result.url].upVotes++;
-                else this.posturls[res.result.url].downVotes++;
+                if (this.posturls[key].active_votes[i].percent > 0)
+                  this.posturls[key].upVotes++;
+                else this.posturls[key].downVotes++;
                 if (
-                  this.posturls[res.result.url].active_votes[i].voter ==
+                  this.posturls[key].active_votes[i].voter ==
                   this.account
                 ) {
-                  this.posturls[res.result.url].slider =
-                    this.posturls[res.result.url].active_votes[i].percent;
-                  this.posturls[res.result.url].hasVoted = true;
+                  this.posturls[key].slider =
+                    this.posturls[key].active_votes[i].percent;
+                  this.posturls[key].hasVoted = true;
                 }
               }
+              var contracts = false
               var type = "Blog";
               try {
-                this.posturls[res.result.url].json_metadata = JSON.parse(
-                  this.posturls[res.result.url].json_metadata
+                this.posturls[key].json_metadata = JSON.parse(
+                  this.posturls[key].json_metadata
                 );
-                this.posturls[res.result.url].pic = this.picFind(
-                  this.posturls[res.result.url].json_metadata
+                this.posturls[key].pic = this.picFind(
+                  this.posturls[key].json_metadata
                 );
-
+                if(this.posturls[key].json_metadata.assets){
+                  for(var i = 0; i < this.posturls[key].json_metadata.assets.length; i++){
+                    if(this.posturls[key].json_metadata.assets[i].contract){
+                      this.posturls[key].contract[this.posturls[key].json_metadata.assets[i].contract] = {}
+                      contracts = true
+                    }
+                  }
+                }
+                if(contracts){
+                  this.getContracts(key)
+                }
                 if (
                   "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
-                  this.posturls[res.result.url].json_metadata.vrHash ||
+                  this.posturls[key].json_metadata.vrHash ||
                   "newhashhere" ==
-                  this.posturls[res.result.url].json_metadata.vrHash
+                  this.posturls[key].json_metadata.vrHash
                 )
                   type = "360";
-                else if (this.posturls[res.result.url].json_metadata.vrHash)
+                else if (this.posturls[key].json_metadata.vrHash)
                   type = "VR";
-                else if (this.posturls[res.result.url].json_metadata.arHash)
+                else if (this.posturls[key].json_metadata.arHash)
                   type = "AR";
-                else if (this.posturls[res.result.url].json_metadata.appHash)
+                else if (this.posturls[key].json_metadata.appHash)
                   type = "APP";
-                else if (this.posturls[res.result.url].json_metadata.audHash)
+                else if (this.posturls[key].json_metadata.audHash)
                   type = "Audio";
-                else if (this.posturls[res.result.url].json_metadata.vidHash)
+                else if (this.posturls[key].json_metadata.vidHash)
                   type = "Video";
               } catch (e) {
-                console.log(res.result.url, e, "no JSON?");
+                console.log(key, e, "no JSON?");
               }
-              this.posturls[res.result.url].type = type;
+              this.posturls[key].type = type;
               if (type != "Blog")
-                this.posturls[res.result.url].url =
-                  "/dlux" + this.posturls[res.result.url].url;
+                this.posturls[key].url =
+                  "/dlux" + this.posturls[key].url;
               else
-                this.posturls[res.result.url].url =
-                  "/blog" + this.posturls[res.result.url].url;
-              this.posturls[res.result.url].rep = "...";
-              this.rep(res.result.url);
-              if (this.posturls[res.result.url].slider < 0) {
-                this.posturls[res.result.url].slider =
-                  this.posturls[res.result.url].slider * -1;
-                this.posturls[res.result.url].flag = true;
+                this.posturls[key].url =
+                  "/blog" + this.posturls[key].url;
+              this.posturls[key].rep = "...";
+              this.rep(key);
+              if (this.posturls[key].slider < 0) {
+                this.posturls[key].slider =
+                  this.posturls[key].slider * -1;
+                this.posturls[key].flag = true;
               }
-              this.posturls[res.result.url].preview = this.removeMD(
-                this.posturls[res.result.url].body
+              this.posturls[key].preview = this.removeMD(
+                this.posturls[key].body
               ).substr(0, 250);
-              this.posturls[res.result.url].ago = this.timeSince(
-                this.posturls[res.result.url].created
+              this.posturls[key].ago = this.timeSince(
+                this.posturls[key].created
               );
               this.selectPosts();
-              if(modal)this.modalSelect(res.result.url)
+              if(modal)this.modalSelect(key)
             }
           });
       } else {
         console.log("no author or permlink", a, p);
+      }
+    },
+    getContracts(url){
+      var contracts = [],
+        getContract = (u, id) => {
+          fetch('https://spktest.dlux.io/api/fileContract/' + id)
+            .then((r) => r.json())
+            .then((res) => {
+              res.result.extend = "7"
+              if (res.result) {
+                this.contracts[id] = res.result
+                this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
+              }
+            });
+        }
+      for(var contract in this.posturls[url].contract){
+        contracts.push(contract)
+      }
+      contracts = [...new Set(contracts)]
+      for(var i = 0; i < contracts.length; i++){
+        getContract(url, contracts[i])
       }
     },
     imgUrlAlt(event) {

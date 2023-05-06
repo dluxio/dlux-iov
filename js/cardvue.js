@@ -372,6 +372,7 @@ export default {
             this.$emit('reply', deets)
         },
         broca_calc(last = '0,0') {
+            if(!last)last='0,0'
             const last_calc = this.Base64toNumber(last.split(',')[1])
             const accured = parseInt((parseFloat(this.broca_refill) * (this.head_block - last_calc)) / (this.spk_power * 1000))
             var total = parseInt(last.split(',')[0]) + accured
