@@ -932,10 +932,11 @@ createApp({
             if (res.result.length < this.postSelect[this.postSelect.entry].a)
               this.postSelect[this.postSelect.entry].e = true;
             for (var i = 0; i < res.result.length; i++) {
-              if (!this.posturls[res.result[i].url]) {
-                this.posturls[res.result[i].url] = res.result[i];
+              const key = `/@${res.result[i].author}/${res.result[i].permlink}`;
+              if (!this.posturls[key]) {
+                this.posturls[key] = res.result[i];
               }
-              this[this.postSelect.entry].push(res.result[i].url);
+              this[this.postSelect.entry].push(key);
             }
             var called = false;
             for (var post in this.posturls) {
@@ -978,8 +979,9 @@ createApp({
           .then((r) => r.json())
           .then((res) => {
             if (res.result) {
-              this.posturls[res.result.url] = {
-                ...this.posturls[res.result.url],
+              const key = `/@${res.result.author}/${res.result.permlink}`
+              this.posturls[key] = {
+                ...this.posturls[key],
                 ...res.result,
                 slider: 10000,
                 flag: false,
@@ -993,51 +995,51 @@ createApp({
               };
               for (
                 var i = 0;
-                i < this.posturls[res.result.url].active_votes.length;
+                i < this.posturls[key].active_votes.length;
                 i++
               ) {
-                if (this.posturls[res.result.url].active_votes[i].percent > 0)
-                  this.posturls[res.result.url].upVotes++;
-                else this.posturls[res.result.url].downVotes++;
-                if(this.posturls[res.result.url].active_votes[i].voter == this.account){
-                  this.posturls[res.result.url].slider = this.posturls[res.result.url].active_votes[i].percent
-                  this.posturls[res.result.url].hasVoted = true
+                if (this.posturls[key].active_votes[i].percent > 0)
+                  this.posturls[key].upVotes++;
+                else this.posturls[key].downVotes++;
+                if(this.posturls[key].active_votes[i].voter == this.account){
+                  this.posturls[key].slider = this.posturls[key].active_votes[i].percent
+                  this.posturls[key].hasVoted = true
                 }
               }
               try {
-                this.posturls[res.result.url].json_metadata = JSON.parse(
-                  this.posturls[res.result.url].json_metadata
+                this.posturls[key].json_metadata = JSON.parse(
+                  this.posturls[key].json_metadata
                 );
-                this.posturls[res.result.url].pic = this.picFind(
-                  this.posturls[res.result.url].json_metadata
+                this.posturls[key].pic = this.picFind(
+                  this.posturls[key].json_metadata
                 );
               } catch (e) {
-                console.log(res.result.url, "no JSON?");
+                console.log(key, "no JSON?");
               }
               var contracts = false
-              if(this.posturls[res.result.url].json_metadata.assets){
-                for(var i = 0; i < this.posturls[res.result.url].json_metadata.assets.length; i++){
-                  if(this.posturls[res.result.url].json_metadata.assets[i].contract){
-                    this.posturls[res.result.url].contract[this.posturls[res.result.url].json_metadata.assets[i].contract] = {}
+              if(this.posturls[key].json_metadata.assets){
+                for(var i = 0; i < this.posturls[key].json_metadata.assets.length; i++){
+                  if(this.posturls[key].json_metadata.assets[i].contract){
+                    this.posturls[key].contract[this.posturls[key].json_metadata.assets[i].contract] = {}
                     contracts = true
                   }
                 }
               }
               if(contracts){
-                this.getContracts(res.result.url)
+                this.getContracts(key)
               }
-              this.posturls[res.result.url].rep = "...";
-              this.rep(res.result.url);
-              if (this.posturls[res.result.url].slider < 0){
-                this.posturls[res.result.url].slider =
-                  this.posturls[res.result.url].slider * -1;
-                this.posturls[res.result.url].flag = true
+              this.posturls[key].rep = "...";
+              this.rep(key);
+              if (this.posturls[key].slider < 0){
+                this.posturls[key].slider =
+                  this.posturls[key].slider * -1;
+                this.posturls[key].flag = true
               }
-              this.posturls[res.result.url].preview = this.removeMD(
-                this.posturls[res.result.url].body
+              this.posturls[key].preview = this.removeMD(
+                this.posturls[key].body
               ).substr(0, 250);
-              this.posturls[res.result.url].ago = this.timeSince(
-                this.posturls[res.result.url].created
+              this.posturls[key].ago = this.timeSince(
+                this.posturls[key].created
               );
               this.selectPosts();
             }
