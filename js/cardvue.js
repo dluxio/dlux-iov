@@ -68,38 +68,39 @@ export default {
               </div>
           </div>
       </a>
-                                  </div >
-                              </div >
+                                  </div>
+                              </div>
       
                               <!-- vote collapse -->
                               <div class="collapse" :id="'vote-' + post.author + '-' + post.permlink">
                                   <form id="voteForm">
                                       <div class="p-2 d-flex align-items-center text-white-50">
       
-                                          <button type="button" class="btn me-2"
+                                          <button type="button" class="btn btn-sm me-1"
                                               :class="{'btn-success': !flag, ' btn-danger': flag}"
-                                              @click="vote(post.url)" style="width: 100px;">{{flag ? '-' :
-                                              ''}}{{slider / 100}}%</button>
+                                              @click="vote(post.url)" style="min-width: 85px;"><span v-if="!flag"><i class="fas fa-heart fa-fw me-1"></i></span><span v-if="flag"><i class="fa-solid fa-flag me-1"></i></span>{{flag ? '-' :
+                                              ''}}{{formatNumber(slider / 100, 0,'.',',')}}%</button>
       
-                                          <button type="button" class="btn btn-secondary me-2"
+                                          <button type="button" class="btn btn-sm btn-secondary"
                                               :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
                                               data-bs-toggle="collapse"><span class="close text-white">×</span></button>
-      
-                                          <div class="d-flex align-items-center px-3 border rounded" style="height: 38px;"
-                                              :class="{'border-success': !flag, 'border-danger': flag}">
-                                              <input type="range" class="form-range mx-auto p-0" step="1"
+
+                                              <input type="range" class="form-range mx-2" step="1"
                                                   max="10000" v-model="slider">
+      
+                                          <div class="d-none align-items-center px-3 border rounded" style="height: 38px;"
+                                              :class="{'border-success': !flag, 'border-danger': flag}">
+                                              
                                           </div>
       
-                                          <div class="ms-auto">
-                                              <p class="me-1 my-0" id="commentVal"
+
+                                              <span style="min-width: 100px" class="text-end text-nowrap" id="commentVal"
                                                   :class="{'text-success': !flag, 'text-danger': flag}">
                                                   {{toFixed(voteval *
                                                   slider/10000,3)}}
                                                   <i class="me-1 fab fa-fw fa-hive"></i>
-                                              </p>
-                                          </div >
-                                      </div >
+                                              </span>
+                                      </div>
                                   </form >
                               </div >
       
@@ -150,8 +151,9 @@ export default {
                               </div>
    <div class="card-footer text-white-50">
       <!-- footer buttons -->
-      <div class="d-flex align-items-center my-2">
-         <a href="#/" class="no-decoration" @click="flag = false"
+      <div class="d-flex flex-wrap align-items-center">
+        <div class="text-nowrap my-2"> 
+        <a role="button" class="no-decoration" @click="flag = false"
             data-bs-toggle="collapse"
             :class="{'text-primary': post.hasVoted, 'text-white-50': !post.hasVoted, 'text-danger': slider < 0 }"
             :data-bs-target="'#vote-' + post.author + '-' + post.permlink">
@@ -168,23 +170,24 @@ export default {
          <i class="fa-solid fa-star ms-2 me-1"></i><span
             class="text-white-50">{{post.rating}}</span>
          </a >
-         <a href="#/" class="no-decoration text-white-50" data-bs-toggle="collapse"
+         <a role="button" class="no-decoration text-white-50" data-bs-toggle="collapse"
             :class="{'text-primary': flag > 0}"
             :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
             @click="flag = true" >
          <i class="fa-solid fa-flag ms-2 me-1"></i><span
             class="text-white-50">{{post.downVotes ? post.downVotes : ''}}</span>
-         </a >
-         <a v-for="(contract, name, index) in post.contract" href="#/" class="no-decoration text-white-50"
+         </a>
+         <a role="button" v-for="(contract, name, index) in post.contract" class="no-decoration text-white-50"
             data-bs-toggle="collapse"
             :data-bs-target="'#contract-' + post.author + '-' + post.permlink">
          <i class="fa-solid fa-file-contract ms-2 me-1" :class="{'text-success': color_code(name) > 28800 * 7,'text-warning': color_code(name) < 28800 * 7 &&  color_code(name) > 28800, 'text-warning': color_code(name) < 28800}"></i>
-         </a >
-         <div class="ms-auto">
+         </a>
+         </div>
+         <div class="ms-auto my-2">
             <pop-vue v-if="post.total_payout_value || post.pending_payout_value" title="Post Earnings"
                :id="'popper-' + post.author + '-' + post.permlink" :content="(gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') + ' HBD' : post.pending_payout_value ? post.pending_payout_value : '') + '<br>' + (post.paid ? precision(post.payout, 3) : 0) + ' ' + TOKEN"
                trigger="hover">
-               <button class="btn btn-secondary">
+               <button class="btn btn-sm btn-secondary">
                {{ gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') :
                formatNumber(post.pending_payout_value, 3, '.',',')}} HBD
                </button>
