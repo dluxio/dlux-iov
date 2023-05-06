@@ -35,18 +35,8 @@ export default {
                  <a href="#/"
                     v-show="post.author == account"
                     @click="edit = !edit">Edit Post</a>
-                 <div v-show="!edit">
-                    <vue-ratings class="d-flex"
-                       :stars="post?.json_metadata?.review?.rating">
-                    </vue-ratings>
-                 </div>
-                 <div v-show="edit">
-                    <vue-ratings class="d-flex" vote="true"
-                       @rating="setRating(post.url, $event)">
-                    </vue-ratings>
-                 </div>
                  <small class="text-muted"
-                    id="modal_created">{{post.ago}}</small>
+                    id="modal_created">{{timeSince(post.created)}}</small>
               </span>
            </div>
         </div>
@@ -54,9 +44,14 @@ export default {
            <vue-markdown :md="post.body">
            </vue-markdown>
         </div>
-        <div class="card-body" v-show="edit">
-           <vue-markdown :toedit="post.body" @settext="pending(post.url, $event)">
+        <div v-show="edit">
+           <vue-markdown :toedit="post.body" @settext="pending($event)"/>
            </vue-markdown>
+        </div>
+        <div v-show="makeReply">
+        <mde @data="mde = $event" />
+        <button @click="makeReply = !makeReply">Cancel</button>
+        <button @click="reply()">Reply</button>
         </div>
         <div class="card-footer">
               <vote :post="post" :account="account" :voteval="voteval" @vote="vote($event)"></vote>
@@ -70,10 +65,11 @@ export default {
                                                             post.curator_payout_value, 3, '.',',') :
                                                             formatNumber(post.pending_payout_value, 3, '.',',')}} HBD
                                                         </button>
+                                                        <button @click="makeReply = !makeReply">{{makeReply ? 'Cancel' : 'Reply'}}</button>
                                                     </pop-vue>
         </div>
-        <div v-for="reply in post.replies">
-            <replies :post="reply" :account="account" :voteval="voteval" @vote="vote($event)"></replies>
+        <div v-for="reps in post.replies">
+            <replies :post="reps" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)"/>
         </div>
      </div>
   </div>
@@ -97,12 +93,51 @@ export default {
         collapse: false,
         edit: false,
         view: true,
+        mde: '',
+        makeReply: false,
     };
     },
-    emits: ['vote'],
+    emits: ['vote', 'reply'],
     methods:{
+        pending(event){
+            this.mde = event
+        },
         vote(event){
             this.$emit('vote', event);
+        },
+        timeSince(date) {
+            var seconds = Math.floor((new Date() - new Date(date + ".000Z")) / 1000);
+            var interval = Math.floor(seconds / 86400);
+            if (interval > 7) {
+              return new Date(date).toLocaleDateString();
+            }
+            if (interval >= 1) {
+              return interval + ` day${interval > 1 ? "s" : ""} ago`;
+            }
+            interval = Math.floor(seconds / 3600);
+            if (interval >= 1) {
+              return interval + ` hour${interval > 1 ? "s" : ""} ago`;
+            }
+            interval = Math.floor(seconds / 60);
+            if (interval >= 1) {
+              return `${interval} minute${interval > 1 ? "s" : ""} ago`;
+            }
+            return Math.floor(seconds) + " seconds ago";
+          },
+        setReply(event){
+            this.mde = event
+        },
+        reply(deets){
+            if(!deets)deets = {
+                "parent_author": this.post.author,
+                "parent_permlink": this.post.permlink,
+                "author": this.account,
+                "permlink": 're-' + this.post.permlink,
+                "title": '',
+                "body": this.mde,
+                "json_metadata": JSON.stringify(this.postCustom_json)
+            }
+            this.$emit('reply', deets)
         },
         formatNumber(t, n, r, e) { // number, decimals, decimal separator, thousands separator
             if (typeof t != "number") {

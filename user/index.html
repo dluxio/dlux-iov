@@ -26,6 +26,8 @@
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
     <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
     <script type="module" src="/js/vueme.js"></script>
+    <link href="/css/smde-comment.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
 </head>
 
 <body class="d-flex flex-column h-100 padme-t70 text-white" id="explore">
@@ -1884,7 +1886,7 @@
                                     </div>
                                     <div class="replies">
                                         <div v-for="post in displayPost.item.replies" :key="post.url">
-                                            <replies :post="post" :account="account" :voteval="voteVal" @vote="vote($event)"/>
+                                            <replies :post="post" :account="account" :voteval="voteVal" @vote="vote($event)" @reply="reply($event)"/>
                                         </div>
                                     </div>
                                 </div>
