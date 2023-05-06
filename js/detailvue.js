@@ -45,7 +45,7 @@ export default {
 
                         </div>
                         <div class="d-flex align-items-center justify-content-between">
-                            <a :href="'/@' + displayPost.author" class="no-decoration">
+                            <a :href="'/@' + post.author" class="no-decoration">
                                 <div class="d-flex align-items-center">
                                     <img v-if="post.author" :src="'https://images.hive.blog/u/' + post.author + '/avatar'"
                                         alt=""
@@ -115,10 +115,10 @@ export default {
                                 <div class="p-2 d-flex align-items-center text-white-50">
 
                                     <button type="button" class="btn me-2"
-                                        :class="{'btn-success': !post.flag, ' btn-danger': post.flag}"
+                                        :class="{'btn-success': !flag, ' btn-danger': flag}"
                                         @click="vote(post.url)"
-                                        style="width: 100px;">{{post.flag ? '-' :
-                                        ''}}{{post.slider / 100}}%</button>
+                                        style="width: 100px;">{{flag ? '-' :
+                                        ''}}{{slider / 100}}%</button>
 
                                     <button type="button" class="btn btn-secondary me-2"
                                         :data-bs-target="'#vote-modal-' + post.author + '-' + post.permlink"
@@ -127,16 +127,16 @@ export default {
 
                                     <div class="d-flex align-items-center px-3 border rounded"
                                         style="height: 38px;"
-                                        :class="{'border-success': !post.flag, 'border-danger': post.flag}">
+                                        :class="{'border-success': !flag, 'border-danger': flag}">
                                         <input type="range" class="form-range mx-auto p-0" step="1"
-                                         max="10000" v-model="post.slider">
+                                         max="10000" v-model="slider">
                                     </div>
 
                                     <div class="ms-auto">
                                         <p class="me-1 my-0" id="commentVal"
-                                            :class="{'text-success': !post.flag, 'text-danger': post.flag}">
+                                            :class="{'text-success': !flag, 'text-danger': flag}">
                                             {{toFixed(voteVal *
-                                            post.slider/10000,3)}}
+                                            slider/10000,3)}}
                                             <i class="me-1 fab fa-fw fa-hive"></i>
                                         </p>
                                     </div>
@@ -174,14 +174,14 @@ export default {
                                         class="text-white-50">{{post.children}}</span></a>
 
                                 <a role="button" class="no-decoration text-white-50" data-bs-toggle="collapse"
-                                    :class="{'text-primary': displayPost.flag > 0}"
-                                    :data-bs-target="'#vote-modal-' + displayPost.author + '-' + displayPost.permlink"
-                                    @click="displayPost.flag = true">
+                                    :class="{'text-primary': flag > 0}"
+                                    :data-bs-target="'#vote-modal-' + post.author + '-' + post.permlink"
+                                    @click="flag = true">
                                     <i class="fa-solid fa-flag ms-2 me-1"></i><span
-                                        class="text-white-50">{{displayPost.downVotes ?
-                                        displayPost.downVotes : ''}}</span>
+                                        class="text-white-50">{{post.downVotes ?
+                                        post.downVotes : ''}}</span>
                                 </a>
-                                <a role="button" v-for="contract in displayPost.contract"
+                                <a role="button" v-for="contract in post.contract"
                                     class="no-decoration text-white-50" data-bs-toggle="collapse"
                                     :data-bs-target="'#contract-modal-' + 'contract.i' ">
                                     <i class="fa-solid fa-file-contract ms-2 me-1"></i>
