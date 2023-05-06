@@ -50,7 +50,7 @@ export default {
    <!-- featured image with mouseover launch btn -->
       <div class="card">
           <div class="d-flex">
-              <a target="_blank" :href="post.type != 'blog' ? '/dlux' : '/blog' + post.url" class="p-0 m-0" type="button">
+              <a target="_blank" :href="(post.type != 'blog' ? '/dlux' : '/blog') + post.url" class="p-0 m-0" type="button">
               <div :id="'imagesMain-' + post.author + '-' + post.permlink">
                   <div class="imagebox bg-none">
                       <img v-show="post.pic" alt="Card image cap" class="img-fluid image"
