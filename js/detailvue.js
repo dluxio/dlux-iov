@@ -3,6 +3,7 @@ import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
 import Vote from "/js/vote.js";
 import Pop from "/js/pop.js";
+import Replies from "/js/replies.js";
 
 export default {
     components: {
@@ -11,6 +12,7 @@ export default {
         "mde": MDE,
         "vote": Vote,
         "pop-vue": Pop,
+        "replies": Replies,
     },
     template: `<div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-hidden="true" @blur="goBack()">
     <div class="modal-dialog modal-full modal-xl modal-dialog-centered" style="max-width: 1000px;"
@@ -135,7 +137,7 @@ export default {
                                     <div class="ms-auto">
                                         <p class="me-1 my-0" id="commentVal"
                                             :class="{'text-success': !flag, 'text-danger': flag}">
-                                            {{toFixed(voteVal *
+                                            {{toFixed(voteval *
                                             slider/10000,3)}}
                                             <i class="me-1 fab fa-fw fa-hive"></i>
                                         </p>
@@ -194,7 +196,7 @@ export default {
                     </div>
                     <div class="replies">
                         <div v-for="post in post.replies" :key="post.url">
-                            <replies :post="post" :account="account" :voteval="voteVal" @vote="vote($event)" @reply="reply($event)"/>
+                            <replies :post="post" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)"/>
                         </div>
                     </div>
                 </div>
