@@ -7,6 +7,7 @@ import Modals from "/js/modalvue.js";
 import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
+import Replies from "/js/replies.js";
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "",
@@ -781,6 +782,7 @@ var app = new Vue({
     "vue-markdown": Marker,
     "vue-ratings": Ratings,
     "mde": MDE,
+    "replies": Replies,
   },
   methods: {
     getSetPhotos(s, c) {
@@ -2007,26 +2009,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       )this.getReplies(
           this.displayPost.item.author,
           this.displayPost.item.permlink
-        ).then((r) => {
-          this.posturls[key].replies = r.result;
-          for (let i = 0; i < this.posturls[key].replies.length; i++) {
-            if (this.posturls[key].replies[i].json_metadata) {
-              try {
-                this.posturls[key].replies[i].json_metadata = JSON.parse(
-                  this.posturls[key].replies[i].json_metadata
-                );
-                this.posturls[key].replies[i].edit = false;
-              } catch (e) {}
-            }
-            this.posturls[this.posturls[key].replies[i].url] =
-              this.posturls[key].replies[i];
-            if (this.posturls[key].replies[i].slider < 0) {
-              this.posturls[key].replies[i].flag = true;
-              this.posturls[key].replies[i].slider =
-                this.posturls[key].replies[i].slider * -1;
-            }
-          }
-        });
+        )
     },
     getRewardFund() {
       fetch(this.hapi, {
@@ -2124,8 +2107,33 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         })
           .then((res) => res.json())
           .then((r) => {
-            if (k) r.key = k;
-            resolve(r);
+          const key = `/@${a}/${p}`
+          var authors = []
+          for (let i = 0; i < r.result.length; i++) {
+            authors.push(r.result[i].author)
+            r.result[i].edit = false;
+            if(r.result[i].children)this.getReplies(r.result[i].author, r.result[i].permlink)
+            if (r.result[i].json_metadata) {
+              try {
+                r.result[i].json_metadata = JSON.parse(
+                  r.result[i].json_metadata
+                );
+              } catch (e) {}
+            }
+            const repKey =`/@${r.result[i].author}/${r.result[i].permlink}`
+            this.posturls[repKey] =
+              r.result[i];
+            if (r.result[i].slider < 0) {
+              r.result[i].flag = true;
+              r.result[i].slider =
+                r.result[i].slider * -1;
+
+            }
+            this.posturls[repKey].rep = "...";
+            this.rep(repKey)
+          }
+          this.posturls[key].replies = r.result;
+          this.getHiveAuthors(authors)
           })
           .catch((err) => {
             reject(err);

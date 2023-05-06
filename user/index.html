@@ -65,8 +65,9 @@
                                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions<i
                                         class="fas fa-ellipsis-h ms-2"></i></button>
                                 <div class="dropdown-menu dropdown-menu-dark nav-item dropdown-menu-right"> <a
-                                        class="dropdown-item" type="button" @click="follow(pageAccount)" v-if="!relations.follows">Follow</a> <a class="dropdown-item"
-                                        type="button" @click="unfollow(pageAccount)" v-if="relations.follows">Unfollow</a>
+                                        class="dropdown-item" type="button" @click="follow(pageAccount)"
+                                        v-if="!relations.follows">Follow</a> <a class="dropdown-item" type="button"
+                                        @click="unfollow(pageAccount)" v-if="relations.follows">Unfollow</a>
                                     <modal-vue type="send" token="DLUX" :balance="accountapi.balance" :account="account"
                                         @modalsign="sendIt($event)">
                                         <a slot="trigger" class="dropdown-item" type="button">Send DLUX</a>
@@ -240,8 +241,10 @@
                                                         :content="(gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') + ' HBD' : post.pending_payout_value ? post.pending_payout_value : '') + '<br>' + (post.paid ? precision(post.payout, 3) : 0) + ' ' + TOKEN"
                                                         trigger="hover">
                                                         <button class="btn btn-secondary">
-                                                            {{gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') :
-                                                formatNumber(post.pending_payout_value, 3, '.',',')}} HBD
+                                                            {{gt(post.total_payout_value, post.pending_payout_value) ?
+                                                            formatNumber(post.total_payout_value + ' ' +
+                                                            post.curator_payout_value, 3, '.',',') :
+                                                            formatNumber(post.pending_payout_value, 3, '.',',')}} HBD
                                                         </button>
                                                     </pop-vue>
                                                 </div>
@@ -292,7 +295,8 @@
                                             </p>
                                         </div>
                                         <!--claim dlux-->
-                                        <div v-if="me" class="d-flex align-items-center border-bottom border-secondary py-5">
+                                        <div v-if="me"
+                                            class="d-flex align-items-center border-bottom border-secondary py-5">
                                             <div>
                                                 <div class="d-flex align-items-start">
                                                     <h4 class="m-0">Claim DLUX</h4>
@@ -1107,14 +1111,14 @@
                                                 <h5 id="hivebalance">{{focus.balance}}</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info">
-                                                    <modal-vue type="send" token="HIVE"
-                                                        :balance="parseFloat(focus.balance) * 1000" :account="account"
-                                                        @modalsign="sendIt($event)">
-                                                        <span slot="trigger"><i
-                                                                class="fas fa-paper-plane me-2"></i>Send</span>
-                                                    </modal-vue></button>
+                                                        <modal-vue type="send" token="HIVE"
+                                                            :balance="parseFloat(focus.balance) * 1000"
+                                                            :account="account" @modalsign="sendIt($event)">
+                                                            <span slot="trigger"><i
+                                                                    class="fas fa-paper-plane me-2"></i>Send</span>
+                                                        </modal-vue></button>
                                                     <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                                                    disabled></button>
+                                                        disabled></button>
                                                     <div class="btn-group" role="group" v-if="me">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
@@ -1122,10 +1126,9 @@
                                                             aria-expanded="false"></button>
                                                         <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                                             aria-labelledby="btnGroupDrop1">
-                                                            <a
-                                                            class="dropdown-item disabled" href="#"><i
-                                                                class="fas fa-angle-double-up fa-fw me-2"></i>Power
-                                                            Up</a>
+                                                            <a class="dropdown-item disabled" href="#"><i
+                                                                    class="fas fa-angle-double-up fa-fw me-2"></i>Power
+                                                                Up</a>
                                                             <div class="dropdown-divider"></div>
                                                             <a class="dropdown-item" href="/dex#dlux"><i
                                                                     class="fas fa-store fa-fw me-2"></i>Trade</a>
@@ -1149,14 +1152,15 @@
                                             </div>
                                             <div id="hivepactions" class="float-right text-end">
                                                 <h5 id="hpbal">
-                                                    {{formatNumber(((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares)),3, '.', ',')}}
+                                                    {{formatNumber(((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares)),3,
+                                                    '.', ',')}}
                                                     HP</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info "
                                                         style="pointer-events: none;" disabled><i
                                                             class="fas fa-user-friends me-2"></i>Delegate</button>
-                                                            <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                                                            disabled></button>
+                                                    <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                        disabled></button>
                                                     <div class="btn-group" role="group" v-if="me">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
@@ -1189,14 +1193,14 @@
                                                 <h5 id="hbdbalance">{{focus.hbd_balance}}</h5>
                                                 <div class="btn-group" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info">
-                                                    <modal-vue type="send" token="HBD"
-                                                        :balance="parseFloat(focus.hbd_balance) * 1000"
-                                                        :account="account" @modalsign="sendIt($event)">
-                                                        <span slot="trigger"><i
-                                                                class="fas fa-paper-plane me-2"></i>Send</span>
-                                                    </modal-vue></button>
+                                                        <modal-vue type="send" token="HBD"
+                                                            :balance="parseFloat(focus.hbd_balance) * 1000"
+                                                            :account="account" @modalsign="sendIt($event)">
+                                                            <span slot="trigger"><i
+                                                                    class="fas fa-paper-plane me-2"></i>Send</span>
+                                                        </modal-vue></button>
                                                     <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                                                            disabled></button>
+                                                        disabled></button>
                                                     <div class="btn-group" role="group" v-if="me">
                                                         <button id="btnGroupDrop1" type="button"
                                                             class="btn btn-info dropdown-toggle"
@@ -1241,7 +1245,8 @@
                                             </div>
                                             <div id="hiveval" class="float-right text-end">
                                                 <h5 id="totalhivebalance">
-                                                    ${{formatNumber((((((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares))+parseFloat(focus.balance))*hiveprice.hive.usd)+((parseFloat(focus.hbd_balance)+parseFloat(focus.savings_hbd_balance))*hbdprice.hive_dollar.usd)),2, '.', ',')}}
+                                                    ${{formatNumber((((((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares))+parseFloat(focus.balance))*hiveprice.hive.usd)+((parseFloat(focus.hbd_balance)+parseFloat(focus.savings_hbd_balance))*hbdprice.hive_dollar.usd)),2,
+                                                    '.', ',')}}
                                                 </h5>
                                             </div>
                                         </div>
@@ -1742,8 +1747,8 @@
                         <div class="modal-content bg-img-none text-white">
                             <div class="card text-white bg-img-none bg-blur-none">
                                 <div class="ms-auto">
-                                    <button type="button" class="btn-close mt-3 me-3"
-                                        data-bs-dismiss="modal" aria-label="Close" @click="goBack()"></button>
+                                    <button type="button" class="btn-close mt-3 me-3" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
                                 </div>
                                 <div class="ms-auto me-auto px-2" style="max-width: 750px">
                                     <div class="">
@@ -1852,7 +1857,8 @@
                                                                 v-model="displayPost.item.slider">
                                                         </p>
                                                     </div>
-                                                    <p class="my-0"><span class="me-1" id="commentVal">{{formatNumber(voteVal
+                                                    <p class="my-0"><span class="me-1"
+                                                            id="commentVal">{{formatNumber(voteVal
                                                             *
                                                             displayPost.item.slider/10000,3, '.', ',')}} HBD</span><i
                                                             class="ml-1 fab fa-fw fa-hive"></i></p>
@@ -1878,45 +1884,7 @@
                                     </div>
                                     <div class="replies">
                                         <div v-for="post in displayPost.item.replies" :key="post.url">
-                                            <div class="card-header">
-                                                <div class="float-left">
-                                                    <a :href="post.author_url"><img v-if="post.author_img"
-                                                            :src="post.author_img"
-                                                            class="rounded-circle bg-light img-fluid mr-2 cover author-img"></a>
-                                                </div>
-                                                <div class="float-left">
-                                                    <p class="mt-0 mb-0 text-muted text-semibold"><a class="a-1"
-                                                            id="modal_author"><span
-                                                                class="ml-2 badge badge-pill badge-light">{{post.rep}}</span></a>
-                                                    </p>
-                                                </div>
-                                                <span>
-                                                    <h5>{{post.author}}</h5><a href="#/" v-show="post.author == account"
-                                                        @click="post.edit = !post.edit">Edit Post</a>
-                                                    <div v-show="!posturls[post.url].edit">
-                                                        <vue-ratings class="d-flex"
-                                                            :stars="post?.json_metadata?.review?.rating">
-                                                        </vue-ratings>
-                                                    </div>
-                                                    <div v-show="posturls[post.url].edit">
-                                                        <vue-ratings class="d-flex" vote="true"
-                                                            @rating="setRating(post.url, $event)">
-                                                        </vue-ratings>
-                                                    </div>
-                                                    <small class="text-muted" id="modal_created">{{post.ago}}</small>
-                                                </span>
-                                            </div>
-                                            <div class="card-body" v-show="!posturls[post.url].edit">
-                                                <vue-markdown :md="post.body">
-                                                </vue-markdown>
-                                            </div>
-                                            <div class="card-body" v-show="posturls[post.url].edit">
-                                                <vue-markdown :toedit="post.body" @settext="pending(post.url, $event)">
-                                                </vue-markdown>
-                                            </div>
-                                            <div class="card-footer">
-                                                <!-- votes/value, replies load replies and reply-->
-                                            </div>
+                                            <replies :post="post" :account="account"/>
                                         </div>
                                     </div>
                                 </div>
@@ -4248,7 +4216,7 @@
                     if (hash == '#blog') {
                         newUrl = url.split('#')[0];
                         history.replaceState(null, null, newUrl);
-                    } else if (hash == '#b/'){
+                    } else if (hash == '#b/') {
 
                     } else {
                         newUrl = url.split('#')[0] + hash;
