@@ -16,6 +16,7 @@ export default {
   template: `
   <div>
       <button role="button" @click="view = !view">{{view ? 'Hide' : 'Show'}}</button>
+      <a href="#!" v-if="warn" @click="warn = false">Hidden due to low reputation.</a>
      <div v-if="view" class="rounded p-3 border border-info">
         <div>
            <div>
@@ -95,6 +96,7 @@ export default {
         view: true,
         mde: '',
         makeReply: false,
+        warn: false,
     };
     },
     emits: ['vote', 'reply'],
@@ -170,11 +172,22 @@ export default {
           gt(a,b){
           return parseFloat(a)>parseFloat(b);
         },
+        hideLowRep(){
+            if(post.rep != '...'){
+                if(parseFloat(post.rep) < 25){
+                    this.view = false;
+                    this.warn = true;
+                }
+            } else {
+                setTimeout(this.hideLowRep, 1000)
+            }
+        },
         setRating(rating){
             this.post.rating = rating;
           }
     },
   mounted() {
+    this.hideLowRep()
   },
 };
 
