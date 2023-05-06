@@ -402,17 +402,25 @@ export default {
                     this.view = false;
                     this.warn = true;
                 }
-                this.getContracts()
             } else {
                 setTimeout(this.hideLowRep, 1000)
             }
         },
         setRating(rating) {
             this.post.rating = rating;
-        }
+        },
+        fancyBytes(bytes){
+            var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
+            while (bytes > 1024){
+              bytes = bytes / 1024
+              counter ++
+            }
+            return `${this.toFixed(bytes, 2)} ${p[counter]}B`
+          }
     },
     mounted() {
         this.hideLowRep()
+        this.getContracts()
     },
 };
 
