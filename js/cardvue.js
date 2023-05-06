@@ -220,6 +220,16 @@ export default {
                 return {}
             }
         },
+        contracts: {
+            default: function () {
+                return {}
+            }
+        },
+        extendcost: {
+            default: function () {
+                return {}
+            }
+        },
         broca_refill:{
             default: 0
         },
@@ -240,8 +250,6 @@ export default {
             warn: false,
             flag: false,
             slider: 10000,
-            contracts: {},
-            extendcost: {},
         };
     },
     emits: ['vote', 'reply', 'modalselect', 'tosign'],
