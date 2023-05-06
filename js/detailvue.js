@@ -32,7 +32,7 @@ export default {
                                 <div class="d-flex flex-wrap text-info">
                                     <div>
                                         <p><i
-                                                :class="postSelect.types[post.type].icon"></i>{{postSelect.types[post.type].launch}}
+                                                :class="post_select.types[post.type].icon"></i>{{post_select.types[post.type].launch}}
                                         </p>
 
                                     </div>
@@ -75,7 +75,7 @@ export default {
                                         class="ms-2 fas fa-external-link-alt"></i></button></a>
 
                             <span class="badge bg-primary d-none"><i
-                                    :class="postSelect.types[post.type].icon"></i>{{post.type}}</span>
+                                    :class="post_select.types[post.type].icon"></i>{{post.type}}</span>
                         </div>
 
                     </div>
@@ -88,7 +88,7 @@ export default {
                     </div>
                     <div class="m-auto py-3 text-center">
                         <p><i
-                                :class="postSelect.types[post.type].icon"></i>{{postSelect.types[post.type].launch}}
+                                :class="post_select.types[post.type].icon"></i>{{post_select.types[post.type].launch}}
                         </p>
                         <a :href="post.url"><button class="btn btn-lg btn-primary px-4"
                                 style="border-radius: 5rem;">Launch<i
