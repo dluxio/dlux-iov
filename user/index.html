@@ -1884,7 +1884,7 @@
                                     </div>
                                     <div class="replies">
                                         <div v-for="post in displayPost.item.replies" :key="post.url">
-                                            <replies :post="post" :account="account"/>
+                                            <replies :post="post" :account="account" :voteval="voteVal" @vote="vote($event)"/>
                                         </div>
                                     </div>
                                 </div>

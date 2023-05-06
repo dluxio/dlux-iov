@@ -1,6 +1,7 @@
 import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
+import Vote from "/js/vote.js";
 
 export default {
     name: "replies",
@@ -8,10 +9,12 @@ export default {
         "vue-markdown": Marker,
         "vue-ratings": Ratings,
         "mde": MDE,
+        "vote": Vote,
       },
   template: `
   <div>
-     <div class="rounded p-3 border border-info">
+      <button role="button" @click="view = !view">{{view ? 'Hide' : 'Show'}}</button>
+     <div v-if="view" class="rounded p-3 border border-info">
         <div>
            <div>
               <div>
@@ -54,10 +57,10 @@ export default {
            </vue-markdown>
         </div>
         <div class="card-footer">
-              <div class="float-left">Vote</div>
+              <vote :post="post" :account="account" :voteval="voteval" @vote="vote($event)"></vote>
         </div>
         <div v-for="reply in post.replies">
-            <replies :post="reply" :account="account"></replies>
+            <replies :post="reply" :account="account" :voteval="voteval" @vote="vote($event)"></replies>
         </div>
      </div>
   </div>
@@ -73,15 +76,21 @@ export default {
         },
         account: {
             default: ''
-        }
+        },
+        voteval: 0,
     },
     data() {
     return {
-      collapse: false,
-    edit: false,
+        collapse: false,
+        edit: false,
+        view: true,
     };
     },
+    emits: ['vote'],
     methods:{
+        vote(event){
+            this.$emit('vote', event);
+        },
         setRating(rating){
             this.post.rating = rating;
           }

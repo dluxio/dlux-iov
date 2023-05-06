@@ -1873,14 +1873,23 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       return out + post;
     },
     vote(url) {
-      const key = `/@${url.split("/@")[1].split("/")[0]}/${url.split("/@")[1].split("/")[1]}`
+      var key, slider, flag
+      if(typeof url == 'object'){
+        slider = url.slider
+        flag = url.flag
+        url = url.url
+      } else {
+        key = `/@${url.split("/@")[1].split("/")[0]}/${url.split("/@")[1].split("/")[1]}`
+        slider = this.posturls[key].slider
+        flag = this.posturls[key].flag
+      }
       this.toSign = {
         type: "vote",
         cj: {
           author: url.split("/@")[1].split("/")[0],
           permlink: url.split("/@")[1].split("/")[1],
           weight:
-            this.posturls[key].slider * (this.posturls[key].flag ? -1 : 1),
+            slider * (flag ? -1 : 1),
         },
         msg: `Voting ...`,
         ops: [""],
