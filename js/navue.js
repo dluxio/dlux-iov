@@ -855,10 +855,10 @@ export default {
 
     <div class="row mb-3">
       <label class="form-label d-none">Set and store username:</label>
-      <div class="input-group">
-        <span class="input-group-text bg-darkg border-dark text-white-50">@</span>
-        <input v-model="userField"  autocapitalize="off" placeholder="username" @keyup.enter="setUser()" class="text-center form-control bg-darkg border-dark text-info">
-        <span class="input-group-text bg-darkg border-dark"><a href="#" @click="setUser()" v-if="userField" class="link-info"><i class="fa-solid fa-circle-plus"></i></a></span>
+      <div class="input-group position-relative">
+        <span class="input-group-text">@</span>
+        <input v-model="userField" autocapitalize="off" placeholder="username" @keyup.enter="setUser()" class="form-control text-info">
+        <span v-if="userField"  class="input-group-text border border-start-0 bg-img-none bg-blur-none no-shadow"><a role="button" @click="setUser()" class="link-info"><i class="fa-solid fa-circle-plus"></i></a></span>
       </div>
       <div class="small text-muted text-center mt-2">
         Usernames are only stored locally. <a class="no-decoration" target="_blank" href="https://signup.hive.io/">Get Account</a>
@@ -894,9 +894,8 @@ export default {
     <div class="row mb-3" v-if="recentUsers.length">
         <label class="form-label">Recent usernames:</label>
         <div class="input-group">
-          <span class="input-group-text bg-darkg border-dark text-white-50">@</span>
-          <input v-model="filterUsers" autocapitalize="off" placeholder="search" @keyup="searchRecents()" class="text-center form-control bg-darkg border-dark text-info">
-          <span class="input-group-text bg-darkg border-dark"><a href="#/" @click="filterUsers=''" v-if="filterUsers"><i class="fa-solid fa-xmark"></i></a></span>
+          <span class="input-group-text">@</span>
+          <input type="search" v-model="filterUsers" autocapitalize="off" placeholder="search" @keyup="searchRecents()" class="form-control text-info">
         </div>
       </div>
       <div class="d-flex justify-content-between align-items-center m-3 pb-3 border-dark border-bottom" v-if="!filterUsers" v-for="name in recentUsers">

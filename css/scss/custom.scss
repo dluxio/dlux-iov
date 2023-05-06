@@ -250,6 +250,12 @@ td {
   -webkit-backdrop-filter: blur(0px);
   backdrop-filter: blur(0px);
 }
+.no-shadow{
+  box-shadow: none !important;
+  border-top-color: rgba(255,255,255,0.4) !important;
+  border-right-color: rgba(255,255,255,0.4) !important;
+  border-bottom-color: rgba(255,255,255,0.4) !important;
+}
 
 .dnav {
   background-color: rgba(42, 48, 54, 0.8);
