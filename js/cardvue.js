@@ -244,10 +244,28 @@ export default {
             extendcost: {},
         };
     },
-    emits: ['vote', 'reply', 'modalselect'],
+    emits: ['vote', 'reply', 'modalselect', 'tosign'],
     methods: {
         modalSelect(url) {
             this.$emit('modalselect', url);
+        },
+        extend(contract, amount, up = false){
+            if(amount > this.broca_calc(this.broca))return
+            const toSign = {
+                type: "cja",
+                cj: {
+                  broca: amount,
+                  id: contract.i,
+                  file_owner: contract.t,
+                  power: up ? 1 : 0,
+                },
+                id: `spkcc_extend`,
+                msg: `Extending ${contract}...`,
+                ops: ["getTokenUser"],
+                api: "https://spktest.dlux.io",
+                txid: "extend",
+              }
+              this.$emit('tosign', toSign)
         },
         updateCost(id) {
             this.extendcost[id] = parseInt(this.contracts[id].extend / 30 * this.contracts[id].r)
