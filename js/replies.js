@@ -2,6 +2,7 @@ import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
 import Vote from "/js/vote.js";
+import Pop from "/js/pop.js";
 
 export default {
     name: "replies",
@@ -10,6 +11,7 @@ export default {
         "vue-ratings": Ratings,
         "mde": MDE,
         "vote": Vote,
+        "pop-vue": Pop,
       },
   template: `
   <div>
@@ -58,6 +60,17 @@ export default {
         </div>
         <div class="card-footer">
               <vote :post="post" :account="account" :voteval="voteval" @vote="vote($event)"></vote>
+              <pop-vue :id="'pop-' + post.author + '-' + post.permlink"
+                                                        title="Post Earnings"
+                                                        :content="(gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') + ' HBD' : post.pending_payout_value ? post.pending_payout_value : '')"
+                                                        trigger="hover">
+                                                        <button class="btn btn-secondary">
+                                                            {{gt(post.total_payout_value, post.pending_payout_value) ?
+                                                            formatNumber(post.total_payout_value + ' ' +
+                                                            post.curator_payout_value, 3, '.',',') :
+                                                            formatNumber(post.pending_payout_value, 3, '.',',')}} HBD
+                                                        </button>
+                                                    </pop-vue>
         </div>
         <div v-for="reply in post.replies">
             <replies :post="reply" :account="account" :voteval="voteval" @vote="vote($event)"></replies>
@@ -90,6 +103,37 @@ export default {
     methods:{
         vote(event){
             this.$emit('vote', event);
+        },
+        formatNumber(t, n, r, e) { // number, decimals, decimal separator, thousands separator
+            if (typeof t != "number") {
+              const parts = t ? t.split(" ") : []
+              var maybe = 0
+              for (i = 0; i < parts.length; i++) {
+                if (parseFloat(parts[i])>0){
+                  maybe += parseFloat(parts[i])
+                }
+              }
+              if (maybe>parseFloat(t)){
+                t = maybe
+              } else {
+                t = parseFloat(t)
+              }
+            }
+            if (isNaN(t)) return "Invalid Number";
+            if (!isFinite(t)) return (t < 0 ? "-" : "") + "infinite";
+            (r = r || "."), (e = e || "");
+            var u = t < 0;
+            t = Math.abs(t);
+            var a = (null != n && 0 <= n ? t.toFixed(n) : t.toString()).split("."),
+              i = a[0],
+              o = 1 < a.length ? r + a[1] : "";
+            if (e)
+              for (var c = /(\d+)(\d{3})/; c.test(i); )
+                i = i.replace(c, "$1" + e + "$2");
+            return (u ? "-" : "") + i + o;
+          },
+          gt(a,b){
+          return parseFloat(a)>parseFloat(b);
         },
         setRating(rating){
             this.post.rating = rating;
