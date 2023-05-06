@@ -87,12 +87,6 @@ export default {
 
                                               <input type="range" class="form-range mx-2" step="1"
                                                   max="10000" v-model="slider">
-      
-                                          <div class="d-none align-items-center px-3 border rounded" style="height: 38px;"
-                                              :class="{'border-success': !flag, 'border-danger': flag}">
-                                              
-                                          </div>
-      
 
                                               <span style="min-width: 100px" class="text-end text-nowrap" id="commentVal"
                                                   :class="{'text-success': !flag, 'text-danger': flag}">
@@ -111,10 +105,9 @@ export default {
                                           
       
                                       <div class="p-2 d-flex align-items-center text-white-50">
-                                          <button type="button" class="btn btn-primary me-2" :disabled="extendcost[name] > broca_calc(broca)" @click="extend(contracts[name], extendcost[name])"><i class="fa-solid fa-clock-rotate-left fa-fw me-2"></i>Extend</button>
-                                          <button type="button" class="btn btn-secondary me-2" data-bs-toggle="collapse"
-                                              :data-bs-target="'#contract-' + post.author + '-' + post.permlink"><span
-                                                  class="close text-white">×</span></button>
+                                          <button type="button" class="btn btn-sm btn-primary me-1" :disabled="extendcost[name] > broca_calc(broca)" @click="extend(contracts[name], extendcost[name])"><i class="fa-solid fa-clock-rotate-left fa-fw me-1"></i>Extend</button>
+                                          <button type="button" class="btn btn-sm btn-secondary me-1" data-bs-toggle="collapse"
+                                              :data-bs-target="'#contract-' + post.author + '-' + post.permlink"><span><i class="fa-solid fa-xmark fa-fw"></i></span></button>
                                           
                                          
                                           <p class="text-center ms-auto me-auto my-1"><span
@@ -124,12 +117,10 @@ export default {
                                               Broca</div>
                                       </div>
                                       <div class="d-flex">
-                                      <div class="input-group m-2 mb-3">
-                                          
+                                      <div class="btn-group m-2 mb-3">
                                           <input name="time" @change="updateCost(name);customTime = false" title="1 Day" class="btn-check" id="option1" type="radio"
                                               value="1" v-model="contracts[name].extend" checked>
                                           <label class="btn btn-outline-info l-radius-hotfix" for="option1">1D</label>
-                                          
                                           <input name="time" @change="updateCost(name);customTime = false" title="1 Week" class="btn-check" id="option2"
                                               type="radio" value="7" v-model="contracts[name].extend"><label
                                               class="btn btn-outline-info" for="option2">1W</label>
@@ -139,11 +130,10 @@ export default {
                                           <input name="time" @change="updateCost(name);customTime = false" title="1 Year" class="btn-check" id="option4"
                                               type="radio" value="365" v-model="contracts[name].extend">
                                           <label class="btn btn-outline-info" for="option4">1Y</label>
-                                     
                                           <input type="number" step="1" class="form-control text-center border-info text-info"
                                               v-model="contracts[name].extend" @change="updateCost(name)">
                                           <span
-                                              class="input-group-text border-info text-info">Days</span>
+                                              class="input-group-text">Days</span>
                                       </div>
                                   </div>
                                   </div >
