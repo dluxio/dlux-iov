@@ -1,4 +1,18 @@
-<div class="card text-white">
+import Marker from "/js/marker.js";
+import Ratings from "/js/ratings.js";
+import MDE from "/js/mde.js";
+import Vote from "/js/vote.js";
+import Pop from "/js/pop.js";
+
+export default {
+    components: {
+        "vue-markdown": Marker,
+        "vue-ratings": Ratings,
+        "mde": MDE,
+        "vote": Vote,
+        "pop-vue": Pop,
+    },
+    template: `<div class="card text-white">
     <div class="card-header">
         <div class="d-flex align-items-center flex-wrap">
             <a :href="'/@' + post.author" class="no-decoration">
@@ -17,12 +31,12 @@
                         </span>
                     </div>
                 </div>
-                <h6 class="card-subtitle text-muted m-0">{{ post.ago }}</h6>
+                <h6 class="card-subtitle text-muted m-0">{{ timeSince(post.created) }}</h6>
             </div>
         </div>
     </a>
     <h5 class="m-0 ms-auto"><span class="badge bg-info"><i
-                                            :class="postSelect.types[post.type].icon"></i>{{ post.type }}</span></h5>
+                                            :class="post_select.types[post.type].icon"></i>{{ post.type }}</span></h5>
                                 </div >
                             </div >
     <div class="card-body">
@@ -33,7 +47,7 @@
     </a>
                             </div >
 
-                            < !--featured image with mouseover launch btn-- >
+                            <!--featured image with mouseover launch btn-- >
     <div class="card">
         <div class="d-flex">
             <a target="_blank" :href="post.url" class="p-0 m-0" type="button">
@@ -45,7 +59,7 @@
                     <div class="caption text-white w-100 h-100 d-flex">
                         <div class="m-auto p-3 text-center">
                             <p><i
-                                                                :class="postSelect.types[post.type].icon"></i>{{ postSelect.types[post.type].launch }}
+                                                                :class="post_select.types[post.type].icon"></i>{{ post_select.types[post.type].launch }}
                         </p>
                         <button class="btn btn-lg btn-primary px-4"
                             style="border-radius: 5rem;">Launch<i
@@ -90,7 +104,7 @@
                                 </form >
                             </div >
 
-                            < !--contract collapse-- >
+                            < !--contract collapse
                             <div class="collapse" :id="'contract-' +  post.author + '-' + post.permlink">
                                 <form v-for="(cid, name, index) in post.contract" id="contractForm">
                                     <div v-if="contracts[name]" class="d-flex flex-column">
@@ -134,7 +148,7 @@
                                 </div>
                                 </div >
                                 </form >
-                            </div >
+                            </div >-->
                             <div class="card-footer text-white-50">
                                 <!--footer buttons-->
                                 <div class="d-flex align-items-center my-2">
@@ -156,15 +170,15 @@
                                             class="text-white-50">{{post.rating}}</span>
                                     </a >
     <a href="#/" class="no-decoration text-white-50" data-bs-toggle="collapse"
-                                        : class="{'text-primary': post.flag > 0}"
-                                        : data-bs-target="'#vote-' + post.author + '-' + post.permlink"
+                                        :class="{'text-primary': post.flag > 0}"
+                                        :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
                                         @click="post.flag = true" >
                                         <i class="fa-solid fa-flag ms-2 me-1"></i><span
                                             class="text-white-50">{{post.downVotes ? post.downVotes : ''}}</span>
                                     </a >
     <a v-for="(contract, name, index) in post.contract" href="#/" class="no-decoration text-white-50"
         data-bs-toggle="collapse"
-                                        : data-bs-target="'#contract-' + post.author + '-' + post.permlink">
+                                        :data-bs-target="'#contract-' + post.author + '-' + post.permlink">
         <i class="fa-solid fa-file-contract ms-2 me-1" :class="{'text-success': color_code(name) > 28800 * 7,'text-warning': color_code(name) < 28800 * 7 &&  color_code(name) > 28800, 'text-warning': color_code(name) < 28800}"></i>
                                     </a >
     <div class="ms-auto">
@@ -179,4 +193,145 @@
     </div>
                                 </div >
                             </div >
-                        </div >
+                        </div >`,
+    props: {
+        contracts: {
+            default: function () {
+                return {}
+            }
+        },
+        head_block: {
+            default: 0
+        },
+        TOKEN: {
+            default: 'DLUX'
+        },
+        post: {
+            required: true,
+            default: function () {
+                return {
+
+                };
+            },
+        },
+        account: {
+            default: ''
+        },
+        voteval: 0,
+        post_select:{
+            default: function () {
+                return {}
+            }
+        }
+    },
+    data() {
+        return {
+            collapse: false,
+            edit: false,
+            view: true,
+            mde: '',
+            makeReply: false,
+            warn: false,
+        };
+    },
+    emits: ['vote', 'reply', 'modalselect'],
+    methods: {
+        modalSelect(url) {
+            this.$emit('modalselect', url);
+        },
+        pending(event) {
+            this.mde = event
+        },
+        vote(event) {
+            this.$emit('vote', event);
+        },
+        color_code(name){
+            return parseInt(this.contracts[name] ? this.contracts[name].e.split(':')[0] : 0) - this.head_block
+          },
+        timeSince(date) {
+            var seconds = Math.floor((new Date() - new Date(date + ".000Z")) / 1000);
+            var interval = Math.floor(seconds / 86400);
+            if (interval > 7) {
+                return new Date(date).toLocaleDateString();
+            }
+            if (interval >= 1) {
+                return interval + ` day${interval > 1 ? "s" : ""} ago`;
+            }
+            interval = Math.floor(seconds / 3600);
+            if (interval >= 1) {
+                return interval + ` hour${interval > 1 ? "s" : ""} ago`;
+            }
+            interval = Math.floor(seconds / 60);
+            if (interval >= 1) {
+                return `${interval} minute${interval > 1 ? "s" : ""} ago`;
+            }
+            return Math.floor(seconds) + " seconds ago";
+        },
+        setReply(event) {
+            this.mde = event
+        },
+        reply(deets) {
+            if (!deets) deets = {
+                "parent_author": this.post.author,
+                "parent_permlink": this.post.permlink,
+                "author": this.account,
+                "permlink": 're-' + this.post.permlink,
+                "title": '',
+                "body": this.mde,
+                "json_metadata": JSON.stringify(this.postCustom_json)
+            }
+            this.$emit('reply', deets)
+        },
+        formatNumber(t, n, r, e) { // number, decimals, decimal separator, thousands separator
+            if (typeof t != "number") {
+                const parts = t ? t.split(" ") : []
+                var maybe = 0
+                for (i = 0; i < parts.length; i++) {
+                    if (parseFloat(parts[i]) > 0) {
+                        maybe += parseFloat(parts[i])
+                    }
+                }
+                if (maybe > parseFloat(t)) {
+                    t = maybe
+                } else {
+                    t = parseFloat(t)
+                }
+            }
+            if (isNaN(t)) return "Invalid Number";
+            if (!isFinite(t)) return (t < 0 ? "-" : "") + "infinite";
+            (r = r || "."), (e = e || "");
+            var u = t < 0;
+            t = Math.abs(t);
+            var a = (null != n && 0 <= n ? t.toFixed(n) : t.toString()).split("."),
+                i = a[0],
+                o = 1 < a.length ? r + a[1] : "";
+            if (e)
+                for (var c = /(\d+)(\d{3})/; c.test(i);)
+                    i = i.replace(c, "$1" + e + "$2");
+            return (u ? "-" : "") + i + o;
+        },
+        gt(a, b) {
+            return parseFloat(a) > parseFloat(b);
+        },
+        precision(num, precision) {
+            return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
+          },
+        hideLowRep() {
+            if (this.post.rep != '...') {
+                if (parseFloat(this.post.rep) < 25) {
+                    this.view = false;
+                    this.warn = true;
+                }
+            } else {
+                setTimeout(this.hideLowRep, 1000)
+            }
+        },
+        setRating(rating) {
+            this.post.rating = rating;
+        }
+    },
+    mounted() {
+        this.hideLowRep()
+    },
+};
+

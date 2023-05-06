@@ -8,6 +8,7 @@ import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
 import Replies from "/js/replies.js";
+import CardVue from "/js/cardvue.js";
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "";
@@ -410,6 +411,7 @@ createApp({
     "vue-ratings": Ratings,
     "mde": MDE,
     "replies": Replies,
+    "card-vue": CardVue,
   },
   methods: {
     reply(deets){
