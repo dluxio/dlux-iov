@@ -7,6 +7,7 @@ import Popper from "/js/pop.js";
 import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
+import Replies from "/js/replies.js";
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "";
@@ -408,6 +409,7 @@ createApp({
     "vue-markdown": Marker,
     "vue-ratings": Ratings,
     "mde": MDE,
+    "replies": Replies,
   },
   methods: {
     reply(deets){
