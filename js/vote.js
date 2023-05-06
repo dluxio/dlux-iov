@@ -25,7 +25,7 @@ export default {
               style="height: 38px;"
               :class="{'border-success': !flag, 'border-danger': flag}">
               <input type="range" class="form-range mx-auto p-0" step="1"
-                  value="10000" max="10000" v-model="slider">
+                  max="10000" v-model="slider">
           </div>
 
           <div class="ms-auto">

@@ -42,12 +42,10 @@ export default {
            </div>
         </div>
         <div class="card-body" v-show="!edit">
-           <vue-markdown :md="post.body">
-           </vue-markdown>
+           <vue-markdown :md="post.body"/>
         </div>
         <div v-show="edit">
            <vue-markdown :toedit="post.body" @settext="pending($event)"/>
-           </vue-markdown>
         </div>
         <div v-show="makeReply">
         <mde @data="mde = $event" />
