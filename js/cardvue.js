@@ -81,9 +81,9 @@ export default {
                                               @click="vote(post.url)" style="min-width: 85px;"><span v-if="!flag"><i class="fas fa-heart fa-fw me-1"></i></span><span v-if="flag"><i class="fa-solid fa-flag me-1"></i></span>{{flag ? '-' :
                                               ''}}{{formatNumber(slider / 100, 0,'.',',')}}%</button>
       
-                                          <button type="button" class="btn btn-sm btn-secondary"
+                                          <button type="button" class="btn btn-sm btn-secondary px-1 me-1"
                                               :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
-                                              data-bs-toggle="collapse"><span class="close text-white">×</span></button>
+                                              data-bs-toggle="collapse"><span><i class="fa-solid fa-xmark fa-fw"></i></span></button>
 
                                               <input type="range" class="form-range mx-2" step="1"
                                                   max="10000" v-model="slider">
