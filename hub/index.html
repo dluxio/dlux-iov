@@ -490,44 +490,7 @@
                                 </div>
                                 <div class="replies">
                                     <div v-for="post in displayPost.item.replies" :key="post.url">
-                                        <div class="card-header">
-                                            <div class="float-left">
-                                                <a :href="post.author_url"><img :src="post.author_img"
-                                                        class="rounded-circle bg-light img-fluid mr-2 cover author-img"></a>
-                                            </div>
-                                            <div class="float-left">
-                                                <p class="mt-0 mb-0 text-muted text-semibold"><a class="a-1"
-                                                        id="modal_author"><span
-                                                            class="ml-2 badge badge-pill badge-light">{{post.rep}}</span></a>
-                                                </p>
-                                            </div>
-                                            <span>
-                                                <h5>{{post.author}}</h5><a href="#/" v-show="post.author == account"
-                                                    @click="post.edit = !post.edit">Edit Post</a>
-                                                <div v-show="!posturls[post.url].edit">
-                                                    <vue-ratings class="d-flex"
-                                                        :stars="post?.json_metadata?.review?.rating">
-                                                    </vue-ratings>
-                                                </div>
-                                                <div v-show="posturls[post.url].edit">
-                                                    <vue-ratings class="d-flex" vote="true"
-                                                        @rating="setRating(post.url, $event)">
-                                                    </vue-ratings>
-                                                </div>
-                                                <small class="text-muted" id="modal_created">{{post.ago}}</small>
-                                            </span>
-                                        </div>
-                                        <div class="card-body" v-show="!posturls[post.url].edit">
-                                            <vue-markdown :md="post.body">
-                                            </vue-markdown>
-                                        </div>
-                                        <div class="card-body" v-show="posturls[post.url].edit">
-                                            <vue-markdown :toedit="post.body" @settext="pending(post.url, $event)">
-                                            </vue-markdown>
-                                        </div>
-                                        <div class="card-footer">
-                                            <!-- votes/value, replies load replies and reply-->
-                                        </div>
+                                        <replies :post="post" :account="account" :voteval="voteVal" @vote="vote($event)" @reply="reply($event)"/>
                                     </div>
                                 </div>
                             </div>

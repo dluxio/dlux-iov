@@ -410,13 +410,33 @@ createApp({
     "mde": MDE,
   },
   methods: {
-    vote(url){
+    reply(deets){
+      this.toSign = {
+        type: "raw",
+        key: "posting",
+        op: [["comment", deets]],
+        callbacks: [], //get new replies for a/p
+        txid: `reply:${deets.parent_author}/${deets.permlink}`,
+      }
+    },
+    vote(url) {
+      var key, slider, flag
+      if(typeof url == 'object'){
+        slider = url.slider
+        flag = url.flag
+        url = url.url
+      } else {
+        key = `/@${url.split("/@")[1].split("/")[0]}/${url.split("/@")[1].split("/")[1]}`
+        slider = this.posturls[key].slider
+        flag = this.posturls[key].flag
+      }
       this.toSign = {
         type: "vote",
         cj: {
-          author: url.split('/')[2].replace('@', ''),
-          permlink: url.split('/')[3],
-          weight: this.posturls[url].slider * (this.posturls[url].flag ? -1 : 1),
+          author: url.split("/@")[1].split("/")[0],
+          permlink: url.split("/@")[1].split("/")[1],
+          weight:
+            slider * (flag ? -1 : 1),
         },
         msg: `Voting ...`,
         ops: [""],
