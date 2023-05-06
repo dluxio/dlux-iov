@@ -103,7 +103,7 @@ export default {
                                   </form >
                               </div >
       
-                              <!-- contract collapse
+                              <!-- contract collapse -->
                               <div class="collapse" :id="'contract-' +  post.author + '-' + post.permlink">
                                   <form v-for="(cid, name, index) in post.contract" id="contractForm">
                                       <div v-if="contracts[name]" class="d-flex flex-column">
@@ -147,7 +147,7 @@ export default {
                                   </div>
                                   </div >
                                   </form >
-                              </div > -->
+                              </div>
    <div class="card-footer text-white-50">
       <!-- footer buttons -->
       <div class="d-flex align-items-center my-2">
@@ -194,11 +194,6 @@ export default {
    </div >
 </div >`,
     props: {
-        contracts: {
-            default: function () {
-                return {}
-            }
-        },
         head_block: {
             default: 0
         },
@@ -217,10 +212,19 @@ export default {
             default: ''
         },
         voteval: 0,
-        post_select:{
+        post_select: {
             default: function () {
                 return {}
             }
+        },
+        broca_refill:{
+            default: 0
+        },
+        broca: {
+            default: 0
+        },
+        spk_power: {
+            default: 0
         }
     },
     data() {
@@ -233,6 +237,8 @@ export default {
             warn: false,
             flag: false,
             slider: 10000,
+            contracts: {},
+            extendcost: {},
         };
     },
     emits: ['vote', 'reply', 'modalselect'],
@@ -240,42 +246,68 @@ export default {
         modalSelect(url) {
             this.$emit('modalselect', url);
         },
+        updateCost(id) {
+            this.extendcost[id] = parseInt(this.contracts[id].extend / 30 * this.contracts[id].r)
+            this.$forceUpdate()
+        },
+        getContracts() {
+            var contracts = [],
+                getContract = (id) => {
+                    console.log({id})
+                    fetch('https://spktest.dlux.io/api/fileContract/' + id)
+                        .then((r) => r.json())
+                        .then((res) => {
+                            res.result.extend = "7"
+                            if (res.result) {
+                                this.contracts[id] = res.result
+                                this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
+                            }
+                        });
+                }
+            for (var contract in this.post.contract) {
+                contracts.push(contract)
+            }
+            contracts = [...new Set(contracts)]
+            for (var i = 0; i < contracts.length; i++) {
+                getContract(contracts[i])
+            }
+        },
         imgUrlAlt(event) {
             event.target.src = "/img/dlux-logo-icon.png";
         },
         picFind(json) {
             var arr;
             try {
-              arr = json.image[0];
-            } catch (e) {}
+                arr = json.image[0];
+            } catch (e) { }
             if (typeof json.image == "string") {
-              return json.image;
+                return json.image;
             } else if (typeof arr == "string") {
-              return arr;
+                return arr;
             } else if (typeof json.Hash360 == "string") {
-              return `https://ipfs.io/ipfs/${json.Hash360}`;
+                return `https://ipfs.io/ipfs/${json.Hash360}`;
             } else {
-              /*
-                      var looker
-                      try {
-                          looker = body.split('![')[1]
-                          looker = looker.split('(')[1]
-                          looker = looker.split(')')[0]
-                      } catch (e) {
-                          */
-              return "/img/dluxdefault.svg";
+                /*
+                        var looker
+                        try {
+                            looker = body.split('![')[1]
+                            looker = looker.split('(')[1]
+                            looker = looker.split(')')[0]
+                        } catch (e) {
+                            */
+                return "/img/dluxdefault.svg";
             }
-          },
+        },
         pending(event) {
             this.mde = event
         },
-        vote(url){
-            this.$emit('vote', {url:`/@${this.post.author}/${this.post.permlink}`, slider: this.slider, flag:this.flag})
+        vote(url) {
+            this.$emit('vote', { url: `/@${this.post.author}/${this.post.permlink}`, slider: this.slider, flag: this.flag })
             console.log(this.post)
         },
-        color_code(name){
+        color_code(name) {
             return parseInt(this.contracts[name] ? this.contracts[name].e.split(':')[0] : 0) - this.head_block
-          },
+        },
         timeSince(date) {
             var seconds = Math.floor((new Date() - new Date(date + ".000Z")) / 1000);
             var interval = Math.floor(seconds / 86400);
@@ -310,6 +342,23 @@ export default {
             }
             this.$emit('reply', deets)
         },
+        broca_calc(last = '0,0') {
+            const last_calc = this.Base64toNumber(last.split(',')[1])
+            const accured = parseInt((parseFloat(this.broca_refill) * (this.head_block - last_calc)) / (this.spk_power * 1000))
+            var total = parseInt(last.split(',')[0]) + accured
+            if (total > (this.spk_power * 1000)) total = (this.spk_power * 1000)
+            return total
+        },
+        Base64toNumber(chars) {
+            const glyphs =
+              "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
+            var result = 0;
+            chars = chars.split("");
+            for (var e = 0; e < chars.length; e++) {
+              result = result * 64 + glyphs.indexOf(chars[e]);
+            }
+            return result;
+        },
         formatNumber(t = 1, n, r, e) { // number, decimals, decimal separator, thousands separator
             if (typeof t != "number") {
                 const parts = t ? t.split(" ") : []
@@ -343,8 +392,8 @@ export default {
         },
         precision(num, precision) {
             return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
-          },
-        toFixed(n, digits){
+        },
+        toFixed(n, digits) {
             return parseFloat(n).toFixed(digits)
         },
         hideLowRep() {
@@ -352,8 +401,8 @@ export default {
                 if (parseFloat(this.post.rep) < 25) {
                     this.view = false;
                     this.warn = true;
-                    this.post.pic = this.picFind(this.post.json_metadata)
                 }
+                this.getContracts()
             } else {
                 setTimeout(this.hideLowRep, 1000)
             }
