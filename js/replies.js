@@ -173,7 +173,7 @@ export default {
           return parseFloat(a)>parseFloat(b);
         },
         hideLowRep(){
-            if(post.rep != '...'){
+            if(this.post.rep != '...'){
                 if(parseFloat(post.rep) < 25){
                     this.view = false;
                     this.warn = true;
