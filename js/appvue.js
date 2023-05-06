@@ -560,6 +560,8 @@ createApp({
       window.history.back();
     },
     modalSelect(key) {
+      if(key.indexOf('/@') > 0)
+        key = '/@' + key.split('/@')[1];
       this.displayPost.index = key;
       this.displayPost.item = this.posturls[key];
       window.history.pushState("Blog Modal", this.displayPost.item.title, "/blog/@" + key.split('/@')[1]);
