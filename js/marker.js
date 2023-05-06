@@ -49,14 +49,14 @@ export default {
   },
   computed: {
     compiledMarkdown: function () {
-      return marked.parse(
+      return DOMPurify.sanitize(marked.parse(
         this.md
           ? this.md.replace(
               `[View in VR @ dlux.io](https://dlux.io/dlux/@${this.author}/${this.permlink})`,
               ""
             )
           : this.text
-      );
+      ))
     },
   },
 };
