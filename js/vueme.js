@@ -897,15 +897,6 @@ var app = new Vue({
         txid: "unfollow:" + acc,
       }
     },
-    reply(deets){
-      this.toSign = {
-        type: "raw",
-        key: "posting",
-        op: [["comment", deets]],
-        callbacks: [], //get new replies for a/p
-        txid: `reply:${deets.parent_author}/${deets.permlink}`,
-      }
-    },
     post() {
 			var tags = this.postTags.toLowerCase().split(',')
 			this.postCustom_json.tags = ['dlux']
@@ -1880,6 +1871,15 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       //remove trailing zeros
       out = out.replace(/\.?0+$/, "");
       return out + post;
+    },
+    reply(deets){
+      this.toSign = {
+        type: "raw",
+        key: "posting",
+        op: [["comment", deets]],
+        callbacks: [], //get new replies for a/p
+        txid: `reply:${deets.parent_author}/${deets.permlink}`,
+      }
     },
     vote(url) {
       var key, slider, flag
