@@ -110,7 +110,7 @@ export default {
                                           
       
                                       <div class="p-2 d-flex align-items-center text-white-50">
-                                          <button type="button" class="btn btn-primary me-2" :disabled="extendcost[name] > broca_calc(spkapi.broca)" @click="extend(contracts[name], extendcost[name])"><i class="fa-solid fa-clock-rotate-left fa-fw me-2"></i>Extend</button>
+                                          <button type="button" class="btn btn-primary me-2" :disabled="extendcost[name] > broca_calc(broca)" @click="extend(contracts[name], extendcost[name])"><i class="fa-solid fa-clock-rotate-left fa-fw me-2"></i>Extend</button>
                                           <button type="button" class="btn btn-secondary me-2" data-bs-toggle="collapse"
                                               :data-bs-target="'#contract-' + post.author + '-' + post.permlink"><span
                                                   class="close text-white">×</span></button>
