@@ -14,14 +14,14 @@ export default {
         "pop-vue": Pop,
         "replies": Replies,
     },
-    template: `<div :class="{'fade': modal, 'modal': modal}" id="detailModal" tabindex="-1" role="dialog" aria-hidden="true" @blur="goBack()">
+    template: `<div :class="{'fade': modal, 'modal': modal}" id="detailModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-full modal-xl modal-dialog-centered" style="max-width: 1000px;"
         role="document">
         <div class="modal-content rounded bg-img-none text-white">
             <div class="card text-white bg-img-none bg-blur-none">
                 <div class="ms-auto">
                     <button :class="{'invisible' : !modal}" type="button" class="btn-close mt-3 me-3"
-                        data-bs-dismiss="modal" aria-label="Close"></button>
+                        data-bs-dismiss="modal" aria-label="Close" @click="goBack()"></button>
                 </div>
                 <div class="ms-auto me-auto px-2" style="max-width: 750px">
                     <div class="">
@@ -471,6 +471,10 @@ methods: {
 mounted() {
     this.hideLowRep()
     this.getContracts()
+    const target = document.getElementsByClassName("modal-backdrop")
+    target.addEventListener("click", () => {
+      this.goBack()
+    });
 },
 };
 
