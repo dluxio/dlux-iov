@@ -14,7 +14,7 @@ export default {
         "pop-vue": Pop,
         "replies": Replies,
     },
-    template: `<div :class="{'fade': hide}" id="detailModal" tabindex="-1" role="dialog" aria-hidden="true" @blur="goBack()">
+    template: `<div v-if="post.author" :class="{'fade': hide}" id="detailModal" tabindex="-1" role="dialog" aria-hidden="true" @blur="goBack()">
     <div class="modal-dialog modal-full modal-xl modal-dialog-centered" style="max-width: 1000px;"
         role="document">
         <div class="modal-content bg-img-none text-white">
