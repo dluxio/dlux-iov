@@ -216,11 +216,11 @@ export default {
                                 REWARD<i class="fa-solid fa-arrow-down-wide-short fa-fw ms-1"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                 <li><a class="dropdown-item" role="button">Reward</a></li>
-                                 <li><a class="dropdown-item" role="button">Author Vote</a></li>
-                                 <li><a class="dropdown-item" role="button">Newest</a></li>
-                                 <li><a class="dropdown-item" role="button">Oldest</a></li>
-                                 <li><a class="dropdown-item" role="button">Reputation</a></li>
+                                 <li><a class="dropdown-item" role="button" @click="orderBr('Reward')">Reward</a></li>
+                                 <li><a class="dropdown-item" role="button" @click="orderBr('Newest')">Newest</a></li>
+                                 <li><a class="dropdown-item" role="button" @click="orderBr('AuthorVote')">Author Vote</a></li>
+                                 <li><a class="dropdown-item" role="button" @click="orderBr('Oldest')">Oldest</a></li>
+                                 <li><a class="dropdown-item" role="button" @click="orderBr('Rep')">Reputation</a></li>
                             </ul>
                         </div>
                         </div>
@@ -297,6 +297,40 @@ data() {
 },
 emits: ['vote', 'reply', 'modalselect', 'tosign'],
 methods: {
+    orderBy(type){
+        switch(type){
+            case 'Reward':
+                this.post.replies.sort((a, b) => {
+                    if(parseFloat(b.total_payout_value) || parseFloat(a.total_payout_value))return parseFloat(b.total_payout_value) - parseFloat(a.total_payout_value)
+                    return parseFloat(b.pending_payout_value) - parseFloat(a.pending_payout_value)
+                });
+                break;
+            case 'Newest':
+                this.post.replies.sort((a, b) => {
+                    return Date.parse(b.created + '.000') - Date.parse(a.created + '.000')
+                })
+                break;
+            case 'AuthorVote':
+                this.post.replies.sort((a, b) => {
+                    const aw = a.active_votes.find(v => v.voter === this.post.author)
+                    const bw = b.active_votes.find(v => v.voter === this.post.author)
+                    return aw - bw
+                })
+                break;
+            case 'Oldest':
+                this.post.replies.sort((a, b) => {
+                    return Date.parse(a.created + '.000') - Date.parse(b.created + '.000')
+                })
+                break;
+            case 'Rep':
+                this.post.replies.sort((a, b) => {
+                    return b.author_reputation - a.author_reputation
+                })
+                break;
+            default:
+                break;
+        }
+    },
     modalSelect(url) {
         this.$emit('modalselect', url);
     },
