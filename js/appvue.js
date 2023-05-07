@@ -1030,6 +1030,7 @@ createApp({
                   }
                 }
               }
+              try {
               if (
                 "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
                 this.posturls[key].json_metadata.vrHash ||
