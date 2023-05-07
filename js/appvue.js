@@ -1030,6 +1030,26 @@ createApp({
                   }
                 }
               }
+              if (
+                "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
+                this.posturls[key].json_metadata.vrHash ||
+                "newhashhere" ==
+                this.posturls[key].json_metadata.vrHash
+              )
+                type = "360";
+              else if (this.posturls[key].json_metadata.vrHash)
+                type = "VR";
+              else if (this.posturls[key].json_metadata.arHash)
+                type = "AR";
+              else if (this.posturls[key].json_metadata.appHash)
+                type = "APP";
+              else if (this.posturls[key].json_metadata.audHash)
+                type = "Audio";
+              else if (this.posturls[key].json_metadata.vidHash)
+                type = "Video";
+            } catch (e) {
+              console.log(key, e, "no JSON?");
+            }
               if(contracts){
                 this.getContracts(key)
               }
