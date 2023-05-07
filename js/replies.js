@@ -32,7 +32,7 @@ export default {
               </div>
           </div>
         </a>
-        <a role="button" class="ms-auto no-decoration text-white" @click="view = !view"><i v-show="view" class="fa-solid fa-circle-minus fa-fw"></i><i v-show="!view" class="fa-solid fa-circle-plus fa-fw"></i></a>                    
+        <a role="button" class="ms-auto no-decoration text-white" @click="view = !view"><i v-show="view" class="fa-solid fa-circle-minus fa-fw"></i><i v-show="!view" class="fa-solid fa-circle-plus fa-fw"></i>({{post.children + 1}})</a>                    
       </div> 
       </div>
       <div class="card-body" v-if="view" v-show="!edit">
