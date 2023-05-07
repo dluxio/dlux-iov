@@ -9,6 +9,7 @@ import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
 import Replies from "/js/replies.js";
 import CardVue from "./cardvue.js";
+import DetailVue from "./detailvue.js";
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "",
@@ -788,6 +789,7 @@ var app = new Vue({
     "mde": MDE,
     "replies": Replies,
     "card-vue": CardVue,
+    "detail-vue": DetailVue,
   },
   methods: {
     getSetPhotos(s, c) {

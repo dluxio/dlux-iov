@@ -173,7 +173,7 @@ export default {
                                 <i class="fa-solid fa-file-contract ms-2 me-1"></i>
                             </a>
 
-                        <vue-ratings role="button" class="ms-2" vote="true" @rating="setRating(post.url, $event)"></vue-ratings>
+                        <vue-ratings v-if="post.type != 'blog'" role="button" class="ms-2" vote="true" @rating="setRating(post.url, $event)"></vue-ratings>
                         <div class="ms-auto" id="modal_total_payout"><pop-vue v-if="post.total_payout_value || post.pending_payout_value" title="Post Earnings"
                         :id="'popper-' + post.author + '-' + post.permlink" :content="(gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') + ' HBD' : post.pending_payout_value ? post.pending_payout_value : '') + '<br>' + (post.paid ? precision(post.payout, 3) : 0) + ' ' + TOKEN"
                         trigger="hover">
