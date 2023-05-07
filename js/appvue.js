@@ -971,7 +971,7 @@ createApp({
         this[modal[0]].index = modal[1];
       }
     },
-    getContent(a, p) {
+    getContent(a, p, modal) {
       if (a && p) {
         fetch(this.hapi, {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content", "params":["${a}", "${p}"], "id":1}`,
