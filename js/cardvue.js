@@ -67,33 +67,6 @@ export default {
                                   </div>
                               </div>
       
-                              <!-- vote collapse -->
-                              <div class="collapse" :id="'vote-' + post.author + '-' + post.permlink">
-                                  <form id="voteForm">
-                                      <div class="p-2 d-flex align-items-center text-white-50">
-      
-                                          <button type="button" class="btn btn-sm me-1"
-                                              :class="{'btn-success': !flag, ' btn-danger': flag}"
-                                              @click="vote(post.url)" style="min-width: 85px;"><span v-if="!flag"><i class="fas fa-heart fa-fw me-1"></i></span><span v-if="flag"><i class="fa-solid fa-flag me-1"></i></span>{{flag ? '-' :
-                                              ''}}{{formatNumber(slider / 100, 0,'.',',')}}%</button>
-      
-                                          <button type="button" class="btn btn-sm btn-secondary px-1 me-1"
-                                              :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
-                                              data-bs-toggle="collapse"><span><i class="fa-solid fa-xmark fa-fw"></i></span></button>
-
-                                              <input type="range" class="form-range mx-2" step="1"
-                                                  max="10000" v-model="slider">
-
-                                              <span style="min-width: 100px" class="text-end text-nowrap" id="commentVal"
-                                                  :class="{'text-success': !flag, 'text-danger': flag}">
-                                                  {{toFixed(voteval *
-                                                  slider/10000,3)}}
-                                                  <i class="me-1 fab fa-fw fa-hive"></i>
-                                              </span>
-                                      </div>
-                                  </form >
-                              </div >
-      
                               <!-- contract collapse -->
                               <div class="collapse" :id="'contract-' +  post.author + '-' + post.permlink">
                                   <form v-for="(cid, name, index) in post.contract" id="contractForm">
@@ -119,7 +92,7 @@ export default {
                                         </div>
 
                                         <div class="input-group flex-nowrap col m-1">
-                                          <input type="number" step="1" class="form-control ps-1 pe-0 btn-sm text-end border-info text-info"
+                                          <input type="number" step="1" class="form-control px-1 btn-sm text-end border-info text-info"
                                               v-model="contracts[name].extend" @change="updateCost(name)" style="min-width: 60px;">
                                           <span class="input-group-text btn-sm">Days</span>
                                       </div>
@@ -137,6 +110,34 @@ export default {
                                   </div >
                                   </form >
                               </div>
+
+                              <!-- vote collapse -->
+                              <div class="collapse border-top" :id="'vote-' + post.author + '-' + post.permlink">
+                                  <form id="voteForm">
+                                      <div class="p-2 d-flex align-items-center text-white-50">
+      
+                                          <button type="button" class="btn btn-sm me-1"
+                                              :class="{'btn-success': !flag, ' btn-danger': flag}"
+                                              @click="vote(post.url)" style="min-width: 85px;"><span v-if="!flag"><i class="fas fa-heart fa-fw me-1"></i></span><span v-if="flag"><i class="fa-solid fa-flag me-1"></i></span>{{flag ? '-' :
+                                              ''}}{{formatNumber(slider / 100, 0,'.',',')}}%</button>
+      
+                                          <button type="button" class="btn btn-sm btn-secondary px-1 me-1"
+                                              :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
+                                              data-bs-toggle="collapse"><span><i class="fa-solid fa-xmark fa-fw"></i></span></button>
+
+                                              <input type="range" class="form-range mx-2" step="1"
+                                                  max="10000" v-model="slider">
+
+                                              <span style="min-width: 100px" class="text-end text-nowrap" id="commentVal"
+                                                  :class="{'text-success': !flag, 'text-danger': flag}">
+                                                  {{toFixed(voteval *
+                                                  slider/10000,3)}}
+                                                  <i class="me-1 fab fa-fw fa-hive"></i>
+                                              </span>
+                                      </div>
+                                  </form>
+                              </div>
+
    <div class="card-footer text-white-50">
       <!-- footer buttons -->
       <div class="d-flex flex-wrap align-items-center">
