@@ -29,36 +29,33 @@ export default {
             :class="{'text-primary': flag > 0}"
               @click="show = true; flag = true"><i class="fa-solid fa-flag me-1"></i><span
               class="text-white-50">{{post.downVotes ? post.downVotes : ''}}</span></a>
-  <form v-if="show">
-      <div class="p-2 d-flex align-items-center text-white-50">
+  
+              <!-- vote collapse -->
+              <div class="collapse border-top" :id="'vote-' + post.author + '-' + post.permlink">
+                  <form id="voteForm">
+                      <div class="p-2 d-flex align-items-center text-white-50">
 
-          <button type="button" class="btn btn-sm me-2"
-              :class="{'btn-success': !flag, ' btn-danger': flag}"
-              @click="vote(post.url)" style="width: 100px;">{{flag ? '-'
-              :
-              ''}}{{slider / 100}}%</button>
+                          <button type="button" class="btn btn-sm me-1"
+                              :class="{'btn-success': !flag, ' btn-danger': flag}"
+                              @click="vote(post.url)" style="min-width: 85px;"><span v-if="!flag"><i class="fas fa-heart fa-fw me-1"></i></span><span v-if="flag"><i class="fa-solid fa-flag me-1"></i></span>{{flag ? '-' :
+                              ''}}{{formatNumber(slider / 100, 0,'.',',')}}%</button>
 
-          <button type="button" class="btn btn-secondary me-2"
-              @click="show = false"><span
-                  class="close text-white">×</span></button>
+                          <button type="button" class="btn btn-sm btn-secondary px-1 me-1"
+                              :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
+                              data-bs-toggle="collapse"><span><i class="fa-solid fa-xmark fa-fw"></i></span></button>
 
-          <div class="d-flex align-items-center px-3 border rounded"
-              style="height: 38px;"
-              :class="{'border-success': !flag, 'border-danger': flag}">
-              <input type="range" class="form-range mx-auto p-0" step="1"
-                  max="10000" v-model="slider">
-          </div>
+                              <input type="range" class="form-range mx-2" step="1"
+                                  max="10000" v-model="slider">
 
-          <div class="ms-auto">
-              <p class="me-1 my-0"
-                  :class="{'text-success': !flag, 'text-danger': flag}">
-                  {{formatNumber(voteval *
-                  slider/10000,3, '.', ',')}}
-                  <i class="me-1 fab fa-fw fa-hive"></i>
-              </p>
-          </div>
-      </div>
-  </form>
+                              <span style="min-width: 100px" class="text-end text-nowrap" id="commentVal"
+                                  :class="{'text-success': !flag, 'text-danger': flag}">
+                                  {{toFixed(voteval *
+                                  slider/10000,3)}}
+                                  <i class="me-1 fab fa-fw fa-hive"></i>
+                              </span>
+                      </div>
+                  </form>
+              </div>
 </div>
             <pop-vue class="ms-auto" :id="'pop-' + post.author + '-' + post.permlink"
                         title="Post Earnings"
