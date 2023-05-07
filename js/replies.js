@@ -43,7 +43,7 @@ export default {
         </div>
         
         <div class="card-footer">
-          <vote :post="post" :account="account" :voteval="voteval" @vote="vote($event)"></vote>
+          <vote :post="post" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)"></vote>
         </div>
         <div v-for="reps in post.replies">
             <replies :post="reps" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)"/>

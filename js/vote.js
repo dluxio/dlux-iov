@@ -94,10 +94,29 @@ export default {
         show: false,
         warn: false,
         makeReply: false,
+        mde: '',
     };
     },
-    emits: ['vote'],
+    emits: ['vote', 'reply'],
     methods:{
+      pending(event){
+        this.mde = event
+        },
+        setReply(event){
+          this.mde = event
+      },
+      reply(deets){
+        if(!deets)deets = {
+            "parent_author": this.post.author,
+            "parent_permlink": this.post.permlink,
+            "author": this.account,
+            "permlink": 're-' + this.post.permlink,
+            "title": '',
+            "body": this.mde,
+            "json_metadata": JSON.stringify(this.postCustom_json)
+        }
+        this.$emit('reply', deets)
+    },
         vote(url){
             this.$emit('vote', {url:`/@${this.post.author}/${this.post.permlink}`, slider: this.slider, flag:this.flag})
             console.log(this.post)
