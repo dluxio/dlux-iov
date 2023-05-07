@@ -471,7 +471,7 @@ methods: {
 mounted() {
     this.hideLowRep()
     this.getContracts()
-    const target = document.getElementsByClassName("modal-backdrop")
+    const target = document.getElementsByClassName("modal-backdrop")[0]
     target.addEventListener("click", () => {
       this.goBack()
     });
