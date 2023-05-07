@@ -993,9 +993,8 @@ createApp({
                 downVotes: 0,
                 edit: false,
                 hasVoted: false,
-                contract: {
-
-                }
+                contract: {},
+                type: 'Blog'
               };
               for (
                 var i = 0;
@@ -1051,6 +1050,7 @@ createApp({
             } catch (e) {
               console.log(key, e, "no JSON?");
             }
+            this.posturls[key].type = type;
               if(contracts){
                 this.getContracts(key)
               }
