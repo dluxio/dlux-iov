@@ -16,7 +16,6 @@ export default {
   template: `
 <div>
   <a role="button" v-if="warn" @click="warn = false">Hidden due to low reputation.</a>
-  <div>
         <div class="d-flex align-items-start">
               <a :href="'/@' + post.author" class="no-decoration">
               <img :src="'https://images.hive.blog/u/' + post.author + '/avatar'"
