@@ -11,27 +11,8 @@ export default {
         "pop-vue": Pop,
       },
   template: `
-  <div v-show="makeReply" class="mx-2">
-            <mde @data="mde = $event" />
-            <div class="d-flex">
-              <button class="btn btn-sm btn-secondary ms-auto" @click="makeReply = !makeReply"><i class="fa-solid fa-xmark fa-fw me-1"></i>Cancel</button>
-              <button class="btn btn-sm btn-primary ms-1" @click="reply()"><i class="fa-solid fa-comment fa-fw me-1"></i>Reply</button>
-            </div>
-          </div>
-          <div v-show="!makeReply" class="d-flex">
-            <button class="btn btn-sm btn-primary me-1" @click="makeReply = !makeReply">{{makeReply ? 'Cancel' : 'Reply'}}</button>
-            <div class="d-flex align-items-center">
-  <a v-if="!show" role="button" class="no-decoration"
-        :class="{'text-primary': post.hasVoted, 'text-white-50': !post.hasVoted, 'text-danger': slider < 0 }"
-              @click="show = true; flag = false"><i class="fas fa-heart fa-fw me-1"></i><span
-              class="text-white-50">{{post.upVotes}}</span></a>
-    <a v-if="!show" role="button" class="ms-2 no-decoration text-white-50"
-            :class="{'text-primary': flag > 0}"
-              @click="show = true; flag = true"><i class="fa-solid fa-flag me-1"></i><span
-              class="text-white-50">{{post.downVotes ? post.downVotes : ''}}</span></a>
-  
-              <!-- vote collapse -->
-              <div class="collapse border-top" :id="'vote-' + post.author + '-' + post.permlink">
+  <!-- vote collapse -->
+              <div class="collapse" :id="'vote-' + post.author + '-' + post.permlink">
                   <form id="voteForm">
                       <div class="p-2 d-flex align-items-center text-white-50">
 
@@ -42,7 +23,7 @@ export default {
 
                           <button type="button" class="btn btn-sm btn-secondary px-1 me-1"
                               :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
-                              data-bs-toggle="collapse"><span><i class="fa-solid fa-xmark fa-fw"></i></span></button>
+                              data-bs-toggle="collapse"><i class="fa-solid fa-xmark fa-fw"></i></button>
 
                               <input type="range" class="form-range mx-2" step="1"
                                   max="10000" v-model="slider">
@@ -56,8 +37,35 @@ export default {
                       </div>
                   </form>
               </div>
-</div>
-            <pop-vue class="ms-auto" :id="'pop-' + post.author + '-' + post.permlink"
+  <!-- reply collapse -->
+  <div v-show="makeReply" class="mx-2">
+            <mde @data="mde = $event" />
+            <div class="d-flex">
+              <button class="btn btn-sm btn-secondary ms-auto" @click="makeReply = !makeReply"><i class="fa-solid fa-xmark fa-fw me-1"></i>Cancel</button>
+              <button class="btn btn-sm btn-primary ms-1" @click="reply()"><i class="fa-solid fa-comment fa-fw me-1"></i>Reply</button>
+            </div>
+          </div>
+<!-- footer buttons -->
+    <div v-show="!makeReply" class="d-flex">
+            
+            <div class="d-flex align-items-center">
+            <a role="button" class="no-decoration" @click="flag = false"
+            data-bs-toggle="collapse"
+            :class="{'text-primary': post.hasVoted, 'text-white-50': !post.hasVoted, 'text-danger': slider < 0 }"
+            :data-bs-target="'#vote-' + post.author + '-' + post.permlink">
+            <i class="fas fa-heart fa-fw me-1"></i><span
+            class="text-white-50">{{post.upVotes}}</span>
+            </a>
+            <a role="button" class="ms-2 no-decoration text-white-50" data-bs-toggle="collapse"
+         :class="{'text-primary': flag > 0}"
+         :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
+         @click="flag = true" >
+          <i class="fa-solid fa-flag me-1"></i><span
+         class="text-white-50">{{post.downVotes ? post.downVotes : ''}}</span>
+          </a>
+      <button class="btn btn-sm btn-primary ms-2" @click="makeReply = !makeReply">{{makeReply ? 'Cancel' : 'Reply'}}</button>
+  
+            <pop-vue class="ms-1" :id="'pop-' + post.author + '-' + post.permlink"
                         title="Post Earnings"
                         :content="(gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') + ' HBD' : post.pending_payout_value ? post.pending_payout_value : '')"
                         trigger="hover">
@@ -69,6 +77,7 @@ export default {
               </button>
               </pop-vue>
           </div>
+        </div>
         `,
     props: {
         post: {
