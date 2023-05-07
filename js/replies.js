@@ -47,7 +47,6 @@ export default {
               </div>
            </div>                 
         </div>
-        </div>
         `,
     props: {
         post: {

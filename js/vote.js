@@ -53,9 +53,8 @@ export default {
             <i class="fas fa-heart fa-fw me-1"></i><span
             class="text-white-50">{{post.upVotes}}</span>
             </a>
-            <a @click="makeVote = !makeVote" role="button" class="ms-2 no-decoration text-white-50"
-         :class="{'text-primary': flag > 0}"
-         @click="flag = true" >
+            <a @click="makeVote = !makeVote; flag = true" role="button" class="ms-2 no-decoration text-white-50"
+         :class="{'text-primary': flag > 0}" >
           <i class="fa-solid fa-flag me-1"></i><span
          class="text-white-50">{{post.downVotes ? post.downVotes : ''}}</span>
           </a>
