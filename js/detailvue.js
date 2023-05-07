@@ -271,6 +271,9 @@ methods: {
     modalSelect(url) {
         this.$emit('modalselect', url);
     },
+    goBack(){
+        window.history.back();
+    },
     extend(contract, amount, up = false){
         if(amount > this.broca_calc(this.broca))return
         const toSign = {

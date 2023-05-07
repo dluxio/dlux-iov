@@ -125,7 +125,8 @@
                     <div class="col-sm-6 col-lg-4 mb-4" v-for="post in displayPosts" :key="post.url">
                         <card-vue 
                             :post="post" 
-                            :account="account" 
+                            :account="account"
+                            :has_ipfs="spkapi.storage.length ? true : false" 
                             :post_select="postSelect" 
                             :voteval="voteVal" 
                             :head_block="spkapi.head_block"
