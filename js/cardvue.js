@@ -258,7 +258,7 @@ export default {
         },
         isStored(contract){
             var found = false
-            for (var i = 0; i < this.contracts[contract].n.length; i++) {
+            for (var i in this.contracts[contract].n) {
                 if (this.contracts[contract].n[i] == this.account) {
                     found = true
                     break
