@@ -257,7 +257,14 @@ export default {
             this.$emit('modalselect', url);
         },
         isStored(contract){
-            return this.contracts[contract].n.indexOf(this.account) >= 0 ? true : false
+            var found = false
+            for (var i = 0; i < this.contracts[contract].n.length; i++) {
+                if (this.contracts[contract].n[i] == this.account) {
+                    found = true
+                    break
+                }
+            }
+            return found
         },
         extend(contract, amount){
             if(amount > this.broca_calc(this.broca))return
