@@ -74,21 +74,25 @@ export default {
                                           <div class="text-center w-100 mb-1 py-1 bg-dark">
                                       <span class="text-break">{{fancyBytes(contracts[name].u)}} |
                                       {{expIn(contracts[name])}}</span></div>
-
+                                        <a role="button" @click="showNodes = !showNodes"><h6>Storage Detail ({{contract.nt}}/{{contract.p}})</h6></a>
+                                      <div v-if="showNodes" v-for="acc in contract.n">
+                                        <p>@{{acc}}</p>
+                                        </div>
+                                        <a v-if="has_ipfs" role="button" @click="store(contract.i, isStored(contract.i))"><h6>{{isStored(contract.i) ? 'Remove from Storage' : 'Place in Storage'}}</h6></a>
                                       <div class="d-flex flex-wrap mx-1">
                                       <div class="btn-group m-1">
-                                          <input name="time" @change="updateCost(name);customTime = false" title="1 Day" class="btn-check" id="option1" type="radio"
+                                          <input name="time" @change="updateCost(name);customTime = false" title="1 Day" class="btn-check" :id="'option1-' + name" type="radio"
                                               value="1" v-model="contracts[name].extend" checked>
-                                          <label class="btn btn-sm btn-outline-info" for="option1">1D</label>
-                                          <input name="time" @change="updateCost(name);customTime = false" title="1 Week" class="btn-check" id="option2"
+                                          <label class="btn btn-sm btn-outline-info" :for="'option1-' + name">1D</label>
+                                          <input name="time" @change="updateCost(name);customTime = false" title="1 Week" class="btn-check" :id="'option2-' + name"
                                               type="radio" value="7" v-model="contracts[name].extend">
-                                          <label class="btn btn-sm btn-outline-info" for="option2">1W</label>
-                                          <input name="time" @change="updateCost(name);customTime = false" title="1 Month" class="btn-check" id="option3"
+                                          <label class="btn btn-sm btn-outline-info" :for="'option2-' + name">1W</label>
+                                          <input name="time" @change="updateCost(name);customTime = false" title="1 Month" class="btn-check" :id="'option3-' + name"
                                               type="radio" value="30" v-model="contracts[name].extend">
-                                          <label class="btn btn-sm btn-outline-info" for="option3">1M</label>
-                                          <input name="time" @change="updateCost(name);customTime = false" title="1 Year" class="btn-check" id="option4"
+                                          <label class="btn btn-sm btn-outline-info" :for="'option3-' + name">1M</label>
+                                          <input name="time" @change="updateCost(name);customTime = false" title="1 Year" class="btn-check" :id="'option4-' + name"
                                               type="radio" value="365" v-model="contracts[name].extend">
-                                          <label class="btn btn-sm btn-outline-info" for="option4">1Y</label>
+                                          <label class="btn btn-sm btn-outline-info" :for="'option4-' + name">1Y</label>
                                         </div>
 
                                         <div class="input-group flex-nowrap col m-1">
@@ -101,6 +105,8 @@ export default {
                                     
                                     <div class="p-2 d-flex align-items-center text-white-50">
                                     <button type="button" class="btn btn-sm btn-primary me-1" :disabled="extendcost[name] > broca_calc(broca)" @click="extend(contracts[name], extendcost[name])"><i class="fa-solid fa-clock-rotate-left fa-fw me-1"></i>Extend</button>
+                                    <input :id="'spread-' + name" type="checkbox" v-model="spread">
+                                          <label :for="'spread-' + name"><i class="fa-solid fa-tower-broadcast"></i></label>
                                     <button type="button" class="btn btn-sm btn-secondary me-1" data-bs-toggle="collapse"
                                         :data-bs-target="'#contract-' + post.author + '-' + post.permlink"><span><i class="fa-solid fa-xmark fa-fw"></i></span></button>
                                     <div class="ms-auto text-primary">{{formatNumber(extendcost[name], 0, '.',',')}}
@@ -203,6 +209,9 @@ export default {
         account: {
             default: ''
         },
+        has_ipfs: {
+            default: false
+        },
         voteval: 0,
         post_select: {
             default: function () {
@@ -239,6 +248,7 @@ export default {
             warn: false,
             flag: false,
             slider: 10000,
+            spread: false
         };
     },
     emits: ['vote', 'reply', 'modalselect', 'tosign'],
@@ -246,7 +256,10 @@ export default {
         modalSelect(url) {
             this.$emit('modalselect', url);
         },
-        extend(contract, amount, up = false){
+        isStored(contract){
+            return this.contracts[contract].n[this.account] ? true : false
+        },
+        extend(contract, amount){
             if(amount > this.broca_calc(this.broca))return
             const toSign = {
                 type: "cja",
@@ -254,13 +267,28 @@ export default {
                   broca: amount,
                   id: contract.i,
                   file_owner: contract.t,
-                  power: up ? 1 : 0,
+                  power: this.spread ? 1 : 0,
                 },
                 id: `spkcc_extend`,
                 msg: `Extending ${contract}...`,
                 ops: ["getTokenUser"],
                 api: "https://spktest.dlux.io",
                 txid: "extend",
+              }
+              this.$emit('tosign', toSign)
+        },
+        store(contract, remove = false){
+            // have a storage node?
+            const toSign = {
+                type: "cja",
+                cj: {
+                  items: [contract]
+                },
+                id: `spkcc_${!remove ? 'store' : 'remove'}`,
+                msg: `Storing ${contract}...`,
+                ops: ["getTokenUser"],
+                api: "https://spktest.dlux.io",
+                txid: `${contract}_${!remove ? 'store' : 'remove'}`,
               }
               this.$emit('tosign', toSign)
         },
