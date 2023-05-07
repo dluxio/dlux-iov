@@ -15,7 +15,7 @@ export default {
         "replies": Replies,
     },
     template: `
-<div :class="{'fade': modal, 'modal': modal}" id="detailModal" tabindex="-1" role="dialog" aria-hidden="true">
+<div :class="{'fade': modal, 'modal': modal}" id="detailModal" tabindex="-1" role="dialog" aria-hidden="true" @focus="orderBy('Reward')">
     <div class="modal-dialog modal-full modal-xl modal-dialog-centered" style="max-width: 1000px;"
         role="document">
         <div class="modal-content rounded bg-img-none text-white">
@@ -293,7 +293,7 @@ emits: ['vote', 'reply', 'modalselect', 'tosign'],
 methods: {
     orderBy(type){
         this.orderby = type;
-        switch(type){
+        if(this.post?.replies?.length)switch(type){
             case 'Reward':
                 this.post.replies.sort((a, b) => {
                     if(parseFloat(b.total_payout_value) || parseFloat(a.total_payout_value))return parseFloat(b.total_payout_value) - parseFloat(a.total_payout_value)
