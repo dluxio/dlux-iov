@@ -74,7 +74,7 @@ export default {
                                           <div class="text-center w-100 mb-1 py-1 bg-dark">
                                       <span class="text-break">{{fancyBytes(contracts[name].u)}} |
                                       {{expIn(contracts[name])}}</span></div>
-                                        <a role="button" @click="showNodes = !showNodes"><h6>Storage Detail ({{contracts[name].nt}}/{{contracts[name].p}})</h6></a> | <a v-if="has_ipfs" role="button" @click="store(contracts[name].i, isStored(contracts[name].i))"><h6>{{isStored(contracts[name].i) ? 'Remove from Storage' : 'Place in Storage'}}</h6></a>
+                                        <a role="button" @click="showNodes = !showNodes"><span>Storage Detail ({{contracts[name].nt}}/{{contracts[name].p}})</span></a> | <a v-if="has_ipfs" role="button" @click="store(contracts[name].i, isStored(contracts[name].i))"><span>{{isStored(contracts[name].i) ? 'Remove from Storage' : 'Place in Storage'}}</span></a>
                                       
                                       <div v-if="showNodes" v-for="acc in contract.n">
                                         <p>@{{acc}}</p>
@@ -248,7 +248,8 @@ export default {
             warn: false,
             flag: false,
             slider: 10000,
-            spread: false
+            spread: false,
+            showNodes: false,
         };
     },
     emits: ['vote', 'reply', 'modalselect', 'tosign'],
