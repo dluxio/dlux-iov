@@ -51,7 +51,7 @@ export default {
             <a @click="makeVote = !makeVote; flag = false" role="button" class="no-decoration"
             :class="{'text-primary': post.hasVoted, 'text-white-50': !post.hasVoted, 'text-danger': slider < 0 }">
             <i class="fas fa-heart fa-fw me-1"></i><span
-            class="text-white-50">{{post.upVotes}}</span>
+            class="text-white-50">{{post.active_votes.length}}</span>
             </a>
             <a @click="makeVote = !makeVote; flag = true" role="button" class="ms-2 no-decoration text-white-50"
          :class="{'text-primary': flag > 0}" >
