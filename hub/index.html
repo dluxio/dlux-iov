@@ -126,7 +126,7 @@
                         <card-vue 
                             :post="post" 
                             :account="account"
-                            :has_ipfs="spkapi.storage" 
+                            :has_ipfs="spkapi.storage.length ? true : false"" 
                             :post_select="postSelect" 
                             :voteval="voteVal" 
                             :head_block="spkapi.head_block"
