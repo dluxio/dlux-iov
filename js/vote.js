@@ -14,7 +14,7 @@ export default {
   <!-- vote  -->
               <div v-show="makeVote">
                   <form id="voteForm">
-                      <div class="p-2 d-flex align-items-center text-white-50">
+                      <div class="d-flex mt-1 align-items-center text-white-50">
 
                           <button type="button" class="btn btn-sm me-1"
                               :class="{'btn-success': !flag, ' btn-danger': flag}"
@@ -31,22 +31,22 @@ export default {
                                   :class="{'text-success': !flag, 'text-danger': flag}">
                                   {{toFixed(voteval *
                                   slider/10000,3)}}
-                                  <i class="me-1 fab fa-fw fa-hive"></i>
+                                  <i class="fab fa-fw fa-hive"></i>
                               </span>
                       </div>
                   </form>
               </div>
+              <div class="mb-3">
   <!-- reply  -->
-  <div v-show="makeReply" class="mx-2">
+  <div v-show="makeReply">
             <mde @data="mde = $event" />
             <div class="d-flex">
-              <button class="btn btn-sm btn-secondary ms-auto" @click="makeReply = !makeReply"><i class="fa-solid fa-xmark fa-fw me-1"></i>Cancel</button>
-              <button class="btn btn-sm btn-primary ms-1" @click="reply()"><i class="fa-solid fa-comment fa-fw me-1"></i>Reply</button>
+              <button class="btn btn-sm px-2 btn-secondary ms-auto" @click="makeReply = !makeReply"><i class="fa-solid fa-xmark fa-fw me-1"></i>Cancel</button>
+              <button class="btn btn-sm px-2 btn-primary ms-1" @click="reply()"><i class="fa-solid fa-comment fa-fw me-1"></i>Reply</button>
             </div>
           </div>
 <!-- footer buttons -->
-    <div v-if="!makeReply && !makeVote" class="d-flex">
-            
+    <div v-if="!makeReply && !makeVote" class="d-flex mt-1">
             <div class="d-flex align-items-center">
             <a @click="makeVote = !makeVote" role="button" class="no-decoration" @click="flag = false"
             :class="{'text-primary': post.hasVoted, 'text-white-50': !post.hasVoted, 'text-danger': slider < 0 }">
@@ -59,13 +59,13 @@ export default {
           <i class="fa-solid fa-flag me-1"></i><span
          class="text-white-50">{{post.downVotes ? post.downVotes : ''}}</span>
           </a>
-      <button class="btn btn-sm btn-primary ms-2" @click="makeReply = !makeReply">Reply</button>
+      <button class="btn px-2 btn-sm btn-light ms-2" @click="makeReply = !makeReply">Reply</button>
   
             <pop-vue class="ms-1" :id="'pop-' + post.author + '-' + post.permlink"
                         title="Post Earnings"
                         :content="(gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') + ' HBD' : post.pending_payout_value ? post.pending_payout_value : '')"
                         trigger="hover">
-              <button class="btn btn-sm btn-secondary">
+              <button class="btn px-2 btn-sm btn-secondary">
                   {{gt(post.total_payout_value, post.pending_payout_value) ?
                   formatNumber(post.total_payout_value + ' ' +
                   post.curator_payout_value, 3, '.',',') :
@@ -73,6 +73,7 @@ export default {
               </button>
               </pop-vue>
           </div>
+        </div>
         </div>
         `,
     props: {

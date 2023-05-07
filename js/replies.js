@@ -16,40 +16,37 @@ export default {
   template: `
 <div>
   <a role="button" v-if="warn" @click="warn = false">Hidden due to low reputation.</a>
-  <div class="card bg-img-none text-white m-2">
-    <div class="card-header">
-      <div class="d-flex align-items-center">
-        <a :href="'/@' + post.author" class="no-decoration">
-          <div class="d-flex align-items-center">
-            <img :src="'https://images.hive.blog/u/' + post.author + '/avatar'"
-                    class="rounded-circle bg-light img-fluid me-1 cover author-img" style="width: 50px;">
-              <div>
+  <div>
+        <div class="d-flex align-items-start">
+              <a :href="'/@' + post.author" class="no-decoration">
+              <img :src="'https://images.hive.blog/u/' + post.author + '/avatar'"
+                    class="rounded-circle border-2 border-light bg-light img-fluid me-2 cover author-img" :class="{'w-32p': post.depth > 1, 'w-40p': post.depth = 1}"></a>
+              <div class="d-flex flex-column w-100">
                 <div class="d-flex align-items-center">
+                  <a :href="'/@' + post.author" class="no-decoration">
+                  <span class="d-flex align-items-center">
                   <h5 class="m-0 text-white-50">{{ post.author }}</h5>
-                  <span class="ms-1 badge small text-bg-light">{{ post.rep }}</span>
+                  <span class="ms-1 badge small text-bg-dark border border-2 border-dark text-white-50">{{ post.rep }}</span></span></a>
+                  <span class="ms-1 text-muted">•</span>
+                  <span class="ms-1 small text-muted" style="font-weight: 400">{{ timeSince(post.created) }}</span>
+                  <a role="button" class="ms-auto no-decoration text-white" @click="view = !view"><i v-show="view" class="fa-solid fa-circle-minus fa-fw"></i><i v-show="!view" class="fa-solid fa-circle-plus fa-fw"></i></a>
                 </div>
-                <span class="small text-muted" style="font-weight: 400">{{ timeSince(post.created) }}</span>
+                <div class="my-1" v-if="view" v-show="!edit">
+                  <vue-markdown :md="post.body"/>
+                </div>
+                <div v-show="edit">
+                  <vue-markdown :toedit="post.body" @settext="pending($event)"/>
+                </div>
+              <div class="card-footer p-0" v-if="view">
+                <vote :post="post" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)"></vote>
               </div>
-          </div>
-        </a>
-        <a role="button" class="ms-auto no-decoration text-white" @click="view = !view"><i v-show="view" class="fa-solid fa-circle-minus fa-fw"></i><i v-show="!view" class="fa-solid fa-circle-plus fa-fw">({{post.children + 1}})</i></a>                    
-      </div> 
-      </div>
-      <div class="card-body" v-if="view" v-show="!edit">
-           <vue-markdown :md="post.body"/>
-        </div>
-        <div v-show="edit">
-           <vue-markdown :toedit="post.body" @settext="pending($event)"/>
-        </div>
-        
-        <div class="card-footer">
-          <vote :post="post" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)"></vote>
-        </div>
-        <div v-for="reps in post.replies">
-            <replies v-if="view" :post="reps" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)"/>
-        </div>
-     </div>
-  </div>
+              <div v-if="!view" class="text-center p-2">{{post.children + 1}} comment<span v-if="post.children > 0">s</span> collapsed. <a role="button" class="text-info no-decoration" @click="view = !view">Click to expand</a>
+              </div>
+              <div v-for="reps in post.replies">
+                <replies v-if="view" :post="reps" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)"/>
+              </div>
+           </div>                 
+        </div> 
         `,
     props: {
         post: {

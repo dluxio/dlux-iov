@@ -12680,6 +12680,14 @@ td {
   text-align: center;
 }
 
+.w-40p {
+  width: 40px;
+}
+
+.w-32p {
+  width: 32px;
+}
+
 .caption {
   top: 50%;
   left: 50%;

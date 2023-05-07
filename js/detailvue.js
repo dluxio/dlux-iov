@@ -97,18 +97,10 @@ export default {
                                     class="ms-2 fas fa-external-link-alt"></i></button></a>
                     </div>
                     <div class="">
-                        <!--leave comment-->
-                        <div
-                            :data-bs-target="'#comment-modal-' + post.author + '-' + post.permlink">
-                            <form id="commentForm">
-                                <!--input with buttons and preview-->
-                                <mde id="body" @settext="pending(post.url, $event)" />
-                            </form>
-                        </div>
+
                         <div class="d-flex align-items-center">
-                            <vue-ratings vote="true" @rating="setRating(post.url, $event)">
-                            </vue-ratings>
-                            <button class="ms-auto btn btn-outline-primary" @click="comment(post.url)">Post Comment</button>
+                            
+                            
                         </div>
                         <!--modal vote collapse-->
                         <div class="collapse"
@@ -163,9 +155,13 @@ export default {
                                 </div>
                             </form>
                         </div>
+                        </div>
+                        </div>
                         <!--footer buttons-->
-                        <div class="d-flex align-items-center my-2">
-                            <div><a role="button" class="no-decoration" data-bs-toggle="collapse"
+                        <div class="my-2 py-2" style="border-top: solid 1px rgba(0,0,0,1); border-bottom: solid 1px rgba(255,255,255,0.4);">
+                            <div class="ms-auto me-auto" style="max-width: 750px">
+                            <div class="d-flex align-items-center">
+                            <a role="button" class="no-decoration" data-bs-toggle="collapse"
                                     :data-bs-target="'#vote-modal-' + post.author + '-' + post.permlink"><i
                                         class="fas fa-heart me-1"></i><span
                                         class="text-white-50">{{post.upVotes}}</span></a>
@@ -188,13 +184,46 @@ export default {
                                     :data-bs-target="'#contract-modal-' + 'contract.i' ">
                                     <i class="fa-solid fa-file-contract ms-2 me-1"></i>
                                 </a>
-                            </div>
+
+                            <vue-ratings class="ms-2" vote="true" @rating="setRating(post.url, $event)">
+                            </vue-ratings>
                             <div class="ms-auto" id="modal_total_payout"><i
                                     class="ms-1 fab fa-fw fa-hive text-white-50"></i>
                             </div>
                         </div>
+                   </div>
+                   </div>
+                    <!--new comment-->
+                    <div>
+                    <div class="mb-3 ms-auto me-auto" style="max-width: 750px">
+                        <form id="commentForm">
+                            <!--input with buttons and preview-->
+                            <mde id="body" @settext="pending(post.url, $event)" />
+                        </form>
+                        <div class="d-flex">
+                        <button class="btn btn-sm px-2 btn-secondary"><i class="fa-solid fa-user-plus fa-fw"></i></button>
+                        <button class="ms-auto btn btn-sm px-2 btn-primary" @click="comment(post.url)">Reply</button>
+                        </div>
                     </div>
-                    <div class="replies">
+                    </div>
+                    <div class="bg-darkest border-1 border-start border-end p-1"></div>
+                    <!-- comments -->
+                    <div class="replies ms-auto me-auto" style="max-width: 750px">
+                    <div class="d-flex text-nobreak align-items-center my-2">
+                        <h5 class="m-0">{{post.children}} Comment<span v-if="post.children > 1">s</span></h5>
+                        <div class="dropdown ms-auto">
+                            <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                REWARD<i class="fa-solid fa-arrow-down-wide-short fa-fw ms-1"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                 <li><a class="dropdown-item" role="button">Reward</a></li>
+                                 <li><a class="dropdown-item" role="button">Author Vote</a></li>
+                                 <li><a class="dropdown-item" role="button">Newest</a></li>
+                                 <li><a class="dropdown-item" role="button">Oldest</a></li>
+                                 <li><a class="dropdown-item" role="button">Reputation</a></li>
+                            </ul>
+                        </div>
+                        </div>
                         <div v-for="post in post.replies" :key="post.url">
                             <replies :post="post" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)"/>
                         </div>
