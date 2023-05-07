@@ -43,28 +43,7 @@ export default {
         </div>
         
         <div class="card-footer">
-          <div v-show="makeReply" class="mx-2">
-            <mde @data="mde = $event" />
-            <div class="d-flex">
-              <button class="btn btn-sm btn-secondary ms-auto" @click="makeReply = !makeReply"><i class="fa-solid fa-xmark fa-fw me-1"></i>Cancel</button>
-              <button class="btn btn-sm btn-primary ms-1" @click="reply()"><i class="fa-solid fa-comment fa-fw me-1"></i>Reply</button>
-            </div>
-          </div>
-          <div v-show="!makeReply" class="d-flex">
-            <vote :post="post" :account="account" :voteval="voteval" @vote="vote($event)"></vote>
-            <button class="btn btn-sm btn-primary me-1" @click="makeReply = !makeReply">{{makeReply ? 'Cancel' : 'Reply'}}</button>
-            <pop-vue class="ms-auto" :id="'pop-' + post.author + '-' + post.permlink"
-                        title="Post Earnings"
-                        :content="(gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') + ' HBD' : post.pending_payout_value ? post.pending_payout_value : '')"
-                        trigger="hover">
-              <button class="btn btn-sm btn-secondary">
-                  {{gt(post.total_payout_value, post.pending_payout_value) ?
-                  formatNumber(post.total_payout_value + ' ' +
-                  post.curator_payout_value, 3, '.',',') :
-                  formatNumber(post.pending_payout_value, 3, '.',',')}} HBD
-              </button>
-              </pop-vue>
-          </div>
+          <vote :post="post" :account="account" :voteval="voteval" @vote="vote($event)"></vote>
         </div>
         <div v-for="reps in post.replies">
             <replies :post="reps" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)"/>
