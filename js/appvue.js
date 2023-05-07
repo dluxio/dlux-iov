@@ -1021,6 +1021,7 @@ createApp({
                 console.log(key, "no JSON?");
               }
               var contracts = false
+              var type = "Blog";
               if(this.posturls[key].json_metadata.assets){
                 for(var i = 0; i < this.posturls[key].json_metadata.assets.length; i++){
                   if(this.posturls[key].json_metadata.assets[i].contract){
@@ -1046,6 +1047,7 @@ createApp({
                 this.posturls[key].created
               );
               this.selectPosts();
+              if(modal)this.modalSelect(key)
             }
           });
       } else {
