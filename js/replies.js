@@ -16,7 +16,7 @@ export default {
   template: `
 <div>
   <a role="button" v-if="warn" @click="warn = false">Hidden due to low reputation.</a>
-  </div>
+  <div>
         <div class="d-flex align-items-start">
               <a :href="'/@' + post.author" class="no-decoration">
               <img :src="'https://images.hive.blog/u/' + post.author + '/avatar'"
@@ -46,7 +46,8 @@ export default {
                 <replies v-if="view" :post="reps" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)"/>
               </div>
            </div>                 
-        </div> 
+        </div>
+        </div>
         `,
     props: {
         post: {
