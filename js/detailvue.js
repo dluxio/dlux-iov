@@ -51,17 +51,13 @@ export default {
                                 <div class="d-flex align-items-center">
                                     <img v-if="post.author" :src="'https://images.hive.blog/u/' + post.author + '/avatar'"
                                         alt=""
-                                        class="rounded-circle bg-light img-fluid me-3 cover author-img"
+                                        class="rounded-circle bg-light img-fluid me-1 cover author-img"
                                         style="width: 50px;">
                                     <div>
                                         <div class="d-flex align-items-center">
                                             <h3 class="m-0 text-white-50">{{post.author}}</h3>
                                             <div>
-                                                <span style="font-size: .5em;"
-                                                    class="ms-2 badge small rounded-pill text-white"
-                                                    :class="{'bg-danger': post.rep < 25, 'bg-warning': post.rep >= 25 && post.rep < 50, 'bg-success': post.rep >= 50}">
-                                                    {{post.rep}}
-                                                </span>
+                                            <span class="badge small text-bg-dark border border-2 border-dark text-white-50">{{post.rep}}</span>
                                             </div>
                                         </div>
                                         <span class="small text-muted">{{post.ago}}</span>
@@ -106,36 +102,28 @@ export default {
                         <div class="collapse"
                             :id="'vote-modal-' + post.author + '-' + post.permlink">
                             <form id="voteForm">
-                                <div class="p-2 d-flex align-items-center text-white-50">
+                      <div class="d-flex mt-1 align-items-center text-white-50">
 
-                                    <button type="button" class="btn me-2"
-                                        :class="{'btn-success': !flag, ' btn-danger': flag}"
-                                        @click="vote(post.url)"
-                                        style="width: 100px;">{{flag ? '-' :
-                                        ''}}{{slider / 100}}%</button>
+                          <button type="button" class="btn btn-sm me-1"
+                              :class="{'btn-success': !flag, ' btn-danger': flag}"
+                              @click="vote(post.url)" style="min-width: 85px;"><span v-if="!flag"><i class="fas fa-heart fa-fw me-1"></i></span><span v-if="flag"><i class="fa-solid fa-flag me-1"></i></span>{{flag ? '-' :
+                              ''}}{{formatNumber(slider / 100, 0,'.',',')}}%</button>
 
-                                    <button type="button" class="btn btn-secondary me-2"
-                                        :data-bs-target="'#vote-modal-' + post.author + '-' + post.permlink"
-                                        data-bs-toggle="collapse"><span
-                                            class="close text-white">×</span></button>
+                          <button type="button" class="btn btn-sm btn-secondary px-1 me-1" 
+                          data-bs-toggle="collapse" :data-bs-target="'#vote-modal-' + post.author + '-' + post.permlink">
+                            <i class="fa-solid fa-xmark fa-fw"></i></button>
 
-                                    <div class="d-flex align-items-center px-3 border rounded"
-                                        style="height: 38px;"
-                                        :class="{'border-success': !flag, 'border-danger': flag}">
-                                        <input type="range" class="form-range mx-auto p-0" step="1"
-                                         max="10000" v-model="slider">
-                                    </div>
+                              <input type="range" class="form-range mx-2" step="1"
+                                  max="10000" v-model="slider">
 
-                                    <div class="ms-auto">
-                                        <p class="me-1 my-0" id="commentVal"
-                                            :class="{'text-success': !flag, 'text-danger': flag}">
-                                            {{toFixed(voteval *
-                                            slider/10000,3)}}
-                                            <i class="me-1 fab fa-fw fa-hive"></i>
-                                        </p>
-                                    </div>
-                                </div>
-                            </form>
+                              <span style="min-width: 100px" class="text-end text-nowrap" id="commentVal"
+                                  :class="{'text-success': !flag, 'text-danger': flag}">
+                                  {{toFixed(voteval *
+                                  slider/10000,3)}}
+                                  <i class="fab fa-fw fa-hive"></i>
+                              </span>
+                      </div>
+                  </form>
                         </div>
                         <!--modal contract collapse-->
                         <div class="collapse"
@@ -161,13 +149,12 @@ export default {
                 <div class="my-2 py-2" style="border-top: solid 1px rgba(0,0,0,1); border-bottom: solid 1px rgba(255,255,255,0.4);">
                     <div class="ms-auto me-auto" style="max-width: 750px">
                         <div class="d-flex align-items-center">
-                            <a role="button" class="no-decoration" data-bs-toggle="collapse"
+                            <a role="button" @click="flag = false" class="no-decoration" data-bs-toggle="collapse"
                                 :data-bs-target="'#vote-modal-' + post.author + '-' + post.permlink"><i
                                     class="fas fa-heart me-1"></i><span
                                     class="text-white-50">{{post.upVotes}}</span>
                             </a>
-                            <a role="button" class="no-decoration" data-bs-toggle="collapse"
-                                :data-bs-target="'#comment-modal-' + post.author + '-' + post.permlink">
+                            <a href="#comment-section" class="no-decoration">
 
                                 <i class="fas fa-comment ms-2 me-1"></i><span
                                     class="text-white-50">{{post.children}}</span>
@@ -182,13 +169,20 @@ export default {
                             </a>
                             <a role="button" v-for="contract in post.contract"
                                 class="no-decoration text-white-50" data-bs-toggle="collapse"
-                                :data-bs-target="'#contract-modal-' + 'contract.i' ">
+                                :data-bs-target="'#contract-modal-' + post.author + '-' + post.permlink">
                                 <i class="fa-solid fa-file-contract ms-2 me-1"></i>
                             </a>
 
-                        <vue-ratings class="ms-2" vote="true" @rating="setRating(post.url, $event)"></vue-ratings>
-                        <div class="ms-auto" id="modal_total_payout"><i
-                                class="ms-1 fab fa-fw fa-hive text-white-50"></i>
+                        <vue-ratings role="button" class="ms-2" vote="true" @rating="setRating(post.url, $event)"></vue-ratings>
+                        <div class="ms-auto" id="modal_total_payout"><pop-vue v-if="post.total_payout_value || post.pending_payout_value" title="Post Earnings"
+                        :id="'popper-' + post.author + '-' + post.permlink" :content="(gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') + ' HBD' : post.pending_payout_value ? post.pending_payout_value : '') + '<br>' + (post.paid ? precision(post.payout, 3) : 0) + ' ' + TOKEN"
+                        trigger="hover">
+                        <button class="btn btn-sm btn-outline-light">
+                        {{ gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') :
+                        formatNumber(post.pending_payout_value, 3, '.',',')}}<i
+                        class="ms-1 fab fa-fw fa-hive"></i>
+                        </button>
+                     </pop-vue>
                         </div>
                     </div>
                 </div>
@@ -208,14 +202,14 @@ export default {
             </div>
             <div class="bg-darkest border-1 border-start border-end p-1"></div>
             <!-- comments -->
-                <div class="replies ms-auto me-auto" style="max-width: 750px">
+                <div id="comment-section" class="replies w-100 ms-auto me-auto mb-3" style="max-width: 750px">
                     <div class="d-flex text-nobreak align-items-center my-2">
                         <h5 class="m-0">{{post.children}} Comment<span v-if="post.children > 1">s</span></h5>
                         <div class="dropdown ms-auto">
-                            <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                REWARD<i class="fa-solid fa-arrow-down-wide-short fa-fw ms-1"></i>
+                            <button class="btn btn-sm btn-dark dropdown-toggle text-uppercase" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{orderBy}}<i class="fa-solid fa-arrow-down-wide-short fa-fw ms-1"></i>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-dark">
+                            <ul class="dropdown-menu dropdown-menu-dark bg-dark">
                                  <li><a class="dropdown-item" role="button" @click="orderBy('Reward')">Reward</a></li>
                                  <li><a class="dropdown-item" role="button" @click="orderBy('Newest')">Newest</a></li>
                                  <li><a class="dropdown-item" role="button" @click="orderBy('AuthorVote')">Author Vote</a></li>

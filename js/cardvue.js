@@ -184,7 +184,8 @@ export default {
                trigger="hover">
                <button class="btn btn-sm btn-secondary">
                {{ gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') :
-               formatNumber(post.pending_payout_value, 3, '.',',')}} HBD
+               formatNumber(post.pending_payout_value, 3, '.',',')}}<i
+               class="ms-1 fab fa-fw fa-hive"></i>
                </button>
             </pop-vue>
          </div>
