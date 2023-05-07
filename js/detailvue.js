@@ -207,7 +207,7 @@ export default {
                         <h5 class="m-0">{{post.children}} Comment<span v-if="post.children > 1">s</span></h5>
                         <div class="dropdown ms-auto">
                             <button class="btn btn-sm btn-dark dropdown-toggle text-uppercase" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                {{orderBy}}<i class="fa-solid fa-arrow-down-wide-short fa-fw ms-1"></i>
+                                {{orderby}}<i class="fa-solid fa-arrow-down-wide-short fa-fw ms-1"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark bg-dark">
                                  <li><a class="dropdown-item" role="button" @click="orderBy('Reward')">Reward</a></li>
@@ -286,11 +286,13 @@ data() {
         warn: false,
         flag: false,
         slider: 10000,
+        orderby: 'Reward',
     };
 },
 emits: ['vote', 'reply', 'modalselect', 'tosign'],
 methods: {
     orderBy(type){
+        this.orderby = type;
         switch(type){
             case 'Reward':
                 this.post.replies.sort((a, b) => {
