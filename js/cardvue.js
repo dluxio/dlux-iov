@@ -301,7 +301,7 @@ export default {
               this.$emit('tosign', toSign)
         },
         updateCost(id) {
-            this.extendcost[id] = parseInt(this.contracts[id].extend * (this.contracts[id].p + (spread ? 1 : 0)) / (30 * 3) * this.contracts[id].r)
+            this.extendcost[id] = parseInt(this.contracts[id].extend * (this.contracts[id].p + (this.spread ? 1 : 0)) / (30 * 3) * this.contracts[id].r)
             this.$forceUpdate()
         },
         getContracts() {
