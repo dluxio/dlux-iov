@@ -211,6 +211,9 @@ props: {
     TOKEN: {
         default: 'DLUX'
     },
+    hide: {
+        default: true
+    },
     post: {
         required: true,
         default: function () {
