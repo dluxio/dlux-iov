@@ -88,7 +88,7 @@ export default {
                         <p><i
                                 :class="post_select.types[post.type].icon"></i>{{post_select.types[post.type].launch}}
                         </p>
-                        <a :href="post.url"><button class="btn btn-lg btn-primary px-4"
+                        <a v-if="post.type != 'Blog'" :href="'/dlux/@' + post.author + '/' + post.permlink"><button class="btn btn-lg btn-primary px-4"
                                 style="border-radius: 5rem;">Launch<i
                                     class="ms-2 fas fa-external-link-alt"></i></button></a>
                     </div>
