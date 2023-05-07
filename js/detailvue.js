@@ -17,10 +17,10 @@ export default {
     template: `<div v-if="post.author" :class="{'fade': modal, 'modal': modal}" id="detailModal" tabindex="-1" role="dialog" aria-hidden="true" @blur="goBack()">
     <div class="modal-dialog modal-full modal-xl modal-dialog-centered" style="max-width: 1000px;"
         role="document">
-        <div class="modal-content bg-img-none text-white">
+        <div class="modal-content rounded bg-img-none text-white">
             <div class="card text-white bg-img-none bg-blur-none">
-                <div class="ms-auto" v-if="modal">
-                    <button type="button" class="btn-close mt-3 me-3"
+                <div class="ms-auto">
+                    <button v-if="modal" type="button" class="btn-close mt-3 me-3"
                         data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="ms-auto me-auto px-2" style="max-width: 750px">
