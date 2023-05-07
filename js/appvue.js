@@ -1377,7 +1377,23 @@ createApp({
     },
   },
   mounted() {
-    window.addEventListener('scroll', this.handleScroll);
+    if (location.pathname.split("/@")[1]) {
+      this.pageAccount = location.pathname.split("/@")[1]
+      if (this.pageAccount.indexOf('/') > -1) {
+        this.pagePermlink = this.pageAccount.split('/')[1]
+        this.pageAccount = this.pageAccount.split('/')[0]
+      }
+    } else {
+      this.pageAccount = this.account;
+      this.me = true;
+    }
+    if (this.pageAccount == this.account) this.me = true;
+    if(this.pagePermlink){
+      this.getContent(this.pageAccount, this.pagePermlink, true)
+    } else {
+      this.getPosts();
+      window.addEventListener('scroll', this.handleScroll);
+    }
     this.getStats()
     this.getSPKStats()
     this.getPosts();
