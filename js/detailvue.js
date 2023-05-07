@@ -216,11 +216,11 @@ export default {
                                 REWARD<i class="fa-solid fa-arrow-down-wide-short fa-fw ms-1"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                 <li><a class="dropdown-item" role="button" @click="orderBr('Reward')">Reward</a></li>
-                                 <li><a class="dropdown-item" role="button" @click="orderBr('Newest')">Newest</a></li>
-                                 <li><a class="dropdown-item" role="button" @click="orderBr('AuthorVote')">Author Vote</a></li>
-                                 <li><a class="dropdown-item" role="button" @click="orderBr('Oldest')">Oldest</a></li>
-                                 <li><a class="dropdown-item" role="button" @click="orderBr('Rep')">Reputation</a></li>
+                                 <li><a class="dropdown-item" role="button" @click="orderBy('Reward')">Reward</a></li>
+                                 <li><a class="dropdown-item" role="button" @click="orderBy('Newest')">Newest</a></li>
+                                 <li><a class="dropdown-item" role="button" @click="orderBy('AuthorVote')">Author Vote</a></li>
+                                 <li><a class="dropdown-item" role="button" @click="orderBy('Oldest')">Oldest</a></li>
+                                 <li><a class="dropdown-item" role="button" @click="orderBy('Rep')">Reputation</a></li>
                             </ul>
                         </div>
                         </div>
