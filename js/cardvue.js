@@ -98,40 +98,42 @@ export default {
                               <div class="collapse" :id="'contract-' +  post.author + '-' + post.permlink">
                                   <form v-for="(cid, name, index) in post.contract" id="contractForm">
                                       <div v-if="contracts[name]" class="d-flex flex-column">
-                                          
-      
-                                      <div class="p-2 d-flex align-items-center text-white-50">
-                                          <button type="button" class="btn btn-sm btn-primary me-1" :disabled="extendcost[name] > broca_calc(broca)" @click="extend(contracts[name], extendcost[name])"><i class="fa-solid fa-clock-rotate-left fa-fw me-1"></i>Extend</button>
-                                          <button type="button" class="btn btn-sm btn-secondary me-1" data-bs-toggle="collapse"
-                                              :data-bs-target="'#contract-' + post.author + '-' + post.permlink"><span><i class="fa-solid fa-xmark fa-fw"></i></span></button>
-                                          
-                                         
-                                          <p class="text-center ms-auto me-auto my-1"><span
-                                              class="me-1 text-break">{{fancyBytes(contracts[name].u)}} |
-                                              {{expIn(contracts[name])}}</span></p>
-                                          <div class="ms-auto text-primary">{{extendcost[name]}}
-                                              Broca</div>
-                                      </div>
-                                      <div class="d-flex">
-                                      <div class="btn-group m-2 mb-3">
+                                          <div class="text-center w-100 mb-1 py-1 bg-dark">
+                                      <span class="text-break">{{fancyBytes(contracts[name].u)}} |
+                                      {{expIn(contracts[name])}}</span></div>
+
+                                      <div class="d-flex flex-wrap mx-1">
+                                      <div class="btn-group m-1">
                                           <input name="time" @change="updateCost(name);customTime = false" title="1 Day" class="btn-check" id="option1" type="radio"
                                               value="1" v-model="contracts[name].extend" checked>
-                                          <label class="btn btn-outline-info l-radius-hotfix" for="option1">1D</label>
+                                          <label class="btn btn-sm btn-outline-info" for="option1">1D</label>
                                           <input name="time" @change="updateCost(name);customTime = false" title="1 Week" class="btn-check" id="option2"
-                                              type="radio" value="7" v-model="contracts[name].extend"><label
-                                              class="btn btn-outline-info" for="option2">1W</label>
+                                              type="radio" value="7" v-model="contracts[name].extend">
+                                          <label class="btn btn-sm btn-outline-info" for="option2">1W</label>
                                           <input name="time" @change="updateCost(name);customTime = false" title="1 Month" class="btn-check" id="option3"
-                                              type="radio" value="30" v-model="contracts[name].extend"><label
-                                              class="btn btn-outline-info" for="option3">1M</label>
+                                              type="radio" value="30" v-model="contracts[name].extend">
+                                          <label class="btn btn-sm btn-outline-info" for="option3">1M</label>
                                           <input name="time" @change="updateCost(name);customTime = false" title="1 Year" class="btn-check" id="option4"
                                               type="radio" value="365" v-model="contracts[name].extend">
-                                          <label class="btn btn-outline-info" for="option4">1Y</label>
-                                          <input type="number" step="1" class="form-control text-center border-info text-info"
-                                              v-model="contracts[name].extend" @change="updateCost(name)">
-                                          <span
-                                              class="input-group-text">Days</span>
+                                          <label class="btn btn-sm btn-outline-info" for="option4">1Y</label>
+                                        </div>
+
+                                        <div class="input-group flex-nowrap col m-1">
+                                          <input type="number" step="1" class="form-control ps-1 pe-0 btn-sm text-end border-info text-info"
+                                              v-model="contracts[name].extend" @change="updateCost(name)" style="min-width: 60px;">
+                                          <span class="input-group-text btn-sm">Days</span>
                                       </div>
-                                  </div>
+
+                                    </div>
+                                    
+                                    <div class="p-2 d-flex align-items-center text-white-50">
+                                    <button type="button" class="btn btn-sm btn-primary me-1" :disabled="extendcost[name] > broca_calc(broca)" @click="extend(contracts[name], extendcost[name])"><i class="fa-solid fa-clock-rotate-left fa-fw me-1"></i>Extend</button>
+                                    <button type="button" class="btn btn-sm btn-secondary me-1" data-bs-toggle="collapse"
+                                        :data-bs-target="'#contract-' + post.author + '-' + post.permlink"><span><i class="fa-solid fa-xmark fa-fw"></i></span></button>
+                                    <div class="ms-auto text-primary">{{formatNumber(extendcost[name], 0, '.',',')}}
+                                        Broca</div>
+                                    </div>
+
                                   </div >
                                   </form >
                               </div>
@@ -146,30 +148,30 @@ export default {
          <i class="fas fa-heart fa-fw me-1"></i><span
             class="text-white-50">{{post.upVotes}}</span>
          </a>
-         <a href="#detailModal" class="no-decoration text-white-50" data-bs-toggle="modal"
+         <a href="#detailModal" class="ms-2 no-decoration text-white-50" data-bs-toggle="modal"
             @click="modalSelect(post.url)"><i
-            class="fas fa-comment fa-fw ms-2 me-1"></i><span
+            class="fas fa-comment fa-fw me-1"></i><span
             class="text-white-50">{{post.children}}</span>
          </a>
-         <a v-show="post.rating" href="#detailModal" class="no-decoration text-white-50"
+         <a v-show="post.rating" href="#detailModal" class="ms-2 no-decoration text-white-50"
             data-bs-toggle="modal" @click="modalSelect(post.url)" >
-         <i class="fa-solid fa-star ms-2 me-1"></i><span
+         <i class="fa-solid fa-star me-1"></i><span
             class="text-white-50">{{post.rating}}</span>
          </a >
-         <a role="button" class="no-decoration text-white-50" data-bs-toggle="collapse"
+         <a role="button" class="ms-2 no-decoration text-white-50" data-bs-toggle="collapse"
             :class="{'text-primary': flag > 0}"
             :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
             @click="flag = true" >
-         <i class="fa-solid fa-flag ms-2 me-1"></i><span
+         <i class="fa-solid fa-flag me-1"></i><span
             class="text-white-50">{{post.downVotes ? post.downVotes : ''}}</span>
          </a>
-         <a role="button" v-for="(contract, name, index) in post.contract" class="no-decoration text-white-50"
+         <a role="button" v-for="(contract, name, index) in post.contract" class="ms-2 no-decoration text-white-50"
             data-bs-toggle="collapse"
             :data-bs-target="'#contract-' + post.author + '-' + post.permlink">
-         <i class="fa-solid fa-file-contract ms-2 me-1" :class="{'text-success': color_code(name) > 28800 * 7,'text-warning': color_code(name) < 28800 * 7 &&  color_code(name) > 28800, 'text-warning': color_code(name) < 28800}"></i>
+         <i class="fa-solid fa-file-contract me-1" :class="{'text-success': color_code(name) > 28800 * 7,'text-warning': color_code(name) < 28800 * 7 &&  color_code(name) > 28800, 'text-warning': color_code(name) < 28800}"></i>
          </a>
          </div>
-         <div class="ms-auto my-2">
+         <div class="ms-2 ms-auto my-2">
             <pop-vue v-if="post.total_payout_value || post.pending_payout_value" title="Post Earnings"
                :id="'popper-' + post.author + '-' + post.permlink" :content="(gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') + ' HBD' : post.pending_payout_value ? post.pending_payout_value : '') + '<br>' + (post.paid ? precision(post.payout, 3) : 0) + ' ' + TOKEN"
                trigger="hover">
