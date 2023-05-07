@@ -102,6 +102,9 @@ export default {
         setReply(event){
           this.mde = event
       },
+      toFixed(num, fixed) {
+        return parseFloat(num).toFixed(fixed)
+      },
       reply(deets){
         if(!deets)deets = {
             "parent_author": this.post.author,
