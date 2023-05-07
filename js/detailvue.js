@@ -65,7 +65,7 @@ export default {
                                 </div>
                             </a>
 
-                            <a :href="post.url" target="_blank"
+                            <a v-if="post.type != 'Blog'" :href="'/dlux/@' + post.author + '/' + post.permlink" target="_blank"
                                 class="ms-auto no-decoration"><button
                                     class="btn btn-lg btn-primary px-4 d-flex align-items-center"
                                     style="border-radius: 5rem;"><span
