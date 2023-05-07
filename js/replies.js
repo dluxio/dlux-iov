@@ -46,7 +46,7 @@ export default {
           <vote :post="post" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)"></vote>
         </div>
         <div v-for="reps in post.replies">
-            <replies :post="reps" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)"/>
+            <replies v-if="view" :post="reps" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)"/>
         </div>
      </div>
   </div>
