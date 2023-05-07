@@ -141,7 +141,21 @@
                 </div>
             </div>
             <!--detail view-->
-            <detailvue></detailvue>
+            <detail-vue 
+                :post="displayPost.item" 
+                :account="account"
+                :modal="true"
+                :post_select="postSelect" 
+                :voteval="voteVal" 
+                :head_block="sstats.head_block"
+                :broca_refill="sstats.broca_refill"
+                :broca="spkapi.broca"
+                :spk_power="spkapi.spk_power"
+                :contracts="contracts"
+                :extendcost="extendcost"
+                @tosign="toSign=$event"
+                @modalselect="modalSelect($event)" 
+                @vote="vote($event)"></detail-vue>
         </main>
         <!-- Footer -->
         <div>

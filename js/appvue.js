@@ -971,7 +971,7 @@ createApp({
         this[modal[0]].index = modal[1];
       }
     },
-    getContent(a, p) {
+    getContent(a, p, modal) {
       if (a && p) {
         fetch(this.hapi, {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content", "params":["${a}", "${p}"], "id":1}`,
@@ -993,9 +993,8 @@ createApp({
                 downVotes: 0,
                 edit: false,
                 hasVoted: false,
-                contract: {
-
-                }
+                contract: {},
+                type: 'Blog'
               };
               for (
                 var i = 0;
@@ -1021,6 +1020,7 @@ createApp({
                 console.log(key, "no JSON?");
               }
               var contracts = false
+              var type = "Blog";
               if(this.posturls[key].json_metadata.assets){
                 for(var i = 0; i < this.posturls[key].json_metadata.assets.length; i++){
                   if(this.posturls[key].json_metadata.assets[i].contract){
@@ -1029,6 +1029,28 @@ createApp({
                   }
                 }
               }
+              try {
+              if (
+                "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
+                this.posturls[key].json_metadata.vrHash ||
+                "newhashhere" ==
+                this.posturls[key].json_metadata.vrHash
+              )
+                type = "360";
+              else if (this.posturls[key].json_metadata.vrHash)
+                type = "VR";
+              else if (this.posturls[key].json_metadata.arHash)
+                type = "AR";
+              else if (this.posturls[key].json_metadata.appHash)
+                type = "APP";
+              else if (this.posturls[key].json_metadata.audHash)
+                type = "Audio";
+              else if (this.posturls[key].json_metadata.vidHash)
+                type = "Video";
+            } catch (e) {
+              console.log(key, e, "no JSON?");
+            }
+            this.posturls[key].type = type;
               if(contracts){
                 this.getContracts(key)
               }
@@ -1046,6 +1068,7 @@ createApp({
                 this.posturls[key].created
               );
               this.selectPosts();
+              if(modal)this.modalSelect(key)
             }
           });
       } else {
@@ -1377,7 +1400,23 @@ createApp({
     },
   },
   mounted() {
-    window.addEventListener('scroll', this.handleScroll);
+    if (location.pathname.split("/@")[1]) {
+      this.pageAccount = location.pathname.split("/@")[1]
+      if (this.pageAccount.indexOf('/') > -1) {
+        this.pagePermlink = this.pageAccount.split('/')[1]
+        this.pageAccount = this.pageAccount.split('/')[0]
+      }
+    } else {
+      this.pageAccount = this.account;
+      this.me = true;
+    }
+    if (this.pageAccount == this.account) this.me = true;
+    if(this.pagePermlink){
+      this.getContent(this.pageAccount, this.pagePermlink, true)
+    } else {
+      this.getPosts();
+      window.addEventListener('scroll', this.handleScroll);
+    }
     this.getStats()
     this.getSPKStats()
     this.getPosts();
