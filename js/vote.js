@@ -11,8 +11,8 @@ export default {
         "pop-vue": Pop,
       },
   template: `
-  <!-- vote collapse -->
-              <div class="collapse" :id="'vote-' + post.author + '-' + post.permlink">
+  <!-- vote  -->
+              <div v-show="makeVote">
                   <form id="voteForm">
                       <div class="p-2 d-flex align-items-center text-white-50">
 
@@ -21,9 +21,8 @@ export default {
                               @click="vote(post.url)" style="min-width: 85px;"><span v-if="!flag"><i class="fas fa-heart fa-fw me-1"></i></span><span v-if="flag"><i class="fa-solid fa-flag me-1"></i></span>{{flag ? '-' :
                               ''}}{{formatNumber(slider / 100, 0,'.',',')}}%</button>
 
-                          <button type="button" class="btn btn-sm btn-secondary px-1 me-1"
-                              :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
-                              data-bs-toggle="collapse"><i class="fa-solid fa-xmark fa-fw"></i></button>
+                          <button type="button" class="btn btn-sm btn-secondary px-1 me-1" @click="makeVote = !makeVote">
+                            <i class="fa-solid fa-xmark fa-fw"></i></button>
 
                               <input type="range" class="form-range mx-2" step="1"
                                   max="10000" v-model="slider">
@@ -37,7 +36,7 @@ export default {
                       </div>
                   </form>
               </div>
-  <!-- reply collapse -->
+  <!-- reply  -->
   <div v-show="makeReply" class="mx-2">
             <mde @data="mde = $event" />
             <div class="d-flex">
@@ -46,24 +45,21 @@ export default {
             </div>
           </div>
 <!-- footer buttons -->
-    <div v-show="!makeReply" class="d-flex">
+    <div v-if="!makeReply && !makeVote" class="d-flex">
             
             <div class="d-flex align-items-center">
-            <a role="button" class="no-decoration" @click="flag = false"
-            data-bs-toggle="collapse"
-            :class="{'text-primary': post.hasVoted, 'text-white-50': !post.hasVoted, 'text-danger': slider < 0 }"
-            :data-bs-target="'#vote-' + post.author + '-' + post.permlink">
+            <a @click="makeVote = !makeVote" role="button" class="no-decoration" @click="flag = false"
+            :class="{'text-primary': post.hasVoted, 'text-white-50': !post.hasVoted, 'text-danger': slider < 0 }">
             <i class="fas fa-heart fa-fw me-1"></i><span
             class="text-white-50">{{post.upVotes}}</span>
             </a>
-            <a role="button" class="ms-2 no-decoration text-white-50" data-bs-toggle="collapse"
+            <a @click="makeVote = !makeVote" role="button" class="ms-2 no-decoration text-white-50"
          :class="{'text-primary': flag > 0}"
-         :data-bs-target="'#vote-' + post.author + '-' + post.permlink"
          @click="flag = true" >
           <i class="fa-solid fa-flag me-1"></i><span
          class="text-white-50">{{post.downVotes ? post.downVotes : ''}}</span>
           </a>
-      <button class="btn btn-sm btn-primary ms-2" @click="makeReply = !makeReply">{{makeReply ? 'Cancel' : 'Reply'}}</button>
+      <button class="btn btn-sm btn-primary ms-2" @click="makeReply = !makeReply">Reply</button>
   
             <pop-vue class="ms-1" :id="'pop-' + post.author + '-' + post.permlink"
                         title="Post Earnings"
@@ -100,6 +96,7 @@ export default {
         show: false,
         warn: false,
         makeReply: false,
+        makeVote: false,
         mde: '',
     };
     },

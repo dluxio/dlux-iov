@@ -72,6 +72,7 @@ export default {
         view: true,
         mde: '',
         makeReply: false,
+        makeVote: false,
         warn: false,
     };
     },
