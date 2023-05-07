@@ -1,17 +1,19 @@
 export default {
     name: "vote",
   template: `
-  <div>
-  <button v-if="!show" type="button" class="btn me-2"
-              :class="{'btn-success': true}"
-              @click="show = true; flag = false" style="width: 100px;">Vote</button>
-    <button v-if="!show" type="button" class="btn me-2"
-              :class="{'btn-danger': true}"
-              @click="show = true; flag = true" style="width: 100px;">Flag</button>
+  <div class="d-flex align-items-center">
+  <a v-if="!show" role="button" class="no-decoration"
+        :class="{'text-primary': post.hasVoted, 'text-white-50': !post.hasVoted, 'text-danger': slider < 0 }"
+              @click="show = true; flag = false"><i class="fas fa-heart fa-fw me-1"></i><span
+              class="text-white-50">{{post.upVotes}}</span></a>
+    <a v-if="!show" role="button" class="ms-2 no-decoration text-white-50"
+            :class="{'text-primary': flag > 0}"
+              @click="show = true; flag = true"><i class="fa-solid fa-flag me-1"></i><span
+              class="text-white-50">{{post.downVotes ? post.downVotes : ''}}</span></a>
   <form v-if="show">
       <div class="p-2 d-flex align-items-center text-white-50">
 
-          <button type="button" class="btn me-2"
+          <button type="button" class="btn btn-sm me-2"
               :class="{'btn-success': !flag, ' btn-danger': flag}"
               @click="vote(post.url)" style="width: 100px;">{{flag ? '-'
               :

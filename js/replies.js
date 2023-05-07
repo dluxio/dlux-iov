@@ -14,58 +14,57 @@ export default {
         "pop-vue": Pop,
       },
   template: `
-  <div>
-      <button role="button" @click="view = !view">{{view ? 'Hide' : 'Show'}}</button>
-      <a href="#!" v-if="warn" @click="warn = false">Hidden due to low reputation.</a>
-     <div v-if="view" class="rounded p-3 border border-info">
-        <div>
-           <div>
+<div>
+  <a role="button" v-if="warn" @click="warn = false">Hidden due to low reputation.</a>
+  <div class="card bg-img-none text-white m-2">
+    <div class="card-header">
+      <div class="d-flex align-items-center">
+        <a :href="'/@' + post.author" class="no-decoration">
+          <div class="d-flex align-items-center">
+            <img :src="'https://images.hive.blog/u/' + post.author + '/avatar'"
+                    class="rounded-circle bg-light img-fluid me-1 cover author-img" style="width: 50px;">
               <div>
-                 <a :href="'/@' + post.author"><img
-                    :src="'https://images.hive.blog/u/' + post.author + '/avatar'"
-                    class="rounded-circle bg-light img-fluid mr-2 cover author-img"></a><h5>@{{post.author}}</h5>
+                <div class="d-flex align-items-center">
+                  <h5 class="m-0 text-white-50">{{ post.author }}</h5>
+                  <span class="ms-1 badge small text-bg-light">{{ post.rep }}</span>
+                </div>
+                <span class="small text-muted" style="font-weight: 400">{{ timeSince(post.created) }}</span>
               </div>
-              <div>
-                 <p class="mt-0 mb-0 text-muted text-semibold"><a class="a-1"
-                    id="modal_author"><span
-                    class="ml-2 badge badge-pill badge-light">{{post.rep}}</span></a>
-                 </p>
-              </div>
-              <span>
-                 
-                 <a href="#/"
-                    v-show="post.author == account"
-                    @click="edit = !edit">Edit Post</a>
-                 <small class="text-muted"
-                    id="modal_created">{{timeSince(post.created)}}</small>
-              </span>
-           </div>
-        </div>
-        <div class="card-body" v-show="!edit">
+          </div>
+        </a>
+        <a role="button" class="ms-auto no-decoration text-white" @click="view = !view"><i v-show="view" class="fa-solid fa-circle-minus fa-fw"></i><i v-show="!view" class="fa-solid fa-circle-plus fa-fw"></i></a>                    
+      </div> 
+      </div>
+      <div class="card-body" v-if="view" v-show="!edit">
            <vue-markdown :md="post.body"/>
         </div>
         <div v-show="edit">
            <vue-markdown :toedit="post.body" @settext="pending($event)"/>
         </div>
-        <div v-show="makeReply">
-        <mde @data="mde = $event" />
-        <button @click="makeReply = !makeReply">Cancel</button>
-        <button @click="reply()">Reply</button>
-        </div>
+        
         <div class="card-footer">
-              <vote :post="post" :account="account" :voteval="voteval" @vote="vote($event)"></vote>
-              <pop-vue :id="'pop-' + post.author + '-' + post.permlink"
-                                                        title="Post Earnings"
-                                                        :content="(gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') + ' HBD' : post.pending_payout_value ? post.pending_payout_value : '')"
-                                                        trigger="hover">
-                                                        <button class="btn btn-secondary">
-                                                            {{gt(post.total_payout_value, post.pending_payout_value) ?
-                                                            formatNumber(post.total_payout_value + ' ' +
-                                                            post.curator_payout_value, 3, '.',',') :
-                                                            formatNumber(post.pending_payout_value, 3, '.',',')}} HBD
-                                                        </button>
-                                                        <button @click="makeReply = !makeReply">{{makeReply ? 'Cancel' : 'Reply'}}</button>
-                                                    </pop-vue>
+          <div v-show="makeReply" class="mx-2">
+            <mde @data="mde = $event" />
+            <div class="d-flex">
+              <button class="btn btn-sm btn-secondary ms-auto" @click="makeReply = !makeReply"><i class="fa-solid fa-xmark fa-fw me-1"></i>Cancel</button>
+              <button class="btn btn-sm btn-primary ms-1" @click="reply()"><i class="fa-solid fa-comment fa-fw me-1"></i>Reply</button>
+            </div>
+          </div>
+          <div v-show="!makeReply" class="d-flex">
+            <vote :post="post" :account="account" :voteval="voteval" @vote="vote($event)"></vote>
+            <button class="btn btn-sm btn-primary me-1" @click="makeReply = !makeReply">{{makeReply ? 'Cancel' : 'Reply'}}</button>
+            <pop-vue class="ms-auto" :id="'pop-' + post.author + '-' + post.permlink"
+                        title="Post Earnings"
+                        :content="(gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') + ' HBD' : post.pending_payout_value ? post.pending_payout_value : '')"
+                        trigger="hover">
+              <button class="btn btn-sm btn-secondary">
+                  {{gt(post.total_payout_value, post.pending_payout_value) ?
+                  formatNumber(post.total_payout_value + ' ' +
+                  post.curator_payout_value, 3, '.',',') :
+                  formatNumber(post.pending_payout_value, 3, '.',',')}} HBD
+              </button>
+              </pop-vue>
+          </div>
         </div>
         <div v-for="reps in post.replies">
             <replies :post="reps" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)"/>
