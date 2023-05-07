@@ -48,7 +48,7 @@ export default {
 <!-- footer buttons -->
     <div v-if="!makeReply && !makeVote" class="d-flex mt-1">
             <div class="d-flex align-items-center">
-            <a @click="makeVote = !makeVote" role="button" class="no-decoration" @click="flag = false"
+            <a @click="makeVote = !makeVote; flag = false" role="button" class="no-decoration"
             :class="{'text-primary': post.hasVoted, 'text-white-50': !post.hasVoted, 'text-danger': slider < 0 }">
             <i class="fas fa-heart fa-fw me-1"></i><span
             class="text-white-50">{{post.upVotes}}</span>
