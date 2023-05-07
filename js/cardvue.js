@@ -74,11 +74,11 @@ export default {
                                           <div class="text-center w-100 mb-1 py-1 bg-dark">
                                       <span class="text-break">{{fancyBytes(contracts[name].u)}} |
                                       {{expIn(contracts[name])}}</span></div>
-                                        <a role="button" @click="showNodes = !showNodes"><h6>Storage Detail ({{contract.nt}}/{{contract.p}})</h6></a>
+                                        <a role="button" @click="showNodes = !showNodes"><h6>Storage Detail ({{contracts[name].nt}}/{{contracts[name].p}})</h6></a>
                                       <div v-if="showNodes" v-for="acc in contract.n">
                                         <p>@{{acc}}</p>
                                         </div>
-                                        <a v-if="has_ipfs" role="button" @click="store(contract.i, isStored(contract.i))"><h6>{{isStored(contract.i) ? 'Remove from Storage' : 'Place in Storage'}}</h6></a>
+                                        <a v-if="has_ipfs" role="button" @click="store(contracts[name].i, isStored(contracts[name].i))"><h6>{{isStored(contracts[name].i) ? 'Remove from Storage' : 'Place in Storage'}}</h6></a>
                                       <div class="d-flex flex-wrap mx-1">
                                       <div class="btn-group m-1">
                                           <input name="time" @change="updateCost(name);customTime = false" title="1 Day" class="btn-check" :id="'option1-' + name" type="radio"
