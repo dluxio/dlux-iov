@@ -14,12 +14,12 @@ export default {
         "pop-vue": Pop,
         "replies": Replies,
     },
-    template: `<div v-if="post.author" :class="{'fade': hide}" id="detailModal" tabindex="-1" role="dialog" aria-hidden="true" @blur="goBack()">
+    template: `<div v-if="post.author" :class="{'fade': modal}" id="detailModal" tabindex="-1" role="dialog" aria-hidden="true" @blur="goBack()">
     <div class="modal-dialog modal-full modal-xl modal-dialog-centered" style="max-width: 1000px;"
         role="document">
         <div class="modal-content bg-img-none text-white">
             <div class="card text-white bg-img-none bg-blur-none">
-                <div class="ms-auto">
+                <div class="ms-auto" v-if="modal">
                     <button type="button" class="btn-close mt-3 me-3"
                         data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -212,6 +212,9 @@ props: {
         default: 'DLUX'
     },
     hide: {
+        default: true
+    },
+    modal: {
         default: true
     },
     post: {
