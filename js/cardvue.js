@@ -19,20 +19,16 @@ export default {
          <a :href="'/@' + post.author" class="no-decoration">
             <div class="d-flex align-items-center">
                <img v-if="post.author" :src="'https://images.hive.blog/u/' + post.author + '/avatar'" alt=""
-                  class="rounded-circle bg-light img-fluid me-3 cover author-img"
+                  class="rounded-circle bg-light img-fluid me-1 cover author-img"
                   style="width: 50px;">
                <div>
-                  <div class="d-flex align-items-center mb-1">
-                     <h3 class="card-title m-0">{{ post.author }}</h3>
-                     <div>
-                        <span style="font-size: .5em;"
-                           class="ms-2 badge small rounded-pill text-white"
-                           :class="{'bg-danger': post.rep < 25, 'bg-warning': post.rep >= 25 && post.rep < 50, 'bg-success': post.rep >= 50}">
+                  <div class="d-flex align-items-center">
+                     <h5 class="m-0 text-white-50">{{ post.author }}</h5>
+                        <span class="ms-1 badge small text-bg-light">
                         {{ post.rep }}
                         </span>
-                     </div>
                   </div>
-                  <h6 class="card-subtitle text-muted m-0">{{ timeSince(post.created) }}</h6>
+                  <span class="small text-muted" style="font-weight: 400">{{ timeSince(post.created) }}</span>
                </div>
             </div>
          </a>
