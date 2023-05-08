@@ -28,7 +28,7 @@ export default {
                 <a-entity look-at="[camera]">
                     <a-plane class="voteButton" position="-1.25 0 .5" depth="0.5" width="0.5" material="side:double;src:#voteButtonPic;transparent:true;alphaTest:0.82"></a-plane>
                 </a-entity>
-                <a-entity class="hidebutton" look-at="[camera]" visible="false" position="0 1.2 0">
+                <a-entity class="hidebutton" look-at="[camera]" visible="true" position="0 1.2 0">
                     <a-entity class="col-1" position="0 3.6 0">
                         <a-entity class="r1-title" geometry="primitive:plane;width:6;height:1" material="side:double;color:#16398D;opacity:0.7" position="0 0.5 0">
                             <a-entity class="title-text" :text="'width: 6; wrapCount: 28; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: bottom; color:; value:' + post.title + ';'" position="-2.765 -0.381 0.199" rotation="" scale="1 1 0.01" material=""></a-entity>
