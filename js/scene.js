@@ -65,7 +65,7 @@ export default {
                 </a-entity>
             </a-entity>
             <a-entity id="greeting" geometry="primitive:plane;width:18;height:6.5" material="side:double;color:#4C4C4C;opacity:0.7" position="0 3.5 0" scale=".7 .7 .7" rotation="">
-                <a-entity id="greeter-pic" geometry="primitive:circle" crossorigin="anonymous" :material="'side:double;src:#author' + user + ';'" position="-9 3.25 0.1" scale="2 2 2" do-on-assetsload="#user"></a-entity>
+                <a-entity id="greeter-pic" geometry="primitive:circle" crossorigin="anonymous" :material="'side:double;src:#author-' + user + ';'" position="-9 3.25 0.1" scale="2 2 2" do-on-assetsload="#user"></a-entity>
                 <a-entity id="greeter-name" :text="'value:' + user + '; width: 7; wrapCount: 17; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: bottom; color:;'" position="-6.47 1.23 0.1" rotation="" scale="2 2 0.01" material=""></a-entity>
                 <a-entity id="greeter-pinned-post" text="value:Welcome to dlux, sign in with Hive to start building.;width: 8.5; wrapCount: 32.5; lineHeight: 60; letterSpacing: 5; anchor: left; baseline: bottom; color:;" position="-7.6 -2.06 0.1" rotation="" scale="2 2 0.01" material=""></a-entity>
             </a-entity>
