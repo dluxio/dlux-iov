@@ -84,11 +84,11 @@ export default {
                         <vue-markdown :md="post.body" :author="post.author"
                             :permlink="post.permlink"></vue-markdown>
                     </div>
-                    <div class="m-auto py-3 text-center">
+                    <div class="m-auto py-3 text-center" v-if="(post.type == 'Blog' && !solo) || post.type != 'Blog'">
                         <p><i
                                 :class="post_select.types[post.type].icon"></i>{{post_select.types[post.type].launch}}
                         </p>
-                        <a v-if="post.type != 'Blog'" :href="'/dlux/@' + post.author + '/' + post.permlink"><button class="btn btn-lg btn-primary px-4"
+                        <a :href="(post.type == 'Blog' ? '/blog/@' : '/dlux/@') + post.author + '/' + post.permlink"><button class="btn btn-lg btn-primary px-4"
                                 style="border-radius: 5rem;">Launch<i
                                     class="ms-2 fas fa-external-link-alt"></i></button></a>
                     </div>
@@ -229,6 +229,9 @@ export default {
 props: {
     head_block: {
         default: 0
+    },
+    solo: {
+        default: false
     },
     TOKEN: {
         default: 'DLUX'
