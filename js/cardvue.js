@@ -112,7 +112,7 @@ export default {
                                     
                                     <div class="p-2 d-flex align-items-center text-white-50">
                                     <button type="button" class="btn btn-sm btn-primary me-1" :disabled="extendcost[name] > broca_calc(broca)" @click="extend(contracts[name], extendcost[name])"><i class="fa-solid fa-clock-rotate-left fa-fw me-1"></i>Extend</button>
-                                    <button type="button" v-if="contracts[name].t == account" class="btn btn-sm btn-warning me-1" @click="cancel_contract(contracts[name])"><i class="fa-solid fa-clock-rotate-left fa-fw me-1"></i>Cancel</button>
+                                    <button type="button" v-if="contracts[name].t == account" class="btn btn-sm btn-warning me-1" @click="cancel_contract(contracts[name])"><i class="fa-solid fa-file-circle-xmark"></i>Cancel</button>
                                     <button type="button" class="btn btn-sm btn-secondary me-1" data-bs-toggle="collapse"
                                         :data-bs-target="'#contract-' + post.author + '-' + post.permlink"><span><i class="fa-solid fa-xmark fa-fw"></i></span></button>
                                         <input :id="'spread-' + name" type="checkbox" v-model="spread" @change="updateCost(name)">
