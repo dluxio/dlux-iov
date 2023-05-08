@@ -34,7 +34,7 @@ export default {
                             <a-entity class="title-text" :text="'width: 6; wrapCount: 28; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: bottom; color:; value:' + post.title + ';'" position="-2.765 -0.381 0.199" rotation="" scale="1 1 0.01" material=""></a-entity>
                         </a-entity>
                         <a-entity class="r2-author" geometry="primitive:plane;width:6;height:1" material="side:double;color:#25D193;opacity:0.7" position="0 -0.5 0" rotation="0 0 0" url="/@">
-                            <a-entity class="author-pic" geometry="primitive:circle;radius:0.45" :material="'side:double;src:#author-' + post.author + ';'" crossorigin="anonymous" position="-2.34 0 0.1" scale="1 1 1"></a-entity>
+                            <a-entity v-if="austors[post.author]" class="author-pic" geometry="primitive:circle;radius:0.45" :material="'side:double;src:#author-' + post.author + ';'" crossorigin="anonymous" position="-2.34 0 0.1" scale="1 1 1"></a-entity>
                             <a-entity class="username" :text="'width: 3.7; wrapCount: 21; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: center; color:black; value:' + post.author + ';'" position="-1.627 .025 0.207" rotation="" scale="1 1 0.01" material=""></a-entity>
                             <a-entity class="rep" :text="'width: 10; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: bottom; color:black; value:' + post.rep + ';'" position="2.194796349166291 -0.12506570270188472 0.1" rotation="" scale="1 1 0.01" material=""></a-entity>
                         </a-entity>
