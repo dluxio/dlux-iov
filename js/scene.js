@@ -1405,6 +1405,23 @@ export default {
         },
       },
       mounted() {
+        AFRAME.registerComponent("show-info", {
+            schema: {
+              show: { default: "" },
+            },
+            init: function () {
+              var el = this.el;
+              var showEl = el.querySelector(".hidebutton");
+              //mouseenter
+              el.addEventListener("mouseenter", function () {
+                showEl.setAttribute("visible", true);
+              });
+              //mouseleave
+              el.addEventListener("mouseleave", function () {
+                showEl.setAttribute("visible", false);
+              });
+            },
+          });
         if (location.pathname.split("/@")[1]) {
           this.pageAccount = location.pathname.split("/@")[1]
           if (this.pageAccount.indexOf('/') > -1) {
