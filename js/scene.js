@@ -4,7 +4,18 @@ export default {
   template: `
   <a-scene antialias="true">
         <!-- Asset Manager-->
-        <a-assets><img id="nav-trending-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2FFire_Emoji.png" crossorigin="anonymous" /><img id="nav-new-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Forange-new-512.gif" crossorigin="anonymous" /><img id="nav-random-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Fwhitedice.png" crossorigin="anonymous" /><img id="nav-browse-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2F29506-200.png" crossorigin="anonymous" /><img id="nav-create-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Fdocument.png" crossorigin="anonymous" /><img id="nav-hive-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Fhive-coin.png" crossorigin="anonymous" /><img id="nav-profile-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Fmarkegiles.jpg" crossorigin="anonymous" /><img id="greeter-pic-photo" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Frobotolux.png" crossorigin="anonymous" /><img id="voteButtonPic" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Fupvote.png?1528448497979" crossorigin="anonymous" />
+        <a-assets>
+            <img id="nav-trending-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2FFire_Emoji.png" crossorigin="anonymous" />
+            <img id="nav-new-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Forange-new-512.gif" crossorigin="anonymous" />
+            <img id="nav-random-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Fwhitedice.png" crossorigin="anonymous" />
+            <img id="nav-browse-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2F29506-200.png" crossorigin="anonymous" />
+            <img id="nav-create-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Fdocument.png" crossorigin="anonymous" />
+            <img id="nav-hive-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Fhive-coin.png" crossorigin="anonymous" />
+            <img id="nav-profile-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Fmarkegiles.jpg" crossorigin="anonymous" />
+            <img id="greeter-pic-photo" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Frobotolux.png" crossorigin="anonymous" />
+            <img id="voteButtonPic" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Fupvote.png?1528448497979" crossorigin="anonymous" />
+            <img v-for="post in displayPosts" :id="'portal-' + post.author + post.permlink" :src="'https://ipfs.dlux.io/ipfs/' + get360(post)" crossorigin="anonymous" />
+            <img v-for="(author, name) in authors" :id="'author-' + name" :src="'https://images.hive.blog/u/' + name + '/avatar'" crossorigin="anonymous" />
             <a-assets-item v-pre id="obfont" src="https://rawgit.com/mrdoob/three.js/dev/examples/fonts/optimer_bold.typeface.json"></a-assets-item><template id="hand-template"><a-entity><a-box scale="0.1 0.1 0.1"></a-box></a-entity></template></a-assets>
         <!-- DLUX-->
         <a-entity id="dlux-container" look-at="[camera]" position="0 1.6 -14">
@@ -54,8 +65,8 @@ export default {
                 </a-entity>
             </a-entity>
             <a-entity id="greeting" geometry="primitive:plane;width:18;height:6.5" material="side:double;color:#4C4C4C;opacity:0.7" position="0 3.5 0" scale=".7 .7 .7" rotation="">
-                <a-entity id="greeter-pic" geometry="primitive:circle" crossorigin="anonymous" material="side:double;src:#greeter-pic-photo" position="-9 3.25 0.1" scale="2 2 2" do-on-assetsload="#user"></a-entity>
-                <a-entity id="greeter-name" :text.value="hapi" text="value:@robotolux; width: 7; wrapCount: 17; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: bottom; color:;" position="-6.47 1.23 0.1" rotation="" scale="2 2 0.01" material=""></a-entity>
+                <a-entity id="greeter-pic" geometry="primitive:circle" crossorigin="anonymous" :material="'side:double;src:#author' + user + ';'" position="-9 3.25 0.1" scale="2 2 2" do-on-assetsload="#user"></a-entity>
+                <a-entity id="greeter-name" :text="'value:' + user + '; width: 7; wrapCount: 17; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: bottom; color:;'" position="-6.47 1.23 0.1" rotation="" scale="2 2 0.01" material=""></a-entity>
                 <a-entity id="greeter-pinned-post" text="value:Welcome to dlux, sign in with Hive to start building.;width: 8.5; wrapCount: 32.5; lineHeight: 60; letterSpacing: 5; anchor: left; baseline: bottom; color:;" position="-7.6 -2.06 0.1" rotation="" scale="2 2 0.01" material=""></a-entity>
             </a-entity>
         </a-entity>
@@ -72,27 +83,27 @@ export default {
         </a-entity>
         <!-- Portals-->
         <a-entity id="portalsHolder" position="1 1.6 -1" rotation="0 58 0" layout="type: circle; radius: 10;angle: 14.5;plane:xz">
-            <a-entity v-for="post in displayPosts" class="poster-image" bind__visible="p1.visible" visible="" bind__material.src="p1.Hash360" material="side:double;src:" show-info="" geometry="primitive:sphere" crossorigin="anonymous" position="0 0 0" rotation="0 180 0" scale="1 1 1">
+            <a-entity v-for="post in displayPosts" class="poster-image" :material="'side:double;src:#portal-' + post.author + post.permlink" show-info="" geometry="primitive:sphere" crossorigin="anonymous" position="0 0 0" rotation="0 180 0" scale="1 1 1">
                 <a-sphere :url="'/dlux/@' + post.author + '/' + post.permlink" opacity="0" scale="1.001 1.001 1.001"></a-sphere>
                 <a-entity look-at="[camera]">
-                    <a-plane class="voteButton" bind__vote="p1.postUrl" vote="" position="-1.25 0 .5" depth="0.5" width="0.5" material="side:double;src:#voteButtonPic;transparent:true;alphaTest:0.82"></a-plane>
+                    <a-plane class="voteButton" position="-1.25 0 .5" depth="0.5" width="0.5" material="side:double;src:#voteButtonPic;transparent:true;alphaTest:0.82"></a-plane>
                 </a-entity>
                 <a-entity class="hidebutton" look-at="[camera]" visible="false" position="0 1.2 0">
                     <a-entity class="col-1" position="0 3.6 0">
                         <a-entity class="r1-title" geometry="primitive:plane;width:6;height:1" material="side:double;color:#16398D;opacity:0.7" position="0 0.5 0">
-                            <a-entity v-if="post.title" class="title-text" text.value="post.title" text="width: 6; wrapCount: 28; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: bottom; color:; value:;" position="-2.765 -0.381 0.199" rotation="" scale="1 1 0.01" material=""></a-entity>
+                            <a-entity class="title-text" :text="'width: 6; wrapCount: 28; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: bottom; color:; value:' + post.title + ';'" position="-2.765 -0.381 0.199" rotation="" scale="1 1 0.01" material=""></a-entity>
                         </a-entity>
                         <a-entity class="r2-author" geometry="primitive:plane;width:6;height:1" material="side:double;color:#25D193;opacity:0.7" position="0 -0.5 0" rotation="0 0 0" url="/@">
-                            <a-entity class="author-pic" geometry="primitive:circle;radius:0.45" material="side:double;src:" bind__material.src="authorImage" crossorigin="anonymous" position="-2.34 0 0.1" scale="1 1 1"></a-entity>
-                            <a-entity class="username" text.value="post.author" text="width: 3.7; wrapCount: 21; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: center; color:black; value:;" position="-1.627 .025 0.207" rotation="" scale="1 1 0.01" material=""></a-entity>
-                            <a-entity class="rep" text.value="post.rep" text="width: 10; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: bottom; color:black; value:;" position="2.194796349166291 -0.12506570270188472 0.1" rotation="" scale="1 1 0.01" material=""></a-entity>
+                            <a-entity class="author-pic" geometry="primitive:circle;radius:0.45" :material="'side:double;src:#author-' + post.author + ';'" crossorigin="anonymous" position="-2.34 0 0.1" scale="1 1 1"></a-entity>
+                            <a-entity class="username" :text="'width: 3.7; wrapCount: 21; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: center; color:black; value:' + post.author + ';'" position="-1.627 .025 0.207" rotation="" scale="1 1 0.01" material=""></a-entity>
+                            <a-entity class="rep" :text="'width: 10; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: bottom; color:black; value:' + post.rep + ';'" position="2.194796349166291 -0.12506570270188472 0.1" rotation="" scale="1 1 0.01" material=""></a-entity>
                         </a-entity>
                         <a-entity class="r3-body" geometry="primitive:plane;width:6;height:2" material="side:double;opacity:0.7" position="0 -2 0">
-                            <a-entity class="body-text" text.value="post.body" text="width: 5.8; wrapCount: 40; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: top; color: black; value:;" position="-2.884 .804 0.147" rotation="" scale="1 1 .01" material=""></a-entity>
+                            <a-entity class="body-text" :text="'width: 5.8; wrapCount: 40; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: top; color: black; value:' + post.body + ';'" position="-2.884 .804 0.147" rotation="" scale="1 1 .01" material=""></a-entity>
                         </a-entity>
                         <a-entity class="r4-voting" geometry="primitive:plane;width:6;height:1" material="side:double;color:#999999;opacity:0.7" position="0 -3.5 0">
-                            <a-entity class="value" text.value="(gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') + ' HBD' : post.pending_payout_value ? post.pending_payout_value : '')" text="width: 10; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: bottom; color:; value:;" position="1.385 -0.09268436887713527 0.1" rotation="" scale="1 1 0.01" material=""></a-entity>
-                            <a-entity class="value" text.value="post.upVotes" text="width: 10; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: bottom; color:; value:;" position="0.25 -0.09268436887713527 0.1" rotation="" scale="1 1 0.01" material=""></a-entity>
+                            <a-entity class="value" :text="'width: 10; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: bottom; color:; value:' + (gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') + ' HBD' : post.pending_payout_value ? post.pending_payout_value : '') + ';'" position="1.385 -0.09268436887713527 0.1" rotation="" scale="1 1 0.01" material=""></a-entity>
+                            <a-entity class="value" :text="'width: 10; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: bottom; color:; value:' + post.net_votes + ';'" position="0.25 -0.09268436887713527 0.1" rotation="" scale="1 1 0.01" material=""></a-entity>
                         </a-entity>
                     </a-entity>
                 </a-entity>
@@ -764,6 +775,16 @@ export default {
               if (re.result.length) this[key] = true;
               else this[key] = false;
             });
+        },
+        get360(post){
+            if(post?.json_metadata?.assets?.length){
+                for(var i = 0; i < post.json_metadata.assets.length; i++){
+                    if(post.json_metadata.assets[i].type == "ts"){
+                        return post.json_metadata.assets[i].hash
+                    }
+                }
+            }
+            return 'QmZcerSAQ6X1bcL2TKvf2SdYau5iLuz2VjALSGQjtXyZuz'
         },
         tokenSend() {
           if (!this.sendFormValid) return;
