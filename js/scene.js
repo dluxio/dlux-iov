@@ -22,8 +22,8 @@ export default {
             </a-camera>
         </a-entity>
         <!-- Portals-->
-        <a-entity id="portalsHolder" position="1 1.6 -1" rotation="0 58 0" layout="type: circle; radius: 10;angle: 14.5;plane:xz">
-            <a-entity v-for="post in displayPosts" class="poster-image" :material="'side:double;src:#portal-' + post.author + post.permlink" show-info="" geometry="primitive:sphere" crossorigin="anonymous" position="0 0 0" rotation="0 180 0" scale="1 1 1">
+        <a-entity id="portalsHolder" position="1 1.6 -1" rotation="0 58 0" layout="type: circle; radius: 10;angle: 15;plane:xz">
+            <a-entity v-for="post in displayPosts" class="poster-image" :material="'side:double;src:#portal-' + post.author + post.permlink + ';'" show-info="" geometry="primitive:sphere" crossorigin="anonymous" position="0 0 0" rotation="0 180 0" scale="1 1 1">
                 <a-sphere :url="'/dlux/@' + post.author + '/' + post.permlink" opacity="0" scale="1.001 1.001 1.001"></a-sphere>
                 <a-entity look-at="[camera]">
                     <a-plane class="voteButton" position="-1.25 0 .5" depth="0.5" width="0.5" material="side:double;src:#voteButtonPic;transparent:true;alphaTest:0.82"></a-plane>
@@ -1419,6 +1419,21 @@ export default {
               //mouseleave
               el.addEventListener("mouseleave", function () {
                 showEl.setAttribute("visible", false);
+              });
+            },
+          });
+          AFRAME.registerComponent("url", {
+            schema: { default: "" },
+            init: function () {
+              var url = this.data;
+              this.el.addEventListener("click", function () {
+                window.location.href = url;
+              });
+            },
+            update: function () {
+              var url = this.data;
+              this.el.addEventListener("click", function () {
+                window.location.href = url;
               });
             },
           });
