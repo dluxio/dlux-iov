@@ -5,15 +5,6 @@ export default {
   <a-scene antialias="true">
         <!-- Asset Manager-->
         <a-assets>
-            <img id="nav-trending-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2FFire_Emoji.png" crossorigin="anonymous" />
-            <img id="nav-new-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Forange-new-512.gif" crossorigin="anonymous" />
-            <img id="nav-random-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Fwhitedice.png" crossorigin="anonymous" />
-            <img id="nav-browse-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2F29506-200.png" crossorigin="anonymous" />
-            <img id="nav-create-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Fdocument.png" crossorigin="anonymous" />
-            <img id="nav-hive-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Fhive-coin.png" crossorigin="anonymous" />
-            <img id="nav-profile-icon" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Fmarkegiles.jpg" crossorigin="anonymous" />
-            <img id="greeter-pic-photo" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Frobotolux.png" crossorigin="anonymous" />
-            <img id="voteButtonPic" src="https://cdn.glitch.com/5ba0e9a1-e1be-470c-be6c-b6bd1b8e349e%2Fupvote.png?1528448497979" crossorigin="anonymous" />
             <img v-for="post in displayPosts" :id="'portal-' + post.author + post.permlink" :src="'https://ipfs.dlux.io/ipfs/' + get360(post)" crossorigin="anonymous" />
             <img v-for="(author, name) in authors" :id="'author-' + name" :src="'https://images.hive.blog/u/' + name + '/avatar'" crossorigin="anonymous" />
             <img :id="'user-' + user" :src="'https://images.hive.blog/u/' + user + '/avatar'" crossorigin="anonymous" />
@@ -50,10 +41,7 @@ export default {
                         <a-entity class="r3-body" geometry="primitive:plane;width:6;height:2" material="side:double;opacity:0.7" position="0 -2 0">
                             <a-entity class="body-text" :text="'width: 5.8; wrapCount: 40; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: top; color: black; value:' + post.body + ';'" position="-2.884 .804 0.147" rotation="" scale="1 1 .01" material=""></a-entity>
                         </a-entity>
-                        <a-entity class="r4-voting" geometry="primitive:plane;width:6;height:1" material="side:double;color:#999999;opacity:0.7" position="0 -3.5 0">
-                            <a-entity class="value" :text="'width: 10; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: bottom; color:; value:' + (gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') + ' HBD' : post.pending_payout_value ? post.pending_payout_value : '') + ';'" position="1.385 -0.09268436887713527 0.1" rotation="" scale="1 1 0.01" material=""></a-entity>
-                            <a-entity class="value" :text="'width: 10; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: bottom; color:; value:' + post.net_votes + ';'" position="0.25 -0.09268436887713527 0.1" rotation="" scale="1 1 0.01" material=""></a-entity>
-                        </a-entity>
+                        
                     </a-entity>
                 </a-entity>
             </a-entity>
