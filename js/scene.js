@@ -17,62 +17,10 @@ export default {
             <img v-for="post in displayPosts" :id="'portal-' + post.author + post.permlink" :src="'https://ipfs.dlux.io/ipfs/' + get360(post)" crossorigin="anonymous" />
             <img v-for="(author, name) in authors" :id="'author-' + name" :src="'https://images.hive.blog/u/' + name + '/avatar'" crossorigin="anonymous" />
             <img :id="'user-' + user" :src="'https://images.hive.blog/u/' + user + '/avatar'" crossorigin="anonymous" />
-            <a-assets-item v-pre id="obfont" src="https://rawgit.com/mrdoob/three.js/dev/examples/fonts/optimer_bold.typeface.json"></a-assets-item><template id="hand-template"><a-entity><a-box scale="0.1 0.1 0.1"></a-box></a-entity></template></a-assets>
-        <!-- DLUX-->
-        <a-entity id="dlux-container" look-at="[camera]" position="0 1.6 -14">
-            <!-- DLUX Navigation-->
-            <a-entity id="nav" position="0 9 1" scale="2 2 2">
-                <a-entity id="nav-trending" trending="" geometry="primitive:plane" material="side:double;src:#nav-trending-icon;transparent:true;alphaTest:0.32" position="-3.2 0 0"></a-entity>
-                <a-entity id="nav-new" new="" geometry="primitive:plane" material="side:double;src:#nav-new-icon;transparent:true;alphaTest:0.5" position="-1.6 0 0"></a-entity>
-                <a-entity id="nav-random" url="https://otolux.la" geometry="primitive:plane" material="side:double;src:#nav-random-icon;transparent:true;alphaTest:0.5" position="0 0 0"></a-entity>
-                <!-- Browse button 0.325 spacing-->
-                <a-entity id="nav-browse" show-menu="" geometry="primitive:plane" material="side:double;src:#nav-browse-icon;transparent:true;alphaTest:0.5" position="1.6 0 0">
-                    <a-entity class="hiddenMenu" id="nav-browse-items" position="0 -.5 0" visible="false">
-                        <a-entity geometry="primitive:plane;height:1;width:3" material="opacity:0;depthWrite:false" position="0 0 0"></a-entity>
-                        <a-entity id="browse-hr" geometry="primitive:plane;height:.1;width:3" material="side:double;color:#9100b5" position="0 -.25 0"></a-entity>
-                        <a-entity id="browse-videos" geometry="primitive:plane;height:.6;width:3" material="side:double;color:#4C4C4C;" position="0 -.6 0" url="/feed/videos">
-                            <a-entity id="browse-videos-text" text="value:Videos;width: 9; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: center; color:;" material="color:#FFF" position="-1.3 0 0.1" scale="1 1 .01"></a-entity>
-                        </a-entity>
-                        <a-entity class="hr" geometry="primitive:plane;height:.05;width:3" material="side:double;color:#7F7F7F;" position="0 -.925 0"></a-entity>
-                        <a-entity id="browse-games" geometry="primitive:plane;height:.6;width:3" material="side:double;color:#4C4C4C;" position="0 -1.25 0" url="/feed/games">
-                            <a-entity id="browse-games-text" text="value:Games;width: 9; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: center; color:;" material="color:#FFF" position="-1.3 0 0.1" scale="1 1 .01"></a-entity>
-                        </a-entity>
-                        <a-entity class="hr" geometry="primitive:plane;height:.05;width:3" material="side:double;color:#7F7F7F;" position="0 -1.575 0"></a-entity>
-                        <a-entity id="browse-apps" geometry="primitive:plane;height:.6;width:3" material="side:double;color:#4C4C4C;" position="0 -1.9 0" url="/feed/apps">
-                            <a-entity id="browse-apps-text" text="value:Apps;width: 9; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: center; color:;" material="color:#FFF" position="-1.3 0 0.1" scale="1 1 .01"></a-entity>
-                        </a-entity>
-                        <a-entity class="hr" geometry="primitive:plane;height:.05;width:3" material="side:double;color:#7F7F7F;" position="0 -2.225 0"></a-entity>
-                        <a-entity id="browse-art" geometry="primitive:plane;height:.6;width:3" material="side:double;color:#4C4C4C;" position="0 -2.550 0" url="/feed/art">
-                            <a-entity id="browse-art-text" text="value:Art;width: 9; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: center; color:;" material="color:#FFF" position="-1.3 0 0.1" scale="1 1 .01"></a-entity>
-                        </a-entity>
-                        <a-entity class="hr" geometry="primitive:plane;height:.05;width:3" material="side:double;color:#7F7F7F;" position="0 -2.875 0"></a-entity>
-                        <a-entity id="browse-education" geometry="primitive:plane;height:.6;width:3" material="side:double;color:#4C4C4C;" position="0 -3.2 0" url="/feed/eductation">
-                            <a-entity id="browse-education-text" text="value:Education;width: 9; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: center; color:;" material="color:#FFF" position="-1.3 0 0.1" scale="1 1 .01"></a-entity>
-                        </a-entity>
-                    </a-entity>
-                </a-entity>
-                <a-entity id="nav-hive" show-menu="" geometry="primitive:circle;radius:.5" material="side:double;src:#nav-hive-icon" position="3.2 0 0">
-                    <a-entity class="hiddenMenu" id="nav-hive-items" position="0 -.5 0" visible="false">
-                        <a-entity geometry="primitive:plane;height:1;width:3" material="opacity:0;depthWrite:false" position="0 0 0"></a-entity>
-                        <a-entity id="hive-hr" geometry="primitive:plane;height:.1;width:3" material="side:double;color:#1b5199" position="0 -.25 0"></a-entity>
-                        <a-entity id="hive-login" geometry="primitive:plane;height:.6;width:3" material="side:double;color:#4C4C4C;" position="0 -.6 0" url="/auth">
-                            <a-entity id="hive-login-text" text="value:Login;width: 9; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: center; color:;" material="color:#FFF" position="-1.3 0 0.1" scale="1 1 .01"></a-entity>
-                        </a-entity>
-                        <a-entity class="hr" geometry="primitive:plane;height:.05;width:3" material="side:double;color:#7F7F7F;" position="0 -.925 0"></a-entity>
-                        <a-entity id="join-hive" geometry="primitive:plane;height:.6;width:3" material="side:double;color:#4C4C4C;" position="0 -1.25 0" url="https://signup.hiveit.com">
-                            <a-entity id="join-hive-text" text="value:Join Hive;width: 9; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: center; color:;" material="color:#FFF" position="-1.3 0 0.1" scale="1 1 .01"></a-entity>
-                        </a-entity>
-                    </a-entity>
-                </a-entity>
-            </a-entity>
-            <a-entity id="greeting" geometry="primitive:plane;width:18;height:6.5" material="side:double;color:#4C4C4C;opacity:0.7" position="0 3.5 0" scale=".7 .7 .7" rotation="">
-                <a-entity id="greeter-pic" geometry="primitive:circle" crossorigin="anonymous" :material="'side:double;src:#user-' + user + ';'" position="-9 3.25 0.1" scale="2 2 2" do-on-assetsload="#user"></a-entity>
-                <a-entity id="greeter-name" :text="'value:' + user + '; width: 7; wrapCount: 17; lineHeight: 50; letterSpacing: 5; anchor: left; baseline: bottom; color:;'" position="-6.47 1.23 0.1" rotation="" scale="2 2 0.01" material=""></a-entity>
-                <a-entity id="greeter-pinned-post" text="value:Welcome to dlux, sign in with Hive to start building.;width: 8.5; wrapCount: 32.5; lineHeight: 60; letterSpacing: 5; anchor: left; baseline: bottom; color:;" position="-7.6 -2.06 0.1" rotation="" scale="2 2 0.01" material=""></a-entity>
-            </a-entity>
-        </a-entity>
-        <!-- DLUX Spotlight-->
-        <a-entity id="spot-light" light="angle:35;intensity:0.2;type:spot" position="0 8.5 31" rotation="-10.5 0 0"></a-entity>
+            <a-assets-item v-pre id="obfont" src="https://rawgit.com/mrdoob/three.js/dev/examples/fonts/optimer_bold.typeface.json"></a-assets-item>
+            <template id="hand-template"><a-entity><a-box scale="0.1 0.1 0.1"></a-box></a-entity></template>
+        </a-assets>
+        
         <!-- Environment-->
         <a-entity environment="preset: starry"></a-entity>
         <a-entity id="ambient-light" light="type:ambient;intensity:0.5"></a-entity>
@@ -111,11 +59,6 @@ export default {
             </a-entity>
         </a-entity>
         <!-- otolux tag-->
-        <a-entity id="ototag" url="http://otolux.la" geometry="primitive:plane;height:0.77;width:5.91" material="side:double" position="0 0.369 10" rotation="0 -180 0">
-            <a-entity id="heart" obj-model="obj:/viz/love.obj" material="color:#ff0000" position="" rotation="" scale="0.015 0.015 0.015" url="http://otolux.la"></a-entity>
-            <a-entity id="madein" text="value:made in LA        by OTOLUX;width: 8.5; wrapCount: 40; lineHeight: 50; letterSpacing: 5; align: center; anchor: center; baseline: center; color:black;" position="0 0 .1" scale="1 1 0.01" visible="" material="" rotation=""></a-entity>
-            <a-entity id="madeout" text="value:made in LA        by OTOLUX;width: 8.5; wrapCount: 40; lineHeight: 50; letterSpacing: 5; align: center; anchor: center; baseline: center; color:black;" position="0 0 -.1" scale="1 1 0.01" visible="" material="" rotation="0 180 0"></a-entity>
-        </a-entity>
     </a-scene>
   `,
     props: {
