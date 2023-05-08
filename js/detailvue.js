@@ -50,14 +50,16 @@ export default {
                             <a :href="'/@' + post.author" class="no-decoration">
                                 <div class="d-flex align-items-center">
                                     <img v-if="post.author" :src="'https://images.hive.blog/u/' + post.author + '/avatar'"
-                                        alt=""
-                                        class="rounded-circle bg-light img-fluid me-1 cover author-img"
+                                        :alt="'https://images.hive.blog/u/' + post.author"
+                                        class="rounded-circle bg-light img-fluid me-1 border border-light"
                                         style="width: 50px;">
                                     <div>
                                         <div class="d-flex align-items-center">
                                             <h3 class="m-0 text-white-50">{{post.author}}</h3>
                                             <div>
-                                            <span class="badge small text-bg-dark border border-2 border-dark text-white-50">{{post.rep}}</span>
+                                            <span class="ms-1 badge text-white-50"
+                                            :class="{'rep-danger': post.rep < 25, 'rep-warning': post.rep >= 25 && post.rep < 50, 'rep-success': post.rep >= 50}">
+                                            {{post.rep}}</span>
                                             </div>
                                         </div>
                                         <span class="small text-muted">{{post.ago}}</span>

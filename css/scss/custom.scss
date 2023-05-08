@@ -109,7 +109,7 @@ body {
   background-color: #212529;
 }
 
-.cover {
+.cover { 
   object-fit: cover;
 }
 
@@ -117,10 +117,17 @@ body {
   background-color: #343a40 !important;
 }
 
-.border-dark {
+.border-darkg {
   border-color: #343a40 !important;
 }
 
+.bg-indigo {
+  background-color: #6610f2;
+
+}
+.border-light-50 {
+  border-color: rgba(255,255,255,0.5) !important;
+}
 .col-sort {
   background-color: cornflowerblue !important;
   color: #282828;
@@ -259,7 +266,15 @@ td {
 .btn-sm {
   height:31px;
 }
-
+.bg-blur{
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.bg-blur-darkg {
+  background-color: rgba(#343a40, 0.8);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+}
 .dnav {
   background-color: rgba(42, 48, 54, 0.8);
   -webkit-backdrop-filter: blur(10px);
@@ -323,6 +338,19 @@ td {
 
 .square {
   border-radius: 0px;
+}
+
+.rep-success {
+  border-color: rgba(#41D7A7, .5) !important;
+  box-shadow: inset 0px 0px 5px 1px #41D7A7;
+}
+.rep-warning {
+  border-color: rgba(#ffc107, .5) !important;
+  box-shadow: inset 0px 0px 5px 1px #ffc107;
+}
+.rep-danger {
+  border-color: rgba(#FC346F, .5) !important;
+  box-shadow: inset 0px 0px 5px 1px #FC346F;
 }
 
 #dapps {

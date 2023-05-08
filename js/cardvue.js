@@ -14,29 +14,36 @@ export default {
     },
     template: `
     <div class="card text-white">
-   <div class="card-header">
+   <div class="card-header px-2 pt-1 pb-0">
       <div class="d-flex align-items-center flex-wrap">
-         <a :href="'/@' + post.author" class="no-decoration">
-            <div class="d-flex align-items-center">
-               <img v-if="post.author" :src="'https://images.hive.blog/u/' + post.author + '/avatar'" alt=""
-                  class="rounded-circle bg-light img-fluid me-1 cover author-img"
-                  style="width: 50px;">
+            <div class="d-flex align-items-center mt-1 mb-2">
+                <a :href="'/@' + post.author" class="no-decoration">
+               <img v-if="post.author" :src="'https://images.hive.blog/u/' + post.author + '/avatar'"
+                :alt="'https://images.hive.blog/u/' + post.author"
+                  class="rounded-circle bg-light img-fluid me-1 border"
+    
+                  style="width: 50px;"></a>
                <div>
+                  <!-- author & rep -->
+                  <a :href="'/@' + post.author" class="no-decoration">
                   <div class="d-flex align-items-center">
                      <h5 class="m-0 text-white-50">{{ post.author }}</h5>
-                        <span class="ms-1 badge small text-bg-light">
+                        <span class="ms-1 badge small  text-white-50"
+                        :class="{'rep-danger': post.rep < 25, 'rep-warning': post.rep >= 25 && post.rep < 50, 'rep-success': post.rep >= 50}">
                         {{ post.rep }}
                         </span>
-                  </div>
+                  </div></a>
+                  <!-- ago -->
                   <span class="small text-muted" style="font-weight: 400">{{ timeSince(post.created) }}</span>
+                  
+                  </div> 
                </div>
-            </div>
-         </a>
-         <h5 class="m-0 ms-auto"><span class="badge bg-info"><i
-            :class="post_select.types[post.type].icon"></i>{{ post.type }}</span></h5>
+               <!-- label -->
+               <h5 class="m-0 ms-auto align-self-end"><span class="badge square rounded-top border border-bottom-0 bg-info border-light-50"><i
+               :class="post_select.types[post.type].icon"></i>{{ post.type }}</span></h5>
       </div >
    </div >
-   <div class="card-body">
+   <div class="card-body px-2">
       <a href="#detailModal" class="no-decoration" data-bs-toggle="modal"
          @click="modalSelect(post.url)">
          <h3 class="lead text-white truncate1">{{ post.title }}</h3>
@@ -144,7 +151,7 @@ export default {
                                   </form>
                               </div>
 
-   <div class="card-footer text-white-50">
+   <div class="card-footer text-white-50 px-2 pb-1">
       <!-- footer buttons -->
       <div class="d-flex flex-wrap align-items-center">
         <div class="text-nowrap my-2"> 

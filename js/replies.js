@@ -25,7 +25,9 @@ export default {
                   <a :href="'/@' + post.author" class="no-decoration">
                   <span class="d-flex align-items-center">
                   <h5 class="m-0 text-white-50">{{ post.author }}</h5>
-                  <span class="badge small text-bg-dark border border-2 border-dark text-white-50">{{ post.rep }}</span></span></a>
+                  <span class="ms-1 badge small text-white-50"
+                  :class="{'rep-danger': post.rep < 25, 'rep-warning': post.rep >= 25 && post.rep < 50, 'rep-success': post.rep >= 50}">
+                  {{ post.rep }}</span></span></a>
                   <span class="ms-1 text-muted">•</span>
                   <span class="ms-1 small text-muted" style="font-weight: 400">{{ timeSince(post.created) }}</span>
                   <a role="button" class="ms-auto no-decoration text-white-50" @click="view = !view"><i v-show="view" class="fa-solid fa-circle-minus fa-fw"></i><i v-show="!view" class="fa-solid fa-circle-plus fa-fw"></i></a>
