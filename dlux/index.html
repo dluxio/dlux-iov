@@ -46,7 +46,8 @@
             if (!hashy) {
                 hashy = JSON.parse(metadata).audHash
             }
-            const splits = hashy.split('/')
+            console.log({hashy})
+            const splits = typeof hashy == 'string' ? hashy.split('/') : []
             if (splits.length && splits[3] == 'ipfs') {
                 hashy = splits('/')[4];
             }
