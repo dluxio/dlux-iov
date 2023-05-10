@@ -4,6 +4,7 @@ import MDE from "/js/mde.js";
 import Vote from "/js/vote.js";
 import Pop from "/js/pop.js";
 import Replies from "/js/replies.js";
+import Bennies from "/js/bennies.js";
 
 export default {
     components: {
@@ -13,6 +14,7 @@ export default {
         "vote": Vote,
         "pop-vue": Pop,
         "replies": Replies,
+        "bennies": Bennies
     },
     template: `
 <div :class="{'fade': modal, 'modal': modal}" id="detailModal" tabindex="-1" role="dialog" aria-hidden="true" @focus="orderBy('Reward')">
