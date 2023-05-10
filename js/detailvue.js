@@ -21,42 +21,6 @@ export default {
     <div class="modal-dialog modal-full modal-xl modal-dialog-centered" style="max-width: 1000px;"
         role="document">
         <div class="modal-content rounded bg-img-none text-white">
-        <a data-bs-toggle="modal" href="#myModal" class="btn btn-primary">Launch modal</a>
-
-                <div class="modal" id="myModal">
-                        <div class="modal-dialog">
-                          <div class="modal-content">
-                            <div class="modal-header">
-                              <h4 class="modal-title">Modal title</h4>    
-                              <button type="button" class="close" data-dismiss="modal">×</button>
-                            </div><div class="container"></div>
-                            <div class="modal-body">
-                              ...
-                              <a data-bs-toggle="modal" href="#myModal2" class="btn btn-primary">Open modal2</a>
-                            </div>
-                            <div class="modal-footer">
-                              <a href="#" data-bs-dismiss="modal" class="btn">Close</a>
-                            </div>
-                          </div>
-                        </div>
-                </div>
-                <div class="modal" id="myModal2">
-                        <div class="modal-dialog">
-                          <div class="modal-content">
-                            <div class="modal-header">
-                              <h4 class="modal-title">2nd Modal title</h4>
-                              <button type="button" class="close" data-bs-dismiss="modal">×</button>
-                            </div><div class="container"></div>
-                            <div class="modal-body">
-                              ..
-                            </div>
-                            <div class="modal-footer">
-                              <a href="#" data-bs-dismiss="modal" class="btn">Close</a>
-                              <a href="#" class="btn btn-primary">Save changes</a>
-                            </div>
-                          </div>
-                        </div>
-                </div>
             <div class="card text-white bg-img-none bg-blur-none">
                 <div class="ms-auto">
                     <button :class="{'invisible' : !modal}" type="button" class="btn-close mt-3 me-3"
@@ -138,48 +102,22 @@ export default {
                             
                             
                         </div>
-                        <!--modal vote collapse-->
-                        <div class="collapse"
-                            :id="'vote-modal-' + post.author + '-' + post.permlink">
-                            <form id="voteForm">
-                      <div class="d-flex mt-1 align-items-center text-white-50">
-
-                          <button type="button" class="btn btn-sm me-1"
-                              :class="{'btn-success': !flag, ' btn-danger': flag}"
-                              @click="vote(post.url)" style="min-width: 85px;"><span v-if="!flag"><i class="fas fa-heart fa-fw me-1"></i></span><span v-if="flag"><i class="fa-solid fa-flag me-1"></i></span>{{flag ? '-' :
-                              ''}}{{formatNumber(slider / 100, 0,'.',',')}}%</button>
-
-                          <button type="button" class="btn btn-sm btn-secondary px-1 me-1" 
-                          data-bs-toggle="collapse" :data-bs-target="'#vote-modal-' + post.author + '-' + post.permlink">
-                            <i class="fa-solid fa-xmark fa-fw"></i></button>
-
-                              <input type="range" class="form-range mx-2" step="1"
-                                  max="10000" v-model="slider">
-
-                              <span style="min-width: 100px" class="text-end text-nowrap" id="commentVal"
-                                  :class="{'text-success': !flag, 'text-danger': flag}">
-                                  {{toFixed(voteval *
-                                  slider/10000,3)}}
-                                  <i class="fab fa-fw fa-hive"></i>
-                              </span>
-                      </div>
-                  </form>
-                        </div>
+                        
                         <!--modal contract collapse-->
                         <div class="collapse" :id="'contract-modal-' + post.author + '-' + post.permlink">
-                            <h4 class="mx-2 text-white-50 text-center mt-2">Storage Contract Details</h4>
+                            <h4 class="text-white-50 text-center mt-2">Storage Contract Details</h4>
                             <form v-for="(cid, name, index) in post.contract" id="contractForm">
                                     <div v-if="contracts[name]">
 
                                     <!-- detail banner -->
                                     <div class="d-flex flex-column mb-2">
                                         <div class="w-100 py-1">
-                                            <div class="d-flex justify-content-between align-items-center mx-2">
+                                            <div class="d-flex justify-content-between align-items-center">
                                                 <span class="text-break">{{fancyBytes(contracts[name].u)}} | {{expIn(contracts[name])}}</span>
                                                 <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="collapse" :data-bs-target="'#nodes-' + post.permlink">
                                                 <i class="fa-solid fa-tower-broadcast fa-fw me-1"></i>{{contracts[name].nt}}/{{contracts[name].p}}</button>
                                             </div>
-                                            <div class="collapse mx-2" :id="'nodes-' + post.permlink">
+                                            <div class="collapse" :id="'nodes-' + post.permlink">
                                                 <div class="text-lead text-uppercase text-white-50 pb-05 mt-1 border-bottom">Nodes Storing This Contract</div>
                                                 <ol type="1" class="my-1" v-for="(acc, prop, index) in contracts[name].n">
                                                     <li class="mt-1"><a :href="'/@' + acc " class="no-decoration text-info">@{{acc}}</a></li>
@@ -193,7 +131,7 @@ export default {
                                     </div>
 
                                     <!-- node banner -->
-                                    <div v-if="has_ipfs" class="alert alert-secondary d-flex align-items-center py-1 ps-2 pe-1 mx-2 mb-2">
+                                    <div v-if="has_ipfs" class="alert alert-secondary d-flex align-items-center py-1 ps-2 pe-1 mb-2">
                                         <span class="me-1">{{isStored(contracts[name].i) ? 'Your node is storing this contract' : 'Your node is not storing this contract'}}</span>
                                         <button @click="store(contracts[name].i, isStored(contracts[name].i))" class="btn ms-auto"
                                             :class="{'btn-success': !isStored(contracts[name].i), 'btn-danger': isStored(contracts[name].i)}">
@@ -206,7 +144,7 @@ export default {
                                     
 
                                     <!-- extend time input -->
-                                    <div class="d-flex flex-wrap px-2 mb-2">
+                                    <div class="d-flex flex-wrap mb-2">
                                       <div class="btn-group mt-1">
                                           <input name="time" @change="updateCost(name);customTime = false" title="1 Day" class="btn-check" :id="'option1-' + name" type="radio"
                                               value="1" v-model="contracts[name].extend" checked>
@@ -229,7 +167,7 @@ export default {
                                     </div>
 
                                     <!-- action buttons -->
-                                    <div class="px-2 mb-2 d-flex flex-wrap text-nobreak align-items-center text-white-50">
+                                    <div class="mb-2 d-flex flex-wrap text-nobreak align-items-center text-white-50">
                                         <button type="button" class="btn btn-sm btn-primary mt-1" :disabled="extendcost[name] > broca_calc(broca)" @click="extend(contracts[name], extendcost[name])">
                                             <i class="fa-solid fa-clock-rotate-left fa-fw me-1"></i>Extend</button>
                                         <button type="button" class="btn btn-sm btn-warning ms-1 mt-1" v-if="contracts[name].t == account" @click="cancel_contract(contracts[name])">
@@ -249,33 +187,62 @@ export default {
                                     </div>
                                 </form>
                         </div>
+
+                        <!--modal vote collapse-->
+                        <div class="collapse"
+                            :id="'vote-modal-' + post.author + '-' + post.permlink">
+                            <form id="voteForm">
+                      <div class="d-flex align-items-center text-white-50">
+
+                          <button type="button" class="btn btn-sm me-1"
+                              :class="{'btn-success': !flag, ' btn-danger': flag}"
+                              @click="vote(post.url)" style="min-width: 85px;"><span v-if="!flag"><i class="fas fa-heart fa-fw me-1"></i></span><span v-if="flag"><i class="fa-solid fa-flag me-1"></i></span>{{flag ? '-' :
+                              ''}}{{formatNumber(slider / 100, 0,'.',',')}}%</button>
+
+                          <button type="button" class="btn btn-sm btn-secondary px-1 me-1" 
+                          data-bs-toggle="collapse" :data-bs-target="'#vote-modal-' + post.author + '-' + post.permlink">
+                            <i class="fa-solid fa-xmark fa-fw"></i></button>
+
+                              <input type="range" class="form-range mx-2" step="1"
+                                  max="10000" v-model="slider">
+
+                              <span style="min-width: 100px" class="text-end text-nowrap" id="commentVal"
+                                  :class="{'text-success': !flag, 'text-danger': flag}">
+                                  {{toFixed(voteval *
+                                  slider/10000,3)}}
+                                  <i class="fab fa-fw fa-hive"></i>
+                              </span>
+                      </div>
+                  </form>
+                        </div>
+
                     </div>
                 </div>
                 <!--footer buttons-->
-                <div class="my-2 py-2" style="border-top: solid 1px rgba(0,0,0,1); border-bottom: solid 1px rgba(255,255,255,0.4);">
+                <div class="my-2 p-2" style="border-top: solid 1px rgba(0,0,0,1); border-bottom: solid 1px rgba(255,255,255,0.4);">
                     <div class="ms-auto me-auto" style="max-width: 750px">
                         <div class="d-flex align-items-center">
                             <a role="button" @click="flag = false" class="no-decoration" data-bs-toggle="collapse"
                                 :data-bs-target="'#vote-modal-' + post.author + '-' + post.permlink"><i
-                                    class="fas fa-heart me-1"></i><span
+                                    class="fas fa-heart fa-fw me-1"></i><span
                                     class="text-white-50">{{post.upVotes}}</span>
                             </a>
                             <a href="#comments" class="no-decoration">
-                                <i class="fas fa-comment ms-2 me-1"></i><span
+                                <i class="fas fa-comment fa-fw ms-2 me-1"></i><span
                                     class="text-white-50">{{post.children}}</span>
                             </a>
                             <a role="button" class="no-decoration text-white-50" data-bs-toggle="collapse"
                                 :class="{'text-primary': flag > 0}"
                                 :data-bs-target="'#vote-modal-' + post.author + '-' + post.permlink"
                                 @click="flag = true">
-                                <i class="fa-solid fa-flag ms-2 me-1"></i><span
+                                <i class="fa-solid fa-flag fa-fw ms-2 me-1"></i><span
                                     class="text-white-50">{{post.downVotes ?
                                     post.downVotes : ''}}</span>
                             </a>
                             <a role="button" v-for="(contract, name, index) in post.contract"
                                 class="no-decoration text-white-50" data-bs-toggle="collapse"
                                 :data-bs-target="'#contract-modal-' + post.author + '-' + post.permlink">
-                                <i class="fa-solid fa-file-contract ms-2 me-1" :class="{'text-success': color_code(name) > 28800 * 7,'text-warning': color_code(name) < 28800 * 7 &&  color_code(name) > 28800, 'text-warning': color_code(name) < 28800}"></i>
+                                <i class="fa-solid fa-file-contract fa-fw ms-2 me-1" :class="{'text-success': color_code(name) > 28800 * 7,'text-warning': color_code(name) < 28800 * 7 &&  color_code(name) > 28800, 'text-warning': color_code(name) < 28800}"></i>
                             </a>
 
                         <vue-ratings v-if="post.type != 'Blog'" role="button" class="ms-2" vote="true" @rating="setRating(post.url, $event)"></vue-ratings>
@@ -293,7 +260,7 @@ export default {
                 </div>
             </div>
             <!--new comment-->
-            <div>
+            <div class="px-2">
                 <div class="mb-3 ms-auto me-auto" style="max-width: 750px">
                     <form id="commentForm">
                         <!--input with buttons and preview-->
@@ -303,18 +270,17 @@ export default {
                         <bennies :list="bens" :hide="hideBens" @update-hide="hideBens = true" @update-bennies="bens=$event">
                             <button class="btn btn-sm px-2 btn-secondary" @click="hideBens = !hideBens"><i class="fa-solid fa-user-plus fa-fw"></i></button>
                         </bennies>
-                        
-                        <button class="ms-auto btn btn-sm px-2 btn-primary" @click="comment(post.url)">Reply</button>
+                        <button class="ms-auto btn btn-sm px-2 btn-primary" @click="comment(post.url)"><i class="fas fa-comment fa-fw me-1"></i>Reply</button>
                     </div>
                 </div>
             </div>
             <div class="bg-darkest border-1 border-start border-end p-1"></div>
             <!-- comments -->
-                <div id="comments" class="replies w-100 ms-auto me-auto mb-3" style="max-width: 750px">
+                <div id="comments" class="replies w-100 ms-auto me-auto px-2 mb-3" style="max-width: 750px">
                     <div class="d-flex text-nobreak align-items-center my-2">
                         <h5 class="m-0">{{post.children}} Comment<span v-if="post.children > 1">s</span></h5>
                         <div class="dropdown ms-auto">
-                            <button class="btn btn-sm btn-dark dropdown-toggle text-uppercase" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-sm btn-dark px-2 text-uppercase" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 {{orderby}}<i class="fa-solid fa-arrow-down-wide-short fa-fw ms-1"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark bg-dark">

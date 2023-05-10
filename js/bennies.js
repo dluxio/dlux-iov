@@ -2,28 +2,13 @@ export default {
     template: `
     <div>
         <slot v-if="hide"/>
-        <div class="modal">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Modal title</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true"></span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <p>Modal body text goes here.</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary">Save changes</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
         <div v-if="!hide">
             <p>Current Bennies: ({{bennies?.length}}/8){{total/100}}%</p>
-            <button @click="cancel()">Cancel</button>
+            <div class="input-group mb-3">
+                <span class="input-group-text">@</span>
+                <input type="search" class="form-control">
+            </div>
+            <button class="btn btn-sm px-2 btn-secondary" @click="cancel()"><i class="fa-solid fa-xmark fa-fw me-1"></i>Cancel</button>
         </div>
     </div>
     `,

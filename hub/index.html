@@ -114,65 +114,50 @@
                             </div>
                         </div>
                         <div class="mx-1">
-                            <input type="search" class="form-control" placeholder="Search"
-                                v-model="postSelect.searchTerm" @keyup.enter="postSelect.entry = 'search';getPosts()">
+                            <input type="search" class="form-control"
+                                placeholder="Search" v-model="postSelect.searchTerm"
+                                @keyup.enter="postSelect.entry = 'search';getPosts()">
                         </div>
                     </div>
                 </div>
                 <!--main view-->
-                <a data-bs-toggle="modal" href="#myModal" class="btn btn-primary">Launch modal</a>
-
-                <div class="modal" id="myModal">
-                        <div class="modal-dialog">
-                          <div class="modal-content">
-                            <div class="modal-header">
-                              <h4 class="modal-title">Modal title</h4>    
-                              <button type="button" class="close" data-dismiss="modal">×</button>
-                            </div><div class="container"></div>
-                            <div class="modal-body">
-                              ...
-                              <a data-bs-toggle="modal" href="#myModal2" class="btn btn-primary">Open modal2</a>
-                            </div>
-                            <div class="modal-footer">
-                              <a href="#" data-bs-dismiss="modal" class="btn">Close</a>
-                            </div>
-                          </div>
-                        </div>
-                </div>
-                <div class="modal" id="myModal2">
-                        <div class="modal-dialog">
-                          <div class="modal-content">
-                            <div class="modal-header">
-                              <h4 class="modal-title">2nd Modal title</h4>
-                              <button type="button" class="close" data-bs-dismiss="modal">×</button>
-                            </div><div class="container"></div>
-                            <div class="modal-body">
-                              ..
-                            </div>
-                            <div class="modal-footer">
-                              <a href="#" data-bs-dismiss="modal" class="btn">Close</a>
-                              <a href="#" class="btn btn-primary">Save changes</a>
-                            </div>
-                          </div>
-                        </div>
-                </div>
-                
                 <div class="row">
                     <div class="col-sm-6 col-lg-4 mb-3" v-for="post in displayPosts" :key="post.url">
-                        <card-vue :post="post" :account="account" :has_ipfs="spkapi.storage.length ? true : false"
-                            :post_select="postSelect" :voteval="voteVal" :head_block="spkapi.head_block"
-                            :broca_refill="sstats.broca_refill" :broca="spkapi.broca" :spk_power="spkapi.spk_power"
-                            :contracts="contracts" :extendcost="extendcost" @tosign="toSign=$event"
-                            @modalselect="modalSelect($event)" @vote="vote($event)"></card-vue>
+                        <card-vue 
+                            :post="post" 
+                            :account="account"
+                            :has_ipfs="spkapi.storage.length ? true : false" 
+                            :post_select="postSelect" 
+                            :voteval="voteVal" 
+                            :head_block="spkapi.head_block"
+                            :broca_refill="sstats.broca_refill"
+                            :broca="spkapi.broca"
+                            :spk_power="spkapi.spk_power"
+                            :contracts="contracts"
+                            :extendcost="extendcost"
+                            @tosign="toSign=$event"
+                            @modalselect="modalSelect($event)" 
+                            @vote="vote($event)"></card-vue>
                     </div>
                 </div>
             </div>
             <!--detail view-->
-            <detail-vue :post="displayPost.item" :account="account" :modal="true" :post_select="postSelect"
-                :has_ipfs="spkapi.storage?.length ? true : false" :voteval="voteVal" :head_block="sstats.head_block"
-                :broca_refill="sstats.broca_refill" :broca="spkapi.broca" :spk_power="spkapi.spk_power"
-                :contracts="contracts" :extendcost="extendcost" @tosign="toSign=$event"
-                @modalselect="modalSelect($event)" @vote="vote($event)"></detail-vue>
+            <detail-vue
+                :post="displayPost.item" 
+                :account="account"
+                :modal="true"
+                :post_select="postSelect"
+                :has_ipfs="spkapi.storage?.length ? true : false" 
+                :voteval="voteVal" 
+                :head_block="sstats.head_block"
+                :broca_refill="sstats.broca_refill"
+                :broca="spkapi.broca"
+                :spk_power="spkapi.spk_power"
+                :contracts="contracts"
+                :extendcost="extendcost"
+                @tosign="toSign=$event"
+                @modalselect="modalSelect($event)" 
+                @vote="vote($event)"></detail-vue>
         </main>
         <!-- Footer -->
         <div>

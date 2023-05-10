@@ -102,13 +102,13 @@ export default {
 
                                     <!-- node banner -->
                                     <div v-if="has_ipfs" class="alert alert-secondary d-flex align-items-center py-1 ps-2 pe-1 mx-2 mb-2">
-                                        <span class="me-1">{{isStored(contracts[name].i) ? 'Your node is storing this contract' : 'Your node is not storing this contract'}}</span>
-                                        <button @click="store(contracts[name].i, isStored(contracts[name].i))" class="btn ms-auto"
+                                        <div class="me-1">{{isStored(contracts[name].i) ? 'Your node is storing this contract' : 'Your node is not storing this contract'}}</div>
+                                        <div class="ms-auto">
+                                        <button @click="store(contracts[name].i, isStored(contracts[name].i))" class="btn text-nowrap"
                                             :class="{'btn-success': !isStored(contracts[name].i), 'btn-danger': isStored(contracts[name].i)}">
-                                            <span v-if="!isStored(contracts[name].i)">
-                                                <i class="fa-solid fa-square-plus fa-fw me-1"></i>Add</span>
+                                            <span v-if="!isStored(contracts[name].i)"><i class="fa-solid fa-square-plus fa-fw me-1"></i>Add</span>
                                             <span v-if="isStored(contracts[name].i)"><i class="fa-solid fa-trash-can fa-fw me-1"></i>Remove</span>
-                                        </button>
+                                        </button></div>
                                     </div>
 
                                     
@@ -137,7 +137,7 @@ export default {
                                     </div>
 
                                     <!-- action buttons -->
-                                    <div class="px-2 mb-2 d-flex flex-wrap text-nobreak align-items-center text-white-50">
+                                    <div class="px-2 mb-2 d-flex flex-wrap text-wrap align-items-center text-white-50">
                                         <button type="button" class="btn btn-sm btn-primary mt-1" :disabled="extendcost[name] > broca_calc(broca)" @click="extend(contracts[name], extendcost[name])">
                                             <i class="fa-solid fa-clock-rotate-left fa-fw me-1"></i>Extend</button>
                                         <button type="button" class="btn btn-sm btn-warning ms-1 mt-1" v-if="contracts[name].t == account" @click="cancel_contract(contracts[name])">
@@ -145,7 +145,7 @@ export default {
                                         <button type="button" class="btn btn-sm btn-secondary ms-1 mt-1" data-bs-toggle="collapse"
                                         :data-bs-target="'#contract-' + post.author + '-' + post.permlink">
                                             <i class="fa-solid fa-xmark fa-fw"></i></button>
-                                        <div class="d-flex align-items-center text-nobreak ms-1 mt-1 btn btn-sm btn-outline-secondary p-0">
+                                        <div class="d-flex align-items-center text-wrap ms-1 mt-1 btn btn-sm btn-outline-secondary p-0">
                                             <label :for="'spread-' + name" role="button" class="ps-1">&nbsp;</label>
                                             <input class="form control" :id="'spread-' + name" type="checkbox" role="button" v-model="spread" @change="updateCost(name)">
                                             <label :for="'spread-' + name" role="button" class="px-1 py-05">Add<i class="fa-solid fa-tower-broadcast fa-fw ms-1"></i></label>
