@@ -75,29 +75,30 @@ export default {
                               </div>
       
                             <!-- contract collapse -->
-                            <div class="collapse show" :id="'contract-' +  post.author + '-' + post.permlink">
+                            <div class="collapse" :id="'contract-' +  post.author + '-' + post.permlink">
                                 <form v-for="(cid, name, index) in post.contract" id="contractForm">
                                     <div v-if="contracts[name]">
+
                                     <!-- detail banner -->
-                                    <div class="d-flex flex-column">
-                                        <div class="w-100 mb-1 py-1 bg-dark">
-                                            <div class="d-flex justify-content-between mx-2">
+                                    <div class="d-flex flex-column mb-2">
+                                        <div class="w-100 py-1 bg-dark">
+                                            <div class="d-flex justify-content-between align-items-center mx-2">
                                                 <span class="text-break">{{fancyBytes(contracts[name].u)}} | {{expIn(contracts[name])}}</span>
-                                                <button class="btn btn-sm btn-outline-success" data-bs-toggle="collapse" :data-bs-target="'#nodes-' + post.permlink">
-                                                ({{contracts[name].nt}}/{{contracts[name].p}})</button>
+                                                <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="collapse" :data-bs-target="'#nodes-' + post.permlink">
+                                                <i class="fa-solid fa-tower-broadcast fa-fw me-1"></i>{{contracts[name].nt}}/{{contracts[name].p}}</button>
                                             </div>
-                                            <div class="collapse show mx-2" :id="'nodes-' + post.permlink">
-                                                <p class="text-uppercase">Nodes Hosting This Contract</p>
-                                                <div v-for="acc in contracts[name].n">
-                                                    <p>@{{acc}}</p>
+                                            <div class="collapse mx-2" :id="'nodes-' + post.permlink">
+                                                <div class="text-lead text-uppercase text-white-50 pb-05 mt-1 border-bottom">Nodes Hosting This Contract</div>
+                                                <div v-for="acc in contracts[name].n" class="mt-1">
+                                                    <span class="mt-1">@{{acc}}</span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     <!-- node banner -->
-                                    <div v-if="has_ipfs" class="alert alert-secondary d-flex align-items-center py-1 ps-2 pe-1 mx-2">
-                                        <span class="me-1">{{isStored(contracts[name].i) ? 'Your node is storing this contract' : 'Your node not storing this contract'}}</span>
+                                    <div v-if="has_ipfs" class="alert alert-secondary d-flex align-items-center py-1 ps-2 pe-1 mx-2 mb-2">
+                                        <span class="me-1">{{isStored(contracts[name].i) ? 'Your node is storing this contract' : 'Your node is not storing this contract'}}</span>
                                         <button @click="store(contracts[name].i, isStored(contracts[name].i))" class="btn ms-auto"
                                             :class="{'btn-success': !isStored(contracts[name].i), 'btn-danger': isStored(contracts[name].i)}">
                                             <span v-if="!isStored(contracts[name].i)">
