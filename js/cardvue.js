@@ -91,7 +91,7 @@ export default {
                                                 <div class="text-lead text-uppercase text-white-50 pb-05 mt-1 border-bottom">Nodes Hosting This Contract</div>
                                                 <div v-for="(acc, prop, index) in contracts[name].n">
                                                     <p>@{{acc}}</p>
-                                                    <p v-if="index == Object.keys(contracts[name].n).length - 1 && index + 1 < contracts[name].p">{{contracts[name].p - index + 1}} slots are open!<p>
+                                                    <p v-if="index == Object.keys(contracts[name].n).length - 1 && index + 1 < contracts[name].p">{{contracts[name].p - (index + 1) }} slots are open!<p>
                                                 </div>
                                             </div>
                                         </div>
