@@ -83,7 +83,7 @@ export default {
                                         <div class="w-100 mb-1 py-1 bg-dark">
                                             <div class="d-flex justify-content-between mx-2">
                                                 <span class="text-break">{{fancyBytes(contracts[name].u)}} | {{expIn(contracts[name])}}</span>
-                                                <button class="btn btn-sm btn-outline-success" data-bs-toggle="collapse" :data-bs-target="'#nodes-' + post.permlink">
+                                                <button role="button" class="btn btn-sm btn-outline-success" data-bs-toggle="collapse" :data-bs-target="'#nodes-' + post.permlink">
                                                 ({{contracts[name].nt}}/{{contracts[name].p}})</button>
                                             </div>
                                             <div class="collapse show mx-2" :id="'nodes-' + post.permlink">
