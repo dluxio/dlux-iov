@@ -265,7 +265,7 @@ export default {
                         <mde id="body" @settext="pending(post.url, $event)" />
                     </form>
                     <div class="d-flex">
-                        <bennies :list="bens" :hide="hideBens">
+                        <bennies :list="bens" :hide="hideBens" @update-hide="hideBens = true" @update-bennies="bens=$event">
                             <button class="btn btn-sm px-2 btn-secondary" @click="hideBens = !hideBens"><i class="fa-solid fa-user-plus fa-fw"></i></button>
                         </bennies>
                         <button class="ms-auto btn btn-sm px-2 btn-primary" @click="comment(post.url)">Reply</button>

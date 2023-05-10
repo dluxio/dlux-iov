@@ -4,6 +4,7 @@ export default {
         <slot v-if="hide"/>
         <div v-if="!hide">
             <p>Current Bennies: ({{bennies?.length}}/8){{total/100}}%</p>
+            <button @click="cancel()">Cancel</button>
         </div>
     </div>
     `,
@@ -26,7 +27,7 @@ export default {
             default: true
         } 
     },
-    emits: ['updateBennies'],
+    emits: ['updateBennies', 'updateHide'],
     methods:{
         checkHive(account, amount){
             fetch('https://api.hive.blog', {
@@ -60,6 +61,10 @@ export default {
         },
         finalize(){
             this.$emit('updateBennies', this.bennies);
+            this.$emit('updateHide', true);
+        },
+        cancel(){
+            this.$emit('updateHide', true);
         }
     },
     mounted() {
