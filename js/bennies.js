@@ -3,7 +3,7 @@ export default {
     <div>
         <slot v-if="hide"/>
         <div v-if="!hide">
-            
+            <p>Current Bennies: ({{bennies?.length}}/8){{total/100}}%</p>
         </div>
     </div>
     `,
