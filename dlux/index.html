@@ -46,9 +46,12 @@
             if (!hashy) {
                 hashy = JSON.parse(metadata).audHash
             }
-            if (hashy.split('/')[3] == 'ipfs') {
-                hashy = hashy.split('/')[4];
+            console.log({hashy})
+            const splits = typeof hashy == 'string' ? hashy.split('/') : []
+            if (splits.length && splits[3] == 'ipfs') {
+                hashy = splits('/')[4];
             }
+            if(!hashy)hashy = 'QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16'
             function match (s,t) {var a=[];for(var i=0;i<s.length;i++){j=s.indexOf(t,i);if(j>=0){a.push(j);i=j}else return a}}
 
             const subauthor = match(author,'.').length ? match(author,'.').join('') + author.replace('.', '-') : author

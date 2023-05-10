@@ -113,7 +113,7 @@ var app = new Vue({
       postCustom_json: {
         "app": "dlux/0.1.0",
         "xr": true,
-        "Hash360": "",
+        "Hash360": "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16",
         "format": "markdown",
         "assets": [
           // {"hash":"",
