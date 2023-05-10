@@ -332,12 +332,39 @@ td {
   color: #000000;
   font-size: 20px;
   font-weight: 700;
-
   padding: 30px;
 }
 
 .square {
   border-radius: 0px;
+}
+
+.px-05 {
+  padding-left: 0.25em !important;
+  padding-right: 0.25em !important;
+}
+.ps-05 {
+  padding-left: 0.25em !important;
+}
+.pe-05 {
+  padding-right: 0.25em !important;
+}
+
+.py-05 {
+  padding-top: 0.25em !important;
+  padding-bottom: 0.25em !important;
+}
+.pt-05 {
+  padding-top: 0.25em !important;
+}
+.pb-05 {
+  padding-bottom: 0.25em !important;
+}
+.p-05 {
+  padding-left: 0.25em !important;
+  padding-right: 0.25em !important;
+  padding-top: 0.25em !important;
+  padding-bottom: 0.25em !important;
 }
 
 .rep-success {
@@ -583,4 +610,20 @@ td {
   div.behavemark img {
     max-width: 100%;
   }
+}
+.btn-blue {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: $blue;
+  --bs-btn-border-color: $blue;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #c52b6f;
+  --bs-btn-hover-border-color: #ba2869;
+  --bs-btn-focus-shadow-rgb: 235, 81, 150;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #ba2869;
+  --bs-btn-active-border-color: #ae2662;
+  --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: #e83283;
+  --bs-btn-disabled-border-color: #e83283;
 }

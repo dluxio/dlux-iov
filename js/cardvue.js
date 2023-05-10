@@ -51,12 +51,12 @@ export default {
       </a>
    </div >
    <!-- featured image with mouseover launch btn -->
-      <div class="card">
+      <div class="card square">
           <div class="d-flex">
               <a target="_blank" :href="(post.type != 'blog' ? '/dlux/@' : '/blog/@') + post.author + '/' + post.permlink" class="p-0 m-0" type="button">
               <div :id="'imagesMain-' + post.author + '-' + post.permlink">
                   <div class="imagebox bg-none">
-                      <img v-show="post.pic" alt="Card image cap" class="img-fluid image"
+                      <img v-show="post.pic" :alt="post.pic" class="img-fluid image"
                                                       :src="post.pic" @error="imgUrlAlt"
                                                       style="width: 1500px; height: 360px; object-fit: cover;" />
                       <div class="caption text-white w-100 h-100 d-flex">
@@ -74,20 +74,40 @@ export default {
                                   </div>
                               </div>
       
-                              <!-- contract collapse -->
-                              <div class="collapse" :id="'contract-' +  post.author + '-' + post.permlink">
-                                  <form v-for="(cid, name, index) in post.contract" id="contractForm">
-                                      <div v-if="contracts[name]" class="d-flex flex-column">
-                                          <div class="text-center w-100 mb-1 py-1 bg-dark">
-                                      <span class="text-break">{{fancyBytes(contracts[name].u)}} |
-                                      {{expIn(contracts[name])}}</span></div>
-                                        <a role="button" @click="showNodes = !showNodes"><span>Storage Detail ({{contracts[name].nt}}/{{contracts[name].p}})</span></a><a v-if="has_ipfs" role="button" @click="store(contracts[name].i, isStored(contracts[name].i))"><span>{{isStored(contracts[name].i) ? 'Remove from Storage' : 'Place in Storage'}}</span></a>
-                                      
-                                      <div v-if="showNodes" v-for="acc in contracts[name].n">
-                                        <p>@{{acc}}</p>
+                            <!-- contract collapse -->
+                            <div class="collapse show" :id="'contract-' +  post.author + '-' + post.permlink">
+                                <form v-for="(cid, name, index) in post.contract" id="contractForm">
+                                    
+                                    <!-- detail banner -->
+                                    <div v-if="contracts[name]" class="d-flex flex-column">
+                                        <div class="w-100 mb-1 py-1 bg-dark">
+                                            <div class="d-flex justify-content-between mx-2">
+                                                <span class="text-break">{{fancyBytes(contracts[name].u)}} | {{expIn(contracts[name])}}</span>
+                                                <button class="btn btn-sm btn-outline-success" data-bs-toggle="collapse" :data-bs-target="'#nodes-' + post.permlink">
+                                                ({{contracts[name].nt}}/{{contracts[name].p}})</button>
+                                            </div>
+                                            <div class="collapse show mx-2" :id="'nodes-' + post.permlink">
+                                                <p class="text-uppercase">Nodes Hosting This Contract</p>
+                                                <div v-for="acc in contracts[name].n">
+                                                    <p>@{{acc}}</p>
+                                                </div>
+                                            </div>
                                         </div>
-                                      <div class="d-flex flex-wrap mx-1">
-                                      <div class="btn-group m-1">
+                                    </div>
+
+                                    <!-- node banner -->
+                                    <div v-if="has_ipfs" class="alert alert-secondary d-flex align-items-center py-1 ps-2 pe-1 mx-2">
+                                        <span class="me-1">{{isStored(contracts[name].i) ? 'Your node is storing this contract' : 'Your node not storing this contract'}}</span>
+                                        <button @click="store(contracts[name].i, isStored(contracts[name].i))" class="btn ms-auto"
+                                        :class="{'btn-success': !isStored(contracts[name].i), 'btn-danger': isStored(contracts[name].i)}">
+                                        <span v-if="!isStored(contracts[name].i)"><i class="fa-solid fa-square-plus fa-fw me-1"></i>Add</span><span v-if="isStored(contracts[name].i)"><i class="fa-solid fa-trash-can fa-fw me-1"></i>Remove</span></button>
+                                    </div>
+
+                                    
+
+                                    <!-- extend time input -->
+                                    <div class="d-flex flex-wrap px-2 mb-2">
+                                      <div class="btn-group mt-1">
                                           <input name="time" @change="updateCost(name);customTime = false" title="1 Day" class="btn-check" :id="'option1-' + name" type="radio"
                                               value="1" v-model="contracts[name].extend" checked>
                                           <label class="btn btn-sm btn-outline-info" :for="'option1-' + name">1D</label>
@@ -101,29 +121,35 @@ export default {
                                               type="radio" value="365" v-model="contracts[name].extend">
                                           <label class="btn btn-sm btn-outline-info" :for="'option4-' + name">1Y</label>
                                         </div>
-
-                                        <div class="input-group flex-nowrap col m-1">
+                                        <div class="input-group flex-nowrap col ms-1 mt-1">
                                           <input type="number" step="1" class="form-control px-1 btn-sm text-end border-info text-info"
                                               v-model="contracts[name].extend" @change="updateCost(name)" style="min-width: 60px;">
                                           <span class="input-group-text btn-sm">Days</span>
                                       </div>
-
                                     </div>
-                                    
-                                    <div class="p-2 d-flex align-items-center text-white-50">
-                                    <button type="button" class="btn btn-sm btn-primary me-1" :disabled="extendcost[name] > broca_calc(broca)" @click="extend(contracts[name], extendcost[name])"><i class="fa-solid fa-clock-rotate-left fa-fw me-1"></i>Extend</button>
-                                    <button type="button" v-if="contracts[name].t == account" class="btn btn-sm btn-warning me-1" @click="cancel_contract(contracts[name])"><i class="fa-solid fa-file-circle-xmark fa-fw me-1"></i> Cancel</button>
-                                    <button type="button" class="btn btn-sm btn-secondary me-1" data-bs-toggle="collapse"
-                                        :data-bs-target="'#contract-' + post.author + '-' + post.permlink"><span><i class="fa-solid fa-xmark fa-fw"></i></span></button>
-                                        <input :id="'spread-' + name" type="checkbox" v-model="spread" @change="updateCost(name)">
-                                          <label :for="'spread-' + name"><i class="fa-solid fa-tower-broadcast fa-fw me-1"></i>Amplify </label>
-                                    <div class="ms-auto text-primary">{{formatNumber(extendcost[name], 0, '.',',')}}
+
+                                    <!-- action buttons -->
+                                    <div class="px-2 mb-2 d-flex flex-wrap text-nobreak align-items-center text-white-50">
+                                        <button type="button" class="btn btn-sm btn-primary mt-1" :disabled="extendcost[name] > broca_calc(broca)" @click="extend(contracts[name], extendcost[name])">
+                                            <i class="fa-solid fa-clock-rotate-left fa-fw me-1"></i>Extend</button>
+                                        <button type="button" class="btn btn-sm btn-warning ms-1 mt-1" v-if="contracts[name].t == account" @click="cancel_contract(contracts[name])">
+                                            <i class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Sever</button>
+                                        <button type="button" class="btn btn-sm btn-secondary ms-1 mt-1" data-bs-toggle="collapse"
+                                        :data-bs-target="'#contract-' + post.author + '-' + post.permlink">
+                                            <i class="fa-solid fa-xmark fa-fw"></i></button>
+                                        <div class="text-nobreak ms-1 mt-1 btn btn-sm btn-outline-secondary p-0">
+                                            <label :for="'spread-' + name" role="button" class="ps-1">&nbsp;</label>
+                                            <input class="form control" :id="'spread-' + name" type="checkbox" role="button" v-model="spread" @change="updateCost(name)">
+                                            <label :for="'spread-' + name" role="button" class="px-1 py-05"><i class="fa-solid fa-tower-broadcast fa-fw mx-1"></i>+ 1</label>
+                                        </div>
+                                        <div class="ms-auto mt-1 text-primary">{{formatNumber(extendcost[name], 0, '.',',')}}
                                         Broca</div>
                                     </div>
 
-                                  </div >
-                                  </form >
-                              </div>
+                                    
+
+                                </form>
+                            </div>
 
                               <!-- vote collapse -->
                               <div class="collapse border-top" :id="'vote-' + post.author + '-' + post.permlink">

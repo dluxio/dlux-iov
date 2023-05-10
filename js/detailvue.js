@@ -156,7 +156,7 @@ export default {
                                     class="fas fa-heart me-1"></i><span
                                     class="text-white-50">{{post.upVotes}}</span>
                             </a>
-                            <a href="#comment-section" class="no-decoration">
+                            <a href="comments" class="no-decoration">
 
                                 <i class="fas fa-comment ms-2 me-1"></i><span
                                     class="text-white-50">{{post.children}}</span>
@@ -204,7 +204,7 @@ export default {
             </div>
             <div class="bg-darkest border-1 border-start border-end p-1"></div>
             <!-- comments -->
-                <div id="comment-section" class="replies w-100 ms-auto me-auto mb-3" style="max-width: 750px">
+                <div id="comments" class="replies w-100 ms-auto me-auto mb-3" style="max-width: 750px">
                     <div class="d-flex text-nobreak align-items-center my-2">
                         <h5 class="m-0">{{post.children}} Comment<span v-if="post.children > 1">s</span></h5>
                         <div class="dropdown ms-auto">
