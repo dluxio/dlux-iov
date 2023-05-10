@@ -109,7 +109,7 @@ export default {
                                     
 
                                     <!-- extend time input -->
-                                    <div class="d-flex flex-wrap px-2 mb-2">
+                                    <div class="d-flex flex-wrap px-2 mb-2" v-if="contracts[name]">
                                       <div class="btn-group mt-1">
                                           <input name="time" @change="updateCost(name);customTime = false" title="1 Day" class="btn-check" :id="'option1-' + name" type="radio"
                                               value="1" v-model="contracts[name].extend" checked>
