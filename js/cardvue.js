@@ -75,7 +75,7 @@ export default {
                               </div>
       
                             <!-- contract collapse -->
-                            <div class="collapse" :id="'contract-' +  post.author + '-' + post.permlink">
+                            <div class="collapse show" :id="'contract-' +  post.author + '-' + post.permlink">
                                 <form v-for="(cid, name, index) in post.contract" id="contractForm">
                                     <div v-if="contracts[name]">
 
@@ -87,12 +87,15 @@ export default {
                                                 <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="collapse" :data-bs-target="'#nodes-' + post.permlink">
                                                 <i class="fa-solid fa-tower-broadcast fa-fw me-1"></i>{{contracts[name].nt}}/{{contracts[name].p}}</button>
                                             </div>
-                                            <div class="collapse mx-2" :id="'nodes-' + post.permlink">
+                                            <div class="collapse show mx-2" :id="'nodes-' + post.permlink">
                                                 <div class="text-lead text-uppercase text-white-50 pb-05 mt-1 border-bottom">Nodes Hosting This Contract</div>
-                                                <div v-for="(acc, prop, index) in contracts[name].n">
-                                                    <p>@{{acc}}</p>
-                                                    <p v-if="index == Object.keys(contracts[name].n).length - 1 && index + 1 < contracts[name].p">{{contracts[name].p - (index + 1) }} slots are open!</p>
-                                                </div>
+                                                <ol type="1" class="mt-1" v-for="(acc, prop, index) in contracts[name].n">
+                                                    <li class="mt-1">@{{acc}}</li>
+                                                    <div v-for="Object.keys(contracts[name])">
+                                                    <li>Open</li>
+                                                    </div>
+                                                </ol>
+                                                <p class="d-none" v-if="index == Object.keys(contracts[name].n).length - 1 && index + 1 < contracts[name].p">{{contracts[name].p - (index + 1) }} slots are open!</p>
                                             </div>
                                         </div>
                                     </div>
