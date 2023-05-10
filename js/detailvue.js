@@ -263,7 +263,9 @@ export default {
                         <mde id="body" @settext="pending(post.url, $event)" />
                     </form>
                     <div class="d-flex">
-                        <button class="btn btn-sm px-2 btn-secondary"><i class="fa-solid fa-user-plus fa-fw"></i></button>
+                        <bennies :list="bens" :hide-bens="true">
+                            <button class="btn btn-sm px-2 btn-secondary" @click="hideBens = !hideBens"><i class="fa-solid fa-user-plus fa-fw"></i></button>
+                        </bennies>
                         <button class="ms-auto btn btn-sm px-2 btn-primary" @click="comment(post.url)">Reply</button>
                     </div>
                 </div>
@@ -353,6 +355,7 @@ props: {
 data() {
     return {
         collapse: false,
+        hideBens: true,
         edit: false,
         view: true,
         mde: '',
@@ -362,6 +365,7 @@ data() {
         flag: false,
         slider: 10000,
         orderby: 'Reward',
+        bens: [],
     };
 },
 emits: ['vote', 'reply', 'modalselect', 'tosign'],

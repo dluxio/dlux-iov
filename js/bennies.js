@@ -1,5 +1,12 @@
 export default {
-    template: ``,
+    template: `
+    <div>
+        <slot v-if="hide"/>
+        <div v-if="!hide">
+            
+        </div>
+    </div>
+    `,
     data() {
         return {
             total: 0,
@@ -13,7 +20,11 @@ export default {
             default: function () {
                 return []
             }
-        }   
+        },
+        hide: {
+            type: Boolean,
+            default: true
+        } 
     },
     emits: ['updateBennies'],
     methods:{
