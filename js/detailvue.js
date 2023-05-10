@@ -235,7 +235,7 @@ export default {
                                     class="text-white-50">{{post.downVotes ?
                                     post.downVotes : ''}}</span>
                             </a>
-                            <a role="button" v-for="contract in post.contract"
+                            <a role="button" v-for="(contract, name, index) in post.contract"
                                 class="no-decoration text-white-50" data-bs-toggle="collapse"
                                 :data-bs-target="'#contract-modal-' + post.author + '-' + post.permlink"
                                 :class="{'text-success': color_code(name) > 28800 * 7,'text-warning': color_code(name) < 28800 * 7 &&  color_code(name) > 28800, 'text-warning': color_code(name) < 28800}">
