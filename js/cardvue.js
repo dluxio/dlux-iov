@@ -88,7 +88,7 @@ export default {
                                                 <i class="fa-solid fa-tower-broadcast fa-fw me-1"></i>{{contracts[name].nt}}/{{contracts[name].p}}</button>
                                             </div>
                                             <div class="collapse show mx-2" :id="'nodes-' + post.permlink">
-                                                <div class="text-lead text-uppercase text-white-50 pb-05 mt-1 border-bottom">Nodes Hosting This Contract</div>
+                                                <div class="text-lead text-uppercase text-white-50 pb-05 mt-1 border-bottom">Nodes Storing This Contract</div>
                                                 <ol type="1" class="mt-1" v-for="(acc, prop, index) in contracts[name].n">
                                                     <li class="mt-1">@{{acc}}</li>
                                                     <div  v-if="index == Object.keys(contracts[name].n).length - 1 && index + 1 < contracts[name].p" v-for="i in (contracts[name].p - (index + 1))">
@@ -145,7 +145,7 @@ export default {
                                         <button type="button" class="btn btn-sm btn-secondary ms-1 mt-1" data-bs-toggle="collapse"
                                         :data-bs-target="'#contract-' + post.author + '-' + post.permlink">
                                             <i class="fa-solid fa-xmark fa-fw"></i></button>
-                                        <div class="text-nobreak ms-1 mt-1 btn btn-sm btn-outline-secondary p-0">
+                                        <div class="d-flex align-items-center text-nobreak ms-1 mt-1 btn btn-sm btn-outline-secondary p-0">
                                             <label :for="'spread-' + name" role="button" class="ps-1">&nbsp;</label>
                                             <input class="form control" :id="'spread-' + name" type="checkbox" role="button" v-model="spread" @change="updateCost(name)">
                                             <label :for="'spread-' + name" role="button" class="px-1 py-05"><i class="fa-solid fa-tower-broadcast fa-fw mx-1"></i>+ 1</label>
