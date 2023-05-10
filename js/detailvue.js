@@ -21,6 +21,31 @@ export default {
     <div class="modal-dialog modal-full modal-xl modal-dialog-centered" style="max-width: 1000px;"
         role="document">
         <div class="modal-content rounded bg-img-none text-white">
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            Launch demo modal
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        ...
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
             <div class="card text-white bg-img-none bg-blur-none">
                 <div class="ms-auto">
                     <button :class="{'invisible' : !modal}" type="button" class="btn-close mt-3 me-3"
@@ -224,8 +249,7 @@ export default {
                                     class="fas fa-heart me-1"></i><span
                                     class="text-white-50">{{post.upVotes}}</span>
                             </a>
-                            <a href="comments" class="no-decoration">
-
+                            <a href="#comments" class="no-decoration">
                                 <i class="fas fa-comment ms-2 me-1"></i><span
                                     class="text-white-50">{{post.children}}</span>
                             </a>
@@ -268,6 +292,7 @@ export default {
                         <bennies :list="bens" :hide="hideBens" @update-hide="hideBens = true" @update-bennies="bens=$event">
                             <button class="btn btn-sm px-2 btn-secondary" @click="hideBens = !hideBens"><i class="fa-solid fa-user-plus fa-fw"></i></button>
                         </bennies>
+                        
                         <button class="ms-auto btn btn-sm px-2 btn-primary" @click="comment(post.url)">Reply</button>
                     </div>
                 </div>

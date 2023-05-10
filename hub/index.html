@@ -114,50 +114,30 @@
                             </div>
                         </div>
                         <div class="mx-1">
-                            <input type="search" class="form-control"
-                                placeholder="Search" v-model="postSelect.searchTerm"
-                                @keyup.enter="postSelect.entry = 'search';getPosts()">
+                            <input type="search" class="form-control" placeholder="Search"
+                                v-model="postSelect.searchTerm" @keyup.enter="postSelect.entry = 'search';getPosts()">
                         </div>
                     </div>
                 </div>
                 <!--main view-->
+
+                
                 <div class="row">
                     <div class="col-sm-6 col-lg-4 mb-3" v-for="post in displayPosts" :key="post.url">
-                        <card-vue 
-                            :post="post" 
-                            :account="account"
-                            :has_ipfs="spkapi.storage.length ? true : false" 
-                            :post_select="postSelect" 
-                            :voteval="voteVal" 
-                            :head_block="spkapi.head_block"
-                            :broca_refill="sstats.broca_refill"
-                            :broca="spkapi.broca"
-                            :spk_power="spkapi.spk_power"
-                            :contracts="contracts"
-                            :extendcost="extendcost"
-                            @tosign="toSign=$event"
-                            @modalselect="modalSelect($event)" 
-                            @vote="vote($event)"></card-vue>
+                        <card-vue :post="post" :account="account" :has_ipfs="spkapi.storage.length ? true : false"
+                            :post_select="postSelect" :voteval="voteVal" :head_block="spkapi.head_block"
+                            :broca_refill="sstats.broca_refill" :broca="spkapi.broca" :spk_power="spkapi.spk_power"
+                            :contracts="contracts" :extendcost="extendcost" @tosign="toSign=$event"
+                            @modalselect="modalSelect($event)" @vote="vote($event)"></card-vue>
                     </div>
                 </div>
             </div>
             <!--detail view-->
-            <detail-vue
-                :post="displayPost.item" 
-                :account="account"
-                :modal="true"
-                :post_select="postSelect"
-                :has_ipfs="spkapi.storage?.length ? true : false" 
-                :voteval="voteVal" 
-                :head_block="sstats.head_block"
-                :broca_refill="sstats.broca_refill"
-                :broca="spkapi.broca"
-                :spk_power="spkapi.spk_power"
-                :contracts="contracts"
-                :extendcost="extendcost"
-                @tosign="toSign=$event"
-                @modalselect="modalSelect($event)" 
-                @vote="vote($event)"></detail-vue>
+            <detail-vue :post="displayPost.item" :account="account" :modal="true" :post_select="postSelect"
+                :has_ipfs="spkapi.storage?.length ? true : false" :voteval="voteVal" :head_block="sstats.head_block"
+                :broca_refill="sstats.broca_refill" :broca="spkapi.broca" :spk_power="spkapi.spk_power"
+                :contracts="contracts" :extendcost="extendcost" @tosign="toSign=$event"
+                @modalselect="modalSelect($event)" @vote="vote($event)"></detail-vue>
         </main>
         <!-- Footer -->
         <div>
