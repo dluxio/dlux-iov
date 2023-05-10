@@ -148,13 +148,12 @@ export default {
                                         <div class="d-flex align-items-center text-nobreak ms-1 mt-1 btn btn-sm btn-outline-secondary p-0">
                                             <label :for="'spread-' + name" role="button" class="ps-1">&nbsp;</label>
                                             <input class="form control" :id="'spread-' + name" type="checkbox" role="button" v-model="spread" @change="updateCost(name)">
-                                            <label :for="'spread-' + name" role="button" class="px-1 py-05"><i class="fa-solid fa-tower-broadcast fa-fw mx-1"></i>+ 1</label>
+                                            <label :for="'spread-' + name" role="button" class="px-1 py-05">Add<i class="fa-solid fa-tower-broadcast fa-fw ms-1"></i></label>
                                         </div>
-                                        <div class="ms-auto mt-1 text-primary">{{formatNumber(extendcost[name], 0, '.',',')}}
+                                        <div class="ms-auto mt-1 text-primary fw-bold">{{formatNumber(extendcost[name], 0, '.',',')}}
                                         Broca</div>
                                     </div>
 
-                                    
                                     </div>
                                 </form>
                             </div>
