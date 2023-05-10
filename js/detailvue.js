@@ -266,10 +266,11 @@ export default {
                         <!--input with buttons and preview-->
                         <mde id="body" @settext="pending(post.url, $event)" />
                     </form>
+                    <div class="collapse" id="bene-collapse">
+                        <bennies :list="bens" @update-bennies="bens=$event"></bennies>
+                    </div>
                     <div class="d-flex">
-                        <bennies :list="bens" :hide="hideBens" @update-hide="hideBens = true" @update-bennies="bens=$event">
-                            <button class="btn btn-sm px-2 btn-secondary" @click="hideBens = !hideBens"><i class="fa-solid fa-user-plus fa-fw"></i></button>
-                        </bennies>
+                        <button class="btn btn-sm px-2 btn-secondary" data-bs-toggle="collapse" data-bs-target="#bene-collapse"><i class="fa-solid fa-user-group fa-fw me-1"></i>Beneficiaries <span>+</span></button>
                         <button class="ms-auto btn btn-sm px-2 btn-primary" @click="comment(post.url)"><i class="fas fa-comment fa-fw me-1"></i>Reply</button>
                     </div>
                 </div>

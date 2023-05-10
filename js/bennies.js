@@ -1,14 +1,42 @@
 export default {
     template: `
     <div>
-        <slot v-if="hide"/>
-        <div v-if="!hide">
-            <p>Current Bennies: ({{bennies?.length}}/8){{total/100}}%</p>
-            <div class="input-group mb-3">
-                <span class="input-group-text">@</span>
-                <input type="search" class="form-control">
-            </div>
-            <button class="btn btn-sm px-2 btn-secondary" @click="cancel()"><i class="fa-solid fa-xmark fa-fw me-1"></i>Cancel</button>
+        <p>Current Beneficiaries: ({{bennies?.length}}/8){{total/100}}%</p>
+        <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th class="w-50">Username</th>
+                    <th class="text-center">Reward</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                <tr>
+                    <td class="w-50">@username</td>
+                    <td class="text-center">
+                        <span class="pe-05"><button class="btn btn-sm btn-secondary">-</button></span>
+                        <span>10%</span>
+                        <span class="ps-05"><button class="btn btn-sm btn-secondary">+</button></span>
+                    </td>
+                    <td class="text-end"><button class="btn btn-danger"><i class="fa-solid fa-trash-can fa-fw"></i></button></td>
+                </tr>
+                <tr>
+                    <td class="w-50">
+                        <div class="input-group">
+                            <span class="input-group-text">@</span>
+                            <input type="search" placeholder="username" class="form-control">
+                        </div>
+                    </td>
+                    <td class="text-center">
+                        <div class="input-group">
+                            <input type="number" step="1"  placeholder="amount" class="form-control">
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </td>
+                    <td class="text-end"><button class="btn btn-success" disabled><i class="fa-solid fa-square-plus fa-fw"></i></button></td>
+            </tbody>
+        </table>
         </div>
     </div>
     `,
