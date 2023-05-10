@@ -21,31 +21,42 @@ export default {
     <div class="modal-dialog modal-full modal-xl modal-dialog-centered" style="max-width: 1000px;"
         role="document">
         <div class="modal-content rounded bg-img-none text-white">
-        <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-            Launch demo modal
-        </button>
+        <a data-bs-toggle="modal" href="#myModal" class="btn btn-primary">Launch modal</a>
 
-        <!-- Modal -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        ...
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save changes</button>
-                    </div>
+                <div class="modal" id="myModal">
+                        <div class="modal-dialog">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h4 class="modal-title">Modal title</h4>    
+                              <button type="button" class="close" data-dismiss="modal">×</button>
+                            </div><div class="container"></div>
+                            <div class="modal-body">
+                              ...
+                              <a data-bs-toggle="modal" href="#myModal2" class="btn btn-primary">Open modal2</a>
+                            </div>
+                            <div class="modal-footer">
+                              <a href="#" data-bs-dismiss="modal" class="btn">Close</a>
+                            </div>
+                          </div>
+                        </div>
                 </div>
-            </div>
-        </div>
+                <div class="modal" id="myModal2">
+                        <div class="modal-dialog">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h4 class="modal-title">2nd Modal title</h4>
+                              <button type="button" class="close" data-bs-dismiss="modal">×</button>
+                            </div><div class="container"></div>
+                            <div class="modal-body">
+                              ..
+                            </div>
+                            <div class="modal-footer">
+                              <a href="#" data-bs-dismiss="modal" class="btn">Close</a>
+                              <a href="#" class="btn btn-primary">Save changes</a>
+                            </div>
+                          </div>
+                        </div>
+                </div>
             <div class="card text-white bg-img-none bg-blur-none">
                 <div class="ms-auto">
                     <button :class="{'invisible' : !modal}" type="button" class="btn-close mt-3 me-3"
