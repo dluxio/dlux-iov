@@ -405,7 +405,6 @@ methods: {
         return `Expires in ${parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60) < 24 ? parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60) + ' hours' : parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60 / 24) + ' days'}`
     },
     color_code(name) {
-        console.log(parseInt(this.contracts[name] ? this.contracts[name].e.split(':')[0] : 0) - this.head_block)
         return parseInt(this.contracts[name] ? this.contracts[name].e.split(':')[0] : 0) - this.head_block
     },
     modalSelect(url) {
