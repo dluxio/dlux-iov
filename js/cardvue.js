@@ -96,7 +96,7 @@ export default {
                                     </div>
 
                                     <!-- node banner -->
-                                    <div v-if="has_ipfs" class="alert alert-secondary d-flex align-items-center py-1 ps-2 pe-1 mx-2">
+                                    <div v-if="has_ipfs && contracts[name]" class="alert alert-secondary d-flex align-items-center py-1 ps-2 pe-1 mx-2">
                                         <span class="me-1">{{isStored(contracts[name].i) ? 'Your node is storing this contract' : 'Your node not storing this contract'}}</span>
                                         <button @click="store(contracts[name].i, isStored(contracts[name].i))" class="btn ms-auto"
                                             :class="{'btn-success': !isStored(contracts[name].i), 'btn-danger': isStored(contracts[name].i)}">
