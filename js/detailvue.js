@@ -494,6 +494,47 @@ methods: {
     color_code(name) {
         return parseInt(this.contracts[name] ? this.contracts[name].e.split(':')[0] : 0) - this.head_block
     },
+    store(contract, remove = false){
+        // have a storage node?
+        const toSign = {
+            type: "cja",
+            cj: {
+              items: [contract]
+            },
+            id: `spkcc_${!remove ? 'store' : 'remove'}`,
+            msg: `Storing ${contract}...`,
+            ops: ["getTokenUser"],
+            api: "https://spktest.dlux.io",
+            txid: `${contract}_${!remove ? 'store' : 'remove'}`,
+          }
+          this.$emit('tosign', toSign)
+    },
+    updateCost(id) {
+        this.extendcost[id] = parseInt(this.contracts[id].extend * (this.contracts[id].p + (this.spread ? 1 : 0)) / (30 * 3) * this.contracts[id].r)
+        this.$forceUpdate()
+    },
+    getContracts() {
+        var contracts = [],
+            getContract = (id) => {
+                console.log({id})
+                fetch('https://spktest.dlux.io/api/fileContract/' + id)
+                    .then((r) => r.json())
+                    .then((res) => {
+                        res.result.extend = "7"
+                        if (res.result) {
+                            this.contracts[id] = res.result
+                            this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
+                        }
+                    });
+            }
+        for (var contract in this.post.contract) {
+            contracts.push(contract)
+        }
+        contracts = [...new Set(contracts)]
+        for (var i = 0; i < contracts.length; i++) {
+            getContract(contracts[i])
+        }
+    },
     timeSince(date) {
         var seconds = Math.floor((new Date() - new Date(date + ".000Z")) / 1000);
         var interval = Math.floor(seconds / 86400);
