@@ -91,8 +91,8 @@ export default {
                                                 <div class="text-lead text-uppercase text-white-50 pb-05 mt-1 border-bottom">Nodes Hosting This Contract</div>
                                                 <ol type="1" class="mt-1" v-for="(acc, prop, index) in contracts[name].n">
                                                     <li class="mt-1">@{{acc}}</li>
-                                                    <div v-for="Object.keys(contracts[name])">
-                                                    <li>Open</li>
+                                                    <div  v-if="index == Object.keys(contracts[name].n).length - 1 && index + 1 < contracts[name].p" v-for="i in (contracts[name].p - (index + 1))">
+                                                        <li>Open</li>
                                                     </div>
                                                 </ol>
                                                 <p class="d-none" v-if="index == Object.keys(contracts[name].n).length - 1 && index + 1 < contracts[name].p">{{contracts[name].p - (index + 1) }} slots are open!</p>
