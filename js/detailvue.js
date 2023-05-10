@@ -410,6 +410,16 @@ methods: {
     modalSelect(url) {
         this.$emit('modalselect', url);
     },
+    isStored(contract){
+        var found = false
+        for (var i in this.contracts[contract].n) {
+            if (this.contracts[contract].n[i] == this.account) {
+                found = true
+                break
+            }
+        }
+        return found
+    },
     goBack(){
         window.history.back();
     },
