@@ -237,7 +237,8 @@ export default {
                             </a>
                             <a role="button" v-for="contract in post.contract"
                                 class="no-decoration text-white-50" data-bs-toggle="collapse"
-                                :data-bs-target="'#contract-modal-' + post.author + '-' + post.permlink">
+                                :data-bs-target="'#contract-modal-' + post.author + '-' + post.permlink"
+                                :class="{'text-success': color_code(name) > 28800 * 7,'text-warning': color_code(name) < 28800 * 7 &&  color_code(name) > 28800, 'text-warning': color_code(name) < 28800}">
                                 <i class="fa-solid fa-file-contract ms-2 me-1"></i>
                             </a>
 
