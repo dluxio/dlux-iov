@@ -99,8 +99,11 @@ export default {
                                     <div v-if="has_ipfs" class="alert alert-secondary d-flex align-items-center py-1 ps-2 pe-1 mx-2">
                                         <span class="me-1">{{isStored(contracts[name].i) ? 'Your node is storing this contract' : 'Your node not storing this contract'}}</span>
                                         <button @click="store(contracts[name].i, isStored(contracts[name].i))" class="btn ms-auto"
-                                        :class="{'btn-success': !isStored(contracts[name].i), 'btn-danger': isStored(contracts[name].i)}">
-                                        <span v-if="!isStored(contracts[name].i)"><i class="fa-solid fa-square-plus fa-fw me-1"></i>Add</span><span v-if="isStored(contracts[name].i)"><i class="fa-solid fa-trash-can fa-fw me-1"></i>Remove</span></button>
+                                            :class="{'btn-success': !isStored(contracts[name].i), 'btn-danger': isStored(contracts[name].i)}">
+                                            <span v-if="!isStored(contracts[name].i)">
+                                                <i class="fa-solid fa-square-plus fa-fw me-1"></i>Add</span>
+                                            <span v-if="isStored(contracts[name].i)"><i class="fa-solid fa-trash-can fa-fw me-1"></i>Remove</span>
+                                        </button>
                                     </div>
 
                                     
