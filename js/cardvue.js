@@ -77,9 +77,9 @@ export default {
                             <!-- contract collapse -->
                             <div class="collapse show" :id="'contract-' +  post.author + '-' + post.permlink">
                                 <form v-for="(cid, name, index) in post.contract" id="contractForm">
-                                    
+                                    <div v-if="contracts[name]">
                                     <!-- detail banner -->
-                                    <div v-if="contracts[name]" class="d-flex flex-column">
+                                    <div class="d-flex flex-column">
                                         <div class="w-100 mb-1 py-1 bg-dark">
                                             <div class="d-flex justify-content-between mx-2">
                                                 <span class="text-break">{{fancyBytes(contracts[name].u)}} | {{expIn(contracts[name])}}</span>
@@ -96,7 +96,7 @@ export default {
                                     </div>
 
                                     <!-- node banner -->
-                                    <div v-if="has_ipfs && contracts[name]" class="alert alert-secondary d-flex align-items-center py-1 ps-2 pe-1 mx-2">
+                                    <div v-if="has_ipfs" class="alert alert-secondary d-flex align-items-center py-1 ps-2 pe-1 mx-2">
                                         <span class="me-1">{{isStored(contracts[name].i) ? 'Your node is storing this contract' : 'Your node not storing this contract'}}</span>
                                         <button @click="store(contracts[name].i, isStored(contracts[name].i))" class="btn ms-auto"
                                             :class="{'btn-success': !isStored(contracts[name].i), 'btn-danger': isStored(contracts[name].i)}">
@@ -109,7 +109,7 @@ export default {
                                     
 
                                     <!-- extend time input -->
-                                    <div class="d-flex flex-wrap px-2 mb-2" v-if="contracts[name]">
+                                    <div class="d-flex flex-wrap px-2 mb-2">
                                       <div class="btn-group mt-1">
                                           <input name="time" @change="updateCost(name);customTime = false" title="1 Day" class="btn-check" :id="'option1-' + name" type="radio"
                                               value="1" v-model="contracts[name].extend" checked>
@@ -150,7 +150,7 @@ export default {
                                     </div>
 
                                     
-
+                                    </div>
                                 </form>
                             </div>
 
