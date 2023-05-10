@@ -299,6 +299,9 @@ props: {
     head_block: {
         default: 0
     },
+    has_ipfs: {
+        default: false
+    },
     solo: {
         default: false
     },
@@ -355,6 +358,7 @@ data() {
         view: true,
         mde: '',
         makeReply: false,
+        spread: false,
         warn: false,
         flag: false,
         slider: 10000,
