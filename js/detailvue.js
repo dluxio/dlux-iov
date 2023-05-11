@@ -271,7 +271,7 @@ export default {
                     </div>
                     <div class="d-flex">
                         <button class="btn btn-sm px-2 btn-secondary" data-bs-toggle="collapse" data-bs-target="#bene-collapse"><i class="fa-solid fa-user-group fa-fw me-1"></i>Beneficiaries {{bens.length ? '(' + bens.length + ')' : ''}}<span v-if="!bens.length">+</span></button>
-                        <button class="ms-auto btn btn-sm px-2 btn-primary" @click="comment(post.url)"><i class="fas fa-comment fa-fw me-1"></i>Reply</button>
+                        <button class="ms-auto btn btn-sm px-2 btn-primary" :disabled="!mde" @click="comment(post.url)"><i class="fas fa-comment fa-fw me-1"></i>Reply</button>
                     </div>
                 </div>
             </div>
@@ -593,18 +593,20 @@ methods: {
         this.$emit('reply', deets)
     },
     comment(url){
-        var deets = {
-            "parent_author": this.post.author,
-            "parent_permlink": this.post.permlink,
-            "author": this.account,
-            "permlink": 're-' + this.post.permlink,
-            "title": '',
-            "body": this.mde,
-            "json_metadata": JSON.stringify(this.postCustom_json)
+        if(this.mde){
+            var deets = {
+                "parent_author": this.post.author,
+                "parent_permlink": this.post.permlink,
+                "author": this.account,
+                "permlink": 're-' + this.post.permlink,
+                "title": '',
+                "body": this.mde,
+                "json_metadata": JSON.stringify(this.postCustom_json)
+            }
+            if (this.bens.length)deets.bens = this.bens
+            console.log({deets})
+            this.$emit('reply', deets)
         }
-        if (this.bens.length)deets.bens = this.bens
-        console.log({deets})
-        this.$emit('reply', deets)
     },
     broca_calc(last = '0,0') {
         if(!last)last='0,0'
@@ -671,7 +673,7 @@ methods: {
             setTimeout(this.hideLowRep, 1000)
         }
     },
-    setRating(rating) {
+    setRating(url, rating) {
         this.postCustom_json.review.rating = rating;
     },
     fancyBytes(bytes){
