@@ -517,13 +517,13 @@
                   <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
                     <div>
                       <div class="input-group me-2">
-                        <span class="input-group-text bg-darkg border-dark text-secondary"
+                        <span class="input-group-text text-secondary"
                           @click="focus('filteraccount')"><i class="fas fa-search"></i></span>
                         <input type="text" v-on:keyup="searchRunners()"
-                          class="form-control bg-darkg border-dark text-info" id="filteraccount"
+                          class="form-control text-info" id="filteraccount"
                           v-model="filteraccount.value" @ aria-required="true" placeholder="Search" />
 
-                        <span class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix"
+                        <span class="input-group-text text-white-50 r-radius-hotfix"
                           style="width: 42px">
                           <span v-if="filteraccount.value">
                             <a role="button" class="badge badge-secondary" @click="setValue('filteraccount.value','')"><i
@@ -539,7 +539,7 @@
                   </div>
                   <div class="table-responsive">
                     <table role="table" aria-busy="false" aria-colcount="3"
-                      class="table table-dark bg-darkger text-white-50 table-striped table-hover table-borderless mb-0">
+                      class="table text-white-50 table-light table-striped table-hover mb-0">
                       <thead role="rowgroup" class="">
                         <tr role="row" class="">
                           <th role="columnheader" v-bind:class="{'col-sort':filteraccount.usera || filteraccount.userd}"
