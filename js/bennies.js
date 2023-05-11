@@ -28,9 +28,9 @@ export default {
                             <input type="text" placeholder="username" class="form-control p-1" v-model="addAccount">
                             <button class="btn py-1 px-2 btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-star me-1 fa-fw"></i></button>
                             <ul class="dropdown-menu">
-                                <li class=""><a class="dropdown-item d-flex align-items-center" role="button">@user1<span class="ms-auto"><a class="mx-1 btn btn-sm btn-light text-dark" role="button"><i class="fa-solid fa-xmark fa-fw"></i></a></span></a></li>
-                                <li class="d-flex align-items-center justify-content-between"><a class="dropdown-item" role="button">@useruseruser2</a><a class="mx-1 btn btn-sm btn-dark" role="button"><i class="fa-solid fa-xmark fa-fw"></i></a></li>
-                                <li class="d-flex align-items-center justify-content-between"><a class="dropdown-item" role="button">@useruser3</a><a class="mx-1 btn btn-sm btn-secondary" role="button"><i class="fa-solid fa-xmark fa-fw"></i></a></li>
+                                <li class=""><a class="dropdown-item d-flex align-items-center" role="button" @click="logIt()">@user1<span class="ms-auto"><a @click="logIt()" class="mx-1 btn btn-sm btn-light text-dark" role="button"><i class="fa-solid fa-xmark fa-fw"></i></a></span></a></li>
+                                <li class="d-flex align-items-center justify-content-between" @click="logIt()"><a class="dropdown-item" role="button">@useruseruser2</a><a @click="logIt()" class="mx-1 btn btn-sm btn-dark" role="button"><i class="fa-solid fa-xmark fa-fw"></i></a></li>
+                                <li class="d-flex align-items-center justify-content-between" @click="logIt()"><a class="dropdown-item" role="button">@useruser3</a><a @click="logIt()" class="mx-1 btn btn-sm btn-secondary" role="button"><i class="fa-solid fa-xmark fa-fw"></i></a></li>
                             </ul>
                         </div>
                     </td>
@@ -76,6 +76,9 @@ export default {
                 this.addAccount = '';
                 this.addWeight = "1.00";
             }
+        },
+        logIt(event){
+            console.log('click', event)
         },
         incBen(ben){
             if(this.total <= 9900 && ben.weight <= 9900){
