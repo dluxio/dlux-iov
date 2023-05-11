@@ -1,4 +1,3 @@
-import { isProxy, toRaw } from 'vue';
 import ToastVue from "/js/toastvue.js";
 
 export default {
@@ -501,7 +500,6 @@ export default {
     HKCsign(op) {
       return new Promise((resolve, reject) => {
         if (window.hive_keychain) {
-          const clean = toRaw(op[1])
           console.log(clean, op[1])
           try {
             window.hive_keychain.requestBroadcast(
