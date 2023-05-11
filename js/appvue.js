@@ -417,7 +417,7 @@ createApp({
   },
   methods: {
     reply(deets){
-      console.log(deets)
+      console.log('getReply:', deets)
       var operations = []
       if(deets.bens){
         operations.push(["comment_options",
