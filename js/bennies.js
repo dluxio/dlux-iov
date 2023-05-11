@@ -26,7 +26,7 @@ export default {
                         <div class="input-group">
                             <span class="input-group-text p-1">@</span>
                             <input type="text" placeholder="username" class="form-control p-1" v-model="addAccount">
-                            <button class="btn py-1 px-2 btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-star me-1 fa-fw"></i></button>
+                            <button class="btn py-1 px-2 btn-outline-secondary dropdown-toggle" :disabled="!favorites.length" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-star me-1 fa-fw"></i></button>
                             <ul class="dropdown-menu">
                                 <li v-for="acc in favorites"class="d-flex align-items-center justify-content-between">
                                     <a class="dropdown-item" role="button" @click="addAccount = acc">@{{acc}}</a>
