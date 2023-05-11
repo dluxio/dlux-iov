@@ -26,11 +26,11 @@ export default {
                         <div class="input-group">
                             <span class="input-group-text p-1">@</span>
                             <input type="text" placeholder="username" class="form-control p-1" v-model="addAccount">
-                            <button class="btn py-1 px-2 btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-crown me-1 fa-fw"></i></button>
+                            <button class="btn py-1 px-2 btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-star me-1 fa-fw"></i></button>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" role="button">@user1</a></li>
-                                <li><a class="dropdown-item" role="button">@user2</a></li>
-                                <li><a class="dropdown-item" role="button">@user3</a></li>
+                                <li class=""><a class="dropdown-item d-flex align-items-center" role="button">@user1<span class="ms-auto"><a class="mx-1 btn btn-sm btn-light text-dark" role="button"><i class="fa-solid fa-xmark fa-fw"></i></a></span></a></li>
+                                <li class="d-flex align-items-center justify-content-between"><a class="dropdown-item" role="button">@useruseruser2</a><a class="mx-1 btn btn-sm btn-dark" role="button"><i class="fa-solid fa-xmark fa-fw"></i></a></li>
+                                <li class="d-flex align-items-center justify-content-between"><a class="dropdown-item" role="button">@useruser3</a><a class="mx-1 btn btn-sm btn-secondary" role="button"><i class="fa-solid fa-xmark fa-fw"></i></a></li>
                             </ul>
                         </div>
                     </td>
