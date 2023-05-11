@@ -156,6 +156,7 @@
                 :contracts="contracts"
                 :extendcost="extendcost"
                 @tosign="toSign=$event"
+                @reply="reply($event)"
                 @modalselect="modalSelect($event)" 
                 @vote="vote($event)"></detail-vue>
         </main>
