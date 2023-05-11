@@ -34,7 +34,7 @@ export default {
                             <span class="input-group-text">%</span>
                         </div>
                     </td>
-                    <td class="text-end"><button class="btn btn-success" :disabled="!addAccount" @click="appendBen()"><i class="fa-solid fa-square-plus fa-fw"></i></button></td>
+                    <td class="text-end"><button class="btn btn-success" :disabled="!addAccount || (total + addWeight * 100) > 10000" @click="appendBen()"><i class="fa-solid fa-square-plus fa-fw"></i></button></td>
             </tbody>
         </table>
         </div>

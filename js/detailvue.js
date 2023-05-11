@@ -270,7 +270,7 @@ export default {
                         <bennies :list="bens" @update-bennies="bens=$event"></bennies>
                     </div>
                     <div class="d-flex">
-                        <button class="btn btn-sm px-2 btn-secondary" data-bs-toggle="collapse" data-bs-target="#bene-collapse"><i class="fa-solid fa-user-group fa-fw me-1"></i>Beneficiaries <span>+</span></button>
+                        <button class="btn btn-sm px-2 btn-secondary" data-bs-toggle="collapse" data-bs-target="#bene-collapse"><i class="fa-solid fa-user-group fa-fw me-1"></i>Beneficiaries {{bens.length ? '(' + bens.length + ')' : ''}}<span>+</span></button>
                         <button class="ms-auto btn btn-sm px-2 btn-primary" @click="comment(post.url)"><i class="fas fa-comment fa-fw me-1"></i>Reply</button>
                     </div>
                 </div>
