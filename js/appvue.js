@@ -441,7 +441,7 @@ createApp({
       this.toSign = {
         type: "raw",
         key: "posting",
-        op: toRaw(operations),
+        op: JSON.stringify(operations),
         callbacks: [], //get new replies for a/p
         txid: `reply:${deets.parent_author}/${deets.permlink}`,
       }
