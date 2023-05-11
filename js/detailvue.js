@@ -264,7 +264,7 @@ export default {
                 <div class="mb-3 ms-auto me-auto" style="max-width: 750px">
                     <form id="commentForm">
                         <!--input with buttons and preview-->
-                        <mde id="body" @settext="pending(post.url, $event)" />
+                        <mde id="body" @data="settext($event)" />
                     </form>
                     <div class="collapse" id="bene-collapse">
                         <bennies :list="bens" @update-bennies="bens=$event"></bennies>
