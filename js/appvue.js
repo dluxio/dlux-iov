@@ -417,6 +417,7 @@ createApp({
   },
   methods: {
     reply(deets){
+      console.log(deets)
       var operations = []
       if(deets.bens){
         operations.push(["comment_options",
@@ -444,6 +445,7 @@ createApp({
         callbacks: [], //get new replies for a/p
         txid: `reply:${deets.parent_author}/${deets.permlink}`,
       }
+      console.log(this.toSign)
     },
     vote(url) {
       var key, slider, flag
