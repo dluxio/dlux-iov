@@ -500,11 +500,12 @@ export default {
     HKCsign(op) {
       return new Promise((resolve, reject) => {
         if (window.hive_keychain) {
-          console.log(op[1])
+          const clean = [...op[1]]
+          console.log(clean, op[1])
           try {
             window.hive_keychain.requestBroadcast(
               op[0],
-              op[1],
+              clean,
               op[2],
               function (response) {
                 resolve(response);
