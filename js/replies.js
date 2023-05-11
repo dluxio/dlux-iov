@@ -11,7 +11,7 @@ export default {
         "vue-ratings": Ratings,
         "mde": MDE,
         "vote": Vote,
-        "pop-vue": Pop,
+        "pop-vue": Pop
       },
   template: `
 <div>

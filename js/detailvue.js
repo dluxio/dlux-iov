@@ -371,6 +371,11 @@ data() {
         slider: 10000,
         orderby: 'Reward',
         bens: [],
+        postCustom_json: {
+            review:{
+                rating: 0
+            }
+        }
     };
 },
 emits: ['vote', 'reply', 'modalselect', 'tosign'],
@@ -573,7 +578,8 @@ methods: {
         this.mde = event
     },
     reply(deets) {
-        if (!deets) deets = {
+        if (!deets) {
+            deets = {
             "parent_author": this.post.author,
             "parent_permlink": this.post.permlink,
             "author": this.account,
@@ -582,6 +588,21 @@ methods: {
             "body": this.mde,
             "json_metadata": JSON.stringify(this.postCustom_json)
         }
+            if (this.bens.length)deets.bens = this.bens
+        }
+        this.$emit('reply', deets)
+    },
+    comment(url){
+        var deets = {
+            "parent_author": this.post.author,
+            "parent_permlink": this.post.permlink,
+            "author": this.account,
+            "permlink": 're-' + this.post.permlink,
+            "title": '',
+            "body": this.mde,
+            "json_metadata": JSON.stringify(this.postCustom_json)
+        }
+        if (this.bens.length)deets.bens = this.bens
         this.$emit('reply', deets)
     },
     broca_calc(last = '0,0') {
@@ -650,7 +671,7 @@ methods: {
         }
     },
     setRating(rating) {
-        this.post.rating = rating;
+        this.postCustom_json.review.rating = rating;
     },
     fancyBytes(bytes){
         var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']

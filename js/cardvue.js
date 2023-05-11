@@ -10,7 +10,7 @@ export default {
         "vue-ratings": Ratings,
         "mde": MDE,
         "vote": Vote,
-        "pop-vue": Pop,
+        "pop-vue": Pop
     },
     template: `
     <div class="card text-white">
@@ -292,6 +292,7 @@ export default {
             slider: 10000,
             spread: false,
             showNodes: false,
+            bens: [],
         };
     },
     emits: ['vote', 'reply', 'modalselect', 'tosign'],
