@@ -123,8 +123,9 @@ export default {
             "permlink": 're-' + this.post.permlink,
             "title": '',
             "body": this.mde,
-            "json_metadata": JSON.stringify(this.postCustom_json)
+            "json_metadata": JSON.stringify(this.postCustom_json),
         }
+        if(this.bens.length)deets.bens = this.bens
         this.$emit('reply', deets)
     },
         vote(url){

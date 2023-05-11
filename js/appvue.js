@@ -417,10 +417,30 @@ createApp({
   },
   methods: {
     reply(deets){
+      var operations = []
+      if(deets.bens){
+        operations.push(["comment_options",
+          {
+            "author": this.account,
+            "permlink": this.postPermlink,
+            "max_accepted_payout": "1000000.000 HBD",
+            "percent_hbd": 10000,
+            "allow_votes": true,
+            "allow_curation_rewards": true,
+            "extensions":
+              [[0,
+                {
+                  "beneficiaries":
+                    deets.bens
+                }]]
+          }])
+          delete deets.bens
+      }
+      operations.unshift(["comment", deets])
       this.toSign = {
         type: "raw",
         key: "posting",
-        op: [["comment", deets]],
+        op: operations,
         callbacks: [], //get new replies for a/p
         txid: `reply:${deets.parent_author}/${deets.permlink}`,
       }
