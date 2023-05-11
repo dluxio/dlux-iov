@@ -21,20 +21,27 @@ export default {
                     </td>
                     <td class="text-end"><button class="btn btn-danger" @click="subBenny(ben.account)"><i class="fa-solid fa-trash-can fa-fw"></i></button></td>
                 </tr>
-                <tr v-if="bennies.length < 8 && total < 10000">
+                <tr v-if="bennies.length < 8 && total < 10000" style="border-bottom-style: hidden !important;">
                     <td class="w-50">
                         <div class="input-group">
-                            <span class="input-group-text">@</span>
-                            <input type="text" placeholder="username" class="form-control" v-model="addAccount">
+                            <span class="input-group-text p-1">@</span>
+                            <input type="text" placeholder="username" class="form-control p-1" v-model="addAccount">
+                            <button class="btn py-1 px-2 btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-crown me-1 fa-fw"></i></button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" role="button">@user1</a></li>
+                                <li><a class="dropdown-item" role="button">@user2</a></li>
+                                <li><a class="dropdown-item" role="button">@user3</a></li>
+                            </ul>
                         </div>
                     </td>
                     <td class="text-center">
                         <div class="input-group">
-                            <input type="number" step="0.01" min="0.01" :max="100 - (total/100)" placeholder="amount" class="form-control" v-model="addWeight">
-                            <span class="input-group-text">%</span>
+                            <input type="number" step="0.01" min="0.01" :max="100 - (total/100)" placeholder="amount" class="form-control p-1 text-center" v-model="addWeight">
+                            <span class="input-group-text p-1">%</span>
                         </div>
                     </td>
                     <td class="text-end"><button class="btn btn-success" :disabled="!addAccount || (total + addWeight * 100) > 10000" @click="appendBen()"><i class="fa-solid fa-square-plus fa-fw"></i></button></td>
+                </tr>
             </tbody>
         </table>
         </div>
