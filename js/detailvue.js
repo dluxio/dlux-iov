@@ -603,6 +603,7 @@ methods: {
             "json_metadata": JSON.stringify(this.postCustom_json)
         }
         if (this.bens.length)deets.bens = this.bens
+        console.log({deets})
         this.$emit('reply', deets)
     },
     broca_calc(last = '0,0') {
