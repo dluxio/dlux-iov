@@ -415,6 +415,9 @@ methods: {
                 break;
         }
     },
+    settext(text) {
+        this.mde = text;
+    },
     expIn(con){
         return `Expires in ${parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60) < 24 ? parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60) + ' hours' : parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60 / 24) + ' days'}`
     },
