@@ -2,6 +2,7 @@ import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
 import Pop from "/js/pop.js";
+import Bennies from "/js/bennies.js";
 
 export default {
     components: {
@@ -9,6 +10,7 @@ export default {
         "vue-ratings": Ratings,
         "mde": MDE,
         "pop-vue": Pop,
+        "bennies": Bennies
       },
   template: `
 <div>
@@ -38,6 +40,9 @@ export default {
   <!-- reply  -->
     <div v-show="makeReply">
       <mde @data="mde = $event" />
+      <div class="collapse" id="bene-collapse">
+          <bennies :list="bens" @update-bennies="bens=$event"></bennies>
+      </div>
       <div class="d-flex">
         <button class="btn btn-sm px-2 btn-secondary ms-auto" @click="makeReply = !makeReply"><i class="fa-solid fa-xmark fa-fw me-1"></i>Cancel</button>
         <button class="btn btn-sm px-2 btn-primary ms-1" @click="reply()"><i class="fa-solid fa-comment fa-fw me-1"></i>Reply</button>
@@ -96,6 +101,7 @@ export default {
         makeReply: false,
         makeVote: false,
         mde: '',
+        bens: [],
     };
     },
     emits: ['vote', 'reply'],

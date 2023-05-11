@@ -61,7 +61,7 @@ export default {
             default: true
         } 
     },
-    emits: ['updateBennies', 'updateHide'],
+    emits: ['updateBennies'],
     methods:{
         appendBen(){
             if(this.addAccount != '' && this.addWeight > 0){
@@ -98,6 +98,7 @@ export default {
                 if(data.result[0].id){
                     this.total += amount;
                     this.bennies.push({account, weight: amount});
+                    this.finalize()
                 }
             })
         },
@@ -105,7 +106,9 @@ export default {
             this.checkHive(account, amount);
         },
         subBenny(account){
+            this.total -= this.bennies.find(benny => benny.account == account).weight;
             this.bennies = this.bennies.filter(benny => benny.account != account);
+            this.finalize()
         },
         updateBenny(account, amount){
             for (let index = 0; index < this.bennies.length; index++) {
@@ -113,13 +116,10 @@ export default {
                     this.bennies[index].weight = amount;
                 }
             }
+            this.finalize()
         },
         finalize(){
             this.$emit('updateBennies', this.bennies);
-            this.$emit('updateHide', true);
-        },
-        cancel(){
-            this.$emit('updateHide', true);
         }
     },
     mounted() {
