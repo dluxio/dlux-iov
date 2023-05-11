@@ -423,7 +423,7 @@ createApp({
         operations.push(["comment_options",
           {
             "author": this.account,
-            "permlink": this.postPermlink,
+            "permlink": deets.permlinklink,
             "max_accepted_payout": "1000000.000 HBD",
             "percent_hbd": 10000,
             "allow_votes": true,
