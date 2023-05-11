@@ -504,7 +504,7 @@ export default {
           try {
             window.hive_keychain.requestBroadcast(
               op[0],
-              clean,
+              op[1],
               op[2],
               function (response) {
                 resolve(response);
