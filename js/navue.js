@@ -228,7 +228,7 @@ export default {
     sign(op) {
       return new Promise((resolve, reject) => {
         if (this.HKC) {
-          console.log("HKC", op);
+          console.log("HKCsign", op);
           this.HKCsign(op)
             .then((r) => resolve(r))
             .catch((e) => reject(e));
@@ -246,7 +246,7 @@ export default {
     signOnly(op) {
       return new Promise((resolve, reject) => {
         if (this.HKC) {
-          console.log("HKC");
+          console.log("HKCsignOnly");
           this.HKCsignOnly(op)
             .then((r) => resolve(r))
             .catch((e) => reject(e));
