@@ -28,9 +28,12 @@ export default {
                             <input type="text" placeholder="username" class="form-control p-1" v-model="addAccount">
                             <button class="btn py-1 px-2 btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-star me-1 fa-fw"></i></button>
                             <ul class="dropdown-menu">
-                                <li class=""><a class="dropdown-item d-flex align-items-center" role="button" @click="logIt()">@user1<span class="ms-auto"><a @click="logIt()" class="mx-1 btn btn-sm btn-light text-dark" role="button"><i class="fa-solid fa-xmark fa-fw"></i></a></span></a></li>
-                                <li class="d-flex align-items-center justify-content-between" @click="logIt()"><a class="dropdown-item" role="button">@useruseruser2</a><a @click="logIt()" class="mx-1 btn btn-sm btn-dark" role="button"><i class="fa-solid fa-xmark fa-fw"></i></a></li>
-                                <li class="d-flex align-items-center justify-content-between" @click="logIt()"><a class="dropdown-item" role="button">@useruser3</a><a @click="logIt()" class="mx-1 btn btn-sm btn-secondary" role="button"><i class="fa-solid fa-xmark fa-fw"></i></a></li>
+                                <li v-for="acc in favorites"class="d-flex align-items-center justify-content-between">
+                                    <a class="dropdown-item" role="button" @click="addAccount = acc">@{{acc}}</a>
+                                    <a @click="removeFavorite(acc)" class="mx-1 btn btn-sm btn-secondary" role="button">
+                                        <i class="fa-solid fa-xmark fa-fw"></i>
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </td>
@@ -52,7 +55,8 @@ export default {
             total: 0,
             addAccount: '',
             addWeight: "1.00",
-            bennies: []
+            bennies: [],
+            favorites: []
         }
     },
     props: {
@@ -108,6 +112,7 @@ export default {
                 if(data.result[0].id){
                     this.total += amount;
                     this.bennies.push({account, weight: amount});
+                    this.addFavorite(account)
                     this.finalize()
                 }
             })
@@ -130,11 +135,32 @@ export default {
         },
         finalize(){
             this.$emit('updateBennies', this.bennies);
+        },
+        getFavorites(){
+            let favorites = localStorage.getItem('favoriteBens');
+            if(favorites){
+                favorites = favorites.split(',')
+                this.favorites = favorites;
+            }
+        },
+        setFavorites(){
+            localStorage.setItem('favoriteBens', this.favorites);
+        },
+        addFavorite(account){
+            if(!this.favorites.includes(account)){
+                this.favorites.push(account);
+                this.setFavorites()
+            }
+        },
+        removeFavorite(account){
+            this.favorites = this.favorites.filter(favorite => favorite != account);
+            this.setFavorites()
         }
     },
     mounted() {
         this.list.forEach(benny => {
             this.checkHive(benny.account, benny.weight)
         });
+        this.getFavorites()
     },
 };
