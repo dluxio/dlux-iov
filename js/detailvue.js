@@ -42,7 +42,7 @@ export default {
 
                                     </div>
                                     <p class="mx-2">•</p>
-                                    <vue-ratings class="d-flex" :stars="post.stars"
+                                    <vue-ratings class="d-flex" :stars="post.rating"
                                         :ratings="post.ratings">
                                     </vue-ratings>
                                 </div>
