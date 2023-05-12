@@ -18,6 +18,35 @@
     <!-- <link href="/css/bootstrap.min.css" rel="stylesheet" /> -->
     <link href="/css/custom.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked-linkify-it/lib/index.umd.js"></script>
+    <script>
+        marked.use(markedLinkifyIt({
+	        '@': {
+		        validate: function (text, pos, self) {
+                    var tail = text.slice(pos);
+
+                    if (!self.re.hive) {
+                    self.re.hive =  new RegExp(
+                        '^([a-z0-9\.\-]){1,16}(?!_)(?=$|' + self.re.src_ZPCc + ')'
+                    );
+                    }
+                    if (self.re.hive.test(tail)) {
+                    if (pos >= 2 && tail[pos - 2] === '@') {
+                        return false;
+                    }
+                    return tail.match(self.re.hive)[0].length;
+                    }
+                    return 0;
+                },
+                normalize: function (match) {
+                    if(match.url.endsWith('.')){
+                        match.url = match.url.substring(0, match.url.length - 1);
+                    }
+                    match.url = '/@' + match.url.replace(/^@/, '');
+                }
+            }
+        }, {}));
+    </script>
     <script src="/js/purify.min.js"></script>
     <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
     <!-- <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script> -->

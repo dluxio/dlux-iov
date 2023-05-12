@@ -245,7 +245,7 @@ export default {
                                 <i class="fa-solid fa-file-contract fa-fw ms-2 me-1" :class="{'text-success': color_code(name) > 28800 * 7,'text-warning': color_code(name) < 28800 * 7 &&  color_code(name) > 28800, 'text-warning': color_code(name) < 28800}"></i>
                             </a>
 
-                        <div class="ms-auto" id="modal_total_payout"><pop-vue v-if="post.total_payout_value || post.pending_payout_value" title="Post Earnings"
+                        <div class="ms-auto" id="modal_total_payout"><pop-vue title="Post Earnings"
                         :id="'popper-' + post.author + '-' + post.permlink" :content="(gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') + ' HBD' : post.pending_payout_value ? post.pending_payout_value : '') + '<br>' + (post.paid ? precision(post.payout, 3) : 0) + ' ' + TOKEN"
                         trigger="hover">
                         <button class="btn btn-sm btn-outline-light">
