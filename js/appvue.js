@@ -704,7 +704,7 @@ createApp({
 
             }
             this.posturls[repKey].rep = "...";
-            this.posturls[repKey].rating = JSON.parse(this.posturls[repKey].json_metadata)?.review?.rating || 0
+            this.posturls[repKey].rating = typeof this.posturls[repKey].json_metadata == "string" ? JSON.parse(this.posturls[repKey].json_metadata)?.review?.rating || 0 : 0
             this.rep(repKey)
           }
           this.posturls[key].replies = r.result;
