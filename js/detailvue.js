@@ -245,7 +245,6 @@ export default {
                                 <i class="fa-solid fa-file-contract fa-fw ms-2 me-1" :class="{'text-success': color_code(name) > 28800 * 7,'text-warning': color_code(name) < 28800 * 7 &&  color_code(name) > 28800, 'text-warning': color_code(name) < 28800}"></i>
                             </a>
 
-                        <vue-ratings v-if="post.type != 'Blog'" role="button" class="ms-2" vote="true" @rating="setRating(post.url, $event)"></vue-ratings>
                         <div class="ms-auto" id="modal_total_payout"><pop-vue v-if="post.total_payout_value || post.pending_payout_value" title="Post Earnings"
                         :id="'popper-' + post.author + '-' + post.permlink" :content="(gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') + ' HBD' : post.pending_payout_value ? post.pending_payout_value : '') + '<br>' + (post.paid ? precision(post.payout, 3) : 0) + ' ' + TOKEN"
                         trigger="hover">
@@ -271,6 +270,7 @@ export default {
                     </div>
                     <div class="d-flex">
                         <button class="btn btn-sm px-2 btn-secondary" data-bs-toggle="collapse" data-bs-target="#bene-collapse"><i class="fa-solid fa-user-group fa-fw me-1"></i>Beneficiaries {{bens.length ? '(' + bens.length + ')' : ''}}<span v-if="!bens.length">+</span></button>
+                        <vue-ratings v-if="post.type != 'Blog'" role="button" class="ms-2" vote="true" @rating="setRating(post.url, $event)"></vue-ratings>
                         <button class="ms-auto btn btn-sm px-2 btn-primary" :disabled="!mde" @click="comment(post.url)"><i class="fas fa-comment fa-fw me-1"></i>Reply</button>
                     </div>
                 </div>
