@@ -592,13 +592,16 @@ createApp({
       this.displayPost.item = this.posturls[key];
       window.history.pushState("Blog Modal", this.displayPost.item.title, "/blog/@" + key.split('/@')[1]);
       if (this.displayPost.item.children && !this.displayPost.item.replies.length){
+        var recompile = false
         if(!this.displayPost.item.ratings){
           this.displayPost.item.ratings = 0
           this.displayPost.item.rating = 0
+          recompile = true
         }
         this.getReplies(
           this.displayPost.item.author,
-          this.displayPost.item.permlink
+          this.displayPost.item.permlink,
+          recompile
         )
       }
     },
@@ -675,7 +678,7 @@ createApp({
         this.toSign = {};
       }
     },
-    getReplies(a,p,k){
+    getReplies(a,p,c){
       return new Promise((resolve, reject) => {
         fetch(this.hapi, {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content_replies", "params":["${a}","${p}"], "id":1}`,
@@ -700,7 +703,7 @@ createApp({
               } catch (e) {}
             }
             const repKey =`/@${r.result[i].author}/${r.result[i].permlink}`
-            if(!k){
+            if(!c){
               const rating = r.result[i].json_metadata?.review?.rating || 0
               if(rating > 0){
                 this.posturls[key].rating = parseFloat(( rating / 1) + (this.posturls[key].rating / this.posturls[key].ratings)).toFixed(2)
