@@ -1016,7 +1016,8 @@ createApp({
                 edit: false,
                 hasVoted: false,
                 contract: {},
-                type: 'Blog'
+                type: 'Blog',
+                rating: 0,
               };
               for (
                 var i = 0;
@@ -1035,6 +1036,7 @@ createApp({
                 this.posturls[key].json_metadata = JSON.parse(
                   this.posturls[key].json_metadata
                 );
+                this.posturls[key].rating = this.posturls[key].json_metadata?.review?.rating || 0
                 this.posturls[key].pic = this.picFind(
                   this.posturls[key].json_metadata
                 );
