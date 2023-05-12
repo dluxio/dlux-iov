@@ -591,11 +591,16 @@ createApp({
       this.displayPost.index = key;
       this.displayPost.item = this.posturls[key];
       window.history.pushState("Blog Modal", this.displayPost.item.title, "/blog/@" + key.split('/@')[1]);
-      if (this.displayPost.item.children && !this.displayPost.item.replies.length)
+      if (this.displayPost.item.children && !this.displayPost.item.replies.length){
+        if(!this.displayPost.item.ratings){
+          this.displayPost.item.ratings = 0
+          this.displayPost.item.rating = 0
+        }
         this.getReplies(
           this.displayPost.item.author,
           this.displayPost.item.permlink
         )
+      }
     },
     getRewardFund(){
       fetch(this.hapi, {
@@ -695,6 +700,13 @@ createApp({
               } catch (e) {}
             }
             const repKey =`/@${r.result[i].author}/${r.result[i].permlink}`
+            if(!this.posturls[repKey].raters){
+              const rating = r.result[i].json_metadata?.review?.rating || 0
+              if(rating > 0){
+                this.posturls[key].rating = parseFloat(( 1 / rating) + (this.posturls[key].ratings / this.posturls[key].rating)).toFixed(2)
+                this.posturls[key].ratings += 1
+              }
+            }
             this.posturls[repKey] =
               r.result[i];
             if (r.result[i].slider < 0) {
