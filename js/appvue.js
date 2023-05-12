@@ -593,6 +593,7 @@ createApp({
       window.history.pushState("Blog Modal", this.displayPost.item.title, "/blog/@" + key.split('/@')[1]);
       if (this.displayPost.item.children && !this.displayPost.item.replies.length){
         var recompile = false
+        console.log(this.displayPost.item)
         if(!this.displayPost.item.ratings){
           this.displayPost.item.ratings = 0
           this.displayPost.item.rating = 0
