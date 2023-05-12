@@ -2540,6 +2540,10 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 hasVoted: false,
                 contract: {}
               };
+              if(!this.posturls[key].ratings){
+                this.posturls[key].ratings = 0
+                this.posturls[key].rating = 0
+              }
               for (
                 var i = 0;
                 i < this.posturls[key].active_votes.length;
