@@ -704,6 +704,7 @@ createApp({
 
             }
             this.posturls[repKey].rep = "...";
+            this.posturls[repKey].rating = JSON.parse(this.posturls[repKey].json_metadata).review.rating || 0
             this.rep(repKey)
           }
           this.posturls[key].replies = r.result;
@@ -1017,7 +1018,6 @@ createApp({
                 hasVoted: false,
                 contract: {},
                 type: 'Blog',
-                rating: 0,
               };
               for (
                 var i = 0;
@@ -1036,7 +1036,6 @@ createApp({
                 this.posturls[key].json_metadata = JSON.parse(
                   this.posturls[key].json_metadata
                 );
-                this.posturls[key].rating = this.posturls[key].json_metadata?.review?.rating || 0
                 this.posturls[key].pic = this.picFind(
                   this.posturls[key].json_metadata
                 );
