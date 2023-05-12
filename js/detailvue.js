@@ -415,12 +415,12 @@ methods: {
                 break;
             case 'RateUp':
                 this.post.replies.sort((a, b) => {
-                    return a.rating - b.rating
+                    return b.rating - a.rating
                 })
                 break;
             case 'RateDown':
                 this.post.replies.sort((a, b) => {
-                    return b.rating - a.rating
+                    return a.rating - b.rating
                 })
                 break;
             default:
