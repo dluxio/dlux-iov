@@ -2062,7 +2062,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         !this.displayPost.item.replies.length
       )this.getReplies(
           this.displayPost.item.author,
-          this.displayPost.item.permlink
+          this.displayPost.item.permlink,
+          true
         )
     },
     getRewardFund() {
@@ -2150,7 +2151,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         this.toSign = {};
       }
     },
-    getReplies(a, p, k) {
+    getReplies(a, p, c) {
       return new Promise((resolve, reject) => {
         fetch(this.hapi, {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content_replies", "params":["${a}","${p}"], "id":1}`,
@@ -2175,6 +2176,13 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               } catch (e) {}
             }
             const repKey =`/@${r.result[i].author}/${r.result[i].permlink}`
+            if(c){
+              const rating = r.result[i].json_metadata?.review?.rating || 0
+              if(rating > 0){
+                this.posturls[key].ratings += 1
+                this.posturls[key].rating = parseFloat(( (rating + this.posturls[key].rating) / this.posturls[key].ratings)).toFixed(2)
+              }
+            }
             this.posturls[repKey] =
               r.result[i];
             if (r.result[i].slider < 0) {
