@@ -2184,6 +2184,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
 
             }
             this.posturls[repKey].rep = "...";
+            this.posturls[repKey].rating = this.posturls[repKey].json_metadata?.review?.rating || 0
             this.rep(repKey)
           }
           this.posturls[key].replies = r.result;
