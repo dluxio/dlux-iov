@@ -2540,7 +2540,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 hasVoted: false,
                 contract: {}
               };
+              console.log('try')
               if(!this.posturls[key].ratings){
+                console.log('pass')
                 this.posturls[key].ratings = 0
                 this.posturls[key].rating = 0
               }
