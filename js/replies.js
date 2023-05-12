@@ -29,6 +29,7 @@ export default {
                   :class="{'rep-danger': post.rep < 25, 'rep-warning': post.rep >= 25 && post.rep < 50, 'rep-success': post.rep >= 50}">
                   {{ post.rep }}</span></span></a>
                   <span class="ms-1 text-muted">•</span>
+                  <vue-ratings v-if="post.rating" class="d-flex" :stars="post.rating"/>
                   <span class="ms-1 small text-muted" style="font-weight: 400">{{ timeSince(post.created) }}</span>
                   <a role="button" class="ms-auto no-decoration text-white-50" @click="view = !view"><i v-show="view" class="fa-solid fa-circle-minus fa-fw"></i><i v-show="!view" class="fa-solid fa-circle-plus fa-fw"></i></a>
                 </div>
