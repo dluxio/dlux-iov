@@ -2179,8 +2179,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             if(c){
               const rating = r.result[i].json_metadata?.review?.rating || 0
               if(rating > 0){
-                this.posturls[repKey].ratings += 1
-                this.posturls[repKey].rating = parseFloat(( (rating + this.posturls[repKey].rating) / this.posturls[repKey].ratings)).toFixed(2)
+                this.posturls[key].ratings += 1
+                this.posturls[key].rating = parseFloat(( (rating + this.posturls[key].rating) / this.posturls[key].ratings)).toFixed(2)
               }
             }
             this.posturls[repKey] =
