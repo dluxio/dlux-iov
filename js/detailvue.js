@@ -286,6 +286,8 @@ export default {
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark bg-dark">
                                  <li><a class="dropdown-item" role="button" @click="orderBy('Reward')">Reward</a></li>
+                                 <li><a class="dropdown-item" role="button" @click="orderBy('RateUp')">Ratings<i class="fa-solid fa-arrow-down-wide-short"></i></a></li>
+                                 <li><a class="dropdown-item" role="button" @click="orderBy('RateDown')">Ratings<i class="fa-solid fa-arrow-down-short-wide"></i></a></li>
                                  <li><a class="dropdown-item" role="button" @click="orderBy('Newest')">Newest</a></li>
                                  <li><a class="dropdown-item" role="button" @click="orderBy('AuthorVote')">Author Vote</a></li>
                                  <li><a class="dropdown-item" role="button" @click="orderBy('Oldest')">Oldest</a></li>
@@ -409,6 +411,16 @@ methods: {
             case 'Rep':
                 this.post.replies.sort((a, b) => {
                     return b.author_reputation - a.author_reputation
+                })
+                break;
+            case 'RateUp':
+                this.post.replies.sort((a, b) => {
+                    return a.rating > b.rating
+                })
+                break;
+            case 'RateDown':
+                this.post.replies.sort((a, b) => {
+                    return a.rating < b.rating
                 })
                 break;
             default:
