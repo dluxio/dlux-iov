@@ -1625,7 +1625,8 @@
                     :contracts="contracts"
                     :extendcost="extendcost"
                     @tosign="toSign=$event"
-                    @modalselect="modalSelect($event)" 
+                    @modalselect="modalSelect($event)"
+                    @reply="reply($event)"
                     @vote="vote($event)"></detail-vue>
                 <!-- mint transfer modal -->
                 <div class="modal fade" id="mintTransferModal" tabindex="-1" role="dialog" aria-hidden="true">
