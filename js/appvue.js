@@ -704,7 +704,7 @@ createApp({
               } catch (e) {}
             }
             const repKey =`/@${r.result[i].author}/${r.result[i].permlink}`
-            if(!c){
+            if(c){
               const rating = r.result[i].json_metadata?.review?.rating || 0
               if(rating > 0){
                 this.posturls[key].rating = parseFloat(( rating / 1) + (this.posturls[key].rating / this.posturls[key].ratings)).toFixed(2)
