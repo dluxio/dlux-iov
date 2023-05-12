@@ -19,7 +19,7 @@ export default {
       <i v-show="stars < 1.4" class="far fa-star"></i>
       <i v-show="stars < 0.4" class="far fa-star"></i>
     </div>
-    <p v-show="ratings">{{ratings}} Reviews</p>
+    <p v-show="ratings">{{ratings}} Review{{ratings > 1 ? 's' : ''}}</p>
     <div v-show="vote" class="text-warning">
     <a @click="rating(1)">
     <i v-show="votes >= 1" class="fas fa-star"></i>
