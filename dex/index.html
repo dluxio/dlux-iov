@@ -812,7 +812,7 @@
           </div>
           <!-- market chart -->
           <div class="marketChart mt-3 mb-3">
-            <div id="chartContainer" ref="dumbo">
+            <div id="chartContainer" ref="dumbo" class="rounded p-3 border" :class="{'border-danger': buyhive.checked, 'border-success': buyhbd.checked}">
               <trading-vue :data="this.$data" ref="tvjs" :id="chart.id" :width="chart.width" :height="chart.height"
                 :title-txt="chartTitle" :color-back="chart.bg" />
               <!-- Trading Vue 2 -->
