@@ -65,7 +65,7 @@ var app = new Vue({
         height: 400,
         toolbar: true,
         overlays: false,
-        bg: `#585db3`,
+        bg: `#adb5bd`,
       },
       barcount: 500,
       barwidth: 3600000 * 6,
