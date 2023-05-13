@@ -204,7 +204,7 @@ export default {
          <a v-show="post.rating" href="#detailModal" class="ms-2 no-decoration text-white-50"
             data-bs-toggle="modal" @click="modalSelect(post.url)" >
          <i class="fa-solid fa-star me-1"></i><span
-            class="text-white-50">{{post.rating}}</span>
+            class="text-white-50">{{formatNumber(post.rating, 1, '.',',')}}</span>
          </a >
          <a role="button" class="ms-2 no-decoration text-white-50" data-bs-toggle="collapse"
             :class="{'text-primary': flag > 0}"

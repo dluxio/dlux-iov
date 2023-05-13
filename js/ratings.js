@@ -6,7 +6,7 @@ export default {
   },
   template: `
   <div>
-    <div v-show="stars && !vote" class="text-warning">
+    <div v-show="stars && !vote" class="text-warning me-1">
       <i v-show="stars >= 0.9" class="fas fa-star"></i>
       <i v-show="stars >= 1.9" class="fas fa-star"></i>
       <i v-show="stars >= 2.9" class="fas fa-star"></i>

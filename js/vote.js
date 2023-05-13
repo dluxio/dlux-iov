@@ -40,10 +40,13 @@ export default {
   <!-- reply  -->
     <div v-show="makeReply">
       <mde @data="mde = $event" />
-      <div class="collapse" id="bene-collapse">
+      <div class="collapse" :id="'benes-' + post.author + '-' + post.permlink">
           <bennies :list="bens" @update-bennies="bens=$event"></bennies>
       </div>
       <div class="d-flex">
+      <button class="btn btn-sm px-2 btn-secondary" data-bs-toggle="collapse" :data-bs-target="'#benes-' + post.author + '-' + post.permlink">
+        <i class="fa-solid fa-user-group fa-fw me-1"></i>Beneficiaries {{bens.length ? '(' + bens.length + ')' : ''}}<span v-if="!bens.length">+</span>
+      </button>
         <button class="btn btn-sm px-2 btn-secondary ms-auto" @click="makeReply = !makeReply"><i class="fa-solid fa-xmark fa-fw me-1"></i>Cancel</button>
         <button class="btn btn-sm px-2 btn-primary ms-1" @click="reply()"><i class="fa-solid fa-comment fa-fw me-1"></i>Reply</button>
       </div>

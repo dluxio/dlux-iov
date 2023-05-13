@@ -13,16 +13,16 @@ export default {
             </thead>
             <tbody class="table-group-divider">
                 <tr v-for="ben in bennies">
-                    <td class="w-50">@{{ben.account}}</td>
+                    <td class="ps-0 w-50">@{{ben.account}}</td>
                     <td class="text-center">
                         <span class="pe-05"><button class="btn btn-sm btn-secondary" @click="decBen(ben)">-</button></span>
                         <span>{{ben.weight/100}}%</span>
                         <span class="ps-05"><button class="btn btn-sm btn-secondary" @click="incBen(ben)">+</button></span>
                     </td>
-                    <td class="text-end"><button class="btn btn-danger" @click="subBenny(ben.account)"><i class="fa-solid fa-trash-can fa-fw"></i></button></td>
+                    <td class="pe-0 text-end"><button class="btn btn-danger" @click="subBenny(ben.account)"><i class="fa-solid fa-trash-can fa-fw"></i></button></td>
                 </tr>
                 <tr v-if="bennies.length < 8 && total < 10000" style="border-bottom-style: hidden !important;">
-                    <td class="w-50">
+                    <td class="ps-0 w-50">
                         <div class="input-group">
                             <span class="input-group-text p-1">@</span>
                             <input type="text" placeholder="username" class="form-control p-1" v-model="addAccount">
@@ -43,7 +43,7 @@ export default {
                             <span class="input-group-text p-1">%</span>
                         </div>
                     </td>
-                    <td class="text-end"><button class="btn btn-success" :disabled="!addAccount || (total + addWeight * 100) > 10000" @click="appendBen()"><i class="fa-solid fa-square-plus fa-fw"></i></button></td>
+                    <td class="pe-0 text-end"><button class="btn btn-success" :disabled="!addAccount || (total + addWeight * 100) > 10000" @click="appendBen()"><i class="fa-solid fa-square-plus fa-fw"></i></button></td>
                 </tr>
             </tbody>
         </table>

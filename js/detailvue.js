@@ -20,8 +20,8 @@ export default {
 <div :class="{'fade': modal, 'modal': modal}" id="detailModal" tabindex="-1" role="dialog" aria-hidden="true" @focus="orderBy('Reward')">
     <div class="modal-dialog modal-full modal-xl modal-dialog-centered" style="max-width: 1000px;"
         role="document">
-        <div class="modal-content rounded bg-img-none text-white">
-            <div class="card text-white bg-img-none bg-blur-none">
+        <div class="modal-content rounded bg-img-none">
+            <div class="card bg-img-none bg-blur-none">
                 <div class="ms-auto">
                     <button :class="{'invisible' : !modal}" type="button" class="btn-close mt-3 me-3"
                         data-bs-dismiss="modal" aria-label="Close" @click="goBack()"></button>
@@ -29,17 +29,15 @@ export default {
                 <div class="ms-auto me-auto px-2" style="max-width: 750px">
                     <div class="">
                         <div class="d-flex">
-                            <div><a class="text-white no-decoration"
+                            <div><a class=" no-decoration"
                                     :href="'/blog/@' + post.author + '/' + post.permlink">
                                     <h3 class="card-title" id="modal_title">
                                         {{post.title}}</h3>
                                 </a>
                                 <div class="d-flex flex-wrap text-info" v-if="post.type != 'Blog'">
                                     <div>
-                                        <p><i
-                                                :class="post_select.types[post.type].icon"></i>{{post_select.types[post.type].launch}}
-                                        </p>
-
+                                        <p><i :class="post_select.types[post.type].icon"></i>
+                                        {{post_select.types[post.type].launch}}</p>
                                     </div>
                                     <p class="mx-2">•</p>
                                     <vue-ratings class="d-flex" :stars="post.rating"
@@ -84,7 +82,7 @@ export default {
                     <div>
                         <hr>
                     </div>
-                    <div class="">
+                    <div class="mde-body">
                         <vue-markdown :md="post.body" :author="post.author"
                             :permlink="post.permlink"></vue-markdown>
                     </div>
@@ -268,7 +266,7 @@ export default {
                     <div class="collapse" id="bene-collapse">
                         <bennies :list="bens" @update-bennies="bens=$event"></bennies>
                     </div>
-                    <div class="d-flex">
+                    <div class="d-flex align-items-center">
                         <button class="btn btn-sm px-2 btn-secondary" data-bs-toggle="collapse" data-bs-target="#bene-collapse"><i class="fa-solid fa-user-group fa-fw me-1"></i>Beneficiaries {{bens.length ? '(' + bens.length + ')' : ''}}<span v-if="!bens.length">+</span></button>
                         <vue-ratings v-if="post.type != 'Blog'" role="button" class="ms-2" vote="true" @rating="setRating(post.url, $event)"></vue-ratings>
                         <button class="ms-auto btn btn-sm px-2 btn-primary" :disabled="!mde" @click="comment(post.url)"><i class="fas fa-comment fa-fw me-1"></i>Reply</button>
