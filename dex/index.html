@@ -590,13 +590,13 @@
                       <tbody role="rowgroup" class="tbody-scroll-nodes">
                         <tr class="" role="row" v-for="node in runners" v-if="!filteraccount.value">
                           <td role="cell" class="" aria-colindex="1">
-                            <a :href="atref(node.account)">@{{node.account}}</a>
+                            <a :href="atref(node.account)" class="no-decoration">@{{node.account}}</a>
                           </td>
                           <td role="cell" class="text-white-50" aria-colindex="2">
                             {{formatNumber(node.g/1000,3,'.',',')}}
                           </td>
                           <td role="cell" class="" aria-colindex="3">
-                            <a href="#" @click="setApi(node.api)">{{node.api}}</a>
+                            <a role="button" @click="setApi(node.api)" class="no-decoration">{{node.api}}</a>
                           </td>
                         </tr>
                         <tr class="" role="row" v-for="node in runnersSearch" v-if="filteraccount.value">
@@ -607,7 +607,7 @@
                             {{formatNumber(node.g/1000,3,'.',',')}}
                           </td>
                           <td role="cell" class="" aria-colindex="3">
-                            <a href="#" @click="setApi(node.api)">{{node.api}}</a>
+                            <a role="button" @click="setApi(node.api)">{{node.api}}</a>
                           </td>
                         </tr>
                       </tbody>
