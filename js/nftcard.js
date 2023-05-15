@@ -99,17 +99,17 @@ export default {
     },
     getSetDetailsColors(script) {
       return `linear-gradient(${r})`;
-      let r = "chartreuse,lawngreen";
-      const s = this.baseScript[script];
-      if (s && s.set) {
-        try {
-          r = `${s.set.Color1},${s.set.Color2 ? s.set.Color2 : s.set.Color1}`;
-        } catch (e) {
-          console.log(e);
-          r = "chartreuse,lawngreen";
-        }
-      }
-      return `linear-gradient(${r})`;
+      // let r = "chartreuse,lawngreen";
+      // const s = this.baseScript[script];
+      // if (s && s.set) {
+      //   try {
+      //     r = `${s.set.Color1},${s.set.Color2 ? s.set.Color2 : s.set.Color1}`;
+      //   } catch (e) {
+      //     console.log(e);
+      //     r = "chartreuse,lawngreen";
+      //   }
+      // }
+      // return `linear-gradient(${r})`;
     },
     getIcon(s) {
       return this.baseScript[s] ? this.baseScript[s].set.faicon : "";
