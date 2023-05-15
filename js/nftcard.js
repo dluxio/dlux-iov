@@ -6,7 +6,7 @@ export default {
 <div class="card-header border-0 d-flex align-items-center">
 
     <div class="rounded mb-0 px-3 py-1" style="background: rgba(0,0,0,1)">
-        <a :href="'/nfts/set/' + item.setname + addToken(item.token)"
+        <a :href="'/nfts/set/' + item.setname + '#' + item.token"
             class="no-decoration" style="font-size: 1.3em;"><span
                 class="rainbow-text" style="background-image: linear-gradient(rgb(194, 255, 182), rgb(255, 163, 182), rgb(221, 169, 255), rgb(162, 209, 255));
             -webkit-background-clip: text;
