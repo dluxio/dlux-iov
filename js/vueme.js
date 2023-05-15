@@ -10,6 +10,7 @@ import MDE from "/js/mde.js";
 import Replies from "/js/replies.js";
 import CardVue from "./cardvue.js";
 import DetailVue from "./detailvue.js";
+import NFTCard from "nftcard.js"
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "",
@@ -790,6 +791,7 @@ var app = new Vue({
     "replies": Replies,
     "card-vue": CardVue,
     "detail-vue": DetailVue,
+    "nftcard": NFTCard,
   },
   methods: {
     getSetPhotos(s, c) {
