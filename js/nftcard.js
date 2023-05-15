@@ -98,7 +98,7 @@ export default {
       this.$emit('detail', this.item.setname + ':' + this.item.uid);
     },
     getSetDetailsColors(script) {
-      return `linear-gradient(${r})`;
+      return `linear-gradient('chartreuse,lawngreen')`;
       // let r = "chartreuse,lawngreen";
       // const s = this.baseScript[script];
       // if (s && s.set) {
