@@ -13,7 +13,7 @@ export default {
         -webkit-text-fill-color: transparent; 
         -moz-background-clip: text;
         -moz-text-fill-color: transparent;;"><i class="me-2"
-                    :class="[getIcon(item.script)]"></i><b>{{item.setname}}</b></span></a>
+                    :class="[icon]"></i><b>{{item.setname}}</b></span></a>
     </div>
     <div class="rounded-pill d-flex align-items-center p-2 ms-auto"
         style="background: black">
@@ -116,9 +116,6 @@ export default {
       //   }
       // }
       // return `linear-gradient(${r})`;
-    },
-    getIcon(s) {
-      return this.baseScript[s] ? this.baseScript[s].set.faicon : "";
     },
     timeSince(date) {
       var seconds = Math.floor((new Date() - new Date(date + ".000Z")) / 1000);
