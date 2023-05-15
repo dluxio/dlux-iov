@@ -2957,6 +2957,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
     finishPNFT(s) {
       if (this.baseScript[s.script]) {
+        s.setname = s.set
         this.NFTtrades.push(s);
       } else
         setTimeout(() => {
