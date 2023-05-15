@@ -12568,8 +12568,8 @@ body {
 }
 
 .col-sort {
-  background-color: cornflowerblue !important;
-  color: #282828;
+  background-color: #282828 !important;
+  color: #fff;
 }
 
 .tbody-scroll-orders {

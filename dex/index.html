@@ -850,12 +850,12 @@
                             <div class="me-auto">BLOCK</div>
                             <button title="Sort Ascending" type="button" class="ms-1 btn btn-sm btn-outline-primary"
                               @click="sort('openorders','block','asc');toggleOrders('blocka')"
-                              v-bind:class="{'bg-primary':orders.blocka}">
+                              v-bind:class="{'bg-primary text-white':orders.blocka}">
                               <i class="fas fa-caret-up"></i>
                             </button>
                             <button title="Sort Descending" type="button" class="ms-1 btn btn-sm btn-outline-primary"
                               @click="sort('openorders','block','desc');toggleOrders('blockd')"
-                              v-bind:class="{'bg-primary':orders.blockd}">
+                              v-bind:class="{'bg-primary text-white':orders.blockd}">
                               <i class="fas fa-caret-down"></i>
                             </button>
                           </div>
@@ -866,12 +866,12 @@
                             <div class="me-auto">{{TOKEN}}</div>
                             <button title="Sort Ascending" type="button" class="ms-1 btn btn-sm btn-outline-primary"
                               @click="sort('openorders','amount','asc');toggleOrders('tokena')"
-                              v-bind:class="{'bg-primary':orders.tokena}">
+                              v-bind:class="{'bg-primary text-white':orders.tokena}">
                               <i class="fas fa-caret-up"></i>
                             </button>
                             <button title="Sort Descending" type="button" class="ms-1 btn btn-sm btn-outline-primary"
                               @click="sort('openorders','amount','desc');toggleOrders('tokend')"
-                              v-bind:class="{'bg-primary':orders.tokend}">
+                              v-bind:class="{'bg-primary text-white':orders.tokend}">
                               <i class="fas fa-caret-down"></i>
                             </button>
                           </div>
@@ -880,14 +880,14 @@
                           aria-colindex="3">
                           <div class="d-flex align-items-center">
                             <div class="me-auto">HIVE/HBD</div>
-                            <button title="Sort Ascending" type="button" class="ms-1 btn btn-sm btn-dark"
+                            <button title="Sort Ascending" type="button" class="ms-1 btn btn-sm btn-outline-primary"
                               @click="sort('openorders','nai','asc');toggleOrders('coina')"
-                              v-bind:class="{'bg-primary':orders.coina}">
+                              v-bind:class="{'bg-primary text-white':orders.coina}">
                               <i class="fas fa-caret-up"></i>
                             </button>
-                            <button title="Sort Descending" type="button" class="ms-1 btn btn-sm btn-dark"
+                            <button title="Sort Descending" type="button" class="ms-1 btn btn-sm btn-outline-primary"
                               @click="sort('openorders','nai','desc');toggleOrders('coind')"
-                              v-bind:class="{'bg-primary':orders.coind}">
+                              v-bind:class="{'bg-primary text-white':orders.coind}">
                               <i class="fas fa-caret-down"></i>
                             </button>
                           </div>
@@ -896,14 +896,14 @@
                           aria-colindex="4">
                           <div class="d-flex align-items-center">
                             <div class="me-auto">FILLED</div>
-                            <button title="Sort Ascending" type="button" class="ms-1 btn btn-sm btn-dark"
+                            <button title="Sort Ascending" type="button" class="ms-1 btn btn-sm btn-outline-primary"
                               @click="sort('openorders','percentFilled','asc');toggleOrders('filleda')"
-                              v-bind:class="{'bg-primary':orders.filleda}">
+                              v-bind:class="{'bg-primary text-white':orders.filleda}">
                               <i class="fas fa-caret-up"></i>
                             </button>
-                            <button title="Sort Descending" type="button" class="ms-1 btn btn-sm btn-dark"
+                            <button title="Sort Descending" type="button" class="ms-1 btn btn-sm btn-outline-primary"
                               @click="sort('openorders','percentFilled','desc');toggleOrders('filledd')"
-                              v-bind:class="{'bg-primary':orders.filledd}">
+                              v-bind:class="{'bg-primary text-white':orders.filledd}">
                               <i class="fas fa-caret-down"></i>
                             </button>
                           </div>
@@ -912,14 +912,14 @@
                           aria-colindex="5">
                           <div class="d-flex align-items-center">
                             <div class="me-auto">RATE</div>
-                            <button title="Sort Ascending" type="button" class="ms-1 btn btn-sm btn-dark"
+                            <button title="Sort Ascending" type="button" class="ms-1 btn btn-sm btn-outline-primary"
                               @click="sort('openorders','rate','asc');toggleOrders('ratea')"
-                              v-bind:class="{'bg-primary':orders.ratea}">
+                              v-bind:class="{'bg-primary text-white':orders.ratea}">
                               <i class="fas fa-caret-up"></i>
                             </button>
-                            <button title="Sort Descending" type="button" class="ms-1 btn btn-sm btn-dark"
+                            <button title="Sort Descending" type="button" class="ms-1 btn btn-sm btn-outline-primary"
                               @click="sort('openorders','rate','desc');toggleOrders('rated')"
-                              v-bind:class="{'bg-primary':orders.rated}">
+                              v-bind:class="{'bg-primary text-white':orders.rated}">
                               <i class="fas fa-caret-down"></i>
                             </button>
                           </div>
@@ -928,14 +928,14 @@
                           aria-colindex="6">
                           <div class="d-flex align-items-center">
                             <div class="me-auto">TYPE</div>
-                            <button title="Sort Ascending" type="button" class="ms-1 btn btn-sm btn-dark"
+                            <button title="Sort Ascending" type="button" class="ms-1 btn btn-sm btn-outline-primary"
                               @click="sort('openorders','type','asc');toggleOrders('typea')"
-                              v-bind:class="{'bg-primary':orders.typea}">
+                              v-bind:class="{'bg-primary text-white':orders.typea}">
                               <i class="fas fa-caret-up"></i>
                             </button>
-                            <button title="Sort Descending" type="button" class="ms-1 btn btn-sm btn-dark"
+                            <button title="Sort Descending" type="button" class="ms-1 btn btn-sm btn-outline-primary"
                               @click="sort('openorders','type','desc');toggleOrders('typed')"
-                              v-bind:class="{'bg-primary':orders.typed}">
+                              v-bind:class="{'bg-primary text-white':orders.typed}">
                               <i class="fas fa-caret-down"></i>
                             </button>
                           </div>
