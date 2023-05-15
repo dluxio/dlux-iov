@@ -607,7 +607,7 @@
                             {{formatNumber(node.g/1000,3,'.',',')}}
                           </td>
                           <td role="cell" class="" aria-colindex="3">
-                            <a role="button" @click="setApi(node.api)" @load="proveAPI(node.api)">{{node.api}}</a>
+                            <a role="button" @click="setApi(node.api)" :class="{'text-danger': typeof proven[node.api] != 'number'}">{{node.api}}</a>
                           </td>
                         </tr>
                       </tbody>
