@@ -13,9 +13,9 @@ export default {
               <h2 class="m-0">{{rnft.qty}}</h2>
               </div>
              </div>
-       <div> <a :href="'/nfts/set/' + rnft.set + addToken(rnft.token)" class="no-decoration">
+       <div> <a :href="'/nfts/set/' + rnft.set + '#' + rnft.token" class="no-decoration">
        <h3 class="card-title lead shimmer rounded p-2 m-0">
-         <b><i :class="[getIcon(rnft.script)]"></i>{{rnft.set}}</b></h3></a>
+         <b><i :class="[icon]"></i>{{rnft.set}}</b></h3></a>
          </div>
         </div>
        </div>
@@ -43,11 +43,11 @@ export default {
 <div class="card-body p-0" style="background: rgba(0,0,0,.75)" v-if="mint">
 <div class="px-2 py-5 text-center rounded"
 style="background-color: rgba(0,0,0,0.75)">
-<img v-if="getAttr(rnft.script, 'wrapped')" class="rounded max-160"
-    :src="'https://ipfs.io/ipfs/' + getAttr(rnft.script, 'wrapped')"></img>
+<img v-if="wrapped" class="rounded max-160"
+    :src="'https://ipfs.io/ipfs/' + wrapped"></img>
 <div>
     <h3 class="my-0 mx-2 p-0 p-2 ms-auto"
-        :style="{'background-image': getSetDetailsColors(rnft.script)}"
+        :style="{'background-image': colors}"
         style="-webkit-background-clip: text;
            -webkit-text-fill-color: transparent; 
            -moz-background-clip: text;

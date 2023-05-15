@@ -1345,7 +1345,8 @@
                                 <div v-for="rnft of accountRNFTs" class="col">
                                     <nftcard 
                                         :item="item"
-                                        :mint="true" 
+                                        :mint="true"
+                                        :wrapped="getAttr(rnft.script, 'wrapped')"
                                         :icon="getIcon(item.script)" 
                                         :colors="getSetDetailsColors(item.script)" 
                                         @detail="modalIndex('itemModal', $event);itemModal.hidden = false"/>
