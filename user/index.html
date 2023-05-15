@@ -1343,58 +1343,12 @@
                             <div v-if="accountRNFTs.length"
                                 class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
                                 <div v-for="rnft of accountRNFTs" class="col">
-                                    <div class="card h-100 my-3"
-                                        :style="{'background': getSetDetailsColors(rnft.script)}" style="border: none;">
-                                        <div class="card-header">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="rounded-pill d-flex align-items-center p-2"
-                                                    style="background-color: black">
-                                                    <div class="ps-2"><small>QTY: </small></div>
-                                                    <div class="px-2">
-                                                        <h2 class="m-0">{{rnft.qty}}</h2>
-                                                    </div>
-                                                </div>
-                                                <div> <a :href="'/nfts/set/' + rnft.set + addToken(rnft.token)"
-                                                        class="no-decoration">
-                                                        <h3 class="card-title lead shimmer rounded p-2 m-0">
-                                                            <b><i :class="[getIcon(rnft.script)]"></i>
-                                                                {{rnft.set}}
-                                                            </b>
-                                                        </h3>
-                                                    </a></div>
-                                            </div>
-                                        </div>
-                                        <div class="card-body pb-1">
-                                            <div class="px-2 py-5 text-center rounded"
-                                                style="background-color: rgba(0,0,0,0.75)">
-                                                <img v-if="getAttr(rnft.script, 'wrapped')" class="rounded max-160"
-                                                    :src="'https://ipfs.io/ipfs/' + getAttr(rnft.script, 'wrapped')"></img>
-                                                <div>
-                                                    <h3 class="my-0 mx-2 p-0 p-2 ms-auto"
-                                                        :style="{'background-image': getSetDetailsColors(rnft.script)}"
-                                                        style="-webkit-background-clip: text;
-                                                           -webkit-text-fill-color: transparent; 
-                                                           -moz-background-clip: text;
-                                                           -moz-text-fill-color: transparent;"> sealed NFT</h3>
-                                                </div>
-                                                <h5 class="d-none" v-if="rnft.qty > 0">Unwrap to see what's
-                                                    inside.</h5>
-
-                                            </div>
-                                        </div>
-                                        <div class="card-footer">
-                                            <div class="d-flex flex-wrap justify-content-between rounded-pill p-3"
-                                                style="background-color: rgba(0,0,0,0.75)" v-if="rnft.qty > 0">
-                                                <button type="button" class="btn btn-primary me-auto ms-auto mt-1"
-                                                    @click="openFT(rnft)">Open<i
-                                                        class="fas fa-box-open ms-2"></i></button>
-                                                <button type="button" class="btn btn-info me-auto ms-auto mt-1"
-                                                    data-bs-toggle="modal" data-bs-target="#mintTransferModal"
-                                                    @click="mint_detail.set = rnft.set; mint_detail.token = rnft.token">Transfer<i
-                                                        class="fas fa-exchange-alt ms-2"></i></button>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <nftcard 
+                                        :item="item"
+                                        :mint="true" 
+                                        :icon="getIcon(item.script)" 
+                                        :colors="getSetDetailsColors(item.script)" 
+                                        @detail="modalIndex('itemModal', $event);itemModal.hidden = false"/>
                                 </div>
                             </div>
                             <!-- NFT INVENTORY -->

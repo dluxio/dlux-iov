@@ -7,8 +7,8 @@ export default {
 
     <div class="rounded px-2 py-1" style="background: rgba(0,0,0,1)">
         <a :href="'/nfts/set/' + item.setname + '#' + item.token"
-            class="no-decoration" style="font-size: 1.3em;"><span
-                class="rainbow-text" style="background-image: linear-gradient(rgb(194, 255, 182), rgb(255, 163, 182), rgb(221, 169, 255), rgb(162, 209, 255));
+            class="no-decoration" style="font-size: 1.3em;">
+            <span class="rainbow-text" style="background-image: linear-gradient(rgb(194, 255, 182), rgb(255, 163, 182), rgb(221, 169, 255), rgb(162, 209, 255));
             -webkit-background-clip: text;
         -webkit-text-fill-color: transparent; 
         -moz-background-clip: text;
@@ -21,8 +21,33 @@ export default {
     </div>
 
 </div>
-<div class="card-body p-0" style="background: rgba(0,0,0,.75)">
-
+<!-- MINT -->
+<div class="card-body p-0" style="background: rgba(0,0,0,.75)" v-if="mint">
+    <div class="">
+        <a href="#itemModal" class="a-1" data-bs-toggle="modal"
+            @click="modalIndex()">
+            <div class="card-img-top"
+                :alt="'image-' +  item.setname + '-' + item.uid"
+                v-html="item.HTML">
+            </div>
+        </a>
+    </div>
+    <div class="text-center">
+        <h3 class="my-1"
+            :style="{'background-image': colors}"
+            style="-webkit-background-clip: text;
+                   -webkit-text-fill-color: transparent; 
+                   -moz-background-clip: text;
+                   -moz-text-fill-color: transparent;">
+            #{{uid}}</h3>
+    </div>
+    <div class="text-center lead mb-1"><small><span
+                class="badge bg-dark text-muted">{{item.token}}<i
+                    class="fa-solid fa-link mx-2 text-info"></i>network</span></small>
+    </div>
+</div>
+<!-- NFT -->
+<div class="card-body p-0" style="background: rgba(0,0,0,.75)" v-if="!mint">
     <div class="">
         <a href="#itemModal" class="a-1" data-bs-toggle="modal"
             @click="modalIndex()">
@@ -47,7 +72,6 @@ export default {
     </div>
 </div>
 <div class="card-footer border-0">
-
     <div class="d-flex text-center rounded-pill py-1"
         style="background-color: rgba(0,0,0,.5)">
         <div class="ms-auto me-auto">
