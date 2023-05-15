@@ -137,6 +137,9 @@ style="background-color: rgba(0,0,0,0.75)">
     colors: {
       default: 'linear-gradient(chartreuse,lawngreen)'
     },
+    wrapped: {
+      default: ''
+    },
     uid: {
       default: ''
     },
