@@ -84,19 +84,19 @@ style="background-color: rgba(0,0,0,0.75)">
     </div>
 </div>
 <!-- MINT FOOT -->
-<div class="card-footer border-0" v-if="!mint">
+<div class="card-footer border-0" v-if="mint">
     <div class="d-flex text-center rounded-pill py-1"
         style="background-color: rgba(0,0,0,.5)">
-         <div class="ms-auto me-auto" v-if="!mint">
+         <div class="ms-auto me-auto">
             <div class="btn-group" role="group">
-            <button type="button" class="btn btn-primary me-auto ms-auto mt-1" 
-            @click="openFT(item)"><i class="fas fa-box-open"></i></button>
-            <button type="button" class="btn ps-05 pe-05 border-0"
-            disabled></button>
-            <button type="button" class="btn btn-info me-auto ms-auto mt-1" 
-            data-bs-toggle="modal" data-bs-target="#mintTransferModal" 
-            @click="mint_detail.set = item.set; mint_detail.token = item.token">
-            <i class="fas fa-exchange-alt"></i></button>
+              <button type="button" class="btn btn-primary me-auto ms-auto mt-1" 
+              @click="openFT(item)"><i class="fas fa-box-open"></i></button>
+              <button type="button" class="btn ps-05 pe-05 border-0"
+              disabled></button>
+              <button type="button" class="btn btn-info me-auto ms-auto mt-1" 
+              data-bs-toggle="modal" data-bs-target="#mintTransferModal" 
+              @click="mint_detail.set = item.set; mint_detail.token = item.token">
+              <i class="fas fa-exchange-alt"></i></button>
             </div>
           </div>
       </div>
@@ -106,7 +106,7 @@ style="background-color: rgba(0,0,0,0.75)">
 <div class="card-footer border-0" v-if="!mint">
     <div class="d-flex text-center rounded-pill py-1"
         style="background-color: rgba(0,0,0,.5)">
-      <div class="ms-auto me-auto" v-if="!mint">
+      <div class="ms-auto me-auto">
             <div class="btn-group" role="group">
                 <button type="button" class="btn btn-dark" title="Set pfp"><i
                         class="fa-regular fa-circle-user"></i></button>
