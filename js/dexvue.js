@@ -671,6 +671,12 @@ var app = new Vue({
     toFixed(value, decimals) {
       return Number(value).toFixed(decimals);
     },
+    trade_date(ts){
+      // return a time string if less then 24 hours old
+      if (Date.now() - ts < 86400000) return new Date(ts).toLocaleTimeString()
+      //return an actual date if older then 24 hours
+      return new Date(ts).toLocaleDateString()
+    },
     parseFloat(value) {
       return parseFloat(value);
     },

@@ -1437,8 +1437,7 @@
                             {{formatNumber(item.target_volume,3,'.',',')}}
                           </td>
                           <td aria-colindex="3" role="cell" class="">
-                            {{new
-                            Date(item.trade_timestamp).toLocaleTimeString()}}
+                            {{trade_date(item.trade_timestamp)}}
                           </td>
                         </tr>
                       </tbody>
