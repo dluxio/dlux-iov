@@ -10,12 +10,12 @@ export default {
        style="background-color: black">
         <div class="ps-2"><small>QTY: </small></div>
            <div class="px-2">
-              <h2 class="m-0">{{rnft.qty}}</h2>
+              <h2 class="m-0">{{item.qty}}</h2>
               </div>
              </div>
-       <div> <a :href="'/nfts/set/' + rnft.set + '#' + rnft.token" class="no-decoration">
+       <div> <a :href="'/nfts/set/' + item.set + '#' + item.token" class="no-decoration">
        <h3 class="card-title lead shimmer rounded p-2 m-0">
-         <b><i :class="[icon]"></i>{{rnft.set}}</b></h3></a>
+         <b><i :class="[icon]"></i>{{item.set}}</b></h3></a>
          </div>
         </div>
        </div>
@@ -53,7 +53,7 @@ style="background-color: rgba(0,0,0,0.75)">
            -moz-background-clip: text;
            -moz-text-fill-color: transparent;"> sealed NFT</h3>
 </div>
-<h5 class="d-none" v-if="rnft.qty > 0">Unwrap to see what's
+<h5 class="d-none" v-if="item.qty > 0">Unwrap to see what's
     inside.</h5>
 
 </div>
@@ -90,12 +90,12 @@ style="background-color: rgba(0,0,0,0.75)">
          <div class="ms-auto me-auto" v-if="!mint">
             <div class="btn-group" role="group">
             <button type="button" class="btn btn-primary me-auto ms-auto mt-1" 
-            @click="openFT(rnft)"><i class="fas fa-box-open"></i></button>
+            @click="openFT(item)"><i class="fas fa-box-open"></i></button>
             <button type="button" class="btn ps-05 pe-05 border-0"
             disabled></button>
             <button type="button" class="btn btn-info me-auto ms-auto mt-1" 
             data-bs-toggle="modal" data-bs-target="#mintTransferModal" 
-            @click="mint_detail.set = rnft.set; mint_detail.token = rnft.token">
+            @click="mint_detail.set = item.set; mint_detail.token = item.token">
             <i class="fas fa-exchange-alt"></i></button>
             </div>
           </div>
