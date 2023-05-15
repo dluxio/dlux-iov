@@ -1261,10 +1261,10 @@
                                     </div>
                                 </div>
                                 <!-- NFT TRADES -->
-                                <div v-for="trade in NFTtrades" class="col my-3" id="trade-nft-cards">
+                                <div v-for="item in NFTtrades" class="col my-3" id="trade-nft-cards">
                                     <nftcard 
                                         :item="item"
-                                        :trade="true" 
+                                        trade="true" 
                                         :uid="Base64toNumber(item.uid)"
                                         :icon="getIcon(item.script)" 
                                         :colors="getSetDetailsColors(item.script)" 
@@ -1282,7 +1282,7 @@
                                 <div v-for="rnft of accountRNFTs" class="col">
                                     <nftcard 
                                         :item="rnft"
-                                        :mint="true"
+                                        mint="true"
                                         :wrapped="getAttr(rnft.script, 'wrapped')"
                                         :icon="getIcon(rnft.script)" 
                                         :colors="getSetDetailsColors(rnft.script)" 
