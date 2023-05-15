@@ -39,7 +39,7 @@ export default {
                    -webkit-text-fill-color: transparent; 
                    -moz-background-clip: text;
                    -moz-text-fill-color: transparent;">
-            #{{Base64toNumber(item.uid)}}</h3>
+            #{{uid}}</h3>
     </div>
     <div class="mt-1 mb-2 text-center lead"><small><span
                 class="badge bg-dark text-muted">{{item.token}}<i
@@ -82,6 +82,9 @@ export default {
     },
     colors: {
       default: 'linear-gradient(chartreuse,lawngreen)'
+    },
+    uid: {
+      default: ''
     },
     trade: {
       default: false

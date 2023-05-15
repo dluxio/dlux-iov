@@ -1568,7 +1568,12 @@
                             <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-1">
 
                                 <div class="col mb-4" v-for="item in displayNFTs">
-                                    <nftcard :item="item" :icon="getIcon(item.script)" :colors="getSetDetailsColors(item.script)" @detail="modalIndex('itemModal', $event);itemModal.hidden = false"/>
+                                    <nftcard 
+                                        :item="item" 
+                                        :uid="Base64toNumber(item.uid)"
+                                        :icon="getIcon(item.script)" 
+                                        :colors="getSetDetailsColors(item.script)" 
+                                        @detail="modalIndex('itemModal', $event);itemModal.hidden = false"/>
                                 </div>
                             </div>
                         </div>
