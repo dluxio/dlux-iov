@@ -804,7 +804,7 @@ export default {
 
 
 
-<div class="offcanvas offcanvas-start bg-dark text-white-50" style="max-width:200px" tabindex="-1" id="offcanvasNav" aria-labelledby="offcanvasLeftLabel">
+<div class="offcanvas offcanvas-start bg-darkg-blur text-white-50" style="max-width:200px" tabindex="-1" id="offcanvasNav" aria-labelledby="offcanvasLeftLabel">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title" id="offcanvasLeftLabel"><a class="navbar-brand d-sm-none text-white d-flex align-items-center" href="/"><img src="/img/dlux-hive-logo-alpha.svg" class="me-2" alt="dlux-logo" width="40" height="40">DLUX</a></h5>
     <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -822,10 +822,10 @@ export default {
 </div>
 
 
-<div class="offcanvas offcanvas-end bg-dark text-white-50" tabindex="-1" id="offcanvasUsers" aria-labelledby="offcanvasRightLabel">
+<div class="offcanvas offcanvas-end bg-blur-darkg bg-img-none text-white-50" tabindex="-1" id="offcanvasUsers" aria-labelledby="offcanvasRightLabel">
   <div class="offcanvas-header d-flex align-items-center justify-content-between">
     <h5 id="offcanvasRightLabel" class="m-0 p-0">User Management</h5>
-    <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="offcanvas-body">
     <div class="d-flex flex-column">
@@ -878,7 +878,7 @@ export default {
     <div class="row mb-3">
       <div>
         <label class="form-label">Current user:</label>
-        <div v-if="!user" class="bg-darkest px-4 py-2 mx-2">
+        <div v-if="!user" class="bg-darkest rounded px-4 py-2 mx-2">
           <img src="#" alt="" width="50" height="50" class="img-fluid rounded-circle bg-light me-1 cover">
           <span>NONE SELECTED</span>
         </div>
@@ -887,7 +887,7 @@ export default {
           <span id="userName">{{user}}</span>
           <div class="ms-auto">
             <a class="btn btn-outline-secondary me-2" :class="[{'btn-outline-success':HAS_.wsconn && HAS_.token},{'btn-outline-warning':!HAS_.wsconn && HAS_.token},{'btn-outline-secondary':!HAS_.token}]" :href="HAS_.uri" v-if="HAS"><i class="fa-solid fa-satellite-dish"></i></a>
-            <a class="btn btn-outline-danger" href="#/" @click="logout()"><i class="fas fa-power-off fa-fw"></i></a>
+            <a class="btn btn-outline-danger" role="button" @click="logout()"><i class="fas fa-power-off fa-fw"></i></a>
           </div>
         </div>
       </div>
@@ -900,13 +900,13 @@ export default {
           <input type="search" v-model="filterUsers" autocapitalize="off" placeholder="search" @keyup="searchRecents()" class="form-control text-info">
         </div>
       </div>
-      <div class="d-flex justify-content-between align-items-center m-3 pb-3 border-dark border-bottom" v-if="!filterUsers" v-for="name in recentUsers">
-        <div class="flex-fill text-center"><a class="link-info" href="#/" @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
-        <div class="flex-shrink"><a href="#" @click="deleteRecentUser(name)" alt="Remove username" class="ms-auto link-secondary"><i class="fa-solid fa-trash-can"></i></a></div>
+      <div class="d-flex justify-content-between align-items-center py-3 border-light border-bottom" v-if="!filterUsers" v-for="name in recentUsers">
+        <div class="flex-fill text-center"><a class="text-info" role="button" @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
+        <div class="flex-shrink"><a class="text-danger ms-auto" role="button" @click="deleteRecentUser(name)" alt="Remove username"><i class="fa-solid fa-trash-can"></i></a></div>
       </div>
-      <div class="d-flex justify-content-between align-items-center m-3 pb-3 border-dark border-bottom" v-if="filterUsers" v-for="name in filterRecents">
-        <div class="flex-fill text-center"><a class="link-info" href="#/" @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
-        <div class="flex-shrink"><a href="#" @click="deleteRecentUser(name);searchRecents()" alt="Remove username" class="ms-auto link-secondary"><i class="fa-solid fa-trash-can"></i></a></div>
+      <div class="d-flex justify-content-between align-items-center py-3 border-light border-bottom" v-if="filterUsers" v-for="name in filterRecents">
+        <div class="flex-fill text-center"><a class="text-info" role="button" @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
+        <div class="flex-shrink"><a class="text-danger ms-auto" role="button" @click="deleteRecentUser(name);searchRecents()" alt="Remove username"><i class="fa-solid fa-trash-can"></i></a></div>
       </div>
     </div>
   </div>
