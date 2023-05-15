@@ -3,7 +3,24 @@ export default {
   },
   template: `<div class="card h-100 text-white border-0"
 :style="{'background': colors}">
-<div class="card-header border-0 d-flex align-items-center">
+<!-- MINT HEAD -->
+<div class="card-header" v-if="mint">
+  <div class="d-flex justify-content-between align-items-center">
+     <div class="rounded-pill d-flex align-items-center p-2"
+       style="background-color: black">
+        <div class="ps-2"><small>QTY: </small></div>
+           <div class="px-2">
+              <h2 class="m-0">{{rnft.qty}}</h2>
+              </div>
+             </div>
+       <div> <a :href="'/nfts/set/' + rnft.set + addToken(rnft.token)" class="no-decoration">
+       <h3 class="card-title lead shimmer rounded p-2 m-0">
+         <b><i :class="[getIcon(rnft.script)]"></i>{{rnft.set}}</b></h3></a>
+         </div>
+        </div>
+       </div>
+<!-- NFT HEAD -->
+<div class="card-header border-0 d-flex align-items-center" v-if="!mint">
 
     <div class="rounded px-2 py-1" style="background: rgba(0,0,0,1)">
         <a :href="'/nfts/set/' + item.setname + '#' + item.token"
@@ -21,32 +38,27 @@ export default {
     </div>
 
 </div>
-<!-- MINT -->
+
+<!-- MINT BODY -->
 <div class="card-body p-0" style="background: rgba(0,0,0,.75)" v-if="mint">
-    <div class="">
-        <a href="#itemModal" class="a-1" data-bs-toggle="modal"
-            @click="modalIndex()">
-            <div class="card-img-top"
-                :alt="'image-' +  item.setname + '-' + item.uid"
-                v-html="item.HTML">
-            </div>
-        </a>
-    </div>
-    <div class="text-center">
-        <h3 class="my-1"
-            :style="{'background-image': colors}"
-            style="-webkit-background-clip: text;
-                   -webkit-text-fill-color: transparent; 
-                   -moz-background-clip: text;
-                   -moz-text-fill-color: transparent;">
-            #{{uid}}</h3>
-    </div>
-    <div class="text-center lead mb-1"><small><span
-                class="badge bg-dark text-muted">{{item.token}}<i
-                    class="fa-solid fa-link mx-2 text-info"></i>network</span></small>
-    </div>
+<div class="px-2 py-5 text-center rounded"
+style="background-color: rgba(0,0,0,0.75)">
+<img v-if="getAttr(rnft.script, 'wrapped')" class="rounded max-160"
+    :src="'https://ipfs.io/ipfs/' + getAttr(rnft.script, 'wrapped')"></img>
+<div>
+    <h3 class="my-0 mx-2 p-0 p-2 ms-auto"
+        :style="{'background-image': getSetDetailsColors(rnft.script)}"
+        style="-webkit-background-clip: text;
+           -webkit-text-fill-color: transparent; 
+           -moz-background-clip: text;
+           -moz-text-fill-color: transparent;"> sealed NFT</h3>
 </div>
-<!-- NFT -->
+<h5 class="d-none" v-if="rnft.qty > 0">Unwrap to see what's
+    inside.</h5>
+
+</div>
+</div>
+<!-- NFT BODY -->
 <div class="card-body p-0" style="background: rgba(0,0,0,.75)" v-if="!mint">
     <div class="">
         <a href="#itemModal" class="a-1" data-bs-toggle="modal"
@@ -71,10 +83,30 @@ export default {
                     class="fa-solid fa-link mx-2 text-info"></i>network</span></small>
     </div>
 </div>
-<div class="card-footer border-0">
+<!-- MINT FOOT -->
+<div class="card-footer border-0" v-if="!mint">
     <div class="d-flex text-center rounded-pill py-1"
         style="background-color: rgba(0,0,0,.5)">
-        <div class="ms-auto me-auto">
+         <div class="ms-auto me-auto" v-if="!mint">
+            <div class="btn-group" role="group">
+            <button type="button" class="btn btn-primary me-auto ms-auto mt-1" 
+            @click="openFT(rnft)"><i class="fas fa-box-open"></i></button>
+            <button type="button" class="btn ps-05 pe-05 border-0"
+            disabled></button>
+            <button type="button" class="btn btn-info me-auto ms-auto mt-1" 
+            data-bs-toggle="modal" data-bs-target="#mintTransferModal" 
+            @click="mint_detail.set = rnft.set; mint_detail.token = rnft.token">
+            <i class="fas fa-exchange-alt"></i></button>
+            </div>
+          </div>
+      </div>
+</div>
+        
+<!-- NFT FOOT -->
+<div class="card-footer border-0" v-if="!mint">
+    <div class="d-flex text-center rounded-pill py-1"
+        style="background-color: rgba(0,0,0,.5)">
+      <div class="ms-auto me-auto" v-if="!mint">
             <div class="btn-group" role="group">
                 <button type="button" class="btn btn-dark" title="Set pfp"><i
                         class="fa-regular fa-circle-user"></i></button>
