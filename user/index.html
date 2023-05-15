@@ -1262,78 +1262,15 @@
                                 </div>
                                 <!-- NFT TRADES -->
                                 <div v-for="trade in NFTtrades" class="col my-3" id="trade-nft-cards">
-                                    <div class="card h-100 text-white bg-darkest border-dark">
-                                        <div class="card-header border-dark d-flex align-items-center"
-                                            :style="{'background': getSetDetailsColors(trade.script), 'border': 'none'}">
-                                            <!--add color to header-->
-                                            <div class="rounded-pill d-flex align-items-center p-2"
-                                                style="background-color: black">
-                                                <h2 class="m-0 px-2">{{trade.uid}}</h2>
-                                            </div>
-                                            <div class="rounded py-1 px-2 ms-auto mb-0"
-                                                style="background: rgba(0,0,0,1)">
-                                                <a :href="'/nfts/set/' + trade.set + addToken(trade.token)"
-                                                    class="lead no-decoration"><span
-                                                        class="my-1 p-0 ms-auto rainbow-text" style="background-image: linear-gradient(rgb(194, 255, 182), rgb(255, 163, 182), rgb(221, 169, 255), rgb(162, 209, 255));
-                                                    -webkit-background-clip: text;
-                                                -webkit-text-fill-color: transparent; 
-                                                -moz-background-clip: text;
-                                                -moz-text-fill-color: transparent;"><i class="me-2"
-                                                            :class="[getIcon(trade.script)]"></i><b>{{trade.set}}</b></span></a>
-                                            </div>
+                                    <nftcard 
+                                        :item="item"
+                                        :trade="true" 
+                                        :uid="Base64toNumber(item.uid)"
+                                        :icon="getIcon(item.script)" 
+                                        :colors="getSetDetailsColors(item.script)" 
+                                        @detail="modalIndex('itemModal', $event);itemModal.hidden = false"/>
 
-                                        </div>
-
-                                        <div class="card-body bg-darkest d-flex flex-column p-0">
-                                            <div class="mt-1 mb-2 text-center lead"><small><span
-                                                        class="badge bg-dark text-muted">{{trade.token}}<i
-                                                            class="fa-solid fa-link mx-2"></i>network</span></small>
-                                            </div>
-                                            <a href="#itemModal" class="a-1" data-bs-toggle="modal"
-                                                @click="modalIndex('itemModal', 0, trade );itemModal.hidden = false">
-                                                <div class="card-img-top" v-html="trade.comp.HTML"></div>
-                                            </a>
-                                            <div class="text-center my-2">
-                                                <h4>#{{Base64toNumber(trade.uid)}}</h4>
-                                            </div>
-                                            <div class="mt-auto">
-                                                <div v-if="trade.to != account"
-                                                    class="text-dark d-flex flex-column mb-0">
-                                                    <div class="p-2 text-center text-white"
-                                                        style="background-color: rgba(0,0,0,0.75)">
-                                                        <h4 class="">To: {{trade.to}}</h4>
-                                                        <h5 class="mb-0">Price: {{trade.priceString}}</h5>
-                                                    </div>
-                                                </div>
-                                                <div v-if="trade.to == account"
-                                                    class="text-dark d-flex flex-column mb-0">
-                                                    <div class="p-2 text-center text-white"
-                                                        style="background-color: rgba(0,0,0,.75)">
-                                                        <h4 class="">From: {{trade.from}}</h4>
-                                                        <h5 class="mb-0">Price: {{trade.priceString}}</h5>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="card-footer" v-if="trade.to == account">
-                                            <div class="d-flex flex-wrap rounded-pill p-3 justify-content-between"
-                                                style="background-color: rgba(0,0,0,0.75)">
-                                                <button type="button" class="btn btn-success me-auto ms-auto mt-1"
-                                                    @click="acceptNFT(trade)">Accept<i
-                                                        class="fas fa-check-square ms-3"></i></button>
-                                                <button type="button" class="btn btn-danger me-auto ms-auto mt-1"
-                                                    @click="rejectMFT(trade)">Reject<i
-                                                        class="fas fa-window-close ms-2"></i></button>
-                                            </div>
-                                        </div>
-                                        <div class="card-footer" v-if="trade.from == account">
-                                            <div class="d-flex flex-wrap justify-content-around">
-                                                <button type="button" class="btn btn-warning me-auto ms-auto mt-1"
-                                                    @click="cancelNFT(trade)">Cancel<i
-                                                        class="fas fa-window-close ms-2"></i></button>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    
                                 </div>
                             </div>
                             <div v-if="accountRNFTs.length" class="border-bottom border-5 mt-5">
