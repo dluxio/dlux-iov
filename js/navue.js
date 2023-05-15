@@ -804,18 +804,18 @@ export default {
 
 
 
-<div class="offcanvas offcanvas-start bg-darkg-blur text-white-50" style="max-width:200px" tabindex="-1" id="offcanvasNav" aria-labelledby="offcanvasLeftLabel">
+<div class="offcanvas offcanvas-start bg-blur-darkg bg-img-none text-white-50" style="max-width:200px" tabindex="-1" id="offcanvasNav" aria-labelledby="offcanvasLeftLabel">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title" id="offcanvasLeftLabel"><a class="navbar-brand d-sm-none text-white d-flex align-items-center" href="/"><img src="/img/dlux-hive-logo-alpha.svg" class="me-2" alt="dlux-logo" width="40" height="40">DLUX</a></h5>
-    <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
-  <div class="offcanvas-body">
-    <div class="d-flex justify-content-center">
+  <div class="offcanvas-body p-0 side-nav">
+    <div>
       <ul class="navbar-nav">      
-        <li class="nav-item"><h4><a class="nav-link text-white-50" href="/hub/"><i class="fa-solid fa-mountain-sun me-3"></i>HUB</a></h4></li>
-        <li class="nav-item"><h4><a class="nav-link text-white-50" href="/nfts/sets/"><i class="fa-solid fa-store me-3"></i>NFTS</a></h4></li>
-        <li class="nav-item"><h4><a class="nav-link text-white-50" href="/dex/"><i class="fa-solid fa-building-columns me-3"></i>DEX</a></h4></li>
-        <li class="nav-item"><h4><a class="nav-link text-white-50" href="/docs/"><i class="fa-solid fa-book me-3"></i>DOCS</a></h4></li>
+        <li class="nav-item"><a class="nav-link text-white-50" href="/hub/"><i class="fa-solid fa-mountain-sun mx-3"></i>HUB</a></li>
+        <li class="nav-item"><a class="nav-link text-white-50" href="/nfts/sets/"><i class="fa-solid fa-store mx-3"></i>NFTS</a></li>
+        <li class="nav-item"><a class="nav-link text-white-50" href="/dex/"><i class="fa-solid fa-building-columns mx-3"></i>DEX</a></li>
+        <li class="nav-item"><a class="nav-link text-white-50" href="/docs/"><i class="fa-solid fa-book mx-3"></i>DOCS</a></li>
       </ul>
     </div>
   </div>

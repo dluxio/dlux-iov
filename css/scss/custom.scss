@@ -624,6 +624,26 @@ color: linear-gradient(45deg,
   color: darkorange;
 }
 
+.side-nav ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.side-nav li {
+  font-size: 1.4em;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.side-nav li:hover {
+  background-color: #495057;
+}
+
+.side-nav i {
+  margin-right: 10px;
+}
+
 .jumbo-dlux {
   background-color: rgba(0, 0, 0, 0.8);
   -webkit-backdrop-filter: blur(10px);
