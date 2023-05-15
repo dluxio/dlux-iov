@@ -924,7 +924,7 @@
                             </button>
                           </div>
                         </th>
-                        <th role="columnheader" class="" style="width: 150px;" v-bind:class="{'col-sort':orders.typea || orders.typed}"
+                        <th role="columnheader" class="" v-bind:class="{'col-sort':orders.typea || orders.typed}"
                           aria-colindex="6">
                           <div class="d-flex align-items-center">
                             <div class="me-auto">TYPE</div>
@@ -965,7 +965,7 @@
                           v-bind:class="{'text-danger':(order.type == 'hive:sell' || order.type == 'hbd:sell'), 'text-success':(order.type == 'hive:buy' || order.type == 'hbd:buy')}">
                           {{formatNumber(order.rate,6,'.',',')}}
                         </td>
-                        <td role="cell" class="" aria-colindex="6" style="width: 150px;"
+                        <td role="cell" class="" aria-colindex="6"
                           v-bind:class="{'text-danger':(order.type == 'hive:sell' || order.type == 'hbd:sell'), 'text-success':(order.type == 'hive:buy' || order.type == 'hbd:buy')}">
                           {{toUpperCase(order.type)}}
                         </td>

@@ -882,7 +882,7 @@ export default {
           <img src="#" alt="" width="50" height="50" class="img-fluid rounded-circle bg-light me-1 cover">
           <span>NONE SELECTED</span>
         </div>
-        <div v-if="user" class="bg-darkest d-flex align-items-center p-2">
+        <div v-if="user" class="bg-darkest rounded d-flex align-items-center p-2">
           <img :src="avatar" id="userImage" alt="" width="50" height="50" class="img-fluid rounded-circle bg-light me-2 cover">
           <span id="userName">{{user}}</span>
           <div class="ms-auto">
