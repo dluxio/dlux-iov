@@ -597,6 +597,29 @@ color: linear-gradient(45deg,
   border-style: solid;
   border-width: 1.5px;
 }
+// HONEY ELEMENTS
+.text-honey {
+  color: #EBA937 !important;
+}
+.border-honey {
+  border-color: #EBA937 !important;
+}
+.border-honey-glow {
+  border-color: #EBA937 !important;
+  box-shadow: inset 0px 0px 10px 5px rgba(235,169,55, 0.3);
+}
+.btn-honey {
+  color: #fff !important;
+  background: #EBA937 !important;
+}
+.btn-honey:hover {
+  background: #b07f2a !important;
+}
+.btn-outline-honey {
+  color: #fff !important;
+  border-color: #EBA937 !important;
+}
+// HIVE ELEMENTS
 .text-hive {
   color: #e31337 !important;
 }
@@ -618,6 +641,7 @@ color: linear-gradient(45deg,
   color: #fff !important;
   border-color: #e31337 !important;
 }
+// HBD ELEMENTS
 .text-hbd {
   color: #00960f !important;
 }
