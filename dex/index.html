@@ -814,9 +814,32 @@
             </div>
             <div class="mt-2 text-center d-flex justify-content-between">
               <div>
-                <!-- <script type="text/javascript">
-    $('#time-scale').multiselect();
-</script>  -->
+                <div class="dropdown">
+                <a class="btn btn-outline-secondary dropdown-toggle" role="button" id="barwidth"
+                  data-bs-toggle="dropdown" aria-expanded="false">
+                  {{barwidth.value}}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-dark bg-black" aria-labelledby="barwidth">
+                  <li>
+                    <a class="dropdown-item" role="button" @click="getHistorical(60000)">1 minute</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" role="button" @click="getHistorical(300000)">5 minutes</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" role="button" @click="getHistorical(900000)">15 minutes</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" role="button" @click="getHistorical(3600000)">1 hour</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" role="button" @click="getHistorical(21600000)">6 hours</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" role="button" @click="getHistorical(86400000)">1 day</a>
+                  </li>
+                </ul>
+              </div>
                 <select id="time-scale" class="form-select" v-model="barwidth"
                   @change="getHistorical()">
                   <option value="60000">1m</option>
