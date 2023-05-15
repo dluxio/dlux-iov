@@ -81,6 +81,7 @@ var app = new Vue({
       bargov: "",
       barpow: "",
       toSign: {},
+      proven: {},
       buyFormValid: false,
       sellFormValid: false,
       govFormValid: false,
@@ -677,6 +678,18 @@ var app = new Vue({
       //return an actual date if older then 24 hours
       return new Date(ts).toLocaleDateString()
     },
+    proveAPI(url){
+      if (this.proven[url]) return this.proven[url]
+      fetch(url)
+        .then(response => response.json())
+        .then(data => { 
+          if (data.behind){
+            this.proven[url] = data.behind
+          } else {
+            this.proven[url] = 'BAD'
+          }
+        })
+    },
     parseFloat(value) {
       return parseFloat(value);
     },
@@ -755,7 +768,7 @@ var app = new Vue({
       }
     },
     setApi(url) {
-      // remove trailing slash
+      if(typeof this.proven[url] != 'number')return alert('This API is not responding, please try another one.')
       if (url.substr(-1) == "/") {
         url = url.substr(0, url.length - 1);
       }
@@ -831,8 +844,10 @@ var app = new Vue({
         this.runnersSearch = this.runners.reduce((acc, runner) => {
           if (runner.account.toLowerCase().includes(term.toLowerCase())) {
             acc.push(runner);
+            this.proveAPI(runner.api)
           } else if (runner.api.toLowerCase().includes(term.toLowerCase())) {
             acc.push(runner);
+            this.proveAPI(runner.api)
           }
           return acc;
         }, []);

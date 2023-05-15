@@ -607,7 +607,7 @@
                             {{formatNumber(node.g/1000,3,'.',',')}}
                           </td>
                           <td role="cell" class="" aria-colindex="3">
-                            <a role="button" @click="setApi(node.api)">{{node.api}}</a>
+                            <a role="button" @click="setApi(node.api)" :class="{'text-danger': typeof proven[node.api] != 'number'}">{{node.api}}</a>
                           </td>
                         </tr>
                       </tbody>
@@ -817,30 +817,30 @@
                 <div class="dropdown">
                 <a class="btn btn-outline-secondary dropdown-toggle" role="button" id="barwidth"
                   data-bs-toggle="dropdown" aria-expanded="false">
-                  {{barwidth.value}}
+                  {{barwidth == 86400000 ? '1 Day' : barwidth == 21600000 ? '6 Hours' : barwidth == 3600000 ? '1 Hour' : barwidth == 900000 ? '15 Minutes' : barwidth == 300000 ? '5 Minutes' : barwidth == 60000 ? '1 Minute' : '???'}}
                 </a>
                 <ul class="dropdown-menu dropdown-menu-dark bg-black" aria-labelledby="barwidth">
                   <li>
-                    <a class="dropdown-item" role="button" @click="getHistorical(60000)">1 minute</a>
+                    <a class="dropdown-item" role="button" @click="barwidth = 60000; getHistorical()">1 minute</a>
                   </li>
                   <li>
-                    <a class="dropdown-item" role="button" @click="getHistorical(300000)">5 minutes</a>
+                    <a class="dropdown-item" role="button" @click="barwidth = 300000; getHistorical()">5 minutes</a>
                   </li>
                   <li>
-                    <a class="dropdown-item" role="button" @click="getHistorical(900000)">15 minutes</a>
+                    <a class="dropdown-item" role="button" @click="barwidth = 900000; getHistorical()">15 minutes</a>
                   </li>
                   <li>
-                    <a class="dropdown-item" role="button" @click="getHistorical(3600000)">1 hour</a>
+                    <a class="dropdown-item" role="button" @click="barwidth = 3600000; getHistorical()">1 hour</a>
                   </li>
                   <li>
-                    <a class="dropdown-item" role="button" @click="getHistorical(21600000)">6 hours</a>
+                    <a class="dropdown-item" role="button" @click="barwidth = 21600000; getHistorical()">6 hours</a>
                   </li>
                   <li>
-                    <a class="dropdown-item" role="button" @click="getHistorical(86400000)">1 day</a>
+                    <a class="dropdown-item" role="button" @click="barwidth = 86400000; getHistorical()">1 day</a>
                   </li>
                 </ul>
               </div>
-                <select id="time-scale" class="form-select" v-model="barwidth"
+                <!-- <select id="time-scale" class="form-select" v-model="barwidth"
                   @change="getHistorical()">
                   <option value="60000">1m</option>
                   <option value="300000">5m</option>
@@ -848,7 +848,7 @@
                   <option value="3600000">1h</option>
                   <option value="21600000" selected>6h</option>
                   <option value="86400000">1d</option>
-                </select>
+                </select> -->
               </div>
               <div></div>
               <div>
