@@ -1,7 +1,7 @@
 export default {
-    components: {
-    },
-    template: `<div class="card h-100 text-white border-0"
+  components: {
+  },
+  template: `<div class="card h-100 text-white border-0"
 :style="{'background': getSetDetailsColors(item.script)}">
 <div class="card-header border-0 d-flex align-items-center">
 
@@ -66,104 +66,105 @@ export default {
     </div>
 </div>
 </div>`,
-// @click="modalIndex('itemModal', item.setname + ':' + item.uid );itemModal.hidden = false"
-// set PFP
-props: {
+  // @click="modalIndex('itemModal', item.setname + ':' + item.uid );itemModal.hidden = false"
+  // set PFP
+  props: {
     item: {
-    required: true,
-    default: function () {
+      required: true,
+      default: function () {
         return {
-            script: '',
+          script: '',
         };
+      },
     },
+    trade: {
+      default: false
+    },
+    mint: {
+      default: false
     },
     account: {
-        default: ''
+      default: ''
     },
-},
-emits: ['detail'],
-data() {
-return {
-    collapse: false,
-    edit: false,
-    view: true,
-    mde: '',
-    makeReply: false,
-    makeVote: false,
-    warn: false,
-};
-},
-methods:{
-    modalIndex(){
-        this.$emit('detail', this.item.setname + ':' + this.item.uid);
+  },
+  emits: ['detail'],
+  data() {
+    return {
+      
+    };
+  },
+  methods: {
+    modalIndex() {
+      this.$emit('detail', this.item.setname + ':' + this.item.uid);
     },
     getSetDetailsColors(script) {
-        let r = "chartreuse,lawngreen";
-        const s = this.baseScript[script];
-        if (s && s.set) {
-          try {
-            r = `${s.set.Color1},${s.set.Color2 ? s.set.Color2 : s.set.Color1}`;
-          } catch (e) {
-            console.log(e);
-            r = "chartreuse,lawngreen";
-          }
+      return `linear-gradient(${r})`;
+      let r = "chartreuse,lawngreen";
+      const s = this.baseScript[script];
+      if (s && s.set) {
+        try {
+          r = `${s.set.Color1},${s.set.Color2 ? s.set.Color2 : s.set.Color1}`;
+        } catch (e) {
+          console.log(e);
+          r = "chartreuse,lawngreen";
         }
-        return `linear-gradient(${r})`;
-      },
-      getIcon(s) {
-        return this.baseScript[s] ? this.baseScript[s].set.faicon : "";
-      },
-    timeSince(date) {
-        var seconds = Math.floor((new Date() - new Date(date + ".000Z")) / 1000);
-        var interval = Math.floor(seconds / 86400);
-        if (interval > 7) {
-          return new Date(date).toLocaleDateString();
-        }
-        if (interval >= 1) {
-          return interval + ` day${interval > 1 ? "s" : ""} ago`;
-        }
-        interval = Math.floor(seconds / 3600);
-        if (interval >= 1) {
-          return interval + ` hour${interval > 1 ? "s" : ""} ago`;
-        }
-        interval = Math.floor(seconds / 60);
-        if (interval >= 1) {
-          return `${interval} minute${interval > 1 ? "s" : ""} ago`;
-        }
-        return Math.floor(seconds) + " seconds ago";
-      },
-    formatNumber(t, n, r, e) { // number, decimals, decimal separator, thousands separator
-        if (typeof t != "number") {
-          const parts = t ? t.split(" ") : []
-          var maybe = 0
-          for (i = 0; i < parts.length; i++) {
-            if (parseFloat(parts[i])>0){
-              maybe += parseFloat(parts[i])
-            }
-          }
-          if (maybe>parseFloat(t)){
-            t = maybe
-          } else {
-            t = parseFloat(t)
-          }
-        }
-        if (isNaN(t)) return "Invalid Number";
-        if (!isFinite(t)) return (t < 0 ? "-" : "") + "infinite";
-        (r = r || "."), (e = e || "");
-        var u = t < 0;
-        t = Math.abs(t);
-        var a = (null != n && 0 <= n ? t.toFixed(n) : t.toString()).split("."),
-          i = a[0],
-          o = 1 < a.length ? r + a[1] : "";
-        if (e)
-          for (var c = /(\d+)(\d{3})/; c.test(i); )
-            i = i.replace(c, "$1" + e + "$2");
-        return (u ? "-" : "") + i + o;
-      },
-      gt(a,b){
-      return parseFloat(a)>parseFloat(b);
+      }
+      return `linear-gradient(${r})`;
     },
-},
-mounted() {
-},
+    getIcon(s) {
+      return this.baseScript[s] ? this.baseScript[s].set.faicon : "";
+    },
+    timeSince(date) {
+      var seconds = Math.floor((new Date() - new Date(date + ".000Z")) / 1000);
+      var interval = Math.floor(seconds / 86400);
+      if (interval > 7) {
+        return new Date(date).toLocaleDateString();
+      }
+      if (interval >= 1) {
+        return interval + ` day${interval > 1 ? "s" : ""} ago`;
+      }
+      interval = Math.floor(seconds / 3600);
+      if (interval >= 1) {
+        return interval + ` hour${interval > 1 ? "s" : ""} ago`;
+      }
+      interval = Math.floor(seconds / 60);
+      if (interval >= 1) {
+        return `${interval} minute${interval > 1 ? "s" : ""} ago`;
+      }
+      return Math.floor(seconds) + " seconds ago";
+    },
+    formatNumber(t, n, r, e) { // number, decimals, decimal separator, thousands separator
+      if (typeof t != "number") {
+        const parts = t ? t.split(" ") : []
+        var maybe = 0
+        for (i = 0; i < parts.length; i++) {
+          if (parseFloat(parts[i]) > 0) {
+            maybe += parseFloat(parts[i])
+          }
+        }
+        if (maybe > parseFloat(t)) {
+          t = maybe
+        } else {
+          t = parseFloat(t)
+        }
+      }
+      if (isNaN(t)) return "Invalid Number";
+      if (!isFinite(t)) return (t < 0 ? "-" : "") + "infinite";
+      (r = r || "."), (e = e || "");
+      var u = t < 0;
+      t = Math.abs(t);
+      var a = (null != n && 0 <= n ? t.toFixed(n) : t.toString()).split("."),
+        i = a[0],
+        o = 1 < a.length ? r + a[1] : "";
+      if (e)
+        for (var c = /(\d+)(\d{3})/; c.test(i);)
+          i = i.replace(c, "$1" + e + "$2");
+      return (u ? "-" : "") + i + o;
+    },
+    gt(a, b) {
+      return parseFloat(a) > parseFloat(b);
+    },
+  },
+  mounted() {
+  },
 };
