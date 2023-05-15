@@ -3060,7 +3060,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         });
     },
     getAttr(script, att) {
-      if (this.baseScript[script]) return this.baseScript[script].setname[att];
+      if (this.baseScript[script]) return this.baseScript[script].set[att];
     },
     getTokenUser(user = this.account, fu) {
       fetch(this.lapi + "/@" + user)
