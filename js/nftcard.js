@@ -77,6 +77,12 @@ export default {
         };
       },
     },
+    icon: {
+      default: ''
+    },
+    colors: {
+      default: 'linear-gradient(chartreuse,lawngreen)'
+    },
     trade: {
       default: false
     },
