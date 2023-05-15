@@ -844,16 +844,16 @@
                     id="useropenorders">
                     <thead role="rowgroup" class="">
                       <tr role="row" class="">
-                        <th role="columnheader" class="border-top-start" style="border-top-left-radius: .375em;" v-bind:class="{'col-sort':orders.blocka || orders.blockd}"
+                        <th role="columnheader" style="border-top-left-radius: .375em;" v-bind:class="{'col-sort':orders.blocka || orders.blockd}"
                           aria-colindex="1">
                           <div class="d-flex align-items-center">
                             <div class="me-auto">BLOCK</div>
-                            <button title="Sort Ascending" type="button" class="ms-1 btn btn-sm btn-secondary"
+                            <button title="Sort Ascending" type="button" class="ms-1 btn btn-sm btn-outline-primary"
                               @click="sort('openorders','block','asc');toggleOrders('blocka')"
                               v-bind:class="{'bg-primary':orders.blocka}">
                               <i class="fas fa-caret-up"></i>
                             </button>
-                            <button title="Sort Descending" type="button" class="ms-1 btn btn-sm btn-secondary"
+                            <button title="Sort Descending" type="button" class="ms-1 btn btn-sm btn-outline-primary"
                               @click="sort('openorders','block','desc');toggleOrders('blockd')"
                               v-bind:class="{'bg-primary':orders.blockd}">
                               <i class="fas fa-caret-down"></i>
@@ -864,12 +864,12 @@
                           aria-colindex="2">
                           <div class="d-flex align-items-center">
                             <div class="me-auto">{{TOKEN}}</div>
-                            <button title="Sort Ascending" type="button" class="ms-1 btn btn-sm btn-secondary"
+                            <button title="Sort Ascending" type="button" class="ms-1 btn btn-sm btn-outline-primary"
                               @click="sort('openorders','amount','asc');toggleOrders('tokena')"
                               v-bind:class="{'bg-primary':orders.tokena}">
                               <i class="fas fa-caret-up"></i>
                             </button>
-                            <button title="Sort Descending" type="button" class="ms-1 btn btn-sm btn-secondary"
+                            <button title="Sort Descending" type="button" class="ms-1 btn btn-sm btn-outline-primary"
                               @click="sort('openorders','amount','desc');toggleOrders('tokend')"
                               v-bind:class="{'bg-primary':orders.tokend}">
                               <i class="fas fa-caret-down"></i>
