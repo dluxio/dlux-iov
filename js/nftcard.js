@@ -97,9 +97,6 @@ methods:{
     modalIndex(){
         this.$emit('detail', this.item.setname + ':' + this.item.uid);
     },
-    pending(event){
-        this.mde = event
-    },
     getSetDetailsColors(script) {
         let r = "chartreuse,lawngreen";
         const s = this.baseScript[script];
@@ -116,9 +113,6 @@ methods:{
       getIcon(s) {
         return this.baseScript[s] ? this.baseScript[s].set.faicon : "";
       },
-    vote(event){
-        this.$emit('vote', event);
-    },
     timeSince(date) {
         var seconds = Math.floor((new Date() - new Date(date + ".000Z")) / 1000);
         var interval = Math.floor(seconds / 86400);
@@ -138,21 +132,6 @@ methods:{
         }
         return Math.floor(seconds) + " seconds ago";
       },
-    setReply(event){
-        this.mde = event
-    },
-    reply(deets){
-        if(!deets)deets = {
-            "parent_author": this.post.author,
-            "parent_permlink": this.post.permlink,
-            "author": this.account,
-            "permlink": 're-' + this.post.permlink,
-            "title": '',
-            "body": this.mde,
-            "json_metadata": JSON.stringify(this.postCustom_json)
-        }
-        this.$emit('reply', deets)
-    },
     formatNumber(t, n, r, e) { // number, decimals, decimal separator, thousands separator
         if (typeof t != "number") {
           const parts = t ? t.split(" ") : []
@@ -184,21 +163,7 @@ methods:{
       gt(a,b){
       return parseFloat(a)>parseFloat(b);
     },
-    hideLowRep(){
-        if(this.post.rep != '...'){
-            if(parseFloat(this.post.rep) < 25){
-                this.view = false;
-                this.warn = true;
-            }
-        } else {
-            setTimeout(this.hideLowRep, 1000)
-        }
-    },
-    setRating(rating){
-        this.post.rating = rating;
-      }
 },
 mounted() {
-this.hideLowRep()
 },
 };
