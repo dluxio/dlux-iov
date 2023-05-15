@@ -157,6 +157,7 @@ var app = new Vue({
           },
           script: "",
           set: "",
+          setname: "",
           time: "",
         },
         sale: {
@@ -169,6 +170,7 @@ var app = new Vue({
           },
           script: "",
           set: "",
+          setname: "",
           uid: "",
         },
       },
@@ -251,6 +253,7 @@ var app = new Vue({
       displayNFTs: [],
       mint_detail: {
         set: "",
+        setname: "",
         token: "",
       },
       focusSet: {
@@ -266,7 +269,8 @@ var app = new Vue({
           token: "",
           precision: 2,
         },
-        set: "dlux",
+        setname: "dlux",
+        set: {},
         permlink: "",
         author: "",
         script: "",
@@ -280,7 +284,7 @@ var app = new Vue({
       pageAccount: "",
       pagePermlink: "",
       pfp: {
-        set: "",
+        setname: "",
         uid: "",
       },
       hasDrop: false,
@@ -795,7 +799,7 @@ var app = new Vue({
   },
   methods: {
     getSetPhotos(s, c) {
-      return s.set ? `https://ipfs.io/ipfs/${s.set[c]}` : "";
+      return s.setname ? `https://ipfs.io/ipfs/${s.set[c]}` : "";
     },
     getSPKUser(user) {
       if (user)
@@ -1247,7 +1251,7 @@ function buyFT(setname, uid, price, type,  callback){
     */
     buyFT(uid, set) {
       var cja = {
-        set: set || this.focusSet.set,
+        set: set || this.focusSetname,
         uid: uid,
       };
       this.toSign = {
@@ -1270,7 +1274,7 @@ function bidFT(setname, uid, callback){
     bidFT(uid, set, price, type) {
       bid_amount = parseInt(price * 1000);
       var cja = {
-        set: set || this.focusSet.set,
+        set: set || this.focusSet.setname,
         uid: uid,
         bid_amount,
       };
@@ -1295,7 +1299,7 @@ function giveFT(setname, to, qty, callback){
     */
     giveFT() {
       var cja = {
-        set: this.mint_detail.set,
+        set: this.mint_detail.setname,
         to: this.giveFTusername,
         qty: parseInt(this.giveFTqty),
       };
@@ -1304,7 +1308,7 @@ function giveFT(setname, to, qty, callback){
         cj: cja,
         id: `${this.prefix}ft_transfer`,
         msg: `Trying to give ${parseInt(this.giveFTqty)} ${
-          this.mint_detail.set
+          this.mint_detail.setname
         } mint token${parseInt(this.giveFTqty) > 1 ? "s" : ""} to ${
           this.giveFTusername
         }`,
@@ -1325,7 +1329,7 @@ function tradeFT(setname, to, price, callback){
     */
     tradeFT(item) {
       const price = parseInt(this.FTmenu.amount * 1000);
-      var cja = { set: item.set, to: this.FTmenu.to, price };
+      var cja = { set: item.setname, to: this.FTmenu.to, price };
       this.toSign = {
         type: "cja",
         cj: cja,
@@ -1411,23 +1415,23 @@ function tradeFTreject(setname, uid, callback){
 
     openFT(item) {
       var cja = {
-          set: item.set,
+          set: item.setname,
         },
         type = "cja";
       this.toSign = {
         type,
         cj: cja,
         id: `${item.token}_nft_mint`,
-        msg: `Minting: ${item.set} NFT`,
+        msg: `Minting: ${item.setname} NFT`,
         ops: ["getUserNFTs"],
         api: this.apiFor(item.token),
-        txid: `${item.set}_nft_mint`,
+        txid: `${item.setname}_nft_mint`,
       };
     },
 
     acceptFT(item) {
       var cja = {
-          set: item.set,
+          set: item.setname,
           uid: item.uid,
         },
         type = "cja";
@@ -1435,16 +1439,16 @@ function tradeFTreject(setname, uid, callback){
         type,
         cj: cja,
         id: `${item.token}_ft_escrow_complete`,
-        msg: `Proposing Trade: ${item.set}:${item.uid}`,
+        msg: `Proposing Trade: ${item.setname}:${item.uid}`,
         ops: ["getUserNFTs"],
         api: this.apiFor(item.token),
-        txid: `${item.set}:${item.uid}_ft_escrow_complete`,
+        txid: `${item.setname}:${item.uid}_ft_escrow_complete`,
       };
     },
 
     rejectFT(item) {
       var cja = {
-          set: item.set,
+          set: item.setname,
           uid: item.uid,
         },
         type = "cja";
@@ -1721,7 +1725,7 @@ function sellNFTcancel(setname, uid, callback){
 */
     cancelNFT(item) {
       var cja = {
-          set: item.set,
+          set: item.setname,
           uid: item.uid,
         },
         type = "cja";
@@ -1729,15 +1733,15 @@ function sellNFTcancel(setname, uid, callback){
         type,
         cj: cja,
         id: `${item.token}_nft_sell_cancel`,
-        msg: `Canceling: ${item.set}:${item.uid}`,
+        msg: `Canceling: ${item.setname}:${item.uid}`,
         ops: ["getUserNFTs"],
         api: this.apiFor(item.token),
-        txid: `${item.set}:${item.uid}_nft_sell_cancel`,
+        txid: `${item.setname}:${item.uid}_nft_sell_cancel`,
       };
     },
     cancelFT(item) {
       var cja = {
-          set: item.set,
+          set: item.setname,
           uid: item.uid,
         },
         type = "cja";
@@ -1745,10 +1749,10 @@ function sellNFTcancel(setname, uid, callback){
         type,
         cj: cja,
         id: `${item.token}_ft_sell_cancel`,
-        msg: `Canceling: ${item.set}:${item.uid}`,
+        msg: `Canceling: ${itemname}:${item.uid}`,
         ops: ["getUserNFTs"],
         api: this.apiFor(item.token),
-        txid: `${item.set}:${item.uid}_ft_sell_cancel`,
+        txid: `${itemname}:${item.uid}_ft_sell_cancel`,
       };
     },
     /*
@@ -1760,14 +1764,14 @@ function buyNFT(setname, uid, price, type, callback){
 */
     buyNFT(item) {
       var cja = {
-          set: item.set,
+          set: item.setname,
           uid: item.uid,
           price: item.price.amount,
         },
         type = "cja";
       if (item.price.token == "HIVE" || item.price.token == "HBD") {
         type = "xfr";
-        cja.memo = `NFTbuy ${item.set}:${item.uid}`;
+        cja.memo = `NFTbuy ${item.setname}:${item.uid}`;
         cja[`${item.price.token.toLowerCase()}`] = item.price.amount;
         cja.to = this.multisig;
       }
@@ -1775,10 +1779,10 @@ function buyNFT(setname, uid, price, type, callback){
         type,
         cj: cja,
         id: `${this.prefix}nft_buy`,
-        msg: `Purchasing: ${item.set}:${item.uid}`,
+        msg: `Purchasing: ${item.setname}:${item.uid}`,
         ops: ["getTokenUser", "getUserNFTs", "getHiveUser"],
         api: this.apiFor(this.prefix),
-        txid: `${item.set}:${item.uid}_nft_buy`,
+        txid: `${item.setname}:${item.uid}_nft_buy`,
       };
     },
     /*
@@ -2097,7 +2101,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     modalIndex(modal, index, source = "displayNFTs") {
       if (source != "displayNFTs") {
         source.HTML = source.comp.HTML;
-        source.setname = source.set;
+        source.setname = source.setname;
         this[modal].index = 0;
         this[modal].items = [source];
         this[modal].item = source;
@@ -2756,7 +2760,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
     getMint(set, item) {
       for (let i = 0; i < this.rNFTs.length; i++) {
-        if (this.rNFTs[i].set == set) {
+        if (this.rNFTs[i].setname == set) {
           if (item) return this.rNFTs[i][item];
           return this.rNFTs[i];
         }
@@ -2896,7 +2900,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           .then((r) => r.json())
           .then((json) => {
             if (json.result == "No Profile Picture Set or Owned") return;
-            this.pfp.set = json.result[0].pfp.split(":")[0];
+            this.pfp.setname = json.result[0].pfp.split(":")[0];
             this.pfp.uid = json.result[0].pfp.split(":")[1];
           });
       }
@@ -3031,7 +3035,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             NFTs[j].owner = un;
             // this.itemModal.items.push(NFTs[j]);
             // this.itemModal.item = this.itemModal[0];
-            scripts[NFTs[j].script] = { token: p[i].token, set: NFTs[j].set };
+            scripts[NFTs[j].script] = { token: p[i].token, set: NFTs[j].setname };
             this.callScript(NFTs[j]).then((comp) => {
               this.accountNFTs.push(comp);
               this.displayNFT(0);
@@ -3046,17 +3050,17 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             this.callScript({
               script,
               token: scripts[script].token,
-              set: scripts[script].set,
+              set: scripts[script].setname,
             }).then((comp) => {
               this.baseScript[comp.script] = comp;
               this.baseScript[comp.script].token = p[i].token;
-              this.baseScript[comp.script].setname = scripts[script].set;
+              this.baseScript[comp.script].setname = scripts[script].setname;
             });
           }
         });
     },
     getAttr(script, att) {
-      if (this.baseScript[script]) return this.baseScript[script].set[att];
+      if (this.baseScript[script]) return this.baseScript[script].setname[att];
     },
     getTokenUser(user = this.account, fu) {
       fetch(this.lapi + "/@" + user)
