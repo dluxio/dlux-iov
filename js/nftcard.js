@@ -2,7 +2,7 @@ export default {
   components: {
   },
   template: `<div class="card h-100 text-white border-0"
-:style="{'background': getSetDetailsColors(item.script)}">
+:style="{'background': colors}">
 <div class="card-header border-0 d-flex align-items-center">
 
     <div class="rounded mb-0 px-3 py-1" style="background: rgba(0,0,0,1)">
@@ -34,7 +34,7 @@ export default {
     </div>
     <div class="text-center my-2 me-2">
         <h3 class="my-0 mx-2 p-0 p-2 ms-auto"
-            :style="{'background-image': getSetDetailsColors(item.script)}"
+            :style="{'background-image': colors}"
             style="-webkit-background-clip: text;
                    -webkit-text-fill-color: transparent; 
                    -moz-background-clip: text;
@@ -105,20 +105,6 @@ export default {
   methods: {
     modalIndex() {
       this.$emit('detail', this.item.setname + ':' + this.item.uid);
-    },
-    getSetDetailsColors(script) {
-      return `linear-gradient('chartreuse,lawngreen')`;
-      // let r = "chartreuse,lawngreen";
-      // const s = this.baseScript[script];
-      // if (s && s.set) {
-      //   try {
-      //     r = `${s.set.Color1},${s.set.Color2 ? s.set.Color2 : s.set.Color1}`;
-      //   } catch (e) {
-      //     console.log(e);
-      //     r = "chartreuse,lawngreen";
-      //   }
-      // }
-      // return `linear-gradient(${r})`;
     },
     timeSince(date) {
       var seconds = Math.floor((new Date() - new Date(date + ".000Z")) / 1000);
