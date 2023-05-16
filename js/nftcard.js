@@ -173,6 +173,9 @@ export default {
     icon: {
       default: ''
     },
+    index: {
+      default: 0
+    },
     colors: {
       default: 'linear-gradient(chartreuse,lawngreen)'
     },
@@ -205,7 +208,7 @@ export default {
         tab: name,
       }
       console.log(this.item)
-      this.$emit('detail', this.item);
+      this.$emit('detail', `${this.item.setname}:${this.item.uid}`);
     },
     modal(name) {
       const object = {
