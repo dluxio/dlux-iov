@@ -164,7 +164,7 @@
                     </div>
                     <div class="col-xl-6 scroll">
                         <h3 class="d-none">Build</h3>
-                        <div class="accordion text-start bg-blur-darkg bg-img-none" id="360accordion">
+                        <div class="accordion text-start bg-blur-darkg rounded" id="360accordion">
                             <div class="accordion-item bg-img-none">
                                 <h2 class="accordion-header">
                                     <button class="accordion-button" type="button" data-bs-toggle="collapse"
@@ -1634,7 +1634,7 @@
                     </div>
                     <div class="col-xl-6 scroll">
                         <h3 class="d-none">Preview</h3>
-                        <div class="accordion bg-blur-darkg" id="previewCol">
+                        <div class="accordion bg-blur-darkg rounded" id="previewCol">
                             <div class="accordion-item bg-img-none">
                                 <h2 class="accordion-header">
                                     <button class="accordion-button" type="button" data-bs-toggle="collapse"
@@ -1673,6 +1673,7 @@
                                 </h2>
                                 <div id="previewPost" class="accordion-collapse collapse show">
                                     <div class="accordion-body text-start">
+                                        <div v-if="!postBody.length"><p class="text-center">Use the Post Details area to compose the body of your post.</p></div>
                                         <vue-showdown :markdown="postBody" />
                                     </div>
                                 </div>
