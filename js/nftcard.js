@@ -4,24 +4,30 @@ export default {
   template: `<div class="card h-100 text-white border-0"
 :style="{'background': colors}">
 <!-- MINT HEAD -->
-<div class="card-header" v-if="mint">
+<div class="card-header px-2" v-if="mint">
   <div class="d-flex justify-content-between align-items-center">
+
+  
      <div class="rounded-pill d-flex align-items-center py-1 px-2"
        style="background-color: black">
-        <div class=""><small>QTY: </small></div>
-           <div class="ms-1">
-              <h2 class="m-0">{{item.qty}}</h2>
-              </div>
-             </div>
-       <div>
-        <a :href="'/nfts/set/' + item.set + '#' + item.token" class="no-decoration">
-       <h3 class="card-title lead shimmer rounded border border-dark p-2 m-0">
-         <b><i :class="[icon]"></i>{{item.set}}</b></h3></a>
+        <div>
+        <small>QTY: </small>
+        </div>
+        <div class="ms-1">
+          <h2 class="m-0">{{item.qty}}</h2>
+        </div>
+      </div>
+
+             <div class="rounded px-2 py-1 shimmer border border-dark">
+             <a :href="'/nfts/set/' + item.setname + '#' + item.token"
+                 class="no-decoration text-black" style="font-size: 1.3em;">
+                 <i class="me-1" :class="[icon]"></i><b>{{item.set}}</b></a>
          </div>
+
         </div>
        </div>
 <!-- NFT HEAD -->
-<div class="card-header border-0 d-flex align-items-center" v-if="!mint">
+<div class="card-header px-2 d-flex align-items-center" v-if="!mint">
     <div class="rounded px-2 py-1" style="background: rgba(0,0,0,1)">
         <a :href="'/nfts/set/' + item.setname + '#' + item.token"
             class="no-decoration" style="font-size: 1.3em;">
@@ -87,8 +93,8 @@ style="background-color: rgba(0,0,0,0.75)">
     </div>
 </div>
 <!-- TRADE PRICING -->
-<div class="mt-auto mx-1" v-if="trade">
-    <div class="mt-2">
+<div class="mx-1" v-if="trade">
+    <div class="mt-1">
     <div class="text-dark d-flex flex-column mb-0">
     <div class="p-2 text-white rounded-top"
      style="background-color: rgba(0,0,0,0.75)">
@@ -108,51 +114,49 @@ style="background-color: rgba(0,0,0,0.75)">
    </div>
   </div>
 </div>
-<!-- TRADE FOOT -->
-<div class="card-footer" v-if="trade">
-  <div class="d-flex flex-wrap rounded-pill p-3 justify-content-between"
-     style="background-color: rgba(0,0,0,0.75)">
-     <div class="btn-group" v-if="item.to == account">
-      <button type="button" class="btn btn-success me-auto ms-auto mt-1"
-       @click="acceptNFT(item)">Accept<i
-         class="fas fa-check-square ms-3"></i></button>
-         <button type="button" class="btn btn-danger me-auto ms-auto mt-1"
-         @click="rejectMFT(item)">Reject<i
-        class="fas fa-window-close ms-2"></i></button>
-        </div>
-        <div class="btn-group" v-if="item.from == account">
-        <button type="button" class="btn btn-warning me-auto ms-auto mt-1"
-         @click="cancelNFT(item)">Cancel
-         <i class="fas fa-window-close ms-2"></i></button>
-        </div>
-    </div>
-  </div>
         
-<!-- NFT / MINT FOOT -->
-<div class="card-footer border-0" v-if="!trade">
+<!-- FOOT -->
+<div class="card-footer">
     <div class="d-flex text-center rounded-pill py-1"
         style="background-color: rgba(0,0,0,.5)">
-      <div class="ms-auto me-auto">
+        <div class="ms-auto me-auto" v-if="trade">
+        <!-- ACCEPT / REJECT -->
+     <div class="btn-group" role="group" v-if="item.to == account">
+      <button type="button" class="btn btn-success"
+       @click="acceptNFT(item)"><i class="fa-solid fa-check fa-fw"></i></button>
+       <button type="button" class="btn ps-05 pe-05 border-0"
+              disabled></button>
+         <button type="button" class="btn btn-danger"
+         @click="rejectMFT(item)"><i class="fa-solid fa-xmark fa-fw"></i></button>
+        </div>
+        <!-- CANCEL -->
+        <div class="btn-group" v-if="item.from == account">
+        <button type="button" class="btn btn-warning"
+         @click="cancelNFT(item)">
+         <i class="fa-solid fa-xmark fa-fw"></i></button>
+        </div>
+        </div>
+      <div class="ms-auto me-auto" v-if="!trade">
       <!-- MINT ACTIONS -->
       <div class="btn-group" role="group" v-if="mint">
-              <button type="button" class="btn btn-dark me-auto ms-auto mt-1" 
-              @click="openFT(item)"><i class="fas fa-box-open"></i></button>
+              <button type="button" class="btn btn-dark" 
+              @click="openFT(item)"><i class="fas fa-box-open fa-fw"></i></button>
               <button type="button" class="btn ps-05 pe-05 border-0"
               disabled></button>
-              <button type="button" class="btn btn-dark me-auto ms-auto mt-1" 
+              <button type="button" class="btn btn-dark" 
               data-bs-toggle="modal" data-bs-target="#mintTransferModal" 
               @click="mint_detail.set = item.set; mint_detail.token = item.token">
-              <i class="fas fa-exchange-alt"></i></button>
+              <i class="fas fa-exchange-alt fa-fw"></i></button>
             </div>
             <!-- NFT ACTIONS -->
             <div class="btn-group" role="group" v-if="!mint">
                 <button type="button" class="btn btn-dark" title="Set pfp"><i
-                        class="fa-regular fa-circle-user"></i></button>
+                        class="fa-regular fa-circle-user fa-fw"></i></button>
                 <button type="button" class="btn ps-05 pe-05 border-0"
                     disabled></button>
                 <button type="button" class="btn btn-dark" data-bs-toggle="modal"
                 @click="modalIndex()" data-bs-target="#itemModal" title="Actions">
-                <i class="fas fa-exchange-alt"></i></button>
+                <i class="fas fa-exchange-alt fa-fw"></i></button>
             </div>
         </div>
     </div>
