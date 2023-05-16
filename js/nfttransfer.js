@@ -5,8 +5,11 @@ export default {
 <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
     <div class="modal-content bg-dark text-white">
         <div class="border border-info bg-darker mx-auto px-5 py-3 rounded col-12">
-            <div class="container-fluid">
-                <h3 class="text-center">Transfer {{item.set}} FT</h3>
+            <div class="">
+                <div class="d-flex align-items-center justify-content-between pb-1 mb-3">
+                <h3 class="mb-0">Transfer {{item.set}} FT</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
                 <ul class="nav nav-pills bg-darker justify-content-center">
                     <li class="nav-item"> <a class="nav-link active" id="giveFTlink" role="tab"
                             data-bs-toggle="tab" aria-controls="giveFT" aria-expanded="true"
@@ -27,15 +30,15 @@ export default {
                 <div class="tab-content">
                     <div role="tabpanel" class="tab-pane fade show active" id="giveFTtab"
                         aria-labelledby="giveFT">
+                        <!-- GIVE FORM -->
                         <form class="needs-validation mt-4" @action="giveFT()" novalidate>
                             <!--:action="javascript:giveFT('{{item.data.set}}','{{giveFTusername.value}}','{{giveFTqty.value}}')"-->
                             <div class="row mb-3">
                                 <label for="giveFTusername" class="form-label">Username</label>
-                                <div class="input-group">
-                                    <span
-                                        class="input-group-text bg-darkg border-dark text-white-50">@</span>
+                                <div class="input-group has-validation">
+                                    <span class="input-group-text">@</span>
                                     <input type="text"
-                                        class="form-control bg-darkg border-dark text-info r-radius-hotfix"
+                                        class="form-control text-info"
                                         v-model="give.to" aria-describedby="giveFTuserprep"
                                         required>
                                     <div class="invalid-feedback"> Please enter the
@@ -45,13 +48,13 @@ export default {
                             </div>
                             <div class="row mb-3">
                                 <label for="giveFTqty" class="form-label">Quantity</label>
-                                <div class="input-group">
+                                <div class="input-group has-validation">
                                     <input type="number"
-                                        class="form-control bg-darkg border-dark text-info "
+                                        class="form-control text-info"
                                         v-model="give.qty" aria-describedby="giveFTqtyappend"
                                         step="1" min="1" required>
                                     <span
-                                        class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50 "
+                                        class="input-group-text"
                                         id="giveFTqtyappend">{{item.set}}
                                         FT</span>
                                     <div class="invalid-feedback"> Please enter the
@@ -59,7 +62,6 @@ export default {
                                         FTs to send. </div>
                                 </div>
                             </div>
-
                             <div class="text-center">
                                 <button id="giveFTbutton" class="btn btn-info" @click="giveFT()"
                                     type="submit">Give</button>
@@ -68,16 +70,17 @@ export default {
                     </div>
                     <div role="tabpanel" class="tab-pane fade show " id="tradeFTtab"
                         aria-labelledby="tradeFT">
+                        <!-- TRADE FORM -->
                         <form class="needs-validation mt-4" novalidate>
                             <!--:action="javascript:tradeFT('{{item.data.set}}','{{tradeFTusername.value}}','{{tradeFTamount.value}}')"-->
                             <div class="row mb-3">
                                 <label for="tradeFTusername" class="form-label">Username</label>
-                                <div class="input-group">
+                                <div class="input-group has-validation">
                                     <span
-                                        class="input-group-text bg-darkg border-dark text-white-50"
+                                        class="input-group-text"
                                         id="tradeFTuserprep">@</span>
                                     <input type="text"
-                                        class="form-control r-radius-hotfix bg-darkg border-dark text-info "
+                                        class="form-control text-info "
                                         id="tradeFTusername" aria-describedby="tradeFTuserprep"
                                         v-model="trade.to" required>
                                     <div class="invalid-feedback"> Please enter the
@@ -88,13 +91,13 @@ export default {
                             <div class="row mb-3">
                                 <div class="col-6">
                                     <label for="tradeFTqty" class="form-label">Quantity</label>
-                                    <div class="input-group">
+                                    <div class="input-group has-validation">
                                         <input type="number"
-                                            class="form-control bg-darkg border-dark text-info "
+                                            class="form-control text-info bg-transparent"
                                             id="tradeFTqty" aria-describedby="tradeFTqtyappend"
                                             placeholder="1" step="1" min="1" required readonly>
                                         <span
-                                            class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
+                                            class="input-group-text"
                                             id="tradeFTqtyappend">{{item.set}}
                                             FT</span>
                                         <div class="invalid-feedback"> Please enter the
@@ -104,14 +107,14 @@ export default {
                                 </div>
                                 <div class="col-6">
                                     <label for="tradeFTamount" class="form-label">Amount</label>
-                                    <div class="input-group">
+                                    <div class="input-group has-validation">
                                         <input type="number"
-                                            class="form-control bg-darkg border-dark text-info "
+                                            class="form-control text-info "
                                             id="tradeFTamount" v-model="trade.amount"
                                             aria-describedby="tradeFTamountappend"
                                             placeholder="0.000" step="0.001" min="0.001" required>
                                         <span
-                                            class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
+                                            class="input-group-text"
                                             id="tradeFTamountappend">DLUX</span>
                                         <div class="invalid-feedback"> Please enter the
                                             amount
@@ -120,7 +123,7 @@ export default {
                                 </div>
                             </div>
                             <div class="text-center">
-                                <button id="tradeFTbutton" class="btn btn-info my-2" type="button"
+                                <button id="tradeFTbutton" class="btn btn-info my-2" type="submit"
                                     @click="tradeFT(item)">Propose
                                     Trade</button>
                             </div>
@@ -128,18 +131,19 @@ export default {
                     </div>
                     <div role="tabpanel" class="tab-pane fade show " id="sellFTtab"
                         aria-labelledby="sellFT">
+                        <!-- SELL FORM -->
                         <form class="needs-validation mt-4" novalidate>
                             <!--:action="javascript:sellFT('{{item.data.set}}','{{sellFTprice.value}}')"-->
                             <div class="row mb-3">
                                 <div class="col-6">
                                     <label for="sellFTqty" class="form-label">Quantity</label>
-                                    <div class="input-group">
+                                    <div class="input-group has-validation">
                                         <input type="number"
-                                            class="form-control bg-darkg border-dark text-info"
+                                            class="form-control text-info bg-transparent"
                                             id="sellFTqty" aria-describedby="sellFTqtyappend"
                                             placeholder="1" step="1" min="1" required readonly>
                                         <span
-                                            class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
+                                            class="input-group-text"
                                             id="sellFTqtyappend">{{item.set}}
                                             FT</span>
                                         <div class="invalid-feedback"> Please enter the
@@ -150,13 +154,13 @@ export default {
                                 <div class="col-6">
                                     <label for="sellFTprice" class="form-label">Sale
                                         Price</label>
-                                    <div class="input-group">
+                                    <div class="input-group has-validation">
                                         <input type="number"
-                                            class="form-control bg-darkg border-dark text-info"
+                                            class="form-control text-info"
                                             id="sellFTprice" aria-describedby="sellFTpriceappend"
                                             placeholder="0.000" step="0.001" min="0.001" required>
                                         <span
-                                            class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
+                                            class="input-group-text"
                                             id="sellFTpriceappend">DLUX</span>
                                         <div class="invalid-feedback"> Please enter the
                                             amount
@@ -179,18 +183,19 @@ export default {
                     </div>
                     <div role="tabpanel" class="tab-pane fade show " id="auctionFTtab"
                         aria-labelledby="auctionFT">
+                        <!-- AUCTION FORM -->
                         <form class="needs-validation mt-4" novalidate>
                             <!--:action="javascript:auctionFT('{{item.data.set}}','{{auctionFTprice.value}}','{{Date.now()}}','{{auctionFTdays.value}}'),'{{auctionFTpriceType.value}}'"-->
                             <div class="row mb-3">
                                 <div class="col-6">
                                     <label for="auctionFTqty" class="form-label">Quantity</label>
-                                    <div class="input-group">
+                                    <div class="input-group has-validation">
                                         <input type="number"
-                                            class="form-control bg-darkg border-dark text-info"
+                                            class="form-control text-info bg-transparent"
                                             id="auctionFTqty" aria-describedby="auctionFTqtyappend"
                                             placeholder="1" step="1" min="1" required readonly>
                                         <span
-                                            class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
+                                            class="input-group-text"
                                             id="auctionFTqtyappend">{{item.set}}
                                             FT</span>
                                         <div class="invalid-feedback"> Please enter the
@@ -201,14 +206,14 @@ export default {
                                 <div class="col-6">
                                     <label for="auctionFTprice" class="form-label">Starting
                                         Bid</label>
-                                    <div class="input-group">
+                                    <div class="input-group has-validation">
                                         <input type="number"
-                                            class="form-control bg-darkg border-dark text-info"
+                                            class="form-control text-info"
                                             id="auctionFTprice"
                                             aria-describedby="auctionFTpriceappend"
                                             placeholder="0.000" step="0.001" min="0.001" required>
                                         <span
-                                            class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
+                                            class="input-group-text"
                                             id="auctionFTqtyappend">DLUX</span>
                                         <div class="invalid-feedback"> Please enter the
                                             amount
@@ -273,15 +278,16 @@ export default {
                     </div>
                     <div role="tabpanel" class="tab-pane fade show " id="airdropFTtab"
                         aria-labelledby="airdropFT">
+                        <!-- AIRDROP FORM -->
                         <form class="needs-validation mt-4" novalidate>
                             <!--:action="javascript:airdropFT('{{item.data.set}}','{{airdropFTusers.value}}')"-->
                             <div class="row mb-3">
                                 <div class="col-12">
                                     <label for="airdropFTusers" class="form-label">Airdrop
                                         to</label>
-                                    <div class="input-group">
+                                    <div class="input-group has-validation">
                                         <textarea name="paragraph_text" cols="50" rows="2"
-                                            class="form-control r-radius-hotfix bg-darkg border-dark text-info"
+                                            class="form-control text-info"
                                             id="airdropFTusers" aria-describedby="airdropFT"
                                             required placeholder="name user-name"></textarea>
                                         <div class="invalid-feedback"> Please enter at
@@ -295,13 +301,13 @@ export default {
                                     <label for="airdropFTqty" class="form-label">Quantity
                                         sent
                                         to each</label>
-                                    <div class="input-group">
+                                    <div class="input-group has-validation">
                                         <input type="number"
-                                            class="form-control bg-darkg border-dark text-info"
+                                            class="form-control text-info bg-transparent"
                                             id="airdropFTqty" aria-describedby="airdropFTqtyappend"
                                             placeholder="1" step="1" min="1" required readonly>
                                         <span
-                                            class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
+                                            class="input-group-text"
                                             id="airdropFTqtyappend">{{item.set}}
                                             FT</span>
                                         <div class="invalid-feedback"> Please enter the
