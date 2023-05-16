@@ -3,7 +3,7 @@ export default {
     },
     template: `
 <div class="modal fade " id="itemModal" tabindex="-1" role="dialog"
-        aria-hidden="true" v-if="isMountedComponent">
+        aria-hidden="true" v-if="isMountedComponent && !itemModal.hidden">
     <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
        <div class="modal-content bg-dark text-white">
           <div class="card text-white bg-dark ">
