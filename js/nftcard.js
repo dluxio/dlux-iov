@@ -119,16 +119,16 @@ export default {
         <div class="ms-auto me-auto" v-if="trade">
         <!-- ACCEPT / REJECT -->
      <div class="btn-group" role="group" v-if="item.to == account">
-      <button type="button" class="btn btn-success"
+      <button type="button" class="btn btn-success" title="Accept Trade"
        @click="acceptNFT(item)"><i class="fa-solid fa-check fa-fw"></i></button>
        <button type="button" class="btn ps-05 pe-05 border-0"
               disabled></button>
-         <button type="button" class="btn btn-danger"
+         <button type="button" class="btn btn-danger" title="Decline Trade"
          @click="rejectMFT(item)"><i class="fa-solid fa-xmark fa-fw"></i></button>
         </div>
         <!-- CANCEL -->
         <div class="btn-group" v-if="item.from == account">
-        <button type="button" class="btn btn-warning"
+        <button type="button" class="btn btn-warning" title="Cancel Trade"
          @click="cancelNFT(item)">
          <i class="fa-solid fa-xmark fa-fw"></i></button>
         </div>
