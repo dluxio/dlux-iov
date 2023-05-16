@@ -1,11 +1,29 @@
 export default {
   components: {
   },
-  template: `<div class="card h-100 text-white border-0"
+  template: `<div class="card h-100 text-white border-start border-end"
 :style="{'background': colors}">
-<!-- MINT HEAD -->
-<div class="card-header px-2" v-if="mint">
-  <div class="d-flex justify-content-between align-items-center">
+<!-- HEAD -->
+<div class="card-header border-0 px-2">
+  <!-- NFT HEAD --> 
+  <div class="d-flex justify-content-between align-items-center" v-if="!mint">
+    <div class="rounded-pill d-flex align-items-center p-1"
+        style="background: black">
+        <h2 class="m-0 px-1">{{item.uid}}</h2>
+    </div>
+    <div class="rounded px-2 py-1" style="background: rgba(0,0,0,1)">
+        <a :href="'/nfts/set/' + item.setname + '#' + item.token"
+            class="no-decoration" style="font-size: 1.3em;">
+            <span class="rainbow-text" style="background-image: linear-gradient(rgb(194, 255, 182), rgb(255, 163, 182), rgb(221, 169, 255), rgb(162, 209, 255));
+            -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent; 
+        -moz-background-clip: text;
+        -moz-text-fill-color: transparent;;"><i class="me-1"
+                    :class="[icon]"></i><b>{{item.setname}}</b></span></a>
+    </div>
+    </div>
+    <!-- MINT HEAD -->
+    <div class="d-flex justify-content-between align-items-center" v-if="mint">
      <div class="rounded-pill d-flex align-items-center py-1 px-2"
        style="background-color: black">
         <div>
@@ -21,60 +39,25 @@ export default {
                  <i class="me-1" :class="[icon]"></i><b>{{item.set}}</b></a>
          </div>
         </div>
-       </div>
-<!-- NFT HEAD -->
-<div class="card-header px-2 d-flex justify-content-between align-items-center" v-if="!mint">
-<div class="rounded-pill d-flex align-items-center p-1"
-        style="background: black">
-        <h2 class="m-0 px-1">{{item.uid}}</h2>
-    </div>
-    <div class="rounded px-2 py-1" style="background: rgba(0,0,0,1)">
-        <a :href="'/nfts/set/' + item.setname + '#' + item.token"
-            class="no-decoration" style="font-size: 1.3em;">
-            <span class="rainbow-text" style="background-image: linear-gradient(rgb(194, 255, 182), rgb(255, 163, 182), rgb(221, 169, 255), rgb(162, 209, 255));
-            -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent; 
-        -moz-background-clip: text;
-        -moz-text-fill-color: transparent;;"><i class="me-1"
-                    :class="[icon]"></i><b>{{item.setname}}</b></span></a>
-    </div>
-    
 </div>
 
-<!-- MINT BODY -->
-<div class="card-body px-2 pt-2 pb-0 d-flex flex-column" v-if="mint" style="background-color: rgba(0,0,0,0.75)">
-  <div class="p-2 flex-grow-1 d-flex">
+<!-- BODY -->
+<div class="card-body d-flex flex-column px-1 rounded" style="background: rgba(0,0,0,.75)">
+  <!-- NFT BODY -->
+  <div class="flex-grow-1" v-if="!mint">
+    <a href="#itemModal" class="a-1" data-bs-toggle="modal" 
+      @click="modalIndex('details')">
+      <div class="card-img-top" :alt="'image-' +  item.setname + '-' + item.uid"
+        v-html="item.HTML">
+      </div>
+    </a>
+  </div>
+  <!-- MINT BODY -->
+  <div class="p-2 flex-grow-1 d-flex" v-if="mint">
     <img v-if="wrapped" class="w-100 border border-dark border-2 rounded mt-auto mb-auto"
     :src="'https://ipfs.io/ipfs/' + wrapped">
-     </div>
-    <div class="flex-shrink-1">
-      <div class="text-center">
-      <h3 class="my-1"
-        :style="{'background-image': colors}"
-        style="-webkit-background-clip: text;
-           -webkit-text-fill-color: transparent; 
-           -moz-background-clip: text;
-           -moz-text-fill-color: transparent;">sealed NFT</h3>
-      </div>
-    <div class="text-center lead mb-1">
-    <small><span class="badge bg-dark text-muted">{{item.token}}
-    <i class="fa-solid fa-link mx-2 text-info">
-    </i>network</span></small>
-    </div>
-    </div>
   </div>
-
-<!-- NFT BODY -->
-<div class="card-body p-0" style="background: rgba(0,0,0,.75)" v-if="!mint">
-    <div>
-        <a href="#itemModal" class="a-1" data-bs-toggle="modal"
-            @click="modalIndex('details')">
-            <div class="card-img-top"
-                :alt="'image-' +  item.setname + '-' + item.uid"
-                v-html="item.HTML">
-            </div>
-        </a>
-    </div>
+  <div class="flex-shrink-1">
     <div class="text-center">
         <h3 class="my-1"
             :style="{'background-image': colors}"
@@ -82,58 +65,65 @@ export default {
                    -webkit-text-fill-color: transparent; 
                    -moz-background-clip: text;
                    -moz-text-fill-color: transparent;">
-            #{{uid}}</h3>
+            <span v-if="!mint">#{{uid}}</span>
+            <span v-if="mint">sealed NFT</h3>
     </div>
-    <div class="text-center lead mb-1"><small><span
+    <div class="text-center lead"><small><span
                 class="badge bg-dark text-muted">{{item.token}}<i
                     class="fa-solid fa-link mx-2 text-info"></i>network</span></small>
     </div>
-</div>
-<!-- TRADE PRICING -->
-<div class="mx-1" v-if="trade">
-    <div class="mt-1">
-    <div class="text-dark d-flex flex-column mb-0">
-    <div class="p-2 text-white rounded-top"
-     style="background-color: rgba(0,0,0,0.75)">
-     <div class="d-flex mx-3">
-     <div class="mx-1 mt-1 text-end">
-       <h5 class="mt-2 small"><span v-if="item.to != account">TO:</span>
-       <span v-if="item.to == account">FROM:</span></h5>
-       <h5 class="mt-3 small">PRICE:</h5>
-     </div>
-      <div class="mx-1 text-start">
-     <h5 class="lead mt-2"><span v-if="item.to != account">{{item.to}}</span>
-     <span v-if="item.to == account">{{item.from}}</span></h5>
-     <h5 class="lead">{{item.priceString}}</h5>
-       </div>
-    </div>
-    </div>
-   </div>
   </div>
 </div>
-        
+<!-- TRADE FOOT -->
+<div class="card-footer border-0 px-1" v-if="trade">
+        <div class="p-2 text-white text-center rounded" style="background-color: rgba(0,0,0,0.75)">
+        <section>
+          <div class="d-flex align-items-center">
+            <div class="text-end me-1" style="flex: 1">
+              <h5 class="small m-0">
+                <span v-if="item.to != account">TO:</span>
+                <span v-if="item.to == account">FROM:</span>
+              </h5>
+            </div>
+            <div class="text-start" style="flex: 2">
+              <h5 class="lead m-0">
+                <span v-if="item.to != account">{{item.to}}</span>
+                <span v-if="item.to == account">{{item.from}}</span>
+              </h5>
+            </div>
+          </div>
+          <div class="d-flex align-items-center my-2">
+            <div class="text-end me-1" style="flex: 1">
+              <h5 class="small m-0">PRICE:</h5>
+            </div>
+            <div class="text-start" style="flex: 2">
+              <h5 class="lead m-0">{{item.priceString}}</h5>
+            </div>
+          </div>
+        </section>
+          <!-- ACCEPT / REJECT -->
+          <div class="btn-group" role="group" v-if="item.to == account">
+           <button type="button" class="btn btn-success" title="Accept Trade"
+            @click="acceptNFT(item)"><i class="fa-solid fa-check fa-fw"></i></button>
+            <button type="button" class="btn ps-05 pe-05 border-0"
+                   disabled></button>
+              <button type="button" class="btn btn-danger" title="Decline Trade"
+              @click="rejectMFT(item)"><i class="fa-solid fa-xmark fa-fw"></i></button>
+           </div>
+             <!-- CANCEL -->
+             <div class="btn-group" v-if="item.from == account">
+             <button type="button" class="btn btn-warning" title="Cancel Trade"
+              @click="cancelNFT(item)">
+              <i class="fa-solid fa-xmark fa-fw"></i></button>
+             </div>
+        </div>
+      </div>
+
 <!-- FOOT -->
-<div class="card-footer">
+<div class="card-footer border-0" v-if="!trade">
     <div class="d-flex text-center rounded-pill py-1"
         style="background-color: rgba(0,0,0,.5)">
-        <div class="ms-auto me-auto" v-if="trade">
-        <!-- ACCEPT / REJECT -->
-     <div class="btn-group" role="group" v-if="item.to == account">
-      <button type="button" class="btn btn-success" title="Accept Trade"
-       @click="acceptNFT(item)"><i class="fa-solid fa-check fa-fw"></i></button>
-       <button type="button" class="btn ps-05 pe-05 border-0"
-              disabled></button>
-         <button type="button" class="btn btn-danger" title="Decline Trade"
-         @click="rejectMFT(item)"><i class="fa-solid fa-xmark fa-fw"></i></button>
-        </div>
-        <!-- CANCEL -->
-        <div class="btn-group" v-if="item.from == account">
-        <button type="button" class="btn btn-warning" title="Cancel Trade"
-         @click="cancelNFT(item)">
-         <i class="fa-solid fa-xmark fa-fw"></i></button>
-        </div>
-        </div>
-      <div class="ms-auto me-auto" v-if="!trade">
+        <div class="ms-auto me-auto">
       <!-- MINT ACTIONS -->
       <div class="btn-group" role="group" v-if="mint">
               <button type="button" class="btn btn-dark" title="Open Mint" 
