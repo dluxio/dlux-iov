@@ -95,7 +95,7 @@
 
                         <p class="lead">Responsive WebXR across mobile, desktop, and headset.</p>
                         <div>
-                            <a href="/vr" class="btn btn-lg btn-outline-primary" target="_blank"><i
+                            <a href="/vr" class="btn btn-lg btn-outline-danger" target="_blank"><i
                                     class="fas fa-vr-cardboard me-2"></i>Launch overworld
                             </a>
                         </div>
@@ -106,7 +106,7 @@
 
             <div class="container-fluid">
                 <div class="row my-3">
-                    <div class="container-fluid d-flex justify-content-center">
+                    <div class="container-fluid d-flex flex-wrap justify-content-center">
                         <div class="mx-1 d-none">
                             <a class="btn btn-outline-secondary dropdown-toggle " data-bs-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false">{{postSelect.entry
@@ -142,11 +142,13 @@
                                 </a>
                             </div>
                         </div>
-                        <div class="mx-1">
-                            <input type="search" class="form-control"
+                        <div class="row">
+                        <div class="input-group flex-nowrap">
+                            <span class="input-group-text"><i class="fa-solid fa-magnifying-glass fa-fw"></i></span>
+                            <input type="search" class="form-control text-info"
                                 placeholder="Search" v-model="postSelect.searchTerm"
                                 @keyup.enter="postSelect.entry = 'search';getPosts()">
-                        </div>
+                        </div></div>
                     </div>
                 </div>
                 <!--main view-->
