@@ -3,7 +3,7 @@ export default {
     },
     template: `
 <div class="modal fade " id="itemModal" tabindex="-1" role="dialog"
-        aria-hidden="true" v-if="itemmodal.item.uid">
+        aria-hidden="true" v-if="isMountedComponent">
     <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
        <div class="modal-content bg-dark text-white">
           <div class="card text-white bg-dark ">
@@ -862,7 +862,8 @@ export default {
                 sort: "uid",
                 showDeleted: false,
                 searching: false,
-              }
+              },
+            isMountedComponent: false,
         };
     },
     methods: {
@@ -926,5 +927,6 @@ export default {
         },
     },
     mounted() {
+        this.isMountedComponent = true;
     },
 };
