@@ -2,6 +2,7 @@ export default {
     components: {
     },
     template: `
+    <div>
 <div class="modal fade " id="itemModal" tabindex="-1" role="dialog"
         aria-hidden="true" v-if="isMountedComponent && !itemModal.hidden">
     <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
@@ -771,6 +772,7 @@ export default {
              </div>
           </div>
        </div>
+    </div>
     </div>
  </div>`,
     props: {
