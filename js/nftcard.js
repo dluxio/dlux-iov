@@ -27,7 +27,11 @@ export default {
         </div>
        </div>
 <!-- NFT HEAD -->
-<div class="card-header px-2 d-flex align-items-center" v-if="!mint">
+<div class="card-header px-2 d-flex justify-content-between align-items-center" v-if="!mint">
+<div class="rounded-pill d-flex align-items-center p-1"
+        style="background: black">
+        <h2 class="m-0 px-1">{{item.uid}}</h2>
+    </div>
     <div class="rounded px-2 py-1" style="background: rgba(0,0,0,1)">
         <a :href="'/nfts/set/' + item.setname + '#' + item.token"
             class="no-decoration" style="font-size: 1.3em;">
@@ -38,21 +42,15 @@ export default {
         -moz-text-fill-color: transparent;;"><i class="me-1"
                     :class="[icon]"></i><b>{{item.setname}}</b></span></a>
     </div>
-    <div class="rounded-pill d-flex align-items-center p-1 ms-auto"
-        style="background: black">
-        <h2 class="m-0 px-1">{{item.uid}}</h2>
-    </div>
+    
 </div>
 
 <!-- MINT BODY -->
-<div class="card-body px-3 py-1" v-if="mint">
-<div class="text-center lead mb-1"><small><span
-class="badge bg-dark text-muted">{{item.token}}<i
-    class="fa-solid fa-link mx-2 text-info"></i>network</span></small>
-</div>
-<div class="p-1 text-center rounded"
+<div class="card-body d-flex flex-column px-3 pt-1 pb-0" v-if="mint">
+
+<div class="text-center rounded border border-dark"
 style="background-color: rgba(0,0,0,0.75)">
-<img v-if="wrapped" class="rounded max-160"
+<img v-if="wrapped" class="rounded w-100"
     :src="'https://ipfs.io/ipfs/' + wrapped"></img>
 <div>
     <h3 class="my-0 mx-2 p-0 p-2 ms-auto"
@@ -62,10 +60,16 @@ style="background-color: rgba(0,0,0,0.75)">
            -moz-background-clip: text;
            -moz-text-fill-color: transparent;"> sealed NFT</h3>
 </div>
-<h5 class="m-0" v-if="item.qty > 0">Unwrap to see what's
+<h5 class="m-0 d-none" v-if="item.qty > 0">Unwrap to see what's
     inside.</h5>
 
 </div>
+
+<div class="text-center lead mt-auto mb-1"><small><span
+class="badge bg-dark text-muted">{{item.token}}<i
+    class="fa-solid fa-link mx-2 text-info"></i>network</span></small>
+</div>
+
 </div>
 <!-- NFT BODY -->
 <div class="card-body p-0" style="background: rgba(0,0,0,.75)" v-if="!mint">
