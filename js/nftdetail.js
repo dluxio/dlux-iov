@@ -1,7 +1,7 @@
 export default {
     components: {
     },
-    template: `<div class="modal fade " id="itemModal" v-show="!itemmodal.hidden" tabindex="-1" role="dialog"
+    template: `<div class="modal fade " id="itemModal" tabindex="-1" role="dialog"
 aria-hidden="true">
 <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
     <div class="modal-content bg-dark text-white">
@@ -858,7 +858,8 @@ aria-hidden="true">
         airdropFT() { },
         sellFT() { },
         modalIndex() {
-            this.$emit('detail', this.item.setname + ':' + this.item.uid);
+            console.log(this.item)
+            this.$emit('detail', this.item.index);
         },
         timeSince(date) {
             var seconds = Math.floor((new Date() - new Date(date + ".000Z")) / 1000);

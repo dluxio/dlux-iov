@@ -68,7 +68,7 @@ export default {
 <div class="card-body p-0" style="background: rgba(0,0,0,.75)" v-if="!mint">
     <div>
         <a href="#itemModal" class="a-1" data-bs-toggle="modal"
-            @click="modalIndex()">
+            @click="modalIndex('details')">
             <div class="card-img-top"
                 :alt="'image-' +  item.setname + '-' + item.uid"
                 v-html="item.HTML">
@@ -152,7 +152,7 @@ export default {
                 <button type="button" class="btn ps-05 pe-05 border-0"
                     disabled></button>
                 <button type="button" class="btn btn-dark" data-bs-toggle="modal"
-                @click="modalIndex()" data-bs-target="#itemModal" title="NFT Actions">
+                @click="modalIndex('transfer')" data-bs-target="#itemModal" title="NFT Actions">
                 <i class="fas fa-exchange-alt fa-fw"></i></button>
             </div>
         </div>
@@ -199,8 +199,13 @@ export default {
     };
   },
   methods: {
-    modalIndex() {
-      this.$emit('detail', this.item.setname + ':' + this.item.uid);
+    modalIndex(name) {
+      const object = {
+        item: this.item,
+        tab: name,
+      }
+      console.log(this.item)
+      this.$emit('detail', this.item);
     },
     modal(name) {
       const object = {

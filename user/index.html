@@ -1280,6 +1280,7 @@
                     :account="account"
                     :itemmodal="itemModal"
                     :pfp="pfp"
+                    @detail="modalIndex('itemModal', $event);itemModal.hidden = false"
                 />
                 <!--Item Modal-->
                 <div class="modal fade" id="itemModalOld" tabindex="-1" v-show="!itemModal.hidden">
