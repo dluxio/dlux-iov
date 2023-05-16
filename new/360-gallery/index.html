@@ -1100,9 +1100,9 @@
                                         <!--no contracts message-->
                                         <div v-show="!numChannels" class="p-3">
                                             <p class="m-0">You have no available SPK Network
-                                                contracts for file hosting. After your account is registered, create a
+                                                contracts for file hosting. <span v-if="saccountapi.pubKey == 'NA'">After your account is registered, create a
                                                 hosting contract to
-                                                upload files.</p>
+                                                upload files.</span><span v-if="saccountapi.pubKey != 'NA'">Create a hosting contract to upload files.</span></p>
                                         </div>
                                         <!--table of available contracts-->
                                         <div v-show="numChannels" class="">
