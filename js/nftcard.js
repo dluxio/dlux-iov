@@ -86,7 +86,28 @@ style="background-color: rgba(0,0,0,0.75)">
                     class="fa-solid fa-link mx-2 text-info"></i>network</span></small>
     </div>
 </div>
-
+<!-- TRADE PRICING -->
+<div class="mt-auto mx-1" v-if="trade">
+    <div class="mt-2">
+    <div class="text-dark d-flex flex-column mb-0">
+    <div class="p-2 text-white rounded-top"
+     style="background-color: rgba(0,0,0,0.75)">
+     <div class="d-flex mx-3">
+     <div class="mx-1 mt-1 text-end">
+       <h5 class="mt-2 small"><span v-if="item.to != account">TO:</span>
+       <span v-if="item.to == account">FROM:</span></h5>
+       <h5 class="mt-3 small">PRICE:</h5>
+     </div>
+      <div class="mx-1 text-start">
+     <h5 class="lead mt-2"><span v-if="item.to != account">{{item.to}}</span>
+     <span v-if="item.to == account">{{item.from}}</span></h5>
+     <h5 class="lead">{{item.priceString}}</h5>
+       </div>
+    </div>
+    </div>
+   </div>
+  </div>
+</div>
 <!-- TRADE FOOT -->
 <div class="card-footer" v-if="item">
   <div class="d-flex flex-wrap rounded-pill p-3 justify-content-between"
