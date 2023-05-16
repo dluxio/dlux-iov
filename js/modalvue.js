@@ -890,12 +890,17 @@ export default {
   },
   mounted() {
     var options = this.$props;
-    var trigger = this.$slots["trigger"][0].elm;
-    var target = this.$el.children[options.type];
-    document.getElementById("app").appendChild(target);
-    trigger.addEventListener("click", () => {
-      var theModal = new Modal(target, () => {});
-      theModal.show();
-    });
+    if(!this.$slots["trigger"]){
+      console.log({options})
+    }
+    else {
+      var trigger = this.$slots["trigger"][0].elm;
+      var target = this.$el.children[options.type];
+      document.getElementById("app").appendChild(target);
+      trigger.addEventListener("click", () => {
+        var theModal = new Modal(target, () => {});
+        theModal.show();
+      });
+    }
   },
 };

@@ -49,7 +49,7 @@ export default {
                                     <input type="number"
                                         class="form-control bg-darkg border-dark text-info "
                                         v-model="give.qty" aria-describedby="giveFTqtyappend"
-                                        value="1" step="1" min="1" required>
+                                        step="1" min="1" required>
                                     <span
                                         class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50 "
                                         id="giveFTqtyappend">{{item.set}}

@@ -45,7 +45,7 @@ export default {
 <div class="card-body px-2 pt-2 pb-0 d-flex flex-column" v-if="mint" style="background-color: rgba(0,0,0,0.75)">
   <div class="p-2 flex-grow-1 d-flex">
     <img v-if="wrapped" class="w-100 border border-dark border-2 rounded mt-auto mb-auto"
-    :src="'https://ipfs.io/ipfs/' + wrapped"></img>
+    :src="'https://ipfs.io/ipfs/' + wrapped">
      </div>
     <div class="flex-shrink-1">
       <div class="text-center">
