@@ -6,8 +6,6 @@ export default {
 <!-- MINT HEAD -->
 <div class="card-header px-2" v-if="mint">
   <div class="d-flex justify-content-between align-items-center">
-
-  
      <div class="rounded-pill d-flex align-items-center py-1 px-2"
        style="background-color: black">
         <div>
@@ -17,13 +15,11 @@ export default {
           <h2 class="m-0">{{item.qty}}</h2>
         </div>
       </div>
-
              <div class="rounded px-2 py-1 shimmer border border-dark">
              <a :href="'/nfts/set/' + item.setname + '#' + item.token"
                  class="no-decoration text-black" style="font-size: 1.3em;">
                  <i class="me-1" :class="[icon]"></i><b>{{item.set}}</b></a>
          </div>
-
         </div>
        </div>
 <!-- NFT HEAD -->
@@ -46,34 +42,31 @@ export default {
 </div>
 
 <!-- MINT BODY -->
-<div class="card-body d-flex flex-column px-3 pt-1 pb-0" v-if="mint">
-
-<div class="text-center rounded border border-dark"
-style="background-color: rgba(0,0,0,0.75)">
-<img v-if="wrapped" class="rounded w-100"
+<div class="card-body px-2 pt-2 pb-0 d-flex flex-column" v-if="mint" style="background-color: rgba(0,0,0,0.75)">
+  <div class="p-2 flex-grow-1 d-flex">
+    <img v-if="wrapped" class="w-100 border border-dark border-2 rounded mt-auto mb-auto"
     :src="'https://ipfs.io/ipfs/' + wrapped"></img>
-<div>
-    <h3 class="my-0 mx-2 p-0 p-2 ms-auto"
+     </div>
+    <div class="flex-shrink-1">
+      <div class="text-center">
+      <h3 class="my-1"
         :style="{'background-image': colors}"
         style="-webkit-background-clip: text;
            -webkit-text-fill-color: transparent; 
            -moz-background-clip: text;
-           -moz-text-fill-color: transparent;"> sealed NFT</h3>
-</div>
-<h5 class="m-0 d-none" v-if="item.qty > 0">Unwrap to see what's
-    inside.</h5>
+           -moz-text-fill-color: transparent;">sealed NFT</h3>
+      </div>
+    <div class="text-center lead mb-1">
+    <small><span class="badge bg-dark text-muted">{{item.token}}
+    <i class="fa-solid fa-link mx-2 text-info">
+    </i>network</span></small>
+    </div>
+    </div>
+  </div>
 
-</div>
-
-<div class="text-center lead mt-auto mb-1"><small><span
-class="badge bg-dark text-muted">{{item.token}}<i
-    class="fa-solid fa-link mx-2 text-info"></i>network</span></small>
-</div>
-
-</div>
 <!-- NFT BODY -->
 <div class="card-body p-0" style="background: rgba(0,0,0,.75)" v-if="!mint">
-    <div class="">
+    <div>
         <a href="#itemModal" class="a-1" data-bs-toggle="modal"
             @click="modalIndex()">
             <div class="card-img-top"
