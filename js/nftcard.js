@@ -109,7 +109,7 @@ style="background-color: rgba(0,0,0,0.75)">
   </div>
 </div>
 <!-- TRADE FOOT -->
-<div class="card-footer" v-if="item">
+<div class="card-footer" v-if="trade">
   <div class="d-flex flex-wrap rounded-pill p-3 justify-content-between"
      style="background-color: rgba(0,0,0,0.75)">
      <div class="btn-group" v-if="item.to == account">
@@ -129,7 +129,7 @@ style="background-color: rgba(0,0,0,0.75)">
   </div>
         
 <!-- NFT / MINT FOOT -->
-<div class="card-footer border-0" v-if="!item">
+<div class="card-footer border-0" v-if="!trade">
     <div class="d-flex text-center rounded-pill py-1"
         style="background-color: rgba(0,0,0,.5)">
       <div class="ms-auto me-auto">
