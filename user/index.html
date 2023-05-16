@@ -1283,59 +1283,6 @@
                     :pfp="pfp"
                     @detail="modalIndex('itemModal', $event);itemModal.hidden = false"
                 />
-                <!--Item Modal-->
-                <div class="modal fade" id="itemModalOld" tabindex="-1" v-show="!itemModal.hidden">
-                    <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
-                        <div class="modal-content bg-dark text-white">
-
-                            <div class="modal-header border-0"
-                                :style="{'background': getSetDetailsColors(focusSet.computed ? focusSet.computed : '')}">
-                                <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
-                                    <h2 class="m-0 px-2">{{itemModal.item.uid}}</h2>
-                                </div>
-                                <div class="ms-auto me-auto">
-                                    <h3 class="modal-title lead border border-dark rounded mb-0 p-2"><a
-                                            :href="'/nfts/set/' + itemModal.item.setname"
-                                            style="color: black">{{itemModal.item.setname}}
-                                            NFT</a></h3>
-                                </div>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body row d-flex ">
-                                <div class="order-md-last col-lg-6 px-0 px-sm-2">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <h2><a class="text-muted p-3" href="#/" @click="modalPrev('itemModal')"><i
-                                                    class="fas fa-caret-square-left"></i></a></h2>
-                                        <h3 style="color:aqua;">{{itemModal.item.uid}}</h3>
-                                        <h2><a class="text-muted p-3" href="#/" @click="modalNext('itemModal')"><i
-                                                    class="fas fa-caret-square-right"></i></a></h2>
-                                    </div>
-                                    <div class="card-img-top" :alt="itemModal.item.set + '-' + itemModal.item.uid">
-                                        <div v-html="itemModal.item.HTML"></div>
-                                        {{itemModal.item.set ? itemModal.item.set.Description : ''}}
-                                    </div>
-                                    <div class="text-center mt-2 text-white-50">
-                                        <p>Owner: <a :href="'/' + itemModal.item.owner + '#inventory/'"
-                                                :title="'/' + itemModal.item.owner + '#inventory/'">{{itemModal.item.owner}}</a>
-                                        </p>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 px-0 px-sm-2">
-                                    <div class="d-flex flex-column">
-                                        <div v-for="atr in itemModal.item.attributes">{{printProps(atr)}}
-                                        </div>
-                                        <div>Set: {{focusSet.set}}</div>
-                                        <div>Link: {{focusSet.link}}</div>
-                                        <div>Permlink: {{focusSet.permlink}}</div>
-                                        <div>Name: {{focusSet.name}}</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal-footer d-flex align-items-center"></div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </main>
         <!-- Footer -->

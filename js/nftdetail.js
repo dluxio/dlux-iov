@@ -757,8 +757,6 @@ aria-hidden="true">
     </div>
 </div>
 </div>`,
-    // @click="modalIndex('itemmodal', item.setname + ':' + item.uid );itemmodal.hidden = false"
-    // set PFP
     props: {
         itemmodal: {
             required: true,
@@ -857,9 +855,8 @@ aria-hidden="true">
         mintFT() { },
         airdropFT() { },
         sellFT() { },
-        modalIndex() {
-            console.log(this.item)
-            this.$emit('detail', this.item.index);
+        modalIndex(name) {
+            this.$emit('detail', name);
         },
         timeSince(date) {
             var seconds = Math.floor((new Date() - new Date(date + ".000Z")) / 1000);
