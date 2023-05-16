@@ -63,7 +63,7 @@ export default {
                           <div class="m-auto p-3 text-center">
                               <p><i :class="post_select.types[post.type].icon"></i>{{ post_select.types[post.type].launch }}
                           </p>
-                          <button class="btn btn-lg btn-primary px-4"
+                          <button class="btn btn-lg btn-danger px-4"
                               style="border-radius: 5rem;">Launch<i
                                   class="ms-2 fas fa-external-link-alt"></i></button>
                       </div>

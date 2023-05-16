@@ -69,7 +69,7 @@ export default {
 
                             <a v-if="post.type != 'Blog'" :href="'/dlux/@' + post.author + '/' + post.permlink" target="_blank"
                                 class="ms-auto no-decoration"><button
-                                    class="btn btn-lg btn-primary px-4 d-flex align-items-center"
+                                    class="btn btn-lg btn-danger px-4 d-flex align-items-center"
                                     style="border-radius: 5rem;"><span
                                         class="d-none d-md-flex me-2">Launch</span><i
                                         class="ms-2 fas fa-external-link-alt"></i></button></a>
@@ -90,7 +90,7 @@ export default {
                         <p><i
                                 :class="post_select.types[post.type].icon"></i>{{post_select.types[post.type].launch}}
                         </p>
-                        <a :href="(post.type == 'Blog' ? '/blog/@' : '/dlux/@') + post.author + '/' + post.permlink"><button class="btn btn-lg btn-primary px-4"
+                        <a :href="(post.type == 'Blog' ? '/blog/@' : '/dlux/@') + post.author + '/' + post.permlink"><button class="btn btn-lg btn-danger px-4"
                                 style="border-radius: 5rem;">Launch<i
                                     class="ms-2 fas fa-external-link-alt"></i></button></a>
                     </div>

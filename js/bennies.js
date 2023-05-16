@@ -1,7 +1,7 @@
 export default {
     template: `
     <div>
-        <p>Current Beneficiaries: ({{bennies?.length}}/8){{total/100}}%</p>
+        <p>Current Beneficiaries: ({{bennies?.length}}/8) {{total/100}}%</p>
         <div class="table-responsive">
         <table class="table align-middle">
             <thead>
