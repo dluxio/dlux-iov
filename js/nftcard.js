@@ -88,27 +88,27 @@ style="background-color: rgba(0,0,0,0.75)">
 </div>
 
 <!-- TRADE FOOT -->
-<div class="card-footer" v-if="trade">
+<div class="card-footer" v-if="item">
   <div class="d-flex flex-wrap rounded-pill p-3 justify-content-between"
      style="background-color: rgba(0,0,0,0.75)">
-     <div class="btn-group" v-if="trade.to == account">
+     <div class="btn-group" v-if="item.to == account">
       <button type="button" class="btn btn-success me-auto ms-auto mt-1"
-       @click="acceptNFT(trade)">Accept<i
+       @click="acceptNFT(item)">Accept<i
          class="fas fa-check-square ms-3"></i></button>
          <button type="button" class="btn btn-danger me-auto ms-auto mt-1"
-         @click="rejectMFT(trade)">Reject<i
+         @click="rejectMFT(item)">Reject<i
         class="fas fa-window-close ms-2"></i></button>
         </div>
-        <div class="btn-group" v-if="trade.from == account">
+        <div class="btn-group" v-if="item.from == account">
         <button type="button" class="btn btn-warning me-auto ms-auto mt-1"
-         @click="cancelNFT(trade)">Cancel
+         @click="cancelNFT(item)">Cancel
          <i class="fas fa-window-close ms-2"></i></button>
         </div>
     </div>
   </div>
         
 <!-- NFT / MINT FOOT -->
-<div class="card-footer border-0" v-if="!trade">
+<div class="card-footer border-0" v-if="!item">
     <div class="d-flex text-center rounded-pill py-1"
         style="background-color: rgba(0,0,0,.5)">
       <div class="ms-auto me-auto">

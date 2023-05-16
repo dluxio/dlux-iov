@@ -1264,7 +1264,8 @@
                                 <div v-for="item in NFTtrades" class="col my-3" id="trade-nft-cards">
                                     <nftcard 
                                         :item="item"
-                                        trade="true" 
+                                        trade="true"
+                                        :account="account" 
                                         :uid="Base64toNumber(item.uid)"
                                         :icon="getIcon(item.script)" 
                                         :colors="getSetDetailsColors(item.script)" 

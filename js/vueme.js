@@ -2958,6 +2958,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     finishPNFT(s) {
       if (this.baseScript[s.script]) {
         s.setname = s.set
+        console.log(s)
         s.HTML = s.comp.HTML
         s.set = s.comp.set
         s.attributes = s.comp.attributes
