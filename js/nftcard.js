@@ -136,11 +136,11 @@ export default {
       <div class="ms-auto me-auto" v-if="!trade">
       <!-- MINT ACTIONS -->
       <div class="btn-group" role="group" v-if="mint">
-              <button type="button" class="btn btn-dark" 
+              <button type="button" class="btn btn-dark" title="Open Mint" 
               @click="openFT(item)"><i class="fas fa-box-open fa-fw"></i></button>
               <button type="button" class="btn ps-05 pe-05 border-0"
               disabled></button>
-              <button type="button" class="btn btn-dark" 
+              <button type="button" class="btn btn-dark" title="Transfer Mint"
               data-bs-toggle="modal" data-bs-target="#transferModal" 
               @click="modal('transfer')">
               <i class="fas fa-exchange-alt fa-fw"></i></button>
@@ -152,7 +152,7 @@ export default {
                 <button type="button" class="btn ps-05 pe-05 border-0"
                     disabled></button>
                 <button type="button" class="btn btn-dark" data-bs-toggle="modal"
-                @click="modalIndex()" data-bs-target="#itemModal" title="Actions">
+                @click="modalIndex()" data-bs-target="#itemModal" title="NFT Actions">
                 <i class="fas fa-exchange-alt fa-fw"></i></button>
             </div>
         </div>
