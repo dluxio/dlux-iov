@@ -144,8 +144,8 @@ style="background-color: rgba(0,0,0,0.75)">
               <button type="button" class="btn ps-05 pe-05 border-0"
               disabled></button>
               <button type="button" class="btn btn-dark" 
-              data-bs-toggle="modal" data-bs-target="#mintTransferModal" 
-              @click="mint_detail.set = item.set; mint_detail.token = item.token">
+              data-bs-toggle="modal" data-bs-target="#transferModal" 
+              @click="modal('transfer')">
               <i class="fas fa-exchange-alt fa-fw"></i></button>
             </div>
             <!-- NFT ACTIONS -->
@@ -195,7 +195,7 @@ style="background-color: rgba(0,0,0,0.75)">
       default: ''
     },
   },
-  emits: ['detail'],
+  emits: ['detail', 'modal'],
   data() {
     return {
       
@@ -204,6 +204,14 @@ style="background-color: rgba(0,0,0,0.75)">
   methods: {
     modalIndex() {
       this.$emit('detail', this.item.setname + ':' + this.item.uid);
+    },
+    modal(name) {
+      const object = {
+        item: this.item,
+        mint: this.mint,
+        tab: name,
+      }
+      this.$emit('modal', name);
     },
     timeSince(date) {
       var seconds = Math.floor((new Date() - new Date(date + ".000Z")) / 1000);

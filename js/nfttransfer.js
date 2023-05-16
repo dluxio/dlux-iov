@@ -1,7 +1,7 @@
 export default {
     components: {
     },
-    template: `<div class="modal fade" id="mintTransferModal" tabindex="-1" role="dialog" aria-hidden="true">
+    template: `<div class="modal fade" id="transferModal" tabindex="-1" role="dialog" aria-hidden="true">
 <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
     <div class="modal-content bg-dark text-white">
         <div class="border border-info bg-darker mx-auto px-5 py-3 rounded col-12">
@@ -36,7 +36,7 @@ export default {
                                         class="input-group-text bg-darkg border-dark text-white-50">@</span>
                                     <input type="text"
                                         class="form-control bg-darkg border-dark text-info r-radius-hotfix"
-                                        v-model="giveFTusername" aria-describedby="giveFTuserprep"
+                                        v-model="give.to" aria-describedby="giveFTuserprep"
                                         required>
                                     <div class="invalid-feedback"> Please enter the
                                         username
@@ -48,7 +48,7 @@ export default {
                                 <div class="input-group">
                                     <input type="number"
                                         class="form-control bg-darkg border-dark text-info "
-                                        v-model="giveFTqty" aria-describedby="giveFTqtyappend"
+                                        v-model="give.qty" aria-describedby="giveFTqtyappend"
                                         value="1" step="1" min="1" required>
                                     <span
                                         class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50 "
@@ -79,7 +79,7 @@ export default {
                                     <input type="text"
                                         class="form-control r-radius-hotfix bg-darkg border-dark text-info "
                                         id="tradeFTusername" aria-describedby="tradeFTuserprep"
-                                        v-model="FTmenu.to" required>
+                                        v-model="trade.to" required>
                                     <div class="invalid-feedback"> Please enter the
                                         username
                                         you'd like to trade with. </div>
@@ -107,7 +107,7 @@ export default {
                                     <div class="input-group">
                                         <input type="number"
                                             class="form-control bg-darkg border-dark text-info "
-                                            id="tradeFTamount" v-model="FTmenu.amount"
+                                            id="tradeFTamount" v-model="trade.amount"
                                             aria-describedby="tradeFTamountappend"
                                             placeholder="0.000" step="0.001" min="0.001" required>
                                         <span
@@ -220,8 +220,8 @@ export default {
                             <div class="d-flex justify-content-around">
                                 <div class="row mb-3 d-flex align-items-center">
                                     <label for="auctionFTdays" class="form-label">Duration</label>
-                                    <select class="mx-2 btn btn-lg btn-secondary"
-                                        class="form-control" id="auctionFTdays" required>
+                                    <select class="mx-2 btn btn-lg btn-secondary form-control"
+                                        id="auctionFTdays" required>
                                         <option value="1">1 Day</option>
                                         <option value="2">2 Days</option>
                                         <option value="3">3 Days</option>
@@ -344,9 +344,6 @@ export default {
         },
         uid: {
             default: ''
-        },
-        trade: {
-            default: false
         },
         mint: {
             default: false

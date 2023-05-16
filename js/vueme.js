@@ -105,6 +105,9 @@ var app = new Vue({
       nftAuctionTabToken: "",
       nftAuctionTabPrice: 0,
       nftAuctionTabTime: 0,
+      transferMint: false,
+      transferModal: {},
+      transferTabTo: "",
       toSign: {},
       account: user,
       FTtrades: [],
@@ -1430,7 +1433,12 @@ function tradeFTreject(setname, uid, callback){
         txid: `${item.setname}_nft_mint`,
       };
     },
-
+    modal (event){
+      this.transferModal = event.item
+      this.transferMint = event.mint
+      this.transferModal.show = true
+      this.transferTabTo = event.tab
+    },
     acceptFT(item) {
       var cja = {
           set: item.setname,
