@@ -79,24 +79,24 @@ export default {
         <div class="p-2 text-white text-center rounded" style="background-color: rgba(0,0,0,0.75)">
         <section>
           <div class="d-flex align-items-center">
-            <div class="text-end me-1" style="flex: 1">
+            <div class="text-end mt-auto mb-auto me-1" style="flex: 1">
               <h5 class="small m-0">
                 <span v-if="item.to != account">TO:</span>
                 <span v-if="item.to == account">FROM:</span>
               </h5>
             </div>
-            <div class="text-start" style="flex: 2">
+            <div class="text-start mt-auto mb-auto" style="flex: 2">
               <h5 class="lead m-0">
-                <span v-if="item.to != account">{{item.to}}</span>
-                <span v-if="item.to == account">{{item.from}}</span>
+                <a class="no-decoration text-info" v-if="item.to != account" :href="'/@' + item.to">{{item.to}}</a>
+                <a class="no-decoration text-info" v-if="item.to == account" :href="'/@' + item.from">{{item.from}}</a>
               </h5>
             </div>
           </div>
           <div class="d-flex align-items-center my-2">
-            <div class="text-end me-1" style="flex: 1">
+            <div class="text-end mt-auto mb-auto me-1" style="flex: 1">
               <h5 class="small m-0">PRICE:</h5>
             </div>
-            <div class="text-start" style="flex: 2">
+            <div class="text-start mt-auto mb-auto" style="flex: 2">
               <h5 class="lead m-0">{{item.priceString}}</h5>
             </div>
           </div>
