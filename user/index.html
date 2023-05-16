@@ -1409,7 +1409,12 @@
                     @reply="reply($event)"
                     @vote="vote($event)"></detail-vue>
                 <!-- mint transfer modal -->
-                <div class="modal fade" id="mintTransferModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <nfttransfer
+                    :account="account"
+                    :item="transferModal"
+                    :mint="transferMint"
+                />
+                <!-- <div class="modal fade" id="mintTransferModal" tabindex="-1" role="dialog" aria-hidden="true">
                     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                         <div class="modal-content bg-dark text-white">
                             <div class="border border-info bg-darker mx-auto px-5 py-3 rounded col-12">
@@ -1436,7 +1441,6 @@
                                         <div role="tabpanel" class="tab-pane fade show active" id="giveFTtab"
                                             aria-labelledby="giveFT">
                                             <form class="needs-validation mt-4" @action="giveFT()" novalidate>
-                                                <!--:action="javascript:giveFT('{{mint_detail.data.set}}','{{giveFTusername.value}}','{{giveFTqty.value}}')"-->
                                                 <div class="row mb-3">
                                                     <label for="giveFTusername" class="form-label">Username</label>
                                                     <div class="input-group">
@@ -1477,7 +1481,6 @@
                                         <div role="tabpanel" class="tab-pane fade show " id="tradeFTtab"
                                             aria-labelledby="tradeFT">
                                             <form class="needs-validation mt-4" novalidate>
-                                                <!--:action="javascript:tradeFT('{{mint_detail.data.set}}','{{tradeFTusername.value}}','{{tradeFTamount.value}}')"-->
                                                 <div class="row mb-3">
                                                     <label for="tradeFTusername" class="form-label">Username</label>
                                                     <div class="input-group">
@@ -1537,7 +1540,6 @@
                                         <div role="tabpanel" class="tab-pane fade show " id="sellFTtab"
                                             aria-labelledby="sellFT">
                                             <form class="needs-validation mt-4" novalidate>
-                                                <!--:action="javascript:sellFT('{{mint_detail.data.set}}','{{sellFTprice.value}}')"-->
                                                 <div class="row mb-3">
                                                     <div class="col-6">
                                                         <label for="sellFTqty" class="form-label">Quantity</label>
@@ -1588,7 +1590,6 @@
                                         <div role="tabpanel" class="tab-pane fade show " id="auctionFTtab"
                                             aria-labelledby="auctionFT">
                                             <form class="needs-validation mt-4" novalidate>
-                                                <!--:action="javascript:auctionFT('{{mint_detail.data.set}}','{{auctionFTprice.value}}','{{Date.now()}}','{{auctionFTdays.value}}'),'{{auctionFTpriceType.value}}'"-->
                                                 <div class="row mb-3">
                                                     <div class="col-6">
                                                         <label for="auctionFTqty" class="form-label">Quantity</label>
@@ -1682,7 +1683,6 @@
                                         <div role="tabpanel" class="tab-pane fade show " id="airdropFTtab"
                                             aria-labelledby="airdropFT">
                                             <form class="needs-validation mt-4" novalidate>
-                                                <!--:action="javascript:airdropFT('{{mint_detail.data.set}}','{{airdropFTusers.value}}')"-->
                                                 <div class="row mb-3">
                                                     <div class="col-12">
                                                         <label for="airdropFTusers" class="form-label">Airdrop
@@ -1729,7 +1729,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <!--filters-->
                 <!-- <div class="col" style="max-width: 300px;">
