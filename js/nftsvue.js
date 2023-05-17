@@ -62,6 +62,7 @@ var app = new Vue({
     return {
       ohlcv: [],
       toSign: {},
+      displayNFTs: [],
       chart: {
         id: "honeycomb_tv",
         width: 600,
@@ -1597,7 +1598,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         fetch("https://token.dlux.io/api/pfp/" + this.account)
           .then((r) => r.json())
           .then((json) => {
-            console.log(json)
             if (json.result == "No Profile Picture Set or Owned") return;
             this.pfp.set = json.result[0].pfp.split(":")[0];
             this.pfp.uid = json.result[0].pfp.split(":")[1];
@@ -2148,8 +2148,15 @@ function bidNFT(setname, uid, bid_amount, type, callback){
   },
   mounted() {
     var setName = location.pathname.split("set/")[1];
-    if (setName) this.getNFTset(setName);
-    else this.getNFTsets();
+    if (setName) this.getNFTset(setName)
+    else if (location.pathname.indexOf('nfts/sets') > 0){
+      this.getNFTsets();
+    }
+    else { //assume index
+      //get sales and auctions
+      this.getNFTset('bz')
+      this.getNFTset('dlux')
+    }
     this.getUserNFTs();
     //this.getQuotes();
     //this.getNodes();

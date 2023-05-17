@@ -75,7 +75,7 @@
                 </div>
                 <div class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
                     <!-- NFTCARD REPEAT AUCTION -->
-                    <div class="col my-2" v-for="(item, name, index) in displayNFTs">
+                    <div class="col my-2" v-for="(item, name, index) in auctions">
                         <nftcard :item="item" :uid="Base64toNumber(item.uid)" :icon="getIcon(item.script)"
                             :colors="getSetDetailsColors(item.script)" :index="index"
                             @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
@@ -130,7 +130,7 @@
                 </div>
                 <div class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
                     <!-- NFTCARD REPEAT SALE -->
-                    <div class="col my-2" v-for="(item, name, index) in displayNFTs">
+                    <div class="col my-2" v-for="(item, name, index) in sales">
                         <nftcard :item="item" :uid="Base64toNumber(item.uid)" :icon="getIcon(item.script)"
                             :colors="getSetDetailsColors(item.script)" :index="index"
                             @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
