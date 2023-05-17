@@ -1724,7 +1724,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               
               this.callScript(this.sales[i], i).then(d => {
                 console.log({d})
-                this.sales[i].setname = d.setname;
+                this.sales[d.i].setname = d.setname;
                 this.sales[d.i].set = d;
               })
             }
