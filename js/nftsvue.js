@@ -1594,9 +1594,10 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
     getPFP() {
       if (this.account) {
-        fetch(this.lapi + "/api/pfp/" + this.account)
+        fetch("https://token.dlux.io/api/pfp/" + this.account)
           .then((r) => r.json())
           .then((json) => {
+            console.log(json)
             if (json.result == "No Profile Picture Set or Owned") return;
             this.pfp.set = json.result[0].pfp.split(":")[0];
             this.pfp.uid = json.result[0].pfp.split(":")[1];
