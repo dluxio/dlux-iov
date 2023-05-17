@@ -2,6 +2,9 @@ import Vue from "https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.esm.browser.js
 import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
+import NFTCard from "./nftcard.js";
+import NFTTransfer from "./nfttransfer.js";
+import NFTDetail from "./nftdetail.js";
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "";
@@ -501,6 +504,11 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
     "nav-vue": Navue,
     "foot-vue": FootVue,
     "cycle-text": Cycler,
+    "nftcard": NFTCard,
+    "nfttransfer": NFTTransfer,
+    "nftdetail": NFTDetail,
+  },
+
   },
   methods: {
     breakIt(it, reset) {
