@@ -1704,7 +1704,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         fetch(this.lapi + "/api/sales/") // + set) until API fix
           .then((response) => response.json())
           .then((data) => {
-            this.sales = data.result.filter((a) => a.set == set);
+            this.sales = [... this.sales, ...data.result.filter((a) => a.set == set)]
             if (!this.price[set]) this.price[set] = {};
             for (var i = 0; i < this.sales.length; i++) {
               const token =
@@ -1721,6 +1721,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               }
               this.focusSetCalc.forSale++;
               this.price[set][this.sales[i].uid] = this.sales[i].price;
+              this.callScript(this.sales[i], i).then(d => {
+                this.sales[d.i].computed = d;
+              })
             }
           });
         fetch(this.lapi + "/api/mintsupply")
@@ -2024,17 +2027,18 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       }
       return result;
     },
-    callScript(o) {
+    callScript(o, i) {
       return new Promise((resolve, reject) => {
         if (this.nftscripts[o.script]) {
           const code = `(//${this.nftscripts[o.script]}\n)("${
             o.uid ? o.uid : 0
           }")`;
           var computed = eval(code);
-          computed.uid = o.uid;
-          computed.owner = o.owner;
+          computed.uid = o.uid || "";
+          computed.owner = o.owner || "";
           computed.script = o.script;
-          computed.setname = o.set;
+          (computed.setname = o.set), (computed.token = o.token);
+          computed.i = i;
           resolve(computed);
         } else {
           this.pullScript(o.script).then((empty) => {
