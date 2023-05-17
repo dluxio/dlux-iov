@@ -1181,7 +1181,7 @@
                             <div v-if="accountRNFTs.length"
                                 class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
                                 <div v-for="rnft in accountRNFTs" class="col my-2">
-                                    <nftcard :item="rnft" mint="true" :wrapped="getAttr(rnft.script, 'wrapped')"
+                                    <nftcard :item="rnft" inventory="true" mint="true" :wrapped="getAttr(rnft.script, 'wrapped')"
                                         :icon="getIcon(rnft.script)" :colors="getSetDetailsColors(rnft.script)"
                                         @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                                 </div>
@@ -1255,10 +1255,14 @@
                             <!-- NFT items -->
                             <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-1 mb-3">
                                 <div class="col my-2" v-for="(item, name, index) in displayNFTs">
-                                    <nftcard :item="item" :uid="Base64toNumber(item.uid)" :icon="getIcon(item.script)"
-                                        :colors="getSetDetailsColors(item.script)"
-                                        :index="index"
-                                        @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
+                                    <nftcard 
+                                    :item="item" 
+                                    :uid="Base64toNumber(item.uid)" 
+                                    :icon="getIcon(item.script)"    
+                                    :colors="getSetDetailsColors(item.script)"
+                                    :index="index"
+                                    inventory="true"
+                                    @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                                 </div>
                             </div>
                         </div>

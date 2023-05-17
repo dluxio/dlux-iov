@@ -27,113 +27,37 @@
         <main role="main" class="flex-shrink-0">
             <div class="container" style="max-width: 1800px !important">
                 <!-- NFT Auction -->
-                <div class="d-flex justify-content-between align-items-center"
-                    style="border-bottom: #FFFFFF thick solid">
+                <div class="d-flex justify-content-between align-items-center border-bottom border-5 border-light">
                     <h1 class="text-white p-0 m-0">NFT Auctions</h1>
-                    <div class="d-none d-xl-block">
-                        <div class="d-flex align-items-center">
-                            <h5 class="m-0">Columns:</h5>
-                            <select id="auctionNFTsizeXL" name="Max Columns" class="btn btn-secondary ml-2">
-                                <option value="5" selected>5</option>
-                                <option value="4">4</option>
-                                <option value="3">3</option>
-                                <option value="2">2</option>
-                                <option value="1">1</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="d-none d-lg-block d-xl-none">
-                        <div class="d-flex align-items-center">
-                            <h5 class="m-0">Columns:</h5>
-                            <select id="auctionNFTsizeLG" name="Max Columns" class="btn btn-secondary ml-2">
-                                <option value="4" selected>4</option>
-                                <option value="3">3</option>
-                                <option value="2">2</option>
-                                <option value="1">1</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="d-none d-md-block d-lg-none">
-                        <div class="d-flex align-items-center">
-                            <h5 class="m-0">Columns:</h5>
-                            <select id="auctionNFTsizeMD" name="Max Columns" class="btn btn-secondary ml-2">
-                                <option value="3" selected>3</option>
-                                <option value="2">2</option>
-                                <option value="1">1</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="d-none d-sm-block d-md-none">
-                        <div class="d-flex align-items-center">
-                            <h5 class="m-0">Columns:</h5>
-                            <select id="auctionNFTsizeSM" name="Max Columns" class="btn btn-secondary ml-2">
-                                <option value="2" selected>2</option>
-                                <option value="1">1</option>
-                            </select>
-                        </div>
-                    </div>
                 </div>
-                <div class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
+                <div class="row row-cols-xl-6 row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
                     <!-- NFTCARD REPEAT AUCTION -->
                     <div class="col my-2" v-for="(item, name, index) in auctions">
-                        <nftcard :item="item" :uid="Base64toNumber(item.uid)" :icon="getIcon(item.script)"
-                            :colors="getSetDetailsColors(item.script)" :index="index"
-                            @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
+                        <nftcard 
+                        :item="item" 
+                        :uid="Base64toNumber(item.uid)" 
+                        :icon="getIcon(item.script)"
+                        :colors="getSetDetailsColors(item.script)" 
+                        :index="index"
+                        auction="true"
+                        @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                     </div>
                 </div>
-                <!-- NFT Auction -->
-                <div class="d-flex justify-content-between align-items-center"
-                    style="border-bottom: #FFFFFF thick solid">
+                <!-- NFT SALES -->
+                <div class="d-flex justify-content-between align-items-center border-bottom border-5 border-light">
                     <h1 class="text-white p-0 m-0">NFT Sales</h1>
-                    <div class="d-none d-xl-block">
-                        <div class="d-flex align-items-center">
-                            <h5 class="m-0">Columns:</h5>
-                            <select id="auctionNFTsizeXL" name="Max Columns" class="btn btn-secondary ml-2">
-                                <option value="5" selected>5</option>
-                                <option value="4">4</option>
-                                <option value="3">3</option>
-                                <option value="2">2</option>
-                                <option value="1">1</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="d-none d-lg-block d-xl-none">
-                        <div class="d-flex align-items-center">
-                            <h5 class="m-0">Columns:</h5>
-                            <select id="auctionNFTsizeLG" name="Max Columns" class="btn btn-secondary ml-2">
-                                <option value="4" selected>4</option>
-                                <option value="3">3</option>
-                                <option value="2">2</option>
-                                <option value="1">1</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="d-none d-md-block d-lg-none">
-                        <div class="d-flex align-items-center">
-                            <h5 class="m-0">Columns:</h5>
-                            <select id="auctionNFTsizeMD" name="Max Columns" class="btn btn-secondary ml-2">
-                                <option value="3" selected>3</option>
-                                <option value="2">2</option>
-                                <option value="1">1</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="d-none d-sm-block d-md-none">
-                        <div class="d-flex align-items-center">
-                            <h5 class="m-0">Columns:</h5>
-                            <select id="auctionNFTsizeSM" name="Max Columns" class="btn btn-secondary ml-2">
-                                <option value="2" selected>2</option>
-                                <option value="1">1</option>
-                            </select>
-                        </div>
-                    </div>
                 </div>
-                <div class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
+                <div class="row row-cols-xxl-6 row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
                     <!-- NFTCARD REPEAT SALE -->
                     <div class="col my-2" v-for="(item, name, index) in sales">
-                        <nftcard :item="item" :uid="Base64toNumber(item.uid)" :icon="getIcon(item.script)"
-                            :colors="getSetDetailsColors(item.script)" :index="index"
-                            @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
+                        <nftcard 
+                        :item="item" 
+                        :uid="Base64toNumber(item.uid)" 
+                        :icon="getIcon(item.script)"
+                        :colors="getSetDetailsColors(item.script)" 
+                        :index="index"
+                        sale="true"
+                        @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                     </div>
                 </div>
             </div>
