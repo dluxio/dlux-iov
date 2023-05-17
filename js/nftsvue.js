@@ -508,8 +508,6 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
     "nfttransfer": NFTTransfer,
     "nftdetail": NFTDetail,
   },
-
-  },
   methods: {
     breakIt(it, reset) {
       if (reset) {
