@@ -62,6 +62,7 @@ var app = new Vue({
     return {
       ohlcv: [],
       toSign: {},
+      presales: [],
       displayNFTs: [],
       chart: {
         id: "honeycomb_tv",
@@ -1704,31 +1705,32 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         fetch(this.lapi + "/api/sales/") // + set) until API fix
           .then((response) => response.json())
           .then((data) => {
-            this.sales = [... this.sales, ...data.result.filter((a) => a.set == set)]
+            this.presales = [... this.presales, ...data.result.filter((a) => a.set == set)]
             if (!this.price[set]) this.price[set] = {};
-            for (var i = 0; i < this.sales.length; i++) {
+            for (var i = 0; i < this.presales.length; i++) {
               const token =
-                this.sales[i].price.token == "HIVE"
+                this.presales[i].price.token == "HIVE"
                   ? "HIVE"
-                  : this.sales[i].price.token == "HBD"
+                  : this.presales[i].price.token == "HBD"
                   ? "HBD"
                   : "TOKEN";
               if (
-                this.sales[i].price.amount < this.focusSetCalc.sf[token] ||
+                this.presales[i].price.amount < this.focusSetCalc.sf[token] ||
                 !this.focusSetCalc.sf[token]
               ) {
-                this.focusSetCalc.sf[token] = this.sales[i].price.amount;
+                this.focusSetCalc.sf[token] = this.presales[i].price.amount;
               }
               this.focusSetCalc.forSale++;
-              this.price[set][this.sales[i].uid] = this.sales[i].price;
+              this.price[set][this.presales[i].uid] = this.presales[i].price;
               
-              this.callScript(this.sales[i], i).then(d => {
+              this.callScript(this.presales[i], i).then(d => {
                 const index = d.i
                 delete d.i
-                this.sales[index] = {
-                  ...this.sales[index],
+                this.presales[index] = {
+                  ...this.presales[index],
                   ...d
                 }
+                this.sales.push(this.presales[index])
               })
             }
           });
