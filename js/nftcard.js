@@ -66,7 +66,7 @@ export default {
                    -moz-background-clip: text;
                    -moz-text-fill-color: transparent;">
             <span v-if="!mint">#{{uid}}</span>
-            <span v-if="mint">sealed NFT</h3>
+            <span v-if="mint">sealed NFT</span></h3>
     </div>
     <div class="text-center lead"><small><span
                 class="badge bg-dark text-muted">{{item.token}}<i
