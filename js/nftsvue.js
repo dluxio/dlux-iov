@@ -1725,8 +1725,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               this.callScript(this.sales[i], i).then(d => {
                 const index = d.i
                 delete d.i
-                this.sales[d.i] = {
-                  ...this.sales[d.i],
+                this.sales[index] = {
+                  ...this.sales[index],
                   ...d
                 }
               })
@@ -2033,7 +2033,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       }
       return result;
     },
-    callScript(o, i) {
+    callScript(o, i = 0) {
       return new Promise((resolve, reject) => {
         if (this.nftscripts[o.script]) {
           const code = `(//${this.nftscripts[o.script]}\n)("${
