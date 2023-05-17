@@ -1721,8 +1721,11 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               }
               this.focusSetCalc.forSale++;
               this.price[set][this.sales[i].uid] = this.sales[i].price;
+              
               this.callScript(this.sales[i], i).then(d => {
-                this.sales[d.i].computed = d;
+                console.log({d})
+                this.sales[i].setname = d.setname;
+                this.sales[d.i].set = d;
               })
             }
           });
