@@ -1629,8 +1629,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         fetch(this.lapi + "/api/mintsupply/" + set)
           .then((response) => response.json())
           .then((data) => {
-            this.mintSales = data.result[0].sales;
-            this.mintAuctions = data.result[0].auctions;
+            this.mintSales = [...this.mintSales, ...data.result[0].sales]
+            this.mintAuctions = [...this.mintAuctions, ...data.result[0].auctions]
           })
           .catch((e) => {
             console.log(e);
@@ -1769,6 +1769,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             }
           });
       }
+    },
+    getIcon(s) {
+      return this.baseScript[s] ? this.baseScript[s].set.faicon : "";
     },
     getUserNFTs() {
       fetch(this.lapi + "/api/nfts/" + this.account)
