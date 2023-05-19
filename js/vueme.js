@@ -3418,6 +3418,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this.sapi = sapi;
       this.checkAccount("pageAccount", "focus");
       this.getHiveUser();
+      this.getSPKUser()
       if(!this.me)this.accountRelations(this.pageAccount);
       this.getHiveStats();
       this.getQuotes();
