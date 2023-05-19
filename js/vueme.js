@@ -810,9 +810,8 @@ var app = new Vue({
     getSetPhotos(s, c) {
       return s.setname ? `https://ipfs.io/ipfs/${s.set[c]}` : "";
     },
-    getSPKUser(user) {
-      if (user)
-        fetch("https://spktest.dlux.io/@" + user)
+    getSPKUser() {
+      if(this.account)fetch("https://spktest.dlux.io/@" + this.account)
           .then((response) => response.json())
           .then((data) => {
             this.spkapi = data
