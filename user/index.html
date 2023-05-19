@@ -138,11 +138,19 @@
                         <div class="container-fluid">
                             <div class="row">
                                 <div class="col-sm-6 col-lg-3 my-2" v-for="post in displayPosts" :key="post.url">
-                                    <card-vue :post="post" :account="account" :post_select="postSelect"
-                                        :voteval="voteVal" :head_block="sstats.head_block"
-                                        :broca_refill="sstats.broca_refill" :broca="spkapi.broca"
-                                        :spk_power="spkapi.spk_power" :contracts="contracts" :extendcost="extendcost"
-                                        @tosign="toSign=$event" @modalselect="modalSelect($event)"
+                                    <card-vue :post="post" 
+                                        :account="account" 
+                                        :post_select="postSelect"
+                                        :voteval="voteVal" 
+                                        :head_block="sstats.head_block"
+                                        :broca_refill="sstats.broca_refill" 
+                                        :broca="spkapi.broca"
+                                        :spk_power="spkapi.spk_power"
+                                        :has_ipfs="spkapi.storage?.length ? true : false"  
+                                        :contracts="contracts" 
+                                        :extendcost="extendcost"
+                                        @tosign="toSign=$event" 
+                                        @modalselect="modalSelect($event)"
                                         @vote="vote($event)"></card-vue>
                                 </div>
                             </div>
