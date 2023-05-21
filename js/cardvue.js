@@ -91,7 +91,7 @@ export default {
                                                 <div class="text-lead text-uppercase text-white-50 pb-05 mt-1 border-bottom">Nodes Storing This Contract</div>
                                                 <ol type="1" class="my-1">
                                                     <div v-for="(acc, prop, index) in contracts[name].n" >
-                                                        <li class="mt-1"><a :href="'/@' + acc " class="no-decoration text-info">@{{acc}}</a></li>
+                                                        <li><a :href="'/@' + acc " class="no-decoration text-info">@{{acc}}</a></li>
                                                         <div v-if="index == Object.keys(contracts[name].n).length - 1 && index + 1 < contracts[name].p" v-for="i in (contracts[name].p - (index + 1))">
                                                             <li>Open</li>
                                                         </div>
