@@ -90,9 +90,11 @@ export default {
                                             <div class="collapse mx-2" :id="'nodes-' + post.permlink">
                                                 <div class="text-lead text-uppercase text-white-50 pb-05 mt-1 border-bottom">Nodes Storing This Contract</div>
                                                 <ol type="1" class="my-1">
-                                                    <li v-for="(acc, prop, index) in contracts[name].n" class="mt-1"><a :href="'/@' + acc " class="no-decoration text-info">@{{acc}}</a></li>
-                                                    <div v-if="index == Object.keys(contracts[name].n).length - 1 && index + 1 < contracts[name].p" v-for="i in (contracts[name].p - (index + 1))">
-                                                        <li>Open</li>
+                                                    <div v-for="(acc, prop, index) in contracts[name].n" >
+                                                        <li class="mt-1"><a :href="'/@' + acc " class="no-decoration text-info">@{{acc}}</a></li>
+                                                        <div v-if="index == Object.keys(contracts[name].n).length - 1 && index + 1 < contracts[name].p" v-for="i in (contracts[name].p - (index + 1))">
+                                                            <li>Open</li>
+                                                        </div>
                                                     </div>
                                                 </ol>
                                                 <p class="d-none" v-if="index == Object.keys(contracts[name].n).length - 1 && index + 1 < contracts[name].p">{{contracts[name].p - (index + 1) }} slots are open!</p>
