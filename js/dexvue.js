@@ -686,12 +686,11 @@ var app = new Vue({
             if (data.behind > -5){
               resolve('GOOD')
             } else {
-              reject('BAD')
+              reject({data})
             }
-            console.log(url, this.proven[url])
           })
           .catch(error => {
-            reject('BAD')
+            reject(error)
           })
       })
     },
@@ -782,6 +781,7 @@ var app = new Vue({
         return;
       }
       this.proveAPI(url).then((res) => {
+        console.log(res)
         if (api != null) {
           location.hash = "";
           localStorage.setItem("lapi", url);
@@ -789,6 +789,7 @@ var app = new Vue({
         }
       })
       .catch((err) => {
+        console.log(err)
         return alert('This API is not responding, please try another one.')
       })
     },
