@@ -688,6 +688,7 @@ var app = new Vue({
           } else {
             this.proven[url] = 'BAD'
           }
+          console.log(url, this.proven[url])
         })
     },
     parseFloat(value) {
