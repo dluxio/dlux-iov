@@ -683,7 +683,7 @@ var app = new Vue({
       fetch(url)
         .then(response => response.json())
         .then(data => { 
-          if (data.behind){
+          if (data.behind > -5){
             this.proven[url] = data.behind
           } else {
             this.proven[url] = 'BAD'
