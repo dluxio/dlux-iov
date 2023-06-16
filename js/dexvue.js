@@ -782,11 +782,9 @@ var app = new Vue({
       }
       this.proveAPI(url).then((res) => {
         console.log(res)
-        if (api != null) {
-          location.hash = "";
-          localStorage.setItem("lapi", url);
-          location.search = "?api=" + url;
-        }
+        location.hash = "";
+        localStorage.setItem("lapi", url);
+        location.search = "?api=" + url;
       })
       .catch((err) => {
         console.log(err)
