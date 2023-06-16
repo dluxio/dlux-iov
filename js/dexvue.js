@@ -679,17 +679,21 @@ var app = new Vue({
       return new Date(ts).toLocaleDateString()
     },
     proveAPI(url){
-      if (this.proven[url]) return this.proven[url]
-      fetch(url)
-        .then(response => response.json())
-        .then(data => { 
-          if (data.behind > -5){
-            this.proven[url] = data.behind
-          } else {
-            this.proven[url] = 'BAD'
-          }
-          console.log(url, this.proven[url])
-        })
+      return new Promise((resolve, reject) => {
+        fetch(url)
+          .then(response => response.json())
+          .then(data => { 
+            if (data.behind > -5){
+              resolve('GOOD')
+            } else {
+              reject('BAD')
+            }
+            console.log(url, this.proven[url])
+          })
+          .catch(error => {
+            reject('BAD')
+          })
+      })
     },
     parseFloat(value) {
       return parseFloat(value);
@@ -769,24 +773,24 @@ var app = new Vue({
       }
     },
     setApi(url) {
-      if(typeof this.proven[url] != 'number')return alert('This API is not responding, please try another one.')
       if (url.substr(-1) == "/") {
         url = url.substr(0, url.length - 1);
       }
-      let api =
-        url ||
-        prompt("Please enter your API", "https://spkinstant.hivehoneycomb.com");
+      url = url || prompt("Please enter your API", "https://spkinstant.hivehoneycomb.com");
       if (url.indexOf("https://") == -1) {
         alert("https is required");
         return;
       }
-      if (api != null) {
-        if (location.hash && api) {
+      this.proveAPI(url).then((res) => {
+        if (api != null) {
           location.hash = "";
+          localStorage.setItem("lapi", url);
+          location.search = "?api=" + url;
         }
-        localStorage.setItem("lapi", api);
-        location.search = "?api=" + api;
-      }
+      })
+      .catch((err) => {
+        return alert('This API is not responding, please try another one.')
+      })
     },
     suggestValue(key, value) {
       if (key.split(".").length > 1) {
@@ -845,10 +849,8 @@ var app = new Vue({
         this.runnersSearch = this.runners.reduce((acc, runner) => {
           if (runner.account.toLowerCase().includes(term.toLowerCase())) {
             acc.push(runner);
-            this.proveAPI(runner.api)
           } else if (runner.api.toLowerCase().includes(term.toLowerCase())) {
             acc.push(runner);
-            this.proveAPI(runner.api)
           }
           return acc;
         }, []);
@@ -1515,9 +1517,6 @@ var app = new Vue({
     this.popDEX(user);
     if (user != "GUEST") this.getTokenUser(user);
     if (user != "GUEST") this.getHiveUser(user);
-    this.proveAPI("https://token.dlux.io");
-    this.proveAPI("https://spkinstant.hivehoneycomb.com");
-    this.proveAPI("https://duat.hivehoneycomb.com");
   },
   computed: {
     chartTitle: {
