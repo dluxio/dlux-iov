@@ -1514,6 +1514,9 @@ var app = new Vue({
     this.popDEX(user);
     if (user != "GUEST") this.getTokenUser(user);
     if (user != "GUEST") this.getHiveUser(user);
+    this.proveAPI("https://token.dlux.io");
+    this.proveAPI("https://spkinstant.hivehoneycomb.com");
+    this.proveAPI("https://duat.hivehoneycomb.com");
   },
   computed: {
     chartTitle: {
