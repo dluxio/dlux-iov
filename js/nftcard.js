@@ -55,9 +55,6 @@ export default {
         v-html="item.HTML">
       </div>
     </a>
-    <button type="button" class="btn btn-primary" @click="modalIndex('details')" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                    Launch demo modal
-                </button>
   </div>
   <!-- MINT BODY -->
   <div class="p-2 flex-grow-1 d-flex" v-if="mint">
