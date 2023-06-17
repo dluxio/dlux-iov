@@ -7,14 +7,14 @@ export default {
         <div class="modal-content bg-dark text-white">
             <div class="card text-white bg-dark ">
                 <div class="card-header border-0 d-flex align-items-center justify-content-between"
-                    :style="{'background': getSetDetailsColors(itemModal.item.script)}">
+                    :style="{'background': getSetDetailsColors(itemmodal.item.script)}">
                     <div class="rounded-pill d-flex align-items-center p-2"
                         style="background-color: black">
-                        <h2 class="m-0 px-2">{{itemModal.item.uid}}</h2>
+                        <h2 class="m-0 px-2">{{itemmodal.item.uid}}</h2>
                     </div>
                     <h3 class="card-title lead border border-dark rounded p-2 mb-0"><a
-                            class="no-decoration" :href="'/nfts/set/'+ itemModal.item.setname"
-                            style="color:black;">{{itemModal.item.setname}}
+                            class="no-decoration" :href="'/nfts/set/'+ itemmodal.item.setname"
+                            style="color:black;">{{itemmodal.item.setname}}
                             NFT</a></h3>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
@@ -25,22 +25,22 @@ export default {
                         <div class="col-12 px-0 px-sm-2">
                             <!-- NFT img -->
                             <div class="card-img-top"
-                                :alt="itemModal.item.setname + '-' + itemModal.item.uid">
-                                <div v-html="itemModal.item.HTML"></div>
+                                :alt="itemmodal.item.setname + '-' + itemmodal.item.uid">
+                                <div v-html="itemmodal.item.HTML"></div>
                                 <!--back forward btns-->
                                 <div class="card-footer d-flex align-items-center">
                                     <h2><a class="text-muted p-3" href="#/"
-                                            @click="modalPrev('itemModal')"
-                                            :class="{'invisible':!itemModal.index}"><i
+                                            @click="modalPrev('itemmodal')"
+                                            :class="{'invisible':!itemmodal.index}"><i
                                                 class="fas fa-caret-square-left"></i></a>
                                     </h2>
                                     <small class="ms-auto text-muted"><i>Item
-                                            {{itemModal.index + 1}} of
+                                            {{itemmodal.index + 1}} of
                                             {{NFTselect.auctionOnly || NFTselect.saleOnly ||
                                             NFTselect.sort == 'price' ||
-                                            itemModal.items.length}}</i></small>
+                                            itemmodal.items.length}}</i></small>
                                     <h2 class="ms-auto"><a class="text-muted p-3" href="#/"
-                                            @click="modalNext('itemModal', 'item')"><i
+                                            @click="modalNext('itemmodal', 'item')"><i
                                                 class="fas fa-caret-square-right"></i></a>
                                     </h2>
                                 </div>
@@ -51,15 +51,15 @@ export default {
                     <!-- NFT detail col 2 -->
                     <div class="col-lg-6 px-0 px-sm-2">
                         <!--pfp-->
-                        <div class="text-center my-3" v-if="itemModal.item.owner == account">
-                            <button @click="setPFP(itemModal.item)"
+                        <div class="text-center my-3" v-if="itemmodal.item.owner == account">
+                            <button @click="setPFP(itemmodal.item)"
                                 class="btn btn-lg btn-outline-primary"
-                                v-if="itemModal.item.uid != pfp.uid"><i
+                                v-if="itemmodal.item.uid != pfp.uid"><i
                                     class="far fa-user-circle me-2"></i>Set as
                                 PFP
                             </button>
                             <button class="btn btn-lg btn-secondary"
-                                v-if="itemModal.item.uid == pfp.uid && itemModal.item.setname == pfp.set"><i
+                                v-if="itemmodal.item.uid == pfp.uid && itemmodal.item.setname == pfp.set"><i
                                     class="far fa-user-circle me-2"></i>Currently set as
                                 your
                                 PFP
@@ -81,7 +81,7 @@ export default {
                                 <div id="collapseDescription" class="collapse"
                                     aria-labelledby="headingDescription" data-parent="#accordion">
                                     <div class="card-body">
-                                        <p>{{itemModal.item.set.Description}}</p>
+                                        <p>{{itemmodal.item.set.Description}}</p>
                                         </p>
                                     </div>
                                 </div>
@@ -103,14 +103,14 @@ export default {
                                     aria-labelledby="headingAttributes" data-parent="#accordion">
                                     <div class="card-body">
                                         <div class="d-flex flex-wrap">
-                                            <div v-for="thing in itemModal.item.attributes"
+                                            <div v-for="thing in itemmodal.item.attributes"
                                                 class="border border-white rounded d-flex mx-2 my-2">
                                                 <div v-for="(value, key, index) in thing" class="p-2">
                                                     <div class="">{{key}}:</div>
                                                     <div class="">{{value}}</div>
                                                 </div>
                                             </div>
-                                            <!-- <div v-for="thing in itemModal.item.comp.attributes"
+                                            <!-- <div v-for="thing in itemmodal.item.comp.attributes"
                                                             class="border border-white rounded d-flex mx-2 my-2">
                                                             <div v-for="(value, key, index) in thing"
                                                                 class="p-2">
@@ -124,7 +124,7 @@ export default {
                             </div>
                             <!-- TRANSFER NFT -->
                             <div class="card bg-dark text-white" style="width: 100"
-                                v-if="itemModal.item.owner == account">
+                                v-if="itemmodal.item.owner == account">
                                 <div class="card-header" id="headingMarket">
                                     <h5 class="mb-0">
                                         <button class="btn btn-link collapsed text-info no-decoration"
@@ -136,12 +136,12 @@ export default {
                                 <div id="collapseMarket" class="collapse"
                                     aria-labelledby="headingMarket" data-parent="#accordion">
                                     <!-- <div class="card-body bg-dark text-white-50 text-center"
-                                  v-if="itemModal.item.owner != account">
+                                  v-if="itemmodal.item.owner != account">
                                   <p>You don't own this NFT</p>
                                 </div> -->
                                     <div class="card-body p-0 bg-dark text-white">
                                         <div class="border-warning border rounded p-3 my-3"
-                                            v-if="itemModal.item.uid == pfp.uid  && itemModal.item.setname == pfp.set">
+                                            v-if="itemmodal.item.uid == pfp.uid  && itemmodal.item.setname == pfp.set">
                                             <p class="text-warning m-0">Transferring this
                                                 NFT will remove it from your PFP</p>
                                         </div>
@@ -208,7 +208,7 @@ export default {
                                                                 </div>
                                                             </div>
                                                             <div class="text-center">
-                                                                <button @click="giveNFT(itemModal.item)"
+                                                                <button @click="giveNFT(itemmodal.item)"
                                                                     id="giveNFTbutton"
                                                                     class="btn btn-info my-2"
                                                                     type="submit">Give</button>
@@ -293,7 +293,7 @@ export default {
                                                             </div>
                                                             <div class="text-center">
                                                                 <button
-                                                                    @click="tradeNFT(itemModal.item)"
+                                                                    @click="tradeNFT(itemmodal.item)"
                                                                     id="tradeNFTbutton"
                                                                     class="btn btn-info my-2"
                                                                     type="submit">Propose
@@ -360,7 +360,7 @@ export default {
                                                                 </p>
                                                             </div>
                                                             <div class="text-center">
-                                                                <button @click="sellNFT(itemModal.item)"
+                                                                <button @click="sellNFT(itemmodal.item)"
                                                                     id="sellNFTbutton"
                                                                     class="btn btn-info my-2"
                                                                     type="submit">List
@@ -465,7 +465,7 @@ export default {
                                                             </div>
                                                             <div class="text-center">
                                                                 <button
-                                                                    @click="auctionNFT(itemModal.item)"
+                                                                    @click="auctionNFT(itemmodal.item)"
                                                                     class="btn btn-info my-2"
                                                                     type="submit">List
                                                                     Item</button>
@@ -479,7 +479,7 @@ export default {
                                 </div>
                             </div>
                             <!-- MELT NFT -->
-                            <div class="card bg-dark text-white" v-if="itemModal.item.owner == account">
+                            <div class="card bg-dark text-white" v-if="itemmodal.item.owner == account">
                                 <div class="card-header" id="headingRedeem">
                                     <h5 class="mb-0">
                                         <button
@@ -487,13 +487,13 @@ export default {
                                             data-bs-toggle="collapse" data-bs-target="#collapseRedeem"
                                             aria-expanded="false" aria-controls="collapseRedeem"><i
                                                 class="fa-solid fa-fire me-3"></i>MELT<span
-                                                class="ms-2 small">({{sets[itemModal.item.token]
+                                                class="ms-2 small">({{sets[itemmodal.item.token]
                                                 ?
-                                                precision(sets[itemModal.item.token][itemModal.item.setname].bond.amount,
-                                                sets[itemModal.item.token][itemModal.item.setname].bond.precision)
+                                                precision(sets[itemmodal.item.token][itemmodal.item.setname].bond.amount,
+                                                sets[itemmodal.item.token][itemmodal.item.setname].bond.precision)
                                                 : 0 }}
-                                                {{sets[itemModal.item.token]?
-                                                sets[itemModal.item.token][itemModal.item.setname].bond.token
+                                                {{sets[itemmodal.item.token]?
+                                                sets[itemmodal.item.token][itemmodal.item.setname].bond.token
                                                 :
                                                 ''}})</span></button>
                                     </h5>
@@ -501,10 +501,10 @@ export default {
                                 <div id="collapseRedeem" class="collapse"
                                     aria-labelledby="headingRedeem" data-parent="#accordion">
                                     <div class="card-body bg-dark text-white-50 text-center"
-                                        v-if="itemModal.item.owner != account">
+                                        v-if="itemmodal.item.owner != account">
                                         <p>You don't own this NFT</p>
                                     </div>
-                                    <div class="card-body p-0" v-if="itemModal.item.owner == account">
+                                    <div class="card-body p-0" v-if="itemmodal.item.owner == account">
                                         <div class="d-flex align-self-end">
                                             <div
                                                 class="border border-warning rounded bg-darker col-12 p-4">
@@ -515,13 +515,13 @@ export default {
                                                     </div>
                                                     <div class="d-flex no-wrap ms-1"> <u>
                                                             <h1>
-                                                                {{sets[itemModal.item.token]
+                                                                {{sets[itemmodal.item.token]
                                                                 ?
-                                                                precision(sets[itemModal.item.token][itemModal.item.setname].bond.amount,
-                                                                sets[itemModal.item.token][itemModal.item.setname].bond.precision)
+                                                                precision(sets[itemmodal.item.token][itemmodal.item.setname].bond.amount,
+                                                                sets[itemmodal.item.token][itemmodal.item.setname].bond.precision)
                                                                 : 0 }}
-                                                                {{sets[itemModal.item.token]?
-                                                                sets[itemModal.item.token][itemModal.item.setname].bond.token
+                                                                {{sets[itemmodal.item.token]?
+                                                                sets[itemmodal.item.token][itemmodal.item.setname].bond.token
                                                                 :
                                                                 ''}}</h1>
                                                         </u></div>
@@ -570,7 +570,7 @@ export default {
                                                                 data-bs-toggle="collapse"
                                                                 href="#melt-confirmation">CANCEL
                                                                 <i class="fas fa-running"></i></button>
-                                                            <button @click="meltNFT(itemModal.item)"
+                                                            <button @click="meltNFT(itemmodal.item)"
                                                                 class="btn btn-danger border-white">DESTROY
                                                                 <i class="fas fa-bomb"></i>
                                                                 <span
@@ -587,17 +587,17 @@ export default {
                             </div>
                             <!-- Bid NFT -->
                             <div class="card bg-dark text-white"
-                                v-if="itemModal.item.owner == 'ah' || itemModal.item.owner == 'hh'">
+                                v-if="itemmodal.item.owner == 'ah' || itemmodal.item.owner == 'hh'">
                                 <div class="card-header" id="headingAuction">
                                     <h5 class="mb-0">
                                         <button
                                             class="btn btn-link collapsed text-warning no-decoration d-flex align-items-center"
-                                            data-bs-toggle="collapse" @click="auctionData('itemModal')"
+                                            data-bs-toggle="collapse" @click="auctionData('itemmodal')"
                                             data-bs-target="#collapseAuction" aria-expanded="false"
                                             aria-controls="collapseAuction"><i
                                                 class="fas fa-comment-dollar me-3"></i><span>BID
                                                 NOW</span><span
-                                                class="small ms-2">({{naiString(itemModal.auction.price)}})</span></button>
+                                                class="small ms-2">({{naiString(itemmodal.auction.price)}})</span></button>
                                     </h5>
                                 </div>
                                 <div id="collapseAuction" class="collapse show"
@@ -610,13 +610,13 @@ export default {
                                                     class="d-flex align-items-center justify-content-between">
                                                     <div class="d-flex me-1">
                                                         <h4>Current
-                                                            Bid:{{naiString(itemModal.auction.price)}}
+                                                            Bid:{{naiString(itemmodal.auction.price)}}
                                                         </h4>
                                                     </div>
                                                     <div class="d-flex no-wrap ms-1"> <u>
                                                             <h4>
                                                                 Number of
-                                                                Bids:{{itemModal.auction.bids}}
+                                                                Bids:{{itemmodal.auction.bids}}
                                                             </h4>
                                                         </u></div>
                                                 </div>
@@ -633,19 +633,19 @@ export default {
                                                             </div>
                                                             <ul>
                                                                 <li>Time Left:
-                                                                    {{itemModal.auction.time}}
+                                                                    {{itemmodal.auction.time}}
                                                                 </li>
                                                                 <li>Opening Price:
-                                                                    {{naiString(itemModal.auction.initial_price)}}
+                                                                    {{naiString(itemmodal.auction.initial_price)}}
                                                                 </li>
                                                                 <li>Seller:
-                                                                    {{itemModal.auction.by}}
+                                                                    {{itemmodal.auction.by}}
                                                                 </li>
                                                                 <li>Bidder:
-                                                                    {{itemModal.auction.bidder}}
+                                                                    {{itemmodal.auction.bidder}}
                                                                 </li>
                                                                 <li>Days:
-                                                                    {{itemModal.auction.days}}
+                                                                    {{itemmodal.auction.days}}
                                                                 </li>
                                                             </ul>
                                                         </div>
@@ -660,13 +660,13 @@ export default {
                                                                     id="auctionNFTprice"
                                                                     aria-describedby="bidNFTpriceappend"
                                                                     placeholder="0.000" step="0.001"
-                                                                    :min="(itemModal.auction.price.amount + (itemModal.auction.bids ? 1 : 0))/ 1000"
+                                                                    :min="(itemmodal.auction.price.amount + (itemmodal.auction.bids ? 1 : 0))/ 1000"
                                                                     required>
                                                                 <div class="input-group-append">
                                                                     <span
                                                                         class="input-group-text bg-dark border-dark text-white-50 r-radius-hotfix m-0"
                                                                         id="bidNFTpriceappend">
-                                                                        {{itemModal.auction.price.token}}
+                                                                        {{itemmodal.auction.price.token}}
                                                                     </span>
                                                                     <div>
                                                                         <div class="invalid-feedback">
@@ -678,7 +678,7 @@ export default {
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <button @click="bidNFT(itemModal.item)"
+                                                            <button @click="bidNFT(itemmodal.item)"
                                                                 type="button" class="btn btn-warning"
                                                                 data-bs-toggle="collapse" href="#/">Bid
                                                             </button>
@@ -691,17 +691,17 @@ export default {
                                 </div>
                             </div>
                             <!-- Buy NFT -->
-                            <div class="card bg-dark text-white" v-if="itemModal.item.owner == 'ls'">
+                            <div class="card bg-dark text-white" v-if="itemmodal.item.owner == 'ls'">
                                 <div class="card-header" id="headingsale">
                                     <h5 class="mb-0">
                                         <button
                                             class="btn btn-link collapsed text-warning no-decoration d-flex align-items-center"
-                                            data-bs-toggle="collapse" @click="saleData('itemModal')"
+                                            data-bs-toggle="collapse" @click="saleData('itemmodal')"
                                             data-bs-target="#collapsesale" aria-expanded="false"
                                             aria-controls="collapsesale"><i
                                                 class="fas fa-money-bill-wave me-3"></i><span>BUY
                                                 NOW</span><span
-                                                class="small ms-2">({{naiString(itemModal.sale.price)}})</span></button>
+                                                class="small ms-2">({{naiString(itemmodal.sale.price)}})</span></button>
                                     </h5>
                                 </div>
                                 <div id="collapsesale" class="collapse show"
@@ -714,12 +714,12 @@ export default {
                                                     class="d-flex align-items-center justify-content-between">
                                                     <div class="d-flex me-1">
                                                         <h4>Price:
-                                                            {{naiString(itemModal.sale.price)}}
+                                                            {{naiString(itemmodal.sale.price)}}
                                                         </h4>
                                                     </div>
                                                     <div class="d-flex no-wrap ms-1">
                                                         <h4>
-                                                            Seller: @{{itemModal.sale.by}}
+                                                            Seller: @{{itemmodal.sale.by}}
                                                         </h4>
                                                     </div>
                                                 </div>
@@ -730,13 +730,13 @@ export default {
                                                         <!-- long name, script, set, uid only other buy data -->
                                                     </div>
                                                     <div class="text-center pb-4">
-                                                        <button v-if="itemModal.sale.by != account"
+                                                        <button v-if="itemmodal.sale.by != account"
                                                             type="button" class="btn btn-warning"
-                                                            @click="buyNFT(itemModal.sale)"
+                                                            @click="buyNFT(itemmodal.sale)"
                                                             href="#/">Buy </button>
                                                         <button v-else type="button"
                                                             class="btn btn-warning"
-                                                            @click="cancelNFT(itemModal.sale)"
+                                                            @click="cancelNFT(itemmodal.sale)"
                                                             href="#/">Cancel </button>
                                                     </div>
                                                 </div>
