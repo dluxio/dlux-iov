@@ -1259,17 +1259,24 @@
                 <!-- Button trigger modal -->
 
                 <!--NFT item detail modal-->
-                <nftdetail :sets="sets" :account="account" :itemmodal="itemModal" :pfp="pfp"
+                <div>
+                    <nftdetail :sets="sets" :account="account" :itemmodal="itemModal" :pfp="pfp"
                     @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
+                </div>
 
                 <!--blog detail view-->
-                <detail-vue :post="displayPost.item" :account="account" :modal="true" :post_select="postSelect"
+                <div>
+                    <detail-vue :post="displayPost.item" :account="account" :modal="true" :post_select="postSelect"
                     :voteval="voteVal" :head_block="sstats.head_block" :broca_refill="sstats.broca_refill"
                     :broca="spkapi.broca" :spk_power="spkapi.spk_power" :contracts="contracts" :extendcost="extendcost"
                     @tosign="toSign=$event" @modalselect="modalSelect($event)" @reply="reply($event)"
                     @vote="vote($event)"></detail-vue>
+                </div>
                 <!-- mint transfer modal -->
-                <nfttransfer :account="account" :item="transferModal" :mint="transferMint" @modal="modal($event)" />
+                <div>
+                    <nfttransfer :account="account" :item="transferModal" :mint="transferMint" @modal="modal($event)" />
+                </div>
+                
 
         </main>
         <!-- Footer -->
