@@ -1,8 +1,8 @@
 export default {
     components: {
     },
-    template: `                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-    aria-hidden="true">
+    template: `<div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel"
+    :aria-hidden="true">
     <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
         <div class="modal-content bg-dark text-white">
             <div class="card text-white bg-dark ">
@@ -827,6 +827,15 @@ export default {
                 to_array: [],
                 qty_each: 1,
             },
+            nftTradeTabTo: '',
+            nftTradeTabToken: 'HIVE',
+            TOKEN: '',
+            nftTradeTabPrice: 1,
+            nftSellTabToken: 'HIVE',
+            nftSellTabPrice: 1,
+            nftAuctionTabPrice: 1,
+            nftAuctionTabTime: 7,
+            nftAuctionTabToken: 'HIVE',
             NFTselect: {
                 start: 0,
                 amount: 30,
@@ -854,6 +863,21 @@ export default {
         modalIndex(name) {
             this.$emit('detail', name);
         },
+        precision(num, precision) {
+            return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
+        },
+        getSetDetailsColors(s) {
+            let r = "chartreuse,lawngreen";
+            if (s && s.set) {
+              try {
+                r = `${s.set.Color1},${s.set.Color2 ? s.set.Color2 : s.set.Color1}`;
+              } catch (e) {
+                console.log(e);
+                r = "chartreuse,lawngreen";
+              }
+            }
+            return `linear-gradient(${r})`;
+          },
         timeSince(date) {
             var seconds = Math.floor((new Date() - new Date(date + ".000Z")) / 1000);
             var interval = Math.floor(seconds / 86400);
