@@ -83,7 +83,7 @@ export default {
               </button></div>
           </form>
         </div>
-        <p class="text-center">Estimated Tokens: ~{{ estimatedPromptTokens }} Prompt | ~{{ estimatedCompletionTokens }} Completion</p>
+        <p class="text-center d-none">Estimated Tokens: ~{{ estimatedPromptTokens }} Prompt | ~{{ estimatedCompletionTokens }} Completion</p>
       </div>
     </div>
   </div>`,

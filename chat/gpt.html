@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+
+<head>
+  <title>DLUX</title>
+
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
+  <!-- Bootstrap -->
+  <link href="/css/custom.css" rel="stylesheet" />
+  <!-- Icons -->
+  <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script type="module" src="/js/spkvue.js"></script>
+  <script type="module" src="/js/chatvue.js"></script>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/img/dlux-icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DLUX">
+  <meta name="theme-color" content="#111222" />
+
+  <script>
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+            registration.unregister();
+        } 
+    });
+//         if ('serviceWorker' in navigator) {
+//             navigator
+//                 .serviceWorker
+//                 .register(
+//                     // path to the service worker file
+//                     '/sw.js'
+//                 )
+//                 // the registration is async and it returns a promise
+//                 .then(function (reg) {
+//                     console.log('Registration Successful');
+//                 });
+//         }
+</script>
+  <style>
+    .vh100 {
+      height: 100vh;
+    }
+
+    .gpt-model {
+      background-color: #1f2123;
+    }
+
+    .gpt-model:hover {
+      background-color: #6c757d;
+    }
+
+    .side-nav {
+      padding-top: 70px;
+      max-width: 260px;
+      background-color: #1f2123;
+    }
+
+    .side-nav ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+
+    .side-nav li {
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .side-nav li:hover {
+      background-color: #495057;
+    }
+
+    .side-nav i {
+      margin-right: 10px;
+    }
+
+    .content {
+      background-color: #353641;
+      margin: 0px;
+      box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .chat-content-area {
+      padding-top: 60px;
+      padding-bottom: 150px;
+      height: 100%;
+      overflow: auto;
+      overflow-x: hidden;
+    }
+
+    .chatgpt-icon {
+      width: 40px;
+    }
+
+    .chat-icon {
+      margin: 0;
+      padding: 0;
+    }
+
+    .chat-txt {
+      margin: 0;
+      padding: 0;
+    }
+
+    .chat-box {
+      padding: 20px;
+    }
+
+    .gpt-chat-box {
+      background-color: #404350;
+      border-top: rgba(0, 0, 0, 0.3) solid 1px;
+      border-bottom: rgba(0, 0, 0, 0.3) solid 1px;
+    }
+
+    .chat-input-area {
+      background-color: #353641;
+      padding: 1.5em;
+      border-top: rgba(0, 0, 0, 0.1) solid;
+      height: 150px;
+    }
+
+    .chat-inputs-container {
+      background-color: #40414f;
+      padding: 5px;
+      border-radius: 5px;
+      box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.1);
+
+    }
+
+    .chat-inputs-container textarea {
+      background-color: transparent;
+      outline: none;
+      border: none;
+      color: #ffffff;
+      resize: none;
+    }
+
+    .fa-paper-plane {
+      color: grey;
+      cursor: pointer;
+    }
+
+    .sendMsg {
+      padding-top: .1em;
+      padding-bottom: .1em;
+      padding-left: .3em;
+      padding-right: .3em;
+    }
+
+    .sendMsg:hover {
+      background: black;
+    }
+
+    @media only screen and (max-width: 768px) {
+
+
+      .chat-box {
+        padding-left: 20px;
+      }
+
+
+    }
+
+    [data-bs-toggle="collapse"].collapsed .if-not-collapsed {
+      display: none;
+    }
+
+    [data-bs-toggle="collapse"]:not(.collapsed) .if-collapsed {
+      display: none;
+    }
+
+  </style>
+</head>
+
+<body class="text-white">
+  <div id="app">
+    <div>
+      <nav-vue @login="account=$event;getTokenUser($event);getHiveUser($event)" @logout="account='';removeUser()"
+        @ack="removeOp($event)" />
+    </div>
+    <main>
+      <!-- START MAIN CONTAINER -->
+      <div class=" vh100 d-flex" style="padding-top:70px">
+
+        <!-- START SIDENAV -->
+        <div class="side-nav flex-shrink-0 d-none d-lg-block">
+          <div class="d-flex align-items-center m-2">
+            <div class="collapse settings-collapse collapse-horizontal show" id="gptSettingsTitle">
+              <h4 class=" lead m-0 float-start">SETTINGS</h4>
+            </div>
+            <button class="btn btn-secondary ms-auto" type="button" data-bs-toggle="collapse"
+              data-bs-target=".settings-collapse" aria-expanded="true" aria-controls="gptSettings gptSettingsTitle">
+
+              <span class="if-collapsed"><i class="fa-solid fa-gear fa-fw m-0"></i></span>
+              <span class="if-not-collapsed"><i class="fa-solid fa-xmark fa-fw m-0"></i></span>
+            </button>
+
+          </div>
+
+          <div class="collapse settings-collapse collapse-horizontal show" id="gptSettings">
+            <div class="" style="width: 260px;">
+              <!-- START NEW CHAT BUTTON -->
+              <div class="row mx-2">
+
+                <button class="btn btn-outline-secondary text-white text-start w-100">+ New Chat</button>
+
+              </div>
+
+              <!-- START MODELS -->
+              <div class="row mx-2 my-3">
+
+                <label for="gpt-model" class="form-label">Model</label>
+                <select v-model="model" name="gpt-model" id="gpt-model"
+                  class="border-secondary text-light gpt-model btn form-select text-start">
+                  <option v-for="model in models" :value="model">{{model}}</option>
+                </select>
+              </div>
+
+
+              <!-- START TEMPERATURE -->
+              <div class="row m-2">
+                <div class="col-12">
+                  <p class="form-label">Temperature</p>
+                </div>
+                <div class="col-9">
+                  <input type="range" class="custom-range w-100" min="0" max="2" step="0.1" id="gpt-temperature"
+                    name="gpt-temperature" v-model="temp" value="0" />
+                </div>
+                <div class="col-3 text-end">
+                  <output for="gpt-temperature">{{temp}}</output>
+                </div>
+              </div>
+
+              <!-- START MAXIMUM LENGTH -->
+              <div class="row m-2">
+                <div class="col-12">
+                  <p class="form-label">Maximum Length</p>
+                </div>
+                <div class="col-9">
+                  <input type="range" class="custom-range w-100" min="0" max="8000" step="13" id="gpt-max-len"
+                    name="gpt-max-len" v-model="max_len" value="1500" />
+                </div>
+                <div class="col-3 text-end">
+                  <output for="gpt-max-len">{{max_len}}</output>
+                </div>
+              </div>
+
+              <!-- START MAXIMUM TOKENS -->
+              <div class="row m-2">
+                <div class="col-12">
+                  <p class="form-label">Maximum Tokens</p>
+                </div>
+                <div class="col-9">
+                  <input type="range" class="custom-range w-100" min="1" max="4096" step="13" id="gpt-max-token"
+                    name="gpt-max-token" v-model="max_tokens" value="50" />
+                </div>
+                <div class="col-3 text-end">
+                  <output for="gpt-max-token">{{max_tokens}}</output>
+                </div>
+              </div>
+
+              <!-- START TOP P -->
+              <div class="row m-2" v-show="false">
+                <div class="col-12 m-2">
+                  <p class="form-label">TopP</p>
+                </div>
+                <div class="col-9">
+                  <input type="range" class="custom-range w-100" min="0" max="1" step="0.01" id="gpt-topP" name="gpt-topP"
+                    value="0.07" v-model="top_p" />
+                </div>
+                <div class="col-3 text-end">
+                  <output for="gpt-topP">0.07</output>
+                </div>
+              </div>
+
+              <!-- START FREQUENCY PENALTY -->
+              <div class="row m-2">
+                <div class="col-12">
+                  <p class="form-label">Frequency Penalty</p>
+                </div>
+                <div class="col-9">
+                  <input type="range" class="custom-range w-100" min="-2" max="2" step="0.01" id="gpt-frequency"
+                    name="gpt-frequency" value="1" v-model="f_penalty" />
+                </div>
+                <div class="col-3 text-end">
+                  <output for="gpt-frequency">{{f_penalty}}</output>
+                </div>
+              </div>
+
+              <!-- START PRESENCE PENALTY -->
+              <div class="row m-2">
+                <div class="col-12">
+                  <p class="form-label">Presence Penalty</p>
+                </div>
+                <div class="col-9">
+                  <input type="range" class="custom-range w-100" min="-2" max="2" step="0.01" id="gpt-precence"
+                    name="gpt-precence" value="0.5" v-model="p_penalty" />
+                </div>
+                <div class="col-3 text-end">
+                  <output for="gpt-precence">{{p_penalty}}</output>
+                </div>
+              </div>
+
+              <!-- START SHOW TOKENS -->
+              <div class="row m-2">
+                <div class="col-12">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" checked role="switch" id="gpt-show-tokens"
+                      name="gpt-show-tokens" v-model="show_tokens">
+                    <label class="form-check-label" for="gpt-show-tokens">Show Response Tokens</label>
+                  </div>
+                </div>
+              </div>
+
+
+              <hr />
+
+              <div class="row d-none ">
+                <div class="col-12">
+                  <ul class="list-unstyled">
+
+                    <!-- START SETTINGS -->
+                    <li class="nav-item">
+                      <a class="nav-link text-white" href="#">
+                        <i class="fas fa-cog"></i> Settings
+                      </a>
+                    </li>
+
+                    <!-- START GET HELP -->
+                    <li class="nav-item">
+                      <a class="nav-link text-white" href="#">
+                        <i class="fas fa-question-circle"></i> Get Help
+                      </a>
+                    </li>
+
+                    <!-- START LOG OUT -->
+                    <li class="nav-item">
+                      <a class="nav-link text-white" href="#">
+                        <i class="fas fa-sign-out-alt"></i> Log Out
+                      </a>
+                    </li>
+
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- START CONTENT -->
+        <chat-vue :account="account" :temp="temp" :model="model" :n="1" :max_len="max_len" :max_tokens="max_tokens"
+          :top_p="top_p" :f_penalty="f_penalty" :p_penalty="p_penalty" :show_tokens="show_tokens"
+          @data="models=$event" />
+
+      </div>
+    </main>
+  </div>
+  <script src="/js/bootstrap.bundle.min.js"></script>
+  <script>
+    (function () {
+      "use strict";
+      window.addEventListener("load", function () {
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.getElementsByClassName("needs-validation");
+        // Loop over them and prevent submission
+        var validation = Array.prototype.filter.call(forms, function (form) {
+          form.addEventListener(
+            "submit",
+            function (event) {
+              if (form.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+              form.classList.add("was-validated");
+            },
+            false
+          );
+        });
+      });
+    })();
+    var disabletab = document.getElementsByClassName("disabled-input");
+    for (var i = 0; i < disabletab.length; i++) {
+      disabletab[i].setAttribute("tabindex", "-1");
+    }
+    var toastElList = [].slice.call(document.querySelectorAll(".toast"));
+    var toastList = toastElList.map(function (toastEl) {
+      return new bootstrap.Toast(toastEl, option);
+    });
+    var tooltipTriggerList = [].slice.call(
+      document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    );
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
+    integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
+</body>
+
+</html>

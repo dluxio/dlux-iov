@@ -3,6 +3,7 @@ import ToastVue from "/js/toastvue.js";
 export default {
   data() {
     return {
+      chatVisible: false,
       HAS: false,
       HKC: true,
       HSR: false,
@@ -48,7 +49,7 @@ export default {
         op.status = "Pending your approval";
         op.delay = 5000;
         op.title = op.id ? op.id : op.cj ? op.cj.memo : "No Waiter";
-        if(!op.api)op.api = this.lapi;
+        if (!op.api) op.api = this.lapi;
         this.ops.push(op);
         this.$emit("ack", op.txid);
         if (op.type == "cja") {
@@ -69,6 +70,9 @@ export default {
     },
   },
   methods: {
+    toggleChat() {
+      this.chatVisible = !this.chatVisible;
+    },
     useHAS() {
       this.HAS = true;
       this.HKC = false;
@@ -147,7 +151,7 @@ export default {
       ];
       this.sign(op)
         .then((r) => {
-          if(obj.id)this.statusFinder(r, obj);
+          if (obj.id) this.statusFinder(r, obj);
         })
         .catch((e) => {
           console.log(e);
@@ -162,12 +166,12 @@ export default {
       this.signOnly(op)
         .then((r) => {
           console.log('signHeaders Return', r)
-          if(r){
+          if (r) {
             localStorage.setItem(
-            `${this.user}:auth`,
-            `${obj.challenge}:${r}`
-          );
-          obj.callbacks[0](`${obj.challenge}:${r}`, console.log('callback?'));
+              `${this.user}:auth`,
+              `${obj.challenge}:${r}`
+            );
+            obj.callbacks[0](`${obj.challenge}:${r}`, console.log('callback?'));
           }
         })
         .catch((e) => {
@@ -233,7 +237,7 @@ export default {
             .then((r) => resolve(r))
             .catch((e) => reject(e));
         } else if (this.HAS) {
-          console.log( op );
+          console.log(op);
           this.HASsign(op);
           reject("No TXID");
         } else {
@@ -262,8 +266,8 @@ export default {
         }
       });
     },
-    HASsignOnly(op){
-      return new Promise ((res, rej) => {
+    HASsignOnly(op) {
+      return new Promise((res, rej) => {
         const now = new Date().getTime();
         if (now > this.HAS_.expire) {
           alert(`Hive Auth Session expired. Please login again.`);
@@ -287,7 +291,7 @@ export default {
         alert("Review and Sign on your PKSA App");
       })
     },
-    HKCsignOnly(op){
+    HKCsignOnly(op) {
       return new Promise((res, rej) => {
         console.log(op)
         window.hive_keychain.requestSignBuffer(
@@ -305,20 +309,16 @@ export default {
       if (op[1][0][0] == "custom_json") {
         if (window.confirm("Open Hive Signer in a new tab?")) {
           window.open(
-            `https://hivesigner.com/sign/custom-json?authority=active&required_auths=%5B%22${
-              this.user
-            }%22%5D&required_posting_auths=%5B%5D&id=${
-              op[1][0][1].id
+            `https://hivesigner.com/sign/custom-json?authority=active&required_auths=%5B%22${this.user
+            }%22%5D&required_posting_auths=%5B%5D&id=${op[1][0][1].id
             }&json=${encodeURIComponent(op[1][0][1].json)}`,
             "_blank"
           );
         }
       } else if (op[1][0][0] == "transfer") {
         window.open(
-          `https://hivesigner.com/sign/transfer?authority=active&from=${
-            op[1][0][1].from
-          }&to=${op[1][0][1].to}&amount=${
-            op[1][0][1].amount
+          `https://hivesigner.com/sign/transfer?authority=active&from=${op[1][0][1].from
+          }&to=${op[1][0][1].to}&amount=${op[1][0][1].amount
           }&memo=${encodeURIComponent(op[1][0][1].memo)}`,
           "_blank"
         );
@@ -500,7 +500,7 @@ export default {
     HKCsign(op) {
       return new Promise((resolve, reject) => {
         if (window.hive_keychain) {
-          if(typeof op[1] == "string") op[1] = JSON.parse(op[1])
+          if (typeof op[1] == "string") op[1] = JSON.parse(op[1])
           console.log(op)
           try {
             window.hive_keychain.requestBroadcast(
@@ -586,8 +586,8 @@ export default {
           this.statusPinger(txid, api, r + 1);
         });
     },
-    showTab(link){
-      if(!deepLink)return
+    showTab(link) {
+      if (!deepLink) return
       deepLink(link)
     },
     searchRecents() {
@@ -694,6 +694,41 @@ export default {
       this.ops = ops;
       localStorage.setItem("pending", JSON.stringify(this.ops));
     },
+    addStingChat() {
+      var stwidget = new StWidget('https://chat.peakd.com/t/hive-163399/0');
+      stwidget.properties = {
+        "requireLogin": true,
+        "showSidebar": true,
+        "sidebar": 2,
+        "sidebar2enableSharedView": false,
+        "sidebarToggleByChannelNameOnDirectGroup": false,
+        "streambarExpand": true,
+        "streambarMode": 1,
+        "sidebarAddButton": 1,
+        "communityChannelNameFormat": "C/<title>/<name>",
+        "messageIconFlexClass": "block text-justify lg:text-left sm:flex",
+        "messageIconClass": "iconFloat",
+        "--appCommunityIconFontSize": "18px",
+        "--appCommunityIconSize": "42px",
+        "homeTabCommunities": false,
+        "homeTabPreferences": true,
+        "homeTabThemes": true,
+        "onlyPrependCommunities": false,
+        "prependCommunities": [
+          "hive-163399"
+        ],
+        "defaultTheme": "Dark",
+        "--appFontFamily": "'Lato'",
+        "--appFontSize": "16px",
+        "--appMessageFontFamily": "'Lato'",
+        "--appMessageFontSize": "16px"
+      };
+      var element = stwidget.createElement('450px', '556px', true, true);
+      //optionally add style/positioning
+      stwidget.setStyle({ direction: 'rtl', top: '80px', right: '32px', position: 'fixed',});
+      //Add the element to webpage
+      document.getElementById("stingChat").appendChild(element);
+    },
   },
   mounted() {
     const signer = localStorage.getItem("signer");
@@ -710,6 +745,12 @@ export default {
     }
     if ("WebSocket" in window) this.HAS_.wsa = true;
     else this.HAS_.wsa = false;
+    // add sting script
+    const script = document.createElement('script');
+    script.src = '/js/stwidget.js';
+    document.head.appendChild(script);
+    // add sting chat
+    this.addStingChat();
   },
   computed: {
     avatar: {
@@ -736,6 +777,7 @@ export default {
     </a>
     <!--desktop nav collapse-->
       <div class="collapse navbar-collapse " id="navbarSupportedContent">
+        <!-- MAIN NAV -->
         <ul class="navbar-nav me-auto">
           <li><a class="navbar-brand" href="/"><img src="/img/dlux-hive-logo-alpha.svg" alt="dlux-logo" width="40" height="40"></a></li> 
           <li class="nav-item"><a class="nav-link" href="/hub/"><i class="fa-solid fa-mountain-sun me-2"></i>HUB</a></li>
@@ -743,10 +785,10 @@ export default {
           <li class="nav-item"><a class="nav-link" href="/dex/"><i class="fa-solid fa-building-columns me-2"></i>DEX</a></li>
           <li class="nav-item"><a class="nav-link" href="/docs/"><i class="fa-solid fa-book me-2"></i>DOCS</a></li>
         </ul>
-        <!--user dropdown-->
+        <!-- USER NAV -->
 	      <ul class="navbar-nav" v-show="user" id="userMenu">
-          <li class="nav-item d-flex align-items-center"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus me-2"></i></a></li>
-		      <li class="nav-item dropdown d-flex align-items-center"></li>
+          <li class="nav-item d-flex align-items-center"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus fa-fw me-1"></i></a></li>
+          <li class="nav-item d-flex align-items-center"><a class="nav-link" role="button" @click="toggleChat"><i class="fa-solid fa-message fa-fw me-2"></i></a></li>
           <a href="#" v-show="user" class="p-0 nav-link d-flex align-items-center text-white-50" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
             <img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light cover"></a>
 		        <a class="nav-link dropdown-toggle dropdown-bs-toggle text-white-50" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
@@ -755,13 +797,11 @@ export default {
 			        <li class=""><a class="dropdown-item" :href="'/me#blog/'" @click="showTab('blog')"><i class="fas fa-user fa-fw me-2"></i>Profile</a></li>
 			        <li class=""><a class="dropdown-item" :href="'/me#wallet/'" @click="showTab('wallet')"><i class="fas fa-wallet fa-fw me-2"></i>Wallet</a></li>
 			        <li class=""><a class="dropdown-item" :href="'/me#inventory/'" @click="showTab('inventory')"><i class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
-			        <li class="d-none"><a class="dropdown-item" :href="'/me#node/'" @click="showTab('node')"><i class="fas fa-robot fa-fw me-2"></i>Node</a></li>
-			        <li class="d-none"><a class="dropdown-item" :href="'/me#settings/'" @click="showTab('settings')"><i class="fas fa-cog fa-fw me-2"></i>Settings</a></li>
               <li class=""><hr class="dropdown-divider"></li>
 			        <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
               <li class=""><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers"><i class="fas fa-user-friends me-2"></i>Users</a></li>
-			        <li><a class="dropdown-item" href="#" @click="logout()"><i class="fas fa-power-off fa-fw me-2"></i>Logout</a></li>
+              <li><a class="dropdown-item" role="button" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers"><i class="fas fa-user-friends me-2"></i>Users</a></li>
+			        <li><a class="dropdown-item" role="button" @click="logout()"><i class="fas fa-power-off fa-fw me-2"></i>Logout</a></li>
 		        </ul>
         </ul>
       </div>
@@ -786,8 +826,8 @@ export default {
               <li class=""><hr class="dropdown-divider"></li>
 			        <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
               <li class=""><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers"><i class="fas fa-user-friends me-2"></i>Users</a></li>
-			        <li><a class="dropdown-item" href="#" @click="logout()"><i class="fas fa-power-off fa-fw me-2"></i>Logout</a></li>
+              <li><a class="dropdown-item" role="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers"><i class="fas fa-user-friends me-2"></i>Users</a></li>
+			        <li><a class="dropdown-item" role="button" @click="logout()"><i class="fas fa-power-off fa-fw me-2"></i>Logout</a></li>
 		        </ul>
           </li>
         </ul>
@@ -800,8 +840,7 @@ export default {
   </div>
 </div>
 
-
-
+<div v-show="chatVisible" id="stingChat"></div>
 
 
 <div class="offcanvas offcanvas-start bg-blur-darkg bg-img-none text-white-50" style="max-width:200px" tabindex="-1" id="offcanvasNav" aria-labelledby="offcanvasLeftLabel">
