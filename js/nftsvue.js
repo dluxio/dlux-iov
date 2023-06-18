@@ -1663,9 +1663,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           });
       }
     },
-    getNFTset(set) {
+    getNFTset(set, api = this.lapi) {
       if (set != "index.html") {
-        fetch(this.lapi + "/api/set/" + set)
+        fetch(api + "/api/set/" + set)
           .then((response) => response.json())
           .then((data) => {
             this.callScript({
