@@ -373,7 +373,7 @@ export default {
                                 </div>
                             </div>
                             <!-- NFT Melt -->
-                            <div class="accordion-item" v-if="itemmodal.item.owner == account">
+                            <div class="accordion-item">
                                 <h2 class="accordion-header">
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMelt" aria-expanded="false" aria-controls="collapseMelt">
                                         <i class="fa-solid fa-fire me-3"></i>MELT<span
