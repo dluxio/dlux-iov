@@ -1625,7 +1625,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       }
     },
     getNFTsets() {
-      for(var chain in this.chains){
+      for(var chain of this.chains){
         if(this.chains[chain].enabled){
           getSets(chain);
         }
