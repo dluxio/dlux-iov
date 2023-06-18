@@ -76,16 +76,6 @@ var app = new Vue({
       },
       presales: [],
       displayNFTs: [],
-      chart: {
-        id: "honeycomb_tv",
-        width: 600,
-        height: 400,
-        toolbar: true,
-        overlays: false,
-        bg: `#111215`,
-      },
-      barcount: 500,
-      barwidth: 3600000 * 6,
       nowtime: new Date().getTime(),
       agoTime: new Date().getTime() - 86400000,
       account: user,
@@ -99,6 +89,7 @@ var app = new Vue({
       iOwnCheckbox: false,
       highBidder: [],
       highBidderCheckbox: false,
+      allSearchNFTs: [],
       uids: [],
       hasDrop: false,
       dropnai: "",
@@ -1632,13 +1623,46 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             for (let i = 0; i < data.result.length; i++) {
               this.callScript({ script: data.result[i].script, uid: "0" }).then(
                 (d) => {
+                  const init = {
+                    owners: 0,
+                    deleted: 0,
+                    af: {
+                      HIVE: 0,
+                      HBD: 0,
+                      TOKEN: 0,
+                    },
+                    sf: {
+                      HIVE: 0,
+                      HBD: 0,
+                      TOKEN: 0,
+                    },
+                    forSale: 0,
+                    forAuction: 0,
+                    forSaleMint: 0,
+                    forAuctionMint: 0,
+                    attributeKeys: [],
+                    attributes: {},
+                    attributesC: {},
+                    amf: {
+                      HIVE: 0,
+                      HBD: 0,
+                      TOKEN: 0,
+                    },
+                    smf: {
+                      HIVE: 0,
+                      HBD: 0,
+                      TOKEN: 0,
+                    },
+                  }
+                  // spread init over data.result[i]
+                  data.result[i] = { ...init, ...data.result[i] }
                   data.result[i].computed = d;
                   data.result[i].token = data.result[i].fee.token;
                   this.showTokens[data.result[i].fee.token] = true;
                   this.nftsets.push(data.result[i]);
                   this.nftsetsf.push(data.result[i]);
                   this.chains[chain].sets[data.result[i].set] = data.result[i]
-                  this.getNFTset(data.result[i].set, this.chains[chain].api)
+                  this.getNFTset(data.result[i].set, chain)
                 }
               );
             }
@@ -1650,11 +1674,13 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         }
       }
     },
-    getNFTsales(set) {
+    getRNFTsales(set, chain = 'dlux') {
       if (set != "index.html") {
-        fetch(this.lapi + "/api/mintsupply/" + set)
+        fetch(this.chains[chain].api + "/api/mintsupply/" + set)
           .then((response) => response.json())
           .then((data) => {
+            this.chains[chain].sets[set].mintSales = data.result[0].sales
+            this.chains[chain].sets[set].mintAuctions = data.result[0].auctions
             this.mintSales = [...this.mintSales, ...data.result[0].sales]
             this.mintAuctions = [...this.mintAuctions, ...data.result[0].auctions]
           })
@@ -1663,7 +1689,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           });
       }
     },
-    getNFTset(set, api = this.lapi) {
+    getNFTset(set, chain = 'dlux') {
+      const api = this.chains[chain].api
       if (set != "index.html") {
         fetch(api + "/api/set/" + set)
           .then((response) => response.json())
@@ -1676,9 +1703,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             }).then((d) => {
               data.set.computed = d;
               data.setname = data.name;
-              this.chains[data.fee.token].sets[data.name] = data.set;
-              this.allNFTs = data.result;
-              this.allSearchNFTs = data.result;
+              this.chains[chain].sets[data.name] = data.set;
+              this.allNFTs = [...this.allNFTs, ...data.result];
+              this.allSearchNFTs = [...this.allSearchNFTs, ...data.result]
               this.selectNFTs();
               var owners = [];
               for (var i = 0; i < this.allNFTs.length; i++) {
@@ -1693,38 +1720,38 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 ) {
                   owners.push(this.allNFTs[i].owner);
                 } else if (this.allNFTs[i].owner == "D") {
-                  this.focusSetCalc.deleted++;
+                  this.chains[chain].sets[data.name].deleted++;
                 }
               }
-              this.focusSetCalc.owners = owners.length;
+              this.chains[chain].sets[data.name].owners = owners.length;
             });
           })
           .catch((e) => {
-            location.hash = "dlux";
+            location.hash = 'dlux';
             location.reload();
           });
         fetch(api + "/api/auctions/" + set)
           .then((response) => response.json())
           .then((data) => {
             console.log({ data });
-            this.auctions = data.result.filter((a) => a.set == set);
+            this.chains[chain].sets[data.name].auctions = data.result.filter((a) => a.set == set);
             if (!this.price[set]) this.price[set] = {};
-            for (var i = 0; i < this.auctions.length; i++) {
+            for (var i = 0; i < this.chains[chain].sets[data.name].auctions.length; i++) {
               const token =
-                this.auctions[i].price.token == "HIVE"
+              this.chains[chain].sets[data.name].auctions[i].price.token == "HIVE"
                   ? "HIVE"
-                  : this.auctions[i].price.token == "HBD"
+                  : this.chains[chain].sets[data.name].auctions[i].price.token == "HBD"
                   ? "HBD"
-                  : "TOKEN";
+                  : chain.toUpperCase()
               if (
-                this.auctions[i].price.amount < this.focusSetCalc.af[token] ||
-                !this.focusSetCalc.af[token]
+                this.chains[chain].sets[data.name].auctions[i].price.amount < this.chains[chain].sets[data.name].af[token] ||
+                !this.chains[chain].sets[data.name].af[token]
               ) {
-                this.focusSetCalc.af[token] = this.auctions[i].price.amount;
+                this.chains[chain].sets[data.name].af[token] = this.chains[chain].sets[data.name].auctions[i].price.amount;
               }
-              this.focusSetCalc.forAuction++;
-              this.price[set][this.auctions[i].uid] = this.auctions[i].price;
-              if (this.auctions[i].bidder == this.account)
+              this.chains[chain].sets[data.name].forAuction++;
+              this.price[set][this.auctions[i].uid] = this.chains[chain].sets[data.name].auctions[i].price;
+              if (this.chains[chain].sets[data.name].auctions[i].bidder == this.account)
                 this.highBidder.push(this.auctions[i].uid);
             }
           });
@@ -1741,12 +1768,12 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                   ? "HBD"
                   : "TOKEN";
               if (
-                this.presales[i].price.amount < this.focusSetCalc.sf[token] ||
-                !this.focusSetCalc.sf[token]
+                this.presales[i].price.amount < this.chains[chain].sets[set].sf[token] ||
+                !this.chains[chain].sets[set].sf[token]
               ) {
-                this.focusSetCalc.sf[token] = this.presales[i].price.amount;
+                this.chains[chain].sets[set].sf[token] = this.presales[i].price.amount;
               }
-              this.focusSetCalc.forSale++;
+              this.chains[chain].sets[set].forSale++;
               this.price[set][this.presales[i].uid] = this.presales[i].price;
               
               this.callScript(this.presales[i], i).then(d => {
@@ -1780,12 +1807,12 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                   : "TOKEN";
               this.mintSales[i].buyQty = 1;
               if (
-                this.mintSales[i].price < this.focusSetCalc.smf[token] ||
-                !this.focusSetCalc.smf[token]
+                this.mintSales[i].price < this.chains[chain].sets[set].smf[token] ||
+                !this.chains[chain].sets[set].smf[token]
               ) {
-                this.focusSetCalc.smf[token] = this.mintSales[i].price;
+                this.chains[chain].sets[set].smf[token] = this.mintSales[i].price;
               }
-              this.focusSetCalc.forSaleMint += this.mintSales[i].qty;
+              this.chains[chain].sets[set].forSaleMint += this.mintSales[i].qty;
             }
             for (var i = 0; i < this.mintAuctions.length; i++) {
               const token =
@@ -1797,12 +1824,12 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               this.mintAuctions[i].bidAmount =
                 this.mintAuctions[i].price + 1000;
               if (
-                this.mintAuctions[i].price < this.focusSetCalc.amf[token] ||
-                !this.focusSetCalc.amf[token]
+                this.mintAuctions[i].price < this.chains[chain].sets[set].amf[token] ||
+                !this.chains[chain].sets[set].amf[token]
               ) {
-                this.focusSetCalc.amf[token] = this.mintAuctions[i].price;
+                this.chains[chain].sets[set].amf[token] = this.mintAuctions[i].price;
               }
-              this.focusSetCalc.forAuctionMint++;
+              this.chains[chain].sets[set].forAuctionMint++;
             }
           });
       }
