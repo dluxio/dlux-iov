@@ -1259,6 +1259,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         if (this[source][i].uid == index.split(':')[1] && this[source][i].setname == index.split(':')[0]) break;
       }
       this[modal].index = i;
+      this[modal].source = source;
       this[modal].items = this[source]
       this[modal].item = this[modal].items[this[modal].index];
       if (this[modal].item.owner == "ls") this.saleData(modal);
