@@ -1630,7 +1630,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           getSets(chain);
         }
       }
-      function getSets(chain){
+      const getSets = (chain) => {
         fetch(this.chains[chain].api + "/api/sets")
           .then((response) => response.json())
           .then((data) => {
