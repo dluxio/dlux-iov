@@ -62,6 +62,18 @@ var app = new Vue({
     return {
       ohlcv: [],
       toSign: {},
+      chains: {
+        dlux: {
+          enabled: true,
+          api: "https://token.dlux.io",
+          sets: {},
+        },
+        duat: {
+          enabled: true,
+          api: "https://duat.hivehoneycomb.com",
+          sets: {},
+        }
+      },
       presales: [],
       displayNFTs: [],
       chart: {
@@ -1613,9 +1625,13 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       }
     },
     getNFTsets() {
-      const apis = ["https://token.dlux.io", "https://duat.hivehoneycomb.com"];
-      for (var j = 0; j < apis.length; j++) {
-        fetch(apis[j] + "/api/sets")
+      for(var chain in this.chains){
+        if(this.chains[chain].enabled){
+          getSets(chain);
+        }
+      }
+      function getSets(chain){
+        fetch(this.chains[chain].api + "/api/sets")
           .then((response) => response.json())
           .then((data) => {
             for (let i = 0; i < data.result.length; i++) {
@@ -1626,6 +1642,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                   this.showTokens[data.result[i].fee.token] = true;
                   this.nftsets.push(data.result[i]);
                   this.nftsetsf.push(data.result[i]);
+                  this.chains[chain].sets.push(data.result[i]);
+                  this.getNFTset(data.result[i].set, this.chains[chain].api)
                 }
               );
             }
@@ -1645,9 +1663,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           });
       }
     },
-    getNFTset(set) {
+    getNFTset(set, api = this.lapi) {
       if (set != "index.html") {
-        fetch(this.lapi + "/api/set/" + set)
+        fetch(api + "/api/set/" + set)
           .then((response) => response.json())
           .then((data) => {
             this.callScript({
@@ -2175,9 +2193,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this.getNFTsets();
     }
     else { //assume index
-      //get sales and auctions
-      this.getNFTset('bz')
-      this.getNFTset('dlux')
+      this.getNFTsets()
     }
     this.getUserNFTs();
     //this.getQuotes();
