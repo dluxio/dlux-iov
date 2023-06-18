@@ -89,8 +89,8 @@ export default {
                                 <div id="collapseAttributes" class="accordion-collapse collapse" data-bs-parent="#nftAccordion">
                                     <div class="accordion-body">
                                         <div class="d-flex flex-wrap">
-                                            <div v-for="thing in itemmodal.item.attributes" class="border border-white rounded d-flex mx-2 my-2">
-                                                <div v-for="(value, key, index) in thing" class="p-2">
+                                            <div v-for="thing in itemmodal.item.attributes" class="border border-white rounded d-flex m-1">
+                                                <div v-for="(value, key, index) in thing" class="d-flex flex-column p-2">
                                                     <div>{{key}}:</div>
                                                     <div>{{value}}</div>
                                                 </div>
@@ -108,90 +108,72 @@ export default {
                                 </h2>
                                 <div id="collapseTransfer" class="accordion-collapse collapse" data-bs-parent="#nftAccordion">
                                     <div class="accordion-body">
-                                    <div class="border-warning border rounded p-3 my-3"
-                                    v-if="itemmodal.item.uid == pfp.uid  && itemmodal.item.setname == pfp.set">
-                                    <p class="text-warning m-0">Transferring this
-                                        NFT will remove it from your PFP</p>
-                                </div>
-                                <div class="border border-info bg-darker mx-auto px-5 py-3 rounded col-12">
-                                    <div class="container-fluid">
-                                        <ul class="nav nav-pills bg-darker justify-content-center" role="tablist">
-                                            <li class="nav-item"> <a class="nav-link active" id="giveNFTlink" role="tab" data-bs-toggle="tab"
+                                        <div class="text-center" v-if="itemmodal.item.owner != account">
+                                            <p>You don't own this NFT</p>
+                                        </div>
+                                        <div class="border-warning border rounded p-3 my-3" v-if="itemmodal.item.uid == pfp.uid  && itemmodal.item.setname == pfp.set">
+                                            <p class="text-warning m-0">Transferring this NFT will remove it from your PFP</p>
+                                        </div>
+                                        <div class="border border-info bg-darker p-3 rounded col-12">
+                                            <div class="container-fluid">
+                                                <ul class="nav nav-pills bg-darker justify-content-center" role="tablist">
+                                                    <li class="nav-item"> <a class="nav-link active" id="giveNFTlink" role="tab" data-bs-toggle="tab"
                                                     aria-controls="giveNFT" aria-expanded="true" href="#giveNFTtab">Give</a></li>
-                                            <li class="nav-item"> <a class="nav-link" id="tradeNFTlink" role="tab" data-bs-toggle="tab"
-                                                    aria-controls="tradeNFT" aria-expanded="true" href="#tradeNFTtab">Trade</a>
-                                            </li>
-                                            <li class="nav-item"> <a class="nav-link" id="sellNFTlink" role="tab" data-bs-toggle="tab"
+                                                    <li class="nav-item"> <a class="nav-link" id="tradeNFTlink" role="tab" data-bs-toggle="tab"
+                                                    aria-controls="tradeNFT" aria-expanded="true" href="#tradeNFTtab">Trade</a></li>
+                                                    <li class="nav-item"> <a class="nav-link" id="sellNFTlink" role="tab" data-bs-toggle="tab"
                                                     aria-controls="sellNFT" aria-expanded="true" href="#sellNFTtab">Sell</a></li>
-                                            <li class="nav-item"> <a class="nav-link" id="auctionNFTlink" role="tab" data-bs-toggle="tab"
-                                                    aria-controls="auctionNFT" aria-expanded="true" href="#auctionNFTtab">Auction</a>
-                                            </li>
-                                        </ul>
-                                        <div class="tab-content">
-                                            <div role="tabpanel" class="tab-pane fade show active" id="giveNFTtab" aria-labelledby="giveNFT">
-                                                <form class="needs-validation mt-4" validate>
-                                                    <div class="form-row my-2">
-                                                        <div class="col-12">
-                                                            <label for="giveNFTusername">Username</label>
-                                                            <div class="input-group">
-                                                                <div class="input-group-prepend">
-                                                                    <span class="input-group-text bg-dark border-dark text-white-50"
-                                                                        id="giveNFTuserprep">@</span>
-                                                                </div>
-                                                                <input v-model="nftTradeTabTo" @blur="checkAccount(nftTradeTabTo, 'nftTradeAllowed')"
-                                                                    type="text" class="form-control bg-dark border-dark text-info r-radius-hotfix"
-                                                                    id="giveNFTusername" aria-describedby="giveNFTuserprep" required>
-                                                                <div class="invalid-feedback">
-                                                                    Please enter the
-                                                                    username you'd
-                                                                    like to give
-                                                                    to.
+                                                    <li class="nav-item"> <a class="nav-link" id="auctionNFTlink" role="tab" data-bs-toggle="tab"
+                                                    aria-controls="auctionNFT" aria-expanded="true" href="#auctionNFTtab">Auction</a></li>
+                                                </ul>
+                                                <div class="tab-content">
+                                                    <div role="tabpanel" class="tab-pane fade show active" id="giveNFTtab" aria-labelledby="giveNFT">
+                                                        <form class="needs-validation mt-4" novalidate>
+                                                            <div class="form-row my-2">
+                                                                <div class="col-12">
+                                                                    <label for="giveNFTusername">Username</label>
+                                                                    <div class="input-group has-validation">
+                                                                        <span class="input-group-text text-white-50" id="giveNFTuserprep">@</span>
+                                                                        <input v-model="nftTradeTabTo" @blur="checkAccount(nftTradeTabTo, 'nftTradeAllowed')" type="text" class="form-control text-info"
+                                                                        id="giveNFTusername" aria-describedby="giveNFTuserprep" required>
+                                                                        <div class="invalid-feedback">
+                                                                            Please enter the username you'd like to give to.
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
+                                                            <div class="text-center">
+                                                                <button @click="giveNFT(itemmodal.item)" id="giveNFTbutton" class="btn btn-info my-2" type="submit">Give</button>
+                                                            </div>
+                                                        </form>
                                                     </div>
-                                                    <div class="text-center">
-                                                        <button @click="giveNFT(itemmodal.item)" id="giveNFTbutton" class="btn btn-info my-2"
-                                                            type="submit">Give</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                            <div role="tabpanel" class="tab-pane fade show" id="tradeNFTtab" aria-labelledby="tradeNFT">
-                                                <form class="needs-validation mt-4" validate>
-                                                    <div class="form-row my-2">
-                                                        <div class="col-12">
-                                                            <label for="tradeNFTusername">Username</label>
-                                                            <div class="input-group">
-                                                                <div class="input-group-prepend">
-                                                                    <span class="input-group-text bg-dark border-dark text-white-50"
-                                                                        id="tradeNFTuserprep">@</span>
-                                                                </div>
-                                                                <input type="text" v-model="nftTradeTabTo"
-                                                                    @blur="checkAccount(nftTradeTabTo, 'nftTradeAllowed')"
-                                                                    class="form-control bg-dark border-dark text-info r-radius-hotfix"
-                                                                    id="tradeNFTusername" aria-describedby="tradeNFTuserprep" required>
-                                                                <div class="invalid-feedback">
-                                                                    Please enter the
-                                                                    username you'd
-                                                                    like to trade
-                                                                    with.
+                                                    <div role="tabpanel" class="tab-pane fade show" id="tradeNFTtab" aria-labelledby="tradeNFT">
+                                                        <form class="needs-validation mt-4" novalidate>
+                                                            <div class="form-row my-2">
+                                                                <div class="col-12">
+                                                                    <label for="tradeNFTusername">Username</label>
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text text-white-50" id="tradeNFTuserprep">@</span>
+                                                                    </div>
+                                                                    <input type="text" v-model="nftTradeTabTo" @blur="checkAccount(nftTradeTabTo, 'nftTradeAllowed')" class="form-control text-info" id="tradeNFTusername" aria-describedby="tradeNFTuserprep" required>
+                                                                    <div class="invalid-feedback">
+                                                                        Please enter the username you'd like to trade with.
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group form-row my-2">
-                                                        <label for="tradeNFTamount">Amount</label>
-                                                        <small v-if="nftTradeTabToken == TOKEN" class="ms-auto mb-2 align-self-center text-white-50">0%
-                                                            FEE</small>
-                                                        <small v-else class="ms-auto mb-2 align-self-center text-white-50">1%
-                                                            FEE</small>
-                                                        <div class="input-group">
-                                                            <input v-model="nftTradeTabPrice" type="number"
-                                                                class="form-control bg-dark border-dark text-info" id="tradeNFTamount"
-                                                                aria-describedby="tradeNFTamountappend" placeholder="0.000" step="0.001" min="0.001"
-                                                                required>
-                                                            <div class="input-group-append">
-                                                                <span class="input-group-text bg-dark border-dark r-radius-hotfix m-0"
+                                                            <div class="form-group form-row my-2">
+                                                                <label for="tradeNFTamount">Amount</label>
+                                                                <small v-if="nftTradeTabToken == TOKEN" class="ms-auto mb-2 align-self-center text-white-50">0%
+                                                                FEE</small>
+                                                                <small v-else class="ms-auto mb-2 align-self-center text-white-50">1%
+                                                                FEE</small>
+                                                                <div class="input-group">
+                                                                    <input v-model="nftTradeTabPrice" type="number"
+                                                                    class="form-control text-info" id="tradeNFTamount"
+                                                                    aria-describedby="tradeNFTamountappend" placeholder="0.000" step="0.001" min="0.001"
+                                                                    required>
+
+                                                                <span class="input-group-text m-0"
                                                                     id="tradeNFTamountappend">
                                                                     <select v-model="nftTradeTabToken"
                                                                         class="form-select border-0 text-white-50 bg-dark w-100 h-100"
@@ -213,7 +195,7 @@ export default {
                                                                 amount of
                                                                 VALUE you'd like to
                                                                 receive. </div>
-                                                        </div>
+                                                        
                                                     </div>
                                                     <div class="text-center">
                                                         <button @click="tradeNFT(itemmodal.item)" id="tradeNFTbutton" class="btn btn-info my-2"
@@ -390,21 +372,18 @@ export default {
                                 </h2>
                                 <div id="collapseMelt" class="accordion-collapse collapse" data-bs-parent="#nftAccordion">
                                     <div class="accordion-body">
-                                    <div class="text-center"
-                                    v-if="itemmodal.item.owner != account">
-                                    <p>You don't own this NFT</p>
-                                </div>
-                                <div class="p-0" v-if="itemmodal.item.owner == account">
-                                    <div class="d-flex align-self-end">
-                                        <div
-                                            class="border border-warning rounded bg-darker col-12 p-4">
-                                            <div
-                                                class="d-flex align-items-center justify-content-between">
-                                                <div class="d-flex me-1">
-                                                    <h4>Melt Value:</h4>
-                                                </div>
-                                                <div class="d-flex no-wrap ms-1"> <u>
-                                                        <h1>
+                                        <div class="text-center" v-if="itemmodal.item.owner != account">
+                                            <p>You don't own this NFT</p>
+                                        </div>
+                                        <div class="p-0" v-if="itemmodal.item.owner == account">
+                                            <div class="d-flex align-self-end">
+                                                <div class="border border-warning rounded bg-darker col-12 p-4">
+                                                    <div class="d-flex align-items-center justify-content-between">
+                                                        <div class="d-flex me-1">
+                                                            <h4>Melt Value:</h4>
+                                                        </div>
+                                                        <div class="d-flex no-wrap ms-1">
+                                                            <h1>
                                                             {{sets[itemmodal.item.token]
                                                             ?
                                                             precision(sets[itemmodal.item.token][itemmodal.item.setname].bond.amount,
@@ -414,40 +393,31 @@ export default {
                                                             sets[itemmodal.item.token][itemmodal.item.setname].bond.token
                                                             :
                                                             ''}}</h1>
-                                                    </u></div>
-                                            </div>
-                                            <div class="pt-2">
-                                                <p class="text-uppercase text-muted">
-                                                    This NFT can be traded, sold, or
-                                                    auctioned until
-                                                    melted. Once melted it will
-                                                    disappear forever.</p>
-                                                <div class="d-flex justify-content-around">
-                                                    <div class="d-flex align-items-center my-4">
-                                                        <div class="text-center p-4">
-                                                            <h1 class="text-warning"
-                                                                style="font-size: 4em">
-                                                                <i
-                                                                    class="fas fa-exclamation-triangle"></i>
-                                                            </h1>
                                                         </div>
-                                                        <ul>
-                                                            <li>This action cannot be
-                                                                undone</li>
-                                                            <li>Your NFT will be deleted
-                                                            </li>
-                                                            <li>You will receive the
-                                                                melt value</li>
-                                                        </ul>
                                                     </div>
-                                                </div>
-                                                <div class="text-center pb-4">
-                                                    <button type="button" class="btn btn-warning"
-                                                        data-bs-toggle="collapse"
-                                                        href="#melt-confirmation">Melt
-                                                    </button>
-                                                </div>
-                                                <div class="collapse bg-danger rounded"
+                                                    <div class="pt-2">
+                                                    <p class="text-uppercase text-muted">This NFT can be traded, sold, or auctioned until melted. Once melted it will disappear forever.</p>
+                                                    <div class="d-flex justify-content-around">
+                                                        <div class="d-flex align-items-center my-4">
+                                                            <div class="text-center p-4">
+                                                                <h1 class="text-warning" style="font-size: 4em">
+                                                                    <i class="fas fa-exclamation-triangle"></i>
+                                                                </h1>
+                                                            </div>
+                                                            <ul>
+                                                                <li>This action cannot be undone</li>
+                                                                <li>Your NFT will be deleted
+                                                                </li>
+                                                                <li>You will receive the melt value</li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-center pb-4">
+                                                        <button type="button" class="btn btn-warning" data-bs-toggle="collapse" href="#melt-confirmation">
+                                                            Melt
+                                                        </button>
+                                                    </div>
+                                                    <div class="collapse bg-danger rounded"
                                                     id="melt-confirmation">
                                                     <div class="text-center pt-4">
                                                         <h2><b>/////// IRREVERSIBLE
