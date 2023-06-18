@@ -1637,7 +1637,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                   this.showTokens[data.result[i].fee.token] = true;
                   this.nftsets.push(data.result[i]);
                   this.nftsetsf.push(data.result[i]);
-                  this.chains[chain].sets.push(data.result[i]);
+                  this.chains[chain].sets[data.result[i].set] = data.result[i]
                   this.getNFTset(data.result[i].set, this.chains[chain].api)
                 }
               );
