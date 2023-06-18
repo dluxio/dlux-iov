@@ -1625,11 +1625,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       }
     },
     getNFTsets() {
-      for(var chain in this.chains){
-        if(this.chains[chain].enabled){
-          getSets(chain);
-        }
-      }
       const getSets = (chain) => {
         fetch(this.chains[chain].api + "/api/sets")
           .then((response) => response.json())
@@ -1648,6 +1643,11 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               );
             }
           });
+      }
+      for(var chain in this.chains){
+        if(this.chains[chain].enabled){
+          getSets(chain);
+        }
       }
     },
     getNFTsales(set) {
