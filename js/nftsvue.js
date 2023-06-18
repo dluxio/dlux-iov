@@ -384,6 +384,7 @@ var app = new Vue({
       saleNFTs: [],
       auctionNFTs: [],
       itemModal: {
+        source: "sales",
         hidden: true,
         item: {
           setname: "",
@@ -1248,12 +1249,17 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       else if (this[modal].item.owner == "ah" || this[modal].item.owner == "hh")
         this.auctionData(modal);
     },
-    modalIndex(modal, index) {
+    modalIndex(modal, index, source = "displayNFTs") {
+      if(typeof index != "string"){
+        source = index.source
+        index = index.index
+      }
       var i = 0;
       for (i; i < this.selectedNFTs.length; i++) {
-        if (this.selectedNFTs[i].uid == index) break;
+        if (this[source][i].uid == index.split(':')[1] && this[source][i].setname == index.split(':')[0]) break;
       }
       this[modal].index = i;
+      this[modal].items = this[source]
       this[modal].item = this[modal].items[this[modal].index];
       if (this[modal].item.owner == "ls") this.saleData(modal);
       else if (this[modal].item.owner == "ah" || this[modal].item.owner == "hh")

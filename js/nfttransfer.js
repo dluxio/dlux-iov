@@ -339,6 +339,15 @@ export default {
                 };
             },
         },
+        transferMint: {
+            default: function () {
+            return {
+                item: '',
+                mint: '',
+                tab: '',
+                };
+            }
+        },
         icon: {
             default: ''
         },
@@ -449,4 +458,4 @@ export default {
     },
     mounted() {
     },
-};
+}

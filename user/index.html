@@ -1174,7 +1174,7 @@
                                 <div v-for="rnft in accountRNFTs" class="col my-2">
                                     <nftcard :item="rnft" inventory="true" mint="true"
                                         :wrapped="getAttr(rnft.script, 'wrapped')" :icon="getIcon(rnft.script)"
-                                        :colors="getSetDetailsColors(rnft.script)"
+                                        :colors="getSetDetailsColors(rnft.script)" @modal="modalIndex('transferModal', $event);transferModal.hidden = false" />
                                         @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                                 </div>
                             </div>

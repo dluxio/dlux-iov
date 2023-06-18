@@ -41,7 +41,7 @@
                         :index="index"
                         auction="true"
                         :account="account"
-                        @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
+                        @detail="modalIndex('itemModal', $event, 'auctions');itemModal.hidden = false" />
                     </div>
                 </div>
                 <!-- NFT SALES -->
@@ -59,10 +59,14 @@
                         :index="index"
                         sale="true"
                         :account="account"
-                        @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
+                        @detail="modalIndex('itemModal', $event, 'sales');itemModal.hidden = false" />
                     </div>
                 </div>
             </div>
+    </div>
+    <div>
+        <nftdetail :sets="sets" :account="account" :itemmodal="itemModal" :pfp="pfp"
+        @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
     </div>
     </main>
     <div>
