@@ -1675,7 +1675,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               owner: null,
             }).then((d) => {
               data.set.computed = d;
-              this.focusSet = data.set;
+              data.setname = data.name;
+              this.chains[data.fee.token].sets[data.name] = data.set;
               this.allNFTs = data.result;
               this.allSearchNFTs = data.result;
               this.selectNFTs();
@@ -1702,7 +1703,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             location.hash = "dlux";
             location.reload();
           });
-        fetch(this.lapi + "/api/auctions/" + set)
+        fetch(api + "/api/auctions/" + set)
           .then((response) => response.json())
           .then((data) => {
             console.log({ data });
@@ -1727,7 +1728,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 this.highBidder.push(this.auctions[i].uid);
             }
           });
-        fetch(this.lapi + "/api/sales/") // + set) until API fix
+        fetch(api + "/api/sales/") // + set) until API fix
           .then((response) => response.json())
           .then((data) => {
             this.presales = [... this.presales, ...data.result.filter((a) => a.set == set)]
@@ -1759,7 +1760,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               })
             }
           });
-        fetch(this.lapi + "/api/mintsupply")
+        fetch(api + "/api/mintsupply")
           .then((response) => response.json())
           .then((data) => {
             this.mintData = data.result.filter((a) => a.set == set) || [];
