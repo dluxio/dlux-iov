@@ -1,8 +1,8 @@
 export default {
     components: {
     },
-    template: `<div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel"
-    :aria-hidden="true">
+    template: `
+<div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" :aria-hidden="true">
     <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="card bg-dark">
@@ -46,22 +46,15 @@ export default {
                                 </div>
                             </div>
                             <!--pfp-->
-                        <div class="text-center my-3" v-if="itemmodal.item.owner == account">
-                            <button @click="setPFP(itemmodal.item)"
-                                class="btn btn-lg btn-outline-primary"
-                                v-if="itemmodal.item.uid != pfp.uid"><i
-                                    class="far fa-user-circle me-2"></i>Set as
-                                PFP
-                            </button>
-                            <button class="btn btn-lg btn-secondary"
-                                v-if="itemmodal.item.uid == pfp.uid && itemmodal.item.setname == pfp.set"><i
-                                    class="far fa-user-circle me-2"></i>Currently set as
-                                your
-                                PFP
-                            </button>
+                            <div class="text-center my-3" v-if="itemmodal.item.owner == account">
+                                <button @click="setPFP(itemmodal.item)" class="btn btn-lg btn-outline-primary" v-if="itemmodal.item.uid != pfp.uid">
+                                    <i class="far fa-user-circle me-2"></i>Set as PFP
+                                </button>
+                                <button class="btn btn-lg btn-secondary" v-if="itemmodal.item.uid == pfp.uid && itemmodal.item.setname == pfp.set">
+                                    <i class="far fa-user-circle me-2"></i>Currently set as your PFP
+                                </button>
+                            </div>
                         </div>
-                        </div>
-
                     </div>
                     <!-- NFT detail col 2 -->
                     <div class="col-lg-6 px-0 px-sm-2">
@@ -100,7 +93,7 @@ export default {
                                 </div>
                             </div>
                             <!-- NFT Transfer -->
-                            <div class="accordion-item">
+                            <div class="accordion-item" v-if="itemmodal.item.owner == account">
                                 <h2 class="accordion-header">
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTransfer" aria-expanded="false" aria-controls="collapseTransfer">
                                         <i class="fas fa-exchange-alt me-3"></i>TRANSFER
@@ -108,9 +101,6 @@ export default {
                                 </h2>
                                 <div id="collapseTransfer" class="accordion-collapse collapse" data-bs-parent="#nftAccordion">
                                     <div class="accordion-body">
-                                        <div class="text-center" v-if="itemmodal.item.owner != account">
-                                            <p>You don't own this NFT</p>
-                                        </div>
                                         <div class="border-warning border rounded p-3 my-3" v-if="itemmodal.item.uid == pfp.uid  && itemmodal.item.setname == pfp.set">
                                             <p class="text-warning m-0">Transferring this NFT will remove it from your PFP</p>
                                         </div>
