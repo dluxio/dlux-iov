@@ -1782,9 +1782,10 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 this.chains[chain].sets[set].af[token] = this.chains[chain].sets[set].auctions[i].price.amount;
               }
               this.chains[chain].sets[set].forAuction++;
-              this.price[set][this.chains[chain].sets[set].auctions.uid] = this.chains[chain].sets[set].auctions[i].price;
+              this.price[set][this.chains[chain].sets[set].auctions[i].uid] = this.chains[chain].sets[set].auctions[i].price;
               if (this.chains[chain].sets[set].auctions[i].bidder == this.account)
-                this.highBidder.push(this.auctions[i].uid);
+                this.highBidder.push(this.chains[chain].sets[set].auctions[i].uid);
+              this.auctions.push(this.chains[chain].sets[set].auctions[i])
             }
           });
         fetch(api + "/api/sales/" + set)
