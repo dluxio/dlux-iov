@@ -1779,13 +1779,15 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                     if (this.chains[chain].sets[set].auctions[i].bidder == this.account)
                       this.highBidder.push(this.chains[chain].sets[set].auctions[i].uid);
                     this.callScript(this.chains[chain].sets[set].auctions[i], i).then(d => {
+                      console.log(d.i)
                       const index = d.i
                       delete d.i
-                      this.chains[chain].sets[set].auctions[i] = {
+                      this.chains[chain].sets[set].auctions[index] = {
+                        ...this.chains[chain].sets[set].auctions[index],
                         ...this.price[set][this.chains[chain].sets[set].auctions[index].uid],
                         ...d
                       }
-                      this.auctions.push(this.chains[chain].sets[set].auctions[i])
+                      this.auctions.push(this.chains[chain].sets[set].auctions[index])
                     })
                   }
                 });
