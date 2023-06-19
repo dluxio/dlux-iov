@@ -584,8 +584,8 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
       }
       return s;
     },
-    validateHeaders(rawHeaders){
-      return new Promise ((res, rej)=>{
+    validateHeaders(rawHeaders) {
+      return new Promise((res, rej) => {
         if (!rawHeaders || rawHeaders.split(":")[0] < Date.now() - 600000000) {
           this.toSign = {
             type: "sign_headers",
@@ -604,30 +604,30 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
     ipfsUpload(event) {
       console.log("1", event);
       var rawHeaders = localStorage.getItem(`${this.account}:auth`)
-      console.log({rawHeaders})
+      console.log({ rawHeaders })
       this.validateHeaders(rawHeaders)
-      .then(headers =>{
-        if (window.IpfsHttpClient) {
-          const ipfs = window.IpfsHttpClient({
-            host: "ipfs.dlux.io",
-            port: "443",
-            protocol: "https",
-            headers: {
-              account: this.account,
-              nonce: headers.split(":")[0],
-              sig: headers.split(":")[1],
-            },
-          });
-          const buf = buffer.Buffer.from("Success");
-          ipfs.add(buf, (err, ipfsReturn) => {
-            if (!err) {
-              console.log(ipfsReturn)
-            } else {
-              console.log("IPFS Upload Failed", err);
-            }
-          });
-        }
-      })
+        .then(headers => {
+          if (window.IpfsHttpClient) {
+            const ipfs = window.IpfsHttpClient({
+              host: "ipfs.dlux.io",
+              port: "443",
+              protocol: "https",
+              headers: {
+                account: this.account,
+                nonce: headers.split(":")[0],
+                sig: headers.split(":")[1],
+              },
+            });
+            const buf = buffer.Buffer.from("Success");
+            ipfs.add(buf, (err, ipfsReturn) => {
+              if (!err) {
+                console.log(ipfsReturn)
+              } else {
+                console.log("IPFS Upload Failed", err);
+              }
+            });
+          }
+        })
     },
     /*
 function buyFT(setname, uid, price, type,  callback){
@@ -696,9 +696,8 @@ function giveFT(setname, to, qty, callback){
         type: "cja",
         cj: cja,
         id: `${this.prefix}ft_transfer`,
-        msg: `Trying to give ${parseInt(this.giveFTqty)} ${this.mint_detail.set} mint token${
-          parseInt(this.giveFTqty) > 1 ? "s" : ""
-        } to ${this.giveFTusername}`,
+        msg: `Trying to give ${parseInt(this.giveFTqty)} ${this.mint_detail.set} mint token${parseInt(this.giveFTqty) > 1 ? "s" : ""
+          } to ${this.giveFTusername}`,
         ops: ["getTokenUser", "getUserNFTs"],
         api: this.apiFor(this.prefix),
         txid: `${this.prefix} _ft_transfer`,
@@ -716,7 +715,7 @@ function tradeFT(setname, to, price, callback){
     */
     tradeFT(setname) {
       const qty = this.tradeQty,
-      price = parseInt(this.tradePrice * 1000);
+        price = parseInt(this.tradePrice * 1000);
       var cja = { set: setname, to: this.tradeTo, price };
       this.toSign = {
         type: "cja",
@@ -744,7 +743,7 @@ function sellFT(setname, price, type, quantity = 1, distro,  callback){
         id = `${this.prefix}ft_sell`;
       if (type.toUpperCase() == "HIVE") {
         cja.hive = price
-        cja.quantity = quantity 
+        cja.quantity = quantity
         cja.distro = distro
         id = `${this.prefix}fts_sell_h`;
       } else if (type.toUpperCase() == "HBD") {
@@ -914,27 +913,27 @@ function setPFP(setname, uid, callback){
           profile_image: `${this.dataAPI}/pfp/${this.account}?${item.setname}-${item.uid}`,
         };
       var cja = [
-          [
-            "custom_json",
-            {
-              required_auths: [],
-              required_posting_auths: [this.account],
-              id: `${this.prefix}nft_pfp`,
-              json: JSON.stringify({
-                set: item.setname,
-                uid: item.uid,
-              }),
-            },
-          ],
-          [
-            "account_update2",
-            {
-              account: this.account,
-              json_metadata: "",
-              posting_json_metadata: JSON.stringify(pjm),
-            },
-          ],
+        [
+          "custom_json",
+          {
+            required_auths: [],
+            required_posting_auths: [this.account],
+            id: `${this.prefix}nft_pfp`,
+            json: JSON.stringify({
+              set: item.setname,
+              uid: item.uid,
+            }),
+          },
         ],
+        [
+          "account_update2",
+          {
+            account: this.account,
+            json_metadata: "",
+            posting_json_metadata: JSON.stringify(pjm),
+          },
+        ],
+      ],
         type = "raw";
       this.toSign = {
         type,
@@ -955,9 +954,9 @@ function setPFP(setname, uid, callback){
     },
     meltNFT(item) {
       var cja = {
-          set: item.setname,
-          uid: item.uid,
-        },
+        set: item.setname,
+        uid: item.uid,
+      },
         type = "cja";
       this.toSign = {
         type,
@@ -981,10 +980,10 @@ function giveNFT(setname, uid, to, callback){
     giveNFT(item) {
       if (this.nftTradeAllowed) {
         var cja = {
-            set: item.setname,
-            uid: item.uid,
-            to: this.nftTradeTabTo,
-          },
+          set: item.setname,
+          uid: item.uid,
+          to: this.nftTradeTabTo,
+        },
           type = "cja";
         this.toSign = {
           type,
@@ -1010,12 +1009,12 @@ function tradeNFT(setname, uid, to, price, type, callback){
     tradeNFT(item) {
       if (this.nftTradeAllowed) {
         var cja = {
-            set: item.setname,
-            uid: item.uid,
-            price: parseInt(this.nftTradeTabPrice * 1000),
-            type: this.nftTradeTabToken,
-            to: this.nftTradeTabTo,
-          },
+          set: item.setname,
+          uid: item.uid,
+          price: parseInt(this.nftTradeTabPrice * 1000),
+          type: this.nftTradeTabToken,
+          to: this.nftTradeTabTo,
+        },
           type = "cja";
         this.toSign = {
           type,
@@ -1036,11 +1035,11 @@ function sellNFT(setname, uid, price, type, callback){
 */
     sellNFT(item) {
       var cja = {
-          set: item.setname,
-          uid: item.uid,
-          price: parseInt(this.nftSellTabPrice * 1000),
-          type: this.nftSellTabToken,
-        },
+        set: item.setname,
+        uid: item.uid,
+        price: parseInt(this.nftSellTabPrice * 1000),
+        type: this.nftSellTabToken,
+      },
         type = "cja";
       this.toSign = {
         type,
@@ -1059,9 +1058,9 @@ function sellNFTcancel(setname, uid, callback){
 */
     cancelNFT(item) {
       var cja = {
-          set: item.set,
-          uid: item.uid,
-        },
+        set: item.set,
+        uid: item.uid,
+      },
         type = "cja";
       this.toSign = {
         type,
@@ -1082,10 +1081,10 @@ function buyNFT(setname, uid, price, type, callback){
 */
     buyNFT(item) {
       var cja = {
-          set: item.set,
-          uid: item.uid,
-          price: item.price.amount,
-        },
+        set: item.set,
+        uid: item.uid,
+        price: item.price.amount,
+      },
         type = "cja";
       if (item.price.token == "HIVE" || item.price.token == "HBD") {
         type = "xfr";
@@ -1121,14 +1120,14 @@ function auctionNFT(setname, uid, price, now, time, type, callback){
 */
     auctionNFT(item) {
       var cja = {
-          set: item.setname,
-          uid: item.uid,
-          price: parseInt(this.nftAuctionTabPrice * 1000),
-          type:
-            this.nftAuctionTabToken != this.TOKEN ? this.nftAuctionTabToken : 0,
-          now: false,
-          time: this.nftAuctionTabTime,
-        },
+        set: item.setname,
+        uid: item.uid,
+        price: parseInt(this.nftAuctionTabPrice * 1000),
+        type:
+          this.nftAuctionTabToken != this.TOKEN ? this.nftAuctionTabToken : 0,
+        now: false,
+        time: this.nftAuctionTabTime,
+      },
         type = "cja";
       this.toSign = {
         type,
@@ -1152,10 +1151,10 @@ function bidNFT(setname, uid, bid_amount, type, callback){
 */
     bidNFT(item) {
       var cja = {
-          set: item.setname,
-          uid: item.uid,
-          bid_amount: parseInt(this.nftAuctionTabPrice * 1000),
-        },
+        set: item.setname,
+        uid: item.uid,
+        bid_amount: parseInt(this.nftAuctionTabPrice * 1000),
+      },
         type = "cja";
       if (this.itemModal.auction.price.token == "HIVE") {
         type = "xfr";
@@ -1215,7 +1214,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       if (
         document.documentElement.clientHeight + window.scrollY >
         document.documentElement.scrollHeight -
-          document.documentElement.clientHeight * 2
+        document.documentElement.clientHeight * 2
       ) {
         this.NFTselect.amount += 30;
         this.selectNFTs();
@@ -1253,7 +1252,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         this.auctionData(modal);
     },
     modalIndex(modal, index, source = "displayNFTs") {
-      if(typeof index != "string"){
+      if (typeof index != "string") {
         source = index.source
         index = index.index
       }
@@ -1269,7 +1268,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       else if (this[modal].item.owner == "ah" || this[modal].item.owner == "hh")
         this.auctionData(modal);
     },
-    pageCtrl(controller) {},
+    pageCtrl(controller) { },
     removeOp(txid) {
       if (this.toSign.txid == txid) {
         this.toSign = {};
@@ -1390,7 +1389,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         i = a[0],
         o = 1 < a.length ? r + a[1] : "";
       if (e)
-        for (var c = /(\d+)(\d{3})/; c.test(i); )
+        for (var c = /(\d+)(\d{3})/; c.test(i);)
           i = i.replace(c, "$1" + e + "$2");
       return (u ? "-" : "") + i + o;
     },
@@ -1668,8 +1667,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             }
           });
       }
-      for(var chain in this.chains){
-        if(this.chains[chain].enabled){
+      for (var chain in this.chains) {
+        if (this.chains[chain].enabled) {
           getSets(chain);
         }
       }
@@ -1757,113 +1756,121 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 }
               }
               this.chains[chain].sets[set].owners = owners.length;
+              fetch(api + "/api/auctions/" + set)
+                .then((response) => response.json())
+                .then((data) => {
+                  this.chains[chain].sets[set].auctions = data.result.filter((a) => a.set == set);
+                  if (!this.price[set]) this.price[set] = {};
+                  for (var i = 0; i < this.chains[chain].sets[set].auctions.length; i++) {
+                    const token =
+                      this.chains[chain].sets[set].auctions[i].price.token == "HIVE"
+                        ? "HIVE"
+                        : this.chains[chain].sets[set].auctions[i].price.token == "HBD"
+                          ? "HBD"
+                          : "TOKEN"
+                    if (
+                      this.chains[chain].sets[set].auctions[i].price.amount < this.chains[chain].sets[set].af[token] ||
+                      !this.chains[chain].sets[set].af[token]
+                    ) {
+                      this.chains[chain].sets[set].af[token] = this.chains[chain].sets[set].auctions[i].price.amount;
+                    }
+                    this.chains[chain].sets[set].forAuction++;
+                    this.price[set][this.chains[chain].sets[set].auctions[i].uid] = this.chains[chain].sets[set].auctions[i].price;
+                    if (this.chains[chain].sets[set].auctions[i].bidder == this.account)
+                      this.highBidder.push(this.chains[chain].sets[set].auctions[i].uid);
+                    this.callScript(this.chains[chain].sets[set].auctions[i], i).then(d => {
+                      const index = d.i
+                      delete d.i
+                      this.chains[chain].sets[set].auctions[i] = {
+                        ...this.price[set][this.chains[chain].sets[set].auctions[index].uid],
+                        ...d
+                      }
+                      this.auctions.push(this.chains[chain].sets[set].auctions[i])
+                    })
+                  }
+                });
+              fetch(api + "/api/sales/" + set)
+                .then((response) => response.json())
+                .then((data) => {
+                  const presales = data.result
+                  if (!this.price[set]) this.price[set] = {};
+                  for (var i = 0; i < presales.length; i++) {
+                    const token =
+                      presales[i].price.token == "HIVE"
+                        ? "HIVE"
+                        : presales[i].price.token == "HBD"
+                          ? "HBD"
+                          : "TOKEN";
+                    if (
+                      presales[i].price.amount < this.chains[chain].sets[set].sf[token] ||
+                      !this.chains[chain].sets[set].sf[token]
+                    ) {
+                      this.chains[chain].sets[set].sf[token] = presales[i].price.amount;
+                    }
+                    this.chains[chain].sets[set].forSale++;
+                    this.price[set][presales[i].uid] = presales[i].price;
+
+                    this.callScript(presales[i], i).then(d => {
+                      const index = d.i
+                      delete d.i
+                      presales[index] = {
+                        ...presales[index],
+                        ...d
+                      }
+                      this.sales.push(presales[index])
+                    })
+                  }
+                });
+              fetch(api + "/api/mintsupply")
+                .then((response) => response.json())
+                .then((data) => {
+                  this.mintData = data.result.filter((a) => a.set == set) || [];
+                  if (this.mintData.length) this.mintData = this.mintData[0];
+                  else this.mintSales = {};
+                  this.mintSales = data.result.filter((a) => a.set == set) || [];
+                  if (this.mintSales.length) this.mintSales = this.mintSales[0].sales;
+                  this.mintAuctions = data.result.filter((a) => a.set == set) || [];
+                  if (this.mintAuctions.length)
+                    this.mintAuctions = this.mintAuctions[0].auctions;
+                  for (var i = 0; i < this.mintSales.length; i++) {
+                    const token =
+                      this.mintSales[i].pricenai.token == "HIVE"
+                        ? "HIVE"
+                        : this.mintSales[i].pricenai.token == "HBD"
+                          ? "HBD"
+                          : "TOKEN";
+                    this.mintSales[i].buyQty = 1;
+                    if (
+                      this.mintSales[i].price < this.chains[chain].sets[set].smf[token] ||
+                      !this.chains[chain].sets[set].smf[token]
+                    ) {
+                      this.chains[chain].sets[set].smf[token] = this.mintSales[i].price;
+                    }
+                    this.chains[chain].sets[set].forSaleMint += this.mintSales[i].qty;
+                  }
+                  for (var i = 0; i < this.mintAuctions.length; i++) {
+                    const token =
+                      this.mintAuctions[i].pricenai.token == "HIVE"
+                        ? "HIVE"
+                        : this.mintAuctions[i].pricenai.token == "HBD"
+                          ? "HBD"
+                          : "TOKEN";
+                    this.mintAuctions[i].bidAmount =
+                      this.mintAuctions[i].price + 1000;
+                    if (
+                      this.mintAuctions[i].price < this.chains[chain].sets[set].amf[token] ||
+                      !this.chains[chain].sets[set].amf[token]
+                    ) {
+                      this.chains[chain].sets[set].amf[token] = this.mintAuctions[i].price;
+                    }
+                    this.chains[chain].sets[set].forAuctionMint++;
+                  }
+                });
             });
           })
           .catch((e) => {
             location.hash = 'dlux';
             location.reload();
-          });
-        fetch(api + "/api/auctions/" + set)
-          .then((response) => response.json())
-          .then((data) => {
-            this.chains[chain].sets[set].auctions = data.result.filter((a) => a.set == set);
-            if (!this.price[set]) this.price[set] = {};
-            for (var i = 0; i < this.chains[chain].sets[set].auctions.length; i++) {
-              const token =
-              this.chains[chain].sets[set].auctions[i].price.token == "HIVE"
-                  ? "HIVE"
-                  : this.chains[chain].sets[set].auctions[i].price.token == "HBD"
-                  ? "HBD"
-                  : "TOKEN"
-              if (
-                this.chains[chain].sets[set].auctions[i].price.amount < this.chains[chain].sets[set].af[token] ||
-                !this.chains[chain].sets[set].af[token]
-              ) {
-                this.chains[chain].sets[set].af[token] = this.chains[chain].sets[set].auctions[i].price.amount;
-              }
-              this.chains[chain].sets[set].forAuction++;
-              this.price[set][this.chains[chain].sets[set].auctions[i].uid] = this.chains[chain].sets[set].auctions[i].price;
-              if (this.chains[chain].sets[set].auctions[i].bidder == this.account)
-                this.highBidder.push(this.chains[chain].sets[set].auctions[i].uid);
-              this.auctions.push(this.chains[chain].sets[set].auctions[i])
-            }
-          });
-        fetch(api + "/api/sales/" + set)
-          .then((response) => response.json())
-          .then((data) => {
-            const presales = data.result
-            if (!this.price[set]) this.price[set] = {};
-            for (var i = 0; i < presales.length; i++) {
-              const token =
-                presales[i].price.token == "HIVE"
-                  ? "HIVE"
-                  : presales[i].price.token == "HBD"
-                  ? "HBD"
-                  : "TOKEN";
-              if (
-                presales[i].price.amount < this.chains[chain].sets[set].sf[token] ||
-                !this.chains[chain].sets[set].sf[token]
-              ) {
-                this.chains[chain].sets[set].sf[token] = presales[i].price.amount;
-              }
-              this.chains[chain].sets[set].forSale++;
-              this.price[set][presales[i].uid] = presales[i].price;
-              
-              this.callScript(presales[i], i).then(d => {
-                const index = d.i
-                delete d.i
-                presales[index] = {
-                  ...presales[index],
-                  ...d
-                }
-                this.sales.push(presales[index])
-              })
-            }
-          });
-        fetch(api + "/api/mintsupply")
-          .then((response) => response.json())
-          .then((data) => {
-            this.mintData = data.result.filter((a) => a.set == set) || [];
-            if (this.mintData.length) this.mintData = this.mintData[0];
-            else this.mintSales = {};
-            this.mintSales = data.result.filter((a) => a.set == set) || [];
-            if (this.mintSales.length) this.mintSales = this.mintSales[0].sales;
-            this.mintAuctions = data.result.filter((a) => a.set == set) || [];
-            if (this.mintAuctions.length)
-              this.mintAuctions = this.mintAuctions[0].auctions;
-            for (var i = 0; i < this.mintSales.length; i++) {
-              const token =
-                this.mintSales[i].pricenai.token == "HIVE"
-                  ? "HIVE"
-                  : this.mintSales[i].pricenai.token == "HBD"
-                  ? "HBD"
-                  : "TOKEN";
-              this.mintSales[i].buyQty = 1;
-              if (
-                this.mintSales[i].price < this.chains[chain].sets[set].smf[token] ||
-                !this.chains[chain].sets[set].smf[token]
-              ) {
-                this.chains[chain].sets[set].smf[token] = this.mintSales[i].price;
-              }
-              this.chains[chain].sets[set].forSaleMint += this.mintSales[i].qty;
-            }
-            for (var i = 0; i < this.mintAuctions.length; i++) {
-              const token =
-                this.mintAuctions[i].pricenai.token == "HIVE"
-                  ? "HIVE"
-                  : this.mintAuctions[i].pricenai.token == "HBD"
-                  ? "HBD"
-                  : "TOKEN";
-              this.mintAuctions[i].bidAmount =
-                this.mintAuctions[i].price + 1000;
-              if (
-                this.mintAuctions[i].price < this.chains[chain].sets[set].amf[token] ||
-                !this.chains[chain].sets[set].amf[token]
-              ) {
-                this.chains[chain].sets[set].amf[token] = this.mintAuctions[i].price;
-              }
-              this.chains[chain].sets[set].forAuctionMint++;
-            }
           });
       }
     },
@@ -2036,7 +2043,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 if (
                   this.NFTselect.searchDeepK &&
                   r.attributes[j][this.NFTselect.searchDeepKey] ==
-                    this.NFTselect.searchTerm
+                  this.NFTselect.searchTerm
                 ) {
                   this.selectedNFTs.push(r);
                   break;
@@ -2124,9 +2131,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     callScript(o, i = 0) {
       return new Promise((resolve, reject) => {
         if (this.nftscripts[o.script]) {
-          const code = `(//${this.nftscripts[o.script]}\n)("${
-            o.uid ? o.uid : 0
-          }")`;
+          const code = `(//${this.nftscripts[o.script]}\n)("${o.uid ? o.uid : 0
+            }")`;
           var computed = eval(code);
           computed.uid = o.uid || "";
           computed.owner = o.owner || "";
@@ -2182,23 +2188,21 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             this.accountapi = data;
             if (
               new Date().getMonth() + 1 !=
-                parseInt(data.drop?.last_claim, 16) &&
+              parseInt(data.drop?.last_claim, 16) &&
               data.drop?.availible.amount > 0
             ) {
               this.hasDrop = true;
               this.dropnai = `${parseFloat(
                 data.drop.availible.amount /
-                  Math.pow(10, data.drop.availible.precision)
-              ).toFixed(data.drop.availible.precision)} ${
-                data.drop.availible.token
-              }`;
+                Math.pow(10, data.drop.availible.precision)
+              ).toFixed(data.drop.availible.precision)} ${data.drop.availible.token
+                }`;
             }
             this.openorders = data.contracts.reduce((acc, cur) => {
-              cur.nai = `${
-                cur.type.split(":")[0] == "hive"
+              cur.nai = `${cur.type.split(":")[0] == "hive"
                   ? parseFloat(cur.hive / 1000).toFixed(3)
                   : parseFloat(cur.hbd / 1000).toFixed(3)
-              } ${cur.type.split(":")[0] == "hive" ? "HIVE" : "HBD"}`;
+                } ${cur.type.split(":")[0] == "hive" ? "HIVE" : "HBD"}`;
               if (
                 cur.partials &&
                 cur.partials.length &&
@@ -2250,7 +2254,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
   mounted() {
     var setName = location.pathname.split("set/")[1];
     if (setName) this.getNFTset(setName)
-    else if (location.pathname.indexOf('nfts/sets') > 0){
+    else if (location.pathname.indexOf('nfts/sets') > 0) {
       this.getNFTsets();
     }
     else { //assume index
@@ -2273,8 +2277,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       get() {
         return this.focusSetCalc.attributes[this.NFTselect.searchDeepKey]
           ? this.focusSetCalc.attributes[this.NFTselect.searchDeepKey].includes(
-              this.NFTselect.searchTerm
-            )
+            this.NFTselect.searchTerm
+          )
           : false;
       },
     },
