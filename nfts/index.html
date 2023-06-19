@@ -64,7 +64,7 @@
                 </div>
             </div>
         <div>
-            <nftdetail :sets="sets" :account="account" :itemmodal="itemModal" :pfp="pfp"
+            <nftdetail :sets="focusSet" :account="account" :itemmodal="itemModal" :pfp="pfp"
             @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
         </div>
     </div>
