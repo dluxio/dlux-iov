@@ -1692,6 +1692,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     getNFTset(set, chain = 'dlux') {
       const api = this.chains[chain].api
       if (set != "index.html") {
+        console.log(this.chains[chain].sets[set])
         fetch(api + "/api/set/" + set)
           .then((response) => response.json())
           .then((data) => {
@@ -1703,6 +1704,39 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             }).then((d) => {
               data.set.computed = d;
               data.setname = set;
+              const init = {
+                owners: 0,
+                deleted: 0,
+                af: {
+                  HIVE: 0,
+                  HBD: 0,
+                  TOKEN: 0,
+                },
+                sf: {
+                  HIVE: 0,
+                  HBD: 0,
+                  TOKEN: 0,
+                },
+                forSale: 0,
+                forAuction: 0,
+                forSaleMint: 0,
+                forAuctionMint: 0,
+                attributeKeys: [],
+                attributes: {},
+                attributesC: {},
+                amf: {
+                  HIVE: 0,
+                  HBD: 0,
+                  TOKEN: 0,
+                },
+                smf: {
+                  HIVE: 0,
+                  HBD: 0,
+                  TOKEN: 0,
+                },
+              }
+              // spread init over data.result[i]
+              data.set = { ...init, ...data.set }
               this.chains[chain].sets[set] = data.set;
               this.allNFTs = [...this.allNFTs, ...data.result];
               this.allSearchNFTs = [...this.allSearchNFTs, ...data.result]
@@ -1755,18 +1789,20 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 this.highBidder.push(this.auctions[i].uid);
             }
           });
-        fetch(api + "/api/sales/") // + set) until API fix
+        fetch(api + "/api/sales/" + set)
           .then((response) => response.json())
           .then((data) => {
             this.presales = [... this.presales, ...data.result.filter((a) => a.set == set)]
             if (!this.price[set]) this.price[set] = {};
             for (var i = 0; i < this.presales.length; i++) {
+              console.log(this.presales[i], this.chains[chain].sets[set])
               const token =
                 this.presales[i].price.token == "HIVE"
                   ? "HIVE"
                   : this.presales[i].price.token == "HBD"
                   ? "HBD"
                   : "TOKEN";
+              console.log(this.chains[chain].sets[set])
               if (
                 this.presales[i].price.amount < this.chains[chain].sets[set].sf[token] ||
                 !this.chains[chain].sets[set].sf[token]
