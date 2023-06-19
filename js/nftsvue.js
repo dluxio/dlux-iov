@@ -1787,6 +1787,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                         ...this.price[set][this.chains[chain].sets[set].auctions[index].uid],
                         ...d
                       }
+                      this.chains[chain].sets[set].auctions[index].token = chain
                       this.auctions.push(this.chains[chain].sets[set].auctions[index])
                     })
                   }
