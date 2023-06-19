@@ -1153,15 +1153,15 @@
                                 <!-- MINT TRADES -->
                                 <div v-for="(rnft, index) in FTtrades" :key="index" class="col my-2">
                                     <nftcard :item="rnft" mint="true" trade="true" :account="account"
-                                        :wrapped="getAttr(rnft.script, 'wrapped')" :icon="getIcon(rnft.script)"
-                                        :colors="getSetDetailsColors(rnft.script)"
+                                        :wrapped="getAttr(rnft.script, 'wrapped')" :oicon="getIcon(rnft.script)"
+                                        :ocolors="getSetDetailsColors(rnft.script)"
                                         @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                                 </div>
                                 <!-- NFT TRADES -->
                                 <div v-for="item in NFTtrades" class="col my-2" id="trade-nft-cards">
                                     <nftcard :item="item" trade="true" :account="account"
-                                        :uid="Base64toNumber(item.uid)" :icon="getIcon(item.script)"
-                                        :colors="getSetDetailsColors(item.script)"
+                                        :uid="Base64toNumber(item.uid)" :oicon="getIcon(item.script)"
+                                        :ocolors="getSetDetailsColors(item.script)"
                                         @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                                 </div>
                             </div>
