@@ -1791,32 +1791,32 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         fetch(api + "/api/sales/" + set)
           .then((response) => response.json())
           .then((data) => {
-            this.presales = [... this.presales, ...data.result.filter((a) => a.set == set)]
+            const presales = data.result
             if (!this.price[set]) this.price[set] = {};
-            for (var i = 0; i < this.presales.length; i++) {
+            for (var i = 0; i < presales.length; i++) {
               const token =
-                this.presales[i].price.token == "HIVE"
+                presales[i].price.token == "HIVE"
                   ? "HIVE"
-                  : this.presales[i].price.token == "HBD"
+                  : presales[i].price.token == "HBD"
                   ? "HBD"
                   : "TOKEN";
               if (
-                this.presales[i].price.amount < this.chains[chain].sets[set].sf[token] ||
+                presales[i].price.amount < this.chains[chain].sets[set].sf[token] ||
                 !this.chains[chain].sets[set].sf[token]
               ) {
-                this.chains[chain].sets[set].sf[token] = this.presales[i].price.amount;
+                this.chains[chain].sets[set].sf[token] = presales[i].price.amount;
               }
               this.chains[chain].sets[set].forSale++;
-              this.price[set][this.presales[i].uid] = this.presales[i].price;
+              this.price[set][presales[i].uid] = presales[i].price;
               
-              this.callScript(this.presales[i], i).then(d => {
+              this.callScript(presales[i], i).then(d => {
                 const index = d.i
                 delete d.i
-                this.presales[index] = {
-                  ...this.presales[index],
+                presales[index] = {
+                  ...presales[index],
                   ...d
                 }
-                this.sales.push(this.presales[index])
+                this.sales.push(presales[index])
               })
             }
           });
