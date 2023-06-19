@@ -44,7 +44,7 @@ export default {
 <!-- BODY -->
 <div class="card-body d-flex flex-column p-0 rounded" style="background: rgba(0,0,0,.75)">
 <div class="text-center rounded-top bg-hive" :class="{'invisible': !auction}">
-    <h5 id="timer-set-uid" class="mb-0 lead">time.animateTime(set, uid)</h5>
+    <h5 id="timer-set-uid" class="mb-0 lead">{{animateTime}}</h5>
 </div>
 <div class="px-1 pb-2">
   <!-- NFT BODY -->
@@ -283,6 +283,29 @@ export default {
     return {
       colors: `linear-gradient(${this.item.set.Color1},${this.item.set.Color2})`
     };
+  },
+  computed: {
+    animateTime(){
+      // display time until expiration
+      const now = new Date();
+      const end = new Date(this.item.time);
+      const diff = end - now;
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor(diff / (1000 * 60));
+      const seconds = Math.floor(diff / (1000));
+      if (days > 0) {
+        return `${days} day${days == 1 ? '' : 's'}`;
+      } else if (hours > 0) {
+        return `${hours} hour${hours == 1 ? '' : 's'}`;
+      } else if (minutes > 0) {
+        return `${minutes} minute${minutes == 1 ? '' : 's'}`;
+      } else if (seconds > 0) {
+        return `${seconds} second${seconds == 1 ? '' : 's'}`;
+      } else {
+        return `0s`;
+      }
+    },
   },
   methods: {
     modalIndex(name) {
