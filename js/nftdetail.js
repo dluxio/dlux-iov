@@ -127,6 +127,7 @@ export default {
                                                     aria-controls="auctionNFT" aria-expanded="true" href="#auctionNFTtab">Auction</a></li>
                                                 </ul>
                                                 <div class="tab-content">
+                                                    <!-- NFT Give -->
                                                     <div role="tabpanel" class="tab-pane fade show active" id="giveNFTtab" aria-labelledby="giveNFT">
                                                         <form class="needs-validation mt-4" novalidate>
                                                             <div class="form-row my-2">
@@ -147,82 +148,72 @@ export default {
                                                             </div>
                                                         </form>
                                                     </div>
+                                                    <!-- NFT Trade -->
                                                     <div role="tabpanel" class="tab-pane fade show" id="tradeNFTtab" aria-labelledby="tradeNFT">
                                                         <form class="needs-validation mt-4" novalidate>
                                                             <div class="form-row my-2">
                                                                 <div class="col-12">
                                                                     <label for="tradeNFTusername">Username</label>
-                                                                    <div class="input-group">
+                                                                    <div class="input-group has-validation">
                                                                         <span class="input-group-text text-white-50" id="tradeNFTuserprep">@</span>
-                                                                    </div>
-                                                                    <input type="text" v-model="nftTradeTabTo" @blur="checkAccount(nftTradeTabTo, 'nftTradeAllowed')" class="form-control text-info" id="tradeNFTusername" aria-describedby="tradeNFTuserprep" required>
-                                                                    <div class="invalid-feedback">
-                                                                        Please enter the username you'd like to trade with.
+                                                                        <input type="text" v-model="nftTradeTabTo" @blur="checkAccount(nftTradeTabTo, 'nftTradeAllowed')" class="form-control text-info" id="tradeNFTusername" aria-describedby="tradeNFTuserprep" required>
+                                                                        <div class="invalid-feedback">
+                                                                            Please enter the username you'd like to trade with.
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                             <div class="form-group form-row my-2">
                                                                 <label for="tradeNFTamount">Amount</label>
-                                                                <small v-if="nftTradeTabToken == TOKEN" class="ms-auto mb-2 align-self-center text-white-50">0%
-                                                                FEE</small>
-                                                                <small v-else class="ms-auto mb-2 align-self-center text-white-50">1%
-                                                                FEE</small>
+                                                                <small v-if="nftTradeTabToken == TOKEN" class="float-end mb-2 align-self-center text-white-50">
+                                                                    0% FEE
+                                                                </small>
+                                                                <small v-else class="float-end mb-2 align-self-center text-white-50">
+                                                                    1% FEE
+                                                                </small>
                                                                 <div class="input-group">
-                                                                    <input v-model="nftTradeTabPrice" type="number"
-                                                                    class="form-control text-info" id="tradeNFTamount"
-                                                                    aria-describedby="tradeNFTamountappend" placeholder="0.000" step="0.001" min="0.001"
-                                                                    required>
-
-                                                                <span class="input-group-text m-0"
-                                                                    id="tradeNFTamountappend">
-                                                                    <select v-model="nftTradeTabToken"
-                                                                        class="form-select border-0 text-white-50 bg-dark w-100 h-100"
+                                                                    <input v-model="nftTradeTabPrice" type="number" class="form-control text-info" id="tradeNFTamount"
+                                                                    aria-describedby="tradeNFTamountappend" placeholder="0.000" step="0.001" min="0.001" required>
+                                                                    <span class="input-group-text e-radius-hotfix m-0 p-0" id="tradeNFTamountappend">
+                                                                        <select v-model="nftTradeTabToken" class="form-select border-0 text-white-50 w-100 h-100"
                                                                         id="tradeNFTpriceType" aria-label="Trade price type select">
-                                                                        <option :value="TOKEN" selected>
-                                                                            {{TOKEN}}
-                                                                        </option>
-                                                                        <option value="HIVE">
-                                                                            HIVE
-                                                                        </option>
-                                                                        <option value="HBD">
-                                                                            HBD
-                                                                        </option>
-                                                                    </select>
-                                                                </span>
+                                                                            <option :value="TOKEN" selected>
+                                                                                {{TOKEN}}
+                                                                            </option>
+                                                                            <option value="HIVE">
+                                                                                HIVE
+                                                                            </option>
+                                                                            <option value="HBD">
+                                                                                HBD
+                                                                            </option>
+                                                                        </select>
+                                                                    </span>
+                                                                    <div class="invalid-feedback">
+                                                                        Please enter the amount of VALUE you'd like to receive.
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                            <div class="invalid-feedback">
-                                                                Please enter the
-                                                                amount of
-                                                                VALUE you'd like to
-                                                                receive. </div>
-                                                        
+                                                            <div class="text-center">
+                                                                <button @click="tradeNFT(itemmodal.item)" id="tradeNFTbutton" class="btn btn-info my-2" type="submit">
+                                                                    Propose Trade
+                                                                </button>
+                                                            </div>
+                                                        </form>
                                                     </div>
-                                                    <div class="text-center">
-                                                        <button @click="tradeNFT(itemmodal.item)" id="tradeNFTbutton" class="btn btn-info my-2"
-                                                            type="submit">Propose
-                                                            Trade</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                            <div role="tabpanel" class="tab-pane fade show " id="sellNFTtab" aria-labelledby="sellNFT">
-                                                <form class="needs-validation mt-4" validate>
-                                                    <div class="form-group form-row my-2">
-                                                        <label for="sellNFTprice">Sale
-                                                            Price</label>
-                                                        <small v-if="nftSellTabToken == TOKEN" class="ms-auto mb-2 align-self-center text-white-50">0%
-                                                            FEE</small>
-                                                        <small v-else class="ms-auto mb-2 align-self-center text-white-50">1%
-                                                            FEE</small>
-                                                        <div class="input-group">
-                                                            <input v-model="nftSellTabPrice" type="number"
-                                                                class="form-control bg-dark border-dark text-info" id="sellNFTprice"
-                                                                aria-describedby="sellNFTpriceappend" placeholder="0.000" step="0.001" min="0.001"
-                                                                required>
-                                                            <div class="input-group-append">
-                                                                <span class="input-group-text bg-dark border-dark r-radius-hotfix m-0"
-                                                                    id="sellNFTpriceappend">
-                                                                    <select v-model="nftSellTabToken"
-                                                                        class="form-select border-0 text-white-50 bg-dark w-100 h-100"
+                                                    <!-- NFT Sell -->
+                                                    <div role="tabpanel" class="tab-pane fade show " id="sellNFTtab" aria-labelledby="sellNFT">
+                                                        <form class="needs-validation mt-4" novalidate>
+                                                            <div class="form-group form-row my-2">
+                                                                <label for="sellNFTprice">Sale Price</label>
+                                                                <small v-if="nftSellTabToken == TOKEN" class="float-end mb-2 align-self-center text-white-50">
+                                                                0% FEE</small>
+                                                                <small v-else class="float-end mb-2 align-self-center text-white-50">
+                                                                1% FEE</small>
+                                                                <div class="input-group">
+                                                                    <input v-model="nftSellTabPrice" type="number" class="form-control text-info" id="sellNFTprice"
+                                                                    aria-describedby="sellNFTpriceappend" placeholder="0.000" step="0.001" min="0.001" required>
+                                                                    <span class="input-group-text e-radius-hotfix m-0 p-0" id="sellNFTpriceappend">
+                                                                        <select v-model="nftSellTabToken" class="form-select border-0 text-white-50 w-100 h-100"
                                                                         id="sellNFTpriceType" aria-label="Sell price type select">
                                                                         <option :value="TOKEN">
                                                                             {{TOKEN}}
@@ -233,124 +224,100 @@ export default {
                                                                         <option value="HBD">
                                                                             HBD
                                                                         </option>
-                                                                    </select>
-                                                                </span>
+                                                                        </select>
+                                                                    </span>
+                                                                    <div class="invalid-feedback">
+                                                                        Please enter the amount of VALUE you'd like to receive. 
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                            <div class="invalid-feedback">
-                                                                Please enter the
-                                                                amount of VALUE
-                                                                you'd like to
-                                                                receive. </div>
-                                                        </div>
+                                                            <div class="form-row my-2">
+                                                                <p class="text-white-50 small">
+                                                                    Ownership will be transferred to the DAO listing service and sold publicly. Cancel anytime to return immediately.
+                                                                </p>
+                                                            </div>
+                                                            <div class="text-center">
+                                                                <button @click="sellNFT(itemmodal.item)" id="sellNFTbutton" class="btn btn-info my-2" type="submit">
+                                                                    List Item
+                                                                </button>
+                                                            </div>
+                                                        </form>
                                                     </div>
-                                                    <div class="form-row my-2">
-                                                        <p class="text-white-50 small">
-                                                            Ownership will be
-                                                            transferred to the DAO
-                                                            listing
-                                                            service and sold
-                                                            publicly. Cancel anytime
-                                                            to return immediately.
-                                                        </p>
-                                                    </div>
-                                                    <div class="text-center">
-                                                        <button @click="sellNFT(itemmodal.item)" id="sellNFTbutton" class="btn btn-info my-2"
-                                                            type="submit">List
-                                                            Item</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                            <div role="tabpanel" class="tab-pane fade show " id="auctionNFTtab" aria-labelledby="auctionNFT">
-                                                <form class="needs-validation mt-4" novalidate>
-                                                    <div class="form-group form-row my-2">
-                                                        <label for="auctionNFTprice">Starting
-                                                            Bid</label>
-                                                        <small v-if="nftAuctionTabToken == TOKEN"
-                                                            class="ms-auto mb-2 align-self-center text-white-50">0%
-                                                            FEE</small>
-                                                        <small v-else class="ms-auto mb-2 align-self-center text-white-50">1%
-                                                            FEE</small>
-                                                        <div class="input-group">
-                                                            <input v-model="nftAuctionTabPrice" type="number"
-                                                                class="form-control bg-dark border-dark text-info" id="auctionNFTprice"
-                                                                aria-describedby="auctionNFTpriceappend" placeholder="0.000" step="0.001" min="0.001"
-                                                                required>
-                                                            <div class="input-group-append">
-                                                                <span class="input-group-text bg-dark border-dark r-radius-hotfix m-0"
-                                                                    id="auctionNFTpriceappend">
-                                                                    <select v-model="nftAuctionTabToken"
-                                                                        class="form-select border-0 text-white-50 bg-dark w-100 h-100"
+                                                    <!-- NFT Auction -->
+                                                    <div role="tabpanel" class="tab-pane fade show " id="auctionNFTtab" aria-labelledby="auctionNFT">
+                                                        <form class="needs-validation mt-4" novalidate>
+                                                            <div class="form-group form-row my-2">
+                                                                <label for="auctionNFTprice">Starting Bid</label>
+                                                                <small v-if="nftAuctionTabToken == TOKEN" class="float-end mb-2 align-self-center text-white-50">
+                                                                0% FEE</small>
+                                                                <small v-else class="float-end mb-2 align-self-center text-white-50">
+                                                                1% FEE</small>
+                                                                <div class="input-group">
+                                                                    <input v-model="nftAuctionTabPrice" type="number" class="form-control text-info" id="auctionNFTprice"
+                                                                    aria-describedby="auctionNFTpriceappend" placeholder="0.000" step="0.001" min="0.001" required>
+                                                                    <span class="input-group-text e-radius-hotfix m-0 p-0" id="auctionNFTpriceappend">
+                                                                        <select v-model="nftAuctionTabToken" class="form-select border-0 text-white-50 w-100 h-100"
                                                                         id="auctionNFTpriceType" aria-label="Auction price type select">
-                                                                        <option :value="TOKEN" selected>
-                                                                            {{TOKEN}}
+                                                                            <option :value="TOKEN" selected>
+                                                                                {{TOKEN}}
+                                                                            </option>
+                                                                            <option value="HIVE">
+                                                                                HIVE
+                                                                            </option>
+                                                                            <option value="HBD">
+                                                                                HBD
+                                                                            </option>
+                                                                        </select>
+                                                                    </span>
+                                                                    <div class="invalid-feedback">
+                                                                        Please enter the amount of VALUE you'd like to start the bidding.
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="d-flex justify-content-around">
+                                                                <div class="form-row my-2 d-flex align-items-center">
+                                                                    <label for="auctionNFTdays" class="m-0">Duration:</label>
+                                                                    <select v-model="nftAuctionTabTime" class="mx-2 btn btn-lg btn-secondary" id="auctionNFTdays" required>
+                                                                        <option value="1">
+                                                                            1 Day
                                                                         </option>
-                                                                        <option value="HIVE">
-                                                                            HIVE
+                                                                        <option value="2">
+                                                                            2 Days
                                                                         </option>
-                                                                        <option value="HBD">
-                                                                            HBD
+                                                                        <option value="3">
+                                                                            3 Days
+                                                                        </option>
+                                                                        <option value="4">
+                                                                            4 Days
+                                                                        </option>
+                                                                        <option value="5">
+                                                                            5 Days
+                                                                        </option>
+                                                                        <option value="6">
+                                                                            6 Days
+                                                                        </option>
+                                                                        <option value="7" selected>
+                                                                            7 Days
                                                                         </option>
                                                                     </select>
-                                                                </span>
+                                                                </div>
                                                             </div>
-                                                            <div class="invalid-feedback">
-                                                                Please enter the
-                                                                amount of
-                                                                VALUE you'd like to
-                                                                start the bidding.
+                                                            <div class="form-row my-2">
+                                                                <p class="text-white-50 small">
+                                                                    Ownership will be transferred to the DAO listing service and auctioned publicly. Once submitted this cannot 
+                                                                    be cancelled. If there are no bids at the end of the auction period, it will be returned to you immediately.
+                                                                </p>
                                                             </div>
-                                                        </div>
+                                                            <div class="text-center">
+                                                                <button @click="auctionNFT(itemmodal.item)" class="btn btn-info my-2" type="submit">
+                                                                    List Item
+                                                                </button>
+                                                            </div>
+                                                        </form>
                                                     </div>
-                                                    <div class="d-flex justify-content-around">
-                                                        <div class="form-row my-2 d-flex align-items-center">
-                                                            <label for="auctionNFTdays" class="m-0">Duration:
-                                                            </label>
-                                                            <select v-model="nftAuctionTabTime" class="mx-2 btn btn-lg btn-secondary"
-                                                                id="auctionNFTdays" required>
-                                                                <option value="1">1
-                                                                    Day</option>
-                                                                <option value="2">2
-                                                                    Days</option>
-                                                                <option value="3">3
-                                                                    Days</option>
-                                                                <option value="4">4
-                                                                    Days</option>
-                                                                <option value="5">5
-                                                                    Days</option>
-                                                                <option value="6">6
-                                                                    Days</option>
-                                                                <option value="7" selected>7
-                                                                    Days
-                                                                </option>
-                                
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-row my-2">
-                                                        <p class="text-white-50 small">
-                                                            Ownership will be
-                                                            transferred to the DAO
-                                                            listing
-                                                            service and auctioned
-                                                            publicly. Once submitted
-                                                            this cannot be
-                                                            cancelled. If
-                                                            there
-                                                            are no bids at the end
-                                                            of the auction period,
-                                                            it will be returned to
-                                                            you
-                                                            immediately.</p>
-                                                    </div>
-                                                    <div class="text-center">
-                                                        <button @click="auctionNFT(itemmodal.item)" class="btn btn-info my-2" type="submit">List
-                                                            Item</button>
-                                                    </div>
-                                                </form>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
                                     </div>
                                 </div>
                             </div>

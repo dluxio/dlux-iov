@@ -302,15 +302,15 @@ color: linear-gradient(45deg,
   color: #17a2b8 !important;
 }
 
-//.r-radius-hotfix {
-//  border-top-right-radius: 0.25rem !important;
-//  border-bottom-right-radius: 0.25rem !important;
-//}
+.e-radius-hotfix {
+  border-top-right-radius: 0.5rem !important;
+  border-bottom-right-radius: 0.5rem !important;
+}
 
-//.l-radius-hotfix {
-//  border-top-left-radius: 0.25rem !important;
-//  border-bottom-left-radius: 0.25rem !important;
-//}
+.s-radius-hotfix {
+  border-top-left-radius: 0.5rem !important;
+  border-bottom-left-radius: 0.5rem !important;
+}
 
 .max-160 {
   max-width: 160px;
