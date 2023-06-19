@@ -240,6 +240,10 @@ export default {
       default: function () {
         return {
           script: '',
+          set: {
+            Color1: '#000000',
+            Color2: '#000000',
+          },
         };
       },
     },
@@ -248,9 +252,6 @@ export default {
     },
     index: {
       default: 0
-    },
-    colors: {
-      default: 'linear-gradient(chartreuse,lawngreen)'
     },
     wrapped: {
       default: ''
@@ -280,7 +281,7 @@ export default {
   emits: ['detail', 'modal'],
   data() {
     return {
-      
+      colors: `linear-gradient(${this.item.set.Color1},${this.item.set.Color2})`
     };
   },
   methods: {
