@@ -142,8 +142,8 @@ export default {
               <h5 class="small m-0">BID:</h5>
             </div>
             <div class="text-start mt-auto mb-auto" style="flex: 2">
-              <h5 class="lead m-0 text-break">{{formatNumber(item.price.amount/1000,item.price.precision,'.',',')}}
-              {{item.price.token}}</h5>
+              <h5 class="lead m-0 text-break">{{formatNumber(item.amount/1000,item.precision,'.',',')}}
+              {{item.token}}</h5>
             </div>
           </div>
         </section>     
