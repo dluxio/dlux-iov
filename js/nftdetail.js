@@ -7,14 +7,14 @@ export default {
         <div class="modal-content">
             <div class="card bg-dark">
                 <div class="card-header border-0 d-flex align-items-center justify-content-between"
-                    :style="{'background': getSetDetailsColors(itemmodal.item.script)}">
+                    :style="{'background': color}">
                     <div class="rounded-pill d-flex align-items-center p-2"
                         style="background-color: black">
                         <h2 class="m-0 px-2">{{itemmodal.item.uid}}</h2>
                     </div>
                     <h3 class="card-title lead border border-dark rounded p-2 mb-0"><a
                             class="no-decoration" :href="'/nfts/set/'+ itemmodal.item.setname"
-                            style="color:black;">{{itemmodal.item.setname}}
+                            style="color:black;">{{icon}}{{itemmodal.item.setname}}
                             NFT</a></h3>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Close"></button>
@@ -580,12 +580,6 @@ export default {
                 };
             },
         },
-        icon: {
-            default: ''
-        },
-        colors: {
-            default: 'linear-gradient(chartreuse,lawngreen)'
-        },
         wrapped: {
             default: ''
         },
@@ -658,6 +652,14 @@ export default {
             },
             isMountedComponent: false,
         };
+    },
+    computed: {
+        color(){
+            return `linear-gradient(${this.itemmodal.item.set.Color1},${this.itemmodal.item.set.Color2 ? this.itemmodal.item.set.Color2 : this.itemmodal.item.set.Color1})`;
+        },
+        icon() {
+            return this.itemmodal.item.set.faicon;
+        }
     },
     methods: {
         giveFT() { },
