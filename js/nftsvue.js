@@ -1702,8 +1702,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               owner: null,
             }).then((d) => {
               data.set.computed = d;
-              data.setname = data.name;
-              this.chains[chain].sets[data.name] = data.set;
+              data.setname = set;
+              this.chains[chain].sets[set] = data.set;
               this.allNFTs = [...this.allNFTs, ...data.result];
               this.allSearchNFTs = [...this.allSearchNFTs, ...data.result]
               this.selectNFTs();
@@ -1720,10 +1720,10 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 ) {
                   owners.push(this.allNFTs[i].owner);
                 } else if (this.allNFTs[i].owner == "D") {
-                  this.chains[chain].sets[data.name].deleted++;
+                  this.chains[chain].sets[set].deleted++;
                 }
               }
-              this.chains[chain].sets[data.name].owners = owners.length;
+              this.chains[chain].sets[set].owners = owners.length;
             });
           })
           .catch((e) => {
@@ -1734,24 +1734,24 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           .then((response) => response.json())
           .then((data) => {
             console.log({ data });
-            this.chains[chain].sets[data.name].auctions = data.result.filter((a) => a.set == set);
+            this.chains[chain].sets[set].auctions = data.result.filter((a) => a.set == set);
             if (!this.price[set]) this.price[set] = {};
-            for (var i = 0; i < this.chains[chain].sets[data.name].auctions.length; i++) {
+            for (var i = 0; i < this.chains[chain].sets[set].auctions.length; i++) {
               const token =
-              this.chains[chain].sets[data.name].auctions[i].price.token == "HIVE"
+              this.chains[chain].sets[set].auctions[i].price.token == "HIVE"
                   ? "HIVE"
-                  : this.chains[chain].sets[data.name].auctions[i].price.token == "HBD"
+                  : this.chains[chain].sets[set].auctions[i].price.token == "HBD"
                   ? "HBD"
-                  : chain.toUpperCase()
+                  : "TOKEN"
               if (
-                this.chains[chain].sets[data.name].auctions[i].price.amount < this.chains[chain].sets[data.name].af[token] ||
-                !this.chains[chain].sets[data.name].af[token]
+                this.chains[chain].sets[set].auctions[i].price.amount < this.chains[chain].sets[set].af[token] ||
+                !this.chains[chain].sets[set].af[token]
               ) {
-                this.chains[chain].sets[data.name].af[token] = this.chains[chain].sets[data.name].auctions[i].price.amount;
+                this.chains[chain].sets[set].af[token] = this.chains[chain].sets[set].auctions[i].price.amount;
               }
-              this.chains[chain].sets[data.name].forAuction++;
-              this.price[set][this.auctions[i].uid] = this.chains[chain].sets[data.name].auctions[i].price;
-              if (this.chains[chain].sets[data.name].auctions[i].bidder == this.account)
+              this.chains[chain].sets[set].forAuction++;
+              this.price[set][this.auctions[i].uid] = this.chains[chain].sets[set].auctions[i].price;
+              if (this.chains[chain].sets[set].auctions[i].bidder == this.account)
                 this.highBidder.push(this.auctions[i].uid);
             }
           });
