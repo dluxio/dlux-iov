@@ -247,9 +247,6 @@ export default {
         };
       },
     },
-    icon: {
-      default: ''
-    },
     index: {
       default: 0
     },
@@ -281,7 +278,8 @@ export default {
   emits: ['detail', 'modal'],
   data() {
     return {
-      colors: `linear-gradient(${this.item.set.Color1},${this.item.set.Color2})`
+      colors: `linear-gradient(${this.item.set.Color1},${this.item.set.Color2})`,
+      icon: `${this.item.set.faicon}`
     };
   },
   computed: {
