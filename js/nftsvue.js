@@ -1692,7 +1692,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     getNFTset(set, chain = 'dlux') {
       const api = this.chains[chain].api
       if (set != "index.html") {
-        console.log(this.chains[chain].sets[set])
         fetch(api + "/api/set/" + set)
           .then((response) => response.json())
           .then((data) => {
@@ -1767,7 +1766,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         fetch(api + "/api/auctions/" + set)
           .then((response) => response.json())
           .then((data) => {
-            console.log({ data });
             this.chains[chain].sets[set].auctions = data.result.filter((a) => a.set == set);
             if (!this.price[set]) this.price[set] = {};
             for (var i = 0; i < this.chains[chain].sets[set].auctions.length; i++) {
@@ -1784,7 +1782,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 this.chains[chain].sets[set].af[token] = this.chains[chain].sets[set].auctions[i].price.amount;
               }
               this.chains[chain].sets[set].forAuction++;
-              this.price[set][this.auctions[i].uid] = this.chains[chain].sets[set].auctions[i].price;
+              this.price[set][this.chains[chain].sets[set].auctions.uid] = this.chains[chain].sets[set].auctions[i].price;
               if (this.chains[chain].sets[set].auctions[i].bidder == this.account)
                 this.highBidder.push(this.auctions[i].uid);
             }
@@ -1795,14 +1793,12 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             this.presales = [... this.presales, ...data.result.filter((a) => a.set == set)]
             if (!this.price[set]) this.price[set] = {};
             for (var i = 0; i < this.presales.length; i++) {
-              console.log(this.presales[i], this.chains[chain].sets[set])
               const token =
                 this.presales[i].price.token == "HIVE"
                   ? "HIVE"
                   : this.presales[i].price.token == "HBD"
                   ? "HBD"
                   : "TOKEN";
-              console.log(this.chains[chain].sets[set])
               if (
                 this.presales[i].price.amount < this.chains[chain].sets[set].sf[token] ||
                 !this.chains[chain].sets[set].sf[token]
