@@ -1820,6 +1820,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                         ...presales[index],
                         ...d
                       }
+                      presales[index].token = chain
                       this.sales.push(presales[index])
                     })
                   }
