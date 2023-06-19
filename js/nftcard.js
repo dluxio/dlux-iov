@@ -256,6 +256,12 @@ export default {
     uid: {
       default: ''
     },
+    oicon: {
+      default: ''
+    },
+    ocolors: {
+      default: ''
+    },
     trade: {
       default: false
     },
@@ -278,11 +284,11 @@ export default {
   emits: ['detail', 'modal'],
   data() {
     return {
-      colors: `linear-gradient(${this.item.set.Color1},${this.item.set.Color2})`,
-      icon: `${this.item.set.faicon}`
     };
   },
   computed: {
+    colors(){return this.ocolors ? this.ocolors : `linear-gradient(${this.item.set.Color1},${this.item.set.Color2})`},
+    icon(){return this.oicon ? this.oicon : `${this.item.set.faicon}`},
     animateTime(){
       // display time until expiration
       const now = new Date();
