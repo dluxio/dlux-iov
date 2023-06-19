@@ -292,6 +292,15 @@ color: linear-gradient(45deg,
   color: #000;
   border: none;
 }
+.nft-header {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.nft-header:first-child > span { margin-right: auto; }
+
+.nft-header:last-child  > span { margin-left: auto;  }
 
 .nav-pills>li>a.active {
   background-color: #17a2b8 !important;

@@ -6,18 +6,32 @@ export default {
     <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="card bg-dark">
-                <div class="card-header border-0 d-flex align-items-center justify-content-between"
+                <div class="card-header border-0 d-flex align-items-center"
                     :style="{'background': color}">
-                    <div class="rounded-pill d-flex align-items-center p-2"
-                        style="background-color: black">
-                        <h2 class="m-0 px-2">{{itemmodal.item.uid}}</h2>
+                    <div class="nft-header d-flex">
+                        <div class="rounded-pill d-flex align-items-center p-2 me-auto"
+                            style="background-color: black">
+                            <h2 class="m-0 px-2">{{itemmodal.item.uid}}</h2>
+                        </div>
                     </div>
-                    <h3 class="card-title lead border border-dark rounded p-2 mb-0"><a
-                            class="no-decoration" :href="'/nfts/set/'+ itemmodal.item.setname"
-                            style="color:black;">{{icon}}{{itemmodal.item.setname}}
-                            NFT</a></h3>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    <div class="nft-header">
+                        <div class="rounded px-2 py-1" style="background: rgba(0,0,0,1)">
+                            <a :href="'/nfts/set/' + itemmodal.item.setname + '#' + itemmodal.item.token" class="no-decoration" style="font-size: 1.3em;">
+                                <span class="rainbow-text" style="background-image: linear-gradient(rgb(194, 255, 182), rgb(255, 163, 182), rgb(221, 169, 255), rgb(162, 209, 255));
+                                -webkit-background-clip: text;
+                                -webkit-text-fill-color: transparent; 
+                                -moz-background-clip: text;
+                                -moz-text-fill-color: transparent;;">
+                                    <i class="me-1" :class="[icon]"></i>
+                                    <b>{{itemmodal.item.setname}}</b>
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="nft-header d-flex">
+                        <button type="button" class="ms-auto btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Close"></button>
+                    </div>
                 </div>
                 <div class="card-body row d-flex ">
                     <!-- NFT detail col 1 -->
