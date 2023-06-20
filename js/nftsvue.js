@@ -86,6 +86,7 @@ var app = new Vue({
       accountNFTs: [],
       accountRNFTs: [],
       iOwn: [],
+      setname: '',
       iOwnCheckbox: false,
       highBidder: [],
       highBidderCheckbox: false,
@@ -2257,6 +2258,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
   },
   mounted() {
     var setName = location.pathname.split("set/")[1];
+    this.setname = setName;
     if (setName) this.getNFTset(setName)
     else if (location.pathname.indexOf('nfts/sets') > 0) {
       this.getNFTsets();
