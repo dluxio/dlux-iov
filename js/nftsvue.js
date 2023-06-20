@@ -2260,16 +2260,15 @@ function bidNFT(setname, uid, bid_amount, type, callback){
   },
   mounted() {
     //get hash and set it
-    this.jsontoken = location.hash.replace('#', '') || 'dlux'
-    for (var chain in this.chains) {
-      this.chains[chain].enabled = false;
-    }
-    this.chains[this.jsontoken].enabled = true;
     var setName = location.pathname.split("set/")[1];
     this.setname = setName;
     if (setName) {
+      this.jsontoken = location.hash.replace('#', '') || 'dlux'
+      for (var chain in this.chains) {
+        this.chains[chain].enabled = false;
+      }
+      this.chains[this.jsontoken].enabled = true;
       this.getNFTset(setName, this.jsontoken);
-      console.log(setName, this.jsontoken);
     } else if (location.pathname.indexOf('nfts/sets') > 0) {
       this.getNFTsets();
     }
