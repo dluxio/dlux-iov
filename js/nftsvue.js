@@ -1736,6 +1736,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               }
               // spread init over data.result[i]
               data.set = { ...init, ...data.set }
+              this.ready = true;
               this.chains[chain].sets[set] = data.set;
               this.allNFTs = [...this.allNFTs, ...data.result];
               this.allSearchNFTs = [...this.allSearchNFTs, ...data.result]
