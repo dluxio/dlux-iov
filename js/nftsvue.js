@@ -2258,7 +2258,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
   },
   mounted() {
     //get hash and set it
-    this.jsontoken = location.hash || 'dlux'
+    this.jsontoken = location.hash.replace('#', '') || 'dlux'
     for (var chain in this.chains) {
       this.chains[chain].enabled = false;
     }
