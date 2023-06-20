@@ -134,7 +134,7 @@
                     -->
                     <div class="col-6 col-lg-3 d-flex text-center flex-column p-2">
                       <div>
-                        <h3 class="mb-0" v-cloak><i class="fa-solid fa-user-astronaut me-1"></i>{{chains[jsontoken].sets[setname]Calc.owners}}
+                        <h3 class="mb-0" v-cloak><i class="fa-solid fa-user-astronaut me-1"></i>{{chains[jsontoken].sets[setname].owners}}
                         </h3>
                       </div>
                       <div>owners</div>
@@ -142,7 +142,7 @@
                     <div class="col-6 col-lg-3 d-flex text-center flex-column p-2">
                       <div>
                         <h3 class="mb-0" v-cloak><i class="fa-solid fa-star me-1"></i>{{chains[jsontoken].sets[setname].minted -
-                          chains[jsontoken].sets[setname]Calc.deleted}}</h3>
+                          chains[jsontoken].sets[setname].deleted}}</h3>
                       </div>
                       <div>items</div>
                     </div>
@@ -150,7 +150,7 @@
                       <div>
                         <h3 class="mb-0" v-cloak>
                           <cycle-text
-                            :items="[sigFig(chains[jsontoken].sets[setname]Calc.sf.HIVE/1000, 2) + ' HIVE', sigFig(chains[jsontoken].sets[setname]Calc.sf.HBD/1000, 2) + ' HBD', sigFig(chains[jsontoken].sets[setname]Calc.sf.TOKEN/1000, 2) + ' ' + TOKEN]"
+                            :items="[sigFig(chains[jsontoken].sets[setname].sf.HIVE/1000, 2) + ' HIVE', sigFig(chains[jsontoken].sets[setname].sf.HBD/1000, 2) + ' HBD', sigFig(chains[jsontoken].sets[setname].sf.TOKEN/1000, 2) + ' ' + TOKEN]"
                             :interval="5000" />
                         </h3>
                       </div>
@@ -160,7 +160,7 @@
                       <div>
                         <h3 class="mb-0" v-cloak>
                           <cycle-text
-                            :items="[chains[jsontoken].sets[setname]Calc.af.HIVE/1000 + ' HIVE', chains[jsontoken].sets[setname]Calc.af.HBD/1000 + ' HBD', chains[jsontoken].sets[setname]Calc.af.TOKEN/1000 + ' ' + TOKEN]"
+                            :items="[chains[jsontoken].sets[setname].af.HIVE/1000 + ' HIVE', chains[jsontoken].sets[setname].af.HBD/1000 + ' HBD', chains[jsontoken].sets[setname].af.TOKEN/1000 + ' ' + TOKEN]"
                             :interval="5000" />
                         </h3>
                       </div>
@@ -172,14 +172,14 @@
                     <div class="progress bg-secondary mb-3" style="height: 40px;">
                       <!--burned-->
                       <div class="progress-bar" style="background-color: rgb(133, 64, 64);" role="progressbar"
-                        :style="{'width': ((chains[jsontoken].sets[setname]Calc.deleted/chains[jsontoken].sets[setname].max)*100) + '%'}" aria-valuenow="0"
+                        :style="{'width': ((chains[jsontoken].sets[setname].deleted/chains[jsontoken].sets[setname].max)*100) + '%'}" aria-valuenow="0"
                         aria-valuemin="0" aria-valuemax="100">
                         <span><i class="me-1 fa-solid fa-fire"></i></span>
-                        <span v-cloak>{{formatNumber(((chains[jsontoken].sets[setname]Calc.deleted/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
+                        <span v-cloak>{{formatNumber(((chains[jsontoken].sets[setname].deleted/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
                       </div>
                       <!--opened-->
                       <div class="progress-bar" style="background-color: rgb(60, 60, 138);" role="progressbar"
-                        :style="{'width': (((chains[jsontoken].sets[setname].minted-chains[jsontoken].sets[setname]Calc.deleted)/chains[jsontoken].sets[setname].max)*100) + '%'}"
+                        :style="{'width': (((chains[jsontoken].sets[setname].minted-chains[jsontoken].sets[setname].deleted)/chains[jsontoken].sets[setname].max)*100) + '%'}"
                         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                         <span><i class="me-1 fa-solid fa-box-open"></i></span>
                         <span v-cloak>{{formatNumber(((chains[jsontoken].sets[setname].minted/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
@@ -197,7 +197,7 @@
                     <div class="d-flex justify-content-between align-items-center text-center">
                       <div v-cloak class="col-3 p-2 d-flex flex-column">
                         <h5 class="mb-1"><i class="fa-solid fa-fire"></i></h3><span
-                            class="mb-2 small">burned</span><span>{{chains[jsontoken].sets[setname]Calc.deleted}}</span>
+                            class="mb-2 small">burned</span><span>{{chains[jsontoken].sets[setname].deleted}}</span>
                       </div>
                       <div v-cloak class="col-3 p-2 d-flex flex-column">
                         <h5 class="mb-1"><i class="fa-solid fa-box-open"></i></h3><span class="mb-2 small">opened</span>
@@ -222,7 +222,7 @@
                       <div class="pr-2"><small>MINT MARKET: </small></div>
                       <div class="px-2">
                         <h2 class="m-0">
-                          <div>{{formatNumber((chains[jsontoken].sets[setname]Calc.forAuctionMint + chains[jsontoken].sets[setname]Calc.forSaleMint),0,'.',',')}}
+                          <div>{{formatNumber((chains[jsontoken].sets[setname].forAuctionMint + chains[jsontoken].sets[setname].forSaleMint),0,'.',',')}}
                           </div>
                         </h2>
                       </div>
@@ -791,11 +791,11 @@
                               :class="{'active':NFTselect.searchDeep && ! NFTselect.searchDeepK}" href="#/"
                               @click="setValue('NFTselect.searchDeep',true);setValue('NFTselect.searchDeepK', false)">Search
                               Attributes</a></li>
-                          <li v-if="!chains[jsontoken].sets[setname]Calc.attributeKeys.length"><a class="dropdown-item"
+                          <li v-if="!chains[jsontoken].sets[setname].attributeKeys.length"><a class="dropdown-item"
                               :class="{'active':NFTselect.searching}" href="#/"
                               @click="selectNFTs(true, true);setValue('NFTselect.searchDeepK', true)">Index
                               Set (Pre-Search)</a></li>
-                          <li v-if="chains[jsontoken].sets[setname]Calc.attributeKeys.length"><a class="dropdown-item"
+                          <li v-if="chains[jsontoken].sets[setname].attributeKeys.length"><a class="dropdown-item"
                               :class="{'active':NFTselect.searchDeepK}" href="#/"
                               @click="setValue('NFTselect.searchDeepK', true)">Search
                               in Attribute</a></li>
@@ -811,7 +811,7 @@
                           <span v-if="!NFTselect.searchDeepKey">Select</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownFilterButton2">
-                          <li v-for="k in chains[jsontoken].sets[setname]Calc.attributeKeys"><a class="dropdown-item"
+                          <li v-for="k in chains[jsontoken].sets[setname].attributeKeys"><a class="dropdown-item"
                               :class="{'active':k == NFTselect.searchDeepKey}" href="#/"
                               @click="setValue('NFTselect.searchDeepKey',k)">{{k}}</a>
                           </li>
@@ -825,10 +825,10 @@
                           <span v-else>Select</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownFilterButton3">
-                          <li v-for="l in chains[jsontoken].sets[setname]Calc.attributes[NFTselect.searchDeepKey]">
+                          <li v-for="l in chains[jsontoken].sets[setname].attributes[NFTselect.searchDeepKey]">
                             <a class="dropdown-item" :class="{'active': includes}" href="#/"
                               @click="setValue('NFTselect.searchTerm', l);selectNFTs()">{{l}}
-                              ({{chains[jsontoken].sets[setname]Calc.attributesC[NFTselect.searchDeepKey][l]}})</a>
+                              ({{chains[jsontoken].sets[setname].attributesC[NFTselect.searchDeepKey][l]}})</a>
                           </li>
                         </ul>
                       </li>
