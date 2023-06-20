@@ -60,6 +60,7 @@ var app = new Vue({
   el: "#app", // vue 2
   data() {
     return {
+      ready: false,
       ohlcv: [],
       toSign: {},
       chains: {
