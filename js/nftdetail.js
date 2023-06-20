@@ -148,7 +148,7 @@ export default {
                                                                 </div>
                                                             </div>
                                                             <div class="text-center">
-                                                                <button @click="giveNFT(itemmodal.item)" id="giveNFTbutton" class="btn btn-info my-2" type="submit">Give</button>
+                                                                <button @click="giveNFT(itemmodal.item)" id="giveNFTbutton" class="btn btn-info my-2" type="button">Give</button>
                                                             </div>
                                                         </form>
                                                     </div>
@@ -198,7 +198,7 @@ export default {
                                                                 </div>
                                                             </div>
                                                             <div class="text-center">
-                                                                <button @click="tradeNFT(itemmodal.item)" id="tradeNFTbutton" class="btn btn-info my-2" type="submit">
+                                                                <button @click="tradeNFT(itemmodal.item)" id="tradeNFTbutton" class="btn btn-info my-2" type="button">
                                                                     Propose Trade
                                                                 </button>
                                                             </div>
@@ -241,7 +241,7 @@ export default {
                                                                 </p>
                                                             </div>
                                                             <div class="text-center">
-                                                                <button @click="sellNFT(itemmodal.item)" id="sellNFTbutton" class="btn btn-info my-2" type="submit">
+                                                                <button @click="sellNFT(itemmodal.item)" id="sellNFTbutton" class="btn btn-info my-2" type="button">
                                                                     List Item
                                                                 </button>
                                                             </div>
@@ -313,7 +313,7 @@ export default {
                                                                 </p>
                                                             </div>
                                                             <div class="text-center">
-                                                                <button @click="auctionNFT(itemmodal.item)" class="btn btn-info my-2" type="submit">
+                                                                <button @click="auctionNFT(itemmodal.item)" class="btn btn-info my-2" type="button">
                                                                     List Item
                                                                 </button>
                                                             </div>

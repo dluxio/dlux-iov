@@ -929,7 +929,7 @@ export default {
         <ul class="navbar-nav me-auto">
           <li><a class="navbar-brand" href="/"><img src="/img/dlux-hive-logo-alpha.svg" alt="dlux-logo" width="40" height="40"></a></li> 
           <li class="nav-item"><a class="nav-link" href="/hub/"><i class="fa-solid fa-mountain-sun me-2"></i>HUB</a></li>
-          <li class="nav-item"><a class="nav-link" href="/nfts/sets/"><i class="fa-solid fa-store me-2"></i>NFTS</a></li>
+          <li class="nav-item"><a class="nav-link" href="/nfts/"><i class="fa-solid fa-store me-2"></i>NFTS</a></li>
           <li class="nav-item"><a class="nav-link" href="/dex/"><i class="fa-solid fa-building-columns me-2"></i>DEX</a></li>
           <li class="nav-item"><a class="nav-link" href="/docs/"><i class="fa-solid fa-book me-2"></i>DOCS</a></li>
         </ul>
@@ -1000,7 +1000,7 @@ export default {
     <div>
       <ul class="navbar-nav">      
         <li class="nav-item"><a class="nav-link text-white-50" href="/hub/"><i class="fa-solid fa-mountain-sun mx-3"></i>HUB</a></li>
-        <li class="nav-item"><a class="nav-link text-white-50" href="/nfts/sets/"><i class="fa-solid fa-store mx-3"></i>NFTS</a></li>
+        <li class="nav-item"><a class="nav-link text-white-50" href="/nfts/"><i class="fa-solid fa-store mx-3"></i>NFTS</a></li>
         <li class="nav-item"><a class="nav-link text-white-50" href="/dex/"><i class="fa-solid fa-building-columns mx-3"></i>DEX</a></li>
         <li class="nav-item"><a class="nav-link text-white-50" href="/docs/"><i class="fa-solid fa-book mx-3"></i>DOCS</a></li>
       </ul>
