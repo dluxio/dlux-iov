@@ -12706,6 +12706,10 @@ td {
   border-bottom-left-radius: 0.5rem !important;
 }
 
+.bottom-shadow {
+  box-shadow: 0 4px 2px -2px black;
+}
+
 .max-160 {
   max-width: 160px;
 }
@@ -13065,6 +13069,10 @@ td {
 
 .text-hbd {
   color: #00960f !important;
+}
+
+.bg-hbd {
+  background-color: #00960f !important;
 }
 
 .border-hbd {

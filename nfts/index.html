@@ -15,6 +15,62 @@
     <!-- Icons -->
     <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
     <script type="module" src="/js/nftsvue.js"></script>
+    <style>
+        .circle {
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            border-radius: 50%;
+            font-size: 25px;
+            color: #fff;
+            text-align: center;
+            background: #000;
+        }
+
+        .circle2 {
+            width: 75px;
+            height: 75px;
+            line-height: 75px;
+            border-radius: 50%;
+            font-size: 50px;
+            color: crimson;
+            text-align: center;
+            background: #000;
+        }
+
+        .arrow {
+            position: absolute;
+            background: #ffc107;
+            border-radius: 50%;
+            border: black thick solid;
+            text-align: center;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4rem;
+            height: 4rem;
+            z-index: 1;
+            color: crimson;
+        }
+
+        .arrow2 {
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+
+        .card-ft {
+            width: 26em;
+        }
+
+        .shimmer {
+            background-image: linear-gradient(to right,
+                    rgb(194, 255, 182),
+                    rgb(255, 163, 182),
+                    rgb(221, 169, 255),
+                    rgb(162, 209, 255));
+        }
+    </style>
 </head>
 
 <body class="d-flex flex-column h-100 padme-t70 text-white" id="index">
@@ -24,49 +80,439 @@
                 @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" @refresh="run($event)"
                 :op="toSign" :lapi="lapi" />
         </div>
-        <main role="main" class="flex-shrink-0">
+        <main role="main">
             <div class="container" style="max-width: 1800px !important">
-                <!-- NFT Auction -->
-                <div class="d-flex justify-content-between align-items-center border-bottom border-5 border-light">
-                    <h1 class="text-white p-0 m-0">NFT Auctions</h1>
-                </div>
-                <div class="row row-cols-xl-6 row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
-                    <!-- NFTCARD REPEAT AUCTION -->
-                    <div class="col my-2" v-for="(item, name, index) in auctions">
-                        <nftcard 
-                        :item="item" 
-                        :uid="Base64toNumber(item.uid)" 
-                        :icon="getIcon(item.script)"
-                        :colors="getSetDetailsColors(item.script)" 
-                        :index="index"
-                        auction="true"
-                        :account="account"
-                        @detail="modalIndex('itemModal', $event, 'auctions');itemModal.hidden = false" />
+                <div class="px-5 py-2 mt-2 mb-2 rounded-3 card">
+                    <div class="d-flex flex-wrap">
+                        <div class="py-5">
+                            <h1 class="display-5 fw-bold">Discover, collect, and sell NFTs</h1>
+                            <p class="col-md-8 fs-4">All with no gas fees at near cost</p>
+                            <div class="d-flex">
+                                <a class="btn btn-primary btn-lg me-2" type="button" href="sets">Explore</a>
+                                <a class="btn btn-secondary btn-lg" type="button" href="create">Create</a>
+                            </div>
+                        </div>
+                        <div class="d-flex ms-auto">
+                            <div class="mt-auto mb-auto" style="width: 350px">
+                                <div class="my-0 py-1 px-2 bg-darker rounded-top">
+                                    <div class="d-flex align-items-center mt-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="circle2 d-flex align-items-center justify-content-around">
+                                                <img src="/img/dlux-hive-logo-alpha.svg" width="50px">
+                                            </div>
+                                            <h2 class="p-0 m-0 ms-2 font-weight-bold">DLUX</h2>
+                                        </div>
+                                        <div class="ms-auto"><a href="/about/" class="no-decoration"
+                                                style="color:silver">About<i class="fas fa-info-circle ms-1"></i></a>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-around my-0">
+                                        <div class="d-flex align-items-center px-3">
+
+                                            <h3 class="py-2 m-0 font-weight-bolder" style="color:#21FFB5">
+                                                999,999,999.999
+                                            </h3>
+                                        </div>
+                                    </div>
+                                    <div class="mt-1 text-end">
+                                        <button class="btn btn-outline-primary btn-sm" href="#buyDluxModal" class="a-1"
+                                            data-bs-toggle="modal">
+                                            Get DLUX
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="bg-darker">
+                                    <div class="bg-hive">
+                                        <div class="bg-darker rounded-bottom bottom-shadow" style="line-height: 10px">
+                                            &nbsp;</div>
+                                        <div class="mx-2 mt-2 d-flex">
+                                            <p class="m-0"><b><i class="fab fa-hive"></i> HIVE</b></p>
+                                            <p class="ms-auto small mb-0 text-white-50">
+                                                {{barhive}}</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-hbd rounded-bottom bottom-shadow">
+                                    <div class="rounded-bottom">
+                                        <div class="bg-hive rounded-bottom bottom-shadow" style="line-height: 10px;">
+                                            &nbsp;</div>
+                                    </div>
+                                    <div class="my-2 mx-2 d-flex">
+                                        <p class="m-0"><b><i class="fab fa-hive"></i> HBD</b></p>
+                                        <p class="ms-auto small text-white-50">
+                                            {{barhbd}}</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <!-- NFT SALES -->
-                <div class="d-flex justify-content-between align-items-center border-bottom border-5 border-light">
-                    <h1 class="text-white p-0 m-0">NFT Sales</h1>
+                <!-- ACTION BAR -->
+                <div class="d-flex">
+                    <!-- Chain -->
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Chain
+                        </button>
+                        <ul class="dropdown-menu bg-black">
+                            <li>
+                                <div class="py-1 px-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="dluxChainCheck">
+                                        <label class="form-check-label" for="dluxChainCheck">
+                                            DLUX
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="py-1 px-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="duatChainCheck">
+                                        <label class="form-check-label" for="duatChainCheck">
+                                            DUAT
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- Set -->
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Set
+                        </button>
+                        <ul class="dropdown-menu bg-black">
+                            <li>
+                                <div class="py-1 px-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="dluxSetCheck">
+                                        <label class="form-check-label" for="dluxSetCheck">
+                                            DLUX Founders
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="py-1 px-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="bzSetCheck">
+                                        <label class="form-check-label" for="bzSetCheck">
+                                            Beez
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="py-1 px-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="hfSetCheck">
+                                        <label class="form-check-label" for="hfSetCheck">
+                                            Hive Folks
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- Status -->
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Status
+                        </button>
+                        <ul class="dropdown-menu bg-black">
+                            <li>
+                                <div class="py-1 px-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="listedStatusCheck">
+                                        <label class="form-check-label" for="listedStatusCheck">
+                                            Listed
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="py-1 px-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value=""
+                                            id="auctionStatusCheck">
+                                        <label class="form-check-label" for="auctionStatusCheck">
+                                            On Auction
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="py-1 px-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="bidsStatusCheck">
+                                        <label class="form-check-label" for="bidsStatusCheck">
+                                            Has Bids
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="py-1 px-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value=""
+                                            id="affordableStatusCheck">
+                                        <label class="form-check-label" for="affordableStatusCheck">
+                                            Affordable
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="py-1 px-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="mintStatusCheck">
+                                        <label class="form-check-label" for="mintStatusCheck">
+                                            Mint
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="py-1 px-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="mineStatusCheck">
+                                        <label class="form-check-label" for="mineStatusCheck">
+                                            Yours
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- Currency -->
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Currency
+                        </button>
+                        <ul class="dropdown-menu bg-black">
+                            <li>
+                                <div class="py-1 px-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="dluxCurrencyCheck">
+                                        <label class="form-check-label" for="dluxCurrencyCheck">
+                                            DLUX
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="py-1 px-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="hiveCurrencyCheck">
+                                        <label class="form-check-label" for="hiveCurrencyCheck">
+                                            HIVE
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="py-1 px-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="hbdCurrencyCheck">
+                                        <label class="form-check-label" for="hbdCurrencyCheck">
+                                            HBD
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="position-relative me-2 flex-grow-1">
+                        <span class="position-absolute top-50 translate-middle-y ps-2"><i
+                                class="fa-solid fa-magnifying-glass fa-fw"></i></span>
+                        <input class="ps-4 form-control border-white" type="search"
+                            placeholder="Search Set, UID, Seller">
+                    </div>
+                    <!-- Sort -->
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Sort
+                        </button>
+                        <ul class="dropdown-menu bg-black">
+                            <li>
+                                <a class="dropdown-item" role="button">Price low to high</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" role="button">Price high to low</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" role="button">Time ending soonest</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" role="button">Time ending latest</a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="row row-cols-xxl-6 row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
+                    <!-- NFTCARD REPEAT AUCTION -->
+                    <div class="col my-2" v-for="(item, name, index) in auctions">
+                        <nftcard :item="item" :uid="Base64toNumber(item.uid)" :icon="getIcon(item.script)"
+                            :colors="getSetDetailsColors(item.script)" :index="index" auction="true" :account="account"
+                            @detail="modalIndex('itemModal', $event, 'auctions');itemModal.hidden = false" />
+                    </div>
                     <!-- NFTCARD REPEAT SALE -->
                     <div class="col my-2" v-for="(item, name, index) in sales">
-                        <nftcard 
-                        :item="item" 
-                        :uid="Base64toNumber(item.uid)" 
-                        :icon="getIcon(item.script)"
-                        :colors="getSetDetailsColors(item.script)" 
-                        :index="index"
-                        sale="true"
-                        :account="account"
-                        @detail="modalIndex('itemModal', $event, 'sales');itemModal.hidden = false" />
+                        <nftcard :item="item" :uid="Base64toNumber(item.uid)" :icon="getIcon(item.script)"
+                            :colors="getSetDetailsColors(item.script)" :index="index" sale="true" :account="account"
+                            @detail="modalIndex('itemModal', $event, 'sales');itemModal.hidden = false" />
                     </div>
                 </div>
             </div>
-        <div>
-            <nftdetail :sets="focusSet" :account="account" :itemmodal="itemModal" :pfp="pfp"
-            @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
-        </div>
+            <!-- Get DLUX Modal-->
+            <div class="modal fade" id="buyDluxModal" tabindex="-1" role="dialog" aria-labelledby="buyDluxModalTitle"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document" id="buy-modal">
+                    <div class="modal-content">
+                        <form class="needs-validation" novalidate id="marketorderform"
+                            action="javascript:buyDEX('markethive.value','markethbd.value','marketqty.value','markettime.value')">
+                            <input id="markethbd" value="0" class="d-none">
+                            <input id="marketqty" value="0" class="d-none">
+                            <input id="markettime" value="0" class="d-none">
+                            <div class="modal-header d-flex flex-fill justify-content-between align-items-center">
+                                <h5 class="modal-title">MARKET ORDER</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="small text-white-50">Market Orders utilize multisig to
+                                    complete partial fills of open orders on the <a href="/dex">DEX</a>, starting
+                                    with the lowest rate to ensure you're getting the best
+                                    price.</p>
+                                <p class="small text-white-50"> If no orders are available, the
+                                    ICO price of 1 HIVE per 1 DLUX is in effect.</p>
+                                <div class="d-flex flex-column">
+                                    <div class="d-flex flex-column flex-fill rounded-top p-3 bg-darker">
+                                        <div class="d-flex flex-row flex-fill align-items-center">
+                                            <p style="font-size: 18px;" class="p-0 m-0 font-weight-light">From</p>
+                                            <div class="d-flex ms-auto align-items-baseline">
+                                                <div class="d-flex small justify-content-between">
+                                                    <p class="my-0 text-white-50">Available<i
+                                                            class="fab fa-hive mx-1"></i></p>
+                                                    <p class="my-0 text-primary">
+                                                        balance
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex flex-row flex-fill mt-1">
+                                            <div class="d-flex align-items-center">
+                                                <div class="circle2"><i class="fab fa-hive"></i>
+                                                </div>
+                                                <h2 class="p-0 m-0 ms-2 font-weight-bold">HIVE
+                                                </h2>
+                                            </div>
+                                            <div class="d-flex ms-auto flex-column">
+                                                <p class="ms-auto my-0 text-white-50 font-weight-bolder"
+                                                    style="font-size: 30px;">
+                                                    <input class="form-control text-white"
+                                                        style="background-color: rgba(0,0,0,0.5); max-width: 150px"
+                                                        id="markethive" value="1" placeholder="0" type="number"
+                                                        min="0.004" step="0.001" required
+                                                        max="accountapi.data.result[0].balance.split(' ')[0]">
+                                                </p>
+                                                <p class="ms-auto my-0 text-muted font-weight-bold"
+                                                    style="font-size: 16px;">&asymp;
+                                                    hiveprice
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <div></div>
+                                            <div>
+                                                <button class="btn btn-outline-secondary btn-sm text-muted"
+                                                    type="button" data-bs-toggle="collapse"
+                                                    data-bs-target="#collapseExample" aria-expanded="false"
+                                                    aria-controls="collapseExample"><i
+                                                        class="fas fa-info-circle"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="collapse" id="collapseExample">
+                                            <div class="d-flex">
+                                                <p style="font-size: 18px;"
+                                                    class="p-0 m-0 text-white-50 font-weight-light">
+                                                    Rate</p>
+                                                <p style="font-size: 16px;" class="p-0 m-0 text-white-50 ms-auto">1 HIVE
+                                                    &asymp; amount DLUX</p>
+                                            </div>
+                                            <div class="d-flex">
+                                                <p style="font-size: 12px;"
+                                                    class="p-0 m-0 text-muted ms-auto text-success">
+                                                    1 DLUX &asymp; amount
+                                                    HIVE</p>
+                                            </div>
+                                            <hr width="100%" style="border: #333 thin solid">
+                                            <div class="d-flex">
+                                                <p style="font-size: 18px;"
+                                                    class="p-0 m-0 text-white-50 font-weight-light">
+                                                    Swap Fee<small
+                                                        class="rounded-pill border border-secondary py-05 px-1 ms-1">0.1%</small>
+                                                </p>
+                                                <p style="font-size: 16px;" class="p-0 m-0 text-white-50 ms-auto">
+                                                    &asymp;
+                                                    <input id="marketfee" class="d-none"
+                                                        value="((markethive.value/dexview1.data[0].rate)*0.001).formatNumber(3,'.',',')">
+                                                    fee DLUX
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="p-0 m-0 bg-dark">
+                                        <div class="arrow2 rounded-circle border border-warning bg-darker text-warning">
+                                            <h1 class="m-2 px-2 py-1"><i class="fas fa-angle-double-down"></i></h1>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex flex-column flex-fill rounded-bottom p-3 border border-warning"
+                                        style="background: radial-gradient(#222,#111);">
+                                        <div class="d-flex flex-row flex-fill align-items-center">
+                                            <p style="font-size: 18px;" class="p-0 m-0 font-weight-light">To</p>
+                                        </div>
+                                        <div class="d-flex flex-row flex-fill mt-1 align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                <div class="circle2 d-flex align-items-center justify-content-around">
+                                                    <img src="/img/dlux-hive-logo-alpha.svg" width="70%">
+                                                </div>
+                                                <h2 class="p-0 m-0 ms-2 font-weight-bold">DLUX
+                                                </h2>
+                                            </div>
+                                            <div class="d-flex ms-auto">
+                                                <p class="ms-auto my-0 text-warning font-weight-bolder"
+                                                    style="font-size: 30px;">&asymp;
+                                                    value
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <p class="pt-3">DLUX is your ticket to the metaverse.
+                                            Purchase NFTs, power-up to vote on proposals, and
+                                            use it across a variety of XR games and apps.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="d-flex justify-content-around">
+                                    <button type="submit" class="btn btn-lg btn-primary">Convert</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- NFT Detail Modal -->
+            <div>
+                <nftdetail :sets="focusSet" :account="account" :itemmodal="itemModal" :pfp="pfp"
+                    @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
+            </div>
     </div>
     </main>
     <div>
