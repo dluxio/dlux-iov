@@ -638,7 +638,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
             this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
           }
           auctionlabel: for(var i = 0; i < this.chains[chain].sets[set].auctions.length; i++){
-            if(!this.selectors.['At Auction'])break auctionlabel;
+            if(!this.selectors['At Auction'])break auctionlabel;
             this.displayNFTs.push(this.chains[chain].sets[set].auctions[i])
           }
         }
