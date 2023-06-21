@@ -634,11 +634,11 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
         setlabel: for(var set in this.chains[chain].sets){
           if(!this.chains[chain].sets[set].enabled)continue setlabel;
           salelabel: for(var i = 0; i < this.chains[chain].sets[set].sales.length; i++){
-            if(!this.selectors.Listed)break salelabel;
+            if(!this.selectors.Listed.checked)break salelabel;
             this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
           }
           auctionlabel: for(var i = 0; i < this.chains[chain].sets[set].auctions.length; i++){
-            if(!this.selectors['At Auction'])break auctionlabel;
+            if(!this.selectors['At Auction'].checked)break auctionlabel;
             this.displayNFTs.push(this.chains[chain].sets[set].auctions[i])
           }
         }
