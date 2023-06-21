@@ -148,18 +148,28 @@ var app = new Vue({
       node: "",
       showTokens: {},
       denoms: {
-        HIVE: true,
-        HBD: true,
-        NATIVE: true,
+        HIVE: {
+          checked: true},
+        HBD: {
+          checked: true},
+        NATIVE: {
+          checked: true},
       },
       selectors: {
-        Listed: true,
-        ["At Auction"]: true,
-        ['Has Bids']: true,
-        ['Your Bids']: true,
-        Affordable: true,
-        Mint: true,
-        Yours: true,
+        Listed: {
+          checked: true},
+        ["At Auction"]: {
+          checked: true},
+        ['Has Bids']: {
+          checked: true},
+        ['Your Bids']: {
+          checked: true},
+        Affordable: {
+          checked: true},
+        Mint: {
+          checked: true},
+        Yours: {
+          checked: true},
       },
       behind: "",
       stats: {},
