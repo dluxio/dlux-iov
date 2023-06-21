@@ -159,7 +159,7 @@
                             <li v-for="(item, name, index) in chains">
                                 <div class="py-1 px-2">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" v-model="chains[name].enabled" :id="name +'ChainCheck'">
+                                        <input @change="displaynfts()" class="form-check-input" type="checkbox" v-model="chains[name].enabled" :id="name +'ChainCheck'">
                                         <label class="form-check-label" :for="name +'ChainCheck'">
                                             {{name}}
                                         </label>
@@ -179,7 +179,7 @@
                                 <li v-for="(set, setname, setindex) in chains[name].sets">
                                     <div class="py-1 px-2">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" v-model="chains[name].sets[setname].enabled" :id="setname + 'SetCheck'">
+                                            <input @change="displaynfts()" class="form-check-input" type="checkbox" v-model="chains[name].sets[setname].enabled" :id="setname + 'SetCheck'">
                                             <label class="form-check-label" :for="setname + 'SetCheck'">
                                                 {{set.name_long}}
                                             </label>
@@ -199,7 +199,7 @@
                             <li v-for="(item, name, index) in selectors">
                                 <div class="py-1 px-2">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" v-model="item.checked" :id="name + 'StatusCheck'">
+                                        <input @change="displaynfts()" class="form-check-input" type="checkbox" v-model="item.checked" :id="name + 'StatusCheck'">
                                         <label class="form-check-label" :for="name + 'StatusCheck'">
                                             {{name}}
                                         </label>
@@ -218,7 +218,7 @@
                             <li v-for="(item, name, index) in denoms">
                                 <div class="py-1 px-2">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" v-model="item.checked" :id="name + 'CurrencyCheck'">
+                                        <input @change="displaynfts()" class="form-check-input" type="checkbox" v-model="item.checked" :id="name + 'CurrencyCheck'">
                                         <label class="form-check-label" :for="name + 'CurrencyCheck'">
                                             {{name}}
                                         </label>
@@ -230,7 +230,7 @@
                     <div class="position-relative me-2 flex-grow-1">
                         <span class="position-absolute top-50 translate-middle-y ps-2"><i
                                 class="fa-solid fa-magnifying-glass fa-fw"></i></span>
-                        <input class="ps-4 form-control border-white" type="search"
+                        <input @change="displaynfts()" class="ps-4 form-control border-white" type="search" v-model="NFTselect.search"
                             placeholder="Search Set, UID, Seller">
                     </div>
                     <!-- Sort -->
@@ -241,32 +241,26 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end bg-black">
                             <li>
-                                <a class="dropdown-item" role="button">Price low to high</a>
+                                <a @click="NFTselect.dir='asc';NFTselect.sort='price';displaynfts()" class="dropdown-item" role="button">Price low to high</a>
                             </li>
                             <li>
-                                <a class="dropdown-item" role="button">Price high to low</a>
+                                <a @click="NFTselect.dir='dec';NFTselect.sort='price';displaynfts()" class="dropdown-item" role="button">Price high to low</a>
                             </li>
                             <li>
-                                <a class="dropdown-item" role="button">Time ending soonest</a>
+                                <a @click="NFTselect.dir='asc';NFTselect.sort='time';displaynfts()" class="dropdown-item" role="button">Time ending soonest</a>
                             </li>
                             <li>
-                                <a class="dropdown-item" role="button">Time ending latest</a>
+                                <a @click="NFTselect.dir='dec';NFTselect.sort='time';displaynfts()" class="dropdown-item" role="button">Time ending latest</a>
                             </li>
                         </ul>
                     </div>
                 </div>
                 <div class="row row-cols-xxl-6 row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
                     <!-- NFTCARD REPEAT AUCTION -->
-                    <div class="col my-2" v-for="(item, name, index) in auctions">
+                    <div class="col my-2" v-for="(item, name, index) in displayNFTs">
                         <nftcard :item="item" :uid="Base64toNumber(item.uid)" :icon="getIcon(item.script)"
-                            :colors="getSetDetailsColors(item.script)" :index="index" auction="true" :account="account"
-                            @detail="modalIndex('itemModal', $event, 'auctions');itemModal.hidden = false" />
-                    </div>
-                    <!-- NFTCARD REPEAT SALE -->
-                    <div class="col my-2" v-for="(item, name, index) in sales">
-                        <nftcard :item="item" :uid="Base64toNumber(item.uid)" :icon="getIcon(item.script)"
-                            :colors="getSetDetailsColors(item.script)" :index="index" sale="true" :account="account"
-                            @detail="modalIndex('itemModal', $event, 'sales');itemModal.hidden = false" />
+                            :colors="getSetDetailsColors(item.script)" :index="index" :auction="item.auction" :sale="item.sale" :account="account"
+                            @detail="modalIndex('itemModal', $event, 'displayNFTs');itemModal.hidden = false" />
                     </div>
                 </div>
             </div>

@@ -627,6 +627,23 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
         }
       })
     },
+    displaynfts(){
+      this.displayNFTs = []
+      chainlabel: for(var chain in this.chains){
+        if(!this.chains[chain].enabled)continue chainlabel;
+        setlabel: for(var set in this.chains[chain].sets){
+          if(!this.chains[chain].sets[set].enabled)continue setlabel;
+          salelabel: for(var i = 0; i < this.chains[chain].sets[set].sales.length; i++){
+            if(!this.selectors.Listed)break salelabel;
+            this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
+          }
+          auctionlabel: for(var i = 0; i < this.chains[chain].sets[set].auctions.length; i++){
+            if(!this.selectors.['At Auction'])break auctionlabel;
+            this.displayNFTs.push(this.chains[chain].sets[set].auctions[i])
+          }
+        }
+      }
+    },
     ipfsUpload(event) {
       console.log("1", event);
       var rawHeaders = localStorage.getItem(`${this.account}:auth`)
@@ -1816,8 +1833,10 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                         ...this.price[set][this.chains[chain].sets[set].auctions[index].uid],
                         ...d
                       }
+                      this.chains[chain].sets[set].auctions[index].auction = true
                       this.chains[chain].sets[set].auctions[index].token = chain
                       this.auctions.push(this.chains[chain].sets[set].auctions[index])
+                      this.displayNFTs.push(this.chains[chain].sets[set].auctions[index])
                     })
                   }
                 });
@@ -1849,8 +1868,10 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                         ...presales[index],
                         ...d
                       }
+                      presales[index].sale = true
                       presales[index].token = chain
                       this.sales.push(presales[index])
+                      this.displayNFTs.push(presales[index])
                     })
                   }
                 });
