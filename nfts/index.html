@@ -175,36 +175,18 @@
                             Set
                         </button>
                         <ul class="dropdown-menu bg-black">
-                            <li>
-                                <div class="py-1 px-2">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="dluxSetCheck">
-                                        <label class="form-check-label" for="dluxSetCheck">
-                                            DLUX Founders
-                                        </label>
+                            <div v-for="(item, name, index) in chains">
+                                <li v-for="(set, setname, setindex) in chains[name].sets">
+                                    <div class="py-1 px-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" v-model="chains[name].sets[setname].enabled" :id="setname + 'SetCheck'">
+                                            <label class="form-check-label" :for="setname + 'SetCheck'">
+                                                {{set.name_long}}
+                                            </label>
+                                        </div>
                                     </div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="py-1 px-2">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="bzSetCheck">
-                                        <label class="form-check-label" for="bzSetCheck">
-                                            Beez
-                                        </label>
-                                    </div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="py-1 px-2">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="hfSetCheck">
-                                        <label class="form-check-label" for="hfSetCheck">
-                                            Hive Folks
-                                        </label>
-                                    </div>
-                                </div>
-                            </li>
+                                </li>
+                            </div>
                         </ul>
                     </div>
                     <!-- Status -->

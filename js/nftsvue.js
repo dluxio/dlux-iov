@@ -1627,6 +1627,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                   const init = {
                     owners: 0,
                     deleted: 0,
+                    enabled: true,
                     af: {
                       HIVE: 0,
                       HBD: 0,
@@ -1707,6 +1708,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               const init = {
                 owners: 0,
                 deleted: 0,
+                enabled: true,
                 af: {
                   HIVE: 0,
                   HBD: 0,
