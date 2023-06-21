@@ -1750,6 +1750,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 owners: 0,
                 deleted: 0,
                 enabled: true,
+                sales: [],
+                auctions: [],
                 af: {
                   HIVE: 0,
                   HBD: 0,
@@ -1870,7 +1872,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                       }
                       presales[index].sale = true
                       presales[index].token = chain
-                      this.sales.push(presales[index])
+                      this.chains[chain].sets[set].sales.push(presales[index])
                       this.displayNFTs.push(presales[index])
                     })
                   }
