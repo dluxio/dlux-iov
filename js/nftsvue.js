@@ -634,7 +634,9 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
         term += arguments[i] + ':'
       }
       term = term.substring(0, term.length - 1) 
+      if(this.NFTselect.keys.indexOf(term) == -1)
       this.NFTselect.keys.push(term)
+      else this.NFTselect.keys.splice(this.NFTselect.keys.indexOf(term), 1)
     },
     clearFilters(){
       var term = ''
@@ -647,7 +649,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           this.chains[this.NFTselect.keys[i].split(':')[1]].enabled = false
         }
         if((!term || term ==  this.NFTselect.keys[i]) && this.NFTselect.keys[i].indexOf('Set') == 0){
-          this.chains[this.NFTselect.keys[i].split(':')[1]].sets[this.NFTselect.keys[i].split(':')[2]].enabled = false
+          this.chains[this.NFTselect.keys[i].split(':')[2]].sets[this.NFTselect.keys[i].split(':')[1]].enabled = false
         }
         if((!term || term ==  this.NFTselect.keys[i]) && this.NFTselect.keys[i].indexOf('Status') == 0){
           this.selectors[this.NFTselect.keys[i].split(':')[1]].enabled = false

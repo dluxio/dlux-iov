@@ -179,7 +179,7 @@
                                 <li v-for="(set, setname, setindex) in chains[name].sets">
                                     <div class="py-1 px-2">
                                         <div class="form-check">
-                                            <input @change="addFilters('Set', setname);displaynfts()" class="form-check-input" type="checkbox" v-model="chains[name].sets[setname].enabled" :id="setname + 'SetCheck'">
+                                            <input @change="addFilters('Set', setname, name);displaynfts()" class="form-check-input" type="checkbox" v-model="chains[name].sets[setname].enabled" :id="setname + 'SetCheck'">
                                             <label class="form-check-label" :for="setname + 'SetCheck'">
                                                 {{set.name_long}}
                                             </label>
