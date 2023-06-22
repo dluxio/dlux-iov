@@ -663,15 +663,15 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
     displaynfts(){
       this.displayNFTs = []
       chainlabel: for(var chain in this.chains){
-        if(this.NFTselect.keys.find(a => a.indexOf('chain') >= 0) >= 0 && !this.chains[chain].enabled)continue chainlabel;
+        if(this.NFTselect.keys.find(a => a.indexOf('Chain') >= 0) >= 0 && !this.chains[chain].enabled)continue chainlabel;
         setlabel: for(var set in this.chains[chain].sets){
-          if(this.NFTselect.keys.find(a => a.indexOf('set') >= 0) >= 0 && !this.chains[chain].sets[set].enabled)continue setlabel;
+          if(this.NFTselect.keys.find(a => a.indexOf('Set') >= 0) >= 0 && !this.chains[chain].sets[set].enabled)continue setlabel;
           salelabel: for(var i = 0; i < this.chains[chain].sets[set].sales.length; i++){
-            if(this.NFTselect.keys.find(a => a.indexOf('status') >= 0) >= 0 && !this.selectors.Listed.checked)break salelabel;
+            if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) >= 0 && !this.selectors.Listed.checked)break salelabel;
             if(this.NFTselect.search)this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
           }
           auctionlabel: for(var i = 0; i < this.chains[chain].sets[set].auctions.length; i++){
-            if(this.NFTselect.keys.find(a => a.indexOf('status') >= 0) >= 0 && !this.selectors['At Auction'].checked)break auctionlabel;
+            if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) >= 0 && !this.selectors['At Auction'].checked)break auctionlabel;
             this.displayNFTs.push(this.chains[chain].sets[set].auctions[i])
           }
         }
