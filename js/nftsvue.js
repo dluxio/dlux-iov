@@ -649,7 +649,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
     },
     smart(name, del = ':', i = 0){
       return name.split(del)[i]
-    }
+    },
     displaynfts(){
       this.displayNFTs = []
       chainlabel: for(var chain in this.chains){
