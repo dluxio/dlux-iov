@@ -662,6 +662,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
     },
     displaynfts(){
       this.displayNFTs = []
+      console.log(this.NFTselect.keys.find(a => a.indexOf('Chain') >= 0))
       chainlabel: for(var chain in this.chains){
         if(this.NFTselect.keys.find(a => a.indexOf('Chain') >= 0) >= 0 && !this.chains[chain].enabled)continue chainlabel;
         setlabel: for(var set in this.chains[chain].sets){
