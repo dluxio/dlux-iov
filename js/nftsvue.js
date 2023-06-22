@@ -662,13 +662,12 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
     },
     displaynfts(){
       this.displayNFTs = []
-      console.log(this.NFTselect.keys.find(a => a.indexOf('Chain') >= 0))
       chainlabel: for(var chain in this.chains){
-        if(this.NFTselect.keys.find(a => a.indexOf('Chain') >= 0) >= 0 && !this.chains[chain].enabled)continue chainlabel;
+        if(this.NFTselect.keys.find(a => a.indexOf('Chain') >= 0) && !this.chains[chain].enabled)continue chainlabel;
         setlabel: for(var set in this.chains[chain].sets){
-          if(this.NFTselect.keys.find(a => a.indexOf('Set') >= 0) >= 0 && !this.chains[chain].sets[set].enabled)continue setlabel;
+          if(this.NFTselect.keys.find(a => a.indexOf('Set') >= 0) && !this.chains[chain].sets[set].enabled)continue setlabel;
           salelabel: for(var i = 0; i < this.chains[chain].sets[set].sales.length; i++){
-            if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) >= 0 && !this.selectors.Listed.checked)break salelabel;
+            if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && !this.selectors.Listed.checked)break salelabel;
             if(this.NFTselect.searchTerm){
               if(this.chains[chain].sets[set].sales[i].uid.indexOf(this.NFTselect.searchTerm) >= 0)this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
               if(this.chains[chain].sets[set].sales[i].seller.indexOf(this.NFTselect.searchTerm) >= 0)this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
@@ -678,7 +677,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
             }
           }
           auctionlabel: for(var i = 0; i < this.chains[chain].sets[set].auctions.length; i++){
-            if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) >= 0 && !this.selectors['At Auction'].checked)break auctionlabel;
+            if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && !this.selectors['At Auction'].checked)break auctionlabel;
             this.displayNFTs.push(this.chains[chain].sets[set].auctions[i])
           }
         }
