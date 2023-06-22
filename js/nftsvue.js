@@ -152,8 +152,6 @@ var app = new Vue({
           checked: false},
         HBD: {
           checked: false},
-        NATIVE: {
-          checked: false},
       },
       selectors: {
         ['For Sale']: {
@@ -663,6 +661,12 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           i--
           continue
         }
+        if((!term || term ==  this.NFTselect.keys[i]) && this.NFTselect.keys[i].indexOf('Currency') == 0){
+          this.denoms[this.NFTselect.keys[i].split(':')[1]].checked = false
+          this.NFTselect.keys.splice(i, 1)
+          i--
+          continue
+        }
       }
       if(!term)this.NFTselect.keys = []
       this.displaynfts()
@@ -678,17 +682,43 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           if(this.NFTselect.keys.find(a => a.indexOf('Set') >= 0) && !this.chains[chain].sets[set].enabled)continue setlabel;
           salelabel: for(var i = 0; i < this.chains[chain].sets[set].sales.length; i++){
             if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && !this.selectors['For Sale'].checked)break salelabel;
+            if(this.NFTselect.keys.find(a => a.indexOf('Curreny') >= 0) && this.denoms[this.chains[chain].sets[set].sales[i].price.token].checked)continue salelabel;
             if(this.NFTselect.searchTerm){
-              if(this.chains[chain].sets[set].sales[i].uid.indexOf(this.NFTselect.searchTerm) >= 0)this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
-              if(this.chains[chain].sets[set].sales[i].seller.indexOf(this.NFTselect.searchTerm) >= 0)this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
-              if(this.chains[chain].sets[set].sales[i].setname.indexOf(this.NFTselect.searchTerm) >= 0)this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
+              if(this.chains[chain].sets[set].sales[i].uid.indexOf(this.NFTselect.searchTerm) >= 0){
+                this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
+                continue
+              }
+              if(this.chains[chain].sets[set].sales[i].by.indexOf(this.NFTselect.searchTerm) >= 0){
+                this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
+                continue
+              }
+              if(this.chains[chain].sets[set].sales[i].setname.indexOf(this.NFTselect.searchTerm) >= 0){
+                this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
+                continue
+              }
             } else {
               this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
             }
           }
           auctionlabel: for(var i = 0; i < this.chains[chain].sets[set].auctions.length; i++){
             if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && !this.selectors['At Auction'].checked)break auctionlabel;
-            this.displayNFTs.push(this.chains[chain].sets[set].auctions[i])
+            if(this.NFTselect.keys.find(a => a.indexOf('Curreny') >= 0) && this.denoms[this.chains[chain].sets[set].auctions[i].price.token].checked)continue auctionlabel;
+            if(this.NFTselect.searchTerm){
+              if(this.chains[chain].sets[set].auctions[i].uid.indexOf(this.NFTselect.searchTerm) >= 0){
+                this.displayNFTs.push(this.chains[chain].sets[set].auctions[i])
+                continue
+              }
+              if(this.chains[chain].sets[set].auctions[i].by.indexOf(this.NFTselect.searchTerm) >= 0){
+                this.displayNFTs.push(this.chains[chain].sets[set].auctions[i])
+                continue
+              }
+              if(this.chains[chain].sets[set].auctions[i].setname.indexOf(this.NFTselect.searchTerm) >= 0){
+                this.displayNFTs.push(this.chains[chain].sets[set].auctions[i])
+                continue
+              }
+            } else {
+              this.displayNFTs.push(this.chains[chain].sets[set].auctions[i])
+            }
           }
         }
       }
@@ -1754,6 +1784,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                   this.nftsets.push(data.result[i]);
                   this.nftsetsf.push(data.result[i]);
                   this.chains[chain].sets[data.result[i].set] = data.result[i]
+                  this.denoms[chain.toUpperCase()] == {
+                    checked: false
+                  }
                   this.getNFTset(data.result[i].set, chain)
                 }
               );
