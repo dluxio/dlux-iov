@@ -629,12 +629,17 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
       })
     },
     addFilters(){
-      console.log(arguments)
-      const term = arguments.join(':')
+      var term = ''
+      for(var i = 0; i < arguments.length; i++){
+        term += arguments[i] + ':'
+      } 
       this.NFTselect.keys.push(term)
     },
     clearFilters(){
-      const term = arguments.join(':')
+      var term = ''
+      for(var i = 0; i < arguments.length; i++){
+        term += arguments[i] + ':'
+      } 
       for(var i = 0; i < this.NFTselect.keys.length; i++){
         if((!term || term ==  this.NFTselect.keys[i]) && this.NFTselect.keys[i].indexOf('Chain') == 0){
           this.chains[this.NFTselect.keys[i].split(':')[1]].enabled = false
