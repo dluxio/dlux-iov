@@ -655,7 +655,8 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           this.selectors[this.NFTselect.keys[i].split(':')[1]].enabled = false
         }
       }
-      this.NFTselect.keys = []
+      if(!term)this.NFTselect.keys = []
+      this.displaynfts()
     },
     smart(name, del = ':', i = 0){
       return name.split(del)[i]
