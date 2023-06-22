@@ -230,7 +230,7 @@
                     <div class="position-relative me-2 flex-grow-1">
                         <span class="position-absolute top-50 translate-middle-y ps-2"><i
                                 class="fa-solid fa-magnifying-glass fa-fw"></i></span>
-                        <input @change="displaynfts()" class="ps-4 form-control border-white" type="search" v-model="NFTselect.searchTerm"
+                        <input @keyup="displaynfts()" class="ps-4 form-control border-white" type="search" v-model="NFTselect.searchTerm"
                             placeholder="Search Set, UID, Seller">
                     </div>
                     <!-- Sort -->
