@@ -632,14 +632,16 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
       var term = ''
       for(var i = 0; i < arguments.length; i++){
         term += arguments[i] + ':'
-      } 
+      }
+      term = term.substring(0, term.length - 1) 
       this.NFTselect.keys.push(term)
     },
     clearFilters(){
       var term = ''
       for(var i = 0; i < arguments.length; i++){
         term += arguments[i] + ':'
-      } 
+      }
+      term = term.substring(0, term.length - 1) 
       for(var i = 0; i < this.NFTselect.keys.length; i++){
         if((!term || term ==  this.NFTselect.keys[i]) && this.NFTselect.keys[i].indexOf('Chain') == 0){
           this.chains[this.NFTselect.keys[i].split(':')[1]].enabled = false
