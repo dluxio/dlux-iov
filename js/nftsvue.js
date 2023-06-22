@@ -629,6 +629,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
       })
     },
     addFilters(){
+      console.log(arguments)
       const term = arguments.join(':')
       this.NFTselect.keys.push(term)
     },
