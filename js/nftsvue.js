@@ -668,7 +668,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           if(this.NFTselect.keys.find(a => a.indexOf('Set') >= 0) >= 0 && !this.chains[chain].sets[set].enabled)continue setlabel;
           salelabel: for(var i = 0; i < this.chains[chain].sets[set].sales.length; i++){
             if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) >= 0 && !this.selectors.Listed.checked)break salelabel;
-            if(this.NFTselect.search){
+            if(this.NFTselect.searchTerm){
               if(this.chains[chain].sets[set].sales[i].uid.indexOf(this.NFTselect.searchTerm) >= 0)this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
               if(this.chains[chain].sets[set].sales[i].seller.indexOf(this.NFTselect.searchTerm) >= 0)this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
               if(this.chains[chain].sets[set].sales[i].setname.indexOf(this.NFTselect.searchTerm) >= 0)this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
