@@ -669,9 +669,9 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           salelabel: for(var i = 0; i < this.chains[chain].sets[set].sales.length; i++){
             if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) >= 0 && !this.selectors.Listed.checked)break salelabel;
             if(this.NFTselect.search){
-              if(this.chains[chain].sets[set].sales[i].uid.search(this.NFTselect.search) >= 0)this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
-              if(this.chains[chain].sets[set].sales[i].seller.search(this.NFTselect.search) >= 0)this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
-              if(this.chains[chain].sets[set].sales[i].setname.search(this.NFTselect.search) >= 0)this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
+              if(this.chains[chain].sets[set].sales[i].uid.indexOf(this.NFTselect.searchTerm) >= 0)this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
+              if(this.chains[chain].sets[set].sales[i].seller.indexOf(this.NFTselect.searchTerm) >= 0)this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
+              if(this.chains[chain].sets[set].sales[i].setname.indexOf(this.NFTselect.searchTerm) >= 0)this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
             } else {
               this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
             }
