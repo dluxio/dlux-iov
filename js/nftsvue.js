@@ -642,10 +642,9 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
       var term = ''
       for(var i = 0; i < arguments.length; i++){
         term += arguments[i] + ':'
-        console.log(arguments[i], i)
       }
-      term = term.substring(0, term.length - 1)
-      console.log(`"${term}"`)
+      if(term)term = term.substring(0, term.length - 1)
+      console.log({term, keys: this.NFTselect.keys})
       for(var i = 0; i < this.NFTselect.keys.length; i++){
         if((!term || term ==  this.NFTselect.keys[i]) && this.NFTselect.keys[i].indexOf('Chain') == 0){
           this.chains[this.NFTselect.keys[i].split(':')[1]].enabled = false
