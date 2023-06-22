@@ -667,11 +667,11 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
         setlabel: for(var set in this.chains[chain].sets){
           if(this.NFTselect.keys.find(a => a.indexOf('Set') >= 0) >= 0 && !this.chains[chain].sets[set].enabled)continue setlabel;
           salelabel: for(var i = 0; i < this.chains[chain].sets[set].sales.length; i++){
-            if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) >= 0 && !this.selectors.Listed.checked)break salelabel;
+            if(this.NFTselect.keys.find(a => a.indexOf('Status:Listed') >= 0) >= 0 && !this.selectors.Listed.checked)break salelabel;
             if(this.NFTselect.search)this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
           }
           auctionlabel: for(var i = 0; i < this.chains[chain].sets[set].auctions.length; i++){
-            if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) >= 0 && !this.selectors['At Auction'].checked)break auctionlabel;
+            if(this.NFTselect.keys.find(a => a.indexOf('Status:At Auction') >= 0) >= 0 && !this.selectors['At Auction'].checked)break auctionlabel;
             this.displayNFTs.push(this.chains[chain].sets[set].auctions[i])
           }
         }
