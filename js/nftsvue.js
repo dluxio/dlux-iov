@@ -682,7 +682,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           if(this.NFTselect.keys.find(a => a.indexOf('Set') >= 0) && !this.chains[chain].sets[set].enabled)continue setlabel;
           salelabel: for(var i = 0; i < this.chains[chain].sets[set].sales.length; i++){
             if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && !this.selectors['For Sale'].checked)break salelabel;
-            if(this.NFTselect.keys.find(a => a.indexOf('Curreny') >= 0) && this.denoms[this.chains[chain].sets[set].sales[i].price.token].checked)continue salelabel;
+            if(this.NFTselect.keys.find(a => a.indexOf('Currency') >= 0) && this.denoms[this.chains[chain].sets[set].sales[i].price.token].checked)continue salelabel;
             if(this.NFTselect.searchTerm){
               if(this.chains[chain].sets[set].sales[i].uid.indexOf(this.NFTselect.searchTerm) >= 0){
                 this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
@@ -702,7 +702,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           }
           auctionlabel: for(var i = 0; i < this.chains[chain].sets[set].auctions.length; i++){
             if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && !this.selectors['At Auction'].checked)break auctionlabel;
-            if(this.NFTselect.keys.find(a => a.indexOf('Curreny') >= 0) && this.denoms[this.chains[chain].sets[set].auctions[i].price.token].checked)continue auctionlabel;
+            if(this.NFTselect.keys.find(a => a.indexOf('Currency') >= 0) && this.denoms[this.chains[chain].sets[set].auctions[i].price.token].checked)continue auctionlabel;
             if(this.NFTselect.searchTerm){
               if(this.chains[chain].sets[set].auctions[i].uid.indexOf(this.NFTselect.searchTerm) >= 0){
                 this.displayNFTs.push(this.chains[chain].sets[set].auctions[i])
