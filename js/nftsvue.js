@@ -65,12 +65,12 @@ var app = new Vue({
       toSign: {},
       chains: {
         dlux: {
-          enabled: false,
+          enabled: true,
           api: "https://token.dlux.io",
           sets: {},
         },
         duat: {
-          enabled: false,
+          enabled: true,
           api: "https://duat.hivehoneycomb.com",
           sets: {},
         }
