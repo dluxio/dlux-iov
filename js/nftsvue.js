@@ -647,12 +647,19 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
       for(var i = 0; i < this.NFTselect.keys.length; i++){
         if((!term || term ==  this.NFTselect.keys[i]) && this.NFTselect.keys[i].indexOf('Chain') == 0){
           this.chains[this.NFTselect.keys[i].split(':')[1]].enabled = false
+          // splice
+          this.NFTselect.keys.splice(i, 1)
+          i--
         }
         if((!term || term ==  this.NFTselect.keys[i]) && this.NFTselect.keys[i].indexOf('Set') == 0){
           this.chains[this.NFTselect.keys[i].split(':')[2]].sets[this.NFTselect.keys[i].split(':')[1]].enabled = false
+          this.NFTselect.keys.splice(i, 1)
+          i--
         }
         if((!term || term ==  this.NFTselect.keys[i]) && this.NFTselect.keys[i].indexOf('Status') == 0){
           this.selectors[this.NFTselect.keys[i].split(':')[1]].enabled = false
+          this.NFTselect.keys.splice(i, 1)
+          i--
         }
       }
       if(!term)this.NFTselect.keys = []
