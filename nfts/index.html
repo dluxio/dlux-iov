@@ -70,6 +70,12 @@
                     rgb(221, 169, 255),
                     rgb(162, 209, 255));
         }
+        .filter-bubble {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            padding-left: 24px;
+            padding-right: 24px;
+        }
     </style>
 </head>
 
@@ -231,7 +237,7 @@
                         <span class="position-absolute top-50 translate-middle-y ps-2"><i
                                 class="fa-solid fa-magnifying-glass fa-fw"></i></span>
                         <input @keyup="displaynfts()" class="ps-4 form-control border-white" type="search" v-model="NFTselect.searchTerm"
-                            placeholder="Search Set, UID, Seller">
+                            placeholder="Search sets, items, and accounts">
                     </div>
                     <!-- Sort -->
                     <div class="dropdown">
@@ -255,13 +261,13 @@
                         </ul>
                     </div>
                 </div>
-                <div class="d-flex mt-2" v-if="NFTselect.keys.length">
+                <div class="d-flex flex-wrap mt-1" v-if="NFTselect.keys.length">
                     <!-- Active Filters -->
-                    <div v-for="(item, name, index) in NFTselect.keys" class="rounded bg-secondary text-black px-2 py-1 me-2 d-flex align-items-center">
+                    <div v-for="(item, name, index) in NFTselect.keys" class="mt-1 rounded bg-secondary text-black filter-bubble me-1 d-flex align-items-center">
                         <span>{{item}}</span>
                         <button @click="clearFilters(item)" type="button" class="ms-1 btn-close btn-close-white"></button>
                     </div>
-                    <button @click="clearFilters()" type="button" v-if="NFTselect.keys.length > 1" class="btn btn-secondary">
+                    <button @click="clearFilters()" type="button" v-if="NFTselect.keys.length > 1" class="mt-1 btn btn-secondary">
                         Clear All
                     </button>
                 </div>
