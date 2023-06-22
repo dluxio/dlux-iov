@@ -688,6 +688,10 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
                 this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
                 continue
               }
+              if(this.chains[chain].sets[set].sales[i].name_long.indexOf(this.NFTselect.searchTerm) >= 0){
+                this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
+                continue
+              }
               if(this.chains[chain].sets[set].sales[i].by.indexOf(this.NFTselect.searchTerm) >= 0){
                 this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
                 continue
@@ -705,6 +709,10 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
             if(this.NFTselect.keys.find(a => a.indexOf('Currency') >= 0) && !this.denoms[this.chains[chain].sets[set].auctions[i].price.token].checked)continue auctionlabel;
             if(this.NFTselect.searchTerm){
               if(this.chains[chain].sets[set].auctions[i].uid.indexOf(this.NFTselect.searchTerm) >= 0){
+                this.displayNFTs.push(this.chains[chain].sets[set].auctions[i])
+                continue
+              }
+              if(this.chains[chain].sets[set].auctions[i].name_long.indexOf(this.NFTselect.searchTerm) >= 0){
                 this.displayNFTs.push(this.chains[chain].sets[set].auctions[i])
                 continue
               }
