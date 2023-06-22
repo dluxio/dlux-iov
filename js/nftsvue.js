@@ -65,12 +65,12 @@ var app = new Vue({
       toSign: {},
       chains: {
         dlux: {
-          enabled: true,
+          enabled: false,
           api: "https://token.dlux.io",
           sets: {},
         },
         duat: {
-          enabled: true,
+          enabled: false,
           api: "https://duat.hivehoneycomb.com",
           sets: {},
         }
@@ -1751,9 +1751,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           });
       }
       for (var chain in this.chains) {
-        if (this.chains[chain].enabled) {
-          getSets(chain);
-        }
+        getSets(chain);
       }
     },
     getRNFTsales(set, chain = 'dlux') {
