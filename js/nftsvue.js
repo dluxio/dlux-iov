@@ -65,12 +65,12 @@ var app = new Vue({
       toSign: {},
       chains: {
         dlux: {
-          enabled: true,
+          enabled: false,
           api: "https://token.dlux.io",
           sets: {},
         },
         duat: {
-          enabled: true,
+          enabled: false,
           api: "https://duat.hivehoneycomb.com",
           sets: {},
         }
@@ -149,27 +149,27 @@ var app = new Vue({
       showTokens: {},
       denoms: {
         HIVE: {
-          checked: true},
+          checked: false},
         HBD: {
-          checked: true},
+          checked: false},
         NATIVE: {
-          checked: true},
+          checked: false},
       },
       selectors: {
         Listed: {
-          checked: true},
+          checked: false},
         ["At Auction"]: {
-          checked: true},
+          checked: false},
         ['Has Bids']: {
-          checked: true},
+          checked: false},
         ['Your Bids']: {
-          checked: true},
+          checked: false},
         Affordable: {
-          checked: true},
+          checked: false},
         Mint: {
-          checked: true},
+          checked: false},
         Yours: {
-          checked: true},
+          checked: false},
       },
       behind: "",
       stats: {},
@@ -402,6 +402,7 @@ var app = new Vue({
         searchDeep: false,
         searchDeepKey: "",
         searchDeepK: false,
+        keys: [],
         saleOnly: false,
         auctionOnly: false,
         dir: "asc",
@@ -627,18 +628,27 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
         }
       })
     },
+    addFilters(filter){
+      this.NFTselect.keys.push(filter)
+    },
+    subFilters(filter){
+      this.NFTselect.keys.splice(this.NFTselect.keys.indexOf(filter), 1)
+    },
+    clearFilters(){
+      this.NFTselect.keys = []
+    },
     displaynfts(){
       this.displayNFTs = []
       chainlabel: for(var chain in this.chains){
-        if(!this.chains[chain].enabled)continue chainlabel;
+        if(this.NFTselect.keys.indexOf('chain') >= 0 && !this.chains[chain].enabled)continue chainlabel;
         setlabel: for(var set in this.chains[chain].sets){
-          if(!this.chains[chain].sets[set].enabled)continue setlabel;
+          if(this.NFTselect.keys.indexOf('set') >= 0 && !this.chains[chain].sets[set].enabled)continue setlabel;
           salelabel: for(var i = 0; i < this.chains[chain].sets[set].sales.length; i++){
-            if(!this.selectors.Listed.checked)break salelabel;
+            if(this.NFTselect.keys.indexOf('status') >= 0 && !this.selectors.Listed.checked)break salelabel;
             this.displayNFTs.push(this.chains[chain].sets[set].sales[i])
           }
           auctionlabel: for(var i = 0; i < this.chains[chain].sets[set].auctions.length; i++){
-            if(!this.selectors['At Auction'].checked)break auctionlabel;
+            if(this.NFTselect.keys.indexOf('status') >= 0 && !this.selectors['At Auction'].checked)break auctionlabel;
             this.displayNFTs.push(this.chains[chain].sets[set].auctions[i])
           }
         }
@@ -1668,7 +1678,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                   const init = {
                     owners: 0,
                     deleted: 0,
-                    enabled: true,
+                    enabled: false,
                     af: {
                       HIVE: 0,
                       HBD: 0,
@@ -1749,7 +1759,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               const init = {
                 owners: 0,
                 deleted: 0,
-                enabled: true,
+                enabled: false,
                 sales: [],
                 auctions: [],
                 af: {
