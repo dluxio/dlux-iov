@@ -258,8 +258,8 @@
                 <div class="d-flex" v-if="NFTselect.keys.length">
                     <!-- Active Filters -->
                     <div v-for="(item, name, index) in NFTselect.keys" class="rounded bg-secondary text-black px-2 py-1 mt-2 d-flex align-items-center">
-                        <span>{{name}}</span>
-                        <button @click="subFilter(name)" type="button" class="ms-1 btn-close btn-close-white"></button>
+                        <span>{{item}}</span>
+                        <button @click="clearFilters(item)" type="button" class="ms-1 btn-close btn-close-white"></button>
                     </div>
                     <div v-if="NFTselect.keys.length > 1" class="rounded bg-secondary text-black px-2 py-1 mt-2 d-flex align-items-center">
                         <span>Clear Filters</span>
