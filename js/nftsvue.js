@@ -658,7 +658,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           continue
         }
         if((!term || term ==  this.NFTselect.keys[i]) && this.NFTselect.keys[i].indexOf('Status') == 0){
-          this.selectors[this.NFTselect.keys[i].split(':')[1]].enabled = false
+          this.selectors[this.NFTselect.keys[i].split(':')[1]].checked = false
           this.NFTselect.keys.splice(i, 1)
           i--
           continue
