@@ -1784,7 +1784,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                   this.nftsets.push(data.result[i]);
                   this.nftsetsf.push(data.result[i]);
                   this.chains[chain].sets[data.result[i].set] = data.result[i]
-                  this.denoms[chain.toUpperCase()] == {
+                  this.denoms[data.result[i].token.toUpperCase()] == {
                     checked: false
                   }
                   this.getNFTset(data.result[i].set, chain)
