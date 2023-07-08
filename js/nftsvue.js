@@ -1692,7 +1692,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 );
               });
             });
-          fetch(api + "/api/recent/HBD_" + this.TOKEN + "?limit=1000")
+          fetch(this.chains[token].api + "/api/recent/HBD_" + this.TOKEN + "?limit=1000")
             .then((response) => response.json())
             .then((data) => {
               this.chains[token].volume.hbd =
