@@ -516,7 +516,7 @@ export default {
         gt(a, b) {
             return parseFloat(a) > parseFloat(b);
         },
-        toUpperCase(str) {
+        toUpperCase(str = "") {
             return str.toUpperCase();
         }
     },
