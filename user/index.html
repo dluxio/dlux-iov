@@ -1247,7 +1247,7 @@
                             <!-- NFT items -->
                             <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-1 mb-3">
                                 <div class="col my-2" v-for="(item, name, index) in displayNFTs">
-                                    <nftcard :item="item" :uid="Base64toNumber(item.uid)"
+                                    <nftcard :item="item" :uid="Base64toNumber(item.uid)" :multisig="chains[item.token].multisig"
                                         :index="index" inventory="true" @focusitem="focusItem = $event" @tosign="toSign = $event"
                                         @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                                 </div>
@@ -1266,7 +1266,7 @@
 
                 <!--blog detail view-->
                 <div>
-                    <detail-vue :post="displayPost.item" :account="account" :modal="true" :post_select="postSelect"
+                    <detail-vue :post="displayPost.item" :account="account" :modal="true" :post_select="postSelect" :chain="chain"
                     :voteval="voteVal" :head_block="sstats.head_block" :broca_refill="sstats.broca_refill"
                     :broca="spkapi.broca" :spk_power="spkapi.spk_power" :contracts="contracts" :extendcost="extendcost"
                     @tosign="toSign=$event" @modalselect="modalSelect($event)" @reply="reply($event)"

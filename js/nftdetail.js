@@ -572,6 +572,12 @@ export default {
     </div>
 </div>`,
     props: {
+        chain: {
+            required: true,
+            default: function () {
+                return {
+                };
+            },
         itemmodal: {
             required: true,
             default: function () {
@@ -677,20 +683,19 @@ export default {
     },
     methods: {
         buyNFT() {
-            //if(hive_buy)
-            // this.$emit('tosign', {
-            //     type: 'cja',
-            //     cj: {
-            //         items: [contract]
-            //       },
-            //     id: `${itemModal.item.token}_`,
-            //     msg: `Storing ${contract}...`,
-            //     ops: ["getTokenUser"],
-            //     api: "https://spktest.dlux.io",
-            //     txid: `${contract}_${!remove ? 'store' : 'remove'}`
-            // });
-            //else
-            this.$emit('tosign', {
+            if(this.itemmodal.item.token == 'HIVE' || this.itemmodal.item.token == "HBD") this.$emit('tosign', {
+                type: "xfr",
+                cj: {
+                  to: this.chain[this.itemmodal.item.token].multisig,
+                  [this.itemmodal.item.token.toLowerCase()]: this.itemmodal.item.price.amount,
+                  memo: `NFTbuy ${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
+                },
+                txid: "sendhive",
+                msg: `Buying ${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
+                api: "https://spktest.dlux.io",
+                ops: ["getTokenUser"],
+              });
+            else this.$emit('tosign', {
                 type: 'cja',
                 cj: {
                     set: this.itemmodal.item.setname,

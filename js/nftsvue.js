@@ -1659,62 +1659,55 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           this.stats = data.stats;
         });
     },
-    getProtocol() {
-      fetch(this.lapi + "/api/protocol")
+    getProtocol(token) {
+      fetch(this.chains[token].api + "/api/protocol")
         .then((response) => response.json())
         .then((data) => {
-          this.prefix = data.prefix;
-          this.multisig = data.multisig;
-          this.jsontoken = data.jsontoken;
-          this.TOKEN = data.jsontoken.toUpperCase();
-          if (this.TOKEN == "DLUX") this.dataAPI = "https://data.dlux.io";
-          else if (data.dataAPI) this.dataAPI = data.dataAPI;
-          else this.dataAPI = "";
-          this.nftSellTabToken = this.TOKEN;
-          this.nftAuctionTabToken = this.TOKEN;
-          this.nftTradeTabToken = this.TOKEN;
-          location.hash = data.jsontoken;
-          this.node = data.node;
-          this.features = data.features ? data.features : this.features;
-          this.behind = data.behind;
-          this.behindTitle = data.behind + " Blocks Behind Hive";
-          fetch(this.lapi + "/api/recent/HIVE_" + this.TOKEN + "?limit=1000")
+          this.chains[token].prefix = data.prefix;
+          this.chains[token].multisig = data.multisig;
+          this.chains[token].jsontoken = data.jsontoken;
+          this.chains[token].TOKEN = data.jsontoken.toUpperCase();
+          this.chains[token].node = data.node;
+          this.chains[token].features = data.features ? data.features : this.features;
+          this.chains[token].behind = data.behind;
+          this.chains[token].behindTitle = data.behind + " Blocks Behind Hive";
+          fetch(this.chains[token].api + "/api/recent/HIVE_" + this.TOKEN + "?limit=1000")
             .then((response) => response.json())
             .then((data) => {
-              this.volume.hive =
+              this.chains[token].volume.hive =
                 data.recent_trades.reduce((a, b) => {
                   if (b.trade_timestamp > this.agoTime)
                     return a + parseInt(parseFloat(b.target_volume) * 1000);
                   else return a;
                 }, 0) / 1000;
-              this.volume.token_hive =
+              this.chains[token].volume.token_hive =
                 data.recent_trades.reduce((a, b) => {
                   if (b.trade_timestamp > this.agoTime)
                     return a + parseInt(parseFloat(b.base_volume) * 1000);
                   else return a;
                 }, 0) / 1000;
-              this.recenthive = data.recent_trades.sort((a, b) => {
+              this.chains[token].recenthive = data.recent_trades.sort((a, b) => {
                 return (
                   parseInt(b.trade_timestamp) - parseInt(a.trade_timestamp)
                 );
               });
             });
-          fetch(this.lapi + "/api/recent/HBD_" + this.TOKEN + "?limit=1000")
+          fetch(api + "/api/recent/HBD_" + this.TOKEN + "?limit=1000")
             .then((response) => response.json())
             .then((data) => {
-              this.volume.hbd =
+              this.chains[token].volume.hbd =
                 data.recent_trades.reduce((a, b) => {
                   if (b.trade_timestamp > this.agoTime)
                     return a + parseInt(parseFloat(b.target_volume) * 1000);
                   else return a;
                 }, 0) / 1000;
-              this.volume.token_hbd =
+              this.chains[token].volume.token_hbd =
                 data.recent_trades.reduce((a, b) => {
                   if (b.trade_timestamp > this.agoTime)
                     return a + parseInt(parseFloat(b.base_volume) * 1000);
                   else return a;
                 }, 0) / 1000;
-              this.recenthbd = data.recent_trades.sort((a, b) => {
+              this.chains[token].recenthbd = data.recent_trades.sort((a, b) => {
                 return (
                   parseInt(b.trade_timestamp) - parseInt(a.trade_timestamp)
                 );

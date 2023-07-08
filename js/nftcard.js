@@ -262,6 +262,9 @@ export default {
     ocolors: {
       default: ''
     },
+    multisig: {
+      default: ''
+    },
     trade: {
       default: false
     },
@@ -313,7 +316,19 @@ export default {
   },
   methods: {
     buyNFT(){
-      this.$emit('tosign', {
+      if(this.item.token == 'HIVE' || this.item.token == "HBD") this.$emit('tosign', {
+        type: "xfr",
+        cj: {
+          to: this.multisig,
+          [this.item.token.toLowerCase()]: this.item.price.amount,
+          memo: `NFTbuy ${this.item.setname}:${this.item.uid}`,
+        },
+        txid: "sendhive",
+        msg: `Buying ${this.item.setname}:${this.item.uid}`,
+        api: "https://spktest.dlux.io",
+        ops: ["getTokenUser"],
+      });
+      else this.$emit('tosign', {
         type: 'cja',
         cj: {
             set: this.item.setname,
