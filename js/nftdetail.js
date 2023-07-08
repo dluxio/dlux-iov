@@ -613,7 +613,7 @@ export default {
             default: ''
         },
     },
-    emits: ['give', 'trade', 'mint', 'airdrop', 'sell', 'detail', 'auction', 'melt'],
+    emits: ['tosign', 'detail'],
     data() {
         return {
             give: {
@@ -676,8 +676,47 @@ export default {
         }
     },
     methods: {
-        buyNFT() {},
-        cancelNFT() {},
+        buyNFT() {
+            //if(hive_buy)
+            // this.$emit('tosign', {
+            //     type: 'cja',
+            //     cj: {
+            //         items: [contract]
+            //       },
+            //     id: `${itemModal.item.token}_`,
+            //     msg: `Storing ${contract}...`,
+            //     ops: ["getTokenUser"],
+            //     api: "https://spktest.dlux.io",
+            //     txid: `${contract}_${!remove ? 'store' : 'remove'}`
+            // });
+            //else
+            this.$emit('tosign', {
+                type: 'cja',
+                cj: {
+                    set: this.itemmodal.item.set,
+                    uid: this.itemmodal.item.uid,
+                    price: this.itemmodal.item.price.amount,
+                  },
+                id: `${this.itemmodal.item.set}:${this.itemmodal.item.uid}_nft_buy`,
+                msg: `buying ${contract}...${this.itemmodal.item.set}:${this.itemmodal.item.uid}`,
+                ops: ["getTokenUser"],
+                api: "https://spktest.dlux.io",
+                txid: `${this.itemmodal.item.set}:${this.itemmodal.item.uid}_nft_buy`
+            });
+        },
+        cancelNFT() {
+            this.$emit('tosign', {
+                type: 'cja',
+                cj: {
+                    items: [contract]
+                  },
+                id: `spkcc_${!remove ? 'store' : 'remove'}`,
+                msg: `Storing ${contract}...`,
+                ops: ["getTokenUser"],
+                api: "https://spktest.dlux.io",
+                txid: `${contract}_${!remove ? 'store' : 'remove'}`
+            });
+        },
         giveFT() { },
         tradeFT() { },
         mintFT() { },

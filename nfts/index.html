@@ -421,7 +421,7 @@
             <!-- NFT Detail Modal -->
             <div>
                 <nftdetail :sets="focusSet" :account="account" :itemmodal="itemModal" :pfp="pfp" :item="focusItem"
-                    @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
+                    @detail="modalIndex('itemModal', $event);itemModal.hidden = false" @tosign="toSign=$event"/>
             </div>
     </div>
     </main>
