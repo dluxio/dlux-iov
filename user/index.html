@@ -1152,7 +1152,7 @@
 
                                 <!-- MINT TRADES -->
                                 <div v-for="(rnft, index) in FTtrades" :key="index" class="col my-2">
-                                    <nftcard :item="rnft" mint="true" trade="true" :account="account" :multisig="chains[item.token].multisig"
+                                    <nftcard :item="rnft" mint="true" trade="true" :account="account" :multisig="chains[rnft.token].multisig"
                                         :wrapped="getAttr(rnft.script, 'wrapped')" :oicon="getIcon(rnft.script)"
                                         :ocolors="getSetDetailsColors(rnft.script)"
                                         @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
@@ -1172,7 +1172,7 @@
                             <div v-if="accountRNFTs.length"
                                 class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
                                 <div v-for="rnft in accountRNFTs" class="col my-2">
-                                    <nftcard :item="rnft" inventory="true" mint="true" :multisig="chains[item.token].multisig"
+                                    <nftcard :item="rnft" inventory="true" mint="true" :multisig="chains[rnft.token].multisig"
                                         :wrapped="getAttr(rnft.script, 'wrapped')" :oicon="getIcon(rnft.script)"
                                         :ocolors="getSetDetailsColors(rnft.script)" @modal="modalIndex('transferModal', $event);transferModal.hidden = false" />
                                         @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
@@ -1266,7 +1266,7 @@
 
                 <!--blog detail view-->
                 <div>
-                    <detail-vue :post="displayPost.item" :account="account" :modal="true" :post_select="postSelect" :chains="chains"
+                    <detail-vue :post="displayPost.item" :account="account" :modal="true" :post_select="postSelect"
                     :voteval="voteVal" :head_block="sstats.head_block" :broca_refill="sstats.broca_refill"
                     :broca="spkapi.broca" :spk_power="spkapi.spk_power" :contracts="contracts" :extendcost="extendcost"
                     @tosign="toSign=$event" @modalselect="modalSelect($event)" @reply="reply($event)"
