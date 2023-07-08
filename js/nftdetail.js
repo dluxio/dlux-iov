@@ -578,6 +578,7 @@ export default {
                 return {
                 };
             },
+        },
         itemmodal: {
             required: true,
             default: function () {
