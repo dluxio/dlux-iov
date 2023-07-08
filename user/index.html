@@ -1266,7 +1266,7 @@
 
                 <!--blog detail view-->
                 <div>
-                    <detail-vue :post="displayPost.item" :account="account" :modal="true" :post_select="postSelect" 
+                    <detail-vue :post="displayPost.item" :account="account" :modal="true" :post_select="postSelect" :chains="chains"
                     :voteval="voteVal" :head_block="sstats.head_block" :broca_refill="sstats.broca_refill"
                     :broca="spkapi.broca" :spk_power="spkapi.spk_power" :contracts="contracts" :extendcost="extendcost"
                     @tosign="toSign=$event" @modalselect="modalSelect($event)" @reply="reply($event)"
@@ -1274,7 +1274,7 @@
                 </div>
                 <!-- mint transfer modal -->
                 <div>
-                    <fttransfer :account="account" :item="focusItem" :mint="transferMint" @modal="modal($event)" />
+                    <fttransfer :account="account" :item="focusItem" :mint="transferMint" @modal="modal($event)" :chains="chains"/>
                 </div>
                 
 

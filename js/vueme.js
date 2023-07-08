@@ -81,6 +81,20 @@ var app = new Vue({
       fileRequests: {},
       relations: {"follows":false,"ignores":false,"blacklists":false,"follows_blacklists":false,"follows_muted":false},
       sets: {},
+      chains: {
+        dlux: {
+          enabled: false,
+          api: "https://token.dlux.io",
+          sets: {},
+          multisig: "dlux-cc",
+        },
+        duat: {
+          enabled: false,
+          api: "https://duat.hivehoneycomb.com",
+          sets: {},
+          multisig: "ragnarok-cc",
+        }
+      },
       disablePost: true,
       File: [],
       FileInfo: {},
