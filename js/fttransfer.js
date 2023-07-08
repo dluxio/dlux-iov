@@ -107,7 +107,7 @@ export default {
                                 </div>
                                 <div class="col-6">
                                     <label for="tradeFTamount" class="form-label">Amount</label>
-                                    <small v-if="ftTradeTabToken == item.token" class="float-end mb-2 align-self-center text-white-50">
+                                    <small v-if="trade.token == item.token" class="float-end mb-2 align-self-center text-white-50">
                                         0% FEE
                                     </small>
                                     <small v-else class="float-end mb-2 align-self-center text-white-50">
@@ -164,7 +164,7 @@ export default {
                                 <div class="col-6">
                                     <label for="sellFTprice" class="form-label">Sale
                                         Price</label>
-                                    <small v-if="ftSellTabToken == item.token" class="float-end mb-2 align-self-center text-white-50">
+                                    <small v-if="sell.token == item.token" class="float-end mb-2 align-self-center text-white-50">
                                         0% FEE
                                     </small>
                                     <small v-else class="float-end mb-2 align-self-center text-white-50">
@@ -226,7 +226,7 @@ export default {
                                 <div class="col-6">
                                     <label for="auctionFTprice" class="form-label">Starting
                                         Bid</label>
-                                    <small v-if="ftAuctionTabToken == item.token" class="float-end mb-2 align-self-center text-white-50">
+                                    <small v-if="auction.token == item.token" class="float-end mb-2 align-self-center text-white-50">
                                         0% FEE
                                     </small>
                                     <small v-else class="float-end mb-2 align-self-center text-white-50">
@@ -407,11 +407,13 @@ export default {
             trade: {
                 to: '',
                 qty: 1,
-                amount: "1.000"
+                amount: "1.000",
+                token: 'HIVE'
             },
             sell: {
                 qty: 1,
-                price: "1.000"
+                price: "1.000",
+                token: 'HIVE'
             },
             auction: {
                 qty: 1,
@@ -425,6 +427,12 @@ export default {
                 qty_each: 1,
             },
             ftGiveFormValid: false,
+            ftTradeFormValid: false,
+            ftSellFormValid: false,
+            ftAuctionFormValid: false,
+            ftAirdropFormValid: false,
+            ftAirdropUsers: [],
+
         };
     },
     methods: {
