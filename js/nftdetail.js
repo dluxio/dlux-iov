@@ -516,12 +516,12 @@ export default {
                                 </div>
                             </div>
                             <!-- NFT Buy -->
-                            <div class="accordion-item" v-if="itemmodal.sale">
+                            <div class="accordion-item" v-if="itemmodal.item.sale">
                                 <h2 class="accordion-header">
                                     <button  @click="saleData('itemmodal')" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBuy" aria-expanded="true" aria-controls="collapseBuy">
                                     <i class="fas fa-money-bill-wave me-3"></i><span>BUY
                                     NOW</span><span
-                                    class="small ms-2">({{naiString(itemmodal.sale.price)}})</span>
+                                    class="small ms-2">({{naiString(itemmodal.item.price)}})</span>
                                     </button>
                                 </h2>
                                 <div id="collapseBuy" class="accordion-collapse collapse show" data-bs-parent="#nftAccordion">
@@ -533,12 +533,12 @@ export default {
                                             class="d-flex align-items-center justify-content-between">
                                             <div class="d-flex me-1">
                                                 <h4>Price:
-                                                    {{naiString(itemmodal.sale.price)}}
+                                                    {{naiString(itemmodal.item.price)}}
                                                 </h4>
                                             </div>
                                             <div class="d-flex no-wrap ms-1">
                                                 <h4>
-                                                    Seller: @{{itemmodal.sale.by}}
+                                                    Seller: @{{itemmodal.item.by}}
                                                 </h4>
                                             </div>
                                         </div>
@@ -549,13 +549,13 @@ export default {
                                                 <!-- long name, script, set, uid only other buy data -->
                                             </div>
                                             <div class="text-center pb-4">
-                                                <button v-if="itemmodal.sale.by != account"
+                                                <button v-if="itemmodal.item.by != account"
                                                     type="button" class="btn btn-warning"
-                                                    @click="buyNFT(itemmodal.sale)"
+                                                    @click="buyNFT()"
                                                     href="#/">Buy </button>
                                                 <button v-else type="button"
                                                     class="btn btn-warning"
-                                                    @click="cancelNFT(itemmodal.sale)"
+                                                    @click="cancelNFT()"
                                                     href="#/">Cancel </button>
                                             </div>
                                         </div>
@@ -676,7 +676,8 @@ export default {
         }
     },
     methods: {
-        buyNFT(sale) {},
+        buyNFT() {},
+        cancelNFT() {},
         giveFT() { },
         tradeFT() { },
         mintFT() { },
