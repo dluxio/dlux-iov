@@ -1671,6 +1671,11 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           this.chains[token].features = data.features ? data.features : this.features;
           this.chains[token].behind = data.behind;
           this.chains[token].behindTitle = data.behind + " Blocks Behind Hive";
+          fetch(this.chains[token].api + "/@" + this.account)
+          .then((response) => response.json())
+          .then((data) => {
+            this.chains[token].account = data;
+          })
           fetch(this.chains[token].api + "/api/recent/HIVE_" + this.TOKEN + "?limit=1000")
             .then((response) => response.json())
             .then((data) => {
