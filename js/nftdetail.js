@@ -700,6 +700,11 @@ export default {
             }
             return `linear-gradient(${r})`;
         },
+        naiString(nai) {
+            return `${parseFloat(nai.amount / Math.pow(10, nai.precision)).toFixed(
+                nai.precision
+              )} ${nai.token}`;
+        },
         timeSince(date) {
             var seconds = Math.floor((new Date() - new Date(date + ".000Z")) / 1000);
             var interval = Math.floor(seconds / 86400);
