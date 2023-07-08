@@ -572,7 +572,7 @@ export default {
     </div>
 </div>`,
     props: {
-        chain: {
+        chains: {
             required: true,
             default: function () {
                 return {
@@ -687,7 +687,7 @@ export default {
             if(this.itemmodal.item.token == 'HIVE' || this.itemmodal.item.token == "HBD") this.$emit('tosign', {
                 type: "xfr",
                 cj: {
-                  to: this.chain[this.itemmodal.item.token].multisig,
+                  to: this.chains[this.itemmodal.item.token].multisig,
                   [this.itemmodal.item.token.toLowerCase()]: this.itemmodal.item.price.amount,
                   memo: `NFTbuy ${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
                 },
