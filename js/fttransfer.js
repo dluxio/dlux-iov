@@ -439,13 +439,15 @@ export default {
             const toSign = {
                 type: "cja",
                 cj: {
-                  items: [contract]
+                  set: this.item.setname,
+                    to: this.give.to,
+                    qty: this.give.qty,
                 },
-                id: `spkcc_${!remove ? 'store' : 'remove'}`,
-                msg: `Storing ${contract}...`,
+                id: `${this.item.token}_ft_transfer`,
+                msg: `Giving ${this.give.qty} ${this.item.set} mint token...`,
                 ops: ["getTokenUser"],
                 api: "https://spktest.dlux.io",
-                txid: `${contract}_${!remove ? 'store' : 'remove'}`,
+                txid: `${this.item.token}_ft_transfer_${this.give.to}`,
               }
               this.$emit('tosign', toSign)
         },
