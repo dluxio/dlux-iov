@@ -281,7 +281,7 @@ export default {
       default: ''
     },
   },
-  emits: ['detail', 'modal'],
+  emits: ['detail', 'modal', 'focusitem'],
   data() {
     return {
     };
@@ -327,6 +327,7 @@ export default {
         tab: name,
       }
       this.$emit('modal', name);
+      this.$emit('focusitem', this.item);
     },
     timeSince(date) {
       var seconds = Math.floor((new Date() - new Date(date + ".000Z")) / 1000);

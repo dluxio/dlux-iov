@@ -113,6 +113,7 @@ var app = new Vue({
       transferTabTo: "",
       toSign: {},
       account: user,
+      focusItem: {},
       FTtrades: [],
       NFTtrades: [],
       FTmenu: {

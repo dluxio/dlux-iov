@@ -365,6 +365,7 @@ var app = new Vue({
       nftsets: [],
       nftsetsf: [],
       nftscripts: {},
+      focusItem: {},
       focusSet: {
         computed: {},
         link: "",

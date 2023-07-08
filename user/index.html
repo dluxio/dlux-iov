@@ -1248,7 +1248,7 @@
                             <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-1 mb-3">
                                 <div class="col my-2" v-for="(item, name, index) in displayNFTs">
                                     <nftcard :item="item" :uid="Base64toNumber(item.uid)"
-                                        :index="index" inventory="true"
+                                        :index="index" inventory="true" @focusitem="focusItem = $event"
                                         @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                                 </div>
                             </div>
@@ -1274,7 +1274,7 @@
                 </div>
                 <!-- mint transfer modal -->
                 <div>
-                    <fttransfer :account="account" :item="transferModal" :mint="transferMint" @modal="modal($event)" />
+                    <fttransfer :account="account" :item="focusItem" :mint="transferMint" @modal="modal($event)" />
                 </div>
                 
 

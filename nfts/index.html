@@ -274,7 +274,7 @@
                 <div class="row row-cols-xxl-6 row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
                     <!-- NFTCARD REPEAT AUCTION -->
                     <div class="col my-2" v-for="(item, name, index) in displayNFTs">
-                        <nftcard :item="item" :uid="Base64toNumber(item.uid)" :icon="getIcon(item.script)"
+                        <nftcard :item="item" :uid="Base64toNumber(item.uid)" :icon="getIcon(item.script)" @focusitem="focusItem = $event"
                             :colors="getSetDetailsColors(item.script)" :index="index" :auction="item.auction" :sale="item.sale" :account="account"
                             @detail="modalIndex('itemModal', $event, 'displayNFTs');itemModal.hidden = false" />
                     </div>
@@ -420,7 +420,7 @@
             </div>
             <!-- NFT Detail Modal -->
             <div>
-                <nftdetail :sets="focusSet" :account="account" :itemmodal="itemModal" :pfp="pfp"
+                <nftdetail :sets="focusSet" :account="account" :itemmodal="itemModal" :pfp="pfp" :item="focusItem"
                     @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
             </div>
     </div>
