@@ -190,13 +190,13 @@ export default {
             <!-- BUY -->
              <div class="btn-group" v-if="item.by != account">
              <button type="button" class="btn btn-primary" title="Buy NFT"
-              @click="buyNFT(item)">
+              @click="buyNFT()">
               Buy NFT</button>
              </div>
             <!-- CANCEL -->
              <div class="btn-group" v-if="item.by == account">
              <button type="button" class="btn btn-warning" title="Cancel Sale"
-              @click="cancelSaleNFT(item)">
+              @click="cancelNFT()">
              Cancel Sale</button>
              </div>
   </div>
@@ -281,7 +281,7 @@ export default {
       default: ''
     },
   },
-  emits: ['detail', 'modal', 'focusitem'],
+  emits: ['detail', 'modal', 'focusitem', 'tosign'],
   data() {
     return {
     };
@@ -312,6 +312,21 @@ export default {
     },
   },
   methods: {
+    buyNFT(){
+      this.$emit('tosign', {
+        type: 'cja',
+        cj: {
+            set: this.item.setname,
+            uid: this.item.uid,
+            price: this.item.price.amount,
+          },
+        id: `${this.item.token}_nft_buy`,
+        msg: `Buying ${this.item.setname}:${this.item.uid}`,
+        ops: ["getTokenUser"],
+        api: "https://spktest.dlux.io",
+        txid: `${this.item.setname}:${this.item.uid}_nft_buy`
+    });
+    },
     modalIndex(name) {
       const object = {
         item: this.item,

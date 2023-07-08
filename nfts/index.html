@@ -276,7 +276,7 @@
                     <div class="col my-2" v-for="(item, name, index) in displayNFTs">
                         <nftcard :item="item" :uid="Base64toNumber(item.uid)" :icon="getIcon(item.script)" @focusitem="focusItem = $event"
                             :colors="getSetDetailsColors(item.script)" :index="index" :auction="item.auction" :sale="item.sale" :account="account"
-                            @detail="modalIndex('itemModal', $event, 'displayNFTs');itemModal.hidden = false" />
+                            @detail="modalIndex('itemModal', $event, 'displayNFTs');itemModal.hidden = false" @tosign="toSign = $event"/>
                     </div>
                 </div>
             </div>
