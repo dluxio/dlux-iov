@@ -676,6 +676,7 @@ export default {
         }
     },
     methods: {
+        buyNFT(sale) {},
         giveFT() { },
         tradeFT() { },
         mintFT() { },
