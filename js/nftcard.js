@@ -320,7 +320,7 @@ export default {
         type: "xfr",
         cj: {
           to: this.multisig,
-          [this.item.token.toLowerCase()]: this.item.price.amount,
+          [this.item.price.token.toLowerCase()]: this.item.price.amount,
           memo: `NFTbuy ${this.item.setname}:${this.item.uid}`,
         },
         txid: "sendhive",
