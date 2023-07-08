@@ -418,7 +418,7 @@ export default {
                                 </div>
                             </div>
                             <!-- NFT Bid -->
-                            <div class="accordion-item" v-if="itemmodal.item.owner == 'ah' || itemmodal.item.owner == 'hh'">
+                            <div class="accordion-item" v-if="auction">
                                 <h2 class="accordion-header">
                                     <button @click="auctionData('itemmodal')" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBid" aria-expanded="true" aria-controls="collapseBid">
                                     <i class="fas fa-comment-dollar me-3"></i><span>BID
@@ -516,7 +516,7 @@ export default {
                                 </div>
                             </div>
                             <!-- NFT Buy -->
-                            <div class="accordion-item" v-if="itemmodal.item.owner == 'ls'">
+                            <div class="accordion-item" v-if="itemmodal.sale">
                                 <h2 class="accordion-header">
                                     <button  @click="saleData('itemmodal')" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBuy" aria-expanded="true" aria-controls="collapseBuy">
                                     <i class="fas fa-money-bill-wave me-3"></i><span>BUY
