@@ -64,7 +64,7 @@ export default {
                             </div>
                             <div class="text-center">
                                 <button id="giveFTbutton" class="btn btn-info" @click="giveFT()"
-                                    type="submit">Give</button>
+                                    type="button">Give</button>
                             </div>
                         </form>
                     </div>
@@ -123,7 +123,7 @@ export default {
                                 </div>
                             </div>
                             <div class="text-center">
-                                <button id="tradeFTbutton" class="btn btn-info my-2" type="submit"
+                                <button id="tradeFTbutton" class="btn btn-info my-2" type="button"
                                     @click="tradeFT(item)">Propose
                                     Trade</button>
                             </div>
@@ -271,7 +271,7 @@ export default {
                                     immediately.</p>
                             </div>
                             <div class="text-center">
-                                <button class="btn btn-info my-2" type="submit">List
+                                <button class="btn btn-info my-2" type="button">List
                                     Item</button>
                             </div>
                         </form>
@@ -317,7 +317,7 @@ export default {
                                 </div>
                             </div>
                             <div class="text-center">
-                                <button class="btn btn-info my-2" type="submit">Airdrop
+                                <button class="btn btn-info my-2" type="button">Airdrop
                                     Tokens</button>
                             </div>
                         </form>
