@@ -316,7 +316,7 @@ export default {
   },
   methods: {
     buyNFT(){
-      if(this.item.token == 'HIVE' || this.item.token == "HBD") this.$emit('tosign', {
+      if(this.item.price.token == 'HIVE' || this.item.price.token == "HBD") this.$emit('tosign', {
         type: "xfr",
         cj: {
           to: this.multisig,
