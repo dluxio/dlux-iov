@@ -107,15 +107,25 @@ export default {
                                 </div>
                                 <div class="col-6">
                                     <label for="tradeFTamount" class="form-label">Amount</label>
+                                    <small v-if="ftTradeTabToken == TOKEN" class="float-end mb-2 align-self-center text-white-50">
+                                        0% FEE
+                                    </small>
+                                    <small v-else class="float-end mb-2 align-self-center text-white-50">
+                                        1% FEE
+                                    </small>
                                     <div class="input-group has-validation">
                                         <input type="number"
                                             class="form-control text-info "
                                             id="tradeFTamount" v-model="trade.amount"
                                             aria-describedby="tradeFTamountappend"
                                             placeholder="0.000" step="0.001" min="0.001" required>
-                                        <span
-                                            class="input-group-text"
-                                            id="tradeFTamountappend">DLUX</span>
+                                        <span class="input-group-text e-radius-hotfix m-0 p-0" id="tradeFTamountappend">
+                                                <select id="tradeFTpriceType" aria-label="Trade price type select" class="form-select border-0 text-white-50 w-100 h-100">
+                                                    <option selected="selected" value="DLUX">DLUX</option>
+                                                    <option value="HIVE">HIVE</option>
+                                                    <option value="HBD">HBD</option>
+                                                </select>
+                                            </span>
                                         <div class="invalid-feedback"> Please enter the
                                             amount
                                             of DLUX you'd like to receive. </div>
@@ -154,14 +164,24 @@ export default {
                                 <div class="col-6">
                                     <label for="sellFTprice" class="form-label">Sale
                                         Price</label>
+                                    <small v-if="ftSellTabToken == TOKEN" class="float-end mb-2 align-self-center text-white-50">
+                                        0% FEE
+                                    </small>
+                                    <small v-else class="float-end mb-2 align-self-center text-white-50">
+                                        1% FEE
+                                    </small>
                                     <div class="input-group has-validation">
                                         <input type="number"
                                             class="form-control text-info"
                                             id="sellFTprice" aria-describedby="sellFTpriceappend"
                                             placeholder="0.000" step="0.001" min="0.001" required>
-                                        <span
-                                            class="input-group-text"
-                                            id="sellFTpriceappend">DLUX</span>
+                                            <span class="input-group-text e-radius-hotfix m-0 p-0" id="sellFTamountappend">
+                                            <select id="sellFTpriceType" aria-label="Trade price type select" class="form-select border-0 text-white-50 w-100 h-100">
+                                                <option selected="selected" value="DLUX">DLUX</option>
+                                                <option value="HIVE">HIVE</option>
+                                                <option value="HBD">HBD</option>
+                                            </select>
+                                        </span>
                                         <div class="invalid-feedback"> Please enter the
                                             amount
                                             of DLUX you'd like to receive. </div>
@@ -206,15 +226,25 @@ export default {
                                 <div class="col-6">
                                     <label for="auctionFTprice" class="form-label">Starting
                                         Bid</label>
+                                    <small v-if="ftAuctionTabToken == TOKEN" class="float-end mb-2 align-self-center text-white-50">
+                                        0% FEE
+                                    </small>
+                                    <small v-else class="float-end mb-2 align-self-center text-white-50">
+                                        1% FEE
+                                    </small>
                                     <div class="input-group has-validation">
                                         <input type="number"
                                             class="form-control text-info"
                                             id="auctionFTprice"
                                             aria-describedby="auctionFTpriceappend"
                                             placeholder="0.000" step="0.001" min="0.001" required>
-                                        <span
-                                            class="input-group-text"
-                                            id="auctionFTqtyappend">DLUX</span>
+                                        <span class="input-group-text e-radius-hotfix m-0 p-0" id="auctionFTamountappend">
+                                            <select id="auctionFTpriceType" aria-label="Trade price type select" class="form-select border-0 text-white-50 w-100 h-100">
+                                                <option selected="selected" value="DLUX">DLUX</option>
+                                                <option value="HIVE">HIVE</option>
+                                                <option value="HBD">HBD</option>
+                                            </select>
+                                        </span>
                                         <div class="invalid-feedback"> Please enter the
                                             amount
                                             of DLUX you'd like to start the bidding.
