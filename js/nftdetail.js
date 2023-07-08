@@ -693,15 +693,15 @@ export default {
             this.$emit('tosign', {
                 type: 'cja',
                 cj: {
-                    set: this.itemmodal.item.set,
+                    set: this.itemmodal.item.setname,
                     uid: this.itemmodal.item.uid,
                     price: this.itemmodal.item.price.amount,
                   },
-                id: `${this.itemmodal.item.set}:${this.itemmodal.item.uid}_nft_buy`,
-                msg: `Buying ${this.itemmodal.item.set}:${this.itemmodal.item.uid}`,
+                id: `${this.itemmodal.item.token}_nft_buy`,
+                msg: `Buying ${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
                 ops: ["getTokenUser"],
                 api: "https://spktest.dlux.io",
-                txid: `${this.itemmodal.item.set}:${this.itemmodal.item.uid}_nft_buy`
+                txid: `${this.itemmodal.item.setname}:${this.itemmodal.item.uid}_nft_buy`
             });
         },
         cancelNFT() {
