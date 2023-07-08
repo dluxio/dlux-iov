@@ -3,7 +3,7 @@ import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
 import NFTCard from "./nftcard.js";
-import NFTTransfer from "./nfttransfer.js";
+import FTTransfer from "./fttransfer.js";
 import NFTDetail from "./nftdetail.js";
 
 let url = location.href.replace(/\/$/, "");
@@ -536,7 +536,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
     "foot-vue": FootVue,
     "cycle-text": Cycler,
     "nftcard": NFTCard,
-    "nfttransfer": NFTTransfer,
+    "fttransfer": FTTransfer,
     "nftdetail": NFTDetail,
   },
   methods: {

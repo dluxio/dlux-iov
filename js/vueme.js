@@ -11,7 +11,7 @@ import Replies from "/js/replies.js";
 import CardVue from "./cardvue.js";
 import DetailVue from "./detailvue.js";
 import NFTCard from "./nftcard.js";
-import NFTTransfer from "./nfttransfer.js";
+import FTTransfer from "./fttransfer.js";
 import NFTDetail from "./nftdetail.js";
 
 let url = location.href.replace(/\/$/, "");
@@ -803,7 +803,7 @@ var app = new Vue({
     "card-vue": CardVue,
     "detail-vue": DetailVue,
     "nftcard": NFTCard,
-    "nfttransfer": NFTTransfer,
+    "fttransfer": FTTransfer,
     "nftdetail": NFTDetail,
   },
   methods: {
