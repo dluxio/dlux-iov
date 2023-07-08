@@ -698,7 +698,7 @@ export default {
                     price: this.itemmodal.item.price.amount,
                   },
                 id: `${this.itemmodal.item.set}:${this.itemmodal.item.uid}_nft_buy`,
-                msg: `buying ${contract}...${this.itemmodal.item.set}:${this.itemmodal.item.uid}`,
+                msg: `Buying ${this.itemmodal.item.set}:${this.itemmodal.item.uid}`,
                 ops: ["getTokenUser"],
                 api: "https://spktest.dlux.io",
                 txid: `${this.itemmodal.item.set}:${this.itemmodal.item.uid}_nft_buy`
