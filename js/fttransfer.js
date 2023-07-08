@@ -120,10 +120,10 @@ export default {
                                             aria-describedby="tradeFTamountappend"
                                             placeholder="0.000" step="0.001" min="0.001" required>
                                         <span class="input-group-text e-radius-hotfix m-0 p-0" id="tradeFTamountappend">
-                                                <select id="tradeFTpriceType" aria-label="Trade price type select" class="form-select border-0 text-white-50 w-100 h-100">
-                                                    <option selected="selected" value="DLUX">DLUX</option>
-                                                    <option value="HIVE">HIVE</option>
-                                                    <option value="HBD">HBD</option>
+                                                <select aria-label="Trade price type select" class="form-select border-0 text-white-50 w-100 h-100" v-model="trade.token">
+                                                    <option selected="selected" :value="item.token">{{toUpperCase(item.token)}}</option>
+                                                    <option value="hive">HIVE</option>
+                                                    <option value="hbd">HBD</option>
                                                 </select>
                                             </span>
                                         <div class="invalid-feedback"> Please enter the
@@ -176,10 +176,10 @@ export default {
                                             id="sellFTprice" aria-describedby="sellFTpriceappend"
                                             placeholder="0.000" step="0.001" min="0.001" required>
                                             <span class="input-group-text e-radius-hotfix m-0 p-0" id="sellFTamountappend">
-                                            <select id="sellFTpriceType" aria-label="Trade price type select" class="form-select border-0 text-white-50 w-100 h-100">
-                                                <option selected="selected" value="DLUX">DLUX</option>
-                                                <option value="HIVE">HIVE</option>
-                                                <option value="HBD">HBD</option>
+                                            <select aria-label="Trade price type select" class="form-select border-0 text-white-50 w-100 h-100" v-model="sell.token">
+                                                <option selected="selected" :value="item.token">{{toUpperCase(item.token)}}</option>
+                                                <option value="hive">HIVE</option>
+                                                <option value="hbd">HBD</option>
                                             </select>
                                         </span>
                                         <div class="invalid-feedback"> Please enter the
@@ -239,11 +239,11 @@ export default {
                                             aria-describedby="auctionFTpriceappend"
                                             placeholder="0.000" step="0.001" min="0.001" required>
                                         <span class="input-group-text e-radius-hotfix m-0 p-0" id="auctionFTamountappend">
-                                            <select id="auctionFTpriceType" aria-label="Trade price type select" class="form-select border-0 text-white-50 w-100 h-100">
-                                                <option selected="selected" value="DLUX">DLUX</option>
-                                                <option value="HIVE">HIVE</option>
-                                                <option value="HBD">HBD</option>
-                                            </select>
+                                        <select aria-label="Trade price type select" class="form-select border-0 text-white-50 w-100 h-100" v-model="auction.token">
+                                            <option selected="selected" :value="item.token">{{toUpperCase(item.token)}}</option>
+                                            <option value="hive">HIVE</option>
+                                            <option value="hbd">HBD</option>
+                                        </select>
                                         </span>
                                         <div class="invalid-feedback"> Please enter the
                                             amount
@@ -516,6 +516,9 @@ export default {
         gt(a, b) {
             return parseFloat(a) > parseFloat(b);
         },
+        toUpperCase(str) {
+            return str.toUpperCase();
+        }
     },
     mounted() {
     },
