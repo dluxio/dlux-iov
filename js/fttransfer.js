@@ -107,7 +107,7 @@ export default {
                                 </div>
                                 <div class="col-6">
                                     <label for="tradeFTamount" class="form-label">Amount</label>
-                                    <small v-if="ftTradeTabToken == TOKEN" class="float-end mb-2 align-self-center text-white-50">
+                                    <small v-if="ftTradeTabToken == item.token" class="float-end mb-2 align-self-center text-white-50">
                                         0% FEE
                                     </small>
                                     <small v-else class="float-end mb-2 align-self-center text-white-50">
@@ -164,7 +164,7 @@ export default {
                                 <div class="col-6">
                                     <label for="sellFTprice" class="form-label">Sale
                                         Price</label>
-                                    <small v-if="ftSellTabToken == TOKEN" class="float-end mb-2 align-self-center text-white-50">
+                                    <small v-if="ftSellTabToken == item.token" class="float-end mb-2 align-self-center text-white-50">
                                         0% FEE
                                     </small>
                                     <small v-else class="float-end mb-2 align-self-center text-white-50">
@@ -226,7 +226,7 @@ export default {
                                 <div class="col-6">
                                     <label for="auctionFTprice" class="form-label">Starting
                                         Bid</label>
-                                    <small v-if="ftAuctionTabToken == TOKEN" class="float-end mb-2 align-self-center text-white-50">
+                                    <small v-if="ftAuctionTabToken == item.token" class="float-end mb-2 align-self-center text-white-50">
                                         0% FEE
                                     </small>
                                     <small v-else class="float-end mb-2 align-self-center text-white-50">
