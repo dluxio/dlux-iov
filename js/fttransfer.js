@@ -31,7 +31,7 @@ export default {
                     <div role="tabpanel" class="tab-pane fade show active" id="giveFTtab"
                         aria-labelledby="giveFT">
                         <!-- GIVE FORM -->
-                        <form class="needs-validation mt-4" @action="giveFT()" novalidate>
+                        <form id="ftGiveForm" class="needs-validation mt-4" @submit.prevent="validateForm('ftGiveForm', 'ftGiveFormValid');giveFT()" novalidate>
                             <!--:action="javascript:giveFT('{{item.data.set}}','{{giveFTusername.value}}','{{giveFTqty.value}}')"-->
                             <div class="row mb-3">
                                 <label for="giveFTusername" class="form-label">Username</label>
@@ -397,7 +397,7 @@ export default {
             default: ''
         },
     },
-    emits: ['give', 'trade', 'mint', 'airdrop', 'sell', 'detail', 'auction', 'melt'],
+    emits: ['tosign', 'detail'],
     data() {
         return {
             give: {
@@ -423,11 +423,32 @@ export default {
                 to_string: '',
                 to_array: [],
                 qty_each: 1,
-            }
+            },
+            ftGiveFormValid: false,
         };
     },
     methods: {
-        giveFT() {},
+        validateForm(formKey, validKey) {
+            var Container = document.getElementById(formKey);
+            if (Container.querySelector('input:invalid'))
+              this[validKey] = false;
+            //querySelector('input:invalid[name="pwd"]')
+            else this[validKey] = true;
+          },
+        giveFT() {
+            const toSign = {
+                type: "cja",
+                cj: {
+                  items: [contract]
+                },
+                id: `spkcc_${!remove ? 'store' : 'remove'}`,
+                msg: `Storing ${contract}...`,
+                ops: ["getTokenUser"],
+                api: "https://spktest.dlux.io",
+                txid: `${contract}_${!remove ? 'store' : 'remove'}`,
+              }
+              this.$emit('tosign', toSign)
+        },
         tradeFT() {},
         mintFT() {},
         airdropFT() {},
