@@ -1740,6 +1740,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
     getNFTsets() {
       const getSets = (chain) => {
+        this.getProtocol(chain);
         fetch(this.chains[chain].api + "/api/sets")
           .then((response) => response.json())
           .then((data) => {
@@ -2400,6 +2401,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       }
       this.chains[this.jsontoken].enabled = true;
       this.getNFTset(setName, this.jsontoken);
+      this.getProtocol(this.jsontoken);
     } else if (location.pathname.indexOf('nfts/sets') > 0) {
       this.getNFTsets();
     }
@@ -2409,7 +2411,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     this.getUserNFTs();
     //this.getQuotes();
     //this.getNodes();
-    this.getProtocol();
     if (user != "GUEST") this.getTokenUser(user);
     if (user != "GUEST") this.getHiveUser(user);
   },
