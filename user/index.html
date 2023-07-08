@@ -1152,14 +1152,14 @@
 
                                 <!-- MINT TRADES -->
                                 <div v-for="(rnft, index) in FTtrades" :key="index" class="col my-2">
-                                    <nftcard :item="rnft" mint="true" trade="true" :account="account"
+                                    <nftcard :item="rnft" mint="true" trade="true" :account="account" :multisig="chains[item.token].multisig"
                                         :wrapped="getAttr(rnft.script, 'wrapped')" :oicon="getIcon(rnft.script)"
                                         :ocolors="getSetDetailsColors(rnft.script)"
                                         @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                                 </div>
                                 <!-- NFT TRADES -->
                                 <div v-for="item in NFTtrades" class="col my-2" id="trade-nft-cards">
-                                    <nftcard :item="item" trade="true" :account="account"
+                                    <nftcard :item="item" trade="true" :account="account" :multisig="chains[item.token].multisig"
                                         :uid="Base64toNumber(item.uid)" :oicon="getIcon(item.script)"
                                         :ocolors="getSetDetailsColors(item.script)"
                                         @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
@@ -1172,7 +1172,7 @@
                             <div v-if="accountRNFTs.length"
                                 class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
                                 <div v-for="rnft in accountRNFTs" class="col my-2">
-                                    <nftcard :item="rnft" inventory="true" mint="true"
+                                    <nftcard :item="rnft" inventory="true" mint="true" :multisig="chains[item.token].multisig"
                                         :wrapped="getAttr(rnft.script, 'wrapped')" :oicon="getIcon(rnft.script)"
                                         :ocolors="getSetDetailsColors(rnft.script)" @modal="modalIndex('transferModal', $event);transferModal.hidden = false" />
                                         @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
@@ -1274,7 +1274,7 @@
                 </div>
                 <!-- mint transfer modal -->
                 <div>
-                    <fttransfer :account="account" :item="focusItem" :mint="transferMint" @modal="modal($event)" :chains="chains"/>
+                    <fttransfer :account="account" :item="focusItem" :mint="transferMint" @modal="modal($event)"/>
                 </div>
                 
 
