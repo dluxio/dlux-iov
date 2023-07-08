@@ -684,11 +684,11 @@ export default {
     },
     methods: {
         buyNFT() {
-            if(this.itemmodal.item.token == 'HIVE' || this.itemmodal.item.token == "HBD") this.$emit('tosign', {
+            if(this.itemmodal.item.price.token == 'HIVE' || this.itemmodal.item.price.token == "HBD") this.$emit('tosign', {
                 type: "xfr",
                 cj: {
                   to: this.chains[this.itemmodal.item.token].multisig,
-                  [this.itemmodal.item.token.toLowerCase()]: this.itemmodal.item.price.amount,
+                  [this.itemmodal.item.price.token.toLowerCase()]: this.itemmodal.item.price.amount,
                   memo: `NFTbuy ${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
                 },
                 txid: "sendhive",
