@@ -809,7 +809,7 @@ export default {
         modalNext(){
             if(this.itemmodal.index < this.itemmodal.items.length - 1) this.itemmodal.index = this.itemmodal.index + 1
             else this.itemmodal.index = 0
-            this.itemmodal.item = this.itemmodal.items[this.itemmodal.item]
+            this.itemmodal.item = this.itemmodal.items[this.itemmodal.index]
         }
     },
     mounted() {
