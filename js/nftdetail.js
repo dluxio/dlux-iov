@@ -139,8 +139,8 @@ export default {
                                                                     <label for="giveNFTusername">Username</label>
                                                                     <div class="input-group has-validation">
                                                                         <span class="input-group-text text-white-50" id="giveNFTuserprep">@</span>
-                                                                        <input id="giveTo" v-model="give.to" @blur="checkAccount(trade.to, 'giveTo')" type="text" class="form-control text-info"
-                                                                        aria-describedby="giveNFTuserprep" required>
+                                                                        <input id="giveTo" v-model="give.to" @blur="checkAccount(trade.to, 'giveToAllowed')" type="text" class="form-control text-info"
+                                                                        aria-describedby="giveNFTuserprep" :class="{'invalid': !giveToAllowed}" required>
                                                                         <div class="invalid-feedback">
                                                                             Please enter the username you'd like to give to.
                                                                         </div>
@@ -644,7 +644,7 @@ export default {
             },
             TOKEN: '',
             nftTradeAllowed: false,
-            nftGiveFormValid: false,
+            giveToAllowed: false,
             NFTselect: {
                 start: 0,
                 amount: 30,
@@ -681,8 +681,9 @@ export default {
             }
           },
         checkAccount(name, key) {
+            return new Promise((resolve, reject) => {
             fetch("https://anyx.io", {
-              body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${this[name]}\"]], \"id\":1}`,
+              body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${name}\"]], \"id\":1}`,
               headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
               },
@@ -692,16 +693,16 @@ export default {
                 return r.json();
               })
               .then((re) => {
-                var Container = document.getElementById(key);
+                console.log(re)
                 if (re.result.length) {
-                    Container.classList.add('was-validated');
-                    //remove invalid
-                    Container.classList.remove('invalid');
+                    this[key] = true
+                    resolve(true);
                 } else {
-                    Container.classList.add('invalid');
-                    Container.classList.remove('was-validated');
+                    this[key] = false
+                    resolve(false);
                 }
               });
+            })
         },
         buyNFT() {
             if(this.itemmodal.item.price.token == 'HIVE' || this.itemmodal.item.price.token == "HBD") this.$emit('tosign', {
