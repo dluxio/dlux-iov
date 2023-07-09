@@ -745,13 +745,13 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           }
         }
       }
-      if(NFTselect.dir == 'asc'){
+      if(this.NFTselect.dir == 'asc'){
         this.displayNFTs.sort((a, b) => {
           if(a[NFTselect.sort].amount < b[NFTselect.sort].amount) return -1
           if(a[NFTselect.sort].amount > b[NFTselect.sort].amount) return 1
           return 0
         })
-      } else if(NFTselect.dir == 'dec'){
+      } else if(this.NFTselect.dir == 'dec'){
         this.displayNFTs.sort((a, b) => {
           if(a[NFTselect.sort].amount > b[NFTselect.sort].amount) return -1
           if(a[NFTselect.sort].amount < b[NFTselect.sort].amount) return 1
