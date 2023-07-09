@@ -145,6 +145,7 @@ export default {
                                                                             Please enter the username you'd like to give to.
                                                                         </div>
                                                                     </div>
+                                                                    <button v-if="give.to" :disabled="giveEnabled" type="button" class="btn my-2" :class="{'btn-warning': !giveEnabled, 'btn-success': giveEnabled}" :disabled="!give.to">Validate Account</button>
                                                                 </div>
                                                             </div>
                                                             <div class="text-center">
