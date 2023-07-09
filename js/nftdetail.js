@@ -332,11 +332,11 @@ export default {
                                         <i class="fa-solid fa-fire me-3"></i>MELT<span
                                         class="ms-2 small">({{sets[itemmodal.item.token]
                                         ?
-                                        precision(sets[itemmodal.item.token][itemmodal.item.setname].bond.amount,
-                                        sets[itemmodal.item.token][itemmodal.item.setname].bond.precision)
+                                        precision(chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.amount,
+                                        chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.precision)
                                         : 0 }}
                                         {{sets[itemmodal.item.token]?
-                                        sets[itemmodal.item.token][itemmodal.item.setname].bond.token
+                                        chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.token
                                         :
                                         ''}})</span>
                                     </button>
@@ -357,11 +357,11 @@ export default {
                                                             <h1>
                                                             {{sets[itemmodal.item.token]
                                                             ?
-                                                            precision(sets[itemmodal.item.token][itemmodal.item.setname].bond.amount,
-                                                            sets[itemmodal.item.token][itemmodal.item.setname].bond.precision)
+                                                            precision(chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.amount,
+                                                            chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.precision)
                                                             : 0 }}
                                                             {{sets[itemmodal.item.token]?
-                                                            sets[itemmodal.item.token][itemmodal.item.setname].bond.token
+                                                            chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.token
                                                             :
                                                             ''}}</h1>
                                                         </div>
