@@ -447,7 +447,7 @@ export default {
             const toSign = {
                 type: "cja",
                 cj: {
-                  set: this.item.setname,
+                  set: this.item.set,
                     to: this.give.to,
                     qty: this.give.qty,
                 },
