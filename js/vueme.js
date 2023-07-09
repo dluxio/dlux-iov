@@ -2127,14 +2127,14 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         });
     },
     modalIndex(modal, index, source = "displayNFTs") {
-      if (source != "displayNFTs") {
-        source.HTML = source.comp.HTML;
-        source.setname = source.setname;
-        this[modal].index = 0;
-        this[modal].items = [source];
-        this[modal].item = source;
-        return;
-      }
+      // if (source != "displayNFTs") {
+      //   source.HTML = source.comp.HTML;
+      //   source.setname = source.setname;
+      //   this[modal].index = 0;
+      //   this[modal].items = [source];
+      //   this[modal].item = source;
+      //   return;
+      // }
       var i = 0;
       for (i; i < this[source].length; i++) {
         if (`${this[source][i].setname}:${this[source][i].uid}` == index) break;
