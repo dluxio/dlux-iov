@@ -2238,9 +2238,23 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             this.barhbd = this.accountinfo.hbd_balance;
           });
     },
+    getHiveInfo() {
+      fetch(hapi, {
+        body: `{"jsonrpc":"2.0", "method":"condenser_api.get_global_dynamic_properties", "params":[], "id":1}`,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        method: "POST",
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data)
+        });
+    },
   },
   mounted() {
     //get hash and set it
+    this.getHiveInfo
     var setName = location.pathname.split("set/")[1];
     this.setname = setName;
     if (setName) {
