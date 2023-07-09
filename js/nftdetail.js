@@ -711,7 +711,7 @@ export default {
                 txid: `${this.itemmodal.item.setname}:${this.itemmodal.item.uid}_nft_cancel`
             });
         },
-        giveFT(){
+        giveNFT(){
             const toSign = {
                 type: "cja",
                 cj: {
