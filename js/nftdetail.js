@@ -133,14 +133,14 @@ export default {
                                                 <div class="tab-content">
                                                     <!-- NFT Give -->
                                                     <div role="tabpanel" class="tab-pane fade show active" id="giveNFTtab" aria-labelledby="giveNFT">
-                                                        <form class="needs-validation mt-4" id="nftGiveForm" @submit.prevent="validateForm('nftGiveForm', 'nftTradeAllowed', giveNFT)" novalidate>
+                                                        <form class="needs-validation mt-4" id="nftGiveForm" @submit.prevent="validateForm('nftGiveForm', giveNFT)" novalidate>
                                                             <div class="form-row my-2">
                                                                 <div class="col-12">
                                                                     <label for="giveNFTusername">Username</label>
                                                                     <div class="input-group has-validation">
                                                                         <span class="input-group-text text-white-50" id="giveNFTuserprep">@</span>
-                                                                        <input v-model="give.to" @blur="checkAccount(trade.to, 'nftTradeAllowed')" type="text" class="form-control text-info"
-                                                                        id="giveNFTusername" aria-describedby="giveNFTuserprep" required>
+                                                                        <input id="giveTo" v-model="give.to" @blur="checkAccount(trade.to, 'giveTo')" type="text" class="form-control text-info"
+                                                                        aria-describedby="giveNFTuserprep" required>
                                                                         <div class="invalid-feedback">
                                                                             Please enter the username you'd like to give to.
                                                                         </div>
@@ -674,7 +674,6 @@ export default {
     methods: {
         validateForm(formKey,  op) {
             var Container = document.getElementById(formKey);
-            if(!validKey)return
             if (Container.querySelector('input:invalid'))
                 Container.classList.add('was-validated');
             else {
