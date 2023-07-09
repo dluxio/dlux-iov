@@ -643,6 +643,7 @@ export default {
                 qty_each: 1,
             },
             TOKEN: '',
+            nftTradeAllowed: false,
             NFTselect: {
                 start: 0,
                 amount: 30,
@@ -670,6 +671,22 @@ export default {
         }
     },
     methods: {
+        checkAccount(name, key) {
+            fetch("https://anyx.io", {
+              body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${this[name]}\"]], \"id\":1}`,
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              method: "POST",
+            })
+              .then((r) => {
+                return r.json();
+              })
+              .then((re) => {
+                if (re.result.length) this[key] = true;
+                else this[key] = false;
+              });
+        },
         buyNFT() {
             if(this.itemmodal.item.price.token == 'HIVE' || this.itemmodal.item.price.token == "HBD") this.$emit('tosign', {
                 type: "xfr",
