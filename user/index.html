@@ -1274,7 +1274,7 @@
                 </div>
                 <!-- mint transfer modal -->
                 <div>
-                    <fttransfer :account="account" :item="focusItem" :mint="transferMint" @modal="modal($event)"/>
+                    <fttransfer :account="account" :item="focusItem" :mint="transferMint" @modal="modal($event)" @tosign="toSign = $event" />
                 </div>
                 
 
