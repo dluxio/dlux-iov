@@ -690,6 +690,8 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           salelabel: for(var i = 0; i < this.chains[chain].sets[set].sales.length; i++){
             if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && !this.selectors['For Sale'].checked)break salelabel;
             if(this.NFTselect.keys.find(a => a.indexOf('Currency') >= 0) && !this.denoms[this.chains[chain].sets[set].sales[i].price.token].checked)continue salelabel;
+            console.log(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) , this.selectors['Affordable'].checked , this.chains[chain].sets[set].sales[i].price.amount , (this.chains[chain].sets[set].sales[i].price.token == chain , this.chains[chain].account.balance , this.chains[chain].sets[set].sales[i].price.token == 'HIVE' , parseFloat(this.barhive) * 1000 , parseFloat(this.barhbd) * 1000))
+            
             if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && this.selectors['Affordable'].checked && this.chains[chain].sets[set].sales[i].price.amount > (this.chains[chain].sets[set].sales[i].price.token == chain ? this.chains[chain].account.balance : this.chains[chain].sets[set].sales[i].price.token == 'HIVE' ? parseFloat(this.barhive) * 1000 : parseFloat(this.barhbd) * 1000))continue salelabel;
             if(this.NFTselect.searchTerm){
               if(this.chains[chain].sets[set].sales[i].uid.toLowerCase().indexOf(this.NFTselect.searchTerm.toLowerCase()) >= 0){
