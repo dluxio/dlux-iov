@@ -71,7 +71,7 @@ export default {
                     <div role="tabpanel" class="tab-pane fade show " id="tradeFTtab"
                         aria-labelledby="tradeFT">
                         <!-- TRADE FORM -->
-                        <form class="needs-validation mt-4" novalidate>
+                        <form id="ftTradeForm" class="needs-validation mt-4" @submit.prevent="validateForm('ftTradeForm', 'ftTradeFormValid');tradeFT()" novalidate>
                             <!--:action="javascript:tradeFT('{{item.data.set}}','{{tradeFTusername.value}}','{{tradeFTamount.value}}')"-->
                             <div class="row mb-3">
                                 <label for="tradeFTusername" class="form-label">Username</label>
@@ -132,7 +132,7 @@ export default {
                             </div>
                             <div class="text-center">
                                 <button id="tradeFTbutton" class="btn btn-info my-2" type="submit"
-                                    @click="tradeFT(item)">Propose
+                                    >Propose
                                     Trade</button>
                             </div>
                         </form>
