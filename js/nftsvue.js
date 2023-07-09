@@ -1802,13 +1802,13 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                     var hbdPrice = 0
                     switch (token) {
                       case "HIVE":
-                        hbdPrice = parseInt(this.chains[chain].sets[set].sales[i].price.amount * this.hiveprice)
+                        hbdPrice = parseInt(presales[i].price.amount * this.hiveprice)
                         break;
                       case "HBD": 
-                        hbdPrice = this.chains[chain].sets[set].sales[i].price.amount
+                        hbdPrice = presales[i].price.amount
                         break;
                       default:
-                        hbdPrice = parseInt(this.chains[chain].sets[set].sales[i].price.amount * this.hiveprice * this.parseFloat(this.chains[chain].account.tick))
+                        hbdPrice = parseInt(presales[i].price.amount * this.hiveprice * this.parseFloat(this.chains[chain].account.tick))
                     }
                     if (
                       presales[i].price.amount < this.chains[chain].sets[set].sf[token] ||
