@@ -404,10 +404,10 @@ export default {
             set: this.item.setname,
           },
         id: `${this.item.token}_nft_mint`,
-        msg: `Canceling ${this.item.setname}:${this.item.uid}`,
+        msg: `Minting ${this.item.setname} token`,
         ops: ["getTokenUser"],
         api: "https://spktest.dlux.io",
-        txid: `${this.item.setname}:${this.item.uid}_nft_cancel`
+        txid: `${this.item.setname}_nft_mint`
       });
     },
     modalIndex(name) {
