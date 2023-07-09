@@ -133,7 +133,7 @@ export default {
                                                 <div class="tab-content">
                                                     <!-- NFT Give -->
                                                     <div role="tabpanel" class="tab-pane fade show active" id="giveNFTtab" aria-labelledby="giveNFT">
-                                                        <form class="needs-validation mt-4" id="nftGiveForm" @submit.prevent="validateForm('nftGiveForm', 'nftGiveFormValid');giveNFT()" novalidate>
+                                                        <form class="needs-validation mt-4" id="nftGiveForm" @submit.prevent="validateForm('nftGiveForm', 'nftTradeAllowed', giveNFT)" novalidate>
                                                             <div class="form-row my-2">
                                                                 <div class="col-12">
                                                                     <label for="giveNFTusername">Username</label>
@@ -672,12 +672,16 @@ export default {
         }
     },
     methods: {
-        validateForm(formKey, validKey) {
+        validateForm(formKey, validKey, op) {
             var Container = document.getElementById(formKey);
+            if(!validKey)return
             if (Container.querySelector('input:invalid'))
               this[validKey] = false;
             //querySelector('input:invalid[name="pwd"]')
-            else this[validKey] = true;
+            else {
+                this[validKey] = true;
+                op();
+            }
           },
         checkAccount(name, key) {
             fetch("https://anyx.io", {
