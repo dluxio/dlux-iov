@@ -750,6 +750,7 @@ export default {
                 api: "https://spktest.dlux.io",
                 txid: `${this.itemmodal.item.token}_nft_transfer_${this.give.to}`,
               }
+              console.log(toSign);
               this.$emit('tosign', toSign)
         },
         tradeFT() { },

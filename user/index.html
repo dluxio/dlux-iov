@@ -1259,7 +1259,7 @@
 
                 <!--NFT item detail modal-->
                 <div>
-                    <nftdetail :account="account" :itemmodal="itemModal" :pfp="pfp" :chains="chains"
+                    <nftdetail :account="account" :itemmodal="itemModal" :pfp="pfp" :chains="chains" @tosign="toSign = $event"
                     @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                 </div>
 
