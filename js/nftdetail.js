@@ -802,14 +802,14 @@ export default {
             return parseFloat(a) > parseFloat(b);
         },
         modalPrev(){
-            if(this.index > 0) this.index = this.index - 1
-            else this.index = this.items.length - 1
-            this.item = this.items[this.index]
+            if(this.itemmodal.index > 0) this.itemmodal.index = this.itemmodal.index - 1
+            else this.itemmodal.index = this.itemmodal.items.length - 1
+            this.itemmodal.item = this.itemmodal.items[this.itemmodal.index]
         },
         modalNext(){
-            if(this.index < this.items.length - 1) this.index = this.index + 1
-            else this.index = 0
-            this.item = this.items[this.index]
+            if(this.itemmodal.index < this.itemmodal.items.length - 1) this.itemmodal.index = this.itemmodal.index + 1
+            else this.itemmodal.index = 0
+            this.itemmodal.item = this.itemmodal.items[this.index]
         }
     },
     mounted() {
