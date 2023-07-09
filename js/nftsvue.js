@@ -68,11 +68,17 @@ var app = new Vue({
           enabled: false,
           api: "https://token.dlux.io",
           sets: {},
+          account:{
+            balance: 0,
+          }
         },
         duat: {
           enabled: false,
           api: "https://duat.hivehoneycomb.com",
           sets: {},
+          account:{
+            balance: 0,
+          }
         }
       },
       presales: [],

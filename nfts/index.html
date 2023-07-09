@@ -112,19 +112,21 @@
                                                 style="color:silver">About<i class="fas fa-info-circle ms-1"></i></a>
                                         </div>
                                     </div>
-                                    <div class="d-flex justify-content-around my-0">
-                                        <div class="d-flex align-items-center px-3">
+                                    <div v-for="(token, name, index) in chains">
+                                        <div class="d-flex justify-content-around my-0">
+                                            <div class="d-flex align-items-center px-3">
 
-                                            <h3 class="py-2 m-0 font-weight-bolder" style="color:#21FFB5">
-                                                999,999,999.999
-                                            </h3>
+                                                <h3 class="py-2 m-0 font-weight-bolder" style="color:#21FFB5">
+                                                    {{chains[name].account.balance}} {{toUpperCase(name)}}
+                                                </h3>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="mt-1 text-end">
-                                        <button class="btn btn-outline-primary btn-sm" href="#buyDluxModal" class="a-1"
-                                            data-bs-toggle="modal">
-                                            Get DLUX
-                                        </button>
+                                        <div class="mt-1 text-end">
+                                            <button class="btn btn-outline-primary btn-sm" href="#buyDluxModal" class="a-1"
+                                                data-bs-toggle="modal">
+                                                Get {{toUpperCase(name)}}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="bg-darker">
