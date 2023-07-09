@@ -352,7 +352,6 @@ export default {
         getContracts() {
             var contracts = [],
                 getContract = (id) => {
-                    console.log({id})
                     fetch('https://spktest.dlux.io/api/fileContract/' + id)
                         .then((r) => r.json())
                         .then((res) => {

@@ -415,7 +415,6 @@ export default {
         item: this.item,
         tab: name,
       }
-      console.log(this.item)
       this.$emit('detail', `${this.item.setname}:${this.item.uid}`);
     },
     modal(name) {
