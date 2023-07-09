@@ -44,7 +44,7 @@ export default {
                                 <!--back forward btns-->
                                 <div class="card-footer d-flex align-items-center">
                                     <h2><a class="text-muted p-3" href="#/"
-                                            @click="modalPrev('itemmodal')"
+                                            @click="modalPrev()"
                                             :class="{'invisible':!itemmodal.index}"><i
                                                 class="fas fa-caret-square-left"></i></a>
                                     </h2>
@@ -54,7 +54,7 @@ export default {
                                             NFTselect.sort == 'price' ||
                                             itemmodal.items.length}}</i></small>
                                     <h2 class="ms-auto"><a class="text-muted p-3" href="#/"
-                                            @click="modalNext('itemmodal', 'item')"><i
+                                            @click="modalNext()"><i
                                                 class="fas fa-caret-square-right"></i></a>
                                     </h2>
                                 </div>
@@ -801,6 +801,16 @@ export default {
         gt(a, b) {
             return parseFloat(a) > parseFloat(b);
         },
+        modalPrev(){
+            if(this.index > 0) this.index = this.index - 1
+            else this.index = this.items.length - 1
+            this.item = this.items[this.index]
+        },
+        modalNext(){
+            if(this.index < this.items.length - 1) this.index = this.index + 1
+            else this.index = 0
+            this.item = this.items[this.index]
+        }
     },
     mounted() {
         this.isMountedComponent = true;
