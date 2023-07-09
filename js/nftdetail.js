@@ -714,13 +714,14 @@ export default {
             this.$emit('tosign', {
                 type: 'cja',
                 cj: {
-                    items: [contract]
+                    set: this.itemmodal.item.setname,
+                    uid: this.itemmodal.item.uid,
                   },
-                id: `spkcc_${!remove ? 'store' : 'remove'}`,
-                msg: `Storing ${contract}...`,
+                id: `${this.itemmodal.item.token}_nft_sell_${(this.itemmodal.item.price.token == 'HIVE' || this.itemmodal.item.price.token == "HBD") ? 'h' : ''}cancel`,
+                msg: `Canceling ${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
                 ops: ["getTokenUser"],
                 api: "https://spktest.dlux.io",
-                txid: `${contract}_${!remove ? 'store' : 'remove'}`
+                txid: `${this.itemmodal.item.setname}:${this.itemmodal.item.uid}_nft_cancel`
             });
         },
         giveFT() { },
