@@ -263,13 +263,16 @@
                         </ul>
                     </div>
                 </div>
-                <div class="d-flex flex-wrap mt-1" v-if="NFTselect.keys.length">
+                <div class="mt-2 ms-1">
+                    <h5 class="mb-0">{{displayNFTs.length}} Items</h5>
+                </div>
+                <div class="d-flex flex-wrap mt-2" v-if="NFTselect.keys.length">
                     <!-- Active Filters -->
-                    <div v-for="(item, name, index) in NFTselect.keys" class="mt-1 rounded bg-secondary text-black filter-bubble me-1 d-flex align-items-center">
+                    <div v-for="(item, name, index) in NFTselect.keys" class="rounded bg-secondary text-black filter-bubble me-1 d-flex align-items-center">
                         <span>{{item}}</span>
                         <button @click="clearFilters(item)" type="button" class="ms-1 btn-close btn-close-white"></button>
                     </div>
-                    <button @click="clearFilters()" type="button" v-if="NFTselect.keys.length > 1" class="mt-1 btn btn-secondary">
+                    <button @click="clearFilters()" type="button" v-if="NFTselect.keys.length > 1" class="btn btn-secondary">
                         Clear All
                     </button>
                 </div>
