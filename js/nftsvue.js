@@ -1799,17 +1799,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                         : presales[i].price.token == "HBD"
                           ? "HBD"
                           : "TOKEN";
-                    var hbdPrice = 0
-                    switch (token) {
-                      case "HIVE":
-                        hbdPrice = parseInt(presales[i].price.amount * this.hiveprice)
-                        break;
-                      case "HBD": 
-                        hbdPrice = presales[i].price.amount
-                        break;
-                      default:
-                        hbdPrice = parseInt(presales[i].price.amount * this.hiveprice * this.parseFloat(this.chains[chain].account.tick))
-                    }
                     if (
                       presales[i].price.amount < this.chains[chain].sets[set].sf[token] ||
                       !this.chains[chain].sets[set].sf[token]
@@ -1822,6 +1811,17 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                     this.callScript(presales[i], i).then(d => {
                       const index = d.i
                       delete d.i
+                      var hbdPrice = 0
+                      switch (presales[index].price.token) {
+                        case "HIVE":
+                          hbdPrice = parseInt(presales[index].price.amount * this.hiveprice)
+                          break;
+                        case "HBD": 
+                          hbdPrice = presales[index].price.amount
+                          break;
+                        default:
+                          hbdPrice = parseInt(presales[index].price.amount * this.hiveprice * this.parseFloat(this.chains[chain].account.tick))
+                      }
                       presales[index] = {
                         ...presales[index],
                         ...d
