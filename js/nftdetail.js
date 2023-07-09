@@ -630,32 +630,26 @@ export default {
             trade: {
                 to: '',
                 qty: 1,
-                amount: "1.000"
+                amount: "1.000",
+                token: 'hive'
             },
             sell: {
                 qty: 1,
-                price: "1.000"
+                price: "1.000",
+                token: 'hive'
             },
             auction: {
                 qty: 1,
                 price: "1.000",
-                days: 1,
-                token: 'HIVE'
+                days: 7,
+                token: 'hive'
             },
             airdrop: {
                 to_string: '',
                 to_array: [],
                 qty_each: 1,
             },
-            nftTradeTabTo: '',
-            nftTradeTabToken: 'HIVE',
             TOKEN: '',
-            nftTradeTabPrice: 1,
-            nftSellTabToken: 'HIVE',
-            nftSellTabPrice: 1,
-            nftAuctionTabPrice: 1,
-            nftAuctionTabTime: 7,
-            nftAuctionTabToken: 'HIVE',
             NFTselect: {
                 start: 0,
                 amount: 30,
