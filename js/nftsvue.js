@@ -398,6 +398,7 @@ var app = new Vue({
       mint_detail: {
         set: "",
       },
+      hiveprice: 1,
       selectedNFTs: [],
       NFTselect: {
         start: 0,
@@ -1748,6 +1749,17 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                         : this.chains[chain].sets[set].auctions[i].price.token == "HBD"
                           ? "HBD"
                           : "TOKEN"
+                    var hbdPrice = 0
+                    switch (token) {
+                      case "HIVE":
+                        hbdPrice = parseInt(this.chains[chain].sets[set].auctions[i].price.amount * this.hiveprice)
+                        break;
+                      case "HBD": 
+                        hbdPrice = this.chains[chain].sets[set].auctions[i].price.amount
+                        break;
+                      case "TOKEN":
+                        hbdPrice = parseInt(this.chains[chain].sets[set].auctions[i].price.amount * this.hiveprice * this.parseFloat(this.chains[chain].account.tick))
+                    }
                     if (
                       this.chains[chain].sets[set].auctions[i].price.amount < this.chains[chain].sets[set].af[token] ||
                       !this.chains[chain].sets[set].af[token]
@@ -2248,7 +2260,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       })
         .then((response) => response.json())
         .then((data) => {
-          console.log(data)
+          this.hiveprice = parseFloat(data.result.base)
         });
     },
   },
