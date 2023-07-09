@@ -330,12 +330,12 @@ export default {
                                 <h2 class="accordion-header">
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMelt" aria-expanded="false" aria-controls="collapseMelt">
                                         <i class="fa-solid fa-fire me-3"></i>MELT<span
-                                        class="ms-2 small">({{sets[itemmodal.item.token]
+                                        class="ms-2 small">({{chains[itemmodal.item.token]
                                         ?
                                         precision(chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.amount,
                                         chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.precision)
                                         : 0 }}
-                                        {{sets[itemmodal.item.token]?
+                                        {{chains[itemmodal.item.token]?
                                         chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.token
                                         :
                                         ''}})</span>
@@ -355,12 +355,12 @@ export default {
                                                         </div>
                                                         <div class="d-flex no-wrap ms-1">
                                                             <h1>
-                                                            {{sets[itemmodal.item.token]
+                                                            {{chains[itemmodal.item.token]
                                                             ?
                                                             precision(chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.amount,
                                                             chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.precision)
                                                             : 0 }}
-                                                            {{sets[itemmodal.item.token]?
+                                                            {{chains[itemmodal.item.token]?
                                                             chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.token
                                                             :
                                                             ''}}</h1>
