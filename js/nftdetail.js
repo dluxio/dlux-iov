@@ -133,7 +133,7 @@ export default {
                                                 <div class="tab-content">
                                                     <!-- NFT Give -->
                                                     <div role="tabpanel" class="tab-pane fade show active" id="giveNFTtab" aria-labelledby="giveNFT">
-                                                        <form class="needs-validation mt-4" novalidate>
+                                                        <form class="needs-validation mt-4" id="nftGiveForm" @submit.prevent="validateForm('nftGiveForm', 'nftGiveFormValid');giveNFT()" novalidate>
                                                             <div class="form-row my-2">
                                                                 <div class="col-12">
                                                                     <label for="giveNFTusername">Username</label>
@@ -148,7 +148,7 @@ export default {
                                                                 </div>
                                                             </div>
                                                             <div class="text-center">
-                                                                <button @click="giveNFT(itemmodal.item)" class="btn btn-info my-2" type="submit">Give</button>
+                                                                <button class="btn btn-info my-2" type="submit">Give</button>
                                                             </div>
                                                         </form>
                                                     </div>
@@ -644,6 +644,7 @@ export default {
             },
             TOKEN: '',
             nftTradeAllowed: false,
+            nftGiveFormValid: false,
             NFTselect: {
                 start: 0,
                 amount: 30,
@@ -671,6 +672,13 @@ export default {
         }
     },
     methods: {
+        validateForm(formKey, validKey) {
+            var Container = document.getElementById(formKey);
+            if (Container.querySelector('input:invalid'))
+              this[validKey] = false;
+            //querySelector('input:invalid[name="pwd"]')
+            else this[validKey] = true;
+          },
         checkAccount(name, key) {
             fetch("https://anyx.io", {
               body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${this[name]}\"]], \"id\":1}`,
