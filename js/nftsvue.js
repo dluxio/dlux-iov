@@ -2240,7 +2240,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
     getHiveInfo() {
       fetch(hapi, {
-        body: `{"jsonrpc":"2.0", "method":"condenser_api.get_global_dynamic_properties", "params":[], "id":1}`,
+        body: `{"jsonrpc":"2.0", "method":"condenser_api.get_dynamic_global_properties", "params":[], "id":1}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
