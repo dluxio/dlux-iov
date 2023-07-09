@@ -139,7 +139,7 @@ export default {
                                                                     <label for="giveNFTusername">Username</label>
                                                                     <div class="input-group has-validation">
                                                                         <span class="input-group-text text-white-50" id="giveNFTuserprep">@</span>
-                                                                        <input ref="giveTo" v-model="give.to" @blur="checkAccount(give.to, 'giveTo')" type="text" class="form-control text-info"
+                                                                        <input ref="giveTo" v-model="give.to" @blur="checkAccount(give.to, 'giveTo', 'giveEnabled')" type="text" class="form-control text-info"
                                                                         aria-describedby="giveNFTuserprep" required>
                                                                         <div class="invalid-feedback">
                                                                             Please enter the username you'd like to give to.
@@ -148,7 +148,7 @@ export default {
                                                                 </div>
                                                             </div>
                                                             <div class="text-center">
-                                                                <button class="btn btn-info my-2" type="submit">Give</button>
+                                                                <button class="btn btn-info my-2" type="submit" :disabled="!giveEnabled">Give</button>
                                                             </div>
                                                         </form>
                                                     </div>
@@ -644,7 +644,7 @@ export default {
             },
             TOKEN: '',
             nftTradeAllowed: false,
-            giveToAllowed: false,
+            giveEnabled: false,
             NFTselect: {
                 start: 0,
                 amount: 30,
@@ -680,7 +680,7 @@ export default {
                 op();
             }
           },
-        checkAccount(name, key) {
+        checkAccount(name, key, enable) {
             return new Promise((resolve, reject) => {
             fetch("https://anyx.io", {
               body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${name}\"]], \"id\":1}`,
@@ -696,9 +696,11 @@ export default {
                 console.log(re)
                 if (re.result.length) {
                     this.$refs[key].setCustomValidity("");
+                    this[enable] = true
                     resolve(true);
                 } else {
                     this.$refs[key].setCustomValidity("Account does not exist");
+                    this[enable] = false
                     resolve(false);
                 }
               });
