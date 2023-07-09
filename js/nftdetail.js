@@ -257,7 +257,7 @@ export default {
                                                                 <small v-else class="float-end mb-2 align-self-center text-white-50">
                                                                 1% FEE</small>
                                                                 <div class="input-group">
-                                                                    <input v-model="nftAuctionTabPrice" type="number" class="form-control text-info" id="auctionNFTprice"
+                                                                    <input v-model="auction.amount" type="number" class="form-control text-info" id="auctionNFTprice"
                                                                     aria-describedby="auctionNFTpriceappend" placeholder="0.000" step="0.001" min="0.001" required>
                                                                     <span class="input-group-text e-radius-hotfix m-0 p-0" id="auctionNFTpriceappend">
                                                                         <select v-model="auction.token" class="form-select border-0 text-white-50 w-100 h-100"
@@ -281,7 +281,7 @@ export default {
                                                             <div class="d-flex justify-content-around">
                                                                 <div class="form-row my-2 d-flex align-items-center">
                                                                     <label for="auctionNFTdays" class="m-0">Duration:</label>
-                                                                    <select v-model="nftAuctionTabTime" class="mx-2 btn btn-lg btn-secondary" id="auctionNFTdays" required>
+                                                                    <select v-model="auction.time" class="mx-2 btn btn-lg btn-secondary" id="auctionNFTdays" required>
                                                                         <option value="1">
                                                                             1 Day
                                                                         </option>
@@ -479,7 +479,7 @@ export default {
                                                 <form class="needs-validation mt-4" novalidate>
                                                     <label for="bidNFTprice">Bid</label>
                                                     <div class="input-group">
-                                                        <input v-model="nftAuctionTabPrice"
+                                                        <input v-model="auction.amount"
                                                             type="number"
                                                             class="form-control bg-dark border-dark text-info"
                                                             id="auctionNFTprice"
