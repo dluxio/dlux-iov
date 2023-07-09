@@ -672,14 +672,12 @@ export default {
         }
     },
     methods: {
-        validateForm(formKey, validKey, op) {
+        validateForm(formKey,  op) {
             var Container = document.getElementById(formKey);
             if(!validKey)return
             if (Container.querySelector('input:invalid'))
-              this[validKey] = false;
-            //querySelector('input:invalid[name="pwd"]')
+                Container.classList.add('was-validated');
             else {
-                this[validKey] = true;
                 op();
             }
           },
@@ -695,8 +693,15 @@ export default {
                 return r.json();
               })
               .then((re) => {
-                if (re.result.length) this[key] = true;
-                else this[key] = false;
+                var Container = document.getElementById(key);
+                if (re.result.length) {
+                    Container.classList.add('was-validated');
+                    //remove invalid
+                    Container.classList.remove('invalid');
+                } else {
+                    Container.classList.add('invalid');
+                    Container.classList.remove('was-validated');
+                }
               });
         },
         buyNFT() {
