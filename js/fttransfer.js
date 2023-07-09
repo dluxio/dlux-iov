@@ -177,7 +177,7 @@ export default {
                                             placeholder="0.000" step="0.001" min="0.001" required>
                                             <span class="input-group-text e-radius-hotfix m-0 p-0" id="sellFTamountappend">
                                             <select aria-label="Trade price type select" class="form-select border-0 text-white-50 w-100 h-100" v-model="sell.token">
-                                                <option selected="selected" :value="item.token">{{toUpperCase(item.token)}}</option>
+                                                <option selected :value="item.token">{{toUpperCase(item.token)}}</option>
                                                 <option value="hive">HIVE</option>
                                                 <option value="hbd">HBD</option>
                                             </select>
@@ -240,8 +240,8 @@ export default {
                                             placeholder="0.000" step="0.001" min="0.001" required>
                                         <span class="input-group-text e-radius-hotfix m-0 p-0" id="auctionFTamountappend">
                                         <select aria-label="Trade price type select" class="form-select border-0 text-white-50 w-100 h-100" v-model="auction.token">
-                                            <option selected="selected" :value="item.token">{{toUpperCase(item.token)}}</option>
-                                            <option value="hive">HIVE</option>
+                                            <option :value="item.token">{{toUpperCase(item.token)}}</option>
+                                            <option selected value="hive">HIVE</option>
                                             <option value="hbd">HBD</option>
                                         </select>
                                         </span>
@@ -408,18 +408,18 @@ export default {
                 to: '',
                 qty: 1,
                 amount: "1.000",
-                token: 'HIVE'
+                token: 'hive'
             },
             sell: {
                 qty: 1,
                 price: "1.000",
-                token: 'HIVE'
+                token: 'hive'
             },
             auction: {
                 qty: 1,
                 price: "1.000",
                 days: 1,
-                token: 'HIVE'
+                token: 'hive'
             },
             airdrop: {
                 to_string: '',
@@ -460,7 +460,7 @@ export default {
               this.$emit('tosign', toSign)
         },
         tradeFT() {},
-        mintFT() {},
+        auctionFT() {},
         airdropFT() {},
         sellFT() {},
         modalIndex() {
