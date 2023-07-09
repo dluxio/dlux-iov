@@ -1174,8 +1174,7 @@
                                 <div v-for="rnft in accountRNFTs" class="col my-2">
                                     <nftcard :item="rnft" inventory="true" mint="true" :multisig="chains[rnft.token].multisig"
                                         :wrapped="getAttr(rnft.script, 'wrapped')" :oicon="getIcon(rnft.script)" @tosign="toSign = $event" @focusitem="focusItem = $event"
-                                        :ocolors="getSetDetailsColors(rnft.script)" @modal="modalIndex('transferModal', $event);transferModal.hidden = false" />
-                                        @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
+                                        :ocolors="getSetDetailsColors(rnft.script)" @modal="modalIndex('transferModal', $event);transferModal.hidden = false"/>
                                 </div>
                             </div>
                             <!-- NFT INVENTORY -->
