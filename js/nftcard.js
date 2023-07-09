@@ -209,7 +209,7 @@ export default {
       <!-- MINT ACTIONS -->
       <div class="btn-group" role="group" v-if="mint">
               <button type="button" class="btn btn-dark" title="Open Mint" 
-              @click="openFT()"><i class="fas fa-box-open fa-fw"></i></button>
+              @click="openNFT()"><i class="fas fa-box-open fa-fw"></i></button>
               <button type="button" class="btn ps-05 pe-05 border-0"
               disabled></button>
               <button type="button" class="btn btn-dark" title="Transfer Mint"
@@ -397,7 +397,7 @@ export default {
         txid: `${this.item.setname}:${this.item.uid}_nft_transfer_cancel`
       });
     },
-    openFT(){
+    openNFT(){
       this.$emit('tosign', {
         type: 'cja',
         cj: {
