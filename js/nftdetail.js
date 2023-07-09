@@ -139,7 +139,7 @@ export default {
                                                                     <label for="giveNFTusername">Username</label>
                                                                     <div class="input-group has-validation">
                                                                         <span class="input-group-text text-white-50" id="giveNFTuserprep">@</span>
-                                                                        <input v-model="nftTradeTabTo" @blur="checkAccount(nftTradeTabTo, 'nftTradeAllowed')" type="text" class="form-control text-info"
+                                                                        <input v-model="trade.to" @blur="checkAccount(trade.to, 'nftTradeAllowed')" type="text" class="form-control text-info"
                                                                         id="giveNFTusername" aria-describedby="giveNFTuserprep" required>
                                                                         <div class="invalid-feedback">
                                                                             Please enter the username you'd like to give to.
@@ -148,7 +148,7 @@ export default {
                                                                 </div>
                                                             </div>
                                                             <div class="text-center">
-                                                                <button @click="giveNFT(itemmodal.item)" id="giveNFTbutton" class="btn btn-info my-2" type="button">Give</button>
+                                                                <button @click="giveNFT(itemmodal.item)" class="btn btn-info my-2" type="submit">Give</button>
                                                             </div>
                                                         </form>
                                                     </div>
@@ -160,7 +160,7 @@ export default {
                                                                     <label for="tradeNFTusername">Username</label>
                                                                     <div class="input-group has-validation">
                                                                         <span class="input-group-text text-white-50" id="tradeNFTuserprep">@</span>
-                                                                        <input type="text" v-model="nftTradeTabTo" @blur="checkAccount(nftTradeTabTo, 'nftTradeAllowed')" class="form-control text-info" id="tradeNFTusername" aria-describedby="tradeNFTuserprep" required>
+                                                                        <input type="text" v-model="trade.to" @blur="checkAccount(trade.to, 'nftTradeAllowed')" class="form-control text-info" id="tradeNFTusername" aria-describedby="tradeNFTuserprep" required>
                                                                         <div class="invalid-feedback">
                                                                             Please enter the username you'd like to trade with.
                                                                         </div>
@@ -169,17 +169,17 @@ export default {
                                                             </div>
                                                             <div class="form-group form-row my-2">
                                                                 <label for="tradeNFTamount">Amount</label>
-                                                                <small v-if="nftTradeTabToken == TOKEN" class="float-end mb-2 align-self-center text-white-50">
+                                                                <small v-if="trade.token == itemmodal.item.token" class="float-end mb-2 align-self-center text-white-50">
                                                                     0% FEE
                                                                 </small>
                                                                 <small v-else class="float-end mb-2 align-self-center text-white-50">
                                                                     1% FEE
                                                                 </small>
                                                                 <div class="input-group">
-                                                                    <input v-model="nftTradeTabPrice" type="number" class="form-control text-info" id="tradeNFTamount"
+                                                                    <input v-model="trade.price" type="number" class="form-control text-info" id="tradeNFTamount"
                                                                     aria-describedby="tradeNFTamountappend" placeholder="0.000" step="0.001" min="0.001" required>
                                                                     <span class="input-group-text e-radius-hotfix m-0 p-0" id="tradeNFTamountappend">
-                                                                        <select v-model="nftTradeTabToken" class="form-select border-0 text-white-50 w-100 h-100"
+                                                                        <select v-model="trade.token" class="form-select border-0 text-white-50 w-100 h-100"
                                                                         id="tradeNFTpriceType" aria-label="Trade price type select">
                                                                             <option :value="TOKEN" selected>
                                                                                 {{TOKEN}}
@@ -209,15 +209,15 @@ export default {
                                                         <form class="needs-validation mt-4" novalidate>
                                                             <div class="form-group form-row my-2">
                                                                 <label for="sellNFTprice">Sale Price</label>
-                                                                <small v-if="nftSellTabToken == TOKEN" class="float-end mb-2 align-self-center text-white-50">
+                                                                <small v-if="sell.token == itemmodal.item.token" class="float-end mb-2 align-self-center text-white-50">
                                                                 0% FEE</small>
                                                                 <small v-else class="float-end mb-2 align-self-center text-white-50">
                                                                 1% FEE</small>
                                                                 <div class="input-group">
-                                                                    <input v-model="nftSellTabPrice" type="number" class="form-control text-info" id="sellNFTprice"
+                                                                    <input v-model="sell.price" type="number" class="form-control text-info" id="sellNFTprice"
                                                                     aria-describedby="sellNFTpriceappend" placeholder="0.000" step="0.001" min="0.001" required>
                                                                     <span class="input-group-text e-radius-hotfix m-0 p-0" id="sellNFTpriceappend">
-                                                                        <select v-model="nftSellTabToken" class="form-select border-0 text-white-50 w-100 h-100"
+                                                                        <select v-model="sell.token" class="form-select border-0 text-white-50 w-100 h-100"
                                                                         id="sellNFTpriceType" aria-label="Sell price type select">
                                                                         <option :value="TOKEN">
                                                                             {{TOKEN}}
@@ -252,7 +252,7 @@ export default {
                                                         <form class="needs-validation mt-4" novalidate>
                                                             <div class="form-group form-row my-2">
                                                                 <label for="auctionNFTprice">Starting Bid</label>
-                                                                <small v-if="nftAuctionTabToken == TOKEN" class="float-end mb-2 align-self-center text-white-50">
+                                                                <small v-if="auction.token == itemmodal.item.token" class="float-end mb-2 align-self-center text-white-50">
                                                                 0% FEE</small>
                                                                 <small v-else class="float-end mb-2 align-self-center text-white-50">
                                                                 1% FEE</small>
@@ -260,7 +260,7 @@ export default {
                                                                     <input v-model="nftAuctionTabPrice" type="number" class="form-control text-info" id="auctionNFTprice"
                                                                     aria-describedby="auctionNFTpriceappend" placeholder="0.000" step="0.001" min="0.001" required>
                                                                     <span class="input-group-text e-radius-hotfix m-0 p-0" id="auctionNFTpriceappend">
-                                                                        <select v-model="nftAuctionTabToken" class="form-select border-0 text-white-50 w-100 h-100"
+                                                                        <select v-model="auction.token" class="form-select border-0 text-white-50 w-100 h-100"
                                                                         id="auctionNFTpriceType" aria-label="Auction price type select">
                                                                             <option :value="TOKEN" selected>
                                                                                 {{TOKEN}}
