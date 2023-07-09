@@ -340,6 +340,20 @@ export default {
         ops: ["getTokenUser"],
         api: "https://spktest.dlux.io",
         txid: `${this.item.setname}:${this.item.uid}_nft_buy`
+      });
+    },
+    cancelNFT(){
+      this.$emit('tosign', {
+        type: 'cja',
+        cj: {
+            set: this.item.setname,
+            uid: this.item.uid,
+          },
+        id: `${this.item.token}_nft_sell_${(this.item.price.token == 'HIVE' || this.item.price.token == "HBD") ? 'h' : ''}cancel`,
+        msg: `Canceling ${this.item.setname}:${this.item.uid}`,
+        ops: ["getTokenUser"],
+        api: "https://spktest.dlux.io",
+        txid: `${this.item.setname}:${this.item.uid}_nft_cancel`
     });
     },
     modalIndex(name) {
