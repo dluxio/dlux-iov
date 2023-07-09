@@ -1161,8 +1161,8 @@
                                 <div v-for="item in NFTtrades" class="col my-2" id="trade-nft-cards">
                                     <nftcard :item="item" trade="true" :account="account" :multisig="chains[item.token].multisig"
                                         :uid="Base64toNumber(item.uid)" :oicon="getIcon(item.script)" @tosign="toSign = $event"
-                                        :ocolors="getSetDetailsColors(item.script)"
-                                        @modal="modalIndex('itemModal', $event);itemModal.hidden = false" />
+                                        :ocolors="getSetDetailsColors(item.script)" @focusitem="focusItem = $event"
+                                        @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                                 </div>
                             </div>
                             <div v-if="accountRNFTs.length" class="border-bottom border-3 mt-5">
