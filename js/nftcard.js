@@ -372,7 +372,7 @@ export default {
       else this.$emit('tosign', {
         type: 'cja',
         cj: {
-            set: this.item.setname,
+            set: this.item.setname || this.item.set,
             uid: this.item.uid,
             price: this.item.price.amount,
           },
@@ -387,7 +387,7 @@ export default {
       this.$emit('tosign', {
         type: 'cja',
         cj: {
-            set: this.item.setname,
+            set: this.item.setname || this.item.set,
             uid: this.item.uid,
           },
         id: `${this.item.token}_nft_transfer_cancel`,
@@ -401,13 +401,13 @@ export default {
       this.$emit('tosign', {
         type: 'cja',
         cj: {
-            set: this.item.setname,
+            set: this.item.set,
           },
         id: `${this.item.token}_nft_mint`,
-        msg: `Minting ${this.item.setname} token`,
+        msg: `Minting ${this.item.set} token`,
         ops: ["getTokenUser"],
         api: "https://spktest.dlux.io",
-        txid: `${this.item.setname}_nft_mint`
+        txid: `${this.item.set}_nft_mint`
       });
     },
     modalIndex(name) {
