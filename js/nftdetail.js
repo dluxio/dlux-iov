@@ -711,7 +711,22 @@ export default {
                 txid: `${this.itemmodal.item.setname}:${this.itemmodal.item.uid}_nft_cancel`
             });
         },
-        giveFT() { },
+        giveFT(){
+            const toSign = {
+                type: "cja",
+                cj: {
+                    set: this.itemmodal.item.setname,
+                    uid: this.itemmodal.item.uid,
+                    to: this.give.to,
+                },
+                id: `${this.itemmodal.item.token}_nft_transfer`,
+                msg: `Giving ${this.itemmodal.item.setname}:${this.itemmodal.item.uid} mint token...`,
+                ops: ["getTokenUser"],
+                api: "https://spktest.dlux.io",
+                txid: `${this.itemmodal.item.token}_nft_transfer_${this.give.to}`,
+              }
+              this.$emit('tosign', toSign)
+        },
         tradeFT() { },
         mintFT() { },
         airdropFT() { },
