@@ -109,16 +109,16 @@ export default {
           <!-- ACCEPT / REJECT -->
           <div class="btn-group" role="group" v-if="item.to == account">
            <button type="button" class="btn btn-success" title="Accept Trade"
-            @click="acceptNFT(item)"><i class="fa-solid fa-check fa-fw"></i></button>
+            @click="acceptXfr()"><i class="fa-solid fa-check fa-fw"></i></button>
             <button type="button" class="btn ps-05 pe-05 border-0"
                    disabled></button>
               <button type="button" class="btn btn-danger" title="Decline Trade"
-              @click="rejectMFT(item)"><i class="fa-solid fa-xmark fa-fw"></i></button>
+              @click="cancelXfr()"><i class="fa-solid fa-xmark fa-fw"></i></button>
            </div>
              <!-- CANCEL -->
              <div class="btn-group" v-if="item.from == account">
              <button type="button" class="btn btn-warning" title="Cancel Trade"
-              @click="cancelNFT(item)">
+              @click="cancelXfr()">
               <i class="fa-solid fa-xmark fa-fw"></i></button>
              </div>
         </div>
@@ -354,7 +354,48 @@ export default {
         ops: ["getTokenUser"],
         api: "https://spktest.dlux.io",
         txid: `${this.item.setname}:${this.item.uid}_nft_cancel`
-    });
+      });
+    },
+    acceptXfr(){
+      if(this.item.price.token == 'HIVE' || this.item.price.token == "HBD") this.$emit('tosign', { //not sure if hive trades exist
+        type: "xfr",
+        // cj: {
+        //   to: this.multisig,
+        //   [this.item.price.token.toLowerCase()]: this.item.price.amount,
+        //   memo: `NFTbuy ${this.item.setname}:${this.item.uid}`,
+        // },
+        txid: "sendhive",
+        msg: `Buying ${this.item.setname}:${this.item.uid}`,
+        api: "https://spktest.dlux.io",
+        ops: ["getTokenUser"],
+      });
+      else this.$emit('tosign', {
+        type: 'cja',
+        cj: {
+            set: this.item.setname,
+            uid: this.item.uid,
+            price: this.item.price.amount,
+          },
+        id: `${this.item.token}_nft_reserve_complete`,
+        msg: `Buying ${this.item.setname}:${this.item.uid}`,
+        ops: ["getTokenUser"],
+        api: "https://spktest.dlux.io",
+        txid: `${this.item.setname}:${this.item.uid}_nft_reserve_complete`
+      });
+    },
+    cancelXfr(){
+      this.$emit('tosign', {
+        type: 'cja',
+        cj: {
+            set: this.item.setname,
+            uid: this.item.uid,
+          },
+        id: `${this.item.token}_nft_transfer_cancel`,
+        msg: `Canceling ${this.item.setname}:${this.item.uid} Transfer`,
+        ops: ["getTokenUser"],
+        api: "https://spktest.dlux.io",
+        txid: `${this.item.setname}:${this.item.uid}_nft_transfer_cancel`
+      });
     },
     modalIndex(name) {
       const object = {
