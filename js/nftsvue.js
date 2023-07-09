@@ -1757,7 +1757,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                       case "HBD": 
                         hbdPrice = this.chains[chain].sets[set].auctions[i].price.amount
                         break;
-                      case "TOKEN":
+                      default:
                         hbdPrice = parseInt(this.chains[chain].sets[set].auctions[i].price.amount * this.hiveprice * this.parseFloat(this.chains[chain].account.tick))
                     }
                     if (
@@ -1781,6 +1781,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                       }
                       this.chains[chain].sets[set].auctions[index].auction = true
                       this.chains[chain].sets[set].auctions[index].token = chain
+                      this.chains[chain].sets[set].auctions[index].hbd_price = hbdPrice
                       this.auctions.push(this.chains[chain].sets[set].auctions[index])
                       this.displayNFTs.push(this.chains[chain].sets[set].auctions[index])
                     })
@@ -1789,7 +1790,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               fetch(api + "/api/sales/" + set)
                 .then((response) => response.json())
                 .then((data) => {
-                  const presales = data.result
+                  var presales = data.result
                   if (!this.price[set]) this.price[set] = {};
                   for (var i = 0; i < presales.length; i++) {
                     const token =
@@ -1798,6 +1799,17 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                         : presales[i].price.token == "HBD"
                           ? "HBD"
                           : "TOKEN";
+                    var hbdPrice = 0
+                    switch (token) {
+                      case "HIVE":
+                        hbdPrice = parseInt(this.chains[chain].sets[set].sales[i].price.amount * this.hiveprice)
+                        break;
+                      case "HBD": 
+                        hbdPrice = this.chains[chain].sets[set].sales[i].price.amount
+                        break;
+                      default:
+                        hbdPrice = parseInt(this.chains[chain].sets[set].sales[i].price.amount * this.hiveprice * this.parseFloat(this.chains[chain].account.tick))
+                    }
                     if (
                       presales[i].price.amount < this.chains[chain].sets[set].sf[token] ||
                       !this.chains[chain].sets[set].sf[token]
@@ -1815,6 +1827,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                         ...d
                       }
                       presales[index].sale = true
+                      presales[index].hbd_price = hbdPrice
                       presales[index].token = chain
                       this.chains[chain].sets[set].sales.push(presales[index])
                       this.displayNFTs.push(presales[index])
