@@ -139,8 +139,8 @@ export default {
                                                                     <label for="giveNFTusername">Username</label>
                                                                     <div class="input-group has-validation">
                                                                         <span class="input-group-text text-white-50" id="giveNFTuserprep">@</span>
-                                                                        <input id="giveTo" v-model="give.to" @blur="checkAccount(trade.to, 'giveToAllowed')" type="text" class="form-control text-info"
-                                                                        aria-describedby="giveNFTuserprep" :class="{'invalid': !giveToAllowed}" required>
+                                                                        <input ref="giveTo" v-model="give.to" @blur="checkAccount(give.to, 'giveTo')" type="text" class="form-control text-info"
+                                                                        aria-describedby="giveNFTuserprep" required>
                                                                         <div class="invalid-feedback">
                                                                             Please enter the username you'd like to give to.
                                                                         </div>
@@ -160,7 +160,7 @@ export default {
                                                                     <label for="tradeNFTusername">Username</label>
                                                                     <div class="input-group has-validation">
                                                                         <span class="input-group-text text-white-50" id="tradeNFTuserprep">@</span>
-                                                                        <input type="text" v-model="trade.to" @blur="checkAccount(trade.to, 'nftTradeAllowed')" class="form-control text-info" id="tradeNFTusername" aria-describedby="tradeNFTuserprep" required>
+                                                                        <input refs="tradeTo" type="text" v-model="trade.to" @blur="checkAccount(trade.to, 'tradeTo')" class="form-control text-info" id="tradeNFTusername" aria-describedby="tradeNFTuserprep" required>
                                                                         <div class="invalid-feedback">
                                                                             Please enter the username you'd like to trade with.
                                                                         </div>
@@ -695,10 +695,10 @@ export default {
               .then((re) => {
                 console.log(re)
                 if (re.result.length) {
-                    this[key] = true
+                    this.$refs[key].setCustomValidity("");
                     resolve(true);
                 } else {
-                    this[key] = false
+                    this.$refs[key].setCustomValidity("Account does not exist");
                     resolve(false);
                 }
               });
