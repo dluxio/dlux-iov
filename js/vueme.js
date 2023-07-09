@@ -2968,9 +2968,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       fetch(`${this.providers[i].api}/api/sets`)
         .then((r) => r.json())
         .then((res) => {
-          this.sets[this.providers[i].token] = {};
+          this.chains[this.providers[i].token].sets = {};
           for (var j = 0; j < res.result.length; j++) {
-            this.sets[this.providers[i].token][res.result[j].set] =
+            this.chains[this.providers[i].token].sets[res.result[j].set] =
               res.result[j];
           }
         });

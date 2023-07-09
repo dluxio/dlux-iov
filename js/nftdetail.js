@@ -344,7 +344,7 @@ export default {
                                 <div id="collapseMelt" class="accordion-collapse collapse" data-bs-parent="#nftAccordion">
                                     <div class="accordion-body">
                                         <div class="text-center" v-if="itemmodal.item.owner != account">
-                                            <p>You don't own this NFT</p>
+                                            <p>The onwer of this NFT can "melt" it and recieve it's melt value.</p>
                                         </div>
                                         <div class="p-0" v-if="itemmodal.item.owner == account">
                                             <div class="d-flex align-self-end">
@@ -584,13 +584,6 @@ export default {
             default: function () {
                 return {
                     script: '',
-                };
-            },
-        },
-        sets: {
-            required: true,
-            default: function () {
-                return {
                 };
             },
         },
