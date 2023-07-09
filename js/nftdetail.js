@@ -139,7 +139,7 @@ export default {
                                                                     <label for="giveNFTusername">Username</label>
                                                                     <div class="input-group has-validation">
                                                                         <span class="input-group-text text-white-50" id="giveNFTuserprep">@</span>
-                                                                        <input v-model="trade.to" @blur="checkAccount(trade.to, 'nftTradeAllowed')" type="text" class="form-control text-info"
+                                                                        <input v-model="give.to" @blur="checkAccount(trade.to, 'nftTradeAllowed')" type="text" class="form-control text-info"
                                                                         id="giveNFTusername" aria-describedby="giveNFTuserprep" required>
                                                                         <div class="invalid-feedback">
                                                                             Please enter the username you'd like to give to.
