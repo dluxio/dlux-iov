@@ -171,7 +171,7 @@
                                                     'text-danger': behind > 100}"> <span v-show="behind < 30">ONLINE -
                                                 </span> <span v-show="behind >= 30 && behind <=100">LAGGING
                                                     - </span> <span v-show="behind > 100">OFFLINE -
-                                                </span> <span>{{behind}} Blocks behind HIVE</span></div>
+                                                </span> <span>{{behind}} Block<span v-if="behind != 1">s</span> behind HIVE</span></div>
                                         </div>
                                         <div class="border-bottom border-secondary">
                                             <p class="lead">An open source platform for p2p games, apps, and
@@ -462,7 +462,7 @@
                                                     v-show="larynxbehind < 30">ONLINE - </span> <span
                                                     v-show="larynxbehind >= 30 && larynxbehind <=100">LAGGING
                                                     - </span> <span v-show="larynxbehind > 100">OFFLINE -
-                                                </span> <span>{{larynxbehind}} Blocks behind HIVE</span>
+                                                </span> <span>{{larynxbehind}} Block<span v-if="larynxbehind != 1">s</span> behind HIVE</span>
                                             </div>
                                             <div id="userNode" class="ms-auto" if="isnode">
                                                 <a class="dropdown btn btn-lg btn-outline-info"
