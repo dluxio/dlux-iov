@@ -1001,7 +1001,7 @@
                                                     content.</p>
                                             </div>
                                             <div id="hiveactions" class="float-right text-end">
-                                                <h5 id="hivebalance">{{focus.balance}}</h5>
+                                                <h5 id="hivebalance">{{formatNumber(focus.balance,3,'.', ',')}} HIVE</h5>
                                                 <div class="btn-group" v-if="me" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info">
                                                         <modal-vue type="send" token="HIVE"
@@ -1083,7 +1083,7 @@
                                                     to the US Dollar</p>
                                             </div>
                                             <div id="hbdactions" class="float-right text-end">
-                                                <h5 id="hbdbalance">{{focus.hbd_balance}}</h5>
+                                                <h5 id="hbdbalance">{{formatNumber(focus.hbd_balance,3,'.', ',')}} HBD</h5>
                                                 <div class="btn-group" v-if="me" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info">
                                                         <modal-vue type="send" token="HBD"
@@ -1125,7 +1125,7 @@
                                                     withdrawl</p>
                                             </div>
                                             <div id="savingsactions" class="float-right text-end">
-                                                <h5 id="savbal">{{focus.savings_hbd_balance}}</h5>
+                                                <h5 id="savbal">{{formatNumber(focus.savings_hbd_balance,3,'.', ',')}} HBD</h5>
                                             </div>
                                         </div>
                                         <hr class="my-4 bg-light">
