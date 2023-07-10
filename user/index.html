@@ -179,8 +179,7 @@
                                             </p>
                                         </div>
                                         <!--claim dlux-->
-                                        <div v-if="me"
-                                            class="d-flex align-items-center border-bottom border-secondary py-5">
+                                        <div class="d-flex align-items-center border-bottom border-secondary py-5">
                                             <div>
                                                 <div class="d-flex align-items-start">
                                                     <h4 class="m-0">Claim DLUX</h4>
@@ -194,27 +193,31 @@
                                                 <h5>
                                                     {{formatNumber((accountapi.claim)/1000, 3, '.', ',')}} DLUX
                                                 </h5>
-                                                <div class="btn-group" role="group" aria-label="DLUX Claim">
-                                                    <button type="submit" class="btn btn-info "
-                                                        @click="rewardClaim('dlux', 'claim', dlux2gov)"><i
-                                                            class="fas fa-coin"></i><i
-                                                            class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
-                                                </div>
-                                                <div> <span class="small" v-show="!dlux2gov">50% Liquid | 50%
-                                                        Power</span> <span class="small" v-show="dlux2gov">50%
-                                                        Liquid | 50% Gov</span></div>
-                                                <div v-show="accountapi.gov > 0" class="text-white">
-                                                    <div class="input-group my-3">
-                                                        <span class="input-group-text border-info text-info">
-                                                            <div class="form-check form-switch ">
-                                                                <input class="form-check-input" type="checkbox"
-                                                                    role="switch" id="flexSwitchCheckDefault"
-                                                                    v-model="dlux2gov">
-                                                                <label class="form-check-label"
-                                                                    for="flexSwitchCheckDefault">Claim GOV not
-                                                                    PWR</label>
-                                                            </div>
-                                                        </span>
+                                                <div v-if="me">
+                                                    <div class="btn-group" role="group"
+                                                        aria-label="DLUX Claim">
+                                                        <button type="submit" class="btn btn-info "
+                                                            @click="rewardClaim('dlux', 'claim', dlux2gov)"><i
+                                                                class="fas fa-coin"></i><i
+                                                                class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
+                                                    </div>
+                                                    <div> <span class="small" v-show="!dlux2gov">50% Liquid | 50%
+                                                            Power</span> <span class="small" v-show="dlux2gov">50%
+                                                            Liquid | 50% Gov</span>
+                                                    </div>
+                                                    <div v-show="accountapi.gov > 0" class="text-white">
+                                                        <div class="input-group my-3">
+                                                            <span class="input-group-text border-info text-info">
+                                                                <div class="form-check form-switch ">
+                                                                    <input class="form-check-input" type="checkbox"
+                                                                        role="switch" id="flexSwitchCheckDefault"
+                                                                        v-model="dlux2gov">
+                                                                    <label class="form-check-label"
+                                                                        for="flexSwitchCheckDefault">Claim GOV not
+                                                                        PWR</label>
+                                                                </div>
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -293,17 +296,20 @@
                                                     </li>
                                                 </ul>
                                             </div>
-                                            <div id="dluxpactions" v-if="me" class="ms-auto text-end">
+                                            <div id="dluxpactions" class="ms-auto text-end">
                                                 <h5 id="pwrbalance">
                                                     {{formatNumber((accountapi.poweredUp)/1000, 3, '.', ',')}}
                                                     DLUX
                                                 </h5>
-                                                <a v-if="accountapi.granting > 0" data-bs-toggle="collapse" id="delegationsbtn" href="#delegations"
-                                                    role="button" aria-expanded="false" aria-controls="Show delegations"
+                                                <a v-if="accountapi.granting > 0" data-bs-toggle="collapse"
+                                                    id="delegationsbtn" href="#delegations" role="button"
+                                                    aria-expanded="false" aria-controls="Show delegations"
                                                     class="text-white" style="text-decoration: none">
-                                                    <h6 id="delegatebal">(-{{formatNumber((accountapi.granting)/1000, 3, '.', ',')}} G)<i class="fas fa-search ms-2"></i></h6>
+                                                    <h6 id="delegatebal">(-{{formatNumber((accountapi.granting)/1000, 3,
+                                                        '.', ',')}} G)<i class="fas fa-search ms-2"></i></h6>
                                                 </a>
-                                                <div class="btn-group" role="group" aria-label="DLUX Power Actions">
+                                                <div class="btn-group" v-if="me" role="group"
+                                                    aria-label="DLUX Power Actions">
                                                     <button type="button" class="btn btn-info p-0">
                                                         <modal-vue type="delegate" token="DLUX" func="why"
                                                             :balance="accountapi.poweredUp" :account="account"
@@ -378,7 +384,7 @@
                                                     <li>1 Week Lock | 4 Week Unlock | 1 Week Convert</li>
                                                 </ul>
                                             </div>
-                                            <div id="dluxgactions" v-if="me" class="ms-auto text-end">
+                                            <div id="dluxgactions" class="ms-auto text-end">
                                                 <h5 id="govbalance">
                                                     {{formatNumber((accountapi.gov)/1000, 3, '.', ',')}} DLUX
                                                 </h5>
@@ -389,7 +395,7 @@
                                                     <h6 id="escrowbal">(-0 DG)<i class="fas fa-search ms-2"></i>
                                                     </h6>
                                                 </a>
-                                                <div class="btn-group" role="group" aria-label="DLUX Actions">
+                                                <div class="btn-group" v-if="me" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info " disabled
                                                         title="Coming soon!" style="pointer-events: none;"><i
                                                             class="fas fa-balance-scale fa-fw me-2"></i>Measures</button>
@@ -671,7 +677,8 @@
                                                     {{formatNumber((saccountapi.balance)/1000, 3, '.', ',')}}
                                                     LARYNX
                                                 </h5>
-                                                <div class="btn-group" v-if="me" role="group" aria-label="LARYNX Actions">
+                                                <div class="btn-group" v-if="me" role="group"
+                                                    aria-label="LARYNX Actions">
                                                     <button type="button" class="btn btn-info p-0">
                                                         <modal-vue type="send" token="LARYNX"
                                                             :balance="saccountapi.balance" :account="account"
@@ -733,7 +740,7 @@
                                                         100,3, '.', ',')}}%</li>
                                                 </ul>
                                             </div>
-                                            <div id="larynxgactions" v-if="me" class="ms-auto text-end" v-show="me">
+                                            <div id="larynxgactions" class="ms-auto text-end" v-show="me">
                                                 <div class="d-flex align-items-center mb-2">
                                                     <small class="ms-auto"><span
                                                             class="badge me-2 text-bg-success">{{formatNumber(parseFloat(spkStats.spk_rate_lgov)
@@ -743,7 +750,8 @@
                                                         {{formatNumber((saccountapi.gov)/1000, 3, '.', ',')}} LL
                                                     </h5>
                                                 </div>
-                                                <div class="btn-group" role="group" aria-label="LARYNX Actions">
+                                                <div class="btn-group" v-if="me" role="group"
+                                                    aria-label="LARYNX Actions">
                                                     <button onclick="location.href='/dex/#larynx'" type="button"
                                                         class="btn btn-info p-0">
                                                         <span class="p-2"><i
@@ -847,7 +855,8 @@
 
                                                     </a>
 
-                                                    <div class="btn-group"  v-if="me" role="group" aria-label="LARYNX Actions">
+                                                    <div class="btn-group" v-if="me" role="group"
+                                                        aria-label="LARYNX Actions">
                                                         <button class="btn btn-info p-0" type="button">
                                                             <modal-vue type="delegate" :smarkets="smarkets.node"
                                                                 token="LARYNX" func="Lock Liquidity" :stats="sstats"
@@ -1034,12 +1043,12 @@
                                                     <li>Increased resource credits</li>
                                                 </ul>
                                             </div>
-                                            <div id="hivepactions" v-if="me" class="float-right text-end">
+                                            <div id="hivepactions" class="float-right text-end">
                                                 <h5 id="hpbal">
                                                     {{formatNumber(((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares)),3,
                                                     '.', ',')}}
                                                     HP</h5>
-                                                <div class="btn-group" role="group" aria-label="DLUX Actions">
+                                                <div class="btn-group" v-if="me" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info "
                                                         style="pointer-events: none;" disabled><i
                                                             class="fas fa-user-friends me-2"></i>Delegate</button>
@@ -1073,9 +1082,9 @@
                                                     pegged
                                                     to the US Dollar</p>
                                             </div>
-                                            <div id="hbdactions" v-if="me" class="float-right text-end">
+                                            <div id="hbdactions" class="float-right text-end">
                                                 <h5 id="hbdbalance">{{focus.hbd_balance}}</h5>
-                                                <div class="btn-group" role="group" aria-label="DLUX Actions">
+                                                <div class="btn-group" v-if="me" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-info">
                                                         <modal-vue type="send" token="HBD"
                                                             :balance="parseFloat(focus.hbd_balance) * 1000"
@@ -1152,15 +1161,17 @@
 
                                 <!-- MINT TRADES -->
                                 <div v-for="(rnft, index) in FTtrades" :key="index" class="col my-2">
-                                    <nftcard :item="rnft" mint="true" trade="true" :account="account" :multisig="chains[rnft.token].multisig"
-                                        :wrapped="getAttr(rnft.script, 'wrapped')" :oicon="getIcon(rnft.script)" @tosign="toSign = $event"
-                                        :ocolors="getSetDetailsColors(rnft.script)"
+                                    <nftcard :item="rnft" mint="true" trade="true" :account="account"
+                                        :multisig="chains[rnft.token].multisig"
+                                        :wrapped="getAttr(rnft.script, 'wrapped')" :oicon="getIcon(rnft.script)"
+                                        @tosign="toSign = $event" :ocolors="getSetDetailsColors(rnft.script)"
                                         @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                                 </div>
                                 <!-- NFT TRADES -->
                                 <div v-for="item in NFTtrades" class="col my-2" id="trade-nft-cards">
-                                    <nftcard :item="item" trade="true" :account="account" :multisig="chains[item.token].multisig"
-                                        :uid="Base64toNumber(item.uid)" :oicon="getIcon(item.script)" @tosign="toSign = $event"
+                                    <nftcard :item="item" trade="true" :account="account"
+                                        :multisig="chains[item.token].multisig" :uid="Base64toNumber(item.uid)"
+                                        :oicon="getIcon(item.script)" @tosign="toSign = $event"
                                         :ocolors="getSetDetailsColors(item.script)" @focusitem="focusItem = $event"
                                         @detail="modalIndex('itemModal', $event, 'NFTtrades');itemModal.hidden = false" />
                                 </div>
@@ -1172,9 +1183,12 @@
                             <div v-if="accountRNFTs.length"
                                 class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
                                 <div v-for="rnft in accountRNFTs" class="col my-2">
-                                    <nftcard :item="rnft" inventory="true" mint="true" :multisig="chains[rnft.token].multisig"
-                                        :wrapped="getAttr(rnft.script, 'wrapped')" :oicon="getIcon(rnft.script)" @tosign="toSign = $event" @focusitem="focusItem = $event"
-                                        :ocolors="getSetDetailsColors(rnft.script)" @modal="modalIndex('transferModal', $event);transferModal.hidden = false"/>
+                                    <nftcard :item="rnft" inventory="true" mint="true"
+                                        :multisig="chains[rnft.token].multisig"
+                                        :wrapped="getAttr(rnft.script, 'wrapped')" :oicon="getIcon(rnft.script)"
+                                        @tosign="toSign = $event" @focusitem="focusItem = $event"
+                                        :ocolors="getSetDetailsColors(rnft.script)"
+                                        @modal="modalIndex('transferModal', $event);transferModal.hidden = false" />
                                 </div>
                             </div>
                             <!-- NFT INVENTORY -->
@@ -1246,8 +1260,9 @@
                             <!-- NFT items -->
                             <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-1 mb-3">
                                 <div class="col my-2" v-for="(item, name, index) in displayNFTs">
-                                    <nftcard :item="item" :uid="Base64toNumber(item.uid)" :multisig="chains[item.token].multisig"
-                                        :index="index" inventory="true" @focusitem="focusItem = $event" @tosign="toSign = $event"
+                                    <nftcard :item="item" :uid="Base64toNumber(item.uid)"
+                                        :multisig="chains[item.token].multisig" :index="index" inventory="true"
+                                        @focusitem="focusItem = $event" @tosign="toSign = $event"
                                         @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                                 </div>
                             </div>
@@ -1259,23 +1274,24 @@
 
                 <!--NFT item detail modal-->
                 <div>
-                    <nftdetail :account="account" :itemmodal="itemModal" :pfp="pfp" :chains="chains" @tosign="toSign = $event"
-                    @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
+                    <nftdetail :account="account" :itemmodal="itemModal" :pfp="pfp" :chains="chains"
+                        @tosign="toSign = $event" @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                 </div>
 
                 <!--blog detail view-->
                 <div>
                     <detail-vue :post="displayPost.item" :account="account" :modal="true" :post_select="postSelect"
-                    :voteval="voteVal" :head_block="sstats.head_block" :broca_refill="sstats.broca_refill"
-                    :broca="spkapi.broca" :spk_power="spkapi.spk_power" :contracts="contracts" :extendcost="extendcost"
-                    @tosign="toSign=$event" @modalselect="modalSelect($event)" @reply="reply($event)"
-                    @vote="vote($event)"></detail-vue>
+                        :voteval="voteVal" :head_block="sstats.head_block" :broca_refill="sstats.broca_refill"
+                        :broca="spkapi.broca" :spk_power="spkapi.spk_power" :contracts="contracts"
+                        :extendcost="extendcost" @tosign="toSign=$event" @modalselect="modalSelect($event)"
+                        @reply="reply($event)" @vote="vote($event)"></detail-vue>
                 </div>
                 <!-- mint transfer modal -->
                 <div>
-                    <fttransfer :account="account" :item="focusItem" :mint="transferMint" @modal="modal($event)" @tosign="toSign = $event" />
+                    <fttransfer :account="account" :item="focusItem" :mint="transferMint" @modal="modal($event)"
+                        @tosign="toSign = $event" />
                 </div>
-                
+
 
         </main>
         <!-- Footer -->
@@ -1379,7 +1395,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
         integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-   <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
