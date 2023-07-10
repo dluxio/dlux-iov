@@ -298,7 +298,7 @@
                                                     {{formatNumber((accountapi.poweredUp)/1000, 3, '.', ',')}}
                                                     DLUX
                                                 </h5>
-                                                <a data-bs-toggle="collapse" id="delegationsbtn" href="#delegations"
+                                                <a v-if="accountapi.granting > 0" data-bs-toggle="collapse" id="delegationsbtn" href="#delegations"
                                                     role="button" aria-expanded="false" aria-controls="Show delegations"
                                                     class="text-white" style="text-decoration: none">
                                                     <h6 id="delegatebal">(-{{formatNumber((accountapi.granting)/1000, 3, '.', ',')}} G)<i class="fas fa-search ms-2"></i></h6>
