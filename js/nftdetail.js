@@ -139,13 +139,13 @@ export default {
                                                                     <label for="giveNFTusername">Username</label>
                                                                     <div class="input-group has-validation">
                                                                         <span class="input-group-text text-white-50" id="giveNFTuserprep">@</span>
-                                                                        <input ref="giveTo" v-model="give.to" @blur="checkAccount(give.to, 'giveTo', 'giveEnabled')" type="text" class="form-control text-info"
+                                                                        <input ref="giveTo" pattern="[1-9a-z\-\.]{3,}" v-model="give.to" @keyup="giveEnabled = false;validateForm('nftGiveForm')" @blur="checkAccount(give.to, 'giveTo', 'giveEnabled')" type="text" class="form-control text-info"
                                                                         aria-describedby="giveNFTuserprep" required>
                                                                         <div class="invalid-feedback">
                                                                             Please enter the username you'd like to give to.
                                                                         </div>
                                                                     </div>
-                                                                    <button v-if="give.to" :disabled="giveEnabled" type="button" class="btn my-2" :class="{'btn-warning': !giveEnabled, 'btn-success': giveEnabled}" :disabled="!give.to">Validate Account</button>
+                                                                    <button v-if="give.to && !giveEnabled" :disabled="giveEnabled" type="button" class="btn my-2" :class="{'btn-warning': !giveEnabled, 'btn-danger': badAccount}">Validate Account</button>
                                                                 </div>
                                                             </div>
                                                             <div class="text-center">
@@ -646,6 +646,7 @@ export default {
             TOKEN: '',
             nftTradeAllowed: false,
             giveEnabled: false,
+            badAccount : false,
             NFTselect: {
                 start: 0,
                 amount: 30,
@@ -678,7 +679,7 @@ export default {
             if (Container.querySelector('input:invalid'))
                 Container.classList.add('was-validated');
             else {
-                op();
+                if(op)op();
             }
           },
         checkAccount(name, key, enable) {
@@ -698,10 +699,12 @@ export default {
                 if (re.result.length) {
                     this.$refs[key].setCustomValidity("");
                     this[enable] = true
+                    this.badAccount = false
                     resolve(true);
                 } else {
                     this.$refs[key].setCustomValidity("Account does not exist");
                     this[enable] = false
+                    this.badAccount = true
                     resolve(false);
                 }
               });
