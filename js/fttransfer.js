@@ -189,8 +189,8 @@ export default {
                                 </div>
                             </div>
                             <div v-if="sell.token != item.token">
-                                You can choose to have sells distributed to multiple accounts:
-                                <bennies :list="bens" @update-bennies="bens=$event"></bennies>
+                                You can choose to have sells distributed to multiple accounts. Must equal 100%.
+                                <bennies eq100="true" :list="bens" @update-bennies="bens=$event"></bennies>
                             </div>
                             <div class="row mb-3">
                                 <p class="text-white-50 small">Ownership will be
@@ -428,7 +428,7 @@ export default {
                 to_array: [],
                 qty_each: 1,
             },
-            bens: [],
+            bens: [{account: this.account, weight: 10000}],
             airdropFeedback: 'Please enter at least one username to airdrop tokens to.',
             airdropAllowed: false,
             ftGiveFormValid: false,
@@ -625,13 +625,19 @@ export default {
         },
         sellFT() {
             var toSign = {}
+            var distro = ''
+            for (var i = 0; i < this.bens.length; i++) {
+                distro += `${this.bens[i].name}_${this.bens[i].weight},`
+            }
+            //remove last comma
+            distro = distro.slice(0, -1)
             if(this.sell.token == 'hive' || this.sell.token == 'hbd')toSign = {
                 type: "cja",
                 cj: {
                     set: this.item.set,
                     [this.sell.token]: parseInt(parseFloat(this.sell.amount) * 1000),
                     quantity: this.sell.qty,
-                    distro: this.sell.distro,
+                    distro: distro,
                 },
                 id: `${this.item.token}_fts_sell_h`,
                 msg: `Selling ${this.item.set} mint token...`,
@@ -645,11 +651,11 @@ export default {
                     set: this.item.set,
                     price: parseInt(parseFloat(this.sell.amount) * 1000),
                 },
-                id: `${this.item.token}_fts_sell`,
+                id: `${this.item.token}_ft_sell`,
                 msg: `Selling ${this.item.set} mint token...`,
                 ops: ["getTokenUser"],
                 api: this.api,
-                txid: `${this.item.token}_fts_sell_h`,
+                txid: `${this.item.token}_ft_sell`,
               }
 
               this.$emit('tosign', toSign)

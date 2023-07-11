@@ -70,7 +70,11 @@ export default {
         hide: {
             type: Boolean,
             default: true
-        } 
+        },
+        eq100: {
+            type: Boolean,
+            default: false
+        },
     },
     emits: ['updateBennies'],
     methods:{
@@ -85,7 +89,11 @@ export default {
             console.log('click', event)
         },
         incBen(ben){
-            if(this.total <= 9900 && ben.weight <= 9900){
+            if(!this.eq100 && this.total <= 9900 && ben.weight <= 9900){
+                this.total += 100;
+                ben.weight += 100;
+                this.updateBenny(ben.account, ben.weight)
+            } else if(this.eq100 && this.total <= 10000 && ben.weight <= 10000){
                 this.total += 100;
                 ben.weight += 100;
                 this.updateBenny(ben.account, ben.weight)
@@ -134,6 +142,23 @@ export default {
             this.finalize()
         },
         finalize(){
+            if(this.eq100){
+                this.total = 0
+                for(let i = this.bennies.length-1; i >= 0; i--){
+                    this.total += this.bennies[i].weight
+                    if(this.total > 10000){
+                        this.bennies[i].weight -= this.total - 10000;
+                        this.total = 10000;
+                    }
+                }
+                if(this.total < 10000){
+                    //add to first benny
+                    this.bennies[0].weight += 10000 - this.total;
+                } else if (this.total > 10000){
+                    //remove from first benny
+                    this.bennies[0].weight -= this.total - 10000;
+                }
+            }
             this.$emit('updateBennies', this.bennies);
         },
         getFavorites(){
