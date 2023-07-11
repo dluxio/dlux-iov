@@ -307,7 +307,7 @@ export default {
                     <div role="tabpanel" class="tab-pane fade show " id="airdropFTtab"
                         aria-labelledby="airdropFT">
                         <!-- AIRDROP FORM -->
-                        <form class="needs-validation mt-4" novalidate>
+                        <form id="airdropFT" class="needs-validation mt-4" novalidate @submit.prevent="validateForm('airdropFT', airdropFT)">
                             <div class="row mb-3">
                                 <div class="col-12">
                                     <label for="airdropFTusers" class="form-label">Airdrop
