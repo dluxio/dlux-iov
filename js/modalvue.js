@@ -208,7 +208,7 @@ export default {
                           </div>
                       </div>
                       </div>
-                      <div v-if="func == 'Power Up' || func == 'Power Down'">
+                      <div v-if="func == 'Power Up' || func == 'Power Down' || func == 'Gov Down' || func == 'Gov Up'">
                           <div class="modal-footer">
                           <div class="me-auto btn-group border border-info rounded px-2 py-1" role="group" aria-label="Transact on Mirror Network Only" v-if="token == 'LARYNX'">
                             <input id="pwrupmirror" type="checkbox" v-model="test" class="me-2">
