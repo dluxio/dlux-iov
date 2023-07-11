@@ -402,7 +402,7 @@ export default {
                                                             data-bs-toggle="collapse"
                                                             href="#melt-confirmation">CANCEL
                                                             <i class="fas fa-running"></i></button>
-                                                        <button @click="meltNFT(itemmodal.item)"
+                                                        <button @click="meltNFT()"
                                                             class="btn btn-danger border-white">DESTROY
                                                             <i class="fas fa-bomb"></i>
                                                             <span
@@ -485,7 +485,7 @@ export default {
                                                             class="form-control bg-dark border-dark text-info"
                                                             id="auctionNFTprice"
                                                             aria-describedby="bidNFTpriceappend"
-                                                            placeholder="0.000" step="0.001"
+                                                            placeholder="0.001" step="0.001"
                                                             :min="(itemmodal.auction.price.amount + (itemmodal.auction.bids ? 1 : 0))/ 1000"
                                                             required>
                                                         <div class="input-group-append">
@@ -720,7 +720,7 @@ export default {
                 },
                 txid: "sendhive",
                 msg: `Buying ${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
-                api: "https://spktest.dlux.io",
+                api: this.chains[this.itemmodal.item.token].api,
                 ops: ["getTokenUser"],
               });
             else this.$emit('tosign', {
@@ -733,7 +733,7 @@ export default {
                 id: `${this.itemmodal.item.token}_nft_buy`,
                 msg: `Buying ${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
                 ops: ["getTokenUser"],
-                api: "https://spktest.dlux.io",
+                api: this.chains[this.itemmodal.item.token].api,
                 txid: `${this.itemmodal.item.setname}:${this.itemmodal.item.uid}_nft_buy`
             });
         },
@@ -747,7 +747,7 @@ export default {
                 id: `${this.itemmodal.item.token}_nft_sell_${(this.itemmodal.item.price.token == 'HIVE' || this.itemmodal.item.price.token == "HBD") ? 'h' : ''}cancel`,
                 msg: `Canceling ${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
                 ops: ["getTokenUser"],
-                api: "https://spktest.dlux.io",
+                api: this.chains[this.itemmodal.item.token].api,
                 txid: `${this.itemmodal.item.setname}:${this.itemmodal.item.uid}_nft_cancel`
             });
         },
@@ -762,14 +762,47 @@ export default {
                 id: `${this.itemmodal.item.token}_nft_transfer`,
                 msg: `Giving ${this.itemmodal.item.setname}:${this.itemmodal.item.uid} mint token...`,
                 ops: ["getTokenUser"],
-                api: "https://spktest.dlux.io",
+                api: this.chains[this.itemmodal.item.token].api,
                 txid: `${this.itemmodal.item.token}_nft_transfer_${this.give.to}`,
               }
               console.log(toSign);
               this.$emit('tosign', toSign)
         },
-        tradeNFT() { },
-        sellNFT() { },
+        tradeNFT() { 
+            this.$emit('tosign', {
+                type: "cja",
+                cj: {
+                  set: this.itemmodal.item.setname,
+                  uid: this.itemmodal.item.uid,
+                  type: this.trade.token,
+                  price: parseInt(this.trade.amount * 1000),
+                  to: this.trade.to,
+
+                },
+                id: `${this.itemmodal.item.token}_nft_reserve_transfer`,
+                txid: `trade_propose_${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
+                msg: `Proposing Transfer ${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
+                api: this.chains[this.itemmodal.item.token].api,
+                ops: ["getTokenUser"],
+              });
+        },
+        sellNFT() { 
+            this.$emit('tosign', {
+                type: "cja",
+                cj: {
+                  set: this.itemmodal.item.setname,
+                  uid: this.itemmodal.item.uid,
+                  type: this.sell.token,
+                  price: parseInt(this.sell.amount * 1000)
+
+                },
+                id: `${this.itemmodal.item.token}_nft_sell`,
+                txid: `sell_${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
+                msg: `Listing ${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
+                api: this.chains[this.itemmodal.item.token].api,
+                ops: ["getTokenUser"],
+              });
+        },
         auctionNFT(){
             if(this.auction.token == 'hive' || this.auction.token == "hbd") this.$emit('tosign', {
                 type: "cja",
@@ -777,14 +810,14 @@ export default {
                   set: this.itemmodal.item.setname,
                   uid: this.itemmodal.item.uid,
                   type: this.auction.token,
-                  price: this.auction.amount,
+                  price: parseInt(this.auction.amount * 1000),
                   time: this.auction.days,
 
                 },
                 id: `${this.itemmodal.item.token}_nft_hauction`,
                 txid: `hauction_${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
                 msg: `Auctioning ${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
-                api: "https://spktest.dlux.io",
+                api: this.chains[this.itemmodal.item.token].api,
                 ops: ["getTokenUser"],
               });
             else this.$emit('tosign', {
@@ -792,14 +825,29 @@ export default {
                 cj: {
                   set: this.itemmodal.item.setname,
                   uid: this.itemmodal.item.uid,
-                  price: this.auction.amount,
+                  price: parseInt(this.auction.amount * 1000),
                   time: this.auction.days,
 
                 },
                 id: `${this.itemmodal.item.token}_nft_auction`,
                 txid: `hauction_${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
                 msg: `Auctioning ${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
-                api: "https://spktest.dlux.io",
+                api: this.chains[this.itemmodal.item.token].api,
+                ops: ["getTokenUser"],
+            });
+        },
+        meltNFT(){
+            this.$emit('tosign', {
+                type: "cja",
+                cj: {
+                  set: this.itemmodal.item.setname,
+                  uid: this.itemmodal.item.uid,
+
+                },
+                id: `${this.itemmodal.item.token}_nft_delete`,
+                txid: `melt_${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
+                msg: `Melting ${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
+                api: this.chains[this.itemmodal.item.token].api,
                 ops: ["getTokenUser"],
             });
         },
