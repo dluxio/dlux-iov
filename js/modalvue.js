@@ -30,7 +30,8 @@ export default {
                   <label class="small" for="sendhiveto">Increase Decentralization:</label>
                   <input class="form-check-input" type="checkbox" role="switch" v-model="up"> 
                 </div> 
-                <label class="small mb-1 d-flex" for="sendAmount">Amount:<span class="ms-auto">Balance: <a class="text-info" role="button" @click="amount = balance">{{formatNumber(balance, 0, '', ',')}}</a> {{token}}</span></label>
+                <label class="small mb-1 d-flex" for="sendAmount">Amount:
+                  <span class="ms-auto">Balance: <a class="text-info" role="button" @click="amount = balance">{{formatNumber(balance, 0, '', ',')}}</a> {{token}}</span></label>
                 <div class="position-relative">
                   <input class="pe-5 form-control text-white bg-dark border-dark" id="sendAmount" type="number" step="1" :min="contract.r" placeholder="Enter amount" v-model="amount"> 
                   <span class="position-absolute end-0 top-50 translate-middle-y px-2">
@@ -70,7 +71,11 @@ export default {
                         </span>
                         <input @blur="accountCheck" class="ps-4 form-control text-white bg-dark border-dark" type="text" placeholder="Payment recipient" v-model="to">
                       </div>
-                      <label class="small mb-1 d-flex" for="sendAmount">Amount: <span class="ms-auto">Balance: <a role="button" class="text-info" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}</span></label>
+                      <label class="small mb-1 d-flex" for="sendAmount">Amount: 
+                        <span class="ms-auto">
+                          Balance: <a role="button" class="text-info" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}
+                        </span>
+                      </label>
                       <div class="position-relative mb-3">
                         <input class="pe-5 form-control text-white bg-dark border-dark" id="sendAmount" type="number" step="0.001" min="0.001" placeholder="Enter amount" v-model="amount">
                         <span class="position-absolute end-0 top-50 translate-middle-y px-2">
@@ -83,10 +88,10 @@ export default {
                       </div>
                   </div>
                   <div class="modal-footer"> 
-                  <div class="me-auto btn-group border border-info rounded px-2 py-1" role="group" aria-label="Transact on Mirror Network Only" v-if="token == 'SPK' || token == 'LARYNX'">
-                  <input id="sendmirror" type="checkbox" v-model="test" class="me-2">
-                  <label for="sendmirror">Mirror Network Only</label>
-                </div>
+                    <div class="me-auto btn-group border border-info rounded px-2 py-1" role="group" aria-label="Transact on Mirror Network Only" v-if="token == 'SPK' || token == 'LARYNX'">
+                      <input id="sendmirror" type="checkbox" v-model="test" class="me-2">
+                      <label for="sendmirror">Mirror Network Only</label>
+                    </div>
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> 
                   <button :disabled="!valid" type="submit" class="btn btn-primary" @click="send" data-bs-dismiss="modal">Send</button> 
                   </div>
@@ -104,23 +109,50 @@ export default {
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <form name="sendhive">
-                  <div class="modal-body"> <label for="sendhivefrom" class="small">From:</label>
-                      <div class="input-group mb-3">
-                          <div class="input-group-text bg-dark border-secondary text-secondary">@</div> <input class="form-control bg-dark border-secondary text-white" type="text" placeholder="Please login" :value="account" readonly>
-                      </div> <label for="sendhiveto" class="small">To:</label>
-                      <div class="input-group mb-3" v-if="token == 'LARYNX'"> <span class="input-group-text bg-dark border-secondary text-secondary">@</span> <select class="form-select text-white bg-dark border-secondary" id="datalistOptions" v-model="to">
-                              <option value="" disabled selected>Select node operator</option>
-                              <option v-for="node in smarkets" :value="node.self">{{node.lastGood >= stats.head_block - 1200 ? '🟩': node.lastGood > stats.head_block - 28800  ? '🟨' : '🟥'}} {{node.self}}</option>
-                          </select> </div>
-                      <div class="input-group mb-3" v-if="token == 'DLUX'"> <span class="input-group-text bg-dark border-secondary text-secondary">@</span> <input @blur="accountCheck" class="form-control bg-dark border-secondary text-white" type="text" placeholder="Recipient" v-model="to"> </div> <label for="delAmount" class="small">Amount (Balance: <a href="#/" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
-                      <div class="input-group mb-3"> <input class="form-control bg-dark border-secondary text-white" type="number" step="0.001" id="delAmount" min="0.001" placeholder="Enter amount" v-model="amount"> <span class="input-group-text bg-dark border-secondary text-secondary">{{token}}</span> </div>
+                <div class="modal-body text-start"> 
+                  <label class="small mb-1" for="sendhivefrom">From:</label>
+                  <div class="position-relative mb-3">
+                    <span class="position-absolute top-50 translate-middle-y ps-2">
+                      <i class="fa-solid fa-at fa-fw"></i>
+                    </span>
+                    <input class="ps-4 form-control bg-dark border-dark text-white" type="text" placeholder="Please login" :value="account" readonly>
                   </div>
-                  <div class="modal-footer">
-                  <div class="me-auto btn-group border border-info rounded px-2 py-1" role="group" aria-label="Transact on Mirror Network Only" v-if="token == 'SPK' || token == 'LARYNX'">
-                  <input id="delegatemirror" type="checkbox" v-model="test" class="me-2">
-                  <label for="delegatemirror">Mirror Network Only</label>
+                  <label for="sendhiveto" class="small mb-1">To:</label>
+                  <div class="position-relative mb-3" v-if="token == 'LARYNX'">
+                    <span class="position-absolute top-50 translate-middle-y ps-2">
+                      <i class="fa-solid fa-at fa-fw"></i>
+                    </span> 
+                    <select class="ps-4 form-select text-white bg-dark border-dark" id="datalistOptions" v-model="to">
+                      <option value="" disabled selected>Select node operator</option>
+                      <option v-for="node in smarkets" :value="node.self">{{node.lastGood >= stats.head_block - 1200 ? '🟩': node.lastGood > stats.head_block - 28800  ? '🟨' : '🟥'}} {{node.self}}</option>
+                    </select> 
+                  </div>
+                  <div class="position-relative mb-3" v-if="token == 'DLUX'">
+                    <span class="position-absolute top-50 translate-middle-y ps-2">
+                      <i class="fa-solid fa-at fa-fw"></i>
+                    </span>  
+                    <input @blur="accountCheck" class="ps-4 form-control bg-dark border-dark text-white" type="text" placeholder="Recipient" v-model="to"> 
+                  </div>
+                  <label for="delAmount" class="small mb-1 d-flex">Amount:
+                    <span class="ms-auto">
+                      Balance: <a role="button" class="text-info" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}
+                    </span>
+                  </label>
+                  <div class="position-relative">
+                    <input class="pe-5 form-control bg-dark border-dark text-white" type="number" step="0.001" id="delAmount" min="0.001" placeholder="Enter amount" v-model="amount"> 
+                    <span class="position-absolute end-0 top-50 translate-middle-y px-2">
+                      {{token}}
+                    </span> 
+                  </div>
                 </div>
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> <button :disabled="!to" type="submit" class="btn btn-primary" @click="delegate" data-bs-dismiss="modal">Confirm</button> </div>
+                <div class="modal-footer">
+                  <div class="me-auto btn-group border border-info rounded px-2 py-1" role="group" aria-label="Transact on Mirror Network Only" v-if="token == 'SPK' || token == 'LARYNX'">
+                    <input id="delegatemirror" type="checkbox" v-model="test" class="me-2">
+                    <label for="delegatemirror">Mirror Network Only</label>
+                  </div>
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> 
+                  <button :disabled="!to" type="submit" class="btn btn-primary" @click="delegate" data-bs-dismiss="modal">Confirm</button> 
+                </div>
               </form>
           </div>
       </div>
@@ -248,7 +280,8 @@ export default {
               </div>
               <form name="contract">
                     <div class="modal-body text-start"> 
-                      <label for="broca" class="small mb-1">Balance: {{formatNumber((balance), 0, '', ',')}}</label>
+                      <label for="broca" class="small mb-1 d-flex">Amount:
+                      <span class="ms-auto">Balance: <a role="button" class="text-info" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 0, '', ',')}}</a> {{token}}</label>
                       <div class="position-relative mb-3">
                         <input id="broca" class="pe-5 form-control text-white border-dark bg-dark" type="number" step="1" :min="1" :max="balance" placeholder="1.000" v-model="amount"> 
                         <span class="position-absolute end-0 top-50 translate-middle-y px-2">
@@ -256,26 +289,35 @@ export default {
                         </span>
                       </div>
                       <label for="c_to" class="small mb-1">Account to Upload File:</label>
-                      <div class="input-group mb-3" id="c_to"> 
-                        <input class="form-control text-white border-dark bg-dark" type="text" v-model="to"> 
+                      <div class="position-relative mb-3" id="c_to">
+                        <span class="position-absolute top-50 translate-middle-y ps-2">
+                          <i class="fa-solid fa-at fa-fw"></i>
+                        </span>  
+                        <input class="ps-4 form-control text-white border-dark bg-dark" type="text" v-model="to"> 
                       </div>
                       <label for="broker" class="small mb-1">IPFS Service Provider:</label>
-                      <div class="input-group mb-3" id="broker">
-                        <input class="form-control bg-dark border-dark text-white e-radius-hotfix" list="datalistOptions2" id="sponsoredContracts" v-model="broker">
-                        <datalist id="datalistOptions2">
+                      <div class="position-relative mb-3" id="broker">
+                        <span class="position-absolute top-50 translate-middle-y ps-2">
+                          <i class="fa-solid fa-at fa-fw"></i>
+                        </span> 
+                        <select class="ps-4 form-select text-white bg-dark border-dark" id="sponsoredContracts" v-model="broker">
+                          <option value="" disabled selected>Select provider</option>
                           <option v-for="(account, key) in ipfsproviders" :value="key"></option>
-                        </datalist>
+                        </select>
+                      </div>
+                      <label for="ben_to" class="small mb-1">Benificiary Account:</label>
+                      <div class="position-relative mb-3" id="ben_to">
+                        <span class="position-absolute top-50 translate-middle-y ps-2">
+                          <i class="fa-solid fa-at fa-fw"></i>
+                        </span>   
+                        <input class="ps-4 form-control text-white border-dark bg-dark" type="text" v-model="ben_to"> 
                       </div>
                       <label for="ben" class="small mb-1">Requested Benificary Amount:</label>
-                      <div class="position-relative mb-3">
+                      <div class="position-relative">
                       <input id="ben" class="pe-5 form-control text-white border-dark bg-dark" type="number" step="0.01" :min="0" :max="100" v-model="ben_amount"> 
                         <span class="position-absolute end-0 top-50 translate-middle-y px-2">
                           <i class="fa-solid fa-percent fa-fw"></i>
                         </span>
-                      </div>
-                      <label for="ben_to" class="small mb-1">Benificiary Account:</label>
-                      <div class="input-group" id="ben_to"> 
-                        <input class="form-control text-white border-dark bg-dark" type="text" v-model="ben_to"> 
                       </div>
                     </div> 
                     <div class="modal-footer">
