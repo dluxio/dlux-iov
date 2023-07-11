@@ -8,6 +8,7 @@ export default {
   },
   template: `
 <div>
+
 <!-- Extend -->
 <div class="modal fade" id="extend" :tabindex="i" role="dialog" aria-hidden="true">
 <div class="modal-dialog modal-dialog-centered" role="document">
@@ -31,6 +32,7 @@ export default {
     </div>
 </div>
 </div>
+
 <!-- Send -->
   <div class="modal fade" id="send" :tabindex="i" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
@@ -78,19 +80,7 @@ export default {
           </div>
       </div>
   </div>
-  <!-- Node Elect -->
-  <div class="modal fade" id="elect" :tabindex="i" role="dialog" aria-hidden="true">
-    <ul class="sortable-list">
-      <li v-for="node in smarkets" class="item" draggable="true">
-        <div v-if="typeof node.val_code == 'string'">
-          <div class="details">
-            <span>{{node.self}}</span>
-          </div>
-          <i class="uil uil-draggabledots"></i>
-        </div>
-      </li>
-    </ul>
-  </div>
+
   <!-- Delegation -->
   <div class="modal fade" id="delegate" :tabindex="i" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
@@ -121,7 +111,8 @@ export default {
           </div>
       </div>
   </div>
-  <!-- Power Up -->
+
+  <!-- Power Gov Service -->
   <div class="modal fade" id="power" tabindex="-1" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content bg-darker text-white">
@@ -227,21 +218,12 @@ export default {
                         </ul>
                       </div>
 
-
-                      <div v-if="func == 'Register a Validator'"> 
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
-                          </div>
-                      </div>
-
-                      
-
                   </div>  
               </form>
           </div>
       </div>
   </div>
+
   <!-- Create Contract -->
   <div class="modal fade" id="build" tabindex="-1" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
@@ -259,22 +241,25 @@ export default {
                           {{token}}
                         </span>
                       </div>
-                      <label for="c_to" class="small mb-1">Account to Upload File</label>
+                      <label for="c_to" class="small mb-1">Account to Upload File:</label>
                       <div class="input-group mb-3" id="c_to"> 
                         <input class="form-control text-white border-dark bg-dark" type="text" v-model="to"> 
                       </div>
-                      <label for="broker" class="small mb-1">IPFS Service Provider</label>
+                      <label for="broker" class="small mb-1">IPFS Service Provider:</label>
                       <div class="input-group mb-3" id="broker">
-                        <input class="form-control bg-dark border-dark text-white" list="datalistOptions2" id="sponsoredContracts" v-model="broker">
+                        <input class="form-control bg-dark border-dark text-white e-radius-hotfix" list="datalistOptions2" id="sponsoredContracts" v-model="broker">
                         <datalist id="datalistOptions2">
                           <option v-for="(account, key) in ipfsproviders" :value="key"></option>
                         </datalist>
                       </div>
-                      <label for="ben" class="small mb-1">Requested Benificary Amount</label>
-                      <div class="input-group mb-3" id="ben">
-                        <input class="form-control text-white border-dark bg-dark" type="number" step="0.01" :min="0" :max="100" v-model="ben_amount"> 
+                      <label for="ben" class="small mb-1">Requested Benificary Amount:</label>
+                      <div class="position-relative mb-3">
+                      <input id="ben" class="pe-5 form-control text-white border-dark bg-dark" type="number" step="0.01" :min="0" :max="100" v-model="ben_amount"> 
+                        <span class="position-absolute end-0 top-50 translate-middle-y px-2">
+                          <i class="fa-solid fa-percent fa-fw"></i>
+                        </span>
                       </div>
-                      <label for="ben_to" class="small mb-1">Benificiary Account</label>
+                      <label for="ben_to" class="small mb-1">Benificiary Account:</label>
                       <div class="input-group" id="ben_to"> 
                         <input class="form-control text-white border-dark bg-dark" type="text" v-model="ben_to"> 
                       </div>
@@ -287,6 +272,7 @@ export default {
           </div>
       </div>
   </div>
+
   <!-- Cancel / Remove -->
   <div class="modal fade" id="confirm" tabindex="-1" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
