@@ -130,10 +130,10 @@ export default {
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <form name="power">
-                  <div class="modal-body">
-
+                      
                       <!-- Power / Gov Up / Down -->
-                      <div v-if="func != 'Election'" id="poweramount"> 
+                      <div v-if="func == 'Power Up' || func == 'Power Down' || func == 'Lock' || func == 'Unlock'">
+                        <div class="modal-body">
                         <label for="poweramount" class="small mb-1 d-flex">Amount:<span class="ms-auto">Balance: <a role="button" class="text-info" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}</span></label>
                         <div class="position-relative">
                           <input class="pe-5 form-control text-white border-dark bg-dark" type="number" step="0.001" :min="min" :max="formatNumber((balance)/1000, 3, '.', ',')" placeholder="1.000" v-model="amount"> 
@@ -141,46 +141,60 @@ export default {
                             {{token}}
                           </span>
                         </div>
+                        </div>
+                        <div class="modal-footer">
+                          <div class="me-auto btn-group border border-info rounded px-2 py-1" role="group" aria-label="Transact on Mirror Network Only" v-if="token == 'LARYNX'">
+                            <input id="pwrupmirror" type="checkbox" v-model="test" class="me-2">
+                            <label for="pwrupmirror">Mirror Network Only</label>
+                          </div>
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                          <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
+                        </div>
                       </div>
 
-                      <!-- Register Service-->
-                      <div v-if="func == 'Register a Service'"> 
-                        <label for="api" class="small">Location (https://ipfs.dlux.io)</label>
+                        <!-- Register Service-->
+                        <div v-if="func == 'Register a Service'"> 
+                          <div class="modal-body text-start">
+                            <label for="api" class="small mb-1">Location (ex: https://ipfs.dlux.io):</label>
                             <div class="input-group mb-3" id="api"> 
                               <input class="form-control text-white border-dark bg-dark" type="text" v-model="api"> 
                             </div>
-                            <label for="peerid" class="small">Unique ID</label>
+                            <label for="peerid" class="small mb-1">Unique ID:</label>
                             <div class="input-group mb-3" id="peerid"> 
                               <input class="form-control text-white border-dark bg-dark" type="text" v-model="id"> 
                             </div>
-                            <label for="peerid" class="small">Service Type</label>
-                            <div class="input-group mb-3" id="type"> 
+                            <label for="peerid" class="small mb-1">Service Type:</label>
+                            <div class="input-group" id="type"> 
                               <input class="form-control text-white border-dark bg-dark" type="text" v-model="to"> 
                             </div>
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
                           </div>
-                      </div>
-
-                        <!-- Register Service Type -->
-                        <div v-if="func == 'Register a Service Type'"> 
-                          <label for="type" class="small">Short Name for Service (IPFS)</label>
-                          <div class="input-group mb-3" id="api"> 
-                            <input class="form-control text-white border-dark bg-dark" type="text" v-model="api"> 
-                          </div>
-                          <label for="peerid" class="small">Full Name for Service (InterPlanetary File System)</label>
-                          <div class="input-group mb-3" id="peerid"> 
-                            <input class="form-control text-white border-dark bg-dark" type="text" v-model="id"> 
-                          </div>  
                           <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                              <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
                           </div>
                         </div>
 
-                      <!-- Elect Validator -->
-                      <div v-if="func == 'Election'">
+                      <!-- Register Service Type -->
+                      <div v-if="func == 'Register a Service Type'"> 
+                        <div class="modal-body text-start">
+                          <label for="type" class="small mb-1">Short Name for Service (ex: IPFS):</label>
+                          <div class="input-group mb-3" id="api"> 
+                            <input class="form-control text-white border-dark bg-dark" type="text" v-model="api"> 
+                          </div>
+                          <label for="peerid" class="small mb-1">Full Name for Service (ex: InterPlanetary File System):</label>
+                          <div class="input-group" id="peerid"> 
+                            <input class="form-control text-white border-dark bg-dark" type="text" v-model="id"> 
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
+                        </div>
+                      </div>
+
+                    <!-- Elect Validator -->
+                    <div v-if="func == 'Election'">
+                      <div class="modal-body">
                         <h3 class="mb-2">Chosen Validators ({{valWorkable.length}}/30)</h3>
                         <div class="d-flex mx-5 justify-content-between align-items-center border-bottom border-secondary py-2 mb-3">
                           <button class="btn btn-success invisible" type="button">Save</button>
@@ -221,17 +235,8 @@ export default {
                           </div>
                       </div>
 
+                      
 
-                      <div v-if="func == 'Power Up' || func == 'Power Down' || func == 'Lock' || func == 'Unlock'">
-                        <div class="modal-footer">
-                          <div class="me-auto btn-group border border-info rounded px-2 py-1" role="group" aria-label="Transact on Mirror Network Only" v-if="token == 'LARYNX'">
-                            <input id="pwrupmirror" type="checkbox" v-model="test" class="me-2">
-                            <label for="pwrupmirror">Mirror Network Only</label>
-                          </div>
-                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                          <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
-                          </div>
-                      </div>
                   </div>  
               </form>
           </div>
