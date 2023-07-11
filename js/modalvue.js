@@ -39,7 +39,7 @@ export default {
                   <h5 class="modal-title">Send {{token}}</h5> <button type="button" class="btn-close " data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <form name="sendhive">
-                    <div class="modal-body">
+                    <div class="modal-body text-start">
                       <label class="small mb-1" for="sendhivefrom">From:</label>
                       <div class="position-relative mb-3">
                         <span class="position-absolute top-50 translate-middle-y ps-2">
@@ -130,7 +130,9 @@ export default {
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <form name="power">
-                <div class="modal-body">
+                  <div class="modal-body">
+
+                      <!-- Power / Gov Up / Down -->
                       <div v-if="func != 'Election'" id="poweramount"> 
                         <label for="poweramount" class="small mb-1 d-flex">Amount:<span class="ms-auto">Balance: <a role="button" class="text-info" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}</span></label>
                         <div class="position-relative">
@@ -138,13 +140,15 @@ export default {
                           <span class="position-absolute end-0 top-50 translate-middle-y px-2">
                             {{token}}
                           </span>
+                        </div>
                       </div>
-                        
-                      </div>
-                      <div v-if="func == 'Register a Service'"> <label for="api" class="small">Location (https://ipfs.dlux.io)</label>
-                          <div class="input-group mb-3" id="api"> 
-                            <input class="form-control text-white border-dark bg-dark" type="text" v-model="api"> 
-                          </div>
+
+                      <!-- Register Service-->
+                      <div v-if="func == 'Register a Service'"> 
+                        <label for="api" class="small">Location (https://ipfs.dlux.io)</label>
+                            <div class="input-group mb-3" id="api"> 
+                              <input class="form-control text-white border-dark bg-dark" type="text" v-model="api"> 
+                            </div>
                             <label for="peerid" class="small">Unique ID</label>
                             <div class="input-group mb-3" id="peerid"> 
                               <input class="form-control text-white border-dark bg-dark" type="text" v-model="id"> 
@@ -158,38 +162,46 @@ export default {
                             <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
                           </div>
                       </div>
-                      <div v-if="func == 'Register a Service Type'"> <label for="type" class="small">Short Name for Service (IPFS)</label>
-                          <div class="input-group mb-3" id="api"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="api"> </div>
+
+                        <!-- Register Service Type -->
+                        <div v-if="func == 'Register a Service Type'"> 
+                          <label for="type" class="small">Short Name for Service (IPFS)</label>
+                          <div class="input-group mb-3" id="api"> 
+                            <input class="form-control text-white border-dark bg-dark" type="text" v-model="api"> 
+                          </div>
                           <label for="peerid" class="small">Full Name for Service (InterPlanetary File System)</label>
-                          <div class="input-group mb-3" id="peerid"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="id"> </div>  
+                          <div class="input-group mb-3" id="peerid"> 
+                            <input class="form-control text-white border-dark bg-dark" type="text" v-model="id"> 
+                          </div>  
                           <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
                           </div>
-                      </div>
+                        </div>
+
+                      <!-- Elect Validator -->
                       <div v-if="func == 'Election'">
-                      
-                      <h3 class="mb-2">Chosen Validators ({{valWorkable.length}}/30)</h3>
-                      <div class="d-flex mx-5 justify-content-between align-items-center border-bottom border-secondary py-2 mb-3">
-                        <button class="btn btn-success invisible" type="button">Save</button>
-                        <h5 class="m-0"> Node (Weight)</h5>
-                        <button :class="{'invisible': !difVote}" class="btn btn-success" type="button" @click="valVote()">Save</button>
-                      </div>
-                      <div class="mb-5">
-                      <div v-if="!valWorkable.length">
-                        <p>No Validators Added</p>
-                      </div>
-                        <ul class="mx-5 p-0">
-                          <div v-for="(node, index) in valWorkable">
-                            <li @dragstart="pick($event, node, index)" @dragover.prevent @dragenter.prevent @drop="move($event, node, index)" class="border border-secondary rounded d-flex align-items-center justify-content-between p-2 my-2 drop-zone" draggable="true" style="cursor: move;">
-                              <i class="fa-solid fa-grip-lines ms-3"></i>  
-                              <h5 class="m-0">@{{node.self}} ({{formatNumber(((30 - index )/ 30)* 100, 1,  '.', ',')}}%)</h5>
-                              <button class="btn btn-primary" @click="sub(node)" type="button"><i class="fa-solid fa-minus"></i></button>
-                            </li>
+                        <h3 class="mb-2">Chosen Validators ({{valWorkable.length}}/30)</h3>
+                        <div class="d-flex mx-5 justify-content-between align-items-center border-bottom border-secondary py-2 mb-3">
+                          <button class="btn btn-success invisible" type="button">Save</button>
+                          <h5 class="m-0"> Node (Weight)</h5>
+                          <button :class="{'invisible': !difVote}" class="btn btn-success" type="button" @click="valVote()">Save</button>
+                        </div>
+                        <div class="mb-5">
+                          <div v-if="!valWorkable.length">
+                            <p>No Validators Added</p>
                           </div>
-                        </ul>
-                      </div>
-                      <h3 class="mb-3">Validators</h3>
+                          <ul class="mx-5 p-0">
+                            <div v-for="(node, index) in valWorkable">
+                              <li @dragstart="pick($event, node, index)" @dragover.prevent @dragenter.prevent @drop="move($event, node, index)" class="border border-secondary rounded d-flex align-items-center justify-content-between p-2 my-2 drop-zone" draggable="true" style="cursor: move;">
+                                <i class="fa-solid fa-grip-lines ms-3"></i>  
+                                <h5 class="m-0">@{{node.self}} ({{formatNumber(((30 - index )/ 30)* 100, 1,  '.', ',')}}%)</h5>
+                                <button class="btn btn-primary" @click="sub(node)" type="button"><i class="fa-solid fa-minus"></i></button>
+                              </li>
+                            </div>
+                          </ul>
+                        </div>
+                        <h3 class="mb-3">Validators</h3>
                         <ul class="mx-5 p-0">
                           <div v-for="node in smarkets">
                             <li v-if="isVal(node)" class="border border-secondary rounded d-flex align-items-center justify-content-between p-2 my-2">
@@ -199,28 +211,30 @@ export default {
                             </li>
                           </div>
                         </ul>
-          
                       </div>
+
+
                       <div v-if="func == 'Register a Validator'"> 
                           <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
                           </div>
                       </div>
-                      </div>
-                      <div v-if="func == 'Power Up' || func == 'Power Down' || func == 'Gov Down' || func == 'Gov Up'">
-                          <div class="modal-footer">
+
+
+                      <div v-if="func == 'Power Up' || func == 'Power Down' || func == 'Lock' || func == 'Unlock'">
+                        <div class="modal-footer">
                           <div class="me-auto btn-group border border-info rounded px-2 py-1" role="group" aria-label="Transact on Mirror Network Only" v-if="token == 'LARYNX'">
                             <input id="pwrupmirror" type="checkbox" v-model="test" class="me-2">
                             <label for="pwrupmirror">Mirror Network Only</label>
                           </div>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                          <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
                           </div>
                       </div>
                   </div>  
               </form>
-          
+          </div>
       </div>
   </div>
   <!-- Create Contract -->
@@ -228,31 +242,42 @@ export default {
       <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content bg-darker text-white">
               <div class="modal-header">
-                  <h5 class="modal-title">Create Contract</h5> <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  <h5 class="modal-title">Create Contract</h5> 
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <form name="contract">
-                  <div class="modal-body"> <label for="broca" class="small">Balance: {{formatNumber((balance), 0, '', ',')}}</label>
-                      <div class="input-group mb-3" id="broca"> <input class="form-control text-white border-dark bg-dark" type="number" step="1" :min="1" :max="balance" placeholder="1.000" v-model="amount"> <span class="input-group-text text-secondary border-dark bg-dark">{{token}}</span> </div>
-                      
-                      <label for="c_to" class="small">Account to Upload File</label>
-                      <div class="input-group mb-3" id="c_to"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="to"> </div>
-                      <label for="broker" class="small">IPFS Service Provider</label>
-                      <div class="input-group mb-3" id="broker"> <input class="form-control bg-dark border-dark text-white"
-                      list="datalistOptions2" id="sponsoredContracts"
-                      v-model="broker">
-                    <datalist id="datalistOptions2">
-                      <option v-for="(account, key) in ipfsproviders" :value="key"></option>
-                    </datalist> </div>
-                      <label for="ben" class="small">Requested Benificary Amount</label>
-                      <div class="input-group mb-3" id="ben"> <input class="form-control text-white border-dark bg-dark" type="number" step="0.01" :min="0" :max="100" v-model="ben_amount"> </div>
-                      <label for="ben_to" class="small">Benificiary Account</label>
-                      <div class="input-group mb-3" id="ben_to"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="ben_to"> </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" @click="build" data-bs-dismiss="modal">Propose</button>
+                    <div class="modal-body text-start"> 
+                      <label for="broca" class="small mb-1">Balance: {{formatNumber((balance), 0, '', ',')}}</label>
+                      <div class="position-relative mb-3">
+                        <input id="broca" class="pe-5 form-control text-white border-dark bg-dark" type="number" step="1" :min="1" :max="balance" placeholder="1.000" v-model="amount"> 
+                        <span class="position-absolute end-0 top-50 translate-middle-y px-2">
+                          {{token}}
+                        </span>
                       </div>
-                      
-                  </div>  
+                      <label for="c_to" class="small mb-1">Account to Upload File</label>
+                      <div class="input-group mb-3" id="c_to"> 
+                        <input class="form-control text-white border-dark bg-dark" type="text" v-model="to"> 
+                      </div>
+                      <label for="broker" class="small mb-1">IPFS Service Provider</label>
+                      <div class="input-group mb-3" id="broker">
+                        <input class="form-control bg-dark border-dark text-white" list="datalistOptions2" id="sponsoredContracts" v-model="broker">
+                        <datalist id="datalistOptions2">
+                          <option v-for="(account, key) in ipfsproviders" :value="key"></option>
+                        </datalist>
+                      </div>
+                      <label for="ben" class="small mb-1">Requested Benificary Amount</label>
+                      <div class="input-group mb-3" id="ben">
+                        <input class="form-control text-white border-dark bg-dark" type="number" step="0.01" :min="0" :max="100" v-model="ben_amount"> 
+                      </div>
+                      <label for="ben_to" class="small mb-1">Benificiary Account</label>
+                      <div class="input-group" id="ben_to"> 
+                        <input class="form-control text-white border-dark bg-dark" type="text" v-model="ben_to"> 
+                      </div>
+                    </div> 
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                      <button type="button" class="btn btn-primary" @click="build" data-bs-dismiss="modal">Propose</button>
+                    </div>
               </form>
           </div>
       </div>
