@@ -141,15 +141,14 @@ export default {
                         aria-labelledby="sellFT">
                         <!-- SELL FORM -->
                         <form class="needs-validation mt-4" novalidate>
-                            <!--:action="javascript:sellFT('{{item.data.set}}','{{sellFTprice.value}}')"-->
                             <div class="row mb-3">
                                 <div class="col-6">
                                     <label for="sellFTqty" class="form-label">Quantity</label>
                                     <div class="input-group has-validation">
-                                        <input type="number"
+                                        <input type="number" v-model="sell.qty"
                                             class="form-control text-info bg-transparent"
                                             id="sellFTqty" aria-describedby="sellFTqtyappend"
-                                            placeholder="1" step="1" min="1" required readonly>
+                                            placeholder="1" step="1" min="1" required :readonly="sell.token == item.token">
                                         <span
                                             class="input-group-text"
                                             id="sellFTqtyappend">{{item.set}}
@@ -174,8 +173,8 @@ export default {
                                             id="sellFTprice" aria-describedby="sellFTpriceappend"
                                             placeholder="0.000" step="0.001" min="0.001" required>
                                             <span class="input-group-text e-radius-hotfix m-0 p-0" id="sellFTamountappend">
-                                            <select aria-label="Trade price type select" class="form-select border-0 text-white-50 w-100 h-100" v-model="sell.token">
-                                                <option selected :value="item.token">{{toUpperCase(item.token)}}</option>
+                                            <select @change="sell.qty = 1" aria-label="Trade price type select" class="form-select border-0 text-white-50 w-100 h-100" v-model="sell.token">
+                                                <option :value="item.token">{{toUpperCase(item.token)}}</option>
                                                 <option value="hive">HIVE</option>
                                                 <option value="hbd">HBD</option>
                                             </select>
@@ -184,6 +183,13 @@ export default {
                                             amount
                                             of DLUX you'd like to receive. </div>
                                     </div>
+                                </div>
+                            </div>
+                            <div v-if="sell.token != item.token">
+                                You can choose to have sells distributed to multiple accounts:
+                                <div v-for="account in sell.distro">
+                                <input type="text" class="form-control text-info bg-transparent" v-model="account.name" @blur="validateDistroAcc()">
+                                <input type="number" class="form-control text-info bg-transparent" v-model="account.percent" @change="validateDistro()">
                                 </div>
                             </div>
                             <div class="row mb-3">
@@ -307,7 +313,7 @@ export default {
                     <div role="tabpanel" class="tab-pane fade show " id="airdropFTtab"
                         aria-labelledby="airdropFT">
                         <!-- AIRDROP FORM -->
-                        <form id="airdropFT" class="needs-validation mt-4" novalidate @submit.prevent="validateForm('airdropFT', airdropFT)">
+                        <form id="airdropFT" class="needs-validation mt-4" novalidate @submit.prevent="checkForm('airdropFT', airdropFT)">
                             <div class="row mb-3">
                                 <div class="col-12">
                                     <label for="airdropFTusers" class="form-label">Airdrop
@@ -408,7 +414,8 @@ export default {
             sell: {
                 qty: 1,
                 price: "1.000",
-                token: 'hive'
+                token: 'hive',
+                distro: [{name: this.account, percent: 100}]
             },
             auction: {
                 qty: 1,
@@ -433,12 +440,84 @@ export default {
         };
     },
     methods: {
+        addDistro(){
+            this.sell.distro.push({name: '', percent: 0})
+        },
+        removeDistro(index){
+            this.sell.distro.splice(index, 1)
+        },
+        validateDistro(){
+            var total = 0
+            for (var i = 0; i < this.sell.distro.length; i++) {
+                total += parseInt(this.sell.distro[i].percent * 100)
+                if(total > 10000) {
+                    this.sell.distro[i].percent = 0
+                    for(var j = i; j < this.sell.distro.length; j++){
+                        this.sell.distro[j].percent = 0
+                    }
+                }
+            }
+            if(total < 10000) {
+                this.sell.distro[this.sell.distro.length - 1].percent = ((10000 - total)/100).toFixed(2)
+            }
+        },
+        validateDistroAcc(){
+            var accs = []
+            for (var i = 0; i < this.sell.distro.length; i++) {
+                if(this.sell.distro[i].name != '') {
+                    accs.push(this.sell.distro[i].name)
+                }
+            }
+            var arrStr = '["' + this.accs.join('","') + '"]'
+            var body = `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[${arrStr}], \"id\":1}`
+            console.log(body)
+            fetch("https://anyx.io", {
+              body,
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              method: "POST",
+            })
+              .then((r) => {
+                return r.json();
+              })
+              .then((re) => {
+                console.log(re)
+                var notFound = accs
+                var to_array = []
+                for(var i = 0; i < re.result.length; i++) {
+                    to_array.push(re.result[i].name)
+                    notFound.splice(notFound.indexOf(re.result[i].name), 1)
+                }
+                if (!notFound.length){
+
+                } else if (notFound.length) {
+                    var j = []
+                    for(var i = 0; i < this.sell.distro.length; i++) {
+                        if(notFound.includes(this.sell.distro[i].name)) {
+                            j.push(i)
+                        }
+                    }
+                    if (j.length){
+                        for(var i = j.length - 1; i > j.length - 1; i--) {
+                            this.sell.distro.splice(j[i], 1)
+                        }
+                    }
+                } else {
+                }
+              });
+        },
         validateForm(formKey, validKey) {
             var Container = document.getElementById(formKey);
             if (Container.querySelector('input:invalid'))
               this[validKey] = false;
             //querySelector('input:invalid[name="pwd"]')
             else this[validKey] = true;
+          },
+          checkForm(formKey, op) {
+            var Container = document.getElementById(formKey);
+            if (!Container.querySelector('input:invalid'))
+              op()
           },
         validateAirdrop() {
             if (this.airdrop.to_string.length)this.airdrop.to_array = this.airdrop.to_string.split(' ')
@@ -471,15 +550,12 @@ export default {
                 if (!notFound.length){
                     this.airdropFeedback = ''
                     this.airdropAllowed = true
-                    resolve(true);
                 } else if (notFound.length) {
                     this.airdropFeedback = 'Following usernames not found: ' + notFound.join(', ') + '. Please check your list and try again.'
                     this.airdropAllowed = false
-                    resolve(true);
                 } else {
                     this.airdropFeedback = 'No valid usernames found. Please check your list and try again.'
                     this.airdropAllowed = false
-                    resolve(false);
                 }
               });
         },
@@ -515,28 +591,12 @@ export default {
               }
               this.$emit('tosign', toSign)
         },
-        auctionFT() {
-            const toSign = {
-                type: "cja",
-                cj: {
-                    set: this.item.set,
-                    to: this.trade.to,
-                    price: parseInt(parseFloat(this.trade.amount) * 1000),
-                },
-                id: `${this.item.token}_ft_escrow`,
-                msg: `Giving ${this.item.set} mint token...`,
-                ops: ["getTokenUser"],
-                api: this.api,
-                txid: `${this.item.token}_ft_transfer_${this.trade.to}`,
-              }
-              this.$emit('tosign', toSign)
-        },
         airdropFT() {
             const toSign = {
                 type: "cja",
                 cj: {
                     set: this.item.set,
-                    to: '["' + this.airdrop.to_array.join('","') + '"]'
+                    to: this.airdrop.to_array
                 },
                 id: `${this.item.token}_ft_airdrop`,
                 msg: `Airdropping ${this.item.set} mint tokens...`,
@@ -546,7 +606,7 @@ export default {
               }
               this.$emit('tosign', toSign)
         },
-        sellFT() {
+        auctionFT() {
             const toSign = {
                 type: "cja",
                 cj: {
@@ -554,12 +614,43 @@ export default {
                     to: this.trade.to,
                     price: parseInt(parseFloat(this.trade.amount) * 1000),
                 },
-                id: `${this.item.token}_ft_escrow`,
+                id: `${this.item.token}_ft_auction`,
                 msg: `Giving ${this.item.set} mint token...`,
                 ops: ["getTokenUser"],
-                api: "https://spktest.dlux.io",
+                api: this.api,
                 txid: `${this.item.token}_ft_transfer_${this.trade.to}`,
               }
+              this.$emit('tosign', toSign)
+        },
+        sellFT() {
+            var toSign = {}
+            if(this.sell.token == 'hive' || this.sell.token == 'hbd')toSign = {
+                type: "cja",
+                cj: {
+                    set: this.item.set,
+                    [this.sell.token]: parseInt(parseFloat(this.sell.amount) * 1000),
+                    quantity: this.sell.qty,
+                    distro: this.sell.distro,
+                },
+                id: `${this.item.token}_fts_sell_h`,
+                msg: `Selling ${this.item.set} mint token...`,
+                ops: ["getTokenUser"],
+                api: this.api,
+                txid: `${this.item.token}_fts_sell_h`,
+              }
+              else toSign = {
+                type: "cja",
+                cj: {
+                    set: this.item.set,
+                    price: parseInt(parseFloat(this.sell.amount) * 1000),
+                },
+                id: `${this.item.token}_fts_sell`,
+                msg: `Selling ${this.item.set} mint token...`,
+                ops: ["getTokenUser"],
+                api: this.api,
+                txid: `${this.item.token}_fts_sell_h`,
+              }
+
               this.$emit('tosign', toSign)
         },
         modalIndex() {
