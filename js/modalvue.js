@@ -13,7 +13,7 @@ export default {
 <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content bg-darker text-white">
         <div class="modal-header">
-            <h5 class="modal-title">Extend {{contract.i}}</h5> <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h5 class="modal-title">Extend {{contract.i}}</h5> <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <form name="sendhive">
             <div class="modal-body"> <label class="small" for="sendhivefrom">From:</label>
@@ -36,33 +36,33 @@ export default {
       <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content bg-darker text-white">
               <div class="modal-header">
-                  <h5 class="modal-title">Send {{token}}</h5> <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                  <h5 class="modal-title">Send {{token}}</h5> <button type="button" class="btn-close " data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <form name="sendhive">
                     <div class="modal-body">
-                      <label class="small" for="sendhivefrom">From:</label>
+                      <label class="small mb-1" for="sendhivefrom">From:</label>
                       <div class="position-relative mb-3">
                         <span class="position-absolute top-50 translate-middle-y ps-2">
                           <i class="fa-solid fa-at fa-fw"></i>
                         </span>
                         <input class="ps-4 form-control bg-dark border-dark" type="text" placeholder="Please login" :value="account" readonly>
                       </div>
-                      <label class="small" for="sendhiveto">To:</label>
+                      <label class="small mb-1" for="sendhiveto">To:</label>
                       <div class="position-relative mb-3">
                         <span class="position-absolute top-50 translate-middle-y ps-2">
                           <i class="fa-solid fa-at fa-fw"></i>
                         </span>
                         <input @blur="accountCheck" class="ps-4 form-control text-white bg-dark border-dark" type="text" placeholder="Payment recipient" v-model="to">
                       </div>
-                      <label class="small" for="sendAmount">Amount (Balance: <a href="#/" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
+                      <label class="small mb-1 d-flex" for="sendAmount">Amount: <span class="ms-auto">Balance: <a role="button" class="text-info" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}</span></label>
                       <div class="position-relative mb-3">
                         <input class="pe-5 form-control text-white bg-dark border-dark" id="sendAmount" type="number" step="0.001" min="0.001" placeholder="Enter amount" v-model="amount">
                         <span class="position-absolute end-0 top-50 translate-middle-y px-2">
-                          DLUX
+                          {{token}}
                         </span>
                       </div>
-                      <label class="small" for="sendhivememo">Memo:</label>
-                      <div class="input-group mb-3">
+                      <label class="small mb-1" for="sendhivememo">Memo:</label>
+                      <div class="input-group">
                         <input class="form-control text-white bg-dark border-dark" type="text" placeholder="Include a memo (optional)" v-model="memo">
                       </div>
                   </div>
@@ -96,7 +96,8 @@ export default {
       <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content bg-darker text-white">
               <div class="modal-header">
-                  <h5 class="modal-title">Delegate {{token}}</h5> <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                  <h5 class="modal-title">Delegate {{token}}</h5> 
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <form name="sendhive">
                   <div class="modal-body"> <label for="sendhivefrom" class="small">From:</label>
@@ -125,20 +126,33 @@ export default {
       <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content bg-darker text-white">
               <div class="modal-header">
-                  <h5 class="modal-title">{{func}} {{token}}  {{func == 'Election' ? 'Validators' : ''}}</h5> <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                  <h5 class="modal-title">{{func}} {{token}}  {{func == 'Election' ? 'Validators' : ''}}</h5> 
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <form name="power">
-                  <div class="modal-body"> 
-                      <div v-if="func != 'Election'" class="input-group mb-3" id="poweramount"> 
-                      <label for="poweramount" class="small">Amount (Balance: <a href="#/" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
-                        <input class="form-control text-white border-dark bg-dark" type="number" step="0.001" :min="min" :max="formatNumber((balance)/1000, 3, '.', ',')" placeholder="1.000" v-model="amount"> <span class="input-group-text text-secondary border-dark bg-dark">{{token}}</span>
+                <div class="modal-body">
+                      <div v-if="func != 'Election'" id="poweramount"> 
+                        <label for="poweramount" class="small mb-1 d-flex">Amount:<span class="ms-auto">Balance: <a role="button" class="text-info" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}</span></label>
+                        <div class="position-relative">
+                          <input class="pe-5 form-control text-white border-dark bg-dark" type="number" step="0.001" :min="min" :max="formatNumber((balance)/1000, 3, '.', ',')" placeholder="1.000" v-model="amount"> 
+                          <span class="position-absolute end-0 top-50 translate-middle-y px-2">
+                            {{token}}
+                          </span>
+                      </div>
+                        
                       </div>
                       <div v-if="func == 'Register a Service'"> <label for="api" class="small">Location (https://ipfs.dlux.io)</label>
-                          <div class="input-group mb-3" id="api"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="api"> </div>
-                          <label for="peerid" class="small">Unique ID</label>
-                          <div class="input-group mb-3" id="peerid"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="id"> </div>
-                          <label for="peerid" class="small">Service Type</label>
-                          <div class="input-group mb-3" id="type"> <input class="form-control text-white border-dark bg-dark" type="text" v-model="to"> </div>
+                          <div class="input-group mb-3" id="api"> 
+                            <input class="form-control text-white border-dark bg-dark" type="text" v-model="api"> 
+                          </div>
+                            <label for="peerid" class="small">Unique ID</label>
+                            <div class="input-group mb-3" id="peerid"> 
+                              <input class="form-control text-white border-dark bg-dark" type="text" v-model="id"> 
+                            </div>
+                            <label for="peerid" class="small">Service Type</label>
+                            <div class="input-group mb-3" id="type"> 
+                              <input class="form-control text-white border-dark bg-dark" type="text" v-model="to"> 
+                            </div>
                           <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
@@ -193,6 +207,7 @@ export default {
                             <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
                           </div>
                       </div>
+                      </div>
                       <div v-if="func == 'Power Up' || func == 'Power Down'">
                           <div class="modal-footer">
                           <div class="me-auto btn-group border border-info rounded px-2 py-1" role="group" aria-label="Transact on Mirror Network Only" v-if="token == 'LARYNX'">
@@ -205,7 +220,7 @@ export default {
                       </div>
                   </div>  
               </form>
-          </div>
+          
       </div>
   </div>
   <!-- Create Contract -->
@@ -213,7 +228,7 @@ export default {
       <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content bg-darker text-white">
               <div class="modal-header">
-                  <h5 class="modal-title">Create Contract</h5> <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                  <h5 class="modal-title">Create Contract</h5> <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <form name="contract">
                   <div class="modal-body"> <label for="broca" class="small">Balance: {{formatNumber((balance), 0, '', ',')}}</label>
@@ -248,7 +263,7 @@ export default {
           <div class="modal-content bg-darker text-white">
               <div class="modal-header">
                   <h5 v-if="func == 'powercancel'" class="modal-title">Cancel Power Down?</h5>
-                  <h5 v-if="func == 'delcancel'" class="modal-title">Remove Delegation</h5> <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                  <h5 v-if="func == 'delcancel'" class="modal-title">Remove Delegation</h5> <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
                   <p v-if="func == 'delcancel'">Do you really want to remove the delegation to @dlux-io?</p>
