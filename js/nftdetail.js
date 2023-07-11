@@ -4,8 +4,8 @@ export default {
     template: `
 <div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" :aria-hidden="true">
     <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="card bg-dark">
+        <div class="modal-content rounded bg-img-none">
+            <div class="card bg-img-none bg-blur-none">
                 <div class="card-header border-0 d-flex align-items-center"
                     :style="{'background': color}">
                     <div class="nft-header d-flex">
@@ -43,17 +43,15 @@ export default {
                                 <div v-html="itemmodal.item.HTML"></div>
                                 <!--back forward btns-->
                                 <div class="card-footer d-flex align-items-center">
-                                    <h2><a class="text-muted p-3" href="#/"
-                                            @click="modalPrev()"
-                                            :class="{'invisible':!itemmodal.index}"><i
-                                                class="fas fa-caret-square-left"></i></a>
+                                    <h2><a class="text-muted p-3" role="button"
+                                            @click="modalPrev()"><i class="fas fa-caret-square-left"></i></a>
                                     </h2>
                                     <small class="ms-auto text-muted"><i>Item
                                             {{itemmodal.index + 1}} of
                                             {{NFTselect.auctionOnly || NFTselect.saleOnly ||
                                             NFTselect.sort == 'price' ||
                                             itemmodal.items.length}}</i></small>
-                                    <h2 class="ms-auto"><a class="text-muted p-3" href="#/"
+                                    <h2 class="ms-auto"><a class="text-muted p-3" role="button"
                                             @click="modalNext()"><i
                                                 class="fas fa-caret-square-right"></i></a>
                                     </h2>
