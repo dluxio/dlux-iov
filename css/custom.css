@@ -12687,15 +12687,6 @@ td {
   margin-left: auto;
 }
 
-.nav-pills > li > a.active {
-  background-color: #17a2b8 !important;
-  color: #ffffff !important;
-}
-
-.nav-pills > li > a {
-  color: #17a2b8 !important;
-}
-
 .e-radius-hotfix {
   border-top-right-radius: 0.5rem !important;
   border-bottom-right-radius: 0.5rem !important;
