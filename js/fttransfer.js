@@ -308,7 +308,6 @@ export default {
                         aria-labelledby="airdropFT">
                         <!-- AIRDROP FORM -->
                         <form class="needs-validation mt-4" novalidate>
-                            <!--:action="javascript:airdropFT('{{item.data.set}}','{{airdropFTusers.value}}')"-->
                             <div class="row mb-3">
                                 <div class="col-12">
                                     <label for="airdropFTusers" class="form-label">Airdrop
@@ -316,12 +315,10 @@ export default {
                                     <div class="input-group has-validation">
                                         <textarea name="paragraph_text" cols="50" rows="2"
                                             class="form-control text-info"
-                                            id="airdropFTusers" aria-describedby="airdropFT"
+                                            id="airdropFTusers" aria-describedby="airdropFT" v-model="airdrop.to_string" @blur="validateAirdrop()"
                                             required placeholder="name user-name"></textarea>
-                                        <div class="invalid-feedback"> Please enter at
-                                            least one
-                                            user name to airdrop tokens to. </div>
                                     </div>
+                                    <div v-if="airdropFeedback">{{airdropFeedback}}</div>
                                 </div>
                             </div>
                             <div class="row mb-3">
@@ -424,6 +421,8 @@ export default {
                 to_array: [],
                 qty_each: 1,
             },
+            airdropFeedback: 'Please enter at least one username to airdrop tokens to.',
+            airdropAllowed: false,
             ftGiveFormValid: false,
             ftTradeFormValid: false,
             ftSellFormValid: false,
@@ -441,6 +440,49 @@ export default {
             //querySelector('input:invalid[name="pwd"]')
             else this[validKey] = true;
           },
+        validateAirdrop() {
+            if (this.airdrop.to_string.length)this.airdrop.to_array = this.airdrop.to_string.split(' ')
+            if(this.airdrop.to_array.length > 100) {
+                this.airdropFeedback = 'Please enter no more than 100 usernames to airdrop tokens to.'
+                return
+            }
+            var arrStr = '["' + this.airdrop.to_array.join('","') + '"]'
+            var body = `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[${arrStr}], \"id\":1}`
+            console.log(body)
+            fetch("https://anyx.io", {
+              body,
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              method: "POST",
+            })
+              .then((r) => {
+                return r.json();
+              })
+              .then((re) => {
+                console.log(re)
+                var notFound = this.airdrop.to_array
+                this.airdrop.to_array = []
+                for(var i = 0; i < re.result.length; i++) {
+                    this.airdrop.to_array.push(re.result[i].name)
+                    notFound.splice(notFound.indexOf(re.result[i].name), 1)
+                }
+                this.airdrop.to_string = this.airdrop.to_array.join(' ')
+                if (!notFound.length){
+                    this.airdropFeedback = ''
+                    this.airdropAllowed = true
+                    resolve(true);
+                } else if (notFound.length) {
+                    this.airdropFeedback = 'Following usernames not found: ' + notFound.join(', ') + '. Please check your list and try again.'
+                    this.airdropAllowed = false
+                    resolve(true);
+                } else {
+                    this.airdropFeedback = 'No valid usernames found. Please check your list and try again.'
+                    this.airdropAllowed = false
+                    resolve(false);
+                }
+              });
+        },
         giveFT() {
             const toSign = {
                 type: "cja",
@@ -452,7 +494,7 @@ export default {
                 id: `${this.item.token}_ft_transfer`,
                 msg: `Giving ${this.give.qty} ${this.item.set} mint token...`,
                 ops: ["getTokenUser"],
-                api: "https://spktest.dlux.io",
+                api: this.api,
                 txid: `${this.item.token}_ft_transfer_${this.give.to}`,
               }
               this.$emit('tosign', toSign)
@@ -466,16 +508,60 @@ export default {
                     price: parseInt(parseFloat(this.trade.amount) * 1000),
                 },
                 id: `${this.item.token}_ft_escrow`,
-                msg: `Giving ${this.give.qty} ${this.item.set} mint token...`,
+                msg: `Giving ${this.item.set} mint token...`,
                 ops: ["getTokenUser"],
-                api: "https://spktest.dlux.io",
-                txid: `${this.item.token}_ft_transfer_${this.give.to}`,
+                api: this.api,
+                txid: `${this.item.token}_ft_transfer_${this.trade.to}`,
               }
               this.$emit('tosign', toSign)
         },
-        auctionFT() {},
-        airdropFT() {},
-        sellFT() {},
+        auctionFT() {
+            const toSign = {
+                type: "cja",
+                cj: {
+                    set: this.item.set,
+                    to: this.trade.to,
+                    price: parseInt(parseFloat(this.trade.amount) * 1000),
+                },
+                id: `${this.item.token}_ft_escrow`,
+                msg: `Giving ${this.item.set} mint token...`,
+                ops: ["getTokenUser"],
+                api: this.api,
+                txid: `${this.item.token}_ft_transfer_${this.trade.to}`,
+              }
+              this.$emit('tosign', toSign)
+        },
+        airdropFT() {
+            const toSign = {
+                type: "cja",
+                cj: {
+                    set: this.item.set,
+                    to: '["' + this.airdrop.to_array.join('","') + '"]'
+                },
+                id: `${this.item.token}_ft_airdrop`,
+                msg: `Airdropping ${this.item.set} mint tokens...`,
+                ops: ["getTokenUser"],
+                api: this.api,
+                txid: `${this.item.token}_ft_airdrop_${this.trade.to_string}`,
+              }
+              this.$emit('tosign', toSign)
+        },
+        sellFT() {
+            const toSign = {
+                type: "cja",
+                cj: {
+                    set: this.item.set,
+                    to: this.trade.to,
+                    price: parseInt(parseFloat(this.trade.amount) * 1000),
+                },
+                id: `${this.item.token}_ft_escrow`,
+                msg: `Giving ${this.item.set} mint token...`,
+                ops: ["getTokenUser"],
+                api: "https://spktest.dlux.io",
+                txid: `${this.item.token}_ft_transfer_${this.trade.to}`,
+              }
+              this.$emit('tosign', toSign)
+        },
         modalIndex() {
             this.$emit('detail', this.item.setname + ':' + this.item.uid);
         },
