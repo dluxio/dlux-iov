@@ -8,6 +8,7 @@ export default {
   },
   template: `
 <div>
+<!-- Extend -->
 <div class="modal fade" id="extend" :tabindex="i" role="dialog" aria-hidden="true">
 <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content bg-darker text-white">
@@ -30,6 +31,7 @@ export default {
     </div>
 </div>
 </div>
+<!-- Send -->
   <div class="modal fade" id="send" :tabindex="i" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content bg-darker text-white">
@@ -37,11 +39,32 @@ export default {
                   <h5 class="modal-title">Send {{token}}</h5> <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <form name="sendhive">
-                  <div class="modal-body"> <label class="small" for="sendhivefrom">From:</label>
-                      <div class="input-group mb-3"> <span class="input-group-text bg-dark border-dark text-secondary">@</span> <input class="form-control text-white bg-dark border-dark" type="text" placeholder="Please login" :value="account" readonly> </div> <label class="small" for="sendhiveto">To:</label>
-                      <div class="input-group mb-3"> <span class="input-group-text bg-dark border-dark text-secondary">@</span> <input @blur="accountCheck" class="form-control text-white bg-dark border-dark" type="text" placeholder="Payment recipient" v-model="to"> </div> <label class="small" for="sendAmount">Amount (Balance: <a href="#/" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
-                      <div class="input-group mb-3"> <input class="form-control text-white bg-dark border-dark" id="sendAmount" type="number" step="0.001" min="0.001" placeholder="Enter amount" v-model="amount"> <span class="input-group-text bg-dark border-dark text-secondary">{{token}}</span> </div> <label class="small" for="sendhivememo">Memo:</label>
-                      <div class="input-group mb-3"> <input class="form-control text-white bg-dark border-dark" type="text" placeholder="Include a memo (optional)" v-model="memo"> </div>
+                    <div class="modal-body">
+                      <label class="small" for="sendhivefrom">From:</label>
+                      <div class="position-relative mb-3">
+                        <span class="position-absolute top-50 translate-middle-y ps-2">
+                          <i class="fa-solid fa-at fa-fw"></i>
+                        </span>
+                        <input class="ps-4 form-control bg-dark border-dark" type="text" placeholder="Please login" :value="account" readonly>
+                      </div>
+                      <label class="small" for="sendhiveto">To:</label>
+                      <div class="position-relative mb-3">
+                        <span class="position-absolute top-50 translate-middle-y ps-2">
+                          <i class="fa-solid fa-at fa-fw"></i>
+                        </span>
+                        <input @blur="accountCheck" class="ps-4 form-control text-white bg-dark border-dark" type="text" placeholder="Payment recipient" v-model="to">
+                      </div>
+                      <label class="small" for="sendAmount">Amount (Balance: <a href="#/" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}):</label>
+                      <div class="position-relative mb-3">
+                        <input class="pe-5 form-control text-white bg-dark border-dark" id="sendAmount" type="number" step="0.001" min="0.001" placeholder="Enter amount" v-model="amount">
+                        <span class="position-absolute end-0 top-50 translate-middle-y px-2">
+                          DLUX
+                        </span>
+                      </div>
+                      <label class="small" for="sendhivememo">Memo:</label>
+                      <div class="input-group mb-3">
+                        <input class="form-control text-white bg-dark border-dark" type="text" placeholder="Include a memo (optional)" v-model="memo">
+                      </div>
                   </div>
                   <div class="modal-footer"> 
                   <div class="me-auto btn-group border border-info rounded px-2 py-1" role="group" aria-label="Transact on Mirror Network Only" v-if="token == 'SPK' || token == 'LARYNX'">
@@ -55,6 +78,7 @@ export default {
           </div>
       </div>
   </div>
+  <!-- Node Elect -->
   <div class="modal fade" id="elect" :tabindex="i" role="dialog" aria-hidden="true">
     <ul class="sortable-list">
       <li v-for="node in smarkets" class="item" draggable="true">
@@ -67,6 +91,7 @@ export default {
       </li>
     </ul>
   </div>
+  <!-- Delegation -->
   <div class="modal fade" id="delegate" :tabindex="i" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content bg-darker text-white">
@@ -95,6 +120,7 @@ export default {
           </div>
       </div>
   </div>
+  <!-- Power Up -->
   <div class="modal fade" id="power" tabindex="-1" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content bg-darker text-white">
@@ -182,6 +208,7 @@ export default {
           </div>
       </div>
   </div>
+  <!-- Create Contract -->
   <div class="modal fade" id="build" tabindex="-1" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content bg-darker text-white">
@@ -215,6 +242,7 @@ export default {
           </div>
       </div>
   </div>
+  <!-- Cancel / Remove -->
   <div class="modal fade" id="confirm" tabindex="-1" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
           <div class="modal-content bg-darker text-white">
