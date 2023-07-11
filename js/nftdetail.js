@@ -851,6 +851,9 @@ export default {
                 ops: ["getTokenUser"],
             });
         },
+        setPFP(){
+            
+        },
         modalIndex(name) {
             this.$emit('detail', name);
         },
