@@ -1,5 +1,8 @@
+import Bennies from "/js/bennies.js";
+
 export default {
     components: {
+        "bennies": Bennies
     },
     template: `<div class="modal fade" id="transferModal" tabindex="-1" role="dialog" aria-hidden="true">
 <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
@@ -187,10 +190,7 @@ export default {
                             </div>
                             <div v-if="sell.token != item.token">
                                 You can choose to have sells distributed to multiple accounts:
-                                <div v-for="account in sell.distro">
-                                <input type="text" class="form-control text-info bg-transparent" v-model="account.name" @blur="validateDistroAcc()">
-                                <input type="number" class="form-control text-info bg-transparent" v-model="account.percent" @change="validateDistro()">
-                                </div>
+                                <bennies :list="bens" @update-bennies="bens=$event"></bennies>
                             </div>
                             <div class="row mb-3">
                                 <p class="text-white-50 small">Ownership will be
@@ -428,6 +428,7 @@ export default {
                 to_array: [],
                 qty_each: 1,
             },
+            bens: [],
             airdropFeedback: 'Please enter at least one username to airdrop tokens to.',
             airdropAllowed: false,
             ftGiveFormValid: false,
