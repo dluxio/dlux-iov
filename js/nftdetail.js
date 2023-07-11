@@ -220,13 +220,13 @@ export default {
                                                                     <span class="input-group-text e-radius-hotfix m-0 p-0" id="sellNFTpriceappend">
                                                                         <select v-model="sell.token" class="form-select border-0 text-white-50 w-100 h-100"
                                                                         id="sellNFTpriceType" aria-label="Sell price type select">
-                                                                        <option :value="TOKEN">
-                                                                            {{TOKEN}}
+                                                                        <option :value="itemmodal.item.token">
+                                                                            {{toUpperCase(itemmodal.item.token)}}
                                                                         </option>
-                                                                        <option value="HIVE">
+                                                                        <option value="hive">
                                                                             HIVE
                                                                         </option>
-                                                                        <option value="HBD">
+                                                                        <option value="hbd">
                                                                             HBD
                                                                         </option>
                                                                         </select>
@@ -263,13 +263,13 @@ export default {
                                                                     <span class="input-group-text e-radius-hotfix m-0 p-0" id="auctionNFTpriceappend">
                                                                         <select v-model="auction.token" class="form-select border-0 text-white-50 w-100 h-100"
                                                                         id="auctionNFTpriceType" aria-label="Auction price type select">
-                                                                            <option :value="TOKEN" selected>
-                                                                                {{TOKEN}}
+                                                                            <option :value="itemmodal.item.token" selected>
+                                                                                {{toUpperCase(itemmodal.item.token)}}
                                                                             </option>
-                                                                            <option value="HIVE">
+                                                                            <option value="hive">
                                                                                 HIVE
                                                                             </option>
-                                                                            <option value="HBD">
+                                                                            <option value="hbd">
                                                                                 HBD
                                                                             </option>
                                                                         </select>
@@ -282,7 +282,7 @@ export default {
                                                             <div class="d-flex justify-content-around">
                                                                 <div class="form-row my-2 d-flex align-items-center">
                                                                     <label for="auctionNFTdays" class="m-0">Duration:</label>
-                                                                    <select v-model="auction.time" class="mx-2 btn btn-lg btn-secondary" id="auctionNFTdays" required>
+                                                                    <select v-model="auction.days" class="mx-2 btn btn-lg btn-secondary" id="auctionNFTdays" required>
                                                                         <option value="1">
                                                                             1 Day
                                                                         </option>
@@ -768,10 +768,41 @@ export default {
               console.log(toSign);
               this.$emit('tosign', toSign)
         },
-        tradeFT() { },
-        mintFT() { },
-        airdropFT() { },
-        sellFT() { },
+        tradeNFT() { },
+        sellNFT() { },
+        auctionNFT(){
+            if(this.auction.token == 'hive' || this.auction.token == "hbd") this.$emit('tosign', {
+                type: "cja",
+                cj: {
+                  set: this.itemmodal.item.setname,
+                  uid: this.itemmodal.item.uid,
+                  type: this.auction.token,
+                  price: this.auction.amount,
+                  time: this.auction.days,
+
+                },
+                id: `${this.itemmodal.item.token}_nft_hauction`,
+                txid: `hauction_${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
+                msg: `Auctioning ${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
+                api: "https://spktest.dlux.io",
+                ops: ["getTokenUser"],
+              });
+            else this.$emit('tosign', {
+                type: "cja",
+                cj: {
+                  set: this.itemmodal.item.setname,
+                  uid: this.itemmodal.item.uid,
+                  price: this.auction.amount,
+                  time: this.auction.days,
+
+                },
+                id: `${this.itemmodal.item.token}_nft_auction`,
+                txid: `hauction_${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
+                msg: `Auctioning ${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
+                api: "https://spktest.dlux.io",
+                ops: ["getTokenUser"],
+            });
+        },
         modalIndex(name) {
             this.$emit('detail', name);
         },
@@ -854,6 +885,9 @@ export default {
             if(this.itemmodal.index < this.itemmodal.items.length - 1) this.itemmodal.index = this.itemmodal.index + 1
             else this.itemmodal.index = 0
             this.itemmodal.item = this.itemmodal.items[this.itemmodal.index]
+        },
+        toUpperCase(str = "") {
+            return str.toUpperCase();
         }
     },
     mounted() {
