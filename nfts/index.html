@@ -286,7 +286,7 @@
                     <div class="dropdown">
                         <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown"
                             aria-expanded="false">
-                            {{'Sort by ' + (NFTselect.sort == 'price' ? 'Price: ' : 'Time: ') +  (NFTselect.dir == 'asc' ? 'Low to High' : 'High to Low')}}
+                            {{NFTselect.sort == 'uid' ? 'Sort' : ('Sort by ' + (NFTselect.sort == 'price' ? 'Price: ' : 'Time: ') +  (NFTselect.dir == 'asc' ? 'Low to High' : 'High to Low'))}}
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end bg-black">
                             <li>
