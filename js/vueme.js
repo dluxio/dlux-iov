@@ -127,7 +127,9 @@ var app = new Vue({
       transferTabTo: "",
       toSign: {},
       account: user,
-      focusItem: {},
+      focusItem: {
+        token: "dlux",
+      },
       FTtrades: [],
       NFTtrades: [],
       FTmenu: {

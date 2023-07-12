@@ -1288,7 +1288,7 @@
                 </div>
                 <!-- mint transfer modal -->
                 <div>
-                    <fttransfer :account="account" :item="focusItem" :mint="transferMint" @modal="modal($event)"
+                    <fttransfer :account="account" :item="focusItem" :mint="transferMint" @modal="modal($event)" :api="chains[focusItem.token].api"
                         @tosign="toSign = $event" />
                 </div>
 
