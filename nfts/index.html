@@ -123,7 +123,7 @@
                                         </div>
                                         <div class="mt-1 text-end">
                                             <button class="btn btn-outline-primary btn-sm" href="#buyTokenModal" class="a-1"
-                                                data-bs-toggle="modal">
+                                                data-bs-toggle="modal" @click="popDex(name)">
                                                 Get {{toUpperCase(name)}}
                                             </button>
                                         </div>
@@ -291,8 +291,7 @@
                 aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered" role="document" id="buy-modal">
                     <div class="modal-content">
-                        <form class="needs-validation" novalidate id="marketorderform"
-                            action="javascript:buyDEX('markethive.value','markethbd.value','marketqty.value','markettime.value')">
+                        <form class="needs-validation" novalidate id="marketorderform" @submit.prevent="dexBuy()">
                             <input id="markethbd" value="0" class="d-none">
                             <input id="marketqty" value="0" class="d-none">
                             <input id="markettime" value="0" class="d-none">
@@ -303,11 +302,9 @@
                             </div>
                             <div class="modal-body">
                                 <p class="small text-white-50">Market Orders utilize multisig to
-                                    complete partial fills of open orders on the <a href="/dex">DEX</a>, starting
+                                    complete partial fills of open orders on the <a :href="'/dex#' + marketorder.name">DEX</a>, starting
                                     with the lowest rate to ensure you're getting the best
                                     price.</p>
-                                <p class="small text-white-50"> If no orders are available, the
-                                    ICO price of 1 HIVE per 1 DLUX is in effect.</p>
                                 <div class="d-flex flex-column">
                                     <div class="d-flex flex-column flex-fill rounded-top p-3 bg-darker">
                                         <div class="d-flex flex-row flex-fill align-items-center">
@@ -317,7 +314,7 @@
                                                     <p class="my-0 text-white-50">Available<i
                                                             class="fab fa-hive mx-1"></i></p>
                                                     <p class="my-0 text-primary">
-                                                        balance
+                                                        {{ barhive }}
                                                     </p>
                                                 </div>
                                             </div>
@@ -332,15 +329,15 @@
                                             <div class="d-flex ms-auto flex-column">
                                                 <p class="ms-auto my-0 text-white-50 font-weight-bolder"
                                                     style="font-size: 30px;">
-                                                    <input class="form-control text-white"
+                                                    <input class="form-control text-white" v-model="marketorder.hive"
                                                         style="background-color: rgba(0,0,0,0.5); max-width: 150px"
                                                         id="markethive" value="1" placeholder="0" type="number"
-                                                        min="0.004" step="0.001" required
-                                                        max="accountapi.data.result[0].balance.split(' ')[0]">
+                                                        min="0.001" step="0.001" required @keyup="marketValue()"
+                                                        :max="parseFloat(barhive)">
                                                 </p>
                                                 <p class="ms-auto my-0 text-muted font-weight-bold"
                                                     style="font-size: 16px;">&asymp;
-                                                    hiveprice
+                                                    $ {{ marketorder.hive * hiveprice }} 
                                                 </p>
                                             </div>
                                         </div>
@@ -360,12 +357,12 @@
                                                     class="p-0 m-0 text-white-50 font-weight-light">
                                                     Rate</p>
                                                 <p style="font-size: 16px;" class="p-0 m-0 text-white-50 ms-auto">1 HIVE
-                                                    &asymp; amount DLUX</p>
+                                                    &asymp; {{1 / chains[marketorder.name].account.tick }} DLUX</p>
                                             </div>
                                             <div class="d-flex">
                                                 <p style="font-size: 12px;"
                                                     class="p-0 m-0 text-muted ms-auto text-success">
-                                                    1 DLUX &asymp; amount
+                                                    1 DLUX &asymp; {{chains[marketorder.name].account.tick}}
                                                     HIVE</p>
                                             </div>
                                             <hr width="100%" style="border: #333 thin solid">
@@ -379,7 +376,7 @@
                                                     &asymp;
                                                     <input id="marketfee" class="d-none"
                                                         value="((markethive.value/dexview1.data[0].rate)*0.001).formatNumber(3,'.',',')">
-                                                    fee DLUX
+                                                    {{ (marketorder.hive * .999 ) * chains[marketorder.name].account.tick}} DLUX
                                                 </p>
                                             </div>
                                         </div>
@@ -399,19 +396,16 @@
                                                 <div class="circle2 d-flex align-items-center justify-content-around">
                                                     <img src="/img/dlux-hive-logo-alpha.svg" width="70%">
                                                 </div>
-                                                <h2 class="p-0 m-0 ms-2 font-weight-bold">DLUX
+                                                <h2 class="p-0 m-0 ms-2 font-weight-bold">{{toUpperCase(marketorder.name)}}
                                                 </h2>
                                             </div>
                                             <div class="d-flex ms-auto">
                                                 <p class="ms-auto my-0 text-warning font-weight-bolder"
                                                     style="font-size: 30px;">&asymp;
-                                                    value
+                                                    {{ marketorder.value / 1000}}
                                                 </p>
                                             </div>
                                         </div>
-                                        <p class="pt-3">DLUX is your ticket to the metaverse.
-                                            Purchase NFTs, power-up to vote on proposals, and
-                                            use it across a variety of XR games and apps.</p>
                                     </div>
                                 </div>
                             </div>

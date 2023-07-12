@@ -81,6 +81,12 @@ var app = new Vue({
           }
         }
       },
+      marketorder: {
+        hive: 1,
+        name: 'dlux',
+        value: 1,
+        dex: []
+      },
       presales: [],
       displayNFTs: [],
       nowtime: new Date().getTime(),
@@ -1271,6 +1277,44 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         }
         return a;
       }, []);
+    },
+    dexBuy(){
+      this.toSign = {
+        type: "xfr",
+        cj: {
+          to: this.chains[this.marketorder.name].multisig,
+          hive: parseInt(this.marketorder.hive) * 1000,
+          memo: ``,
+        },
+        txid: "sendhive",
+        msg: `Market Order`,
+        api: this.chains[this.marketorder.name].api,
+        ops: ["getTokenUser"],
+      }
+    },
+    popDex(name){
+      this.marketorder.name = name
+      fetch(this.chains[name].api + "/dex")
+      .then(r => r.json())
+      .then(r => {
+        console.log(r.markets.hive.sells.sort((a,b) => this.parseFloat(a.rate) - this.parseFloat(b.rate)))
+        this.marketorder.dex = r.markets.hive.sells.sort((a,b) => this.parseFloat(a.rate) - this.parseFloat(b.rate))
+      })
+    },
+    marketValue(){
+      var hive = parseInt(this.marketorder.hive) * 1000
+      var value = 0
+      for(var i = 0; i < this.marketorder.dex.length; i++){
+        if(hive < this.marketorder.dex[i].hive){
+          value += parseInt(hive / this.marketorder.dex[i].rate)
+          break
+        } else {
+          value += parseInt(this.marketorder.dex[i].amount)
+          hive -= this.marketorder.dex[i].hive
+        }
+      }
+      console.log(value, hive)
+      this.marketorder.value = value
     },
     checkAccount(name, key) {
       fetch("https://anyx.io", {
