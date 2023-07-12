@@ -1302,7 +1302,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       })
     },
     marketValue(){
-      var hive = parseInt(this.marketorder.hive) * 1000
+      var hive = parseInt(this.marketorder.hive * 1000)
       var value = 0
       for(var i = 0; i < this.marketorder.dex.length; i++){
         if(hive < this.marketorder.dex[i].hive){
