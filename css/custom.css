@@ -12701,6 +12701,10 @@ td {
   box-shadow: 0 4px 2px -2px black;
 }
 
+.top-shadow {
+  box-shadow: 0 -6px 4px -5px black;
+}
+
 .max-160 {
   max-width: 160px;
 }
