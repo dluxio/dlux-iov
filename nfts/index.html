@@ -70,17 +70,12 @@
                     rgb(221, 169, 255),
                     rgb(162, 209, 255));
         }
-        .filter-bubble {
-            padding-top: 12px;
-            padding-bottom: 12px;
-            padding-left: 24px;
-            padding-right: 24px;
-        }
+        
     </style>
 </head>
 
 <body class="d-flex flex-column h-100 padme-t70 text-white" id="index">
-    <div id="app">
+    <div id="app" v-cloak>
         <div>
             <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
                 @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" @refresh="run($event)"
