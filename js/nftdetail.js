@@ -426,38 +426,37 @@ export default {
                                 </div>
                             </div>
                             <!-- NFT Bid -->
-                            <div class="accordion-item" v-if="itemmodal.item.owner == 'ah' || itemmodal.item.owner == 'hh'">
+                            <div class="accordion-item" v-if="itemmodal.item.auction">
                                 <h2 class="accordion-header">
                                     <button @click="auctionData('itemmodal')" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBid" aria-expanded="true" aria-controls="collapseBid">
                                     <i class="fas fa-comment-dollar me-3"></i><span>BID
                                     NOW</span><span
-                                    class="small ms-2">({{naiString(itemmodal.auction.price)}})</span>
+                                    class="small ms-2">({{naiString(itemmodal.item.price)}})</span>
                                     </button>
                                 </h2>
                                 <div id="collapseBid" class="accordion-collapse collapse show" data-bs-parent="#nftAccordion">
                                     <div class="accordion-body">
                                     <div class="d-flex align-self-end">
                                     <div
-                                        class="border border-warning rounded bg-darker col-12 p-4">
+                                        class="col-12">
                                         <div
                                             class="d-flex align-items-center justify-content-between">
                                             <div class="d-flex me-1">
                                                 <h4>Current
-                                                    Bid:{{naiString(itemmodal.auction.price)}}
+                                                    Bid:{{naiString(itemmodal.item.price)}}
                                                 </h4>
                                             </div>
                                             <div class="d-flex no-wrap ms-1"> <u>
                                                     <h4>
                                                         Number of
-                                                        Bids:{{itemmodal.auction.bids}}
+                                                        Bids:{{itemmodal.item.bids}}
                                                     </h4>
                                                 </u></div>
                                         </div>
-                                        <div class="pt-2">
-                                            <p class="text-uppercase text-muted">
-                                            </p>
+                                        <div class="">
+                                          
                                             <div class="d-flex justify-content-around">
-                                                <div class="d-flex align-items-center my-4">
+                                                <div class="d-flex align-items-center">
                                                     <div class="text-center p-4">
                                                         <h1 class="text-warning"
                                                             style="font-size: 4em">
@@ -466,40 +465,36 @@ export default {
                                                     </div>
                                                     <ul>
                                                         <li>Time Left:
-                                                            {{itemmodal.auction.time}}
+                                                            {{itemmodal.item.time}}
                                                         </li>
                                                         <li>Opening Price:
-                                                            {{naiString(itemmodal.auction.initial_price)}}
+                                                            {{naiString(itemmodal.item.initial_price)}}
                                                         </li>
                                                         <li>Seller:
-                                                            {{itemmodal.auction.by}}
+                                                            {{itemmodal.item.by}}
                                                         </li>
                                                         <li>Bidder:
-                                                            {{itemmodal.auction.bidder}}
+                                                            {{itemmodal.item.bidder}}
                                                         </li>
                                                         <li>Days:
-                                                            {{itemmodal.auction.days}}
+                                                            {{itemmodal.item.days}}
                                                         </li>
                                                     </ul>
                                                 </div>
                                             </div>
-                                            <div class="text-center pb-4">
-                                                <form class="needs-validation mt-4" novalidate>
-                                                    <label for="bidNFTprice">Bid</label>
-                                                    <div class="input-group">
+                                            <div >
+                                                <form class="needs-validation" novalidate>
+                                                    <label for="bidNFTprice" class="mb-1">Bid:</label>
+                                                    <div class="position-relative mb-3">
                                                         <input v-model="auction.amount"
                                                             type="number"
-                                                            class="form-control bg-dark border-dark text-info"
+                                                            class="pe-5 form-control bg-dark border-dark text-info"
                                                             id="auctionNFTprice"
-                                                            aria-describedby="bidNFTpriceappend"
-                                                            placeholder="0.001" step="0.001"
-                                                            :min="(itemmodal.auction.price.amount + (itemmodal.auction.bids ? 1 : 0))/ 1000"
+                                                            :placeholder="formatNumber(((itemmodal.item.price.amount/1000)+1),3,'.',',')" step="0.001"
+                                                            :min="(itemmodal.item.price.amount + (itemmodal.item.bids ? 1 : 0))/ 1000"
                                                             required>
-                                                        <div class="input-group-append">
-                                                            <span
-                                                                class="input-group-text bg-dark border-dark text-white-50 r-radius-hotfix m-0"
-                                                                id="bidNFTpriceappend">
-                                                                {{itemmodal.auction.price.token}}
+                                                            <span class="position-absolute top-50 end-0 translate-middle-y pe-3">
+                                                                {{toUpperCase(auction.token)}}
                                                             </span>
                                                             <div>
                                                                 <div class="invalid-feedback">
@@ -511,10 +506,11 @@ export default {
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    <div class="text-center">
                                                     <button @click="bidNFT(itemmodal.item)"
-                                                        type="button" class="btn btn-warning"
-                                                        data-bs-toggle="collapse" href="#/">Bid
+                                                        type="button" class="btn btn-primary">Bid
                                                     </button>
+                                                    </div>
                                                 </form>
                                             </div>
                                         </div>
