@@ -332,7 +332,7 @@
                                                     <input class="form-control text-white" v-model="marketorder.hive"
                                                         style="background-color: rgba(0,0,0,0.5); max-width: 150px"
                                                         id="markethive" value="1" placeholder="0" type="number"
-                                                        min="0.001" step="0.001" required @keyup="marketValue()"
+                                                        min="0.001" step="0.001" required @change="marketValue()" @keyup="marketValue()"
                                                         :max="parseFloat(barhive)">
                                                 </p>
                                                 <p class="ms-auto my-0 text-muted font-weight-bold"
