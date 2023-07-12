@@ -428,7 +428,7 @@ export default {
                       <!-- NFT Bid -->
                       <div class="accordion-item" v-if="itemmodal.item.auction">
                          <h2 class="accordion-header">
-                            <button @click="auctionData('itemmodal')" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBid" aria-expanded="true" aria-controls="collapseBid">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBid" aria-expanded="true" aria-controls="collapseBid">
                             <i class="fas fa-comment-dollar me-3"></i><span>BID
                             NOW</span><span
                                class="small ms-2">({{naiString(itemmodal.item.price)}})</span>
