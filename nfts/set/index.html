@@ -22,10 +22,10 @@
 
 
   <script>
-    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for(let registration of registrations) {
-            registration.unregister();
-        } 
+    navigator.serviceWorker.getRegistrations().then(function (registrations) {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
     });
 //         if ('serviceWorker' in navigator) {
 //             navigator
@@ -39,7 +39,7 @@
 //                     console.log('Registration Successful');
 //                 });
 //         }
-</script>
+  </script>
 </head>
 
 <body class="d-flex flex-column h-100 padme-t70 text-white" id="explore">
@@ -73,14 +73,17 @@
                 <!--info col-->
                 <div class="col-lg-4">
                   <div class="row mb-3">
-                    <h1 class="card-title text-center" v-cloak>{{chains[jsontoken].sets[setname].name_long ? chains[jsontoken].sets[setname].name_long : ''}}</h1>
+                    <h1 class="card-title text-center" v-cloak>{{chains[jsontoken].sets[setname].name_long ?
+                      chains[jsontoken].sets[setname].name_long : ''}}</h1>
                   </div>
                   <div class="row mb-3">
-                    <p class="m-0 text-center small">Created by <a :href="makeLink('/@',chains[jsontoken].sets[setname].author)"
-                        class="no-decoration" v-cloak>@{{chains[jsontoken].sets[setname].author}}</a></p>
+                    <p class="m-0 text-center small">Created by <a
+                        :href="makeLink('/@',chains[jsontoken].sets[setname].author)" class="no-decoration"
+                        v-cloak>@{{chains[jsontoken].sets[setname].author}}</a></p>
                   </div>
                   <div class="row mb-3">
-                    <p class="text-white-50 m-0" v-cloak>{{chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.Description
+                    <p class="text-white-50 m-0" v-cloak>{{chains[jsontoken].sets[setname].computed.set ?
+                      chains[jsontoken].sets[setname].computed.set.Description
                       : '...'}}</p>
                   </div>
                   <div class="d-flex justify-content-between align-items-center mb-3">
@@ -91,7 +94,8 @@
                     <div class="col-6">
                       <span class="small border border-secondary rounded text-white px-2 py-1" v-cloak>BOND:
                         {{chains[jsontoken].sets[setname].bond ? precision(chains[jsontoken].sets[setname].bond.amount,
-                        chains[jsontoken].sets[setname].bond.precision) : 0 }} {{chains[jsontoken].sets[setname].bond ? chains[jsontoken].sets[setname].bond.token :
+                        chains[jsontoken].sets[setname].bond.precision) : 0 }} {{chains[jsontoken].sets[setname].bond ?
+                        chains[jsontoken].sets[setname].bond.token :
                         ''}}</span>
                     </div>
                   </div>
@@ -106,7 +110,8 @@
                         </a>
                         <div
                           class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
-                          <h6 class="dropdown-header text-center" v-cloak>{{chains[jsontoken].sets[setname].name}} NFT STATS</h6>
+                          <h6 class="dropdown-header text-center" v-cloak>{{chains[jsontoken].sets[setname].name}} NFT
+                            STATS</h6>
                           <div class="dropdown-divider bg-light"></div>
                           <p class="mb-0" v-cloak>Type: {{chains[jsontoken].sets[setname].type}}</p>
                           <div class="dropdown-divider bg-light"></div>
@@ -115,7 +120,8 @@
                           <p class="mb-0" v-cloak>Fee: {{naiString(chains[jsontoken].sets[setname].fee)}}</p>
                           <div class="dropdown-divider bg-light"></div>
                           <p class="mb-0">Script:</p>
-                          <p class="mb-0" style="max-width: 250px;" v-cloak>{{chains[jsontoken].sets[setname].script}}</p>
+                          <p class="mb-0" style="max-width: 250px;" v-cloak>{{chains[jsontoken].sets[setname].script}}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -134,14 +140,16 @@
                     -->
                     <div class="col-6 col-lg-3 d-flex text-center flex-column p-2">
                       <div>
-                        <h3 class="mb-0" v-cloak><i class="fa-solid fa-user-astronaut me-1"></i>{{chains[jsontoken].sets[setname].owners}}
+                        <h3 class="mb-0" v-cloak><i
+                            class="fa-solid fa-user-astronaut me-1"></i>{{chains[jsontoken].sets[setname].owners}}
                         </h3>
                       </div>
                       <div>owners</div>
                     </div>
                     <div class="col-6 col-lg-3 d-flex text-center flex-column p-2">
                       <div>
-                        <h3 class="mb-0" v-cloak><i class="fa-solid fa-star me-1"></i>{{chains[jsontoken].sets[setname].minted -
+                        <h3 class="mb-0" v-cloak><i
+                            class="fa-solid fa-star me-1"></i>{{chains[jsontoken].sets[setname].minted -
                           chains[jsontoken].sets[setname].deleted}}</h3>
                       </div>
                       <div>items</div>
@@ -172,22 +180,24 @@
                     <div class="progress bg-secondary mb-3" style="height: 40px;">
                       <!--burned-->
                       <div class="progress-bar" style="background-color: rgb(133, 64, 64);" role="progressbar"
-                        :style="{'width': ((chains[jsontoken].sets[setname].deleted/chains[jsontoken].sets[setname].max)*100) + '%'}" aria-valuenow="0"
-                        aria-valuemin="0" aria-valuemax="100">
+                        :style="{'width': ((chains[jsontoken].sets[setname].deleted/chains[jsontoken].sets[setname].max)*100) + '%'}"
+                        aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                         <span><i class="me-1 fa-solid fa-fire"></i></span>
-                        <span v-cloak>{{formatNumber(((chains[jsontoken].sets[setname].deleted/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
+                        <span
+                          v-cloak>{{formatNumber(((chains[jsontoken].sets[setname].deleted/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
                       </div>
                       <!--opened-->
                       <div class="progress-bar" style="background-color: rgb(60, 60, 138);" role="progressbar"
                         :style="{'width': (((chains[jsontoken].sets[setname].minted-chains[jsontoken].sets[setname].deleted)/chains[jsontoken].sets[setname].max)*100) + '%'}"
                         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                         <span><i class="me-1 fa-solid fa-box-open"></i></span>
-                        <span v-cloak>{{formatNumber(((chains[jsontoken].sets[setname].minted/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
+                        <span
+                          v-cloak>{{formatNumber(((chains[jsontoken].sets[setname].minted/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
                       </div>
                       <!--closed-->
                       <div class="progress-bar" style="background-color: rgb(50, 94, 50);" role="progressbar"
-                        :style="{'width': (((chains[jsontoken].sets[setname].max-chains[jsontoken].sets[setname].minted)/chains[jsontoken].sets[setname].max)*100) + '%'}" aria-valuenow="0"
-                        aria-valuemin="0" aria-valuemax="100">
+                        :style="{'width': (((chains[jsontoken].sets[setname].max-chains[jsontoken].sets[setname].minted)/chains[jsontoken].sets[setname].max)*100) + '%'}"
+                        aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                         <span><i class="me-1 fa-solid fa-box"></i></span>
                         <span
                           v-cloak>{{formatNumber((((chains[jsontoken].sets[setname].max-chains[jsontoken].sets[setname].minted)/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
@@ -209,7 +219,8 @@
                       </div>
                       <div v-cloak class="col-3 p-2 d-flex flex-column">
                         <h5 class="mb-1"><i class="fa-solid fa-boxes-stacked"></i></h4><span
-                            class="mb-2 small">total</span> <span>{{formatNumber(chains[jsontoken].sets[setname].max,0,'.',',')}}</span>
+                            class="mb-2 small">total</span>
+                          <span>{{formatNumber(chains[jsontoken].sets[setname].max,0,'.',',')}}</span>
                       </div>
                     </div>
                   </div>
@@ -222,14 +233,17 @@
                       <div class="pr-2"><small>MINT MARKET: </small></div>
                       <div class="px-2">
                         <h2 class="m-0">
-                          <div>{{formatNumber((chains[jsontoken].sets[setname].forAuctionMint + chains[jsontoken].sets[setname].forSaleMint),0,'.',',')}}
+                          <div>{{formatNumber((chains[jsontoken].sets[setname].forAuctionMint +
+                            chains[jsontoken].sets[setname].forSaleMint),0,'.',',')}}
                           </div>
                         </h2>
                       </div>
                     </div>
                   </div>
-                  <ul :id="chains[jsontoken].sets[setname].set + '-mint-tabnav'" class="nav nav-tabs mt-3" role="tablist">
-                    <li class="nav-item p-0"> <a class="nav-link active" :href="'#' + chains[jsontoken].sets[setname].set + '-mint-salestab'"
+                  <ul :id="chains[jsontoken].sets[setname].set + '-mint-tabnav'" class="nav nav-tabs mt-3"
+                    role="tablist">
+                    <li class="nav-item p-0"> <a class="nav-link active"
+                        :href="'#' + chains[jsontoken].sets[setname].set + '-mint-salestab'"
                         :id="chains[jsontoken].sets[setname].set + '-mint-saleslink'" role="tab" data-bs-toggle="tab"
                         aria-controls="mintsalestab" aria-expanded="true">
                         <div class="d-flex align-items-center">
@@ -239,8 +253,9 @@
                           </div>
                         </div>
                       </a></li>
-                    <li class="nav-item p-0"> <a class="nav-link" :href="'#'+ chains[jsontoken].sets[setname].set + '-mint-auctionstab'"
-                        role="tab" :id="chains[jsontoken].sets[setname].set + '-mint-auctionslink'" data-bs-toggle="tab"
+                    <li class="nav-item p-0"> <a class="nav-link"
+                        :href="'#'+ chains[jsontoken].sets[setname].set + '-mint-auctionstab'" role="tab"
+                        :id="chains[jsontoken].sets[setname].set + '-mint-auctionslink'" data-bs-toggle="tab"
                         aria-controls="mintauctionstab">
                         <div class="d-flex align-items-center">
                           <div>AUCTIONS</div>
@@ -252,8 +267,8 @@
                   </ul>
 
                   <div :id="chains[jsontoken].sets[setname].set + '-mint-tabs'" class="tab-content bg-darkest">
-                    <div :id="chains[jsontoken].sets[setname].set + '-mint-salestab'" role="tabpanel" class="tab-pane fade show active"
-                      aria-labelledby="mintsalestab">
+                    <div :id="chains[jsontoken].sets[setname].set + '-mint-salestab'" role="tabpanel"
+                      class="tab-pane fade show active" aria-labelledby="mintsalestab">
                       <table class="table table-sm table-dark">
                         <thead>
                           <tr>
@@ -300,8 +315,8 @@
                         </tbody>
                       </table>
                     </div>
-                    <div role="tabpanel" class="tab-pane fade show" :id="chains[jsontoken].sets[setname].set + '-mint-auctionstab'"
-                      aria-labelledby="mintauctionstab">
+                    <div role="tabpanel" class="tab-pane fade show"
+                      :id="chains[jsontoken].sets[setname].set + '-mint-auctionstab'" aria-labelledby="mintauctionstab">
                       <table class="table table-sm table-dark bg-none">
                         <thead>
                           <tr>
@@ -366,11 +381,13 @@
                     <h5 v-if="getMint(chains[jsontoken].sets[setname].set, 'qty') > 0">Unwrap to see what's inside.</h5>
                   </div>
 
-                  <div class="d-flex flex-wrap justify-content-between" v-if="getMint(chains[jsontoken].sets[setname].set, 'qty') > 0">
+                  <div class="d-flex flex-wrap justify-content-between"
+                    v-if="getMint(chains[jsontoken].sets[setname].set, 'qty') > 0">
                     <button type="button" class="btn btn-outline-light me-auto ms-auto mt-1" @click=""
                       oldclick="unwrap custom json">Open<i class="fas fa-box-open ms-3"></i></button>
                     <button type="button" class="btn btn-outline-light me-auto ms-auto mt-1" data-bs-toggle="modal"
-                      data-bs-target="#mintTransferModal" @click="mint_detail.set = chains[jsontoken].sets[setname].set">Transfer<i
+                      data-bs-target="#mintTransferModal"
+                      @click="mint_detail.set = chains[jsontoken].sets[setname].set">Transfer<i
                         class="fas fa-exchange-alt ms-3"></i></button>
                   </div>
 
@@ -381,262 +398,6 @@
         </div>
 
 
-        <div class="modal fade" id="mintTransferModal" tabindex="-1" role="dialog" aria-hidden="true">
-          <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-            <div class="modal-content bg-dark text-white">
-              <div class="border border-info bg-darker mx-auto px-5 py-3 rounded col-12">
-                <div class="container-fluid">
-                  <h3 class="text-center">Transfer {{mint_detail.set}} FT</h3>
-                  <ul class="nav nav-pills bg-darker justify-content-center">
-                    <li class="nav-item"> <a class="nav-link active" id="giveFTlink" role="tab" data-bs-toggle="tab"
-                        aria-controls="giveFT" aria-expanded="true" href="#giveFTtab">Give</a></li>
-                    <li class="nav-item"> <a class="nav-link" id="tradeFTlink" role="tab" data-bs-toggle="tab"
-                        aria-controls="tradeFT" aria-expanded="true" href="#tradeFTtab">Trade</a></li>
-                    <li class="nav-item"> <a class="nav-link" id="sellFTlink" role="tab" data-bs-toggle="tab"
-                        aria-controls="sellFT" aria-expanded="true" href="#sellFTtab">Sell</a></li>
-                    <li class="nav-item"> <a class="nav-link" id="auctionFTlink" role="tab" data-bs-toggle="tab"
-                        aria-controls="auctionFT" aria-expanded="true" href="#auctionFTtab">Auction</a></li>
-                    <li class="nav-item"> <a class="nav-link" id="airdropFTlink" role="tab" data-bs-toggle="tab"
-                        aria-controls="airdropFT" aria-expanded="true" href="#airdropFTtab">Airdrop</a></li>
-                  </ul>
-                  <div class="tab-content">
-                    <div role="tabpanel" class="tab-pane fade show active" id="giveFTtab" aria-labelledby="giveFT">
-                      <form class="needs-validation mt-4" @action="giveFT()" novalidate>
-                        <div class="row mb-3">
-                          <label for="giveFTusername" class="form-label">Username</label>
-                          <div class="input-group">
-                            <span class="input-group-text bg-darkg border-dark text-white-50">@</span>
-                            <input type="text" class="form-control bg-darkg border-dark text-info r-radius-hotfix"
-                              v-model="giveFTusername" aria-describedby="giveFTuserprep" required>
-                            <div class="invalid-feedback"> Please enter the username
-                              you'd like to give to. </div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="giveFTqty" class="form-label">Quantity</label>
-                          <div class="input-group">
-                            <input type="number" class="form-control bg-darkg border-dark text-info " v-model="giveFTqty"
-                              aria-describedby="giveFTqtyappend" value="1" step="1" min="1" required>
-                            <span class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50 "
-                              id="giveFTqtyappend">{{mint_detail.set}} FT</span>
-                            <div class="invalid-feedback"> Please enter the number of
-                              FTs to send. </div>
-                          </div>
-                        </div>
-
-                        <div class="text-center">
-                          <button id="giveFTbutton" class="btn btn-info" @click="giveFT()" type="submit">Give</button>
-                        </div>
-                      </form>
-                    </div>
-                    <div role="tabpanel" class="tab-pane fade show " id="tradeFTtab" aria-labelledby="tradeFT">
-                      <form class="needs-validation mt-4" novalidate>
-                        <div class="row mb-3">
-                          <label for="tradeFTusername" class="form-label">Username</label>
-                          <div class="input-group">
-                            <span class="input-group-text bg-darkg border-dark text-white-50"
-                              id="tradeFTuserprep">@</span>
-                            <input type="text" class="form-control r-radius-hotfix bg-darkg border-dark text-info "
-                              id="tradeFTusername" aria-describedby="tradeFTuserprep" v-model="tradeTo" required>
-                            <div class="invalid-feedback"> Please enter the username
-                              you'd like to trade with. </div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <!-- <div class="col-6">
-                            <label for="tradeFTqty" class="form-label">Quantity</label>
-                            <div class="input-group">
-                              <input type="number" class="form-control bg-darkg border-dark text-info " v-model="tradeQty" id="tradeFTqty"
-                                aria-describedby="tradeFTqtyappend" placeholder="1" step="1" min="1" required readonly>
-                              <span class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
-                                id="tradeFTqtyappend">{{mint_detail.set}} FT</span>
-                              <div class="invalid-feedback"> Please enter the number
-                                of FTs to trade. </div>
-                            </div>
-                          </div> -->
-                          <div class="col-6">
-                            <label for="tradeFTamount" class="form-label">Amount</label>
-                            <div class="input-group">
-                              <input type="number" class="form-control bg-darkg border-dark text-info " v-model="tradePrice"
-                                id="tradeFTamount" aria-describedby="tradeFTamountappend" placeholder="0.000"
-                                step="0.001" min="0.001" required>
-                              <span class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
-                                id="tradeFTamountappend">DLUX</span>
-                              <div class="invalid-feedback"> Please enter the amount
-                                of DLUX you'd like to receive. </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="text-center">
-                          <button id="tradeFTbutton" class="btn btn-info my-2" @click="tradeFT(mint_detail.set)">Propose Trade</button>
-                        </div>
-                      </form>
-                    </div>
-                    <div role="tabpanel" class="tab-pane fade show " id="sellFTtab" aria-labelledby="sellFT">
-                      <form class="needs-validation mt-4" novalidate>
-                        <!--:action="javascript:sellFT('{{mint_detail.data.set}}','{{sellFTprice.value}}')"-->
-                        <div class="row mb-3">
-                          <div class="col-6">
-                            <label for="sellFTqty" class="form-label">Quantity</label>
-                            <div class="input-group">
-                              <input type="number" class="form-control bg-darkg border-dark text-info" id="sellFTqty"
-                                aria-describedby="sellFTqtyappend" placeholder="1" step="1" min="1" required readonly>
-                              <span class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
-                                id="sellFTqtyappend">{{mint_detail.set}} FT</span>
-                              <div class="invalid-feedback"> Please enter the number
-                                of FTs to sell. </div>
-                            </div>
-                          </div>
-                          <div class="col-6">
-                            <label for="sellFTprice" class="form-label">Sale
-                              Price</label>
-                            <div class="input-group">
-                              <input type="number" class="form-control bg-darkg border-dark text-info" id="sellFTprice"
-                                aria-describedby="sellFTpriceappend" placeholder="0.000" step="0.001" min="0.001"
-                                required>
-                              <span class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
-                                id="sellFTpriceappend">DLUX</span>
-                              <div class="invalid-feedback"> Please enter the amount
-                                of DLUX you'd like to receive. </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <p class="text-white-50 small">Ownership will be transferred to
-                            the DAO listing service and sold publicly. Cancel anytime to
-                            return immediately.</p>
-                        </div>
-                        <div class="text-center">
-                          <button id="sellFTbutton" class="btn btn-info my-2" type="submit">List Item</button>
-                        </div>
-                      </form>
-                    </div>
-                    <div role="tabpanel" class="tab-pane fade show " id="auctionFTtab" aria-labelledby="auctionFT">
-                      <form class="needs-validation mt-4" novalidate>
-                        <!--:action="javascript:auctionFT('{{mint_detail.data.set}}','{{auctionFTprice.value}}','{{Date.now()}}','{{auctionFTdays.value}}'),'{{auctionFTpriceType.value}}'"-->
-                        <div class="row mb-3">
-                          <div class="col-6">
-                            <label for="auctionFTqty" class="form-label">Quantity</label>
-                            <div class="input-group">
-                              <input type="number" class="form-control bg-darkg border-dark text-info" id="auctionFTqty"
-                                aria-describedby="auctionFTqtyappend" placeholder="1" step="1" min="1" required
-                                readonly>
-                              <span class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
-                                id="auctionFTqtyappend">{{mint_detail.set}}
-                                FT</span>
-                              <div class="invalid-feedback"> Please enter the number
-                                of FTs to auction. </div>
-                            </div>
-                          </div>
-                          <div class="col-6">
-                            <label for="auctionFTprice" class="form-label">Starting
-                              Bid</label>
-                            <div class="input-group">
-                              <input type="number" class="form-control bg-darkg border-dark text-info"
-                                id="auctionFTprice" aria-describedby="auctionFTpriceappend" placeholder="0.000"
-                                step="0.001" min="0.001" required>
-                              <span class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
-                                id="auctionFTqtyappend">DLUX</span>
-                              <div class="invalid-feedback"> Please enter the amount
-                                of DLUX you'd like to start the bidding. </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="d-flex justify-content-around">
-                          <div class="row mb-3 d-flex align-items-center">
-                            <label for="auctionFTdays" class="form-label">Duration</label>
-                            <select class="mx-2 btn btn-lg btn-secondary" class="form-control" id="auctionFTdays"
-                              required>
-                              <option value="1">1 Day</option>
-                              <option value="2">2 Days</option>
-                              <option value="3">3 Days</option>
-                              <option value="4">4 Days</option>
-                              <option value="5">5 Days</option>
-                              <option value="6">6 Days</option>
-                              <option value="7" selected>7 Days</option>
-                              <option value="8">8 Days</option>
-                              <option value="9">9 Days</option>
-                              <option value="10">10 Days</option>
-                              <option value="11">11 Days</option>
-                              <option value="12">12 Days</option>
-                              <option value="13">13 Days</option>
-                              <option value="14">14 Days</option>
-                              <option value="15">15 Days</option>
-                              <option value="16">16 Days</option>
-                              <option value="17">17 Days</option>
-                              <option value="18">18 Days</option>
-                              <option value="19">19 Days</option>
-                              <option value="20">20 Days</option>
-                              <option value="21">21 Days</option>
-                              <option value="22">22 Days</option>
-                              <option value="23">23 Days</option>
-                              <option value="24">24 Days</option>
-                              <option value="25">25 Days</option>
-                              <option value="26">26 Days</option>
-                              <option value="27">27 Days</option>
-                              <option value="28">28 Days</option>
-                              <option value="29">29 Days</option>
-                              <option value="30">30 Days</option>
-                            </select>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <p class="text-white-50 small">Ownership will be transferred to
-                            the DAO listing service and auctioned publicly. Once
-                            submitted this cannot be cancelled. If there are no bids at
-                            the end of the auction period, it will be returned to you
-                            immediately.</p>
-                        </div>
-                        <div class="text-center">
-                          <button class="btn btn-info my-2" type="submit">List
-                            Item</button>
-                        </div>
-                      </form>
-                    </div>
-                    <div role="tabpanel" class="tab-pane fade show " id="airdropFTtab" aria-labelledby="airdropFT">
-                      <form class="needs-validation mt-4" novalidate>
-                        <!--:action="javascript:airdropFT('{{mint_detail.data.set}}','{{airdropFTusers.value}}')"-->
-                        <div class="row mb-3">
-                          <div class="col-12">
-                            <label for="airdropFTusers" class="form-label">Airdrop
-                              to</label>
-                            <div class="input-group">
-                              <textarea name="paragraph_text" cols="50" rows="2"
-                                class="form-control r-radius-hotfix bg-darkg border-dark text-info" id="airdropFTusers"
-                                aria-describedby="airdropFT" required placeholder="name user-name"></textarea>
-                              <div class="invalid-feedback"> Please enter at least one
-                                user name to airdrop tokens to. </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <div class="col-12">
-                            <label for="airdropFTqty" class="form-label">Quantity sent
-                              to each</label>
-                            <div class="input-group">
-                              <input type="number" class="form-control bg-darkg border-dark text-info" id="airdropFTqty"
-                                aria-describedby="airdropFTqtyappend" placeholder="1" step="1" min="1" required
-                                readonly>
-                              <span class="input-group-text r-radius-hotfix bg-darkg border-dark text-white-50"
-                                id="airdropFTqtyappend">{{mint_detail.set}}
-                                FT</span>
-                              <div class="invalid-feedback"> Please enter the number
-                                of FTs to send to each account. </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="text-center">
-                          <button class="btn btn-info my-2" type="submit">Airdrop
-                            Tokens</button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
         <div class="row">
           <!--filters-->
@@ -970,576 +731,163 @@
             </div>
           </div>
         </div>
-        <!--new item modal-->
-        <div class="modal fade " id="itemModal" v-show="!itemModal.hidden" tabindex="-1" role="dialog"
-          aria-hidden="true">
-          <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
-            <div class="modal-content bg-dark text-white">
-              <div class="card text-white bg-dark ">
-                <div class="card-header border-0 d-flex align-items-center justify-content-between"
-                  :style="{'background': getSetDetailsColors(chains[jsontoken].sets[setname].computed ? chains[jsontoken].sets[setname].computed : '')}">
-                  <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
-                    <h2 class="m-0 px-2">{{itemModal.item.uid}}</h2>
-                  </div>
-                  <h3 class="card-title lead border border-dark rounded p-2 mb-0"><a class="no-decoration"
-                      :href="'/nfts/set/'+ itemModal.item.setname" style="color:black;">{{itemModal.item.setname}}
-                      NFT</a></h3>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="card-body row d-flex ">
-                  <!-- NFT detail col 1 -->
-                  <div class="col-lg-6 px-0 px-sm-2">
-                    <div class="col-12 px-0 px-sm-2">
-                      <!-- NFT img -->
-                      <div class="card-img-top" :alt="makeLink(itemModal.item.setname, '-', ['itemModal.item.uid'])">
-                        <div v-html="itemModal.item.HTML"></div>
-                        <!--back forward btns-->
-                        <div class="card-footer d-flex align-items-center">
-                          <h2><a class="text-muted p-3" href="#/" @click="modalPrev('itemModal')"
-                              :class="{'invisible':!itemModal.index}"><i class="fas fa-caret-square-left"></i></a></h2>
-                          <small class="ms-auto text-muted"><i>Item {{itemModal.index + 1}} of
-                              {{NFTselect.auctionOnly || NFTselect.saleOnly || NFTselect.sort == 'price' ||
-                              NFTselect.searchTerm ? allSearchNFTs.length : allNFTs.length}}</i></small>
-                          <h2 class="ms-auto"><a class="text-muted p-3" href="#/" @click="modalNext('itemModal')"><i
-                                class="fas fa-caret-square-right"></i></a></h2>
-                        </div>
-                      </div>
-                    </div>
 
-                  </div>
-                  <!-- NFT detail col 2 -->
-                  <div class="col-lg-6 px-0 px-sm-2">
-                    <!--pfp-->
-                    <div class="text-center my-3" v-if="itemModal.item.owner == account">
-                      <button @click="setPFP(itemModal.item)" class="btn btn-lg btn-outline-primary" v-if="dataAPI && itemModal.item.uid != pfp.uid"><i
-                          class="far fa-user-circle me-2"></i>Set as
-                        PFP
-                      </button>
-                      <button class="btn btn-lg btn-secondary"
-                        v-if="itemModal.item.uid == pfp.uid && itemModal.item.setname == pfp.set"><i
-                          class="far fa-user-circle me-2"></i>Currently set as
-                        your
-                        PFP
-                      </button>
-                    </div>
-                    <!-- NFT Accordion -->
-                    <div id="accordion" class="col-12 px-0 px-sm-2">
-                      <!-- NFT DESCRIPTION -->
-                      <div class="card bg-dark text-white">
-                        <div class="card-header" id="headingDescription">
-                          <h5 class="mb-0">
-                            <button class="btn btn-link text-primary no-decoration" data-bs-toggle="collapse"
-                              data-bs-target="#collapseDescription" aria-expanded="true"
-                              aria-controls="collapseDescription"><i class="fas fa-list me-3"></i>DESCRIPTION</button>
-                          </h5>
-                        </div>
-                        <div id="collapseDescription" class="collapse" aria-labelledby="headingDescription"
-                          data-parent="#accordion">
-                          <div class="card-body">
-                            <p>{{itemModal.item.set.Description}}</p>
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- NFT ATTRIBUTES -->
-                      <div class="card bg-dark text-white">
-                        <div class="card-header" id="headingAttributes">
-                          <h5 class="mb-0">
-                            <button class="btn btn-link collapsed text-success no-decoration" data-bs-toggle="collapse"
-                              data-bs-target="#collapseAttributes" aria-expanded="false"
-                              aria-controls="collapseAttributes"><i class="fas fa-star me-3"></i>ATTRIBUTES </button>
-                          </h5>
-                        </div>
-                        <div id="collapseAttributes" class="collapse" aria-labelledby="headingAttributes"
-                          data-parent="#accordion">
-                          <div class="card-body">
-                            <div class="d-flex flex-wrap">
-                              <div v-for="thing in itemModal.item.attributes"
-                                class="border border-white rounded d-flex mx-2 my-2">
-                                <div v-for="(value, key, index) in thing" class="p-2">
-                                  <div class="">{{key}}:</div>
-                                  <div class="">{{value}}</div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- TRANSFER NFT -->
-                      <div class="card bg-dark text-white" style="width: 100" v-if="itemModal.item.owner == account">
-                        <div class="card-header" id="headingMarket">
-                          <h5 class="mb-0">
-                            <button class="btn btn-link collapsed text-info no-decoration" data-bs-toggle="collapse"
-                              data-bs-target="#collapseMarket" aria-expanded="false" aria-controls="collapseMarket"><i
-                                class="fas fa-exchange-alt me-3"></i>TRANSFER</button>
-                          </h5>
-                        </div>
-                        <div id="collapseMarket" class="collapse" aria-labelledby="headingMarket"
-                          data-parent="#accordion">
-                          <!-- <div class="card-body bg-dark text-white-50 text-center"
-                            v-if="itemModal.item.owner != account">
-                            <p>You don't own this NFT</p>
-                          </div> -->
-                          <div class="card-body p-0 bg-dark text-white">
-                            <div class="border-warning border rounded p-3 my-3"
-                              v-if="itemModal.item.uid == pfp.uid  && itemModal.item.setname == pfp.set">
-                              <p class="text-warning m-0">Transferring this NFT will remove it from your PFP</p>
-                            </div>
-                            <div class="border border-info bg-darker mx-auto px-5 py-3 rounded col-12">
-                              <div class="container-fluid">
-                                <ul class="nav nav-pills bg-darker justify-content-center" role="tablist">
-                                  <li class="nav-item"> <a class="nav-link active" id="giveNFTlink" role="tab"
-                                      data-bs-toggle="tab" aria-controls="giveNFT" aria-expanded="true"
-                                      href="#giveNFTtab">Give</a></li>
-                                  <li class="nav-item"> <a class="nav-link" id="tradeNFTlink" role="tab"
-                                      data-bs-toggle="tab" aria-controls="tradeNFT" aria-expanded="true"
-                                      href="#tradeNFTtab">Trade</a></li>
-                                  <li class="nav-item"> <a class="nav-link" id="sellNFTlink" role="tab"
-                                      data-bs-toggle="tab" aria-controls="sellNFT" aria-expanded="true"
-                                      href="#sellNFTtab">Sell</a></li>
-                                  <li class="nav-item"> <a class="nav-link" id="auctionNFTlink" role="tab"
-                                      data-bs-toggle="tab" aria-controls="auctionNFT" aria-expanded="true"
-                                      href="#auctionNFTtab">Auction</a></li>
-                                </ul>
-                                <div class="tab-content">
-                                  <div role="tabpanel" class="tab-pane fade show active" id="giveNFTtab"
-                                    aria-labelledby="giveNFT">
-                                    <form class="needs-validation mt-4" validate>
-                                      <div class="form-row my-2">
-                                        <div class="col-12">
-                                          <label for="giveNFTusername">Username</label>
-                                          <div class="input-group">
-                                            <div class="input-group-prepend"> <span
-                                                class="input-group-text bg-dark border-dark text-white-50"
-                                                id="giveNFTuserprep">@</span></div>
-                                            <input v-model="nftTradeTabTo"
-                                              @blur="checkAccount(nftTradeTabTo, 'nftTradeAllowed')" type="text"
-                                              class="form-control bg-dark border-dark text-info r-radius-hotfix"
-                                              id="giveNFTusername" aria-describedby="giveNFTuserprep" required>
-                                            <div class="invalid-feedback"> Please enter the username you'd like to give
-                                              to.
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div class="text-center">
-                                        <button @click="giveNFT(itemModal.item)" id="giveNFTbutton"
-                                          class="btn btn-info my-2" type="submit">Give</button>
-                                      </div>
-                                    </form>
-                                  </div>
-                                  <div role="tabpanel" class="tab-pane fade show" id="tradeNFTtab"
-                                    aria-labelledby="tradeNFT">
-                                    <form class="needs-validation mt-4" validate>
-                                      <div class="form-row my-2">
-                                        <div class="col-12">
-                                          <label for="tradeNFTusername">Username</label>
-                                          <div class="input-group">
-                                            <div class="input-group-prepend"> <span
-                                                class="input-group-text bg-dark border-dark text-white-50"
-                                                id="tradeNFTuserprep">@</span></div>
-                                            <input type="text" v-model="nftTradeTabTo"
-                                              @blur="checkAccount(nftTradeTabTo, 'nftTradeAllowed')"
-                                              class="form-control bg-dark border-dark text-info r-radius-hotfix"
-                                              id="tradeNFTusername" aria-describedby="tradeNFTuserprep" required>
-                                            <div class="invalid-feedback"> Please enter the username you'd like to trade
-                                              with.
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div class="form-group form-row my-2">
-                                        <label for="tradeNFTamount">Amount</label>
-                                        <small v-if="nftTradeTabToken == TOKEN"
-                                          class="ms-auto mb-2 align-self-center text-white-50">0% FEE</small>
-                                        <small v-else class="ms-auto mb-2 align-self-center text-white-50">1%
-                                          FEE</small>
-                                        <div class="input-group">
-                                          <input v-model="nftTradeTabPrice" type="number"
-                                            class="form-control bg-dark border-dark text-info" id="tradeNFTamount"
-                                            aria-describedby="tradeNFTamountappend" placeholder="0.000" step="0.001"
-                                            min="0.001" required>
-                                          <div class="input-group-append"> <span
-                                              class="input-group-text bg-dark border-dark r-radius-hotfix m-0"
-                                              id="tradeNFTamountappend">
-                                              <select v-model="nftTradeTabToken"
-                                                class="form-select border-0 text-white-50 bg-dark w-100 h-100"
-                                                id="tradeNFTpriceType" aria-label="Trade price type select">
-                                                <option :value="TOKEN" selected>{{TOKEN}}</option>
-                                                <option value="HIVE">HIVE</option>
-                                                <option value="HBD">HBD</option>
-                                              </select>
-                                            </span></div>
-                                          <div class="invalid-feedback"> Please enter the amount of
-                                            VALUE you'd like to receive. </div>
-                                        </div>
-                                      </div>
-                                      <div class="text-center">
-                                        <button @click="tradeNFT(itemModal.item)" id="tradeNFTbutton"
-                                          class="btn btn-info my-2" type="submit">Propose
-                                          Trade</button>
-                                      </div>
-                                    </form>
-                                  </div>
-                                  <div role="tabpanel" class="tab-pane fade show " id="sellNFTtab"
-                                    aria-labelledby="sellNFT">
-                                    <form class="needs-validation mt-4" validate>
-                                      <div class="form-group form-row my-2">
-                                        <label for="sellNFTprice">Sale Price</label>
-                                        <small v-if="nftSellTabToken == TOKEN"
-                                          class="ms-auto mb-2 align-self-center text-white-50">0% FEE</small>
-                                        <small v-else class="ms-auto mb-2 align-self-center text-white-50">1%
-                                          FEE</small>
-                                        <div class="input-group">
-                                          <input v-model="nftSellTabPrice" type="number"
-                                            class="form-control bg-dark border-dark text-info" id="sellNFTprice"
-                                            aria-describedby="sellNFTpriceappend" placeholder="0.000" step="0.001"
-                                            min="0.001" required>
-                                          <div class="input-group-append"> <span
-                                              class="input-group-text bg-dark border-dark r-radius-hotfix m-0"
-                                              id="sellNFTpriceappend">
-                                              <select v-model="nftSellTabToken"
-                                                class="form-select border-0 text-white-50 bg-dark w-100 h-100"
-                                                id="sellNFTpriceType" aria-label="Sell price type select">
-                                                <option :value="TOKEN">{{TOKEN}}</option>
-                                                <option value="HIVE">HIVE</option>
-                                                <option value="HBD">HBD</option>
-                                              </select>
-                                            </span></div>
-                                          <div class="invalid-feedback"> Please enter the amount of VALUE
-                                            you'd like to receive. </div>
-                                        </div>
-                                      </div>
-                                      <div class="form-row my-2">
-                                        <p class="text-white-50 small">Ownership will be transferred to the DAO listing
-                                          service and sold publicly. Cancel anytime to return immediately.</p>
-                                      </div>
-                                      <div class="text-center">
-                                        <button @click="sellNFT(itemModal.item)" id="sellNFTbutton"
-                                          class="btn btn-info my-2" type="submit">List
-                                          Item</button>
-                                      </div>
-                                    </form>
-                                  </div>
-                                  <div role="tabpanel" class="tab-pane fade show " id="auctionNFTtab"
-                                    aria-labelledby="auctionNFT">
-                                    <form class="needs-validation mt-4" novalidate>
-                                      <div class="form-group form-row my-2">
-                                        <label for="auctionNFTprice">Starting Bid</label>
-                                        <small v-if="nftAuctionTabToken == TOKEN"
-                                          class="ms-auto mb-2 align-self-center text-white-50">0% FEE</small>
-                                        <small v-else class="ms-auto mb-2 align-self-center text-white-50">1%
-                                          FEE</small>
-                                        <div class="input-group">
-                                          <input v-model="nftAuctionTabPrice" type="number"
-                                            class="form-control bg-dark border-dark text-info" id="auctionNFTprice"
-                                            aria-describedby="auctionNFTpriceappend" placeholder="0.000" step="0.001"
-                                            min="0.001" required>
-                                          <div class="input-group-append"> <span
-                                              class="input-group-text bg-dark border-dark r-radius-hotfix m-0"
-                                              id="auctionNFTpriceappend">
-                                              <select v-model="nftAuctionTabToken"
-                                                class="form-select border-0 text-white-50 bg-dark w-100 h-100"
-                                                id="auctionNFTpriceType" aria-label="Auction price type select">
-                                                <option :value="TOKEN" selected>{{TOKEN}}</option>
-                                                <option value="HIVE">HIVE</option>
-                                                <option value="HBD">HBD</option>
-                                              </select>
-                                            </span></div>
-                                          <div class="invalid-feedback"> Please enter the amount of
-                                            VALUE you'd like to start the bidding. </div>
-                                        </div>
-                                      </div>
-                                      <div class="d-flex justify-content-around">
-                                        <div class="form-row my-2 d-flex align-items-center">
-                                          <label for="auctionNFTdays" class="m-0">Duration: </label>
-                                          <select v-model="nftAuctionTabTime" class="mx-2 btn btn-lg btn-secondary"
-                                            id="auctionNFTdays" required>
-                                            <option value="1">1 Day</option>
-                                            <option value="2">2 Days</option>
-                                            <option value="3">3 Days</option>
-                                            <option value="4">4 Days</option>
-                                            <option value="5">5 Days</option>
-                                            <option value="6">6 Days</option>
-                                            <option value="7" selected>7 Days</option>
-
-                                          </select>
-                                        </div>
-                                      </div>
-                                      <div class="form-row my-2">
-                                        <p class="text-white-50 small">Ownership will be transferred to the DAO listing
-                                          service and auctioned publicly. Once submitted this cannot be cancelled. If
-                                          there
-                                          are no bids at the end of the auction period, it will be returned to you
-                                          immediately.</p>
-                                      </div>
-                                      <div class="text-center">
-                                        <button @click="auctionNFT(itemModal.item)" class="btn btn-info my-2"
-                                          type="submit">List Item</button>
-                                      </div>
-                                    </form>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- MELT NFT -->
-                      <div class="card bg-dark text-white" v-if="itemModal.item.owner == account">
-                        <div class="card-header" id="headingRedeem">
-                          <h5 class="mb-0">
-                            <button class="btn btn-link collapsed text-warning no-decoration" data-bs-toggle="collapse"
-                              data-bs-target="#collapseRedeem" aria-expanded="false" aria-controls="collapseRedeem"><i
-                                class="fa-solid fa-fire me-3"></i>MELT<span class="ms-2 small">({{chains[jsontoken].sets[setname].bond ?
-                                precision(chains[jsontoken].sets[setname].bond.amount,
-                                chains[jsontoken].sets[setname].bond.precision) : 0 }} {{chains[jsontoken].sets[setname].bond ? chains[jsontoken].sets[setname].bond.token :
-                                ''}})</span></button>
-                          </h5>
-                        </div>
-                        <div id="collapseRedeem" class="collapse" aria-labelledby="headingRedeem"
-                          data-parent="#accordion">
-                          <div class="card-body bg-dark text-white-50 text-center"
-                            v-if="itemModal.item.owner != account">
-                            <p>You don't own this NFT</p>
-                          </div>
-                          <div class="card-body p-0" v-if="itemModal.item.owner == account">
-                            <div class="d-flex align-self-end">
-                              <div class="border border-warning rounded bg-darker col-12 p-4">
-                                <div class="d-flex align-items-center justify-content-between">
-                                  <div class="d-flex me-1">
-                                    <h4>Melt Value:</h4>
-                                  </div>
-                                  <div class="d-flex no-wrap ms-1"> <u>
-                                      <h1>
-                                        {{chains[jsontoken].sets[setname].bond ? precision(chains[jsontoken].sets[setname].bond.amount,
-                                        chains[jsontoken].sets[setname].bond.precision) : 0 }} {{chains[jsontoken].sets[setname].bond ? chains[jsontoken].sets[setname].bond.token :
-                                        ''}}</h1>
-                                    </u></div>
-                                </div>
-                                <div class="pt-2">
-                                  <p class="text-uppercase text-muted">This NFT can be traded, sold, or auctioned until
-                                    melted. Once melted it will disappear forever.</p>
-                                  <div class="d-flex justify-content-around">
-                                    <div class="d-flex align-items-center my-4">
-                                      <div class="text-center p-4">
-                                        <h1 class="text-warning" style="font-size: 4em"><i
-                                            class="fas fa-exclamation-triangle"></i></h1>
-                                      </div>
-                                      <ul>
-                                        <li>This action cannot be undone</li>
-                                        <li>Your NFT will be deleted</li>
-                                        <li>You will receive the melt value</li>
-                                      </ul>
-                                    </div>
-                                  </div>
-                                  <div class="text-center pb-4">
-                                    <button type="button" class="btn btn-warning" data-bs-toggle="collapse"
-                                      href="#melt-confirmation">Melt </button>
-                                  </div>
-                                  <div class="collapse bg-danger rounded" id="melt-confirmation">
-                                    <div class="text-center pt-4">
-                                      <h2><b>/////// IRREVERSIBLE \\\\\\\</b></h2>
-                                      <p>Are you sure you want to proceed?</p>
-                                    </div>
-                                    <div class="d-flex justify-content-around p-3">
-                                      <button class="btn btn-secondary" data-bs-toggle="collapse"
-                                        href="#melt-confirmation">CANCEL <i class="fas fa-running"></i></button>
-                                      <button @click="meltNFT(itemModal.item)"
-                                        class="btn btn-danger border-white">DESTROY
-                                        <i class="fas fa-bomb"></i> <span
-                                          class="spinner-border spinner-border-sm d-none" role="status"
-                                          aria-hidden="true"></span></button>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- Bid NFT -->
-                      <div class="card bg-dark text-white"
-                        v-if="itemModal.item.owner == 'ah' || itemModal.item.owner == 'hh'">
-                        <div class="card-header" id="headingAuction">
-                          <h5 class="mb-0">
-                            <button class="btn btn-link collapsed text-warning no-decoration d-flex align-items-center"
-                              data-bs-toggle="collapse" @click="auctionData('itemModal')"
-                              data-bs-target="#collapseAuction" aria-expanded="false" aria-controls="collapseAuction"><i
-                                class="fas fa-comment-dollar me-3"></i><span>BID NOW</span><span
-                                class="small ms-2">({{naiString(itemModal.auction.price)}})</span></button>
-                          </h5>
-                        </div>
-                        <div id="collapseAuction" class="collapse show" aria-labelledby="headingAuction"
-                          data-parent="#accordion">
-                          <div class="card-body p-0">
-                            <div class="d-flex align-self-end">
-                              <div class="border border-warning rounded bg-darker col-12 p-4">
-                                <div class="d-flex align-items-center justify-content-between">
-                                  <div class="d-flex me-1">
-                                    <h4>Current Bid:{{naiString(itemModal.auction.price)}}</h4>
-                                  </div>
-                                  <div class="d-flex no-wrap ms-1"> <u>
-                                      <h4>
-                                        Number of Bids:{{itemModal.auction.bids}}</h4>
-                                    </u></div>
-                                </div>
-                                <div class="pt-2">
-                                  <p class="text-uppercase text-muted"></p>
-                                  <div class="d-flex justify-content-around">
-                                    <div class="d-flex align-items-center my-4">
-                                      <div class="text-center p-4">
-                                        <h1 class="text-warning" style="font-size: 4em"><i
-                                            class="fa-solid fa-gavel"></i></h1>
-                                      </div>
-                                      <ul>
-                                        <li>Time Left: {{itemModal.auction.time}}</li>
-                                        <li>Opening Price: {{naiString(itemModal.auction.initial_price)}}</li>
-                                        <li>Seller: {{itemModal.auction.by}}</li>
-                                        <li>Bidder: {{itemModal.auction.bidder}}</li>
-                                        <li>Days: {{itemModal.auction.days}}</li>
-                                      </ul>
-                                    </div>
-                                  </div>
-                                  <div class="text-center pb-4">
-                                    <form class="needs-validation mt-4" novalidate>
-                                      <label for="bidNFTprice">Bid</label>
-                                      <div class="input-group">
-                                        <input v-model="nftAuctionTabPrice" type="number"
-                                          class="form-control bg-dark border-dark text-info" id="auctionNFTprice"
-                                          aria-describedby="bidNFTpriceappend" placeholder="0.000" step="0.001"
-                                          :min="(itemModal.auction.price.amount + (itemModal.auction.bids ? 1 : 0))/ 1000" required>
-                                        <div class="input-group-append">
-                                          <span class="input-group-text bg-dark border-dark text-white-50 r-radius-hotfix m-0"
-                                            id="bidNFTpriceappend">
-                                            {{itemModal.auction.price.token}}
-                                          </span>
-                                          <div>
-                                            <div class="invalid-feedback"> Please enter the amount of
-                                              VALUE you'd like to start the bidding. </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <button @click="bidNFT(itemModal.item)" type="button" class="btn btn-warning" data-bs-toggle="collapse"
-                                        href="#/">Bid </button>
-                                    </form>
-                                  </div>
-
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- Buy NFT -->
-                      <div class="card bg-dark text-white" v-if="itemModal.item.owner == 'ls'">
-                        <div class="card-header" id="headingsale">
-                          <h5 class="mb-0">
-                            <button class="btn btn-link collapsed text-warning no-decoration d-flex align-items-center"
-                              data-bs-toggle="collapse" @click="saleData('itemModal')" data-bs-target="#collapsesale"
-                              aria-expanded="false" aria-controls="collapsesale"><i
-                                class="fas fa-money-bill-wave me-3"></i><span>BUY NOW</span><span
-                                class="small ms-2">({{naiString(itemModal.sale.price)}})</span></button>
-                          </h5>
-                        </div>
-                        <div id="collapsesale" class="collapse show" aria-labelledby="headingsale"
-                          data-parent="#accordion">
-                          <div class="card-body p-0">
-                            <div class="d-flex align-self-end">
-                              <div class="border border-warning rounded bg-darker col-12 p-4">
-                                <div class="d-flex align-items-center justify-content-between">
-                                  <div class="d-flex me-1">
-                                    <h4>Price: {{naiString(itemModal.sale.price)}}</h4>
-                                  </div>
-                                  <div class="d-flex no-wrap ms-1">
-                                    <h4>
-                                      Seller: @{{itemModal.sale.by}}</h4>
-                                  </div>
-                                </div>
-                                <div class="pt-2">
-                                  <p class="text-uppercase text-muted"></p>
-                                  <div class="d-flex justify-content-around">
-                                    <!-- long name, script, set, uid only other buy data -->
-                                  </div>
-                                  <div class="text-center pb-4">
-                                    <button v-if="itemModal.sale.by != account" type="button" class="btn btn-warning"
-                                      @click="buyNFT(itemModal.sale)" href="#/">Buy </button>
-                                    <button v-else type="button" class="btn btn-warning"
-                                      @click="cancelNFT(itemModal.sale)" href="#/">Cancel </button>
-                                  </div>
-
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                    </div>
+        <!-- ACTION BAR -->
+        <div class="d-flex">
+          <!-- Chain -->
+          <div class="dropdown">
+            <button class="btn btn-outline-light dropdown-toggle me-2" type="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              Chain
+            </button>
+            <ul class="dropdown-menu bg-black">
+              <li v-for="(item, name, index) in chains">
+                <div class="py-1 px-2">
+                  <div class="form-check">
+                    <input @change="addFilters('Chain', name);displaynfts()" class="form-check-input" type="checkbox"
+                      v-model="chains[name].enabled" :id="name +'ChainCheck'">
+                    <label class="form-check-label" :for="name +'ChainCheck'">
+                      {{name}}
+                    </label>
                   </div>
                 </div>
+              </li>
+            </ul>
+          </div>
+          <!-- Set -->
+          <div class="dropdown">
+            <button class="btn btn-outline-light dropdown-toggle me-2" type="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              Set
+            </button>
+            <ul class="dropdown-menu bg-black">
+              <div v-for="(item, name, index) in chains">
+                <li v-for="(set, setname, setindex) in chains[name].sets">
+                  <div class="py-1 px-2">
+                    <div class="form-check">
+                      <input @change="addFilters('Set', setname, name);displaynfts()" class="form-check-input"
+                        type="checkbox" v-model="chains[name].sets[setname].enabled" :id="setname + 'SetCheck'">
+                      <label class="form-check-label" :for="setname + 'SetCheck'">
+                        {{set.name_long}}
+                      </label>
+                    </div>
+                  </div>
+                </li>
               </div>
-              <!-- NFT detail footer -->
-
-            </div>
+            </ul>
+          </div>
+          <!-- Status -->
+          <div class="dropdown">
+            <button class="btn btn-outline-light dropdown-toggle me-2" type="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              Status
+            </button>
+            <ul class="dropdown-menu bg-black">
+              <li v-for="(item, name, index) in selectors">
+                <div class="py-1 px-2">
+                  <div class="form-check">
+                    <input @change="addFilters('Status', name);displaynfts()" class="form-check-input" type="checkbox"
+                      v-model="item.checked" :id="name + 'StatusCheck'">
+                    <label class="form-check-label" :for="name + 'StatusCheck'">
+                      {{name}}
+                    </label>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <!-- Currency -->
+          <div class="dropdown">
+            <button class="btn btn-outline-light dropdown-toggle me-2" type="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              Currency
+            </button>
+            <ul class="dropdown-menu bg-black">
+              <li v-for="(item, name, index) in denoms">
+                <div class="py-1 px-2">
+                  <div class="form-check">
+                    <input @change="addFilters('Currency', name);displaynfts()" class="form-check-input" type="checkbox"
+                      v-model="item.checked" :id="name + 'CurrencyCheck'">
+                    <label class="form-check-label" :for="name + 'CurrencyCheck'">
+                      {{name}}
+                    </label>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <!-- Search -->
+          <div class="position-relative me-2 flex-grow-1">
+            <span class="position-absolute top-50 translate-middle-y ps-2"><i
+                class="fa-solid fa-magnifying-glass fa-fw"></i></span>
+            <input @keyup="displaynfts()" @change="displaynfts()" @search="displaynfts()"
+              class="ps-4 form-control border-white" type="search" v-model="NFTselect.searchTerm"
+              placeholder="Search sets, items, and accounts">
+          </div>
+          <!-- Sort -->
+          <div class="dropdown">
+            <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              {{NFTselect.sort == 'uid' ? 'Sort' : ('Sort by ' + (NFTselect.sort == 'price' ? 'Price: ' : 'Time: ') +
+              (NFTselect.dir == 'asc' ? 'Low to High' : 'High to Low'))}}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end bg-black">
+              <li>
+                <a @click="NFTselect.dir='asc';NFTselect.sort='price';displaynfts()" class="dropdown-item"
+                  role="button">Price low to high</a>
+              </li>
+              <li>
+                <a @click="NFTselect.dir='dec';NFTselect.sort='price';displaynfts()" class="dropdown-item"
+                  role="button">Price high to low</a>
+              </li>
+              <li>
+                <a @click="NFTselect.dir='asc';NFTselect.sort='time';displaynfts()" class="dropdown-item"
+                  role="button">Time ending soonest</a>
+              </li>
+              <li>
+                <a @click="NFTselect.dir='dec';NFTselect.sort='time';displaynfts()" class="dropdown-item"
+                  role="button">Time ending latest</a>
+              </li>
+            </ul>
           </div>
         </div>
-        <!--Item Modal-->
-        <div class="modal fade" id="itemModalOld" tabindex="-1" v-show="!itemModal.hidden">
-          <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
-            <div class="modal-content bg-dark text-white">
-
-              <div class="modal-header border-0"
-                :style="{'background': getSetDetailsColors(chains[jsontoken].sets[setname].computed ? chains[jsontoken].sets[setname].computed : '')}">
-                <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
-                  <h2 class="m-0 px-2">{{itemModal.item.uid}}</h2>
-                </div>
-                <div class="ms-auto me-auto">
-                  <h3 class="modal-title lead border border-dark rounded mb-0 p-2"><a
-                      :href="makeLink('/nfts/set/',itemModal.item.setname)"
-                      style="color: black">{{itemModal.item.setname}}
-                      NFT</a></h3>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body row d-flex ">
-                <div class="order-md-last col-lg-6 px-0 px-sm-2">
-                  <div class="d-flex align-items-center justify-content-between">
-                    <h2><a class="text-muted p-3" href="#/" @click="modalPrev('itemModal')"><i
-                          class="fas fa-caret-square-left"></i></a></h2>
-                    <h3 style="color:aqua;">{{itemModal.item.uid}}</h3>
-                    <h2><a class="text-muted p-3" href="#/" @click="modalNext('itemModal')"><i
-                          class="fas fa-caret-square-right"></i></a></h2>
-                  </div>
-                  <div class="card-img-top" :alt="makeLink(itemModal.item.set, '-', ['itemModal.item.uid'])">
-                    <div v-html="itemModal.item.HTML"></div>
-                    {{itemModal.item.set ? itemModal.item.set.Description : ''}}
-                  </div>
-                  <div class="text-center mt-2 text-white-50">
-                    <p>Owner: <a :href="makeLink('/',itemModal.item.owner,['#inventory/'])"
-                        :title="makeLink('/',itemModal.item.owner,['#inventory/'])">{{itemModal.item.owner}}</a>
-                    </p>
-                  </div>
-                </div>
-                <div class="col-lg-6 px-0 px-sm-2">
-                  <div class="d-flex flex-column">
-                    <div v-for="atr in itemModal.item.attributes">{{printProps(atr)}}</div>
-                    <div>Set: {{chains[jsontoken].sets[setname].set}}</div>
-                    <div>Link: {{chains[jsontoken].sets[setname].link}}</div>
-                    <div>Permlink: {{chains[jsontoken].sets[setname].permlink}}</div>
-                    <div>Name: {{chains[jsontoken].sets[setname].name}}</div>
-                  </div>
-                </div>
-              </div>
-              <div class="modal-footer d-flex align-items-center"></div>
-            </div>
+        <div class="mt-2 ms-1">
+          <h5 class="mb-0">{{displayNFTs.length}} Items</h5>
+        </div>
+        <div class="d-flex flex-wrap mt-2" v-if="NFTselect.keys.length">
+          <!-- Active Filters -->
+          <div v-for="(item, name, index) in NFTselect.keys"
+            class="rounded bg-secondary text-black filter-bubble me-1 d-flex align-items-center">
+            <span>{{item}}</span>
+            <button @click="clearFilters(item)" type="button" class="ms-1 btn-close btn-close-white"></button>
+          </div>
+          <button @click="clearFilters()" type="button" v-if="NFTselect.keys.length > 1" class="btn btn-secondary">
+            Clear All
+          </button>
+        </div>
+        <div class="row row-cols-xxl-6 row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
+          <!-- NFTCARD REPEAT AUCTION -->
+          <div class="col my-2" v-for="(item, name, index) in displayNFTs">
+            <nftcard :item="item" :uid="Base64toNumber(item.uid)" :icon="getIcon(item.script)"
+              @focusitem="focusItem = $event" :multisig="chains[item.token].multisig"
+              :colors="getSetDetailsColors(item.script)" :index="index" :auction="item.auction" :sale="item.sale"
+              :account="account" @detail="modalIndex('itemModal', $event, 'displayNFTs');itemModal.hidden = false"
+              @tosign="toSign = $event" />
           </div>
         </div>
       </div>
-    </main>
-    <div>
-      <foot-vue />
-    </div>
+
+      <!-- NFT Detail Modal -->
+      <div>
+        <nftdetail :sets="focusSet" :account="account" :itemmodal="itemModal" :pfp="pfp" :item="focusItem"
+          :chains="chains" @detail="modalIndex('itemModal', $event);itemModal.hidden = false" @tosign="toSign=$event" />
+      </div>
+
+  </div>
+  </main>
+  <div>
+    <foot-vue />
+  </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
