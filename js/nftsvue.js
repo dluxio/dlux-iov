@@ -765,6 +765,30 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           return 0
         })
       }
+      if(this.NFTselect.sort == 'time'){
+        this.displayNFTs.sort((a, b) => {
+          if(Date.parse(a.time) || 0 > Date.parse(b.time) || 0) return -1
+          if(Date.parse(a.time) || 0 < Date.parse(b.time) || 0) return 1
+          return 0
+        })
+        if(this.NFTselect.dir == 'dec'){
+          var j = 0
+          for (i = 0; i < this.displayNFTs.length; i++) {
+            if (this.displayNFTs[i].time == null) {
+              j = i - 1
+              break
+            }
+          }
+          var temp = []
+          for(var i = 0; i < j; i++){
+            temp.push(this.displayNFTs[i])
+          }
+          temp.reverse()
+          for(var i = 0; i < j; i++){
+            this.displayNFTs[i] = temp[i]
+          }
+        }
+      }
     },
     ipfsUpload(event) {
       console.log("1", event);
