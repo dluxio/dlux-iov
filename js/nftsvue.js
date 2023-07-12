@@ -1317,6 +1317,10 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       console.log(value, hive)
       this.marketorder.value = value
     },
+    popOrder(){
+      this.marketorder.hive = parseFloat(this.barhive)
+      this.marketValue()
+    },
     checkAccount(name, key) {
       fetch("https://anyx.io", {
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${this[name]}\"]], \"id\":1}`,
