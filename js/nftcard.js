@@ -155,7 +155,7 @@ export default {
               Bid NFT</button>
              </div>
             <!-- CANCEL -->
-             <div class="btn-group" v-if="item.by == account">
+             <div class="btn-group" v-if="item.by == account && !item.auction">
              <button type="button" class="btn btn-warning" title="Cancel Sale"
               @click="cancelSaleNFT(item)">
              Cancel Sale</button>
