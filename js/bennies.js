@@ -72,7 +72,6 @@ export default {
             default: true
         },
         eq100: {
-            type: Boolean,
             default: false
         },
     },

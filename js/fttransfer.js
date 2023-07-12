@@ -143,7 +143,7 @@ export default {
                     <div role="tabpanel" class="tab-pane fade show " id="sellFTtab"
                         aria-labelledby="sellFT">
                         <!-- SELL FORM -->
-                        <form class="needs-validation mt-4" novalidate>
+                        <form class="needs-validation mt-4" novalidate @submit.prevent="sellFT()">
                             <div class="row mb-3">
                                 <div class="col-6">
                                     <label for="sellFTqty" class="form-label">Quantity</label>
@@ -201,23 +201,23 @@ export default {
                             </div>
                             <div class="text-center">
                                 <button id="sellFTbutton" class="btn btn-info my-2"
-                                    @click="sellNFT()">List Item</button>
+                                    @click="sellFT()">List Item</button>
                             </div>
                         </form>
                     </div>
                     <div role="tabpanel" class="tab-pane fade show " id="auctionFTtab"
                         aria-labelledby="auctionFT">
                         <!-- AUCTION FORM -->
-                        <form class="needs-validation mt-4" novalidate>
+                        <form class="needs-validation mt-4" novalidate novalidate @submit.prevent="auctionFT()">
                             <!--:action="javascript:auctionFT('{{item.data.set}}','{{auctionFTprice.value}}','{{Date.now()}}','{{auctionFTdays.value}}'),'{{auctionFTpriceType.value}}'"-->
                             <div class="row mb-3">
                                 <div class="col-6">
                                     <label for="auctionFTqty" class="form-label">Quantity</label>
                                     <div class="input-group has-validation">
-                                        <input type="number"
+                                        <input type="number" v-model="auction.qty"
                                             class="form-control text-info bg-transparent"
                                             id="auctionFTqty" aria-describedby="auctionFTqtyappend"
-                                            placeholder="1" step="1" min="1" required readonly>
+                                            placeholder="1" step="1" min="1" readonly>
                                         <span
                                             class="input-group-text"
                                             id="auctionFTqtyappend">{{item.set}}
@@ -230,24 +230,25 @@ export default {
                                 <div class="col-6">
                                     <label for="auctionFTprice" class="form-label">Starting
                                         Bid</label>
-                                    <small v-if="auction.token == item.token" class="float-end mb-2 align-self-center text-white-50">
+                                    <small class="float-end mb-2 align-self-center text-white-50">
                                         0% FEE
                                     </small>
-                                    <small v-else class="float-end mb-2 align-self-center text-white-50">
+                                    <!--<small v-if="auction.token == item.token"  v-else class="float-end mb-2 align-self-center text-white-50">
                                         1% FEE
-                                    </small>
+                                    </small> -->
                                     <div class="input-group has-validation">
-                                        <input type="number"
+                                        <input type="number" v-model="auction.price"
                                             class="form-control text-info"
                                             id="auctionFTprice"
                                             aria-describedby="auctionFTpriceappend"
                                             placeholder="0.000" step="0.001" min="0.001" required>
                                         <span class="input-group-text e-radius-hotfix m-0 p-0" id="auctionFTamountappend">
-                                        <select aria-label="Trade price type select" class="form-select border-0 text-white-50 w-100 h-100" v-model="auction.token">
+                                        <!--<select aria-label="Trade price type select" class="form-select border-0 text-white-50 w-100 h-100" v-model="auction.token">
                                             <option :value="item.token">{{toUpperCase(item.token)}}</option>
                                             <option selected value="hive">HIVE</option>
                                             <option value="hbd">HBD</option>
-                                        </select>
+                                        </select>-->
+                                        {{toUpperCase(item.token)}}
                                         </span>
                                         <div class="invalid-feedback"> Please enter the
                                             amount
@@ -259,7 +260,7 @@ export default {
                             <div class="d-flex justify-content-around">
                                 <div class="row mb-3 d-flex align-items-center">
                                     <label for="auctionFTdays" class="form-label">Duration</label>
-                                    <select class="mx-2 btn btn-lg btn-secondary form-control"
+                                    <select v-model="auction.days" class="mx-2 btn btn-lg btn-secondary form-control"
                                         id="auctionFTdays" required>
                                         <option value="1">1 Day</option>
                                         <option value="2">2 Days</option>
@@ -370,6 +371,10 @@ export default {
                 };
             },
         },
+        api: {
+            default: '',
+            required: true
+        },
         transferMint: {
             default: function () {
             return {
@@ -420,7 +425,7 @@ export default {
             auction: {
                 qty: 1,
                 price: "1.000",
-                days: 1,
+                days: 7,
                 token: 'hive'
             },
             airdrop: {
@@ -612,14 +617,14 @@ export default {
                 type: "cja",
                 cj: {
                     set: this.item.set,
-                    to: this.trade.to,
-                    price: parseInt(parseFloat(this.trade.amount) * 1000),
+                    price: parseInt(parseFloat(this.auction.price) * 1000),
+                    time: parseInt(this.auction.days),
                 },
                 id: `${this.item.token}_ft_auction`,
                 msg: `Giving ${this.item.set} mint token...`,
                 ops: ["getTokenUser"],
                 api: this.api,
-                txid: `${this.item.token}_ft_transfer_${this.trade.to}`,
+                txid: `${this.item.token}_ft_auction`,
               }
               this.$emit('tosign', toSign)
         },
