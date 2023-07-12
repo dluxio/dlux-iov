@@ -184,13 +184,13 @@ export default {
                                                                         <span class="position-absolute top-50 end-0 translate-middle-y ps-2">
                                                                         <select v-model="trade.token" class="form-select border-0 pe-4"
                                                                         id="tradeNFTpriceType" aria-label="Trade price type select">
-                                                                            <option :value="itemmodal.item.token" selected>
+                                                                            <option :value="itemmodal.item.token">
                                                                                 {{toUpperCase(itemmodal.item.token)}}
                                                                             </option>
-                                                                            <option value="HIVE">
+                                                                            <option value="hive" selected>
                                                                                 HIVE
                                                                             </option>
-                                                                            <option value="HBD">
+                                                                            <option value="hbd">
                                                                                 HBD
                                                                             </option>
                                                                         </select>
