@@ -516,7 +516,6 @@ export default {
                                         </div>
                                     </div>
                                 </div> 
-                                    </div>
                                 </div>
                             </div>
                             <!-- NFT Buy -->
@@ -532,7 +531,7 @@ export default {
                                     <div class="accordion-body">
                                     <div class="d-flex align-self-end">
                                     <div
-                                        class="border border-warning rounded bg-darker col-12 p-4">
+                                        class="col-12">
                                         <div
                                             class="d-flex align-items-center justify-content-between">
                                             <div class="d-flex me-1">
@@ -552,9 +551,9 @@ export default {
                                             <div class="d-flex justify-content-around">
                                                 <!-- long name, script, set, uid only other buy data -->
                                             </div>
-                                            <div class="text-center pb-4">
+                                            <div class="text-center">
                                                 <button v-if="itemmodal.item.by != account"
-                                                    type="button" class="btn btn-warning"
+                                                    type="button" class="btn btn-primary"
                                                     @click="buyNFT()"
                                                     href="#/">Buy </button>
                                                 <button v-else type="button"
