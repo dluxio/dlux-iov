@@ -38,11 +38,10 @@ export default {
                     <div class="col-lg-6 px-0 px-sm-2">
                         <div class="col-12 px-0 px-sm-2">
                             <!-- NFT img -->
-                            <div class="card-img-top"
-                                :alt="itemmodal.item.setname + '-' + itemmodal.item.uid">
-                                <div v-html="itemmodal.item.HTML"></div>
+                            <div :alt="itemmodal.item.setname + '-' + itemmodal.item.uid">
+                                <div class="mb-3" v-html="itemmodal.item.HTML"></div>
                                 <!--back forward btns-->
-                                <div class="card-footer d-flex align-items-center">
+                                <div class="d-flex align-items-center">
                                     <h2><a class="text-muted p-3" role="button"
                                             @click="modalPrev()"><i class="fas fa-caret-square-left"></i></a>
                                     </h2>
@@ -74,11 +73,11 @@ export default {
                             <!-- NFT Description -->
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
-                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDescription" aria-expanded="true" aria-controls="collapseDescription">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDescription" aria-expanded="true" aria-controls="collapseDescription">
                                         <i class="fas fa-list me-3"></i>DESCRIPTION
                                     </button>
                                 </h2>
-                                <div id="collapseDescription" class="accordion-collapse collapse show" data-bs-parent="#nftAccordion">
+                                <div id="collapseDescription" class="accordion-collapse collapse" data-bs-parent="#nftAccordion">
                                     <div class="accordion-body">
                                         <p>{{itemmodal.item.set.Description}}</p>
                                     </div>
@@ -87,11 +86,11 @@ export default {
                             <!-- NFT Attributes -->
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAttributes" aria-expanded="false" aria-controls="collapseAttributes">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAttributes" aria-expanded="false" aria-controls="collapseAttributes">
                                         <i class="fas fa-star me-3"></i>ATTRIBUTES
                                     </button>
                                 </h2>
-                                <div id="collapseAttributes" class="accordion-collapse collapse" data-bs-parent="#nftAccordion">
+                                <div id="collapseAttributes" class="accordion-collapse collapse show" data-bs-parent="#nftAccordion">
                                     <div class="accordion-body">
                                         <div class="d-flex flex-wrap">
                                             <div v-for="thing in itemmodal.item.attributes" class="border border-white rounded d-flex m-1">
@@ -112,13 +111,13 @@ export default {
                                     </button>
                                 </h2>
                                 <div id="collapseTransfer" class="accordion-collapse collapse" data-bs-parent="#nftAccordion">
-                                    <div class="accordion-body">
+                                    <div class="accordion-body p-0">
                                         <div class="border-warning border rounded p-3 my-3" v-if="itemmodal.item.uid == pfp.uid  && itemmodal.item.setname == pfp.set">
                                             <p class="text-warning m-0">Transferring this NFT will remove it from your PFP</p>
                                         </div>
-                                        <div class="border border-info bg-darker p-3 rounded col-12">
+                                        <div class="p-3 col-12">
                                             <div class="container-fluid">
-                                                <ul class="nav nav-pills bg-darker justify-content-center" role="tablist">
+                                                <ul class="nav nav-pills justify-content-center" role="tablist">
                                                     <li class="nav-item"> <a class="nav-link active" id="giveNFTlink" role="tab" data-bs-toggle="tab"
                                                     aria-controls="giveNFT" aria-expanded="true" href="#giveNFTtab">Give</a></li>
                                                     <li class="nav-item"> <a class="nav-link" id="tradeNFTlink" role="tab" data-bs-toggle="tab"
@@ -134,7 +133,7 @@ export default {
                                                         <form class="needs-validation mt-4" id="nftGiveForm" @submit.prevent="validateForm('nftGiveForm', giveNFT)" novalidate>
                                                             <div class="form-row my-2">
                                                                 <div class="col-12">
-                                                                    <label for="giveNFTusername">Username</label>
+                                                                    <label for="giveNFTusername" class="small mb-1">Username:</label>
                                                                     <div class="input-group has-validation">
                                                                         <span class="input-group-text text-white-50" id="giveNFTuserprep">@</span>
                                                                         <input ref="giveTo" pattern="[1-9a-z\-\.]{3,}" v-model="give.to" @keyup="giveEnabled = false;validateForm('nftGiveForm')" @blur="checkAccount(give.to, 'giveTo', 'giveEnabled')" type="text" class="form-control text-info"
