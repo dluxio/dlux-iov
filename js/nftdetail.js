@@ -760,7 +760,7 @@ export default {
                 cj: {
                     set: this.itemmodal.item.setname,
                     uid: this.itemmodal.item.uid,
-                    price: parseInt(this.itemmodal.item.price.amount * 1000),
+                    bid_amount: parseInt(this.auction.bid * 1000),
                   },
                 id: `${this.itemmodal.item.token}_nft_bid`,
                 msg: `Buying ${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,

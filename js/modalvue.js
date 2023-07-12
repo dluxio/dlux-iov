@@ -281,7 +281,7 @@ export default {
               <form name="contract">
                     <div class="modal-body text-start"> 
                       <label for="broca" class="small mb-1 d-flex">Amount:
-                      <span class="ms-auto">Balance: <a role="button" class="text-info" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 0, '', ',')}}</a> {{token}}</label>
+                      <span class="ms-auto">Balance: <a role="button" class="text-info" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 0, '', ',')}}</a> {{token}}</span></label>
                       <div class="position-relative mb-3">
                         <input id="broca" class="pe-5 form-control text-white border-dark bg-dark" type="number" step="1" :min="1" :max="balance" placeholder="1.000" v-model="amount"> 
                         <span class="position-absolute end-0 top-50 translate-middle-y px-2">
