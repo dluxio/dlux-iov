@@ -1299,6 +1299,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       .then(r => {
         console.log(r.markets.hive.sells.sort((a,b) => this.parseFloat(a.rate) - this.parseFloat(b.rate)))
         this.marketorder.dex = r.markets.hive.sells.sort((a,b) => this.parseFloat(a.rate) - this.parseFloat(b.rate))
+        this.marketorder.value = parseInt(1 / this.marketorder.dex[0].rate)
       })
     },
     marketValue(){
