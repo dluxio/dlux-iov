@@ -125,9 +125,9 @@
         <main role="main">
             <div class="container" style="max-width: 1800px !important">
                 <div class="d-flex py-2">
-                    <div class="px-5 py-2 rounded-3 card d-flex flex-grow-1">
+                    <div class="px-4 py-2 rounded-3 card d-flex flex-grow-1">
                         <div class="d-flex align-items-center">
-                            <div class="py-5">
+                            <div class="py-5 px-3">
                                 <h1 class="display-5 fw-bold">Welcome to the Market</h1>
                                 <p class="col-md-8 fs-4">Browse, bid, buy, and mint</p>
                                 <div class="d-flex">
@@ -204,7 +204,7 @@
                                 <div class="accordion-item wallet-accordion-item shadow" :id="name + '-wallet-item'"
                                     v-for="(token, name, index) in chains">
                                     <h2 class="accordion-header">
-                                        <button class="accordion-button text-black collapsed" type="button"
+                                        <button class="accordion-button text-black" type="button"  v-bind:class="{'collapsed': name != 'dlux'}"
                                             data-bs-toggle="collapse" :data-bs-target="'#collapse' + name"
                                             aria-expanded="true" :aria-controls="'#collapse' + name">
                                             {{toUpperCase(name)}}<span
@@ -213,7 +213,7 @@
                                                 '.', ',')}}</span>
                                         </button>
                                     </h2>
-                                    <div :id="'collapse' + name" class="accordion-collapse collapse"
+                                    <div :id="'collapse' + name" class="accordion-collapse collapse"  v-bind:class="{'show': name == 'dlux'}"
                                         data-bs-parent="#accordionExample">
                                         <div class="accordion-body">
                                             <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
