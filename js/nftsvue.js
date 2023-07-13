@@ -2356,7 +2356,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     var setName = location.pathname.split("set/")[1] || location.hash.split(':')[1]
     this.setname = setName;
     if (setName) {
-      this.jsontoken = location.hash.replace('#', '') || 'dlux'
+      this.jsontoken = location.hash.replace('#', '').split(':')[0] || 'dlux'
       for (var chain in this.chains) {
         this.chains[chain].enabled = false;
       }
