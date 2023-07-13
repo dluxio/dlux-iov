@@ -58,8 +58,30 @@
     }
 
     .mint-bar {
-
+      min-width: 400px;
       height: 55px;
+    }
+
+    .bg-danger-50 {
+      background-color: rgba(252, 52, 111, .7);
+    }
+
+    .bg-success-50 {
+      background-color: rgba(65, 215, 167, .7);
+    }
+
+    .bg-primary-50 {
+      background-color: rgba(58, 143, 217, .7);
+    }
+
+    .widget-accordion {
+
+      --bs-accordion-border-color: clear !important;
+      --bs-accordion-active-bg: clear !important;
+
+      --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+      --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+
     }
   </style>
 </head>
@@ -135,16 +157,21 @@
           </div>
         </div>
         <!-- widget accordion-->
-        <div class="accordion my-1" id="accordionWidgets">
+        <div class="accordion widget-accordion my-1" id="accordionWidgets">
           <div class="accordion-item">
             <h2 class="accordion-header">
               <button class="accordion-button collapsed pt-2 pb-1" type="button" data-bs-toggle="collapse"
                 data-bs-target="#collapseWidgets" aria-expanded="true" aria-controls="collapseWidgets">
                 <div class="w-100 d-flex flex-wrap justify-content-around align-items-center">
+                  <!-- info icon -->
+                  <div class="d-flex align-items-center me-2 mb-1 rounded-circle bg-dark p-1">
+                    <h2 class="mb-0"><i class="fa-solid fa-circle-info fa-fw"></i></h2>
+                  </div>
+                  <!-- multi bar -->
                   <div
                     class="flex-grow-1 mb-1 me-2 progress bg-secondary border rounded-pill border-dark border-2 mint-bar">
                     <!--burned-->
-                    <div class="progress-bar" style="background-color: rgb(133, 64, 64);" role="progressbar"
+                    <div class="progress-bar bg-danger-50 text-black" role="progressbar"
                       :style="{'width': ((chains[jsontoken].sets[setname].deleted/chains[jsontoken].sets[setname].max)*100) + '%'}"
                       aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                       <span><i class="me-1 fa-solid fa-fire"></i></span>
@@ -152,7 +179,7 @@
                         v-cloak>{{formatNumber(((chains[jsontoken].sets[setname].deleted/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
                     </div>
                     <!--opened-->
-                    <div class="progress-bar" style="background-color: rgb(60, 60, 138);" role="progressbar"
+                    <div class="progress-bar bg-primary-50 text-black" role="progressbar"
                       :style="{'width': (((chains[jsontoken].sets[setname].minted-chains[jsontoken].sets[setname].deleted)/chains[jsontoken].sets[setname].max)*100) + '%'}"
                       aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                       <span><i class="me-1 fa-solid fa-box-open"></i></span>
@@ -160,7 +187,7 @@
                         v-cloak>{{formatNumber(((chains[jsontoken].sets[setname].minted/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
                     </div>
                     <!--closed-->
-                    <div class="progress-bar" style="background-color: rgb(50, 94, 50);" role="progressbar"
+                    <div class="progress-bar bg-success-50 text-black" role="progressbar"
                       :style="{'width': (((chains[jsontoken].sets[setname].max-chains[jsontoken].sets[setname].minted)/chains[jsontoken].sets[setname].max)*100) + '%'}"
                       aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                       <span><i class="me-1 fa-solid fa-box"></i></span>
@@ -470,7 +497,7 @@
         <div class="d-flex">
 
           <!--filters-->
-          <div class="d-flex flex-column" style="max-width: 300px;">
+          <div class="d-none d-flex flex-column" style="max-width: 300px;">
             <div class="accordion bg-dark" id="accordionFilter">
               <div class="accordion-item bg-secondary">
                 <h2 class="accordion-header" id="headingOne">
