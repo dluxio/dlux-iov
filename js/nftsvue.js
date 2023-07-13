@@ -2353,7 +2353,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
   mounted() {
     //get hash and set it
     this.getHiveInfo()
-    var setName = location.pathname.split("set/")[1];
+    var setName = location.pathname.split("set/")[1] || location.hash.split(':')[1]
     this.setname = setName;
     if (setName) {
       this.jsontoken = location.hash.replace('#', '') || 'dlux'
