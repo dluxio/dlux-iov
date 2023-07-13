@@ -124,8 +124,8 @@
         </div>
         <main role="main">
             <div class="container" style="max-width: 1800px !important">
-                <div class="d-flex py-2">
-                    <div class="px-4 py-2 rounded-3 card d-flex flex-grow-1">
+                <div class="d-flex py-2 align-items-stretch">
+                    <div class="px-4 rounded-3 card d-flex flex-grow-1">
                         <div class="d-flex align-items-center">
                             <div class="py-5 px-3">
                                 <h1 class="display-5 fw-bold">Welcome to the Market</h1>
@@ -199,90 +199,18 @@
                                 </div>
                             </div>
 
-                            <div class="ms-auto accordion wallet-accordion text-black pb-0 shadow-lg"
-                                id="accordionExample">
-                                <div class="accordion-item wallet-accordion-item shadow" :id="name + '-wallet-item'"
-                                    v-for="(token, name, index) in chains">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button text-black" type="button"  v-bind:class="{'collapsed': name != 'dlux'}"
-                                            data-bs-toggle="collapse" :data-bs-target="'#collapse' + name"
-                                            aria-expanded="true" :aria-controls="'#collapse' + name">
-                                            {{toUpperCase(name)}}<span
-                                                class="ms-auto small ">{{formatNumber(chains[name].account.balance/1000,
-                                                3,
-                                                '.', ',')}}</span>
-                                        </button>
-                                    </h2>
-                                    <div :id="'collapse' + name" class="accordion-collapse collapse"  v-bind:class="{'show': name == 'dlux'}"
-                                        data-bs-parent="#accordionExample">
-                                        <div class="accordion-body">
-                                            <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
-                                                {{formatNumber(chains[name].account.balance/1000, 3, '.', ',')}}
-                                                {{toUpperCase(name)}}
-                                            </h3>
-                                            <div class="mt-1 text-end">
-                                                <button class="btn btn-outline-dark btn-sm" href="#buyTokenModal"
-                                                    class="a-1" data-bs-toggle="modal" @click="popDex(name)">
-                                                    Get {{toUpperCase(name)}}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="accordion-item wallet-accordion-item bg-hive shadow">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button text-black collapsed" type="button"
-                                            data-bs-toggle="collapse" data-bs-target="#collapseTwo"
-                                            aria-expanded="false" aria-controls="collapseTwo">
-                                            HIVE<span class="ms-auto small">{{barhive}}</span>
-                                        </button>
-                                    </h2>
-                                    <div id="collapseTwo" class="accordion-collapse collapse"
-                                        data-bs-parent="#accordionExample">
-                                        <div class="accordion-body">
-                                            <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
-                                                {{barhive}}</h3>
-                                            <div class="mt-1 text-end">
-                                                <button class="btn btn-outline-dark disabled btn-sm" class="a-1"
-                                                    data-bs-toggle="modal">
-                                                    Get HIVE
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="accordion-item wallet-accordion-item bg-hbd shadow">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button text-black collapsed" type="button"
-                                            data-bs-toggle="collapse" data-bs-target="#collapseThree"
-                                            aria-expanded="false" aria-controls="collapseThree">
-                                            HBD<span class="ms-auto small">{{barhbd}}</span>
-                                        </button>
-                                    </h2>
-                                    <div id="collapseThree" class="accordion-collapse collapse"
-                                        data-bs-parent="#accordionExample">
-                                        <div class="accordion-body">
-                                            <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
-                                                {{barhbd}}</h3>
-                                            <div class="mt-1 text-end">
-                                                <button class="btn btn-outline-dark disabled btn-sm" class="a-1"
-                                                    data-bs-toggle="modal">
-                                                    Get HBD
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+
 
 
                         </div>
                     </div>
-                    <div id="carouselExampleCaptions" class="carousel slide bg-darkg shadow-lg rounded-3 ms-2">
 
+
+
+                    <!-- MINTS -->
+                    <div id="carouselExampleCaptions" class="carousel slide card shadow-lg rounded-3 ms-1">
                         <div class="carousel-inner text-center py-2">
                             <h3>MINTS</h3>
-
                             <div class="carousel-item active">
                                 <div class="d-flex mx-5 my-4 align-items-center rounded">
                                     <img src="https://ipfs.io/ipfs/QmRYrwWuUpjdkn3VW2CY9mD2NcqoGqiJzjN2DmWi49dRZX"
@@ -354,6 +282,86 @@
                                 aria-label="Slide 3"></button>
                         </div>
                     </div>
+
+                    <!-- WALLETS -->
+                    <div class="ms-1 card p-2 rounded-3">
+                        <div class="accordion wallet-accordion text-black" id="accordionExample">
+                            <div class="accordion-item wallet-accordion-item shadow" :id="name + '-wallet-item'"
+                                v-for="(token, name, index) in chains">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button text-black" type="button"
+                                        v-bind:class="{'collapsed': name != 'dlux'}" data-bs-toggle="collapse"
+                                        :data-bs-target="'#collapse' + name" aria-expanded="true"
+                                        :aria-controls="'#collapse' + name">
+                                        {{toUpperCase(name)}}<span
+                                            class="ms-auto small ">{{formatNumber(chains[name].account.balance/1000,
+                                            3,
+                                            '.', ',')}}</span>
+                                    </button>
+                                </h2>
+                                <div :id="'collapse' + name" class="accordion-collapse collapse"
+                                    v-bind:class="{'show': name == 'dlux'}" data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
+                                            {{formatNumber(chains[name].account.balance/1000, 3, '.', ',')}}
+                                            {{toUpperCase(name)}}
+                                        </h3>
+                                        <div class="mt-1 text-end">
+                                            <button class="btn btn-outline-dark btn-sm" href="#buyTokenModal"
+                                                class="a-1" data-bs-toggle="modal" @click="popDex(name)">
+                                                Get {{toUpperCase(name)}}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item wallet-accordion-item bg-hive shadow">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button text-black collapsed" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false"
+                                        aria-controls="collapseTwo">
+                                        HIVE<span class="ms-auto small">{{barhive}}</span>
+                                    </button>
+                                </h2>
+                                <div id="collapseTwo" class="accordion-collapse collapse"
+                                    data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
+                                            {{barhive}}</h3>
+                                        <div class="mt-1 text-end">
+                                            <button class="btn btn-outline-dark disabled btn-sm" class="a-1"
+                                                data-bs-toggle="modal">
+                                                Get HIVE
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item wallet-accordion-item bg-hbd shadow">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button text-black collapsed" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false"
+                                        aria-controls="collapseThree">
+                                        HBD<span class="ms-auto small">{{barhbd}}</span>
+                                    </button>
+                                </h2>
+                                <div id="collapseThree" class="accordion-collapse collapse"
+                                    data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
+                                            {{barhbd}}</h3>
+                                        <div class="mt-1 text-end">
+                                            <button class="btn btn-outline-dark disabled btn-sm" class="a-1"
+                                                data-bs-toggle="modal">
+                                                Get HBD
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
                 <!-- ACTION BAR -->
                 <div class="d-flex">
