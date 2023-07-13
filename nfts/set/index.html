@@ -122,7 +122,8 @@
                       <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="/nfts/sets/">Explore</a></li>
                         <li class="breadcrumb-item active" aria-current="page">dlux</li>
-                        <li class="breadcrumb-item active" aria-current="page">DLUX Founders</li>
+                        <li class="breadcrumb-item active" aria-current="page">{{chains[jsontoken].sets[setname].name_long ?
+                          chains[jsontoken].sets[setname].name_long : ''}}</li>
                       </ol>
                     </nav>
               </div>
