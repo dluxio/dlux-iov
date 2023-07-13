@@ -71,14 +71,17 @@
                     rgb(162, 209, 255));
         }
 
-        .accordion-item {
+        .wallet-accordion-item {
             width: 350px;
         }
 
-        .accordion {
+        .wallet-accordion {
 
             --bs-accordion-border-color: clear !important;
             --bs-accordion-active-bg: clear !important;
+            --bs-accordion-btn-color: #000000;
+            --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+            --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
 
         }
 
@@ -93,6 +96,22 @@
         #duat-wallet-item {
             background-color: #ffc107;
         }
+
+        .mint-img {
+            width: 200px;
+        }
+
+        .carousel {
+            width: 600px;
+        }
+
+        .carousel-indicators {
+            left: 0;
+            right: 0;
+            top: auto;
+            bottom: -15px;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -105,198 +124,235 @@
         </div>
         <main role="main">
             <div class="container" style="max-width: 1800px !important">
-                <div class="px-5 py-2 mt-2 mb-2 rounded-3 card">
-                    <div class="d-flex">
-                        <div class="py-5">
-                            <h1 class="display-5 fw-bold">Discover, collect, and sell NFTs</h1>
-                            <p class="col-md-8 fs-4">All with no gas fees at near cost</p>
-                            <div class="d-flex">
-                                <a class="btn btn-primary btn-lg me-2" type="button" href="sets">Explore</a>
-                                <a class="btn btn-secondary btn-lg" type="button" href="create">Create</a>
-                            </div>
-                        </div>
-
-                        <div id="carouselExampleCaptions" class=" carousel slide">
-                            <div class="carousel-indicators">
-                                <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0"
-                                    class="active" aria-current="true" aria-label="Slide 1"></button>
-                                <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1"
-                                    aria-label="Slide 2"></button>
-                                <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2"
-                                    aria-label="Slide 3"></button>
-                            </div>
-                            <div class="carousel-inner">
-                                <div class="carousel-item active">
-                                    <img src="https://ipfs.io/ipfs/QmRYrwWuUpjdkn3VW2CY9mD2NcqoGqiJzjN2DmWi49dRZX"
-                                        class="w-50 border border-dark border-2 rounded d-block">
-                                    <div class="carousel-caption d-none d-md-block">
-                                        <h5>First slide label</h5>
-                                        <p>Some representative placeholder content for the first slide.</p>
-                                    </div>
-                                </div>
-                                <div class="carousel-item">
-                                    <img src="https://ipfs.io/ipfs/QmV4WZ7sKzvaPG85C2rYNhDS3nVhk3Bv5U9o5Gr9KWx7ir"
-                                        class="w-50 border border-dark border-2 d-block">
-                                    <div class="carousel-caption d-none d-md-block">
-                                        <h5>Second slide label</h5>
-                                        <p>Some representative placeholder content for the second slide.</p>
-                                    </div>
-                                </div>
-                                <div class="carousel-item">
-                                    <img src="https://ipfs.io/ipfs/QmXwAAQkyqzeqJeJcuqrasApruUewALuhTPhJTPdKckM1M"
-                                        class="w-50 border border-dark border-2 d-block">
-                                    <div class="carousel-caption d-none d-md-block">
-                                        <h5>Third slide label</h5>
-                                        <p>Some representative placeholder content for the third slide.</p>
-                                    </div>
+                <div class="d-flex py-2">
+                    <div class="px-5 py-2 rounded-3 card d-flex flex-grow-1">
+                        <div class="d-flex align-items-center">
+                            <div class="py-5">
+                                <h1 class="display-5 fw-bold">Welcome to the Market</h1>
+                                <p class="col-md-8 fs-4">Browse, bid, buy, and mint</p>
+                                <div class="d-flex">
+                                    <a class="btn btn-primary btn-lg me-2" type="button" href="sets">Explore</a>
+                                    <a class="btn btn-secondary btn-lg" type="button" href="create">Create</a>
                                 </div>
                             </div>
-                            <button class="carousel-control-prev" type="button"
-                                data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Previous</span>
-                            </button>
-                            <button class="carousel-control-next" type="button"
-                                data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Next</span>
-                            </button>
-                        </div>
 
 
-                        <div class="d-flex d-none">
-                            <div class="mt-auto mb-auto" style="width: 350px">
-                                <div class="my-0 py-1 px-2 bg-darker rounded-top">
-                                    <div class="d-flex align-items-center mt-2">
-                                        <div class="d-flex align-items-center">
-                                            <div class="circle2 d-flex align-items-center justify-content-around">
-                                                <img src="/img/dlux-hive-logo-alpha.svg" width="50px">
+
+
+                            <div class="d-flex d-none">
+                                <div class="mt-auto mb-auto" style="width: 350px">
+                                    <div class="my-0 py-1 px-2 bg-darker rounded-top">
+                                        <div class="d-flex align-items-center mt-2">
+                                            <div class="d-flex align-items-center">
+                                                <div class="circle2 d-flex align-items-center justify-content-around">
+                                                    <img src="/img/dlux-hive-logo-alpha.svg" width="50px">
+                                                </div>
+                                                <h2 class="p-0 m-0 ms-2 font-weight-bold">HoneyComb</h2>
                                             </div>
-                                            <h2 class="p-0 m-0 ms-2 font-weight-bold">HoneyComb</h2>
-                                        </div>
-                                        <div class="ms-auto"><a href="/about/" class="no-decoration"
-                                                style="color:silver">About<i class="fas fa-info-circle ms-1"></i></a>
-                                        </div>
-                                    </div>
-                                    <div v-for="(token, name, index) in chains">
-                                        <div class="d-flex justify-content-around my-0">
-                                            <div class="d-flex align-items-center px-3">
-
-                                                <h3 class="py-2 m-0 font-weight-bolder" style="color:#21FFB5">
-                                                    {{formatNumber(chains[name].account.balance/1000, 3, '.', ',')}}
-                                                    {{toUpperCase(name)}}
-                                                </h3>
+                                            <div class="ms-auto"><a href="/about/" class="no-decoration"
+                                                    style="color:silver">About<i
+                                                        class="fas fa-info-circle ms-1"></i></a>
                                             </div>
                                         </div>
-                                        <div class="mt-1 text-end">
-                                            <button class="btn btn-outline-primary btn-sm" href="#buyTokenModal"
-                                                class="a-1" data-bs-toggle="modal" @click="popDex(name)">
-                                                Get {{toUpperCase(name)}}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="bg-darker">
-                                    <div class="bg-hive">
-                                        <div class="bg-darker rounded-bottom bottom-shadow" style="line-height: 10px">
-                                            &nbsp;</div>
-                                        <div class="mx-2 mt-2 d-flex">
-                                            <p class="m-0"><b><i class="fab fa-hive"></i> HIVE</b></p>
-                                            <p class="ms-auto small mb-0 text-white-50">
-                                                {{barhive}}</span></p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="bg-hbd rounded-bottom bottom-shadow">
-                                    <div class="rounded-bottom">
-                                        <div class="bg-hive rounded-bottom bottom-shadow" style="line-height: 10px;">
-                                            &nbsp;</div>
-                                    </div>
-                                    <div class="my-2 mx-2 d-flex">
-                                        <p class="m-0"><b><i class="fab fa-hive"></i> HBD</b></p>
-                                        <p class="ms-auto small text-white-50">
-                                            {{barhbd}}</span></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                        <div v-for="(token, name, index) in chains">
+                                            <div class="d-flex justify-content-around my-0">
+                                                <div class="d-flex align-items-center px-3">
 
-                        <div class="accordion text-black" id="accordionExample">
-                            <div class="accordion-item shadow" :id="name + '-wallet-item'"
-                                v-for="(token, name, index) in chains">
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button text-black"
-                                        v-bind:class="{'collapsed': name != 'dlux'}" type="button"
-                                        data-bs-toggle="collapse" :data-bs-target="'#collapse' + name"
-                                        aria-expanded="true" :aria-controls="'#collapse' + name">
-                                        {{toUpperCase(name)}}<span
-                                            class="ms-auto small ">{{formatNumber(chains[name].account.balance/1000, 3,
-                                            '.', ',')}}</span>
-                                    </button>
-                                </h2>
-                                <div :id="'collapse' + name" class="accordion-collapse collapse"
-                                    v-bind:class="{'show': name == 'dlux'}" data-bs-parent="#accordionExample">
-                                    <div class="accordion-body">
-                                        <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
-                                            {{formatNumber(chains[name].account.balance/1000, 3, '.', ',')}}
-                                            {{toUpperCase(name)}}
-                                        </h3>
-                                        <div class="mt-1 text-end">
-                                            <button class="btn btn-outline-dark btn-sm" href="#buyTokenModal"
-                                                class="a-1" data-bs-toggle="modal" @click="popDex(name)">
-                                                Get {{toUpperCase(name)}}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="accordion-item bg-hive shadow">
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button text-black collapsed" type="button"
-                                        data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false"
-                                        aria-controls="collapseTwo">
-                                        HIVE<span class="ms-auto small">{{barhive}}</span>
-                                    </button>
-                                </h2>
-                                <div id="collapseTwo" class="accordion-collapse collapse"
-                                    data-bs-parent="#accordionExample">
-                                    <div class="accordion-body">
-                                        <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
-                                            {{barhive}}</h3>
+                                                    <h3 class="py-2 m-0 font-weight-bolder" style="color:#21FFB5">
+                                                        {{formatNumber(chains[name].account.balance/1000, 3, '.', ',')}}
+                                                        {{toUpperCase(name)}}
+                                                    </h3>
+                                                </div>
+                                            </div>
                                             <div class="mt-1 text-end">
-                                                <button class="btn btn-outline-dark disabled btn-sm"
-                                                    class="a-1" data-bs-toggle="modal" >
+                                                <button class="btn btn-outline-primary btn-sm" href="#buyTokenModal"
+                                                    class="a-1" data-bs-toggle="modal" @click="popDex(name)">
+                                                    Get {{toUpperCase(name)}}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-darker">
+                                        <div class="bg-hive">
+                                            <div class="bg-darker rounded-bottom bottom-shadow"
+                                                style="line-height: 10px">
+                                                &nbsp;</div>
+                                            <div class="mx-2 mt-2 d-flex">
+                                                <p class="m-0"><b><i class="fab fa-hive"></i> HIVE</b></p>
+                                                <p class="ms-auto small mb-0 text-white-50">
+                                                    {{barhive}}</span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-hbd rounded-bottom bottom-shadow">
+                                        <div class="rounded-bottom">
+                                            <div class="bg-hive rounded-bottom bottom-shadow"
+                                                style="line-height: 10px;">
+                                                &nbsp;</div>
+                                        </div>
+                                        <div class="my-2 mx-2 d-flex">
+                                            <p class="m-0"><b><i class="fab fa-hive"></i> HBD</b></p>
+                                            <p class="ms-auto small text-white-50">
+                                                {{barhbd}}</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="ms-auto accordion wallet-accordion text-black pb-0 shadow-lg"
+                                id="accordionExample">
+                                <div class="accordion-item wallet-accordion-item shadow" :id="name + '-wallet-item'"
+                                    v-for="(token, name, index) in chains">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button text-black collapsed" type="button"
+                                            data-bs-toggle="collapse" :data-bs-target="'#collapse' + name"
+                                            aria-expanded="true" :aria-controls="'#collapse' + name">
+                                            {{toUpperCase(name)}}<span
+                                                class="ms-auto small ">{{formatNumber(chains[name].account.balance/1000,
+                                                3,
+                                                '.', ',')}}</span>
+                                        </button>
+                                    </h2>
+                                    <div :id="'collapse' + name" class="accordion-collapse collapse"
+                                        data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+                                            <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
+                                                {{formatNumber(chains[name].account.balance/1000, 3, '.', ',')}}
+                                                {{toUpperCase(name)}}
+                                            </h3>
+                                            <div class="mt-1 text-end">
+                                                <button class="btn btn-outline-dark btn-sm" href="#buyTokenModal"
+                                                    class="a-1" data-bs-toggle="modal" @click="popDex(name)">
+                                                    Get {{toUpperCase(name)}}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item wallet-accordion-item bg-hive shadow">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button text-black collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#collapseTwo"
+                                            aria-expanded="false" aria-controls="collapseTwo">
+                                            HIVE<span class="ms-auto small">{{barhive}}</span>
+                                        </button>
+                                    </h2>
+                                    <div id="collapseTwo" class="accordion-collapse collapse"
+                                        data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+                                            <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
+                                                {{barhive}}</h3>
+                                            <div class="mt-1 text-end">
+                                                <button class="btn btn-outline-dark disabled btn-sm" class="a-1"
+                                                    data-bs-toggle="modal">
                                                     Get HIVE
                                                 </button>
                                             </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="accordion-item bg-hbd shadow">
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button text-black collapsed" type="button"
-                                        data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false"
-                                        aria-controls="collapseThree">
-                                        HBD<span class="ms-auto small">{{barhbd}}</span>
-                                    </button>
-                                </h2>
-                                <div id="collapseThree" class="accordion-collapse collapse"
-                                    data-bs-parent="#accordionExample">
-                                    <div class="accordion-body">
-                                        <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
-                                            {{barhbd}}</h3>
+                                <div class="accordion-item wallet-accordion-item bg-hbd shadow">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button text-black collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#collapseThree"
+                                            aria-expanded="false" aria-controls="collapseThree">
+                                            HBD<span class="ms-auto small">{{barhbd}}</span>
+                                        </button>
+                                    </h2>
+                                    <div id="collapseThree" class="accordion-collapse collapse"
+                                        data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+                                            <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
+                                                {{barhbd}}</h3>
                                             <div class="mt-1 text-end">
-                                                <button class="btn btn-outline-dark disabled btn-sm"
-                                                    class="a-1" data-bs-toggle="modal" >
+                                                <button class="btn btn-outline-dark disabled btn-sm" class="a-1"
+                                                    data-bs-toggle="modal">
                                                     Get HBD
                                                 </button>
                                             </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
+
                         </div>
+                    </div>
+                    <div id="carouselExampleCaptions" class="carousel slide bg-darkg shadow-lg rounded-3 ms-2">
 
+                        <div class="carousel-inner text-center py-2">
+                            <h3>MINTS</h3>
 
+                            <div class="carousel-item active">
+                                <div class="d-flex mx-5 my-4 align-items-center rounded">
+                                    <img src="https://ipfs.io/ipfs/QmRYrwWuUpjdkn3VW2CY9mD2NcqoGqiJzjN2DmWi49dRZX"
+                                        class="border border-dark border-2 rounded mint-img shadow">
+                                    <div class="w-100 d-flex">
+                                        <div class="ms-auto text-end">
+                                            <h5>Hive Folks</h5>
+                                            <small>Lowest Price</small>
+                                            <p>100.000 HIVE</p>
+                                            <small>Lowest Bid</small>
+                                            <p>50 HBD</p>
+                                            <button class="btn btn-sm btn-outline-light">2 Available</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <div class="d-flex mx-5 my-4 align-items-center rounded">
+                                    <img src="https://ipfs.io/ipfs/QmV4WZ7sKzvaPG85C2rYNhDS3nVhk3Bv5U9o5Gr9KWx7ir"
+                                        class="ms-auto me-auto border border-dark border-2 rounded d-block mint-img">
+
+                                    <div class="w-100 d-flex">
+                                        <div class=" ms-auto text-end">
+                                            <h5>Beez</h5>
+                                            <small>Lowest Price</small>
+                                            <p>100.000 HIVE</p>
+                                            <small>Lowest Bid</small>
+                                            <p>50 HBD</p>
+                                            <button class="btn btn-sm btn-outline-light">13 Available</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <div class="d-flex mx-5 my-4 align-items-center rounded">
+                                    <img src="https://ipfs.io/ipfs/QmXwAAQkyqzeqJeJcuqrasApruUewALuhTPhJTPdKckM1M"
+                                        class="ms-auto me-auto border border-dark border-2 rounded d-block mint-img">
+
+                                    <div class="w-100 d-flex">
+                                        <div class="ms-auto text-end">
+                                            <h5>DLUX Founders</h5>
+                                            <small>Lowest Price</small>
+                                            <p>100.000 HIVE</p>
+                                            <small>Lowest Bid</small>
+                                            <p>50 HBD</p>
+                                            <button class="btn btn-sm btn-outline-light">1,996 Available</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions"
+                            data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions"
+                            data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                        <div class="carousel-indicators">
+                            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0"
+                                class="active" aria-current="true" aria-label="Slide 1"></button>
+                            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1"
+                                aria-label="Slide 2"></button>
+                            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2"
+                                aria-label="Slide 3"></button>
+                        </div>
                     </div>
                 </div>
                 <!-- ACTION BAR -->
@@ -467,7 +523,8 @@
                             <div class="modal-body">
                                 <p class="small text-white-50">Market Orders utilize multisig to
                                     complete partial fills of open orders on the <a
-                                        :href="'/dex#' + marketorder.name">DEX</a>, starting
+                                        :href="'/dex#' + marketorder.name">DEX</a>,
+                                    starting
                                     with the lowest rate to ensure you're getting the best
                                     price.</p>
                                 <div class="d-flex flex-column">
@@ -501,7 +558,8 @@
                                                         @keyup="marketValue()" :max="parseFloat(barhive)">
                                                 </p>
                                                 <p class="ms-auto my-0 text-muted font-weight-bold"
-                                                    style="font-size: 16px;">&asymp;
+                                                    style="font-size: 16px;">
+                                                    &asymp;
                                                     $ {{ marketorder.hive * hiveprice }}
                                                 </p>
                                             </div>
