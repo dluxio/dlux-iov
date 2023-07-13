@@ -41,14 +41,25 @@
 //         }
   </script>
   <style>
-    .mint-widget {
-      max-width: 600px;
+    .mint-market-widget {
+      width: 35%;
     }
+
+    .mint-owned-widget {
+      width: 10%;
+    }
+
+    .info-widget {
+      width: 35%;
+    }
+
     .stats-widget {
       max-width: 700px;
     }
-    .info-widget {
-      max-width: 600px;
+
+    .mint-bar {
+
+      height: 55px;
     }
   </style>
 </head>
@@ -73,40 +84,47 @@
                 :src="makeLink('https://ipfs.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.logo : '')"></img>
             </div>
           </div>
-          <div v-cloak class="card-body p-0 rounded"
+          <div v-cloak class="card-body p-0 rounded-bottom rounded-bottom-3"
             :style="{'background': getSetDetailsColors(chains[jsontoken].sets[setname].computed ? chains[jsontoken].sets[setname].computed : '')}"
             style="border: none; ">
 
 
-            <div class="m-3 p-3 rounded d-flex justify-content-center w-100" style="background-color: rgba(0,0,0,0.7)">
+            <div class="mt-3 mx-2 mb-1 pt-3 rounded d-flex align-items-center flex-wrap justify-content-around"
+              style="background-color: rgba(0,0,0,0.7)">
+              <div class="ms-2 mt-2">
+                <h1 class="card-title mb-0" v-cloak>{{chains[jsontoken].sets[setname].name_long ?
+                  chains[jsontoken].sets[setname].name_long : ''}}</h1>
+                <h4 class="m-0 small">Created by <a :href="makeLink('/@',chains[jsontoken].sets[setname].author)"
+                    class="no-decoration" v-cloak>@{{chains[jsontoken].sets[setname].author}}</a></h4>
+              </div>
               <!-- stats widget -->
               <div class="d-flex w-100 align-items-center py-2 justify-content-center stats-widget">
-                  <div class="text-center p-2 border-end">
-                    <h3 class="mb-0"><i
-                        class="fa-solid fa-user-astronaut me-1"></i>{{chains[jsontoken].sets[setname].owners}}</h3>
-                    <p class="mb-0">owners</p>
-                  </div>
-                  
-                  <div class="text-center p-2 border-end">
-                    <h3 class="mb-0"><i class="fa-solid fa-star me-1"></i>{{chains[jsontoken].sets[setname].minted -
-                      chains[jsontoken].sets[setname].deleted}}</h3>
-                    <p class="mb-0">items</p>
-                  </div>
+                <div class="text-center p-2 border-end">
+                  <h3 class="mb-0"><i
+                      class="fa-solid fa-user-astronaut me-1"></i>{{chains[jsontoken].sets[setname].owners}}</h3>
+                  <p class="mb-0">owners</p>
+                </div>
+
+                <div class="text-center p-2 border-end">
+                  <h3 class="mb-0"><i class="fa-solid fa-star me-1"></i>{{chains[jsontoken].sets[setname].minted -
+                    chains[jsontoken].sets[setname].deleted}}</h3>
+                  <p class="mb-0">items</p>
+                </div>
 
                 <div class="d-flex justify-content-around flex-grow-1">
-                  
+
                   <div class="text-center p-2">
                     <h3 class="mb-0"><cycle-text
                         :items="[sigFig(chains[jsontoken].sets[setname].sf.HIVE/1000, 2) + ' HIVE', sigFig(chains[jsontoken].sets[setname].sf.HBD/1000, 2) + ' HBD', sigFig(chains[jsontoken].sets[setname].sf.TOKEN/1000, 2) + ' ' + TOKEN]"
                         :interval="5000" /></h3>
-                    <p class="mb-0">sale floor</p>
+                    <p class="mb-0 text-nowrap">sale floor</p>
                   </div>
-                  
+
                   <div class="text-center p-2">
                     <h3 class="mb-0"><cycle-text
                         :items="[chains[jsontoken].sets[setname].af.HIVE/1000 + ' HIVE', chains[jsontoken].sets[setname].af.HBD/1000 + ' HBD', chains[jsontoken].sets[setname].af.TOKEN/1000 + ' ' + TOKEN]"
                         :interval="5000" /></h3>
-                    <p class="mb-0">auction floor</p>
+                    <p class="mb-0 text-nowrap">auction floor</p>
                   </div>
 
                 </div>
@@ -116,127 +134,15 @@
             </div>
           </div>
         </div>
-
-        <div class="d-flex py-2 align-items-stretch  flex-wrap">
-        <!--info widget -->
-          <div class="p-2 rounded-3 card d-flex me-1 info-widget">
-            <div class="d-flex align-items-center">
-              <div class="p-2">
-                <div class="">
-                  <div class="mb-3">
-                    <h1 class="card-title text-center" v-cloak>{{chains[jsontoken].sets[setname].name_long ?
-                      chains[jsontoken].sets[setname].name_long : ''}}</h1>
-                  </div>
-                  <div class="mb-3">
-                    <p class="m-0 text-center small">Created by <a
-                        :href="makeLink('/@',chains[jsontoken].sets[setname].author)" class="no-decoration"
-                        v-cloak>@{{chains[jsontoken].sets[setname].author}}</a></p>
-                  </div>
-                  <div class="mb-3">
-                    <p class="text-white-50 m-0" v-cloak>{{chains[jsontoken].sets[setname].computed.set ?
-                      chains[jsontoken].sets[setname].computed.set.Description
-                      : '...'}}</p>
-                  </div>
-                  <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div class="">
-                      <span class="small border border-secondary rounded text-white px-2 py-1" v-cloak>ROYALTY:
-                        {{chains[jsontoken].sets[setname].royalty/100}}%</span>
-                    </div>
-                    <div class="">
-                      <span class="small border border-secondary rounded text-white px-2 py-1" v-cloak>BOND:
-                        {{chains[jsontoken].sets[setname].bond ? precision(chains[jsontoken].sets[setname].bond.amount,
-                        chains[jsontoken].sets[setname].bond.precision) : 0 }} {{chains[jsontoken].sets[setname].bond ?
-                        chains[jsontoken].sets[setname].bond.token :
-                        ''}}</span>
-                    </div>
-                  </div>
-                  <div class="mb-3">
-                    <div class="d-flex">
-                      <div class="small">Permlink: <a :href="makeLink('/blog/@',chains[jsontoken].sets[setname].link)"
-                          v-cloak>{{chains[jsontoken].sets[setname].permlink}}</a></div>
-                      <div class="dropdown show d-flex align-items-center p-0 m-0">
-                        <a class="text-white" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                          aria-expanded="false">
-                          <h5 class="m-0"><i class="fas fa-info-circle ms-2"></i></h5>
-                        </a>
-                        <div
-                          class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
-                          <h6 class="dropdown-header text-center" v-cloak>{{chains[jsontoken].sets[setname].name}} NFT
-                            STATS</h6>
-                          <div class="dropdown-divider bg-light"></div>
-                          <p class="mb-0" v-cloak>Type: {{chains[jsontoken].sets[setname].type}}</p>
-                          <div class="dropdown-divider bg-light"></div>
-                          <p class="mb-0" v-cloak>Encoding: {{chains[jsontoken].sets[setname].encoding}}</p>
-                          <div class="dropdown-divider bg-light"></div>
-                          <p class="mb-0" v-cloak>Fee: {{naiString(chains[jsontoken].sets[setname].fee)}}</p>
-                          <div class="dropdown-divider bg-light"></div>
-                          <p class="mb-0">Script:</p>
-                          <p class="mb-0" style="max-width: 250px;" v-cloak>{{chains[jsontoken].sets[setname].script}}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!--multi bar-->
-            <div>
-              <div class="progress bg-secondary mb-3" style="height: 40px;">
-                <!--burned-->
-                <div class="progress-bar" style="background-color: rgb(133, 64, 64);" role="progressbar"
-                  :style="{'width': ((chains[jsontoken].sets[setname].deleted/chains[jsontoken].sets[setname].max)*100) + '%'}"
-                  aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                  <span><i class="me-1 fa-solid fa-fire"></i></span>
-                  <span
-                    v-cloak>{{formatNumber(((chains[jsontoken].sets[setname].deleted/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
-                </div>
-                <!--opened-->
-                <div class="progress-bar" style="background-color: rgb(60, 60, 138);" role="progressbar"
-                  :style="{'width': (((chains[jsontoken].sets[setname].minted-chains[jsontoken].sets[setname].deleted)/chains[jsontoken].sets[setname].max)*100) + '%'}"
-                  aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                  <span><i class="me-1 fa-solid fa-box-open"></i></span>
-                  <span
-                    v-cloak>{{formatNumber(((chains[jsontoken].sets[setname].minted/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
-                </div>
-                <!--closed-->
-                <div class="progress-bar" style="background-color: rgb(50, 94, 50);" role="progressbar"
-                  :style="{'width': (((chains[jsontoken].sets[setname].max-chains[jsontoken].sets[setname].minted)/chains[jsontoken].sets[setname].max)*100) + '%'}"
-                  aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                  <span><i class="me-1 fa-solid fa-box"></i></span>
-                  <span
-                    v-cloak>{{formatNumber((((chains[jsontoken].sets[setname].max-chains[jsontoken].sets[setname].minted)/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
-                </div>
-              </div>
-
-              <div class="d-flex justify-content-between align-items-center text-center">
-                <div v-cloak class="col-3 p-2 d-flex flex-column">
-                  <h5 class="mb-1"><i class="fa-solid fa-fire"></i></h3><span
-                      class="mb-2 small">burned</span><span>{{chains[jsontoken].sets[setname].deleted}}</span>
-                </div>
-                <div v-cloak class="col-3 p-2 d-flex flex-column">
-                  <h5 class="mb-1"><i class="fa-solid fa-box-open"></i></h3><span class="mb-2 small">opened</span>
-                    <span>{{formatNumber(chains[jsontoken].sets[setname].minted,0,'.',',')}}</span>
-                </div>
-                <div v-cloak class="col-3 p-2 d-flex flex-column">
-                  <h5 class="mb-1"><i class="fa-solid fa-box"></i></h4><span class="mb-2 small">sealed</span>
-                    <span>{{formatNumber((chains[jsontoken].sets[setname].max-chains[jsontoken].sets[setname].minted),0,'.',',')}}</span>
-                </div>
-                <div v-cloak class="col-3 p-2 d-flex flex-column">
-                  <h5 class="mb-1"><i class="fa-solid fa-boxes-stacked"></i></h4><span
-                      class="mb-2 small">total</span>
-                    <span>{{formatNumber(chains[jsontoken].sets[setname].max,0,'.',',')}}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- progress widget -->
-          <div class="p-2 rounded-3 card d-flex me-1 flex-grow-1 d-none">
-            <div class="d-flex align-items-center">
-              <div class="p-2">
-                <!--multi bar-->
-                <div>
-                  <div class="progress bg-secondary mb-3" style="height: 40px;">
+        <!-- widget accordion-->
+        <div class="accordion my-1" id="accordionWidgets">
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed pt-2 pb-1" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapseWidgets" aria-expanded="true" aria-controls="collapseWidgets">
+                <div class="w-100 d-flex flex-wrap justify-content-around align-items-center">
+                  <div
+                    class="flex-grow-1 mb-1 me-2 progress bg-secondary border rounded-pill border-dark border-2 mint-bar">
                     <!--burned-->
                     <div class="progress-bar" style="background-color: rgb(133, 64, 64);" role="progressbar"
                       :style="{'width': ((chains[jsontoken].sets[setname].deleted/chains[jsontoken].sets[setname].max)*100) + '%'}"
@@ -262,212 +168,309 @@
                         v-cloak>{{formatNumber((((chains[jsontoken].sets[setname].max-chains[jsontoken].sets[setname].minted)/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
                     </div>
                   </div>
+                  <!-- mint supply -->
 
-                  <div class="d-flex justify-content-between align-items-center text-center">
-                    <div v-cloak class="col-3 p-2 d-flex flex-column">
-                      <h5 class="mb-1"><i class="fa-solid fa-fire"></i></h3><span
-                          class="mb-2 small">burned</span><span>{{chains[jsontoken].sets[setname].deleted}}</span>
-                    </div>
-                    <div v-cloak class="col-3 p-2 d-flex flex-column">
-                      <h5 class="mb-1"><i class="fa-solid fa-box-open"></i></h3><span class="mb-2 small">opened</span>
-                        <span>{{formatNumber(chains[jsontoken].sets[setname].minted,0,'.',',')}}</span>
-                    </div>
-                    <div v-cloak class="col-3 p-2 d-flex flex-column">
-                      <h5 class="mb-1"><i class="fa-solid fa-box"></i></h4><span class="mb-2 small">sealed</span>
-                        <span>{{formatNumber((chains[jsontoken].sets[setname].max-chains[jsontoken].sets[setname].minted),0,'.',',')}}</span>
-                    </div>
-                    <div v-cloak class="col-3 p-2 d-flex flex-column">
-                      <h5 class="mb-1"><i class="fa-solid fa-boxes-stacked"></i></h4><span
-                          class="mb-2 small">total</span>
-                        <span>{{formatNumber(chains[jsontoken].sets[setname].max,0,'.',',')}}</span>
+                  <div class="rounded-pill me-2 d-flex align-items-center px-2 mb-1 py-1"
+                    style="background-color: black">
+                    <div class="pr-2"><small>MINT MARKET: </small></div>
+                    <div class="px-2">
+                      <h2 class="m-0">
+                        <div>{{formatNumber((chains[jsontoken].sets[setname].forAuctionMint +
+                          chains[jsontoken].sets[setname].forSaleMint),0,'.',',')}}
+                        </div>
+                      </h2>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- mint market widget -->
-          <div class="px-4 rounded-3 card d-flex me-1">
-            <div class="d-flex align-items-center">
-              <div class="p-2">
-                <div class="mint-widget">
-                  <div class="d-flex mb-3">
-                    <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
-                      <div class="pr-2"><small>MINT MARKET: </small></div>
-                      <div class="px-2">
-                        <h2 class="m-0">
-                          <div>{{formatNumber((chains[jsontoken].sets[setname].forAuctionMint +
-                            chains[jsontoken].sets[setname].forSaleMint),0,'.',',')}}
-                          </div>
-                        </h2>
-                      </div>
+
+                  <!-- mints owned -->
+
+                  <div class="rounded-pill d-flex align-items-center px-2 py-1 mb-1 me-2"
+                    style="background-color: black">
+                    <div class="pe-2"><small>MINTS OWNED: </small></div>
+                    <div class="px-2">
+                      <h2 class="m-0">{{getMint(chains[jsontoken].sets[setname].set, 'qty')}}</h2>
                     </div>
                   </div>
-                  <ul :id="chains[jsontoken].sets[setname].set + '-mint-tabnav'" class="nav nav-tabs mb-3"
-                    role="tablist">
-                    <li class="nav-item"> <a class="nav-link active"
-                        :href="'#' + chains[jsontoken].sets[setname].set + '-mint-salestab'"
-                        :id="chains[jsontoken].sets[setname].set + '-mint-saleslink'" role="tab" data-bs-toggle="tab"
-                        aria-controls="mintsalestab" aria-expanded="true">
-                        <div class="d-flex align-items-center">
-                          <div @click="">SALES</div>
-                          <div class="mb-3"><span class=" badge rounded-pill bg-danger" style="font-size: .7em">
-                              {{mintSales.length}}</span>
-                          </div>
+
+
+              </button>
+            </h2>
+            <div id="collapseWidgets" class="accordion-collapse collapse" data-bs-parent="#accordionWidgets">
+              <div class="accordion-body p-0 m-0">
+
+                <div class="d-flex align-items-stretch  flex-wrap">
+                  <!--info widget -->
+                  <div class="p-3 d-flex info-widget">
+                    <div class="">
+                      <div>
+                        <div class="mb-3">
+                          <p class="text-white-50 m-0" v-cloak>{{chains[jsontoken].sets[setname].computed.set ?
+                            chains[jsontoken].sets[setname].computed.set.Description
+                            : '...'}}</p>
                         </div>
-                      </a></li>
-                    <li class="nav-item"> <a class="nav-link"
-                        :href="'#'+ chains[jsontoken].sets[setname].set + '-mint-auctionstab'" role="tab"
-                        :id="chains[jsontoken].sets[setname].set + '-mint-auctionslink'" data-bs-toggle="tab"
-                        aria-controls="mintauctionstab">
-                        <div class="d-flex align-items-center">
-                          <div>AUCTIONS</div>
-                          <div class="mb-3"><span class=" badge rounded-pill bg-danger"
-                              style="font-size: .7em">{{mintAuctions.length}}</span>
+                        <!-- financial options -->
+                        <div class="d-flex align-items-center flex-wrap mb-3">
+                          <div class="me-2 d-flex">
+                            <span class="text-center small border border-secondary rounded text-white px-2 py-1"
+                              v-cloak>ROYALTY:
+                              {{chains[jsontoken].sets[setname].royalty/100}}%</span>
                           </div>
-                        </div>
-                      </a></li>
-                  </ul>
 
-                  <div :id="chains[jsontoken].sets[setname].set + '-mint-tabs'" class="tab-content">
-                    <div :id="chains[jsontoken].sets[setname].set + '-mint-salestab'" role="tabpanel"
-                      class="tab-pane fade show active" aria-labelledby="mintsalestab">
-                      <table class="table table-sm">
-                        <thead>
-                          <tr>
-                            <th scope="col" class="small">SUPPLY</th>
-                            <th scope="col" class="small">PRICE</th>
-                            <th scope="col" class="small">QTY</th>
-                            <th scope="col"></th>
-                          </tr>
-                        </thead>
-                        <tbody>
-
-                          <tr scope="row" v-for="ad in mintSales">
-
-                            <td style="vertical-align: middle">
-                              {{formatNumber(ad.qty,0,'.',',')}}</td>
-                            <td style="vertical-align: middle">
-                              {{naiString(ad.pricenai)}}</td>
-                            <td><span v-show="true" class="text-center">
-                                <form class="needs-validation" novalidate>
-                                  <div class="input-group">
-                                    <input value="1" required type="number" min="1" step="1" max="ad.qty"
-                                      class="form-control bg-darkg border-dark text-info" style="max-width: 100px"
-                                      v-model="ad.buyQty">
-                                    <div class="invalid-feedback">Wrong</div>
-
-                                    <div class="invalid-feedback">Fix Yourself</div>
-                                  </div>
-                                  <button type="submit" class="btn btn-info d-none" v-show="ad.by != account"
-                                    @click="buyMint(ad.uid)">Buy</button>{{toFixed(ad.buyQty * ad.pricenai.amount,0)}}
-                                  {{ad.pricenai.tokrn}}
-                                </form>
-                              </span>
-                              </span></td>
-                            <td>
-                              <div>
-                                <button type="submit" class="btn btn-info" v-show="ad.by != account"
-                                  onclick="submit()">Buy</button>
-                                <!-- <button class="btn btn-primary" v-show="ad.by != account">Buy</button> -->
-                                <button class="btn btn-warning" v-show="ad.by == account">Cancel</button>
+                          <div class="me-2 d-flex">
+                            <span class="text-center small border border-secondary rounded text-white px-2 py-1"
+                              v-cloak>BOND:
+                              {{chains[jsontoken].sets[setname].bond ?
+                              precision(chains[jsontoken].sets[setname].bond.amount,
+                              chains[jsontoken].sets[setname].bond.precision) : 0 }}
+                              {{chains[jsontoken].sets[setname].bond ?
+                              chains[jsontoken].sets[setname].bond.token :
+                              ''}}</span>
+                          </div>
+                          <!-- permlink dropdown stats -->
+                          <div class="d-flex ms-auto mt-2">
+                            <div class="small">Permlink: <a
+                                :href="makeLink('/blog/@',chains[jsontoken].sets[setname].link)"
+                                v-cloak>{{chains[jsontoken].sets[setname].permlink}}</a></div>
+                            <div class="dropdown show d-flex align-items-center p-0 m-0">
+                              <a class="text-white" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="false">
+                                <h5 class="m-0"><i class="fas fa-info-circle ms-2"></i></h5>
+                              </a>
+                              <div
+                                class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
+                                <h6 class="dropdown-header text-center" v-cloak>{{chains[jsontoken].sets[setname].name}}
+                                  NFT
+                                  STATS</h6>
+                                <div class="dropdown-divider bg-light"></div>
+                                <p class="mb-0" v-cloak>Type: {{chains[jsontoken].sets[setname].type}}</p>
+                                <div class="dropdown-divider bg-light"></div>
+                                <p class="mb-0" v-cloak>Encoding: {{chains[jsontoken].sets[setname].encoding}}</p>
+                                <div class="dropdown-divider bg-light"></div>
+                                <p class="mb-0" v-cloak>Fee: {{naiString(chains[jsontoken].sets[setname].fee)}}</p>
+                                <div class="dropdown-divider bg-light"></div>
+                                <p class="mb-0">Script:</p>
+                                <p class="mb-0" style="max-width: 250px;" v-cloak>
+                                  {{chains[jsontoken].sets[setname].script}}
+                                </p>
                               </div>
-                            </td>
-
-                          </tr>
-                        </tbody>
-                      </table>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- mint progress stats -->
+                      <div class="d-flex justify-content-between align-items-center text-center">
+                        <div v-cloak class="col-3 p-2 d-flex flex-column">
+                          <h5 class="mb-1"><i class="fa-solid fa-fire"></i></h3><span
+                              class="mb-2 small">burned</span><span>{{chains[jsontoken].sets[setname].deleted}}</span>
+                        </div>
+                        <div v-cloak class="col-3 p-2 d-flex flex-column">
+                          <h5 class="mb-1"><i class="fa-solid fa-box-open"></i></h3><span
+                              class="mb-2 small">opened</span>
+                            <span>{{formatNumber(chains[jsontoken].sets[setname].minted,0,'.',',')}}</span>
+                        </div>
+                        <div v-cloak class="col-3 p-2 d-flex flex-column">
+                          <h5 class="mb-1"><i class="fa-solid fa-box"></i></h4><span class="mb-2 small">sealed</span>
+                            <span>{{formatNumber((chains[jsontoken].sets[setname].max-chains[jsontoken].sets[setname].minted),0,'.',',')}}</span>
+                        </div>
+                        <div v-cloak class="col-3 p-2 d-flex flex-column">
+                          <h5 class="mb-1"><i class="fa-solid fa-boxes-stacked"></i></h4><span
+                              class="mb-2 small">total</span>
+                            <span>{{formatNumber(chains[jsontoken].sets[setname].max,0,'.',',')}}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div role="tabpanel" class="tab-pane fade show"
-                      :id="chains[jsontoken].sets[setname].set + '-mint-auctionstab'" aria-labelledby="mintauctionstab">
-                      <table class="table table-sm">
-                        <thead>
-                          <tr>
-                            <th scope="col" class="small">QTY</th>
-                            <th scope="col" class="small">BID</th>
-                            <th scope="col" class="small">TOTAL</th>
-                            <th scope="col" class="small">HIGH BIDDER</th>
-                        <tbody>
-                          <tr v-for="auc in mintAuctions">
-                            <th scope="row" colspan="4" style="background-color: crimson">
-                              <span>{{auc.time}}</span>
-                            </th>
-                          </tr>
-                          <tr v-for="auc in mintAuctions">
-                            <th scope="row">1</th>
-                            <td>{{naiString(auc.pricenai)}}</td>
-                            <td>&asymp;
-                              {{auc.price}}
-                            </td>
-                            <td>{{auc.bidder}}</td>
-                          </tr>
-                          <tr v-for="auc in mintAuctions">
-                            <th scope="row" colspan="2"></th>
-                            <td><input class="form-control " type="number">
-                            </td>
-                            <td><button class="btn btn-secondary" @click="bidNFT(auc)">Bid</button>
 
-                            </td>
+                  </div>
+                  <!-- mint market widget -->
+                  <div class="p-3 d-flex mint-market-widget">
+                    <div class="d-flex align-items-center">
+                      <div class="p-2">
+                        <div class="">
+                          <div class="d-flex mb-3">
+                            <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
+                              <div class="pr-2"><small>MINT MARKET: </small></div>
+                              <div class="px-2">
+                                <h2 class="m-0">
+                                  <div>{{formatNumber((chains[jsontoken].sets[setname].forAuctionMint +
+                                    chains[jsontoken].sets[setname].forSaleMint),0,'.',',')}}
+                                  </div>
+                                </h2>
+                              </div>
+                            </div>
+                          </div>
+                          <ul :id="chains[jsontoken].sets[setname].set + '-mint-tabnav'" class="nav nav-tabs mb-3"
+                            role="tablist">
+                            <li class="nav-item"> <a class="nav-link active"
+                                :href="'#' + chains[jsontoken].sets[setname].set + '-mint-salestab'"
+                                :id="chains[jsontoken].sets[setname].set + '-mint-saleslink'" role="tab"
+                                data-bs-toggle="tab" aria-controls="mintsalestab" aria-expanded="true">
+                                <div class="d-flex align-items-center">
+                                  <div @click="">SALES</div>
+                                  <div class="mb-3"><span class=" badge rounded-pill bg-danger" style="font-size: .7em">
+                                      {{mintSales.length}}</span>
+                                  </div>
+                                </div>
+                              </a></li>
+                            <li class="nav-item"> <a class="nav-link"
+                                :href="'#'+ chains[jsontoken].sets[setname].set + '-mint-auctionstab'" role="tab"
+                                :id="chains[jsontoken].sets[setname].set + '-mint-auctionslink'" data-bs-toggle="tab"
+                                aria-controls="mintauctionstab">
+                                <div class="d-flex align-items-center">
+                                  <div>AUCTIONS</div>
+                                  <div class="mb-3"><span class=" badge rounded-pill bg-danger"
+                                      style="font-size: .7em">{{mintAuctions.length}}</span>
+                                  </div>
+                                </div>
+                              </a></li>
+                          </ul>
 
-                          </tr>
-                        </tbody>
+                          <div :id="chains[jsontoken].sets[setname].set + '-mint-tabs'" class="tab-content">
+                            <div :id="chains[jsontoken].sets[setname].set + '-mint-salestab'" role="tabpanel"
+                              class="tab-pane fade show active" aria-labelledby="mintsalestab">
+                              <table class="table table-sm">
+                                <thead>
+                                  <tr>
+                                    <th scope="col" class="small">SUPPLY</th>
+                                    <th scope="col" class="small">PRICE</th>
+                                    <th scope="col" class="small">QTY</th>
+                                    <th scope="col"></th>
+                                  </tr>
+                                </thead>
+                                <tbody>
 
-                        <th scope="col" class="small"></th>
-                        <th scope="col" class="small"></th>
-                        </tr>
-                      </table>
+                                  <tr scope="row" v-for="ad in mintSales">
+
+                                    <td style="vertical-align: middle">
+                                      {{formatNumber(ad.qty,0,'.',',')}}</td>
+                                    <td style="vertical-align: middle">
+                                      {{naiString(ad.pricenai)}}</td>
+                                    <td><span v-show="true" class="text-center">
+                                        <form class="needs-validation" novalidate>
+
+                                          <input value="1" required type="number" min="1" step="1" max="ad.qty"
+                                            class="form-control text-info" style="max-width: 100px" v-model="ad.buyQty">
+
+
+                                          <button type="submit" class="btn btn-info d-none" v-show="ad.by != account"
+                                            @click="buyMint(ad.uid)">Buy</button>{{toFixed(ad.buyQty *
+                                          ad.pricenai.amount,0)}}
+                                          {{ad.pricenai.tokrn}}
+                                        </form>
+                                      </span>
+                                      </span></td>
+                                    <td>
+                                      <div>
+                                        <button type="submit" class="btn btn-info" v-show="ad.by != account"
+                                          onclick="submit()">Buy</button>
+                                        <!-- <button class="btn btn-primary" v-show="ad.by != account">Buy</button> -->
+                                        <button class="btn btn-warning" v-show="ad.by == account">Cancel</button>
+                                      </div>
+                                    </td>
+
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade show"
+                              :id="chains[jsontoken].sets[setname].set + '-mint-auctionstab'"
+                              aria-labelledby="mintauctionstab">
+                              <table class="table table-sm">
+                                <thead>
+                                  <tr>
+                                    <th scope="col" class="small">QTY</th>
+                                    <th scope="col" class="small">BID</th>
+                                    <th scope="col" class="small">TOTAL</th>
+                                    <th scope="col" class="small">HIGH BIDDER</th>
+                                <tbody>
+                                  <tr v-for="auc in mintAuctions">
+                                    <th scope="row" colspan="4" style="background-color: crimson">
+                                      <span>{{auc.time}}</span>
+                                    </th>
+                                  </tr>
+                                  <tr v-for="auc in mintAuctions">
+                                    <th scope="row">1</th>
+                                    <td>{{naiString(auc.pricenai)}}</td>
+                                    <td>&asymp;
+                                      {{auc.price}}
+                                    </td>
+                                    <td>{{auc.bidder}}</td>
+                                  </tr>
+                                  <tr v-for="auc in mintAuctions">
+                                    <th scope="row" colspan="2"></th>
+                                    <td><input class="form-control " type="number">
+                                    </td>
+                                    <td><button class="btn btn-secondary" @click="bidNFT(auc)">Bid</button>
+
+                                    </td>
+
+                                  </tr>
+                                </tbody>
+
+                                <th scope="col" class="small"></th>
+                                <th scope="col" class="small"></th>
+                                </tr>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
+                  </div>
+                  <!--mint manager widget-->
+                  <div class="p-2 d-flex flex-grow-1">
+                    <div class="d-flex align-items-center">
+                      <div class="p-2">
+                        <div class="">
+                          <div class="d-flex justify-content-between align-items-center">
+                            <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
+                              <div class="pe-2"><small>MINTS OWNED: </small></div>
+                              <div class="px-2">
+                                <h2 class="m-0">{{getMint(chains[jsontoken].sets[setname].set, 'qty')}}</h2>
+                              </div>
+                            </div>
+                            <div> <a :href="'/nfts/set/' + chains[jsontoken].sets[setname].set" class="no-decoration">
+                                <h3 class="card-title lead shimmer rounded p-2 m-0">
+                                  <b>{{chains[jsontoken].sets[setname].set}}
+                                    NFT</b>
+                                </h3>
+                              </a></div>
+                          </div>
+
+                          <div class="px-2 py-5 text-center">
+                            <img class="rounded max-160"
+                              :src="makeLink('https://ipfs.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.wrapped : '')"></img>
+                            <div style="-webkit-background-clip: text;color: transparent;">
+                              <h3 class="my-0 mx-2 p-0 p-2 ms-auto">sealed NFT</h3>
+                            </div>
+                            <h5 v-if="getMint(chains[jsontoken].sets[setname].set, 'qty') > 0">Unwrap to see what's
+                              inside.</h5>
+                          </div>
+
+                          <div class="d-flex flex-wrap justify-content-between"
+                            v-if="getMint(chains[jsontoken].sets[setname].set, 'qty') > 0">
+                            <button type="button" class="btn btn-outline-light me-auto ms-auto mt-1" @click=""
+                              oldclick="unwrap custom json">Open<i class="fas fa-box-open ms-3"></i></button>
+                            <button type="button" class="btn btn-outline-light me-auto ms-auto mt-1"
+                              data-bs-toggle="modal" data-bs-target="#mintTransferModal"
+                              @click="mint_detail.set = chains[jsontoken].sets[setname].set">Transfer<i
+                                class="fas fa-exchange-alt ms-3"></i></button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <!--mint manager widget-->
-          <div class="px-4 rounded-3 card d-flex">
-            <div class="d-flex align-items-center">
-              <div class="p-2">
-                <div class="">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
-                      <div class="pe-2"><small>MINTS OWNED: </small></div>
-                      <div class="px-2">
-                        <h2 class="m-0">{{getMint(chains[jsontoken].sets[setname].set, 'qty')}}</h2>
-                      </div>
-                    </div>
-                    <div> <a :href="'/nfts/set/' + chains[jsontoken].sets[setname].set" class="no-decoration">
-                        <h3 class="card-title lead shimmer rounded p-2 m-0"><b>{{chains[jsontoken].sets[setname].set}}
-                            NFT</b></h3>
-                      </a></div>
-                  </div>
-
-                  <div class="px-2 py-5 text-center">
-                    <img class="rounded max-160"
-                      :src="makeLink('https://ipfs.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.wrapped : '')"></img>
-                    <div style="-webkit-background-clip: text;color: transparent;">
-                      <h3 class="my-0 mx-2 p-0 p-2 ms-auto">sealed NFT</h3>
-                    </div>
-                    <h5 v-if="getMint(chains[jsontoken].sets[setname].set, 'qty') > 0">Unwrap to see what's inside.</h5>
-                  </div>
-
-                  <div class="d-flex flex-wrap justify-content-between"
-                    v-if="getMint(chains[jsontoken].sets[setname].set, 'qty') > 0">
-                    <button type="button" class="btn btn-outline-light me-auto ms-auto mt-1" @click=""
-                      oldclick="unwrap custom json">Open<i class="fas fa-box-open ms-3"></i></button>
-                    <button type="button" class="btn btn-outline-light me-auto ms-auto mt-1" data-bs-toggle="modal"
-                      data-bs-target="#mintTransferModal"
-                      @click="mint_detail.set = chains[jsontoken].sets[setname].set">Transfer<i
-                        class="fas fa-exchange-alt ms-3"></i></button>
-                  </div>
-                </div>
-            </div>
-          </div>
 
           </div>
         </div>
 
-        <div class="row">
+        <div class="d-flex">
+
           <!--filters-->
-          <div class="col" style="max-width: 300px;">
+          <div class="d-flex flex-column" style="max-width: 300px;">
             <div class="accordion bg-dark" id="accordionFilter">
               <div class="accordion-item bg-secondary">
                 <h2 class="accordion-header" id="headingOne">
@@ -516,7 +519,7 @@
                   </button>
                 </h2>
                 <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
-                  data-bs-parent="#accordionExample">
+                  data-bs-parent="#accordionFilters">
                   <div class="accordion-body bg-darkest">
                     <ul class="list-group">
                       <li class="list-group-item bg-black border border-dark text-white-50">
@@ -544,7 +547,7 @@
                   </button>
                 </h2>
                 <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
-                  data-bs-parent="#accordionExample">
+                  data-bs-parent="#accordionFilters">
                   <div class="accordion-body bg-darkest">
                     Currency selector (USD / DLUX / HIVE) MIN to MAX
 
@@ -559,7 +562,7 @@
                   </button>
                 </h2>
                 <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour"
-                  data-bs-parent="#accordionExample">
+                  data-bs-parent="#accordionFilters">
                   <div class="accordion-body bg-darkest">
                     <ul class="list-group">
                       <li class="list-group-item bg-black border border-dark text-white-50">
@@ -592,17 +595,7 @@
 
 
           <!--set items-->
-          <div class="col">
-
-
-
-
-
-
-
-
-
-
+          <div class="d-flex flex-column flex-grow-1">
 
             <!-- ACTION BAR -->
             <div class="d-flex">
@@ -723,52 +716,6 @@
                   placeholder="Search sets, items, and accounts">
               </div>
 
-              <!-- OLD sort-->
-              <div class="dropdown col me-2">
-                <button class="btn btn-dark border-secondary text-white-50 w-100 dropdown-toggle" type="button"
-                  id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                  <span>Sort on</span>
-                  <span v-if="NFTselect.sort == 'uid' && NFTselect.dir == 'asc'">UID: Low
-                    to High</span>
-                  <span v-if="NFTselect.sort == 'uid' && NFTselect.dir == 'desc'">UID:
-                    High to Low</span>
-                  <span v-if="NFTselect.sort == 'owner' && NFTselect.dir == 'asc'">Owner:
-                    A to Z</span>
-                  <span v-if="NFTselect.sort == 'owner' && NFTselect.dir == 'desc'">Owner:
-                    Z to A</span>
-                  <span v-if="NFTselect.sort == 'price' && NFTselect.dir == 'asc'">Price: Low
-                    to High</span>
-                  <span v-if="NFTselect.sort == 'price' && NFTselect.dir == 'desc'">Price:
-                    High to Low</span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="sortDropdown">
-                  <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'uid' && NFTselect.dir == 'asc'}"
-                      href="#/"
-                      @click="setValue('NFTselect.sort','uid');setValue('NFTselect.dir','asc');selectNFTs(true)">UID:
-                      Low to High</a></li>
-                  <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'uid' && NFTselect.dir == 'desc'}"
-                      href="#/"
-                      @click="setValue('NFTselect.sort','uid');setValue('NFTselect.dir','desc');selectNFTs(true)">UID:
-                      High to Low</a></li>
-                  <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'owner' && NFTselect.dir == 'asc'}"
-                      href="#/"
-                      @click="setValue('NFTselect.sort','owner');setValue('NFTselect.dir','asc');selectNFTs(true)">Owner:
-                      A to Z</a></li>
-                  <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'owner' && NFTselect.dir == 'desc'}"
-                      href="#/"
-                      @click="setValue('NFTselect.sort','owner');setValue('NFTselect.dir','desc');selectNFTs(true)">Ownder:
-                      Z to A</a></li>
-                  <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'price' && NFTselect.dir == 'asc'}"
-                      href="#/"
-                      @click="setValue('NFTselect.sort','price');setValue('NFTselect.dir','asc');selectNFTs(true)">Price:
-                      Low to High</a></li>
-                  <li><a class="dropdown-item" :class="{'active':NFTselect.sort == 'price' && NFTselect.dir == 'desc'}"
-                      href="#/"
-                      @click="setValue('NFTselect.sort','price');setValue('NFTselect.dir','desc');selectNFTs(true)">Price:
-                      High to Low</a></li>
-                </ul>
-              </div>
-
               <!-- Sort -->
               <div class="dropdown me-2">
                 <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown"
@@ -794,10 +741,26 @@
                     <a @click="NFTselect.dir='dec';NFTselect.sort='time';displaynfts()" class="dropdown-item"
                       role="button">Time ending latest</a>
                   </li>
+                  <li>
+                    <a @click="NFTselect.dir='asc';NFTselect.sort='time';displaynfts()" class="dropdown-item"
+                      role="button">Owner Ascending</a>
+                  </li>
+                  <li>
+                    <a @click="NFTselect.dir='dec';NFTselect.sort='time';displaynfts()" class="dropdown-item"
+                      role="button">Owner Descending</a>
+                  </li>
+                  <li>
+                    <a @click="NFTselect.dir='asc';NFTselect.sort='time';displaynfts()" class="dropdown-item"
+                      role="button">UID Ascending</a>
+                  </li>
+                  <li>
+                    <a @click="NFTselect.dir='dec';NFTselect.sort='time';displaynfts()" class="dropdown-item"
+                      role="button">UID Descending</a>
+                  </li>
                 </ul>
               </div>
               <!-- Deleted-->
-              <div class="dropdown col">
+              <div class="dropdown">
                 <button class="btn btn-outline-light dropdown-toggle" type="button" id="deletedDropdown"
                   data-bs-toggle="dropdown" aria-expanded="false">
                   <span v-if="!NFTselect.showDeleted">Deleted: Hiding</span>
