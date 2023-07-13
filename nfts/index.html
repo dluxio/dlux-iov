@@ -124,7 +124,8 @@
         </div>
         <main role="main">
             <div class="container" style="max-width: 1800px !important">
-                <div class="d-flex py-2 align-items-stretch">
+                <div class="d-flex py-2 align-items-stretch  flex-wrap">
+
                     <div class="px-4 rounded-3 card d-flex flex-grow-1">
                         <div class="d-flex align-items-center">
                             <div class="py-5 px-3">
@@ -320,7 +321,7 @@
                                     <button class="accordion-button text-black collapsed" type="button"
                                         data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false"
                                         aria-controls="collapseTwo">
-                                        HIVE<span class="ms-auto small">{{barhive}}</span>
+                                        HIVE<span class="ms-auto small">{{formatNumber(barhive, 3, '.', ',')}}</span>
                                     </button>
                                 </h2>
                                 <div id="collapseTwo" class="accordion-collapse collapse"
@@ -342,7 +343,7 @@
                                     <button class="accordion-button text-black collapsed" type="button"
                                         data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false"
                                         aria-controls="collapseThree">
-                                        HBD<span class="ms-auto small">{{barhbd}}</span>
+                                        HBD<span class="ms-auto small">{{formatNumber(barhbd, 3, '.', ',')}}</span>
                                     </button>
                                 </h2>
                                 <div id="collapseThree" class="accordion-collapse collapse"

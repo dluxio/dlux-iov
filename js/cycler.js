@@ -7,7 +7,7 @@ export default {
   },
   template: `<div>
   <transition name="fade" mode="out-in" appear>
-  <p v-show="text" transition="fade">{{ text }}</p>
+  <span v-show="text" transition="fade">{{ text }}</span>
   </transition>
   </div>`,
   props: ["items", "interval"],
