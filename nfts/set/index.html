@@ -44,6 +44,12 @@
     .mint-widget {
       max-width: 600px;
     }
+    .stats-widget {
+      max-width: 700px;
+    }
+    .info-widget {
+      max-width: 600px;
+    }
   </style>
 </head>
 
@@ -57,7 +63,7 @@
     <main role="main" class="flex-shrink-0">
 
       <div class="container-fluid" v-if="ready">
-        <div class="card bg-dark text-white mb-3">
+        <div class="card bg-dark text-white">
           <div>
             <img class="banner-img w-100 img-fluid"
               :src="makeLink('https://ipfs.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.banner : '')"></img>
@@ -67,26 +73,66 @@
                 :src="makeLink('https://ipfs.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.logo : '')"></img>
             </div>
           </div>
-          <div v-cloak class="card-body p-0"
+          <div v-cloak class="card-body p-0 rounded"
             :style="{'background': getSetDetailsColors(chains[jsontoken].sets[setname].computed ? chains[jsontoken].sets[setname].computed : '')}"
             style="border: none; ">
 
 
-            <div class="m-3 p-3 rounded d-flex flex-column" style="background-color: rgba(0,0,0,0.7)">
+            <div class="m-3 p-3 rounded d-flex justify-content-center w-100" style="background-color: rgba(0,0,0,0.7)">
+              <!-- stats widget -->
+              <div class="d-flex w-100 align-items-center py-2 justify-content-center stats-widget">
+                  <div class="text-center p-2 border-end">
+                    <h3 class="mb-0"><i
+                        class="fa-solid fa-user-astronaut me-1"></i>{{chains[jsontoken].sets[setname].owners}}</h3>
+                    <p class="mb-0">owners</p>
+                  </div>
+                  
+                  <div class="text-center p-2 border-end">
+                    <h3 class="mb-0"><i class="fa-solid fa-star me-1"></i>{{chains[jsontoken].sets[setname].minted -
+                      chains[jsontoken].sets[setname].deleted}}</h3>
+                    <p class="mb-0">items</p>
+                  </div>
 
-              <div class="row mt-5 pt-3">
-                <!--info col-->
-                <div class="col-lg-4">
-                  <div class="row mb-3">
+                <div class="d-flex justify-content-around flex-grow-1">
+                  
+                  <div class="text-center p-2">
+                    <h3 class="mb-0"><cycle-text
+                        :items="[sigFig(chains[jsontoken].sets[setname].sf.HIVE/1000, 2) + ' HIVE', sigFig(chains[jsontoken].sets[setname].sf.HBD/1000, 2) + ' HBD', sigFig(chains[jsontoken].sets[setname].sf.TOKEN/1000, 2) + ' ' + TOKEN]"
+                        :interval="5000" /></h3>
+                    <p class="mb-0">sale floor</p>
+                  </div>
+                  
+                  <div class="text-center p-2">
+                    <h3 class="mb-0"><cycle-text
+                        :items="[chains[jsontoken].sets[setname].af.HIVE/1000 + ' HIVE', chains[jsontoken].sets[setname].af.HBD/1000 + ' HBD', chains[jsontoken].sets[setname].af.TOKEN/1000 + ' ' + TOKEN]"
+                        :interval="5000" /></h3>
+                    <p class="mb-0">auction floor</p>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex py-2 align-items-stretch  flex-wrap">
+        <!--info widget -->
+          <div class="p-2 rounded-3 card d-flex me-1 info-widget">
+            <div class="d-flex align-items-center">
+              <div class="p-2">
+                <div class="">
+                  <div class="mb-3">
                     <h1 class="card-title text-center" v-cloak>{{chains[jsontoken].sets[setname].name_long ?
                       chains[jsontoken].sets[setname].name_long : ''}}</h1>
                   </div>
-                  <div class="row mb-3">
+                  <div class="mb-3">
                     <p class="m-0 text-center small">Created by <a
                         :href="makeLink('/@',chains[jsontoken].sets[setname].author)" class="no-decoration"
                         v-cloak>@{{chains[jsontoken].sets[setname].author}}</a></p>
                   </div>
-                  <div class="row mb-3">
+                  <div class="mb-3">
                     <p class="text-white-50 m-0" v-cloak>{{chains[jsontoken].sets[setname].computed.set ?
                       chains[jsontoken].sets[setname].computed.set.Description
                       : '...'}}</p>
@@ -104,7 +150,7 @@
                         ''}}</span>
                     </div>
                   </div>
-                  <div class="row mb-3">
+                  <div class="mb-3">
                     <div class="d-flex">
                       <div class="small">Permlink: <a :href="makeLink('/blog/@',chains[jsontoken].sets[setname].link)"
                           v-cloak>{{chains[jsontoken].sets[setname].permlink}}</a></div>
@@ -131,60 +177,65 @@
                       </div>
                     </div>
                   </div>
-
-                  
-
-
-
-
                 </div>
-                
+              </div>
+            </div>
+            <!--multi bar-->
+            <div>
+              <div class="progress bg-secondary mb-3" style="height: 40px;">
+                <!--burned-->
+                <div class="progress-bar" style="background-color: rgb(133, 64, 64);" role="progressbar"
+                  :style="{'width': ((chains[jsontoken].sets[setname].deleted/chains[jsontoken].sets[setname].max)*100) + '%'}"
+                  aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                  <span><i class="me-1 fa-solid fa-fire"></i></span>
+                  <span
+                    v-cloak>{{formatNumber(((chains[jsontoken].sets[setname].deleted/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
+                </div>
+                <!--opened-->
+                <div class="progress-bar" style="background-color: rgb(60, 60, 138);" role="progressbar"
+                  :style="{'width': (((chains[jsontoken].sets[setname].minted-chains[jsontoken].sets[setname].deleted)/chains[jsontoken].sets[setname].max)*100) + '%'}"
+                  aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                  <span><i class="me-1 fa-solid fa-box-open"></i></span>
+                  <span
+                    v-cloak>{{formatNumber(((chains[jsontoken].sets[setname].minted/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
+                </div>
+                <!--closed-->
+                <div class="progress-bar" style="background-color: rgb(50, 94, 50);" role="progressbar"
+                  :style="{'width': (((chains[jsontoken].sets[setname].max-chains[jsontoken].sets[setname].minted)/chains[jsontoken].sets[setname].max)*100) + '%'}"
+                  aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                  <span><i class="me-1 fa-solid fa-box"></i></span>
+                  <span
+                    v-cloak>{{formatNumber((((chains[jsontoken].sets[setname].max-chains[jsontoken].sets[setname].minted)/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
+                </div>
+              </div>
 
-                
-
+              <div class="d-flex justify-content-between align-items-center text-center">
+                <div v-cloak class="col-3 p-2 d-flex flex-column">
+                  <h5 class="mb-1"><i class="fa-solid fa-fire"></i></h3><span
+                      class="mb-2 small">burned</span><span>{{chains[jsontoken].sets[setname].deleted}}</span>
+                </div>
+                <div v-cloak class="col-3 p-2 d-flex flex-column">
+                  <h5 class="mb-1"><i class="fa-solid fa-box-open"></i></h3><span class="mb-2 small">opened</span>
+                    <span>{{formatNumber(chains[jsontoken].sets[setname].minted,0,'.',',')}}</span>
+                </div>
+                <div v-cloak class="col-3 p-2 d-flex flex-column">
+                  <h5 class="mb-1"><i class="fa-solid fa-box"></i></h4><span class="mb-2 small">sealed</span>
+                    <span>{{formatNumber((chains[jsontoken].sets[setname].max-chains[jsontoken].sets[setname].minted),0,'.',',')}}</span>
+                </div>
+                <div v-cloak class="col-3 p-2 d-flex flex-column">
+                  <h5 class="mb-1"><i class="fa-solid fa-boxes-stacked"></i></h4><span
+                      class="mb-2 small">total</span>
+                    <span>{{formatNumber(chains[jsontoken].sets[setname].max,0,'.',',')}}</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
-        <div class="d-flex py-2 align-items-stretch  flex-wrap">
-          
-          <div class="p-2 rounded-3 card d-flex me-1 flex-grow-1">
+          <!-- progress widget -->
+          <div class="p-2 rounded-3 card d-flex me-1 flex-grow-1 d-none">
             <div class="d-flex align-items-center">
               <div class="p-2">
-                <!-- stats -->
-                <div class="d-flex align-items-center py-2 border-top border-bottom mb-3">
-                  <div class="d-flex flex-column">
-                    <div class="text-center p-2 border-end">
-                      <h3 class="mb-0"><i
-                          class="fa-solid fa-user-astronaut me-1"></i>{{chains[jsontoken].sets[setname].owners}}</h3>
-                      <p class="mb-0">owners</p>
-                    </div>
-                    <div class="text-center p-2 border-end">
-                      <h3 class="mb-0"><i class="fa-solid fa-star me-1"></i>{{chains[jsontoken].sets[setname].minted -
-                        chains[jsontoken].sets[setname].deleted}}</h3>
-                      <p class="mb-0">items</p>
-                    </div>
-                  </div>
-                  <div class="d-flex flex-grow-1 flex-column">
-                    <div class="text-center p-2">
-                      <h3 class="mb-0"><cycle-text
-                          :items="[sigFig(chains[jsontoken].sets[setname].sf.HIVE/1000, 2) + ' HIVE', sigFig(chains[jsontoken].sets[setname].sf.HBD/1000, 2) + ' HBD', sigFig(chains[jsontoken].sets[setname].sf.TOKEN/1000, 2) + ' ' + TOKEN]"
-                          :interval="5000" /></h3>
-                      <p class="mb-0">sale floor</p>
-                    </div>
-                    <div class="text-center p-2">
-                      <h3 class="mb-0"><cycle-text
-                          :items="[chains[jsontoken].sets[setname].af.HIVE/1000 + ' HIVE', chains[jsontoken].sets[setname].af.HBD/1000 + ' HBD', chains[jsontoken].sets[setname].af.TOKEN/1000 + ' ' + TOKEN]"
-                          :interval="5000" /></h3>
-                      <p class="mb-0">auction floor</p>
-                    </div>
-                  </div>
-                </div>
-
                 <!--multi bar-->
                 <div>
-                  <h3>Minting Progress</h3>
                   <div class="progress bg-secondary mb-3" style="height: 40px;">
                     <!--burned-->
                     <div class="progress-bar" style="background-color: rgb(133, 64, 64);" role="progressbar"
@@ -235,11 +286,10 @@
               </div>
             </div>
           </div>
-
+          <!-- mint market widget -->
           <div class="px-4 rounded-3 card d-flex me-1">
             <div class="d-flex align-items-center">
               <div class="p-2">
-                <!--mint market col-->
                 <div class="mint-widget">
                   <div class="d-flex mb-3">
                     <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
@@ -372,11 +422,10 @@
               </div>
             </div>
           </div>
-
+          <!--mint manager widget-->
           <div class="px-4 rounded-3 card d-flex">
             <div class="d-flex align-items-center">
               <div class="p-2">
-                <!--mint manager col-->
                 <div class="">
                   <div class="d-flex justify-content-between align-items-center">
                     <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
@@ -413,8 +462,8 @@
             </div>
           </div>
 
+          </div>
         </div>
-
 
         <div class="row">
           <!--filters-->
