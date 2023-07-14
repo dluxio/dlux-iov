@@ -50,7 +50,7 @@
     }
 
     .info-widget {
-      width: 35%;
+      max-width: 30%;
     }
 
     .stats-widget {
@@ -187,7 +187,7 @@
                         v-cloak>{{formatNumber(((chains[jsontoken].sets[setname].deleted/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
                     </div>
                     <!--opened-->
-                    <div class="progress-bar bg-primary-50 text-black" role="progressbar"
+                    <div class="progress-bar bg-success-50 text-black" role="progressbar"
                       :style="{'width': (((chains[jsontoken].sets[setname].minted-chains[jsontoken].sets[setname].deleted)/chains[jsontoken].sets[setname].max)*100) + '%'}"
                       aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                       <span><i class="me-1 fa-solid fa-box-open"></i></span>
@@ -195,7 +195,7 @@
                         v-cloak>{{formatNumber(((chains[jsontoken].sets[setname].minted/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
                     </div>
                     <!--closed-->
-                    <div class="progress-bar bg-success-50 text-black" role="progressbar"
+                    <div class="progress-bar bg-primary-50 text-black" role="progressbar"
                       :style="{'width': (((chains[jsontoken].sets[setname].max-chains[jsontoken].sets[setname].minted)/chains[jsontoken].sets[setname].max)*100) + '%'}"
                       aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                       <span><i class="me-1 fa-solid fa-box"></i></span>
@@ -441,7 +441,7 @@
                   </div>
                   <!--mint manager widget-->
                   <div class="p-2 d-flex flex-shrink-1">
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center bg-dark rounded">
                       <div class="p-2">
                         <div class="">
                           <div class="d-flex justify-content-between align-items-center">
@@ -450,7 +450,7 @@
                                   class="no-decoration text-black" style="font-size: 1.3em;">
                                   <i class="me-1" :class="chains[jsontoken].sets[setname].computed.set.faicon"></i><b>{{chains[jsontoken].sets[setname].set}}</b></a>
                           </div>
-                            
+                          <small class="ms-auto">{{formatNumber(getMint(chains[jsontoken].sets[setname].set, 'qty'),0,'.',',')}} mints</small>
                           </div>
 
                           <div class="text-center">
@@ -467,16 +467,16 @@
                                            sealed NFT</h3></div>
                             </div>
                             <div class="text-center lead"><small><span
-                              class="badge bg-dark text-muted">{{chains[jsontoken].jsontoken}}<i
+                              class="badge bg-dark text-muted border border-light-50">{{chains[jsontoken].jsontoken}}<i
                                   class="fa-solid fa-link mx-2 text-info"></i>network</span></small>
-                  </div>
+                            </div>
                           </div>
 
                           <div class="d-flex flex-wrap justify-content-between"
                             v-if="getMint(chains[jsontoken].sets[setname].set, 'qty') > 0">
-                            <button type="button" class="btn btn-secondary me-auto ms-auto mt-1" @click=""
-                              oldclick="unwrap custom json">Open<i class="fas fa-box-open ms-3"></i></button>
-                            <button type="button" class="btn btn-secondary me-auto ms-2 mt-1"
+                            <button type="button" class="btn btn-success me-auto ms-auto mt-1" @click=""
+                              oldclick="unwrap custom json">Mint<i class="fas fa-box-open ms-3"></i></button>
+                            <button type="button" class="btn btn-primary me-auto ms-2 mt-1"
                               data-bs-toggle="modal" data-bs-target="#mintTransferModal"
                               @click="mint_detail.set = chains[jsontoken].sets[setname].set">Transfer<i
                                 class="fas fa-exchange-alt ms-3"></i></button>
