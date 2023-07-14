@@ -302,7 +302,7 @@ export default {
                         </span> 
                         <select class="ps-4 form-select text-white bg-dark border-dark" id="sponsoredContracts" v-model="broker">
                           <option value="" disabled selected>Select provider</option>
-                          <option v-for="(account, key) in ipfsproviders" :value="key"></option>
+                          <option v-for="(account, key) in ipfsproviders" :value="key">{{key}}</option>
                         </select>
                       </div>
                       <label for="ben_to" class="small mb-1">Benificiary Account:</label>
