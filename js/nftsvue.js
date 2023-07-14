@@ -138,6 +138,7 @@ var app = new Vue({
           usd: 1,
         },
       },
+      setPage: false,
       nodes: {},
       runners: [],
       runnersSearch: [],
@@ -216,6 +217,7 @@ var app = new Vue({
         hive_usd: 0,
         hbd_usd: 0,
       },
+      wantedNum: 30,
       sendTo: "",
       sendAmount: 0,
       sendMemo: "",
@@ -754,6 +756,28 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           }
         }
       }
+      if(this.setPage){
+        if(!( this.selectors['At Auction'].checked || this.selectors['For Sale'].checked)){
+          for(var i = 0; (i < this.allNFTs.length && i < this.wantedNum); i++){
+            console.log(chain, set, this.chains[this.jsontoken].sets[set])
+            if(!this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid]){
+              this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid] = true
+              this.callScript(this.allNFTs[i], i).then(d => {
+                const index = d.i
+                delete d.i
+                this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[index].uid] = {
+                  ...this.allNFTs[index],
+                  ...d
+                }
+                this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[index].uid].token = this.jsontoken
+                this.displayNFTs.push(this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[index].uid])
+              })
+            } else {
+              this.displayNFTs.push(this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid])
+            }
+          }
+        }
+      }
       if(this.NFTselect.dir == 'asc'){
         this.displayNFTs.sort((a, b) => {
           if(a.hbd_price < b.hbd_price) return -1
@@ -1221,7 +1245,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         document.documentElement.clientHeight * 2
       ) {
         this.NFTselect.amount += 30;
+        this.wantedNum += 30;
         this.selectNFTs();
+        this.displaynfts()
       }
     },
     modalNext(modal) {
@@ -1760,6 +1786,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 enabled: false,
                 sales: [],
                 auctions: [],
+                loaded: {},
                 af: {
                   HIVE: 0,
                   HBD: 0,
@@ -2364,6 +2391,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     var setName = location.pathname.split("set/")[1] || location.hash.split(':')[1]
     this.setname = setName;
     if (setName) {
+      this.setPage = true;
       this.jsontoken = location.hash.replace('#', '').split(':')[0] || 'dlux'
       for (var chain in this.chains) {
         this.chains[chain].enabled = false;
