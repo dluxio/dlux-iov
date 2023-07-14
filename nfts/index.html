@@ -296,7 +296,7 @@
                                         HIVE<span class="ms-auto small">{{formatNumber(barhive, 3, '.', ',')}}</span>
                                     </button>
                                 </h2>
-                                <div id="collapseTwo" class="accordion-collapse collapse"
+                                <div id="collapseTwo" ref="showhive" class="accordion-collapse collapse"
                                     data-bs-parent="#accordionExample">
                                     <div class="accordion-body">
                                         <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
@@ -319,7 +319,7 @@
                                         HBD<span class="ms-auto small">{{formatNumber(barhbd, 3, '.', ',')}}</span>
                                     </button>
                                 </h2>
-                                <div id="collapseThree" class="accordion-collapse collapse"
+                                <div id="collapseThree" ref="showhbd" class="accordion-collapse collapse"
                                     data-bs-parent="#accordionExample">
                                     <div class="accordion-body">
                                         <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
@@ -338,7 +338,7 @@
                                 v-for="name in chainSorted">
                                 <h2 class="accordion-header">
                                     <button class="accordion-button text-black" type="button"
-                                        v-bind:class="{'collapsed': name != 'dlux'}" data-bs-toggle="collapse"
+                                        :class="{'collapsed': name != 'dlux'}" data-bs-toggle="collapse"
                                         :data-bs-target="'#collapse' + name" aria-expanded="true"
                                         :aria-controls="'#collapse' + name">
                                         {{toUpperCase(name)}}<span
@@ -347,8 +347,8 @@
                                             '.', ',')}}</span>
                                     </button>
                                 </h2>
-                                <div :id="'collapse' + name" class="accordion-collapse collapse"
-                                    v-bind:class="{'show': name == 'dlux'}" data-bs-parent="#accordionExample">
+                                <div :id="'collapse' + name" :ref="'show' + name"  class="accordion-collapse collapse"
+                                    :class="{'show': name == 'dlux'}" data-bs-parent="#accordionExample">
                                     <div class="accordion-body">
                                         <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
                                             {{formatNumber(chains[name].account.balance/1000, 3, '.', ',')}}
@@ -364,7 +364,7 @@
                                 </div>
                             </div>
                             
-                            
+                            <p @click="calc()">click</p>
                         </div>
                     </div>
 
