@@ -11,7 +11,7 @@ export default {
             <div class="toast-header bg-info">
               <strong class="me-auto text-dark">{{alert.title}}</strong>
               <small class="text-dark">{{elaspedTime(alert.time)}}</small>
-              <button type="button" class="btn-close" data-bs-dismiss="toast" @click="removeOp(alert.txid)" aria-label="Close"></button>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" @click="removeOp(alert.txid)" aria-label="Close"></button>
             </div>
             <div class="toast-body text-white">{{alert.status}}</div>
             <div class="toast-body text-white" v-if="alert.link">
