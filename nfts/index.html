@@ -339,7 +339,7 @@
                                 v-for="name in chainSorted">
                                 <h2 class="accordion-header">
                                     <button class="accordion-button text-black" type="button"
-                                        v-bind:class="{'collapsed': name != 'dlux'}" data-bs-toggle="collapse"
+                                        :class="{'collapsed': name != 'dlux'}" data-bs-toggle="collapse"
                                         :data-bs-target="'#collapse' + name" aria-expanded="true"
                                         :aria-controls="'#collapse' + name">
                                         {{toUpperCase(name)}}<span
@@ -348,8 +348,8 @@
                                             '.', ',')}}</span>
                                     </button>
                                 </h2>
-                                <div :id="'collapse' + name" class="accordion-collapse collapse"
-                                    v-bind:class="{'show': name == 'dlux'}" data-bs-parent="#accordionExample">
+                                <div :id="'collapse' + name" :ref="'show' + name"  class="accordion-collapse collapse"
+                                    :class="{'show': name == 'dlux'}" data-bs-parent="#accordionExample">
                                     <div class="accordion-body">
                                         <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
                                             {{formatNumber(chains[name].account.balance/1000, 3, '.', ',')}}
@@ -670,7 +670,7 @@
         <foot-vue />
     </div>
     </div>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
         crossorigin="anonymous"></script>
