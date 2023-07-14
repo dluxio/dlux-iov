@@ -481,7 +481,129 @@ export default {
                          </h2>
                          <div id="collapseBid" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
                             <div class="accordion-body">
-                               <p>table here</p>
+                            <!-- mint market widget -->
+                            <div class="p-3 d-flex flex-grow-1 mint-market-widget">
+                              <div class="d-flex">
+                                <div class="">
+                                  <div class="">
+                                    <ul :id="chains[jsontoken].sets[setname].set + '-mint-tabnav'" class="nav nav-tabs mb-3"
+                                      role="tablist">
+                                      <li class="nav-item"> <a class="nav-link active"
+                                          :href="'#' + chains[jsontoken].sets[setname].set + '-mint-salestab'"
+                                          :id="chains[jsontoken].sets[setname].set + '-mint-saleslink'" role="tab"
+                                          data-bs-toggle="tab" aria-controls="mintsalestab" aria-expanded="true">
+                                          <div class="d-flex align-items-center">
+                                            <div @click="">SALES</div>
+                                            <div class="mb-3"><span class=" badge rounded-pill bg-danger" style="font-size: .7em">
+                                                {{mintSales.length}}</span>
+                                            </div>
+                                          </div>
+                                        </a></li>
+                                      <li class="nav-item"> <a class="nav-link"
+                                          :href="'#'+ chains[jsontoken].sets[setname].set + '-mint-auctionstab'" role="tab"
+                                          :id="chains[jsontoken].sets[setname].set + '-mint-auctionslink'" data-bs-toggle="tab"
+                                          aria-controls="mintauctionstab">
+                                          <div class="d-flex align-items-center">
+                                            <div>AUCTIONS</div>
+                                            <div class="mb-3"><span class=" badge rounded-pill bg-danger"
+                                                style="font-size: .7em">{{mintAuctions.length}}</span>
+                                            </div>
+                                          </div>
+                                        </a></li>
+                                    </ul>
+          
+                                    <div :id="chains[jsontoken].sets[setname].set + '-mint-tabs'" class="tab-content">
+                                      <div :id="chains[jsontoken].sets[setname].set + '-mint-salestab'" role="tabpanel"
+                                        class="tab-pane fade show active" aria-labelledby="mintsalestab">
+                                        <table class="table table-sm">
+                                          <thead>
+                                            <tr>
+                                              <th scope="col" class="small">SUPPLY</th>
+                                              <th scope="col" class="small">PRICE</th>
+                                              <th scope="col" class="small">QTY</th>
+                                              <th scope="col"></th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+          
+                                            <tr scope="row" v-for="ad in mintSales">
+          
+                                              <td style="vertical-align: middle">
+                                                {{formatNumber(ad.qty,0,'.',',')}}</td>
+                                              <td style="vertical-align: middle">
+                                                {{naiString(ad.pricenai)}}</td>
+                                              <td><span v-show="true" class="text-center">
+                                                  <form class="needs-validation" novalidate>
+          
+                                                    <input value="1" required type="number" min="1" step="1" max="ad.qty"
+                                                      class="form-control text-info" style="max-width: 100px" v-model="ad.buyQty">
+          
+          
+                                                    <button type="submit" class="btn btn-info d-none" v-show="ad.by != account"
+                                                      @click="buyMint(ad.uid)">Buy</button>{{toFixed(ad.buyQty *
+                                                    ad.pricenai.amount,0)}}
+                                                    {{ad.pricenai.tokrn}}
+                                                  </form>
+                                                </span>
+                                                </span></td>
+                                              <td>
+                                                <div>
+                                                  <button type="submit" class="btn btn-info" v-show="ad.by != account"
+                                                    onclick="submit()">Buy</button>
+                                                  <!-- <button class="btn btn-primary" v-show="ad.by != account">Buy</button> -->
+                                                  <button class="btn btn-warning" v-show="ad.by == account">Cancel</button>
+                                                </div>
+                                              </td>
+          
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                      </div>
+                                      <div role="tabpanel" class="tab-pane fade show"
+                                        :id="chains[jsontoken].sets[setname].set + '-mint-auctionstab'"
+                                        aria-labelledby="mintauctionstab">
+                                        <table class="table table-sm">
+                                          <thead>
+                                            <tr>
+                                              <th scope="col" class="small">QTY</th>
+                                              <th scope="col" class="small">BID</th>
+                                              <th scope="col" class="small">TOTAL</th>
+                                              <th scope="col" class="small">HIGH BIDDER</th>
+                                          <tbody>
+                                            <tr v-for="auc in mintAuctions">
+                                              <th scope="row" colspan="4" style="background-color: crimson">
+                                                <span>{{auc.time}}</span>
+                                              </th>
+                                            </tr>
+                                            <tr v-for="auc in mintAuctions">
+                                              <th scope="row">1</th>
+                                              <td>{{naiString(auc.pricenai)}}</td>
+                                              <td>&asymp;
+                                                {{auc.price}}
+                                              </td>
+                                              <td>{{auc.bidder}}</td>
+                                            </tr>
+                                            <tr v-for="auc in mintAuctions">
+                                              <th scope="row" colspan="2"></th>
+                                              <td><input class="form-control " type="number">
+                                              </td>
+                                              <td><button class="btn btn-secondary" @click="bidNFT(auc)">Bid</button>
+          
+                                              </td>
+          
+                                            </tr>
+                                          </tbody>
+          
+                                          <th scope="col" class="small"></th>
+                                          <th scope="col" class="small"></th>
+                                          </tr>
+                                        </table>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                             </div>
                          </div>
                       </div>
