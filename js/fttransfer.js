@@ -881,10 +881,10 @@ export default {
         },
         royaltySplit(royalty) {
             var split = royalty.split(',')
-            var string
+            var string = ''
             for (var i = 0; i < split.length; i++) {
                 var s = split[i].split('_')
-                string += `${s[0]}: ${(s[1]/100).toFixed(2)}%\n`
+                string += `@${s[0]}: ${(s[1]/100).toFixed(2)}%\n`
             }
             return string
         },
