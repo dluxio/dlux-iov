@@ -43,7 +43,6 @@ export default {
                 <div class="col-lg-6 px-0 px-sm-2">
                    <div class="col-12 px-0 px-sm-2">
                       <!-- Mint img -->
-                      <!-- MINT BODY -->
                       <div class="p-2 flex-grow-1 d-flex">
                         <img v-if="wrapped" class="w-100 border border-dark border-2 rounded mt-auto mb-auto"
                         :src="'https://ipfs.io/ipfs/' + wrapped">
@@ -64,7 +63,12 @@ export default {
                         </div>
                         </div>
                       <div :alt="item.setname + '-' + item.uid">
+                      <!--Open-->
+                      <div class="text-center my-3" v-if="item.qty > 0">
+                      <button type="button" class="btn btn-success" title="Open Mint" 
+                      @click="openNFT()"><i class="fas fa-box-open fa-fw"></i> Open</button>
                          
+                      </div>
                          <!--back forward btns-->
                          <div class="d-flex align-items-center">
                             <h2><a class="text-muted p-3" role="button" @click="modalPrev()"><i

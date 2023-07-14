@@ -8,14 +8,8 @@ export default {
           <div class="card bg-img-none bg-blur-none">
              <div class="card-header border-0 d-flex align-items-center"
                 :style="{'background': color}">
-                <div class="nft-header d-flex">
-                   <div class="rounded-pill d-flex align-items-center p-2 me-auto"
-                      style="background-color: black">
-                      <h2 class="m-0 px-2">{{itemmodal.item.uid}}</h2>
-                   </div>
-                </div>
                 <div class="nft-header">
-                   <div class="rounded px-2 py-1" style="background: rgba(0,0,0,1)">
+                   <div class="me-auto rounded px-2 py-1" style="background: rgba(0,0,0,1)">
                       <a :href="'/nfts/set/' + itemmodal.item.setname + '#' + itemmodal.item.token" class="no-decoration" style="font-size: 1.3em;">
                       <span class="rainbow-text" style="background-image: linear-gradient(rgb(194, 255, 182), rgb(255, 163, 182), rgb(221, 169, 255), rgb(162, 209, 255));
                          -webkit-background-clip: text;
@@ -26,6 +20,12 @@ export default {
                       <b>{{itemmodal.item.setname}}</b>
                       </span>
                       </a>
+                   </div>
+                </div>
+                <div class="nft-header d-flex">
+                   <div class="rounded-pill d-flex align-items-center p-2"
+                      style="background-color: black">
+                      <h2 class="m-0 px-2">{{itemmodal.item.uid}}</h2>
                    </div>
                 </div>
                 <div class="nft-header d-flex">

@@ -62,11 +62,15 @@ export default {
   </div>
   <!-- MINT BODY -->
   <div class="p-2 flex-grow-1 d-flex" v-if="mint">
+  <a role="button" title="Mint Details"
+  data-bs-toggle="modal" data-bs-target="#transferModal" 
+  @click="modal('transfer')">
     <img v-if="wrapped" class="w-100 border border-dark border-2 rounded mt-auto mb-auto"
-    :src="'https://ipfs.io/ipfs/' + wrapped">
+    :src="'https://ipfs.io/ipfs/' + wrapped"></a>
   </div>
   <div class="flex-shrink-1">
     <div class="text-center">
+ 
         <h3 class="my-1"
             :style="{'background-image': colors}"
             style="-webkit-background-clip: text;
