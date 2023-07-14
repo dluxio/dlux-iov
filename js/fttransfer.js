@@ -486,34 +486,34 @@ export default {
                               <div class="d-flex">
                                 <div class="">
                                   <div class="">
-                                    <ul :id="chains[jsontoken].sets[setname].set + '-mint-tabnav'" class="nav nav-tabs mb-3"
+                                    <ul :id="setdetail + '-mint-tabnav'" class="nav nav-tabs mb-3"
                                       role="tablist">
                                       <li class="nav-item"> <a class="nav-link active"
-                                          :href="'#' + chains[jsontoken].sets[setname].set + '-mint-salestab'"
-                                          :id="chains[jsontoken].sets[setname].set + '-mint-saleslink'" role="tab"
+                                          :href="'#' + setdetail + '-mint-salestab'"
+                                          :id="setdetail + '-mint-saleslink'" role="tab"
                                           data-bs-toggle="tab" aria-controls="mintsalestab" aria-expanded="true">
                                           <div class="d-flex align-items-center">
                                             <div @click="">SALES</div>
                                             <div class="mb-3"><span class=" badge rounded-pill bg-danger" style="font-size: .7em">
-                                                {{mintSales.length}}</span>
+                                                total sales</span>
                                             </div>
                                           </div>
                                         </a></li>
                                       <li class="nav-item"> <a class="nav-link"
-                                          :href="'#'+ chains[jsontoken].sets[setname].set + '-mint-auctionstab'" role="tab"
-                                          :id="chains[jsontoken].sets[setname].set + '-mint-auctionslink'" data-bs-toggle="tab"
+                                          :href="'#'+ setdetail + '-mint-auctionstab'" role="tab"
+                                          :id="setdetail + '-mint-auctionslink'" data-bs-toggle="tab"
                                           aria-controls="mintauctionstab">
                                           <div class="d-flex align-items-center">
                                             <div>AUCTIONS</div>
                                             <div class="mb-3"><span class=" badge rounded-pill bg-danger"
-                                                style="font-size: .7em">{{mintAuctions.length}}</span>
+                                                style="font-size: .7em">total auctions</span>
                                             </div>
                                           </div>
                                         </a></li>
                                     </ul>
           
-                                    <div :id="chains[jsontoken].sets[setname].set + '-mint-tabs'" class="tab-content">
-                                      <div :id="chains[jsontoken].sets[setname].set + '-mint-salestab'" role="tabpanel"
+                                    <div :id="setdetail + '-mint-tabs'" class="tab-content">
+                                      <div :id="setdetail + '-mint-salestab'" role="tabpanel"
                                         class="tab-pane fade show active" aria-labelledby="mintsalestab">
                                         <table class="table table-sm">
                                           <thead>
@@ -560,7 +560,7 @@ export default {
                                         </table>
                                       </div>
                                       <div role="tabpanel" class="tab-pane fade show"
-                                        :id="chains[jsontoken].sets[setname].set + '-mint-auctionstab'"
+                                        :id="setdetail + '-mint-auctionstab'"
                                         aria-labelledby="mintauctionstab">
                                         <table class="table table-sm">
                                           <thead>
@@ -569,6 +569,8 @@ export default {
                                               <th scope="col" class="small">BID</th>
                                               <th scope="col" class="small">TOTAL</th>
                                               <th scope="col" class="small">HIGH BIDDER</th>
+                                            </tr>
+                                        </thead>
                                           <tbody>
                                             <tr v-for="auc in mintAuctions">
                                               <th scope="row" colspan="4" style="background-color: crimson">
