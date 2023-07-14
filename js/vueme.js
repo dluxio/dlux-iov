@@ -2941,6 +2941,20 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         nai.precision
       )} ${nai.token}`;
     },
+    getSetDetailsInfo(s) {
+      let r = "";
+      console.log('here', s)
+      s = this.baseScript[s]
+      if (s && s.set) {
+        try {
+          r = `${s.set.Description}`;
+        } catch (e) {
+          console.log(e);
+          r = "";
+        }
+      }
+      return `${r}`;
+    },
     rep(a) {
       if (!this.authors[this.posturls[a].author]) {
         setTimeout(

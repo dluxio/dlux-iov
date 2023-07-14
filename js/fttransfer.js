@@ -100,7 +100,7 @@ export default {
                          <div id="collapseDescription" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
                             <div class="accordion-body">
                                <p>{{setdetail.name_long}}</p>
-                               <p>setdetail.description</p>
+                               <p>{{info}}</p>
                                <!-- Melt Value -->
                                <div>
                                   <i class="fa-solid fa-fire me-3"></i>MELT<span class="ms-2 small">{{naiString(setdetail.bond)}}</span>
@@ -580,6 +580,9 @@ export default {
                     type:1,
                     };
                 }
+        },
+        info: {
+            default: ''
         },
         icon: {
             default: ''

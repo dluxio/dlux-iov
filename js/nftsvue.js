@@ -2288,6 +2288,18 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       }
       return `linear-gradient(${r})`;
     },
+    getSetDetailsInfo(s) {
+      let r = "";
+      if (s && s.set) {
+        try {
+          r = `${s.set.Description}`;
+        } catch (e) {
+          console.log(e);
+          r = "";
+        }
+      }
+      return `${r}`;
+    },
     getTokenUser(user) {
       if (user)
         fetch(this.lapi + "/@" + user)
