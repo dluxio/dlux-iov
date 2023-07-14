@@ -13,19 +13,12 @@ export default {
           <div class="card bg-img-none bg-blur-none">
              <div class="card-header border-0 d-flex align-items-center" :style="{'background': colors}">
                 <div class="nft-header">
-                   <div class="me-auto rounded px-2 py-1" style="background: rgba(0,0,0,1)">
-                      <a :href="'/nfts/set/' + item.setname + '#' + item.token" class="no-decoration"
-                         style="font-size: 1.3em;">
-                         <span class="rainbow-text" style="background-image: linear-gradient(rgb(194, 255, 182), rgb(255, 163, 182), rgb(221, 169, 255), rgb(162, 209, 255));
-                     -webkit-background-clip: text;
-                     -webkit-text-fill-color: transparent; 
-                     -moz-background-clip: text;
-                     -moz-text-fill-color: transparent;;">
-                            <i class="me-1" :class="[icon]"></i>
-                            <b>{{item.set}}</b>
-                         </span>
-                      </a>
-                   </div>
+                <div class="me-auto rounded px-2 py-1 shimmer border border-dark">
+    <a :href="'/nfts/set/' + item.setname + '#' + item.token"
+        class="no-decoration text-black" style="font-size: 1.3em;">
+        <i class="me-1" :class="[icon]"></i><b>{{item.set}}</b></a>
+    </div>
+
                 </div>
                 <div class="nft-header d-flex">
                    <div class="rounded-pill d-flex align-items-center p-2 " style="background-color: black">
@@ -45,8 +38,28 @@ export default {
                 <div class="col-lg-6 px-0 px-sm-2">
                    <div class="col-12 px-0 px-sm-2">
                       <!-- Mint img -->
+                      <!-- MINT BODY -->
+                      <div class="p-2 flex-grow-1 d-flex">
+                        <img v-if="wrapped" class="w-100 border border-dark border-2 rounded mt-auto mb-auto"
+                        :src="'https://ipfs.io/ipfs/' + wrapped">
+                      </div>
+                      <div class="flex-shrink-1">
+                        <div class="text-center">
+                            <h3 class="my-1"
+                                :style="{'background-image': colors}"
+                                style="-webkit-background-clip: text;
+                                       -webkit-text-fill-color: transparent; 
+                                       -moz-background-clip: text;
+                                       -moz-text-fill-color: transparent;">
+                                <span>sealed NFT</span></h3>
+                        </div>
+                        <div class="text-center lead"><small><span
+                                    class="badge bg-dark text-muted">{{item.token}}<i
+                                        class="fa-solid fa-link mx-2 text-info"></i>network</span></small>
+                        </div>
+                        </div>
                       <div :alt="item.setname + '-' + item.uid">
-                         <div class="mb-3"><img :src="'https://ipfs.io/ipfs/' + wrapped"></div>
+                         
                          <!--back forward btns-->
                          <div class="d-flex align-items-center">
                             <h2><a class="text-muted p-3" role="button" @click="modalPrev()"><i
