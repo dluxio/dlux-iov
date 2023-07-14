@@ -112,10 +112,6 @@
             bottom: -15px;
             text-align: center;
         }
-        .reverseorder {
-  display: flex;
-  flex-direction: column-reverse;
-}
     </style>
 </head>
 
@@ -338,7 +334,6 @@
                                 </div>
                             </div>
                             <!-- HONEYCOMB -->
-                            <div class="reverseorder">
                             <div class="accordion-item wallet-accordion-item shadow" :id="name + '-wallet-item'"
                                 v-for="(token, name, index) in chains">
                                 <h2 class="accordion-header">
@@ -368,7 +363,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                            
                             
                         </div>
                     </div>
