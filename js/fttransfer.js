@@ -38,10 +38,10 @@ export default {
            </div>
         </div>
         <div class="card-body row d-flex ">
-           <!-- NFT detail col 1 -->
+           <!-- Mint detail col 1 -->
            <div class="col-lg-6 px-0 px-sm-2">
               <div class="col-12 px-0 px-sm-2">
-                 <!-- NFT img -->
+                 <!-- Mint img -->
                  <div :alt="item.setname + '-' + item.uid">
                     <div class="mb-3" v-html="item.HTML"></div>
                     <!--back forward btns-->
@@ -60,285 +60,25 @@ export default {
                        </h2>
                     </div>
                  </div>
-                 <!--pfp-->
-                 <div class="text-center my-3" v-if="item.owner == account">
-                    <button @click="setPFP(item)" class="btn btn-lg btn-outline-primary" v-if="item.uid != pfp.uid">
-                    <i class="far fa-user-circle me-2"></i>Set as PFP
-                    </button>
-                    <button class="btn btn-lg btn-secondary" v-if="item.uid == pfp.uid && item.setname == pfp.set">
-                    <i class="far fa-user-circle me-2"></i>Currently set as your PFP
-                    </button>
-                 </div>
+
               </div>
            </div>
-           <!-- NFT detail col 2 -->
+           <!-- Mint detail col 2 -->
            <div class="col-lg-6 px-0 px-sm-2">
-              <div class="accordion" id="nftAccordion">
-                 <!-- NFT Description -->
+              <div class="accordion" id="ftAccordion">
+                 <!-- Mint Description -->
                  <div class="accordion-item">
                     <h2 class="accordion-header">
                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDescription" aria-expanded="true" aria-controls="collapseDescription">
                        <i class="fas fa-list me-3"></i>DESCRIPTION
                        </button>
                     </h2>
-                    <div id="collapseDescription" class="accordion-collapse collapse" data-bs-parent="#nftAccordion">
+                    <div id="collapseDescription" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
                        <div class="accordion-body">
                           <p>item.set.Description</p>
-                       </div>
-                    </div>
-                 </div>
-                 <!-- NFT Attributes -->
-                 <div class="accordion-item">
-                    <h2 class="accordion-header">
-                       <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAttributes" aria-expanded="false" aria-controls="collapseAttributes">
-                       <i class="fas fa-star me-3"></i>ATTRIBUTES
-                       </button>
-                    </h2>
-                    <div id="collapseAttributes" class="accordion-collapse collapse show" data-bs-parent="#nftAccordion">
-                       <div class="accordion-body">
-                          <div class="d-flex flex-wrap">
-                             <div v-for="thing in item.attributes" class="border border-white rounded d-flex m-1">
-                                <div v-for="(value, key, index) in thing" class="d-flex flex-column p-2">
-                                   <div>{{key}}:</div>
-                                   <div>{{value}}</div>
-                                </div>
-                             </div>
-                          </div>
-                       </div>
-                    </div>
-                 </div>
-                 <!-- NFT Transfer -->
-                 <div class="accordion-item" v-if="item.owner == account">
-                    <h2 class="accordion-header">
-                       <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTransfer" aria-expanded="false" aria-controls="collapseTransfer">
-                       <i class="fas fa-exchange-alt me-3"></i>TRANSFER
-                       </button>
-                    </h2>
-                    <div id="collapseTransfer" class="accordion-collapse collapse" data-bs-parent="#nftAccordion">
-                       <div class="accordion-body p-0">
-                          <div class="border-warning border rounded p-3 my-3" v-if="item.uid == pfp.uid  && item.setname == pfp.set">
-                             <p class="text-warning m-0">Transferring this NFT will remove it from your PFP</p>
-                          </div>
-                          <div class="p-3 col-12">
-                             <div class="container-fluid">
-                                <ul class="nav nav-pills justify-content-center" role="tablist">
-                                   <li class="nav-item"> <a class="nav-link active" id="giveNFTlink" role="tab" data-bs-toggle="tab"
-                                      aria-controls="giveNFT" aria-expanded="true" href="#giveNFTtab">Give</a></li>
-                                   <li class="nav-item"> <a class="nav-link" id="tradeNFTlink" role="tab" data-bs-toggle="tab"
-                                      aria-controls="tradeNFT" aria-expanded="true" href="#tradeNFTtab">Trade</a></li>
-                                   <li class="nav-item"> <a class="nav-link" id="sellNFTlink" role="tab" data-bs-toggle="tab"
-                                      aria-controls="sellNFT" aria-expanded="true" href="#sellNFTtab">Sell</a></li>
-                                   <li class="nav-item"> <a class="nav-link" id="auctionNFTlink" role="tab" data-bs-toggle="tab"
-                                      aria-controls="auctionNFT" aria-expanded="true" href="#auctionNFTtab">Auction</a></li>
-                                </ul>
-                                <div class="tab-content">
-                                   <!-- NFT Give -->
-                                   <div role="tabpanel" class="tab-pane fade show active" id="giveNFTtab" aria-labelledby="giveNFT">
-                                      <form class="needs-validation mt-4" id="nftGiveForm" @submit.prevent="validateForm('nftGiveForm', giveNFT)" novalidate>
-                                         <div class="form-row my-2">
-                                            <div class="col-12">
-                                               <label for="giveNFTusername" class="small mb-1">Username:</label>
-                                               <div class="position-relative mb-3">
-                                                  <span class="position-absolute top-50 translate-middle-y ps-2">
-                                                  <i class="fa-solid fa-at fa-fw"></i>
-                                                  </span>
-                                                  <input ref="giveTo" pattern="[1-9a-z\-\.]{3,}" v-model="give.to" @keyup="giveEnabled = false;validateForm('nftGiveForm')" @blur="checkAccount(give.to, 'giveTo', 'giveEnabled')" type="text" class="ps-4 form-control bg-dark border-dark text-info"
-                                                     aria-describedby="giveNFTuserprep" required>
-                                                  <div class="invalid-feedback">
-                                                     Please enter the username you'd like to give to.
-                                                  </div>
-                                               </div>
-                                               <button v-if="give.to && !giveEnabled" :disabled="giveEnabled" type="button" class="btn my-2" :class="{'btn-warning': !giveEnabled, 'btn-danger': badAccount}">Validate Account</button>
-                                            </div>
-                                         </div>
-                                         <div class="text-center">
-                                            <button class="btn btn-info my-2" type="submit" :disabled="!giveEnabled">Give</button>
-                                         </div>
-                                      </form>
-                                   </div>
-                                   <!-- NFT Trade -->
-                                   <div role="tabpanel" class="tab-pane fade show" id="tradeNFTtab" aria-labelledby="tradeNFT">
-                                      <form class="needs-validation mt-4" novalidate>
-                                         <div class="form-row my-2">
-                                            <div class="col-12">
-                                               <label for="tradeNFTusername" class="mb-1">Username:</label>
-                                               <div class="position-relative mb-3">
-                                                  <span class="position-absolute top-50 translate-middle-y ps-2">
-                                                  <i class="fa-solid fa-at fa-fw"></i>
-                                                  </span>
-                                                  <input refs="tradeTo" type="text" v-model="trade.to" @blur="checkAccount(trade.to, 'tradeTo')" class="ps-4 form-control bg-dark border-dark text-info" id="tradeNFTusername" aria-describedby="tradeNFTuserprep" required>
-                                                  <div class="invalid-feedback">
-                                                     Please enter the username you'd like to trade with.
-                                                  </div>
-                                               </div>
-                                            </div>
-                                         </div>
-                                         <div class="form-group form-row my-2">
-                                            <label for="tradeNFTamount" class="mb-1 d-flex">Amount:
-                                            <small v-if="trade.token == item.token" class="ms-auto text-white-50">
-                                            0% FEE
-                                            </small>
-                                            <small v-else class="ms-auto text-white-50">
-                                            1% FEE
-                                            </small>
-                                            </label>
-                                            <div class="position-relative mb-3">
-                                               <input v-model="trade.price" type="number" class="pe-5 form-control bg-dark border-dark text-info" id="tradeNFTamount"
-                                                  placeholder="0.000" step="0.001" min="0.001" required>
-                                               <span class="position-absolute top-50 end-0 translate-middle-y ps-2">
-                                                  <select v-model="trade.token" class="form-select border-0 pe-4"
-                                                     id="tradeNFTpriceType" aria-label="Trade price type select">
-                                                     <option :value="item.token">
-                                                        {{toUpperCase(item.token)}}
-                                                     </option>
-                                                     <option value="hive" selected>
-                                                        HIVE
-                                                     </option>
-                                                     <option value="hbd">
-                                                        HBD
-                                                     </option>
-                                                  </select>
-                                               </span>
-                                               <div class="invalid-feedback">
-                                                  Please enter the amount of VALUE you'd like to receive.
-                                               </div>
-                                            </div>
-                                         </div>
-                                         <div class="text-center">
-                                            <button @click="tradeNFT(item)" id="tradeNFTbutton" class="btn btn-info my-2" type="button">
-                                            Propose Trade
-                                            </button>
-                                         </div>
-                                      </form>
-                                   </div>
-                                   <!-- NFT Sell -->
-                                   <div role="tabpanel" class="tab-pane fade show " id="sellNFTtab" aria-labelledby="sellNFT">
-                                      <form class="needs-validation mt-4" novalidate>
-                                         <div class="form-group form-row my-2">
-                                            <label for="sellNFTprice" class="mb-1 d-flex">Sale Price:
-                                            <small v-if="sell.token == item.token" class="ms-auto text-white-50">
-                                            0% FEE</small>
-                                            <small v-else class="ms-auto text-white-50">
-                                            1% FEE</small>
-                                            </label>
-                                            <div class="position-relative mb-3">
-                                               <input v-model="sell.price" type="number" class="pe-5 form-control bg-dark border-dark text-info" id="sellNFTprice"
-                                                  aria-describedby="sellNFTpriceappend" placeholder="0.000" step="0.001" min="0.001" required>
-                                               <span class="position-absolute top-50 end-0 translate-middle-y ps-2">
-                                                  <select v-model="sell.token" class="form-select border-0 pe-4"
-                                                     id="sellNFTpriceType" aria-label="Sell price type select">
-                                                     <option :value="item.token" selected>
-                                                        {{toUpperCase(item.token)}}
-                                                     </option>
-                                                     <option value="hive">
-                                                        HIVE
-                                                     </option>
-                                                     <option value="hbd">
-                                                        HBD
-                                                     </option>
-                                                  </select>
-                                               </span>
-                                               <div class="invalid-feedback">
-                                                  Please enter the amount of VALUE you'd like to receive. 
-                                               </div>
-                                            </div>
-                                         </div>
-                                         <div class="form-row my-2">
-                                            <p class="text-white-50 small">
-                                               Ownership will be transferred to the DAO listing service and sold publicly. Cancel anytime to return immediately.
-                                            </p>
-                                         </div>
-                                         <div class="text-center">
-                                            <button @click="sellNFT(item)" id="sellNFTbutton" class="btn btn-info my-2" type="button">
-                                            List Item
-                                            </button>
-                                         </div>
-                                      </form>
-                                   </div>
-                                   <!-- NFT Auction -->
-                                   <div role="tabpanel" class="tab-pane fade show " id="auctionNFTtab" aria-labelledby="auctionNFT">
-                                      <form class="needs-validation mt-4" novalidate>
-                                         <div class="form-group form-row my-2">
-                                            <label for="auctionNFTprice" class="d-flex align-items-center mb-1">Starting Bid:
-                                            <small v-if="auction.token == item.token" class="ms-auto text-white-50">
-                                            0% FEE</small>
-                                            <small v-else class="ms-auto text-white-50">
-                                            1% FEE</small>
-                                            </label>
-                                            <div class="position-relative mb-3">
-                                               <input v-model="auction.amount" type="number" class="pe-5 form-control bg-dark border-dark text-info" id="auctionNFTprice"
-                                                  aria-describedby="auctionNFTpriceappend" placeholder="0.000" step="0.001" min="0.001" required>
-                                               <span class="position-absolute top-50 end-0 translate-middle-y ps-2">
-                                                  <select v-model="auction.token" class="form-select border-0 pe-4"
-                                                     id="auctionNFTpriceType" aria-label="Auction price type select">
-                                                     <option :value="item.token" selected>
-                                                        {{toUpperCase(item.token)}}
-                                                     </option>
-                                                     <option value="hive">
-                                                        HIVE
-                                                     </option>
-                                                     <option value="hbd">
-                                                        HBD
-                                                     </option>
-                                                  </select>
-                                               </span>
-                                               <div class="invalid-feedback">
-                                                  Please enter the amount of VALUE you'd like to start the bidding.
-                                               </div>
-                                            </div>
-                                         </div>
-                                         <div class="d-flex justify-content-around">
-                                            <div class="form-row my-2 d-flex align-items-center">
-                                               <label for="auctionNFTdays" class="m-0">Duration:</label>
-                                               <select v-model="auction.days" class="mx-2 btn btn-lg btn-dark" id="auctionNFTdays" required>
-                                                  <option value="1">
-                                                     1 Day
-                                                  </option>
-                                                  <option value="2">
-                                                     2 Days
-                                                  </option>
-                                                  <option value="3">
-                                                     3 Days
-                                                  </option>
-                                                  <option value="4">
-                                                     4 Days
-                                                  </option>
-                                                  <option value="5">
-                                                     5 Days
-                                                  </option>
-                                                  <option value="6">
-                                                     6 Days
-                                                  </option>
-                                                  <option value="7" selected>
-                                                     7 Days
-                                                  </option>
-                                               </select>
-                                            </div>
-                                         </div>
-                                         <div class="form-row my-2">
-                                            <p class="text-white-50 small">
-                                               Ownership will be transferred to the DAO listing service and auctioned publicly. Once submitted this cannot 
-                                               be cancelled. If there are no bids at the end of the auction period, it will be returned to you immediately.
-                                            </p>
-                                         </div>
-                                         <div class="text-center">
-                                            <button @click="auctionNFT(item)" class="btn btn-info my-2" type="button">
-                                            List Item
-                                            </button>
-                                         </div>
-                                      </form>
-                                   </div>
-                                </div>
-                             </div>
-                          </div>
-                       </div>
-                    </div>
-                 </div>
-                 <!-- NFT Melt -->
-                 <div class="accordion-item">
-                    <h2 class="accordion-header">
-                       <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMelt" aria-expanded="false" aria-controls="collapseMelt">
-                       <i class="fa-solid fa-fire me-3"></i>MELT<span
+                          <!-- Melt Value -->
+                        <div>
+                            <i class="fa-solid fa-fire me-3"></i>MELT<span
                           class="ms-2 small">({{chains[item.token]
                        ?
                        precision(chains[item.token].sets[item.setname].bond.amount,
@@ -348,240 +88,14 @@ export default {
                        chains[item.token].sets[item.setname].bond.token
                        :
                        ''}})</span>
-                       </button>
-                    </h2>
-                    <div id="collapseMelt" class="accordion-collapse collapse" data-bs-parent="#nftAccordion">
-                       <div class="accordion-body">
-                          <div class="text-center" v-if="item.owner != account">
-                             <p>The onwer of this NFT can "melt" it and recieve it's melt value.</p>
-                          </div>
-                          <div class="p-0" v-if="item.owner == account">
-                             <div class="d-flex align-self-end">
-                                <div class="border border-warning rounded bg-darker col-12 p-4">
-                                   <div class="d-flex align-items-center justify-content-between">
-                                      <div class="d-flex me-1">
-                                         <h4>Melt Value:</h4>
-                                      </div>
-                                      <div class="d-flex no-wrap ms-1">
-                                         <h1>
-                                            {{chains[item.token]
-                                            ?
-                                            precision(chains[item.token].sets[item.setname].bond.amount,
-                                            chains[item.token].sets[item.setname].bond.precision)
-                                            : 0 }}
-                                            {{chains[item.token]?
-                                            chains[item.token].sets[item.setname].bond.token
-                                            :
-                                            ''}}
-                                         </h1>
-                                      </div>
-                                   </div>
-                                   <div class="pt-2">
-                                      <p class="text-uppercase text-muted">This NFT can be traded, sold, or auctioned until melted. Once melted it will disappear forever.</p>
-                                      <div class="d-flex justify-content-around">
-                                         <div class="d-flex align-items-center my-4">
-                                            <div class="text-center p-4">
-                                               <h1 class="text-warning" style="font-size: 4em">
-                                                  <i class="fas fa-exclamation-triangle"></i>
-                                               </h1>
-                                            </div>
-                                            <ul>
-                                               <li>This action cannot be undone</li>
-                                               <li>Your NFT will be deleted
-                                               </li>
-                                               <li>You will receive the melt value</li>
-                                            </ul>
-                                         </div>
-                                      </div>
-                                      <div class="text-center pb-4">
-                                         <button type="button" class="btn btn-warning" data-bs-toggle="collapse" href="#melt-confirmation">
-                                         Melt
-                                         </button>
-                                      </div>
-                                      <div class="collapse bg-danger rounded"
-                                         id="melt-confirmation">
-                                         <div class="text-center pt-4">
-                                            <h2><b>/////// IRREVERSIBLE
-                                               \\\\\\\</b>
-                                            </h2>
-                                            <p>Are you sure you want to
-                                               proceed?
-                                            </p>
-                                         </div>
-                                         <div class="d-flex justify-content-around p-3">
-                                            <button class="btn btn-secondary"
-                                               data-bs-toggle="collapse"
-                                               href="#melt-confirmation">CANCEL
-                                            <i class="fas fa-running"></i></button>
-                                            <button @click="meltNFT()"
-                                               class="btn btn-danger border-white">DESTROY
-                                            <i class="fas fa-bomb"></i>
-                                            <span
-                                               class="spinner-border spinner-border-sm d-none"
-                                               role="status"
-                                               aria-hidden="true"></span></button>
-                                         </div>
-                                      </div>
-                                   </div>
-                                </div>
-                             </div>
-                          </div>
+                        </div>
                        </div>
                     </div>
                  </div>
-                 <!-- NFT Bid -->
-                 <div class="accordion-item" v-if="item.auction">
-                    <h2 class="accordion-header">
-                       <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBid" aria-expanded="true" aria-controls="collapseBid">
-                       <i class="fas fa-comment-dollar me-3"></i><span>BID
-                       NOW</span><span
-                          class="small ms-2">({{naiString(item.price)}})</span>
-                       </button>
-                    </h2>
-                    <div id="collapseBid" class="accordion-collapse collapse show" data-bs-parent="#nftAccordion">
-                       <div class="accordion-body">
-                          <div class="d-flex align-self-end">
-                             <div
-                                class="col-12">
-                                <div
-                                   class="d-flex align-items-center justify-content-between">
-                                   <div class="d-flex me-1">
-                                      <h4>Current
-                                         Bid:{{naiString(item.price)}}
-                                      </h4>
-                                   </div>
-                                   <div class="d-flex no-wrap ms-1">
-                                      <u>
-                                         <h4>
-                                            Number of
-                                            Bids:{{item.bids}}
-                                         </h4>
-                                      </u>
-                                   </div>
-                                </div>
-                                <div class="">
-                                   <div class="d-flex justify-content-around">
-                                      <div class="d-flex align-items-center">
-                                         <div class="text-center p-4">
-                                            <h1 class="text-warning"
-                                               style="font-size: 4em">
-                                               <i class="fa-solid fa-gavel"></i>
-                                            </h1>
-                                         </div>
-                                         <ul>
-                                            <li>Time Left:
-                                               {{item.time}}
-                                            </li>
-                                            <li>Opening Price:
-                                               {{naiString(item.initial_price)}}
-                                            </li>
-                                            <li>Seller:
-                                               {{item.by}}
-                                            </li>
-                                            <li>Bidder:
-                                               {{item.bidder}}
-                                            </li>
-                                            <li>Days:
-                                               {{item.days}}
-                                            </li>
-                                         </ul>
-                                      </div>
-                                   </div>
-                                   <div>
-                                      <form class="needs-validation" novalidate>
-                                         <label for="bidNFTprice" class="mb-1">Bid:</label>
-                                         <div class="position-relative mb-3">
-                                            <input v-model="auction.bid"
-                                               type="number"
-                                               class="pe-5 form-control bg-dark border-dark text-info"
-                                               id="auctionNFTprice"
-                                               :placeholder="formatNumber(((item.price.amount/1000)+1),3,'.',',')" step="0.001"
-                                               :min="(item.price.amount + (item.bids ? 1 : 0))/ 1000"
-                                               required>
-                                            <span class="position-absolute top-50 end-0 translate-middle-y pe-3">
-                                            {{toUpperCase(item.price.token)}}
-                                            </span>
-                                            <div>
-                                               <div class="invalid-feedback">
-                                                  Please enter the
-                                                  amount of
-                                                  VALUE you'd like
-                                                  to start the
-                                                  bidding. 
-                                               </div>
-                                            </div>
-                                         </div>
-                                         <div class="text-center">
-                                            <button @click="bidNFT(item)"
-                                               type="button" class="btn btn-primary">Bid
-                                            </button>
-                                         </div>
-                                      </form>
-                                   </div>
-                                </div>
-                             </div>
-                          </div>
-                       </div>
-                    </div>
-                    <!-- NFT Buy -->
-                    <div class="accordion-item" v-if="item.sale">
-                       <h2 class="accordion-header">
-                          <button  @click="saleData('itemmodal')" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBuy" aria-expanded="true" aria-controls="collapseBuy">
-                          <i class="fas fa-money-bill-wave me-3"></i><span>BUY
-                          NOW</span><span
-                             class="small ms-2">({{naiString(item.price)}})</span>
-                          </button>
-                       </h2>
-                       <div id="collapseBuy" class="accordion-collapse collapse show" data-bs-parent="#nftAccordion">
-                          <div class="accordion-body">
-                             <div class="d-flex align-self-end">
-                                <div
-                                   class="col-12">
-                                   <div
-                                      class="d-flex align-items-center justify-content-between">
-                                      <div class="d-flex me-1">
-                                         <h4>Price:
-                                            {{naiString(item.price)}}
-                                         </h4>
-                                      </div>
-                                      <div class="d-flex no-wrap ms-1">
-                                         <h4>
-                                            Seller: @{{item.by}}
-                                         </h4>
-                                      </div>
-                                   </div>
-                                   <div class="pt-2">
-                                      <p class="text-uppercase text-muted">
-                                      </p>
-                                      <div class="d-flex justify-content-around">
-                                         <!-- long name, script, set, uid only other buy data -->
-                                      </div>
-                                      <div class="text-center">
-                                         <button v-if="item.by != account"
-                                            type="button" class="btn btn-primary"
-                                            @click="buyNFT()"
-                                            href="#/">Buy </button>
-                                         <button v-else type="button"
-                                            class="btn btn-warning"
-                                            @click="cancelNFT()"
-                                            href="#/">Cancel </button>
-                                      </div>
-                                   </div>
-                                </div>
-                             </div>
-                          </div>
-                       </div>
-                    </div>
-                 </div>
-              </div>
-           </div>
-        </div>
-     </div>
-<!-- NFT Detail Copy Paste Ends Here -->
+                 
 
-
-        
-            <div class="">
+                 <!-- Mint Transfer -->
+                <div class="">
                 <div class="d-flex align-items-center justify-content-between pb-1 mb-3">
                 <h3 class="mb-0">Transfer {{item.set}} FT</h3>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -929,6 +443,51 @@ export default {
                     </div>
                 </div>
             </div>
+                 
+
+
+
+                 <!-- Mint Auctions -->
+                 <div class="accordion-item" v-if="item.auction">
+                    <h2 class="accordion-header">
+                       <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBid" aria-expanded="true" aria-controls="collapseBid">
+                       <i class="fas fa-comment-dollar me-3"></i><span>BID
+                       NOW</span><span
+                          class="small ms-2">lowest bid</span>
+                       </button>
+                    </h2>
+                    <div id="collapseBid" class="accordion-collapse collapse show" data-bs-parent="#ftAccordion">
+                       <div class="accordion-body">
+                          
+                       </div>
+                    </div>
+
+                    <!-- Mint Sales -->
+                    <div class="accordion-item" v-if="item.sale">
+                       <h2 class="accordion-header">
+                          <button  @click="saleData('itemmodal')" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBuy" aria-expanded="true" aria-controls="collapseBuy">
+                          <i class="fas fa-money-bill-wave me-3"></i><span>BUY
+                          NOW</span><span
+                             class="small ms-2">lowest price</span>
+                          </button>
+                       </h2>
+                       <div id="collapseBuy" class="accordion-collapse collapse show" data-bs-parent="#ftAccordion">
+                          <div class="accordion-body">
+
+                          </div>
+                       </div>
+
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </div>
+     </div>
+<!-- NFT Detail Copy Paste Ends Here -->
+
+
+        
+            
         </div>
     </div>
 </div>
