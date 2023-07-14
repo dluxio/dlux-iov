@@ -291,7 +291,7 @@
                             <!-- HIVE -->
                             <div class="accordion-item wallet-accordion-item bg-hive shadow">
                                 <h2 class="accordion-header">
-                                    <button class="accordion-button text-black collapsed" type="button"
+                                    <button onclick="this.blur();" class="accordion-button text-black collapsed" type="button"
                                         data-bs-toggle="collapse" data-bs-target="#collapsehive" aria-expanded="false"
                                         aria-controls="collapsehive">
                                         HIVE<span class="ms-auto small" id="hiveBal">{{formatNumber(barhive, 3, '.', ',')}}</span>
@@ -314,7 +314,7 @@
                             <!-- HBD -->
                             <div class="accordion-item wallet-accordion-item bg-hbd shadow">
                                 <h2 class="accordion-header">
-                                    <button class="accordion-button text-black collapsed" type="button"
+                                    <button onclick="this.blur();" class="accordion-button text-black collapsed" type="button"
                                         data-bs-toggle="collapse" data-bs-target="#collapsehbd" aria-expanded="false"
                                         aria-controls="collapsehbd">
                                         HBD<span class="ms-auto small" id="hbdBal">{{formatNumber(barhbd, 3, '.', ',')}}</span>
@@ -338,7 +338,7 @@
                             <div class="accordion-item wallet-accordion-item shadow" :id="name + '-wallet-item'"
                                 v-for="name in chainSorted">
                                 <h2 class="accordion-header">
-                                    <button class="accordion-button text-black" type="button"
+                                    <button onclick="this.blur();" class="accordion-button text-black" type="button"
                                         :class="{'collapsed': name != 'dlux'}" data-bs-toggle="collapse"
                                         :data-bs-target="'#collapse' + name" aria-expanded="true"
                                         :aria-controls="'#collapse' + name">
