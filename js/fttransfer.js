@@ -92,12 +92,12 @@ export default {
                       <div class="accordion-item">
                          <h2 class="accordion-header">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                               data-bs-target="#collapseDescription" aria-expanded="true"
-                               aria-controls="collapseDescription">
+                               data-bs-target="#collapseftDescription" aria-expanded="true"
+                               aria-controls="collapseftDescription">
                                <i class="fas fa-list me-3"></i>DESCRIPTION
                             </button>
                          </h2>
-                         <div id="collapseDescription" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
+                         <div id="collapseftDescription" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
                             <div class="accordion-body">
                                <p>{{setdetail.name_long}}</p>
                                <p>{{info}}</p>
@@ -117,11 +117,11 @@ export default {
                       <div class="accordion-item" v-if="item.qty > 0">
                          <h2 class="accordion-header">
                             <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                               data-bs-target="#collapseTransfer" aria-expanded="false" aria-controls="collapseTransfer">
+                               data-bs-target="#collapseftTransfer" aria-expanded="false" aria-controls="collapseftTransfer">
                                <i class="fas fa-exchange-alt me-3"></i>TRANSFER
                             </button>
                          </h2>
-                         <div id="collapseTransfer" class="accordion-collapse collapse show"
+                         <div id="collapseftTransfer" class="accordion-collapse collapse show"
                             data-bs-parent="#ftAccordion">
                             <div class="accordion-body">
                                <div class="">
@@ -474,47 +474,16 @@ export default {
                       <div class="accordion-item" v-if="">
                          <h2 class="accordion-header">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                               data-bs-target="#collapseBid" aria-expanded="true" aria-controls="collapseBid">
+                               data-bs-target="#collapseftBid" aria-expanded="true" aria-controls="collapseftBid">
                                <i class="fas fa-comment-dollar me-3"></i><span>BID
                                   NOW</span><span class="small ms-2">lowest bid</span>
                             </button>
                          </h2>
-                         <div id="collapseBid" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
+                         <div id="collapseftBid" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
                             <div class="accordion-body">
                             <!-- mint market widget -->
-                            <div class="p-3 d-flex flex-grow-1 mint-market-widget">
-                              <div class="d-flex">
-                                <div class="">
-                                  <div class="">
-                                    <ul :id="setdetail + '-mint-tabnav'" class="nav nav-tabs mb-3"
-                                      role="tablist">
-                                      <li class="nav-item"> <a class="nav-link active"
-                                          :href="'#' + setdetail + '-mint-salestab'"
-                                          :id="setdetail + '-mint-saleslink'" role="tab"
-                                          data-bs-toggle="tab" aria-controls="mintsalestab" aria-expanded="true">
-                                          <div class="d-flex align-items-center">
-                                            <div @click="">SALES</div>
-                                            <div class="mb-3"><span class=" badge rounded-pill bg-danger" style="font-size: .7em">
-                                                total sales</span>
-                                            </div>
-                                          </div>
-                                        </a></li>
-                                      <li class="nav-item"> <a class="nav-link"
-                                          :href="'#'+ setdetail + '-mint-auctionstab'" role="tab"
-                                          :id="setdetail + '-mint-auctionslink'" data-bs-toggle="tab"
-                                          aria-controls="mintauctionstab">
-                                          <div class="d-flex align-items-center">
-                                            <div>AUCTIONS</div>
-                                            <div class="mb-3"><span class=" badge rounded-pill bg-danger"
-                                                style="font-size: .7em">total auctions</span>
-                                            </div>
-                                          </div>
-                                        </a></li>
-                                    </ul>
-          
-                                    <div :id="setdetail + '-mint-tabs'" class="tab-content">
-                                      <div :id="setdetail + '-mint-salestab'" role="tabpanel"
-                                        class="tab-pane fade show active" aria-labelledby="mintsalestab">
+                            
+                                    
                                         <table class="table table-sm">
                                           <thead>
                                             <tr>
@@ -558,71 +527,67 @@ export default {
                                             </tr>
                                           </tbody>
                                         </table>
-                                      </div>
-                                      <div role="tabpanel" class="tab-pane fade show"
-                                        :id="setdetail + '-mint-auctionstab'"
-                                        aria-labelledby="mintauctionstab">
-                                        <table class="table table-sm">
-                                          <thead>
-                                            <tr>
-                                              <th scope="col" class="small">QTY</th>
-                                              <th scope="col" class="small">BID</th>
-                                              <th scope="col" class="small">TOTAL</th>
-                                              <th scope="col" class="small">HIGH BIDDER</th>
-                                            </tr>
-                                        </thead>
-                                          <tbody>
-                                            <tr v-for="auc in mintAuctions">
-                                              <th scope="row" colspan="4" style="background-color: crimson">
-                                                <span>{{auc.time}}</span>
-                                              </th>
-                                            </tr>
-                                            <tr v-for="auc in mintAuctions">
-                                              <th scope="row">1</th>
-                                              <td>{{naiString(auc.pricenai)}}</td>
-                                              <td>&asymp;
-                                                {{auc.price}}
-                                              </td>
-                                              <td>{{auc.bidder}}</td>
-                                            </tr>
-                                            <tr v-for="auc in mintAuctions">
-                                              <th scope="row" colspan="2"></th>
-                                              <td><input class="form-control " type="number">
-                                              </td>
-                                              <td><button class="btn btn-secondary" @click="bidNFT(auc)">Bid</button>
-          
-                                              </td>
-          
-                                            </tr>
-                                          </tbody>
-          
-                                          <th scope="col" class="small"></th>
-                                          <th scope="col" class="small"></th>
-                                          </tr>
-                                        </table>
-                                      </div>
+                                      
+
+                                      
+                                        
+                                     
                                     </div>
                                   </div>
-                                </div>
+                                
                               </div>
-                            </div>
-                            </div>
-                         </div>
-                      </div>
+
  
                       <!-- Mint Sales -->
                       <div class="accordion-item" v-if="">
                          <h2 class="accordion-header">
                             <button @click="saleData('itemmodal')" class="accordion-button collapsed" type="button"
-                               data-bs-toggle="collapse" data-bs-target="#collapseBuy" aria-expanded="true"
-                               aria-controls="collapseBuy">
+                               data-bs-toggle="collapse" data-bs-target="#collapseftBuy" aria-expanded="true"
+                               aria-controls="collapseftBuy">
                                <i class="fas fa-money-bill-wave me-3"></i><span>BUY
                                   NOW</span><span class="small ms-2">lowest price</span>
                             </button>
                          </h2>
-                         <div id="collapseBuy" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
+                         <div id="collapseftBuy" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
                             <div class="accordion-body">
-                               <p>table here</p>
+                            <table class="table table-sm">
+                            <thead>
+                              <tr>
+                                <th scope="col" class="small">QTY</th>
+                                <th scope="col" class="small">BID</th>
+                                <th scope="col" class="small">TOTAL</th>
+                                <th scope="col" class="small">HIGH BIDDER</th>
+                              </tr>
+                          </thead>
+                            <tbody>
+                              <tr v-for="auc in mintAuctions">
+                                <th scope="row" colspan="4" style="background-color: crimson">
+                                  <span>{{auc.time}}</span>
+                                </th>
+                              </tr>
+                              <tr v-for="auc in mintAuctions">
+                                <th scope="row">1</th>
+                                <td>{{naiString(auc.pricenai)}}</td>
+                                <td>&asymp;
+                                  {{auc.price}}
+                                </td>
+                                <td>{{auc.bidder}}</td>
+                              </tr>
+                              <tr v-for="auc in mintAuctions">
+                                <th scope="row" colspan="2"></th>
+                                <td><input class="form-control " type="number">
+                                </td>
+                                <td><button class="btn btn-secondary" @click="bidNFT(auc)">Bid</button>
+
+                                </td>
+
+                              </tr>
+                            </tbody>
+
+                            <th scope="col" class="small"></th>
+                            <th scope="col" class="small"></th>
+                            </tr>
+                          </table>
                             </div>
                          </div>
                       </div>
