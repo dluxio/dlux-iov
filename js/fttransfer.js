@@ -79,15 +79,7 @@ export default {
                           <!-- Melt Value -->
                         <div>
                             <i class="fa-solid fa-fire me-3"></i>MELT<span
-                          class="ms-2 small">({{chains[item.token]
-                       ?
-                       precision(chains[item.token].sets[item.setname].bond.amount,
-                       chains[item.token].sets[item.setname].bond.precision)
-                       : 0 }}
-                       {{chains[item.token]?
-                       chains[item.token].sets[item.setname].bond.token
-                       :
-                       ''}})</span>
+                          class="ms-2 small">(Melt Value)</span>
                         </div>
                        </div>
                     </div>
