@@ -94,11 +94,14 @@ export default {
                          </h2>
                          <div id="collapseDescription" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
                             <div class="accordion-body">
-                               <p>item.set.Description</p>
+                               <p>{{setdetail.name_long}}</p>
+                               <p>setdetail.description</p>
                                <!-- Melt Value -->
                                <div>
-                                  <i class="fa-solid fa-fire me-3"></i>MELT<span class="ms-2 small">(Melt
-                                     Value)</span>
+                                  <i class="fa-solid fa-fire me-3"></i>MELT<span class="ms-2 small">{{naiString(setdetail.bond)}}</span>
+                                  Royalties: {{royaltySplit(setdetail.royalty_allocation)}}
+                                  Dividends Last:{{naiString(setdetail.last_div)}}
+                                  Dividends Total:{{naiString(setdetail.total_div)}}
                                </div>
                             </div>
                          </div>
@@ -532,6 +535,47 @@ export default {
                 };
             }
         },
+        setdetail: {
+            default: function () {
+                return {
+                    author:"disregardfiat",
+                    bond:{
+                        amount:0,
+                        precision:3,
+                        token:"DLUX",
+                    },
+                    encoding:"svg",
+                    fee:{
+                        amount:0,
+                        precision:3,
+                        token:"DLUX",
+                    },
+                    last_div:{
+                        amount:0,
+                        precision:3,
+                        token:"DLUX",
+                    },
+                    link:"disregardfiat/dlux-founders-set-nft",
+                    max:4096,
+                    max_exe_length:0,
+                    max_opt_length:0,
+                    minted:"1x",
+                    name:"dlux",
+                    name_long:"DLUX Founders",
+                    permlink:"dlux-founders-set-nft",
+                    royalty:"100",
+                    royalty_allocation:"disregardfiat_5000,markegiles_5000",
+                    script:"QmYSRLiGaEmucSXoNiq9RqazmDuEZmCELRDg4wyE7Fo8kX",
+                    set:"dlux",
+                    total_div:{
+                        amount:0,
+                        precision:3,
+                        token:"DLUX",
+                    },
+                    type:1,
+                    };
+                }
+        },
         icon: {
             default: ''
         },
@@ -835,6 +879,15 @@ export default {
             }
             return Math.floor(seconds) + " seconds ago";
         },
+        royaltySplit(royalty) {
+            var split = royalty.split(',')
+            var string
+            for (var i = 0; i < split.length; i++) {
+                var s = split[i].split('_')
+                string += `${s[0]}: ${(s[1]/100).toFixed(2)}%\n`
+            }
+            return string
+        },
         formatNumber(t, n, r, e) { // number, decimals, decimal separator, thousands separator
             if (typeof t != "number") {
                 const parts = t ? t.split(" ") : []
@@ -868,6 +921,11 @@ export default {
         },
         toUpperCase(str = "") {
             return str.toUpperCase();
+        },
+        naiString(nai) {
+          return `${parseFloat(nai.amount / Math.pow(10, nai.precision)).toFixed(
+            nai.precision
+          )} ${nai.token}`;
         }
     },
     mounted() {
