@@ -112,6 +112,10 @@
             bottom: -15px;
             text-align: center;
         }
+        .reverseorder {
+  display: flex;
+  flex-direction: column-reverse;
+}
     </style>
 </head>
 
@@ -287,6 +291,54 @@
                     <!-- WALLETS -->
                     <div class="ms-1 card p-2 rounded-3">
                         <div class="accordion wallet-accordion text-black" id="accordionExample">
+                            <!-- HIVE -->
+                            <div class="accordion-item wallet-accordion-item bg-hive shadow">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button text-black collapsed" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false"
+                                        aria-controls="collapseTwo">
+                                        HIVE<span class="ms-auto small">{{formatNumber(barhive, 3, '.', ',')}}</span>
+                                    </button>
+                                </h2>
+                                <div id="collapseTwo" class="accordion-collapse collapse"
+                                    data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
+                                            {{barhive}}</h3>
+                                        <div class="mt-1 text-end">
+                                            <button class="btn btn-outline-dark disabled btn-sm" class="a-1"
+                                                data-bs-toggle="modal">
+                                                Get HIVE
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- HBD -->
+                            <div class="accordion-item wallet-accordion-item bg-hbd shadow">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button text-black collapsed" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false"
+                                        aria-controls="collapseThree">
+                                        HBD<span class="ms-auto small">{{formatNumber(barhbd, 3, '.', ',')}}</span>
+                                    </button>
+                                </h2>
+                                <div id="collapseThree" class="accordion-collapse collapse"
+                                    data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
+                                            {{barhbd}}</h3>
+                                        <div class="mt-1 text-end">
+                                            <button class="btn btn-outline-dark disabled btn-sm" class="a-1"
+                                                data-bs-toggle="modal">
+                                                Get HBD
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- HONEYCOMB -->
+                            <div class="reverseorder">
                             <div class="accordion-item wallet-accordion-item shadow" :id="name + '-wallet-item'"
                                 v-for="(token, name, index) in chains">
                                 <h2 class="accordion-header">
@@ -316,50 +368,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="accordion-item wallet-accordion-item bg-hive shadow">
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button text-black collapsed" type="button"
-                                        data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false"
-                                        aria-controls="collapseTwo">
-                                        HIVE<span class="ms-auto small">{{formatNumber(barhive, 3, '.', ',')}}</span>
-                                    </button>
-                                </h2>
-                                <div id="collapseTwo" class="accordion-collapse collapse"
-                                    data-bs-parent="#accordionExample">
-                                    <div class="accordion-body">
-                                        <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
-                                            {{barhive}}</h3>
-                                        <div class="mt-1 text-end">
-                                            <button class="btn btn-outline-dark disabled btn-sm" class="a-1"
-                                                data-bs-toggle="modal">
-                                                Get HIVE
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="accordion-item wallet-accordion-item bg-hbd shadow">
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button text-black collapsed" type="button"
-                                        data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false"
-                                        aria-controls="collapseThree">
-                                        HBD<span class="ms-auto small">{{formatNumber(barhbd, 3, '.', ',')}}</span>
-                                    </button>
-                                </h2>
-                                <div id="collapseThree" class="accordion-collapse collapse"
-                                    data-bs-parent="#accordionExample">
-                                    <div class="accordion-body">
-                                        <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
-                                            {{barhbd}}</h3>
-                                        <div class="mt-1 text-end">
-                                            <button class="btn btn-outline-dark disabled btn-sm" class="a-1"
-                                                data-bs-toggle="modal">
-                                                Get HBD
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        </div>
+                            
                         </div>
                     </div>
 
