@@ -620,6 +620,18 @@ export default {
                 };
             },
         },
+        auctions: {
+            required: true,
+            default: function () {
+                return [];
+            },
+        },
+        sales: {
+            required: true,
+            default: function () {
+                return []
+            },
+        },
         api: {
             default: '',
             required: true
