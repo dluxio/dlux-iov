@@ -23,7 +23,7 @@ export default {
         style="background: black">
         <h2 class="m-0 px-1">{{item.uid}}</h2>
     </div>
-    
+
     </div>
     <!-- MINT HEAD -->
     <div class="d-flex justify-content-between align-items-center" v-if="mint">
@@ -38,7 +38,7 @@ export default {
         <small>QTY: </small>
         </div>
         <div class="ms-1">
-          <h2 class="m-0">{{item.qty}}</h2>
+          <h2 class="m-0">{{formatNumber(item.qty,'0','.',',')}}</h2>
         </div>
       </div>
              
