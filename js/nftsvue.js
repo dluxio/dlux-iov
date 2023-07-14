@@ -68,6 +68,7 @@ var app = new Vue({
           enabled: false,
           api: "https://token.dlux.io",
           sets: {},
+          slot: 1,
           account:{
             balance: 0,
           }
@@ -76,6 +77,7 @@ var app = new Vue({
           enabled: false,
           api: "https://duat.hivehoneycomb.com",
           sets: {},
+          slot: 0,
           account:{
             balance: 0,
           }
@@ -2380,6 +2382,15 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       get() {
         return location;
       },
+    },
+    chainSorted:{
+      get() {
+      return Object.keys(this.chains).sort((a, b) => {
+        if(this.chains[a].slot > this.chains[b].slot)return 1
+        else if (this.chains[a].slot < this.chains[b].slot)return -1
+        else return 0
+       })
+      }
     },
     includes: {
       get() {
