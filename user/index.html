@@ -1162,7 +1162,7 @@
                                 <!-- MINT TRADES -->
                                 <div v-for="(rnft, index) in FTtrades" :key="index" class="col my-2">
                                     <nftcard :item="rnft" mint="true" trade="true" :account="account"
-                                        :multisig="chains[rnft.token].multisig"
+                                        :multisig="chains[rnft.token].multisig" @focusitem="focusItem = $event"
                                         :wrapped="getAttr(rnft.script, 'wrapped')" :oicon="getIcon(rnft.script)"
                                         @tosign="toSign = $event" :ocolors="getSetDetailsColors(rnft.script)"
                                         @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
