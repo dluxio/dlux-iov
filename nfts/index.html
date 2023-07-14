@@ -343,7 +343,7 @@
                                         :data-bs-target="'#collapse' + name" aria-expanded="true"
                                         :aria-controls="'#collapse' + name">
                                         {{toUpperCase(name)}}<span
-                                            class="ms-auto small" :id="name + 'Bal'">{{formatNumber(chains[name].account.balance/1000,
+                                            class="ms-auto small" :id="name + 'Bal'" :class="{'d-none': name == 'dlux'}">{{formatNumber(chains[name].account.balance/1000,
                                             3,
                                             '.', ',')}}</span>
                                     </button>
