@@ -7,10 +7,7 @@ export default {
 <div class="card-header border-0 px-2">
   <!-- NFT HEAD --> 
   <div class="d-flex justify-content-between align-items-center" v-if="!mint">
-    <div class="rounded-pill d-flex align-items-center p-1"
-        style="background: black">
-        <h2 class="m-0 px-1">{{item.uid}}</h2>
-    </div>
+    
     <div class="rounded px-2 py-1" style="background: rgba(0,0,0,1)">
         <a :href="'/nfts/set/' + item.setname + '#' + item.token"
             class="no-decoration" style="font-size: 1.3em;">
@@ -21,9 +18,20 @@ export default {
         -moz-text-fill-color: transparent;;"><i class="me-1"
                     :class="[icon]"></i><b>{{item.setname}}</b></span></a>
     </div>
+
+    <div class="rounded-pill d-flex align-items-center p-1"
+        style="background: black">
+        <h2 class="m-0 px-1">{{item.uid}}</h2>
+    </div>
+    
     </div>
     <!-- MINT HEAD -->
     <div class="d-flex justify-content-between align-items-center" v-if="mint">
+    <div class="rounded px-2 py-1 shimmer border border-dark">
+    <a :href="'/nfts/set/' + item.setname + '#' + item.token"
+        class="no-decoration text-black" style="font-size: 1.3em;">
+        <i class="me-1" :class="[icon]"></i><b>{{item.set}}</b></a>
+    </div>
      <div class="rounded-pill d-flex align-items-center py-1 px-2"
        style="background-color: black">
         <div>
@@ -33,11 +41,7 @@ export default {
           <h2 class="m-0">{{item.qty}}</h2>
         </div>
       </div>
-             <div class="rounded px-2 py-1 shimmer border border-dark">
-             <a :href="'/nfts/set/' + item.setname + '#' + item.token"
-                 class="no-decoration text-black" style="font-size: 1.3em;">
-                 <i class="me-1" :class="[icon]"></i><b>{{item.set}}</b></a>
-         </div>
+             
         </div>
 </div>
 
