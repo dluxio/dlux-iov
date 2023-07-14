@@ -15,6 +15,7 @@
     <!-- Icons -->
     <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
     <script type="module" src="/js/nftsvue.js"></script>
+
     <style>
         .circle {
             width: 50px;
@@ -291,12 +292,12 @@
                             <div class="accordion-item wallet-accordion-item bg-hive shadow">
                                 <h2 class="accordion-header">
                                     <button class="accordion-button text-black collapsed" type="button"
-                                        data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false"
-                                        aria-controls="collapseTwo">
-                                        HIVE<span class="ms-auto small">{{formatNumber(barhive, 3, '.', ',')}}</span>
+                                        data-bs-toggle="collapse" data-bs-target="#collapsehive" aria-expanded="false"
+                                        aria-controls="collapsehive">
+                                        HIVE<span class="ms-auto small" id="hiveBal">{{formatNumber(barhive, 3, '.', ',')}}</span>
                                     </button>
                                 </h2>
-                                <div id="collapseTwo" class="accordion-collapse collapse"
+                                <div id="collapsehive" class="accordion-collapse collapse"
                                     data-bs-parent="#accordionExample">
                                     <div class="accordion-body">
                                         <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
@@ -314,12 +315,12 @@
                             <div class="accordion-item wallet-accordion-item bg-hbd shadow">
                                 <h2 class="accordion-header">
                                     <button class="accordion-button text-black collapsed" type="button"
-                                        data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false"
-                                        aria-controls="collapseThree">
-                                        HBD<span class="ms-auto small">{{formatNumber(barhbd, 3, '.', ',')}}</span>
+                                        data-bs-toggle="collapse" data-bs-target="#collapsehbd" aria-expanded="false"
+                                        aria-controls="collapsehbd">
+                                        HBD<span class="ms-auto small" id="hbdBal">{{formatNumber(barhbd, 3, '.', ',')}}</span>
                                     </button>
                                 </h2>
-                                <div id="collapseThree" class="accordion-collapse collapse"
+                                <div id="collapsehbd" class="accordion-collapse collapse"
                                     data-bs-parent="#accordionExample">
                                     <div class="accordion-body">
                                         <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
@@ -342,7 +343,7 @@
                                         :data-bs-target="'#collapse' + name" aria-expanded="true"
                                         :aria-controls="'#collapse' + name">
                                         {{toUpperCase(name)}}<span
-                                            class="ms-auto small ">{{formatNumber(chains[name].account.balance/1000,
+                                            class="ms-auto small" :id="name + 'Bal'">{{formatNumber(chains[name].account.balance/1000,
                                             3,
                                             '.', ',')}}</span>
                                     </button>
@@ -363,8 +364,8 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            
+
+
                         </div>
                     </div>
 
@@ -669,38 +670,40 @@
         <foot-vue />
     </div>
     </div>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
         crossorigin="anonymous"></script>
     <script>
-        (function () {
-            "use strict";
-            window.addEventListener(
-                "load",
-                function () {
-                    // Fetch all the forms we want to apply custom Bootstrap validation styles to
-                    var forms = document.getElementsByClassName("needs-validation");
-                    // Loop over them and prevent submission
-                    var validation = Array.prototype.filter.call(
-                        forms,
-                        function (form) {
-                            form.addEventListener(
-                                "submit",
-                                function (event) {
-                                    if (form.checkValidity() === false) {
-                                        event.preventDefault();
-                                        event.stopPropagation();
-                                    }
-                                    form.classList.add("was-validated");
-                                },
-                                false
-                            );
-                        }
-                    );
-                },
-                false
-            );
-        })();
+
+            (function () {
+                "use strict";
+                window.addEventListener(
+                    "load",
+                    function () {
+                        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                        var forms = document.getElementsByClassName("needs-validation");
+                        // Loop over them and prevent submission
+                        var validation = Array.prototype.filter.call(
+                            forms,
+                            function (form) {
+                                form.addEventListener(
+                                    "submit",
+                                    function (event) {
+                                        if (form.checkValidity() === false) {
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                        }
+                                        form.classList.add("was-validated");
+                                    },
+                                    false
+                                );
+                            }
+                        );
+                    },
+                    false
+                );
+            })();
         var disabletab = document.getElementsByClassName("disabled-input");
         for (var i = 0; i < disabletab.length; i++) {
             disabletab[i].setAttribute("tabindex", "-1");
@@ -715,6 +718,50 @@
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function(){
+        // HIVE Balance
+        var hiveCollapse = document.getElementById('collapsehive');
+        hiveCollapse.addEventListener('show.bs.collapse', event => {
+            var hiveCollapse = document.getElementById('hiveBal');
+            hiveBal.classList.add('d-none');
+        })
+        hiveCollapse.addEventListener('hide.bs.collapse', event => {
+            var hiveCollapse = document.getElementById('hiveBal');
+            hiveBal.classList.remove('d-none');
+        })
+        // HBD Balance
+        var hbdCollapse = document.getElementById('collapsehbd');
+        hbdCollapse.addEventListener('show.bs.collapse', event => {
+            var hbdCollapse = document.getElementById('hbdBal');
+            hbdBal.classList.add('d-none');
+        })
+        hbdCollapse.addEventListener('hide.bs.collapse', event => {
+            var hbdCollapse = document.getElementById('hbdBal');
+            hbdBal.classList.remove('d-none');
+        })
+        // DUAT Balance
+        var duatCollapse = document.getElementById('collapseduat');
+        duatCollapse.addEventListener('show.bs.collapse', event => {
+            var duatCollapse = document.getElementById('duatBal');
+            duatBal.classList.add('d-none');
+        })
+        duatCollapse.addEventListener('hide.bs.collapse', event => {
+            var duatCollapse = document.getElementById('duatBal');
+            duatBal.classList.remove('d-none');
+        })
+        // DLUX Balance
+        var dluxCollapse = document.getElementById('collapsedlux');
+        dluxCollapse.addEventListener('show.bs.collapse', event => {
+            var dluxCollapse = document.getElementById('dluxBal');
+            dluxBal.classList.add('d-none');
+        })
+        dluxCollapse.addEventListener('hide.bs.collapse', event => {
+            var dluxCollapse = document.getElementById('dluxBal');
+            dluxBal.classList.remove('d-none');
+        })
+    });
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
         integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
