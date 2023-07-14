@@ -22,14 +22,14 @@ export default {
                      -moz-background-clip: text;
                      -moz-text-fill-color: transparent;;">
                             <i class="me-1" :class="[icon]"></i>
-                            <b>icon set</b>
+                            <b>{{item.set}}</b>
                          </span>
                       </a>
                    </div>
                 </div>
                 <div class="nft-header d-flex">
                    <div class="rounded-pill d-flex align-items-center p-2 " style="background-color: black">
-                      <h2 class="m-0 px-2">qty</h2>
+                      <h2 class="m-0 px-2">qty: {{item.qty}}</h2>
                    </div>
                 </div>
                 <div class="nft-header d-flex">
@@ -46,7 +46,7 @@ export default {
                    <div class="col-12 px-0 px-sm-2">
                       <!-- Mint img -->
                       <div :alt="item.setname + '-' + item.uid">
-                         <div class="mb-3" v-html="item.HTML"></div>
+                         <div class="mb-3"><img :src="'https://ipfs.io/ipfs/' + wrapped"></div>
                          <!--back forward btns-->
                          <div class="d-flex align-items-center">
                             <h2><a class="text-muted p-3" role="button" @click="modalPrev()"><i
