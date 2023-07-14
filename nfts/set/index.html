@@ -284,7 +284,7 @@
                                 <p class="mb-0" v-cloak>Fee: {{naiString(chains[jsontoken].sets[setname].fee)}}</p>
                                 <div class="dropdown-divider bg-light"></div>
                                 <p class="mb-0">Script:</p>
-                                <p class="mb-0" style="max-width: 250px;" v-cloak>
+                                <p class="mb-0 text-break" style="max-width: 250px;" v-cloak>
                                   {{chains[jsontoken].sets[setname].script}}
                                 </p>
                               </div>
@@ -317,22 +317,10 @@
 
                   </div>
                   <!-- mint market widget -->
-                  <div class="p-3 d-flex mint-market-widget">
-                    <div class="d-flex align-items-center">
+                  <div class="p-3 d-flex flex-grow-1 mint-market-widget">
+                    <div class="d-flex">
                       <div class="p-2">
                         <div class="">
-                          <div class="d-flex mb-3">
-                            <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
-                              <div class="pr-2"><small>MINT MARKET: </small></div>
-                              <div class="px-2">
-                                <h2 class="m-0">
-                                  <div>{{formatNumber((chains[jsontoken].sets[setname].forAuctionMint +
-                                    chains[jsontoken].sets[setname].forSaleMint),0,'.',',')}}
-                                  </div>
-                                </h2>
-                              </div>
-                            </div>
-                          </div>
                           <ul :id="chains[jsontoken].sets[setname].set + '-mint-tabnav'" class="nav nav-tabs mb-3"
                             role="tablist">
                             <li class="nav-item"> <a class="nav-link active"
@@ -452,29 +440,23 @@
                     </div>
                   </div>
                   <!--mint manager widget-->
-                  <div class="p-2 d-flex flex-grow-1">
+                  <div class="p-2 d-flex flex-shrink-1">
                     <div class="d-flex align-items-center">
                       <div class="p-2">
                         <div class="">
                           <div class="d-flex justify-content-between align-items-center">
-                            <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black">
-                              <div class="pe-2"><small>MINTS OWNED: </small></div>
-                              <div class="px-2">
-                                <h2 class="m-0">{{getMint(chains[jsontoken].sets[setname].set, 'qty')}}</h2>
-                              </div>
-                            </div>
-                            <div> <a :href="'/nfts/set/' + chains[jsontoken].sets[setname].set" class="no-decoration">
-                                <h3 class="card-title lead shimmer rounded p-2 m-0">
-                                  <b>{{chains[jsontoken].sets[setname].set}}
-                                    NFT</b>
-                                </h3>
-                              </a></div>
+                            <div class="rounded px-2 py-1 shimmer border border-dark">
+                              <a :href="'/nfts/set/' + chains[jsontoken].sets[setname].set"
+                                  class="no-decoration text-black" style="font-size: 1.3em;">
+                                  <i class="me-1" :class="chains[jsontoken].sets[setname].faicon"></i><b>{{chains[jsontoken].sets[setname].set}}</b></a>
+                          </div>
+                            
                           </div>
 
-                          <div class="px-2 py-5 text-center">
-                            <img class="rounded max-160"
+                          <div class="text-center">
+                            <img class="rounded max-160 my-2"
                               :src="makeLink('https://ipfs.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.wrapped : '')"></img>
-                            <div style="-webkit-background-clip: text;color: transparent;">
+                            <div >
                               <h3 class="my-0 mx-2 p-0 p-2 ms-auto">sealed NFT</h3>
                             </div>
                             <h5 v-if="getMint(chains[jsontoken].sets[setname].set, 'qty') > 0">Unwrap to see what's
