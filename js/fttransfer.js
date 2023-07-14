@@ -22,7 +22,12 @@ export default {
                 </div>
                 <div class="nft-header d-flex">
                    <div class="rounded-pill d-flex align-items-center p-2 " style="background-color: black">
-                      <h2 class="m-0 px-2">qty: {{item.qty}}</h2>
+                   <div>
+                   <small>QTY: </small>
+                   </div>
+                   <div class="ms-1">
+                     <h2 class="m-0">{{formatNumber(item.qty,'0','.',',')}}</h2>
+                   </div>
                    </div>
                 </div>
                 <div class="nft-header d-flex">
