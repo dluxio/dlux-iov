@@ -83,7 +83,7 @@ export default {
                             data-bs-parent="#nftAccordion">
                             <div class="accordion-body">
  
-                               <p>Need Long Name</p>
+                               <p>{{longname}}</p>
                                <p>{{itemmodal.item.set.Description}}</p>
                                <div class="d-flex align-items-center">
                                   <div class="me-2 d-flex">
@@ -648,6 +648,13 @@ export default {
             required: true,
             default: function () {
                 return {
+                    dlux: {
+                        sets: {
+                            dlux: {
+                                name_long: "DLUX",
+                            }
+                        }
+                    }
                 };
             },
         },
@@ -656,6 +663,10 @@ export default {
             default: function () {
                 return {
                     script: '',
+                    item: {
+                        setname: 'dlux',
+                        token: 'dlux',
+                    }
                 };
             },
         },
@@ -743,6 +754,10 @@ export default {
         },
         icon() {
             return this.itemmodal.item.set.faicon;
+        },
+        longname() {
+            if(this.chains[this.itemmodal.item.token]?.sets[this.itemmodal.item.setname]?.name_long)return this.chains[this.itemmodal.item.token]?.sets[this.itemmodal.item.setname]?.name_long
+            return ''
         }
     },
     methods: {
