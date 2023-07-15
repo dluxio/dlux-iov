@@ -127,9 +127,11 @@
             <div class="container" style="max-width: 1800px !important">
                 <div class="d-flex py-2 align-items-stretch  flex-wrap">
 
-                    <div class="px-4 rounded-3 card d-flex flex-grow-1">
+                    <div class="px-2 rounded-3 card d-flex w-100">
                         <div class="d-flex align-items-center">
-                            <div class="py-5 px-3">
+
+                            <!-- MESSAGE -->
+                            <div class="py-5 ps-5 flex-grow-1">
                                 <h1 class="display-5 fw-bold">Welcome to the Market</h1>
                                 <p class="col-md-8 fs-4">Browse, bid, buy, and mint</p>
                                 <div class="d-flex">
@@ -139,233 +141,169 @@
                             </div>
 
 
-
-
-                            <div class="d-flex d-none">
-                                <div class="mt-auto mb-auto" style="width: 350px">
-                                    <div class="my-0 py-1 px-2 bg-darker rounded-top">
-                                        <div class="d-flex align-items-center mt-2">
-                                            <div class="d-flex align-items-center">
-                                                <div class="circle2 d-flex align-items-center justify-content-around">
-                                                    <img src="/img/dlux-hive-logo-alpha.svg" width="50px">
-                                                </div>
-                                                <h2 class="p-0 m-0 ms-2 font-weight-bold">HoneyComb</h2>
-                                            </div>
-                                            <div class="ms-auto"><a href="/about/" class="no-decoration"
-                                                    style="color:silver">About<i
-                                                        class="fas fa-info-circle ms-1"></i></a>
-                                            </div>
-                                        </div>
-                                        <div v-for="(token, name, index) in chains">
-                                            <div class="d-flex justify-content-around my-0">
-                                                <div class="d-flex align-items-center px-3">
-
-                                                    <h3 class="py-2 m-0 font-weight-bolder" style="color:#21FFB5">
-                                                        {{formatNumber(chains[name].account.balance/1000, 3, '.', ',')}}
-                                                        {{toUpperCase(name)}}
-                                                    </h3>
+                            <!-- MINTS -->
+                            <div id="carouselExampleCaptions" class="carousel slide mx-4">
+                                <div class="carousel-inner text-center py-2">
+                                    <h3 class="d-none">MINTS</h3>
+                                    <div class="carousel-item active">
+                                        <div class="d-flex mx-5 my-4 align-items-center rounded">
+                                            <img src="https://ipfs.io/ipfs/QmRYrwWuUpjdkn3VW2CY9mD2NcqoGqiJzjN2DmWi49dRZX"
+                                                class="border border-dark border-2 rounded mint-img shadow">
+                                            <div class="w-100 d-flex">
+                                                <div class="ms-auto text-end">
+                                                    <h5>Hive Folks</h5>
+                                                    <small>Lowest Price</small>
+                                                    <p>100.000 HIVE</p>
+                                                    <small>Lowest Bid</small>
+                                                    <p>50 HBD</p>
+                                                    <button class="btn btn-sm btn-outline-light">2 Available</button>
                                                 </div>
                                             </div>
-                                            <div class="mt-1 text-end">
-                                                <button class="btn btn-outline-primary btn-sm" href="#buyTokenModal"
-                                                    class="a-1" data-bs-toggle="modal" @click="popDex(name)">
-                                                    Get {{toUpperCase(name)}}
-                                                </button>
+                                        </div>
+                                    </div>
+                                    <div class="carousel-item">
+                                        <div class="d-flex mx-5 my-4 align-items-center rounded">
+                                            <img src="https://ipfs.io/ipfs/QmV4WZ7sKzvaPG85C2rYNhDS3nVhk3Bv5U9o5Gr9KWx7ir"
+                                                class="ms-auto me-auto border border-dark border-2 rounded d-block mint-img">
+
+                                            <div class="w-100 d-flex">
+                                                <div class=" ms-auto text-end">
+                                                    <h5>Beez</h5>
+                                                    <small>Lowest Price</small>
+                                                    <p>100.000 HIVE</p>
+                                                    <small>Lowest Bid</small>
+                                                    <p>50 HBD</p>
+                                                    <button class="btn btn-sm btn-outline-light">13 Available</button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="bg-darker">
-                                        <div class="bg-hive">
-                                            <div class="bg-darker rounded-bottom bottom-shadow"
-                                                style="line-height: 10px">
-                                                &nbsp;</div>
-                                            <div class="mx-2 mt-2 d-flex">
-                                                <p class="m-0"><b><i class="fab fa-hive"></i> HIVE</b></p>
-                                                <p class="ms-auto small mb-0 text-white-50">
-                                                    {{barhive}}</span></p>
+                                    <div class="carousel-item">
+                                        <div class="d-flex mx-5 my-4 align-items-center rounded">
+                                            <img src="https://ipfs.io/ipfs/QmXwAAQkyqzeqJeJcuqrasApruUewALuhTPhJTPdKckM1M"
+                                                class="ms-auto me-auto border border-dark border-2 rounded d-block mint-img">
+
+                                            <div class="w-100 d-flex">
+                                                <div class="ms-auto text-end">
+                                                    <h5>DLUX Founders</h5>
+                                                    <small>Lowest Price</small>
+                                                    <p>100.000 HIVE</p>
+                                                    <small>Lowest Bid</small>
+                                                    <p>50 HBD</p>
+                                                    <button class="btn btn-sm btn-outline-light">1,996
+                                                        Available</button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="bg-hbd rounded-bottom bottom-shadow">
-                                        <div class="rounded-bottom">
-                                            <div class="bg-hive rounded-bottom bottom-shadow"
-                                                style="line-height: 10px;">
-                                                &nbsp;</div>
-                                        </div>
-                                        <div class="my-2 mx-2 d-flex">
-                                            <p class="m-0"><b><i class="fab fa-hive"></i> HBD</b></p>
-                                            <p class="ms-auto small text-white-50">
-                                                {{barhbd}}</span></p>
-                                        </div>
-                                    </div>
+
+                                </div>
+                                <button class="carousel-control-prev" type="button"
+                                    data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button"
+                                    data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                                <div class="carousel-indicators">
+                                    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0"
+                                        class="active" aria-current="true" aria-label="Slide 1"></button>
+                                    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1"
+                                        aria-label="Slide 2"></button>
+                                    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2"
+                                        aria-label="Slide 3"></button>
                                 </div>
                             </div>
 
-
-
-
-                        </div>
-                    </div>
-
-
-
-                    <!-- MINTS -->
-                    <div id="carouselExampleCaptions" class="carousel slide card shadow-lg rounded-3 ms-1">
-                        <div class="carousel-inner text-center py-2">
-                            <h3>MINTS</h3>
-                            <div class="carousel-item active">
-                                <div class="d-flex mx-5 my-4 align-items-center rounded">
-                                    <img src="https://ipfs.io/ipfs/QmRYrwWuUpjdkn3VW2CY9mD2NcqoGqiJzjN2DmWi49dRZX"
-                                        class="border border-dark border-2 rounded mint-img shadow">
-                                    <div class="w-100 d-flex">
-                                        <div class="ms-auto text-end">
-                                            <h5>Hive Folks</h5>
-                                            <small>Lowest Price</small>
-                                            <p>100.000 HIVE</p>
-                                            <small>Lowest Bid</small>
-                                            <p>50 HBD</p>
-                                            <button class="btn btn-sm btn-outline-light">2 Available</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="carousel-item">
-                                <div class="d-flex mx-5 my-4 align-items-center rounded">
-                                    <img src="https://ipfs.io/ipfs/QmV4WZ7sKzvaPG85C2rYNhDS3nVhk3Bv5U9o5Gr9KWx7ir"
-                                        class="ms-auto me-auto border border-dark border-2 rounded d-block mint-img">
-
-                                    <div class="w-100 d-flex">
-                                        <div class=" ms-auto text-end">
-                                            <h5>Beez</h5>
-                                            <small>Lowest Price</small>
-                                            <p>100.000 HIVE</p>
-                                            <small>Lowest Bid</small>
-                                            <p>50 HBD</p>
-                                            <button class="btn btn-sm btn-outline-light">13 Available</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="carousel-item">
-                                <div class="d-flex mx-5 my-4 align-items-center rounded">
-                                    <img src="https://ipfs.io/ipfs/QmXwAAQkyqzeqJeJcuqrasApruUewALuhTPhJTPdKckM1M"
-                                        class="ms-auto me-auto border border-dark border-2 rounded d-block mint-img">
-
-                                    <div class="w-100 d-flex">
-                                        <div class="ms-auto text-end">
-                                            <h5>DLUX Founders</h5>
-                                            <small>Lowest Price</small>
-                                            <p>100.000 HIVE</p>
-                                            <small>Lowest Bid</small>
-                                            <p>50 HBD</p>
-                                            <button class="btn btn-sm btn-outline-light">1,996 Available</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions"
-                            data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Previous</span>
-                        </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions"
-                            data-bs-slide="next">
-                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Next</span>
-                        </button>
-                        <div class="carousel-indicators">
-                            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0"
-                                class="active" aria-current="true" aria-label="Slide 1"></button>
-                            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1"
-                                aria-label="Slide 2"></button>
-                            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2"
-                                aria-label="Slide 3"></button>
-                        </div>
-                    </div>
-
-                    <!-- WALLETS -->
-                    <div class="ms-1 card p-2 rounded-3">
-                        <div class="accordion wallet-accordion text-black" id="accordionExample">
-                            <!-- HIVE -->
-                            <div class="accordion-item wallet-accordion-item bg-hive shadow">
-                                <h2 class="accordion-header">
-                                    <button onclick="this.blur();" class="accordion-button text-black collapsed" type="button"
-                                        data-bs-toggle="collapse" data-bs-target="#collapsehive" aria-expanded="false"
-                                        aria-controls="collapsehive">
-                                        HIVE<span class="ms-auto small" id="hiveBal">{{formatNumber(barhive, 3, '.', ',')}}</span>
-                                    </button>
-                                </h2>
-                                <div id="collapsehive" class="accordion-collapse collapse"
-                                    data-bs-parent="#accordionExample">
-                                    <div class="accordion-body">
-                                        <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
-                                            {{barhive}}</h3>
-                                        <div class="mt-1 text-end">
-                                            <button class="btn btn-outline-dark disabled btn-sm" class="a-1"
-                                                data-bs-toggle="modal">
-                                                Get HIVE
+                            <!-- WALLETS -->
+                            <div class="">
+                                <div class="accordion wallet-accordion text-black" id="accordionExample">
+                                    <!-- HIVE -->
+                                    <div class="accordion-item wallet-accordion-item bg-hive shadow">
+                                        <h2 class="accordion-header">
+                                            <button onclick="this.blur();" class="accordion-button text-black collapsed"
+                                                type="button" data-bs-toggle="collapse" data-bs-target="#collapsehive"
+                                                aria-expanded="false" aria-controls="collapsehive">
+                                                HIVE<span class="ms-auto small" id="hiveBal">{{formatNumber(barhive, 3,
+                                                    '.', ',')}}</span>
                                             </button>
+                                        </h2>
+                                        <div id="collapsehive" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionExample">
+                                            <div class="accordion-body">
+                                                <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
+                                                    {{barhive}}</h3>
+                                                <div class="mt-1 text-end">
+                                                    <button class="btn btn-outline-dark disabled btn-sm" class="a-1"
+                                                        data-bs-toggle="modal">
+                                                        Get HIVE
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <!-- HBD -->
-                            <div class="accordion-item wallet-accordion-item bg-hbd shadow">
-                                <h2 class="accordion-header">
-                                    <button onclick="this.blur();" class="accordion-button text-black collapsed" type="button"
-                                        data-bs-toggle="collapse" data-bs-target="#collapsehbd" aria-expanded="false"
-                                        aria-controls="collapsehbd">
-                                        HBD<span class="ms-auto small" id="hbdBal">{{formatNumber(barhbd, 3, '.', ',')}}</span>
-                                    </button>
-                                </h2>
-                                <div id="collapsehbd" class="accordion-collapse collapse"
-                                    data-bs-parent="#accordionExample">
-                                    <div class="accordion-body">
-                                        <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
-                                            {{barhbd}}</h3>
-                                        <div class="mt-1 text-end">
-                                            <button class="btn btn-outline-dark disabled btn-sm" class="a-1"
-                                                data-bs-toggle="modal">
-                                                Get HBD
+                                    <!-- HBD -->
+                                    <div class="accordion-item wallet-accordion-item bg-hbd shadow">
+                                        <h2 class="accordion-header">
+                                            <button onclick="this.blur();" class="accordion-button text-black collapsed"
+                                                type="button" data-bs-toggle="collapse" data-bs-target="#collapsehbd"
+                                                aria-expanded="false" aria-controls="collapsehbd">
+                                                HBD<span class="ms-auto small" id="hbdBal">{{formatNumber(barhbd, 3,
+                                                    '.', ',')}}</span>
                                             </button>
+                                        </h2>
+                                        <div id="collapsehbd" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionExample">
+                                            <div class="accordion-body">
+                                                <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
+                                                    {{barhbd}}</h3>
+                                                <div class="mt-1 text-end">
+                                                    <button class="btn btn-outline-dark disabled btn-sm" class="a-1"
+                                                        data-bs-toggle="modal">
+                                                        Get HBD
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <!-- HONEYCOMB -->
-                            <div class="accordion-item wallet-accordion-item shadow" :id="name + '-wallet-item'"
-                                v-for="name in chainSorted">
-                                <h2 class="accordion-header">
-                                    <button onclick="this.blur();" class="accordion-button text-black" type="button"
-                                        :class="{'collapsed': name != 'dlux'}" data-bs-toggle="collapse"
-                                        :data-bs-target="'#collapse' + name" aria-expanded="true"
-                                        :aria-controls="'#collapse' + name">
-                                        {{toUpperCase(name)}}<span
-                                            class="ms-auto small" :id="name + 'Bal'" :class="{'d-none': name == 'dlux'}">{{formatNumber(chains[name].account.balance/1000,
-                                            3,
-                                            '.', ',')}}</span>
-                                    </button>
-                                </h2>
-                                <div :id="'collapse' + name" :ref="'show' + name"  class="accordion-collapse collapse"
-                                    :class="{'show': name == 'dlux'}" data-bs-parent="#accordionExample">
-                                    <div class="accordion-body">
-                                        <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
-                                            {{formatNumber(chains[name].account.balance/1000, 3, '.', ',')}}
-                                            {{toUpperCase(name)}}
-                                        </h3>
-                                        <div class="mt-1 text-end">
-                                            <button class="btn btn-outline-dark btn-sm" href="#buyTokenModal"
-                                                class="a-1" data-bs-toggle="modal" @click="popDex(name)">
-                                                Get {{toUpperCase(name)}}
+                                    <!-- HONEYCOMB -->
+                                    <div class="accordion-item wallet-accordion-item shadow" :id="name + '-wallet-item'"
+                                        v-for="name in chainSorted">
+                                        <h2 class="accordion-header">
+                                            <button onclick="this.blur();" class="accordion-button text-black"
+                                                type="button" :class="{'collapsed': name != 'dlux'}"
+                                                data-bs-toggle="collapse" :data-bs-target="'#collapse' + name"
+                                                aria-expanded="true" :aria-controls="'#collapse' + name">
+                                                {{toUpperCase(name)}}<span class="ms-auto small" :id="name + 'Bal'"
+                                                    :class="{'d-none': name == 'dlux'}">{{formatNumber(chains[name].account.balance/1000,
+                                                    3,
+                                                    '.', ',')}}</span>
                                             </button>
+                                        </h2>
+                                        <div :id="'collapse' + name" :ref="'show' + name"
+                                            class="accordion-collapse collapse" :class="{'show': name == 'dlux'}"
+                                            data-bs-parent="#accordionExample">
+                                            <div class="accordion-body">
+                                                <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
+                                                    {{formatNumber(chains[name].account.balance/1000, 3, '.', ',')}}
+                                                    {{toUpperCase(name)}}
+                                                </h3>
+                                                <div class="mt-1 text-end">
+                                                    <button class="btn btn-outline-dark btn-sm" href="#buyTokenModal"
+                                                        class="a-1" data-bs-toggle="modal" @click="popDex(name)">
+                                                        Get {{toUpperCase(name)}}
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
 
 
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -470,7 +408,8 @@
                     <div class="dropdown">
                         <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown"
                             aria-expanded="false">
-                            {{NFTselect.sort == 'uid' ? 'Sort' : ('Sort by ' + (NFTselect.sort == 'price' ? 'Price: ' :
+                            {{NFTselect.sort == 'uid' ? 'Sort' : ('Sort by ' + (NFTselect.sort == 'price' ?
+                            'Price: ' :
                             'Time: ') + (NFTselect.dir == 'asc' ? 'Low to High' : 'High to Low'))}}
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end bg-black">
@@ -545,7 +484,8 @@
                                 <div class="d-flex flex-column">
                                     <div class="d-flex flex-column flex-fill rounded-top p-3 bg-darker">
                                         <div class="d-flex flex-row flex-fill align-items-center">
-                                            <p style="font-size: 18px;" class="p-0 m-0 font-weight-light">From</p>
+                                            <p style="font-size: 18px;" class="p-0 m-0 font-weight-light">From
+                                            </p>
                                             <div class="d-flex ms-auto align-items-baseline">
                                                 <div class="d-flex small justify-content-between">
                                                     <p class="my-0 text-white-50">Available<i
@@ -594,8 +534,10 @@
                                                 <p style="font-size: 18px;"
                                                     class="p-0 m-0 text-white-50 font-weight-light">
                                                     Rate</p>
-                                                <p style="font-size: 16px;" class="p-0 m-0 text-white-50 ms-auto">1 HIVE
-                                                    &asymp; {{1 / chains[marketorder.name].account.tick }} DLUX</p>
+                                                <p style="font-size: 16px;" class="p-0 m-0 text-white-50 ms-auto">1
+                                                    HIVE
+                                                    &asymp; {{1 / chains[marketorder.name].account.tick }} DLUX
+                                                </p>
                                             </div>
                                             <div class="d-flex">
                                                 <p style="font-size: 12px;"
@@ -622,7 +564,8 @@
                                     </div>
                                     <div class="p-0 m-0 bg-dark">
                                         <div class="arrow2 rounded-circle border border-warning bg-darker text-warning">
-                                            <h1 class="m-2 px-2 py-1"><i class="fas fa-angle-double-down"></i></h1>
+                                            <h1 class="m-2 px-2 py-1"><i class="fas fa-angle-double-down"></i>
+                                            </h1>
                                         </div>
                                     </div>
                                     <div class="d-flex flex-column flex-fill rounded-bottom p-3 border border-warning"
@@ -676,34 +619,34 @@
         crossorigin="anonymous"></script>
     <script>
 
-            (function () {
-                "use strict";
-                window.addEventListener(
-                    "load",
-                    function () {
-                        // Fetch all the forms we want to apply custom Bootstrap validation styles to
-                        var forms = document.getElementsByClassName("needs-validation");
-                        // Loop over them and prevent submission
-                        var validation = Array.prototype.filter.call(
-                            forms,
-                            function (form) {
-                                form.addEventListener(
-                                    "submit",
-                                    function (event) {
-                                        if (form.checkValidity() === false) {
-                                            event.preventDefault();
-                                            event.stopPropagation();
-                                        }
-                                        form.classList.add("was-validated");
-                                    },
-                                    false
-                                );
-                            }
-                        );
-                    },
-                    false
-                );
-            })();
+        (function () {
+            "use strict";
+            window.addEventListener(
+                "load",
+                function () {
+                    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                    var forms = document.getElementsByClassName("needs-validation");
+                    // Loop over them and prevent submission
+                    var validation = Array.prototype.filter.call(
+                        forms,
+                        function (form) {
+                            form.addEventListener(
+                                "submit",
+                                function (event) {
+                                    if (form.checkValidity() === false) {
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                    }
+                                    form.classList.add("was-validated");
+                                },
+                                false
+                            );
+                        }
+                    );
+                },
+                false
+            );
+        })();
         var disabletab = document.getElementsByClassName("disabled-input");
         for (var i = 0; i < disabletab.length; i++) {
             disabletab[i].setAttribute("tabindex", "-1");
@@ -720,48 +663,48 @@
         });
     </script>
     <script>
-        document.addEventListener("DOMContentLoaded", function(){
-        // HIVE Balance
-        var hiveCollapse = document.getElementById('collapsehive');
-        hiveCollapse.addEventListener('show.bs.collapse', event => {
-            var hiveCollapse = document.getElementById('hiveBal');
-            hiveBal.classList.add('d-none');
-        })
-        hiveCollapse.addEventListener('hide.bs.collapse', event => {
-            var hiveCollapse = document.getElementById('hiveBal');
-            hiveBal.classList.remove('d-none');
-        })
-        // HBD Balance
-        var hbdCollapse = document.getElementById('collapsehbd');
-        hbdCollapse.addEventListener('show.bs.collapse', event => {
-            var hbdCollapse = document.getElementById('hbdBal');
-            hbdBal.classList.add('d-none');
-        })
-        hbdCollapse.addEventListener('hide.bs.collapse', event => {
-            var hbdCollapse = document.getElementById('hbdBal');
-            hbdBal.classList.remove('d-none');
-        })
-        // DUAT Balance
-        var duatCollapse = document.getElementById('collapseduat');
-        duatCollapse.addEventListener('show.bs.collapse', event => {
-            var duatCollapse = document.getElementById('duatBal');
-            duatBal.classList.add('d-none');
-        })
-        duatCollapse.addEventListener('hide.bs.collapse', event => {
-            var duatCollapse = document.getElementById('duatBal');
-            duatBal.classList.remove('d-none');
-        })
-        // DLUX Balance
-        var dluxCollapse = document.getElementById('collapsedlux');
-        dluxCollapse.addEventListener('show.bs.collapse', event => {
-            var dluxCollapse = document.getElementById('dluxBal');
-            dluxBal.classList.add('d-none');
-        })
-        dluxCollapse.addEventListener('hide.bs.collapse', event => {
-            var dluxCollapse = document.getElementById('dluxBal');
-            dluxBal.classList.remove('d-none');
-        })
-    });
+        document.addEventListener("DOMContentLoaded", function () {
+            // HIVE Balance
+            var hiveCollapse = document.getElementById('collapsehive');
+            hiveCollapse.addEventListener('show.bs.collapse', event => {
+                var hiveCollapse = document.getElementById('hiveBal');
+                hiveBal.classList.add('d-none');
+            })
+            hiveCollapse.addEventListener('hide.bs.collapse', event => {
+                var hiveCollapse = document.getElementById('hiveBal');
+                hiveBal.classList.remove('d-none');
+            })
+            // HBD Balance
+            var hbdCollapse = document.getElementById('collapsehbd');
+            hbdCollapse.addEventListener('show.bs.collapse', event => {
+                var hbdCollapse = document.getElementById('hbdBal');
+                hbdBal.classList.add('d-none');
+            })
+            hbdCollapse.addEventListener('hide.bs.collapse', event => {
+                var hbdCollapse = document.getElementById('hbdBal');
+                hbdBal.classList.remove('d-none');
+            })
+            // DUAT Balance
+            var duatCollapse = document.getElementById('collapseduat');
+            duatCollapse.addEventListener('show.bs.collapse', event => {
+                var duatCollapse = document.getElementById('duatBal');
+                duatBal.classList.add('d-none');
+            })
+            duatCollapse.addEventListener('hide.bs.collapse', event => {
+                var duatCollapse = document.getElementById('duatBal');
+                duatBal.classList.remove('d-none');
+            })
+            // DLUX Balance
+            var dluxCollapse = document.getElementById('collapsedlux');
+            dluxCollapse.addEventListener('show.bs.collapse', event => {
+                var dluxCollapse = document.getElementById('dluxBal');
+                dluxBal.classList.add('d-none');
+            })
+            dluxCollapse.addEventListener('hide.bs.collapse', event => {
+                var dluxCollapse = document.getElementById('dluxBal');
+                dluxBal.classList.remove('d-none');
+            })
+        });
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
         integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
