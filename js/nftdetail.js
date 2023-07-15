@@ -89,7 +89,7 @@ export default {
                                   <div class="me-2 d-flex">
                                      <span class="text-center small border border-secondary rounded text-white px-2 py-1"
                                         v-cloak>ROYALTY:
-                                        {{itemmodal.item.setname.royalty/100}}%</span>
+                                        {{chains[itemmodal.item.token]?.sets[itemmodal.item.setname]?.royalty/100}}%</span>
                                   </div>
  
                                   <div class="me-2 d-flex">
