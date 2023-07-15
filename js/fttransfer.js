@@ -649,13 +649,13 @@ export default {
             },
         },
         auctions: {
-            required: true,
+            required: false,
             default: function () {
                 return [];
             },
         },
         sales: {
-            required: true,
+            required: false,
             default: function () {
                 return []
             },
