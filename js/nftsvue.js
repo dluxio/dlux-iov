@@ -1614,53 +1614,54 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           this.chains[token].features = data.features ? data.features : this.features;
           this.chains[token].behind = data.behind;
           this.chains[token].behindTitle = data.behind + " Blocks Behind Hive";
+          this.chains[token].volume = {}
           fetch(this.chains[token].api + "/@" + this.account)
           .then((response) => response.json())
           .then((data) => {
             this.chains[token].account = data;
-            resolve(data.tick)
           })
           fetch(this.chains[token].api + "/api/recent/HIVE_" + this.TOKEN + "?limit=1000")
             .then((response) => response.json())
             .then((data) => {
               this.chains[token].volume.hive =
-                data.recent_trades.reduce((a, b) => {
+                data.recent_trades?.reduce((a, b) => {
                   if (b.trade_timestamp > this.agoTime)
                     return a + parseInt(parseFloat(b.target_volume) * 1000);
                   else return a;
                 }, 0) / 1000;
-              this.chains[token].volume.token_hive =
-                data.recent_trades.reduce((a, b) => {
-                  if (b.trade_timestamp > this.agoTime)
-                    return a + parseInt(parseFloat(b.base_volume) * 1000);
-                  else return a;
-                }, 0) / 1000;
-              this.chains[token].recenthive = data.recent_trades.sort((a, b) => {
+              const tokenvol = data.recent_trades?.reduce((a, b) => {
+                if (b.trade_timestamp > this.agoTime)
+                  return a + parseInt(parseFloat(b.base_volume) * 1000);
+                else return a;
+              }, 0) / 1000 || 0
+              this.chains[token].volume.token_hive = tokenvol
+              const recenthive = data.recent_trades?.sort((a, b) => {
                 return (
                   parseInt(b.trade_timestamp) - parseInt(a.trade_timestamp)
                 );
               });
+              this.chains[token].recenthive = recenthive
             });
           fetch(this.chains[token].api + "/api/recent/HBD_" + this.TOKEN + "?limit=1000")
             .then((response) => response.json())
             .then((data) => {
-              this.chains[token].volume.hbd =
-                data.recent_trades.reduce((a, b) => {
-                  if (b.trade_timestamp > this.agoTime)
-                    return a + parseInt(parseFloat(b.target_volume) * 1000);
-                  else return a;
-                }, 0) / 1000;
+              const hbdvol = data.recent_trades?.reduce((a, b) => {
+                if (b.trade_timestamp > this.agoTime)
+                  return a + parseInt(parseFloat(b.target_volume) * 1000);
+                else return a;
+              }, 0) / 1000 || 0
+              this.chains[token].volume.hbd = hbdvol
               this.chains[token].volume.token_hbd =
-                data.recent_trades.reduce((a, b) => {
+                data.recent_trades?.reduce((a, b) => {
                   if (b.trade_timestamp > this.agoTime)
                     return a + parseInt(parseFloat(b.base_volume) * 1000);
                   else return a;
-                }, 0) / 1000;
-              this.chains[token].recenthbd = data.recent_trades.sort((a, b) => {
+                }, 0) / 1000 || 0
+              this.chains[token].recenthbd = data.recent_trades?.sort((a, b) => {
                 return (
                   parseInt(b.trade_timestamp) - parseInt(a.trade_timestamp)
                 );
-              });
+              }) || 0
             });
         });
       })
@@ -1676,6 +1677,12 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this.accountinfo = {};
       this.barhive = "";
       this.barhbd = "";
+      for(var chain in this.chains){
+        console.log('bye', chain)
+        this.chains[chain].account = {
+          balance: 0
+        }
+      }
     },
     getPFP() {
       if (this.account) {
@@ -2300,66 +2307,76 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       }
       return `${r}`;
     },
-    getTokenUser(user) {
-      if (user)
-        fetch(this.lapi + "/@" + user)
+    getTokenUser(user = this.account) {
+      const getUserData = (url, chain, account) => {
+        fetch(this.chains[chain].api + "/@" + account)
           .then((response) => response.json())
           .then((data) => {
-            this.balance = (data.balance / 1000).toFixed(3);
-            this.bartoken = this.balance;
-            this.barpow = (
-              (data.poweredUp + data.granted - data.granting) /
-              1000
-            ).toFixed(3);
-            this.bargov = (data.gov / 1000).toFixed(3);
-            this.accountapi = data;
-            if (
-              new Date().getMonth() + 1 !=
-              parseInt(data.drop?.last_claim, 16) &&
-              data.drop?.availible.amount > 0
-            ) {
-              this.hasDrop = true;
-              this.dropnai = `${parseFloat(
-                data.drop.availible.amount /
-                Math.pow(10, data.drop.availible.precision)
-              ).toFixed(data.drop.availible.precision)} ${data.drop.availible.token
-                }`;
-            }
-            this.openorders = data.contracts.reduce((acc, cur) => {
-              cur.nai = `${cur.type.split(":")[0] == "hive"
-                  ? parseFloat(cur.hive / 1000).toFixed(3)
-                  : parseFloat(cur.hbd / 1000).toFixed(3)
-                } ${cur.type.split(":")[0] == "hive" ? "HIVE" : "HBD"}`;
-              if (
-                cur.partials &&
-                cur.partials.length &&
-                cur.type.split(":")[1] == "sell"
-              ) {
-                const filled = cur.partials.reduce(function (a, c) {
-                  return a + c.coin;
-                }, 0);
-                cur.percentFilled = parseFloat(
-                  (100 * filled) / (cur.hive ? cur.hive : cur.hbd + filled)
-                ).toFixed(2);
-                acc.push(cur);
-              } else if (cur.partials && cur.partials.length) {
-                const filled = cur.partials.reduce(function (a, c) {
-                  return a + c.token;
-                }, 0);
-                cur.percentFilled = parseFloat(
-                  (100 * filled) / (cur.amount + filled)
-                ).toFixed(2);
-                acc.push(cur);
-              } else {
-                cur.percentFilled = "0.00";
-                acc.push(cur);
-              }
-              console.log({
-                acc,
-              });
-              return acc;
-            }, []);
-          });
+            this.chains[chain].account = data;
+            console.log(this.chains[chain].account)
+          })
+      }
+      for(var token in this.chains){
+        getUserData(this.chains[token].api + "/@" + user, token, user)
+      }
+        // fetch(this.lapi + "/@" + user)
+        //   .then((response) => response.json())
+        //   .then((data) => {
+        //     this.balance = (data.balance / 1000).toFixed(3);
+        //     this.bartoken = this.balance;
+        //     this.barpow = (
+        //       (data.poweredUp + data.granted - data.granting) /
+        //       1000
+        //     ).toFixed(3);
+        //     this.bargov = (data.gov / 1000).toFixed(3);
+        //     this.accountapi = data;
+        //     if (
+        //       new Date().getMonth() + 1 !=
+        //       parseInt(data.drop?.last_claim, 16) &&
+        //       data.drop?.availible.amount > 0
+        //     ) {
+        //       this.hasDrop = true;
+        //       this.dropnai = `${parseFloat(
+        //         data.drop.availible.amount /
+        //         Math.pow(10, data.drop.availible.precision)
+        //       ).toFixed(data.drop.availible.precision)} ${data.drop.availible.token
+        //         }`;
+        //     }
+        //     this.openorders = data.contracts.reduce((acc, cur) => {
+        //       cur.nai = `${cur.type.split(":")[0] == "hive"
+        //           ? parseFloat(cur.hive / 1000).toFixed(3)
+        //           : parseFloat(cur.hbd / 1000).toFixed(3)
+        //         } ${cur.type.split(":")[0] == "hive" ? "HIVE" : "HBD"}`;
+        //       if (
+        //         cur.partials &&
+        //         cur.partials.length &&
+        //         cur.type.split(":")[1] == "sell"
+        //       ) {
+        //         const filled = cur.partials.reduce(function (a, c) {
+        //           return a + c.coin;
+        //         }, 0);
+        //         cur.percentFilled = parseFloat(
+        //           (100 * filled) / (cur.hive ? cur.hive : cur.hbd + filled)
+        //         ).toFixed(2);
+        //         acc.push(cur);
+        //       } else if (cur.partials && cur.partials.length) {
+        //         const filled = cur.partials.reduce(function (a, c) {
+        //           return a + c.token;
+        //         }, 0);
+        //         cur.percentFilled = parseFloat(
+        //           (100 * filled) / (cur.amount + filled)
+        //         ).toFixed(2);
+        //         acc.push(cur);
+        //       } else {
+        //         cur.percentFilled = "0.00";
+        //         acc.push(cur);
+        //       }
+        //       console.log({
+        //         acc,
+        //       });
+        //       return acc;
+        //     }, []);
+        //   });
     },
     calc(){
       const names = ['hive', 'hbd', 'dlux', 'duat']
@@ -2420,8 +2437,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     this.getUserNFTs();
     //this.getQuotes();
     //this.getNodes();
-    if (user != "GUEST") this.getTokenUser(user);
-    if (user != "GUEST") this.getHiveUser(user);
+    //this.getTokenUser();
+    if (user != "GUEST") this.getHiveUser();
   },
   computed: {
     location: {
