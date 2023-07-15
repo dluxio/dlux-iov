@@ -1239,7 +1239,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       return out + post;
     },
     handleScroll: function () {
-      if (
+      if ( this.setPage &&
         document.documentElement.clientHeight + window.scrollY >
         document.documentElement.scrollHeight -
         document.documentElement.clientHeight * 2
@@ -1287,7 +1287,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         index = index.index
       }
       var i = 0;
-      for (i; i < this.selectedNFTs.length; i++) {
+      for (i; i < this[source].length; i++) {
         if (this[source][i].uid == index.split(':')[1] && this[source][i].setname == index.split(':')[0]) break;
       }
       this[modal].index = i;
