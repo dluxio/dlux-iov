@@ -60,7 +60,7 @@ export default {
                             v-if="itemmodal.item.uid != pfp.uid">
                             <i class="far fa-user-circle me-2"></i>Set as PFP
                          </button>
-                         <button class="btn btn-lg btn-secondary"
+                         <button class="btn btn-lg btn-secondary disabled"
                             v-if="itemmodal.item.uid == pfp.uid && itemmodal.item.setname == pfp.set">
                             <i class="far fa-user-circle me-2"></i>Currently set as your PFP
                          </button>
@@ -73,7 +73,7 @@ export default {
                       <!-- NFT Description -->
                       <div class="accordion-item">
                          <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            <button onclick="this.blur();" class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                data-bs-target="#collapseDescription" aria-expanded="true"
                                aria-controls="collapseDescription">
                                <i class="fas fa-list me-3"></i>DESCRIPTION
@@ -82,20 +82,50 @@ export default {
                          <div id="collapseDescription" class="accordion-collapse collapse"
                             data-bs-parent="#nftAccordion">
                             <div class="accordion-body">
+ 
+                               <p>Need Long Name</p>
                                <p>{{itemmodal.item.set.Description}}</p>
+                               <div class="d-flex align-items-center">
+                                  <div class="me-2 d-flex">
+                                     <span class="text-center small border border-secondary rounded text-white px-2 py-1"
+                                        v-cloak>ROYALTY:
+                                        {{itemmodal.item.setname.royalty/100}}%</span>
+                                  </div>
+ 
+                                  <div class="me-2 d-flex">
+                                     <span class="text-center small border border-secondary rounded text-white px-2 py-1"
+                                        v-cloak>BOND:
+                                        {{chains[itemmodal.item.token]
+                                        ?
+                                        precision(chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.amount,
+                                        chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.precision)
+                                        : 0 }}
+                                        {{chains[itemmodal.item.token]?
+                                        chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.token
+                                        :
+                                        ''}}</span>
+                                  </div>
+                                  <div class="d-flex">
+                                     <span class="text-center small border border-secondary rounded text-white px-2 py-1"
+                                        v-cloak>CHAIN:
+                                        {{itemmodal.item.token}}</span>
+                                  </div>
+                               </div>
                             </div>
                          </div>
                       </div>
                       <!-- NFT Attributes -->
                       <div class="accordion-item">
                          <h2 class="accordion-header">
-                            <button class="accordion-button" v-bind:class="{'collapsed' : itemmodal.item.sale || itemmodal.item.auction || itemmodal.item.owner == account }" type="button" data-bs-toggle="collapse"
-                               data-bs-target="#collapseAttributes" aria-expanded="false"
-                               aria-controls="collapseAttributes">
+                            <button onclick="this.blur();" class="accordion-button"
+                               v-bind:class="{'collapsed' : itemmodal.item.sale || itemmodal.item.auction || itemmodal.item.owner == account }"
+                               type="button" data-bs-toggle="collapse" data-bs-target="#collapseAttributes"
+                               aria-expanded="false" aria-controls="collapseAttributes">
                                <i class="fas fa-star me-3"></i>ATTRIBUTES
                             </button>
                          </h2>
-                         <div id="collapseAttributes" class="accordion-collapse collapse" v-bind:class="{'show' : !itemmodal.item.sale && !itemmodal.item.auction && itemmodal.item.owner != account }"
+                         <div id="collapseAttributes" class="accordion-collapse collapse"
+                            v-bind:class="{'show' : !itemmodal.item.sale && !itemmodal.item.auction && itemmodal.item.owner != account }"
                             data-bs-parent="#nftAccordion">
                             <div class="accordion-body">
                                <div class="d-flex flex-wrap">
@@ -113,14 +143,15 @@ export default {
                       <!-- NFT Transfer -->
                       <div class="accordion-item" v-if="itemmodal.item.owner == account">
                          <h2 class="accordion-header">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                            <button onclick="this.blur();" class="accordion-button" type="button" data-bs-toggle="collapse"
                                data-bs-target="#collapseTransfer" aria-expanded="false" aria-controls="collapseTransfer">
                                <i class="fas fa-exchange-alt me-3"></i>TRANSFER
                             </button>
                          </h2>
-                         <div id="collapseTransfer" class="accordion-collapse collapse show" data-bs-parent="#nftAccordion">
-                            <div class="accordion-body p-0">
-                               <div class="border-warning border rounded p-3 my-3"
+                         <div id="collapseTransfer" class="accordion-collapse collapse show"
+                            data-bs-parent="#nftAccordion">
+                            <div class="accordion-body">
+                               <div class="border-warning border rounded p-3"
                                   v-if="itemmodal.item.uid == pfp.uid  && itemmodal.item.setname == pfp.set">
                                   <p class="text-warning m-0">Transferring this NFT will remove it from your PFP</p>
                                </div>
@@ -323,7 +354,8 @@ export default {
                                                        </select>
                                                     </span>
                                                     <div class="invalid-feedback">
-                                                       Please enter the amount of VALUE you'd like to start the bidding.
+                                                       Please enter the amount of VALUE you'd like to start the
+                                                       bidding.
                                                     </div>
                                                  </div>
                                               </div>
@@ -360,7 +392,8 @@ export default {
                                                  <p class="text-white-50 small">
                                                     Ownership will be transferred to the DAO listing service and
                                                     auctioned publicly. Once submitted this cannot
-                                                    be cancelled. If there are no bids at the end of the auction period,
+                                                    be cancelled. If there are no bids at the end of the auction
+                                                    period,
                                                     it will be returned to you immediately.
                                                  </p>
                                               </div>
@@ -381,7 +414,7 @@ export default {
                       <!-- NFT Melt -->
                       <div class="accordion-item" v-if="itemmodal.item.owner == account">
                          <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            <button onclick="this.blur();" class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                data-bs-target="#collapseMelt" aria-expanded="false" aria-controls="collapseMelt">
                                <i class="fa-solid fa-fire me-3"></i>MELT<span
                                   class="ms-2 small">({{chains[itemmodal.item.token]
@@ -397,9 +430,9 @@ export default {
                          </h2>
                          <div id="collapseMelt" class="accordion-collapse collapse" data-bs-parent="#nftAccordion">
                             <div class="accordion-body">
-                               <div class="p-0">
+                               <div class="">
                                   <div class="d-flex align-self-end">
-                                     <div class="border border-warning rounded bg-darker col-12 p-4">
+                                     <div class="">
                                         <div class="d-flex align-items-center justify-content-between">
                                            <div class="d-flex me-1">
                                               <h4>Melt Value:</h4>
@@ -422,8 +455,8 @@ export default {
                                            <p class="text-uppercase text-muted">This NFT can be traded, sold, or
                                               auctioned until melted. Once melted it will disappear forever.</p>
                                            <div class="d-flex justify-content-around">
-                                              <div class="d-flex align-items-center my-4">
-                                                 <div class="text-center p-4">
+                                              <div class="d-flex align-items-center my-2">
+                                                 <div class="text-center">
                                                     <h1 class="text-warning" style="font-size: 4em">
                                                        <i class="fas fa-exclamation-triangle"></i>
                                                     </h1>
@@ -436,16 +469,15 @@ export default {
                                                  </ul>
                                               </div>
                                            </div>
-                                           <div class="text-center pb-4">
+                                           <div class="text-center mb-1">
                                               <button type="button" class="btn btn-warning" data-bs-toggle="collapse"
                                                  href="#melt-confirmation">
                                                  Melt
                                               </button>
                                            </div>
-                                           <div class="collapse bg-danger rounded" id="melt-confirmation">
+                                           <div class="collapse bg-danger rounded mt-1" id="melt-confirmation">
                                               <div class="text-center pt-4">
-                                                 <h2><b>/////// IRREVERSIBLE
-                                                       \\\\\\\</b>
+                                                 <h2><b>IRREVERSIBLE</b>
                                                  </h2>
                                                  <p>Are you sure you want to
                                                     proceed?
@@ -471,7 +503,7 @@ export default {
                       <!-- NFT Bid -->
                       <div class="accordion-item" v-if="itemmodal.item.auction">
                          <h2 class="accordion-header">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                            <button onclick="this.blur();" class="accordion-button" type="button" data-bs-toggle="collapse"
                                data-bs-target="#collapseBid" aria-expanded="true" aria-controls="collapseBid">
                                <i class="fas fa-comment-dollar me-3"></i><span>BID
                                   NOW</span><span class="small ms-2">({{naiString(itemmodal.item.price)}})</span>
@@ -563,7 +595,7 @@ export default {
                       <!-- NFT Buy -->
                       <div class="accordion-item" v-if="itemmodal.item.sale">
                          <h2 class="accordion-header">
-                            <button @click="saleData('itemmodal')" class="accordion-button" type="button"
+                            <button onclick="this.blur();" @click="saleData('itemmodal')" class="accordion-button" type="button"
                                data-bs-toggle="collapse" data-bs-target="#collapseBuy" aria-expanded="true"
                                aria-controls="collapseBuy">
                                <i class="fas fa-money-bill-wave me-3"></i><span>BUY

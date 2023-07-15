@@ -57,10 +57,7 @@ export default {
                                        -moz-text-fill-color: transparent;">
                                 <span>sealed NFT</span></h3>
                         </div>
-                        <div class="text-center lead"><small><span
-                                    class="badge bg-dark text-muted">{{item.token}}<i
-                                        class="fa-solid fa-link mx-2 text-info"></i>network</span></small>
-                        </div>
+                       
                         </div>
                       <div :alt="item.setname + '-' + item.uid">
                       <!--Open-->
@@ -95,23 +92,39 @@ export default {
                       <!-- Mint Description -->
                       <div class="accordion-item">
                          <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            <button onclick="this.blur();" class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            v-bind:class="{'collapsed' : item.sale || item.auction || item.qty != 0 }"
                                data-bs-target="#collapseftDescription" aria-expanded="true"
                                aria-controls="collapseftDescription">
                                <i class="fas fa-list me-3"></i>DESCRIPTION
                             </button>
                          </h2>
-                         <div id="collapseftDescription" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
+                         <div id="collapseftDescription" class="accordion-collapse collapse"  
+                            v-bind:class="{'show' : !item.sale && !item.auction && item.qty == 0 }" 
+                            data-bs-parent="#ftAccordion">
                             <div class="accordion-body">
-                               <p>{{setdetail.name_long}}</p>
+                            
+                               <h3>{{setdetail.name_long}}</h3>
                                <p>{{info}}</p>
-                               <!-- Melt Value -->
-                               <div>
-                                  <i class="fa-solid fa-fire me-3"></i>MELT<span class="ms-2 small">{{naiString(setdetail.bond)}}</span>
-                                  Royalties: {{royaltySplit(setdetail.royalty_allocation)}}
-                                  Dividends Last:{{naiString(setdetail.last_div)}}
-                                  Dividends Total:{{naiString(setdetail.total_div)}}
+                               <div class="d-flex align-items-center"> 
+                               <div class="text-start small border border-secondary rounded text-white px-2 py-1 w-100">
+                                 <div class="d-flex align-items-center justify-content-start">
+                                  <span class="mb-0" title="Total Number of Hodlrs"><i class="fa-solid fa-user-astronaut fa-fw"></i> 269</span>
+                                  <span class="mb-0 ms-2" title="Total Number of Items"><i class="fa-solid fa-star fa-fw"></i> 483</span>     
+                                  <span class="mb-0 ms-2" title="Layer 2 Honeycomb Sidechain"><i class="fa-solid fa-link fa-fw"></i> {{item.token}}</span>
+                                  </div>
+                                  <div class="d-flex align-items-center justify-content-start">
+                                  <span class="mb-0 me-2" title="Melt Value if Item is Burned"><i class="fa-solid fa-fire fa-fw"></i> {{naiString(setdetail.bond)}}</span>
+                                  <span class="mb-0 me-2" title="Last Market Dividends Paid Out to Hodlrs"><i class="fa-solid fa-money-bill-transfer fa-fw"></i> {{naiString(setdetail.last_div)}}</span>
+                                  <span class="mb-0 me-2" title="Total Market Dividends Paid Out to Hodlrs"><i class="fa-solid fa-money-bill-trend-up fa-fw"></i>{{naiString(setdetail.total_div)}}</span>
+                                  </div>
+
+                                  <p class="m-0" title="Royalties"><i class="fa-solid fa-crown fa-fw"></i> {{royaltySplit(setdetail.royalty_allocation)}}</p>
+
                                </div>
+                               </div>
+                               
+                          
                             </div>
                          </div>
                       </div>
@@ -120,7 +133,7 @@ export default {
                       <!-- Mint Transfer -->
                       <div class="accordion-item" v-if="item.qty > 0">
                          <h2 class="accordion-header">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                            <button onclick="this.blur();" class="accordion-button" type="button" data-bs-toggle="collapse"
                                data-bs-target="#collapseftTransfer" aria-expanded="false" aria-controls="collapseftTransfer">
                                <i class="fas fa-exchange-alt me-3"></i>TRANSFER
                             </button>
@@ -475,9 +488,9 @@ export default {
                       </div>
  
                       <!-- Mint Auctions -->
-                      <div class="accordion-item" v-if="">
+                      <div class="accordion-item" v-if="item.auction">
                          <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            <button onclick="this.blur();" class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                data-bs-target="#collapseftBid" aria-expanded="true" aria-controls="collapseftBid">
                                <i class="fas fa-comment-dollar me-3"></i><span>BID
                                   NOW</span><span class="small ms-2">lowest bid</span>
@@ -543,9 +556,9 @@ export default {
 
  
                       <!-- Mint Sales -->
-                      <div class="accordion-item" v-if="">
+                      <div class="accordion-item" v-if="item.sale">
                          <h2 class="accordion-header">
-                            <button @click="saleData('itemmodal')" class="accordion-button collapsed" type="button"
+                            <button @click="saleData('itemmodal')" onclick="this.blur();" class="accordion-button collapsed" type="button"
                                data-bs-toggle="collapse" data-bs-target="#collapseftBuy" aria-expanded="true"
                                aria-controls="collapseftBuy">
                                <i class="fas fa-money-bill-wave me-3"></i><span>BUY
