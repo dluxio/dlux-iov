@@ -32,7 +32,6 @@ if (location.hash && !lapi) {
 if (!lapi) {
   lapi = localStorage.getItem("lapi") || "https://token.dlux.io";
 }
-console.log(lapi);
 if (
   lapi == "https://token.dlux.io" ||
   lapi == "https://spkinstant.hivehoneycomb.com" ||
@@ -43,9 +42,6 @@ if (
 }
 let user = localStorage.getItem("user") || "GUEST";
 let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
-console.log({
-  lapi,
-});
 
 Vue.directive("scroll", {
   inserted: function (el, binding) {
@@ -1619,6 +1615,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           .then((response) => response.json())
           .then((data) => {
             this.chains[token].account = data;
+            resolve(data.tick)
           })
           fetch(this.chains[token].api + "/api/recent/HIVE_" + this.TOKEN + "?limit=1000")
             .then((response) => response.json())
@@ -2313,7 +2310,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           .then((response) => response.json())
           .then((data) => {
             this.chains[chain].account = data;
-            console.log(this.chains[chain].account)
           })
       }
       for(var token in this.chains){
@@ -2437,7 +2433,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     this.getUserNFTs();
     //this.getQuotes();
     //this.getNodes();
-    //this.getTokenUser();
+    //if (user != "GUEST") this.getTokenUser();
     if (user != "GUEST") this.getHiveUser();
   },
   computed: {
