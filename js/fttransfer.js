@@ -108,15 +108,15 @@ export default {
                                <p>{{info}}</p>
                                <div class="d-flex align-items-center"> 
                                <div class="text-start small border border-secondary rounded text-white px-2 py-1 w-100">
-                                 <div class="d-flex align-items-center justify-content-start">
-                                  <span class="mb-0" title="Total Number of Hodlrs"><i class="fa-solid fa-user-astronaut fa-fw"></i> 269</span>
+                                 <div class="d-flex align-items-center justify-content-start flex-wrap">
+                                  <span class="mb-0" title="Total Number of Owners"><i class="fa-solid fa-user-astronaut fa-fw"></i> 269</span>
                                   <span class="mb-0 ms-2" title="Total Number of Items"><i class="fa-solid fa-star fa-fw"></i> 483</span>     
                                   <span class="mb-0 ms-2" title="Layer 2 Honeycomb Sidechain"><i class="fa-solid fa-link fa-fw"></i> {{item.token}}</span>
                                   </div>
-                                  <div class="d-flex align-items-center justify-content-start">
+                                  <div class="d-flex align-items-center justify-content-start flex-wrapa">
                                   <span class="mb-0 me-2" title="Melt Value if Item is Burned"><i class="fa-solid fa-fire fa-fw"></i> {{naiString(setdetail.bond)}}</span>
-                                  <span class="mb-0 me-2" title="Last Market Dividends Paid Out to Hodlrs"><i class="fa-solid fa-money-bill-transfer fa-fw"></i> {{naiString(setdetail.last_div)}}</span>
-                                  <span class="mb-0 me-2" title="Total Market Dividends Paid Out to Hodlrs"><i class="fa-solid fa-money-bill-trend-up fa-fw"></i>{{naiString(setdetail.total_div)}}</span>
+                                  <span class="mb-0 me-2" title="Last Market Dividends Paid Out to Owners"><i class="fa-solid fa-money-bill-transfer fa-fw"></i> {{naiString(setdetail.last_div)}}</span>
+                                  <span class="mb-0 me-2" title="Total Market Dividends Paid Out to Owners"><i class="fa-solid fa-money-bill-trend-up fa-fw"></i>{{naiString(setdetail.total_div)}}</span>
                                   </div>
 
                                   <p class="m-0" title="Royalties"><i class="fa-solid fa-crown fa-fw"></i> {{royaltySplit(setdetail.royalty_allocation)}}</p>
@@ -167,32 +167,36 @@ export default {
                                         <form id="ftGiveForm" class="needs-validation mt-4"
                                            @submit.prevent="validateForm('ftGiveForm', 'ftGiveFormValid');giveFT()"
                                            novalidate>
+                                           <div class="">
+                                              <label for="giveFTqty" class="form-label">Quantity</label>
+                                              <div class="position-relative has-validation mb-3">
+                                                 <input type="number" class="pe-5 form-control bg-dark border-dark text-info" v-model="give.qty"
+                                                    aria-describedby="giveFTqtyappend" step="1" min="1" required>
+                                                 <span class="position-absolute top-50 end-0 translate-middle-y pe-2 text-white-50">
+                                                       {{item.set}} FT
+                                                 </span>
+                                                 <div class="invalid-feedback"> Please enter the
+                                                    number of
+                                                    FTs to send. </div>
+                                              </div>
+                                           </div>
                                            <!--:action="javascript:giveFT('{{item.data.set}}','{{giveFTusername.value}}','{{giveFTqty.value}}')"-->
-                                           <div class="row mb-3">
+                                           <div class="">
                                               <label for="giveFTusername" class="form-label">Username</label>
-                                              <div class="input-group has-validation">
-                                                 <span class="input-group-text">@</span>
-                                                 <input type="text" class="form-control text-info" v-model="give.to"
+                                              <div class="position-relative has-validation mb-3">
+                                                       <span class="position-absolute top-50 translate-middle-y ps-2">
+                                                          <i class="fa-solid fa-at fa-fw"></i>
+                                                       </span>
+                                                 <input type="text" class="ps-4 form-control text-info bg-dark border-dark" v-model="give.to"
                                                     aria-describedby="giveFTuserprep" required>
                                                  <div class="invalid-feedback"> Please enter the
                                                     username
                                                     you'd like to give to. </div>
                                               </div>
                                            </div>
-                                           <div class="row mb-3">
-                                              <label for="giveFTqty" class="form-label">Quantity</label>
-                                              <div class="input-group has-validation">
-                                                 <input type="number" class="form-control text-info" v-model="give.qty"
-                                                    aria-describedby="giveFTqtyappend" step="1" min="1" required>
-                                                 <span class="input-group-text" id="giveFTqtyappend">{{item.set}}
-                                                    FT</span>
-                                                 <div class="invalid-feedback"> Please enter the
-                                                    number of
-                                                    FTs to send. </div>
-                                              </div>
-                                           </div>
+                                           
                                            <div class="text-center">
-                                              <button id="giveFTbutton" class="btn btn-info" @click="giveFT()"
+                                              <button id="giveFTbutton" class="btn btn-info my-2" @click="giveFT()"
                                                  type="submit">Give</button>
                                            </div>
                                         </form>
@@ -203,50 +207,57 @@ export default {
                                         <form id="ftTradeForm" class="needs-validation mt-4"
                                            @submit.prevent="validateForm('ftTradeForm', 'ftTradeFormValid');tradeFT()"
                                            novalidate>
+
+                                           <div class="mb-3">
+                                           <label for="tradeFTqty" class="form-label">Quantity</label>
+                                           <div class="position-relative has-validation mb-3">
+                                           
+                                              <input type="number" class="pe-5 form-control bg-darkg border-0 text-info"
+                                                 id="tradeFTqty" aria-describedby="tradeFTqtyappend"
+                                                 placeholder="1" step="1" min="1" required readonly >
+                                                 <span class="position-absolute top-50 end-0 translate-middle-y pe-2 text-white-50">
+                                                 {{item.set}} FT
+                                           </span>
+                                              
+                                              <div class="invalid-feedback"> Please enter the
+                                                 number
+                                                 of FTs to trade. </div>
+                                           </div>
+                                        </div>
                                            <!--:action="javascript:tradeFT('{{item.data.set}}','{{tradeFTusername.value}}','{{tradeFTamount.value}}')"-->
-                                           <div class="row mb-3">
+
                                               <label for="tradeFTusername" class="form-label">Username</label>
-                                              <div class="input-group has-validation">
-                                                 <span class="input-group-text" id="tradeFTuserprep">@</span>
-                                                 <input type="text" class="form-control text-info " id="tradeFTusername"
+                                              <div class="position-relative has-validation mb-3">
+                                                       <span class="position-absolute top-50 translate-middle-y ps-2">
+                                                          <i class="fa-solid fa-at fa-fw"></i>
+                                                       </span>
+                                                 <input type="text" class="ps-4 form-control bg-dark border-dark text-info " id="tradeFTusername"
                                                     aria-describedby="tradeFTuserprep" v-model="trade.to" required>
                                                  <div class="invalid-feedback"> Please enter the
                                                     username
                                                     you'd like to trade with. </div>
                                               </div>
-                                           </div>
-                                           <div class="row mb-3">
-                                              <div class="col-6">
-                                                 <label for="tradeFTqty" class="form-label">Quantity</label>
-                                                 <div class="input-group has-validation">
-                                                    <input type="number" class="form-control text-info bg-transparent"
-                                                       id="tradeFTqty" aria-describedby="tradeFTqtyappend"
-                                                       placeholder="1" step="1" min="1" required readonly>
-                                                    <span class="input-group-text" id="tradeFTqtyappend">{{item.set}}
-                                                       FT</span>
-                                                    <div class="invalid-feedback"> Please enter the
-                                                       number
-                                                       of FTs to trade. </div>
-                                                 </div>
-                                              </div>
-                                              <div class="col-6">
-                                                 <label for="tradeFTamount" class="form-label">Amount</label>
+                      
+                                           
+                                              
+                                              <div>
+                                                 <label for="tradeFTamount" class="form-label d-flex">Amount
                                                  <small v-if="trade.token == item.token"
-                                                    class="float-end mb-2 align-self-center text-white-50">
+                                                    class="ms-auto align-self-center text-white-50">
                                                     0% FEE
                                                  </small>
-                                                 <small v-else class="float-end mb-2 align-self-center text-white-50">
+                                                 <small v-else class="ms-auto align-self-center text-white-50">
                                                     1% FEE
                                                  </small>
-                                                 <div class="input-group has-validation">
-                                                    <input type="number" class="form-control text-info "
+                                                 </label>
+                                                 <div class="position-relative has-validation mb-3">
+                                                    <input type="number" class="pe-5 form-control bg-dark border-dark text-info "
                                                        id="tradeFTamount" v-model="trade.amount"
                                                        aria-describedby="tradeFTamountappend" placeholder="0.000"
                                                        step="0.001" min="0.001" required>
-                                                    <span class="input-group-text e-radius-hotfix m-0 p-0"
-                                                       id="tradeFTamountappend">
+                                                       <span class="position-absolute top-50 end-0 translate-middle-y ps-2">
                                                        <select aria-label="Trade price type select"
-                                                          class="form-select border-0 text-white-50 w-100 h-100">
+                                                          class="form-select border-0 text-white pe-4 w-100 h-100">
                                                           <option selected :value="item.token">
                                                              {{toUpperCase(item.token)}}</option>
                                                        </select>
@@ -256,7 +267,9 @@ export default {
                                                        of DLUX you'd like to receive. </div>
                                                  </div>
                                               </div>
-                                           </div>
+
+                                             
+                                           
                                            <div class="text-center">
                                               <button id="tradeFTbutton" class="btn btn-info my-2" type="submit">Propose
                                                  Trade</button>
@@ -267,22 +280,23 @@ export default {
                                         aria-labelledby="sellFT">
                                         <!-- SELL FORM -->
                                         <form class="needs-validation mt-4" novalidate @submit.prevent="sellFT()">
-                                           <div class="row mb-3">
-                                              <div class="col-6">
+                                           <div class="">
+                                              <div class="">
                                                  <label for="sellFTqty" class="form-label">Quantity</label>
-                                                 <div class="input-group has-validation">
+                                                 <div class="position-relative has-validation mb-3">
                                                     <input type="number" v-model="sell.qty"
-                                                       class="form-control text-info bg-transparent" id="sellFTqty"
+                                                       class="pe-5 form-control bg-dark border-dark text-info" id="sellFTqty"
                                                        aria-describedby="sellFTqtyappend" placeholder="1" step="1"
                                                        min="1" required :readonly="sell.token == item.token">
-                                                    <span class="input-group-text" id="sellFTqtyappend">{{item.set}}
-                                                       FT</span>
+                                                       <span class="position-absolute top-50 end-0 translate-middle-y pe-2 text-white-50">
+                                                       {{item.set}} FT
+                                                 </span>
                                                     <div class="invalid-feedback"> Please enter the
                                                        number
                                                        of FTs to sell. </div>
                                                  </div>
                                               </div>
-                                              <div class="col-6">
+                                              <div class="">
                                                  <label for="sellFTprice" class="form-label">Sale
                                                     Price</label>
                                                  <small v-if="sell.token == item.token"
@@ -292,15 +306,14 @@ export default {
                                                  <small v-else class="float-end mb-2 align-self-center text-white-50">
                                                     1% FEE
                                                  </small>
-                                                 <div class="input-group has-validation">
-                                                    <input type="number" class="form-control text-info" id="sellFTprice"
+                                                 <div class="position-relative has-validation mb-3">
+                                                    <input type="number" class="pe-5 form-control bg-dark border-dark text-info" id="sellFTprice"
                                                        aria-describedby="sellFTpriceappend" placeholder="0.000"
                                                        step="0.001" min="0.001" required>
-                                                    <span class="input-group-text e-radius-hotfix m-0 p-0"
-                                                       id="sellFTamountappend">
+                                                       <span class="position-absolute top-50 end-0 translate-middle-y ps-2">
                                                        <select @change="sell.qty = 1"
                                                           aria-label="Trade price type select"
-                                                          class="form-select border-0 text-white-50 w-100 h-100"
+                                                          class="pe-4 form-select border-0 text-white w-100 h-100"
                                                           v-model="sell.token">
                                                           <option :value="item.token">{{toUpperCase(item.token)}}
                                                           </option>
@@ -339,22 +352,23 @@ export default {
                                         <form class="needs-validation mt-4" novalidate novalidate
                                            @submit.prevent="auctionFT()">
                                            <!--:action="javascript:auctionFT('{{item.data.set}}','{{auctionFTprice.value}}','{{Date.now()}}','{{auctionFTdays.value}}'),'{{auctionFTpriceType.value}}'"-->
-                                           <div class="row mb-3">
-                                              <div class="col-6">
+                                           <div class="">
+                                              <div class="">
                                                  <label for="auctionFTqty" class="form-label">Quantity</label>
-                                                 <div class="input-group has-validation">
-                                                    <input type="number" v-model="auction.qty"
-                                                       class="form-control text-info bg-transparent" id="auctionFTqty"
+                                                 <div class="position-relative has-validation mb-3">
+                                                    <input type="number"
+                                                       class="pe-5 form-control text-info bg-darkg border-0" id="auctionFTqty"
                                                        aria-describedby="auctionFTqtyappend" placeholder="1" step="1"
                                                        min="1" readonly>
-                                                    <span class="input-group-text" id="auctionFTqtyappend">{{item.set}}
-                                                       FT</span>
+                                                    <span class="position-absolute top-50 end-0 translate-middle-y pe-2 text-white-50">
+                                                    {{item.set}} FT
+                                              </span>
                                                     <div class="invalid-feedback"> Please enter the
                                                        number
                                                        of FTs to auction. </div>
                                                  </div>
                                               </div>
-                                              <div class="col-6">
+                                              <div class="">
                                                  <label for="auctionFTprice" class="form-label">Starting
                                                     Bid</label>
                                                  <small class="float-end mb-2 align-self-center text-white-50">
@@ -363,14 +377,13 @@ export default {
                                                  <!--<small v-if="auction.token == item.token"  v-else class="float-end mb-2 align-self-center text-white-50">
                                          1% FEE
                                      </small> -->
-                                                 <div class="input-group has-validation">
+                                     <div class="position-relative has-validation mb-3">
                                                     <input type="number" v-model="auction.price"
-                                                       class="form-control text-info" id="auctionFTprice"
+                                                       class="pe-5 form-control bg-dark border-dark text-info" id="auctionFTprice"
                                                        aria-describedby="auctionFTpriceappend" placeholder="0.000"
                                                        step="0.001" min="0.001" required>
-                                                    <span class="input-group-text e-radius-hotfix m-0 p-0"
-                                                       id="auctionFTamountappend">
-                                                       <!--<select aria-label="Trade price type select" class="form-select border-0 text-white-50 w-100 h-100" v-model="auction.token">
+                                                       <span class="position-absolute top-50 end-0 translate-middle-y pe-2">
+                                                       <!--<select aria-label="Trade price type select" class="pe-4 form-select border-0 text-white-50 w-100 h-100" v-model="auction.token">
                                              <option :value="item.token">{{toUpperCase(item.token)}}</option>
                                              <option selected value="hive">HIVE</option>
                                              <option value="hbd">HBD</option>
@@ -384,11 +397,11 @@ export default {
                                                  </div>
                                               </div>
                                            </div>
-                                           <div class="d-flex justify-content-around">
-                                              <div class="row mb-3 d-flex align-items-center">
+                                           <div class="d-flex">
+                                              <div class="w-100 mb-3">
                                                  <label for="auctionFTdays" class="form-label">Duration</label>
                                                  <select v-model="auction.days"
-                                                    class="mx-2 btn btn-lg btn-secondary form-control" id="auctionFTdays"
+                                                    class="btn btn-lg btn-dark form-select" id="auctionFTdays"
                                                     required>
                                                     <option value="1">1 Day</option>
                                                     <option value="2">2 Days</option>
@@ -423,7 +436,7 @@ export default {
                                                  </select>
                                               </div>
                                            </div>
-                                           <div class="row mb-3">
+                                           <div class="mb-3">
                                               <p class="text-white-50 small">Ownership will be
                                                  transferred to
                                                  the DAO listing service and auctioned publicly. Once
@@ -444,13 +457,31 @@ export default {
                                         <!-- AIRDROP FORM -->
                                         <form id="airdropFT" class="needs-validation mt-4" novalidate
                                            @submit.prevent="checkForm('airdropFT', airdropFT)">
-                                           <div class="row mb-3">
+                                           <div class="mb-3">
+                                              <div class="">
+                                                 <label for="airdropFTqty" class="form-label">Quantity
+                                                    sent
+                                                    to each</label>
+                                                    <div class="position-relative has-validation mb-3">
+                                                    <input type="number" class="pe-5 form-control bg-darkg border-0 text-info"
+                                                       id="airdropFTqty" aria-describedby="airdropFTqtyappend"
+                                                       placeholder="1" step="1" min="1" required readonly>
+                                                       <span class="position-absolute top-50 end-0 translate-middle-y pe-2 text-white-50">
+                                                       {{item.set}} FT
+                                                 </span>
+                                                    <div class="invalid-feedback"> Please enter the
+                                                       number
+                                                       of FTs to send to each account. </div>
+                                                 </div>
+                                              </div>
+                                           </div>
+                                           <div class="mb-3">
                                               <div class="col-12">
                                                  <label for="airdropFTusers" class="form-label">Airdrop
                                                     to</label>
                                                  <div class="input-group has-validation">
                                                     <textarea name="paragraph_text" cols="50" rows="2"
-                                                       class="form-control text-info" id="airdropFTusers"
+                                                       class="form-control bg-dark border-dark text-info" id="airdropFTusers"
                                                        aria-describedby="airdropFT" v-model="airdrop.to_string"
                                                        @blur="validateAirdrop()" required
                                                        placeholder="name user-name"></textarea>
@@ -458,23 +489,7 @@ export default {
                                                  <div v-if="airdropFeedback">{{airdropFeedback}}</div>
                                               </div>
                                            </div>
-                                           <div class="row mb-3">
-                                              <div class="col-12">
-                                                 <label for="airdropFTqty" class="form-label">Quantity
-                                                    sent
-                                                    to each</label>
-                                                 <div class="input-group has-validation">
-                                                    <input type="number" class="form-control text-info bg-transparent"
-                                                       id="airdropFTqty" aria-describedby="airdropFTqtyappend"
-                                                       placeholder="1" step="1" min="1" required readonly>
-                                                    <span class="input-group-text" id="airdropFTqtyappend">{{item.set}}
-                                                       FT</span>
-                                                    <div class="invalid-feedback"> Please enter the
-                                                       number
-                                                       of FTs to send to each account. </div>
-                                                 </div>
-                                              </div>
-                                           </div>
+                                           
                                            <div class="text-center">
                                               <button class="btn btn-info my-2" type="submit">Airdrop
                                                  Tokens</button>
