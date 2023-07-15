@@ -82,35 +82,35 @@ export default {
                          <div id="collapseDescription" class="accordion-collapse collapse"
                             data-bs-parent="#nftAccordion">
                             <div class="accordion-body">
- 
-                               <p>{{longname}}</p>
+
+                            <h3>{{longname}}</h3>
                                <p>{{itemmodal.item.set.Description}}</p>
-                               <div class="d-flex align-items-center">
-                                  <div class="me-2 d-flex">
-                                     <span class="text-center small border border-secondary rounded text-white px-2 py-1"
-                                        v-cloak>ROYALTY:
-                                        {{chains[itemmodal.item.token]?.sets[itemmodal.item.setname]?.royalty/100}}%</span>
-                                  </div>
- 
-                                  <div class="me-2 d-flex">
-                                     <span class="text-center small border border-secondary rounded text-white px-2 py-1"
-                                        v-cloak>BOND:
-                                        {{chains[itemmodal.item.token]
-                                        ?
-                                        precision(chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.amount,
-                                        chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.precision)
-                                        : 0 }}
-                                        {{chains[itemmodal.item.token]?
-                                        chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.token
-                                        :
-                                        ''}}</span>
-                                  </div>
-                                  <div class="d-flex">
-                                     <span class="text-center small border border-secondary rounded text-white px-2 py-1"
-                                        v-cloak>CHAIN:
-                                        {{itemmodal.item.token}}</span>
-                                  </div>
+                               <div class="d-flex align-items-center"> 
+                                 <div class="text-start small border border-secondary rounded text-white px-2 py-1 w-100">
+                                    <div class="d-flex align-items-center justify-content-start flex-wrap">
+                                       <span class="mb-0" title="Total Number of Owners"><i class="fa-solid fa-user-astronaut fa-fw"></i> 269</span>
+                                       <span class="mb-0 ms-2" title="Total Number of Items"><i class="fa-solid fa-star fa-fw"></i> 483</span>     
+                                       <span class="mb-0 ms-2" title="Layer 2 Honeycomb Sidechain"><i class="fa-solid fa-link fa-fw"></i> {{itemmodal.item.token}}</span>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-start flex-wrapa">
+                                       <span class="mb-0 me-2" title="Melt Value if Item is Burned"><i class="fa-solid fa-fire fa-fw"></i> {{chains[itemmodal.item.token]
+                                          ?
+                                          precision(chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.amount,
+                                          chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.precision)
+                                          : 0 }}
+                                          {{chains[itemmodal.item.token]?
+                                          chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.token
+                                          :
+                                          ''}}</span>
+                                       <span class="mb-0 me-2" title="Last Market Dividends Paid Out to Owners"><i class="fa-solid fa-money-bill-transfer fa-fw"></i> last div </span>
+                                       <span class="mb-0 me-2" title="Total Market Dividends Paid Out to Owners"><i class="fa-solid fa-money-bill-trend-up fa-fw"></i> tot div </span>
+                                    </div>
+                                    <p class="m-0" title="Royalties"><i class="fa-solid fa-crown fa-fw"></i> {{chains[itemmodal.item.token]?.sets[itemmodal.item.setname]?.royalty/100}}</p>
+                                 </div>
                                </div>
+ 
+                              
+                           
                             </div>
                          </div>
                       </div>
