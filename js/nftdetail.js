@@ -51,11 +51,11 @@ export default {
                       <div class="ms-auto" v-if="itemmodal.item.owner == account">
                       <button @click="setPFP(itemmodal.item)" class="btn btn-lg btn-outline-primary"
                       v-if="itemmodal.item.uid != pfp.uid">
-                      <i class="far fa-user-circle me-2"></i>Set as PFP
+                      <i class="far fa-user-circle me-2"></i>Set as pfp
                    </button>
-                   <button class="btn btn-lg btn-secondary disabled"
-                            v-if="itemmodal.item.uid == pfp.uid && itemmodal.item.setname == pfp.set">
-                            <i class="far fa-user-circle me-2"></i>Currently set as your PFP
+                   <button disabled class="btn btn-lg btn-secondary disabled"
+                            v-if="itemmodal.item.uid == pfp.uid && itemmodal.item.setname == pfp.setname">
+                            <i class="far fa-user-circle me-2"></i>Set as pfp
                          </button>
                      </div>
                      
@@ -224,8 +224,8 @@ export default {
                             data-bs-parent="#nftAccordion">
                             <div class="accordion-body">
                                <div class="border-warning border rounded p-3"
-                                  v-if="itemmodal.item.uid == pfp.uid  && itemmodal.item.setname == pfp.set">
-                                  <p class="text-warning m-0">Transferring this NFT will remove it from your PFP</p>
+                                  v-if="itemmodal.item.uid == pfp.uid  && itemmodal.item.setname == pfp.setname">
+                                  <p class="text-warning m-0">Transferring this NFT will remove it from your pfp</p>
                                </div>
                                <div class="p-3 col-12">
                                   <div class="container-fluid">
