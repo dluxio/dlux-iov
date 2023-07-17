@@ -123,6 +123,7 @@ var app = new Vue({
       hbdFormValid: false,
       lapi: lapi,
       hapi: hapi,
+      transferMint: false,
       accountapi: {},
       hiveprice: {
         hive: {
