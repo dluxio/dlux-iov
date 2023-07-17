@@ -193,7 +193,7 @@ export default {
     </div>
 
 <!-- OWNER -->
-<div class="text-white text-center" v-if="!auction && !sale && !inventory">
+<div class="text-white text-center" v-if="!trade && !auction && !sale && !inventory">
       <div class="bg-dark rounded">
         <div class="mt-1 text-center rounded-top bg-primary-50">
           <h5 id="timer-set-uid" class="mb-0 lead">#{{uid}}</h5>
