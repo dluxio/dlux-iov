@@ -66,9 +66,9 @@
                                 <label class="form-label mt-auto mb-auto me-2">Chains:</label>
                                 <div v-for="(item, key, index) in showTokens" class="me-2">
                                     <input type="checkbox" class="btn-check" :id="'btncheck'+key" autocomplete="off"
-                                        :checked="!showTokens[key]">
+                                        :checked="showTokens[key]" @click="showToken(key)">
                                     <label class="btn btn-outline-primary" :for="'btncheck'+key"
-                                        @click="showToken(key)">{{key}}</label>
+                                        >{{key}}</label>
                                 </div>
                             </div>
                         </div>
