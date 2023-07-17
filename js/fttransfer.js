@@ -560,7 +560,7 @@ export default {
                            </div>
 
                       <!-- Mint Auctions -->
-                      <div class="accordion-item" v-if="item.auction">
+                      <div class="accordion-item" v-if="mintauctions.length">
                          <h2 class="accordion-header">
                             <button onclick="this.blur();" class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                data-bs-target="#collapseftBid" aria-expanded="true" aria-controls="collapseftBid">
@@ -612,7 +612,7 @@ export default {
                               </div>
  
                       <!-- Mint Sales -->
-                      <div class="accordion-item" v-if="item.sale">
+                      <div class="accordion-item" v-if="mintauctions.length">
                          <h2 class="accordion-header">
                             <button @click="saleData('itemmodal')" onclick="this.blur();" class="accordion-button collapsed" type="button"
                                data-bs-toggle="collapse" data-bs-target="#collapseftBuy" aria-expanded="true"
