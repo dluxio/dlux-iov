@@ -332,7 +332,7 @@
                                 <div class="d-flex align-items-center">
                                   <div @click="">SALES</div>
                                   <div class="mb-3"><span class=" badge rounded-pill bg-danger" style="font-size: .7em">
-                                      {{mintSales.length}}</span>
+                                      {{chains[jsontoken].sets[setname].mintSales ? chains[jsontoken].sets[setname].mintSales.length : 0}}</span>
                                   </div>
                                 </div>
                               </a></li>
@@ -343,7 +343,7 @@
                                 <div class="d-flex align-items-center">
                                   <div>AUCTIONS</div>
                                   <div class="mb-3"><span class=" badge rounded-pill bg-danger"
-                                      style="font-size: .7em">{{mintAuctions.length}}</span>
+                                      style="font-size: .7em">{{chains[jsontoken].sets[setname].mintAuctions ? chains[jsontoken].sets[setname].mintAuctions.length : 0}}</span>
                                   </div>
                                 </div>
                               </a></li>
@@ -363,7 +363,7 @@
                                 </thead>
                                 <tbody>
 
-                                  <tr scope="row" v-for="ad in mintSales">
+                                  <tr scope="row" v-for="ad in chains[jsontoken].sets[setname].mintSales">
 
                                     <td style="vertical-align: middle">
                                       {{formatNumber(ad.qty,0,'.',',')}}</td>
@@ -407,12 +407,12 @@
                                     <th scope="col" class="small">TOTAL</th>
                                     <th scope="col" class="small">HIGH BIDDER</th>
                                 <tbody>
-                                  <tr v-for="auc in mintAuctions">
+                                  <tr v-for="auc in chains[jsontoken].sets[setname].mintAuctions">
                                     <th scope="row" colspan="4" style="background-color: crimson">
                                       <span>{{auc.time}}</span>
                                     </th>
                                   </tr>
-                                  <tr v-for="auc in mintAuctions">
+                                  <tr v-for="auc in chains[jsontoken].sets[setname].mintAuctions">
                                     <th scope="row">1</th>
                                     <td>{{naiString(auc.pricenai)}}</td>
                                     <td>&asymp;

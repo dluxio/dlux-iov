@@ -63,7 +63,12 @@ var app = new Vue({
         dlux: {
           enabled: false,
           api: "https://token.dlux.io",
-          sets: {},
+          sets: {
+            dlux: {
+              mintAuctions: [],
+              mintSales: [],
+            }
+          },
           slot: 1,
           account:{
             balance: 0,
@@ -1951,47 +1956,49 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               fetch(api + "/api/mintsupply")
                 .then((response) => response.json())
                 .then((data) => {
-                  this.mintData = data.result.filter((a) => a.set == set) || [];
+                  var mintSales = []
+                  var mintAuctions = []
+                  this.chains[chain].sets[set].mintData = data.result.filter((a) => a.set == set) || [];
                   if (this.mintData.length) this.mintData = this.mintData[0];
-                  else this.mintSales = {};
-                  this.mintSales = data.result.filter((a) => a.set == set) || [];
-                  if (this.mintSales.length) this.mintSales = this.mintSales[0].sales;
-                  this.mintAuctions = data.result.filter((a) => a.set == set) || [];
-                  if (this.mintAuctions.length)
-                    this.mintAuctions = this.mintAuctions[0].auctions;
-                  for (var i = 0; i < this.mintSales.length; i++) {
+                  mintSales = data.result.filter((a) => a.set == set) || [];
+                  if (mintSales.length) mintSales = mintSales[0].sales;
+                  mintAuctions = data.result.filter((a) => a.set == set) || [];
+                  if (mintAuctions.length) mintAuctions = mintAuctions[0].auctions;
+                  for (var i = 0; i < mintSales.length; i++) {
                     const token =
-                      this.mintSales[i].pricenai.token == "HIVE"
+                      mintSales[i].pricenai.token == "HIVE"
                         ? "HIVE"
-                        : this.mintSales[i].pricenai.token == "HBD"
+                        : mintSales[i].pricenai.token == "HBD"
                           ? "HBD"
                           : "TOKEN";
-                    this.mintSales[i].buyQty = 1;
+                    mintSales[i].buyQty = 1;
                     if (
-                      this.mintSales[i].price < this.chains[chain].sets[set].smf[token] ||
+                      mintSales[i].price < this.chains[chain].sets[set].smf[token] ||
                       !this.chains[chain].sets[set].smf[token]
                     ) {
-                      this.chains[chain].sets[set].smf[token] = this.mintSales[i].price;
+                      this.chains[chain].sets[set].smf[token] = mintSales[i].price;
                     }
-                    this.chains[chain].sets[set].forSaleMint += this.mintSales[i].qty;
+                    this.chains[chain].sets[set].forSaleMint += mintSales[i].qty;
                   }
-                  for (var i = 0; i < this.mintAuctions.length; i++) {
+                  for (var i = 0; i < mintAuctions.length; i++) {
                     const token =
-                      this.mintAuctions[i].pricenai.token == "HIVE"
+                      mintAuctions[i].pricenai.token == "HIVE"
                         ? "HIVE"
-                        : this.mintAuctions[i].pricenai.token == "HBD"
+                        : mintAuctions[i].pricenai.token == "HBD"
                           ? "HBD"
                           : "TOKEN";
-                    this.mintAuctions[i].bidAmount =
-                      this.mintAuctions[i].price + 1000;
+                    mintAuctions[i].bidAmount =
+                      mintAuctions[i].price + 1000;
                     if (
-                      this.mintAuctions[i].price < this.chains[chain].sets[set].amf[token] ||
+                      mintAuctions[i].price < this.chains[chain].sets[set].amf[token] ||
                       !this.chains[chain].sets[set].amf[token]
                     ) {
-                      this.chains[chain].sets[set].amf[token] = this.mintAuctions[i].price;
+                      this.chains[chain].sets[set].amf[token] = mintAuctions[i].price;
                     }
                     this.chains[chain].sets[set].forAuctionMint++;
                   }
+                  this.chains[chain].sets[set].mintSales = mintSales;
+                  this.chains[chain].sets[set].mintAuctions = mintAuctions;
                 });
             });
           })
