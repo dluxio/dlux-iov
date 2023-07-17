@@ -46,7 +46,7 @@ export default {
                                        -webkit-text-fill-color: transparent; 
                                        -moz-background-clip: text;
                                        -moz-text-fill-color: transparent;">
-                                <span>sealed NFT</span></h3>
+                                <span>#{{itemmodal.item.uid}}</span></h3>
                       <!--Open-->
                       <div class="ms-auto" v-if="itemmodal.item.owner == account">
                       <button @click="setPFP(itemmodal.item)" class="btn btn-lg btn-outline-primary"
