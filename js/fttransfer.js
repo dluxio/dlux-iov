@@ -61,6 +61,17 @@ export default {
                                        -moz-background-clip: text;
                                        -moz-text-fill-color: transparent;">
                                 <span>sealed NFT</span></h3>
+                                <!-- owner info -->
+                                <div class="ms-auto" v-if="item.owner != account">
+                                   <a title="Item From" :href="'/@' + item.from" role="button" class="btn btn-lg btn-outline-light" v-if="item.from != account">
+                                   <i class="fa-solid fa-truck-arrow-right fa-flip-horizontal fa-fw me-1"></i>  
+                                      {{item.from}}
+                                   </a>
+                                   <a title="Item To" :href="'/@' + item.to" role="button" class="btn btn-lg btn-outline-light" v-if="item.from == account">
+                                   <i class="fa-solid fa-truck-arrow-right fa-fw me-1"></i>
+                                      {{item.to}}
+                                   </a>
+                                </div>
                       <!--Open-->
                       <div class="ms-auto" v-if="item.qty > 0 && !item.from">
                       <button type="button" class="btn btn-outline-success" title="Open Mint" 
