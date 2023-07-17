@@ -57,6 +57,14 @@ export default {
                            <i class="fa-solid fa-user-astronaut fa-fw me-1"></i>
                            {{itemmodal.item.owner}}
                         </a>
+                        <a title="Item From" :href="'/@' + itemmodal.item.from" role="button" class="btn btn-lg btn-outline-light" v-if="itemmodal.item.from">
+                        <i class="fa-solid fa-truck-arrow-right fa-flip-horizontal fa-fw me-1"></i>     
+                           {{itemmodal.item.from}}
+                        </a>
+                        <a title="Item To" :href="'/@' + itemmodal.item.to" role="button" class="btn btn-lg btn-outline-light" v-if="!itemmodal.item.to">
+                        <i class="fa-solid fa-truck-arrow-right fa-fw me-1"></i>
+                           {{itemmodal.item.to}}
+                        </a>
                      </div>
                       <!--inventory pfp-->
                       <div class="ms-auto" v-if="itemmodal.item.owner == account">
