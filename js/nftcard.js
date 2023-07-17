@@ -119,7 +119,7 @@ export default {
     <div class="text-white text-center" v-if="sale">
       <div class="bg-dark rounded">
         <div class="mt-1 text-center rounded-top" v-bind:class="{'bg-warning-50': item.by == account, 'bg-success-50': item.by != account}">
-          <h5 id="timer-set-uid" class="mb-0 lead"><span v-if="item.by != account">Buy Now</span><span v-if="item.by == account">Your Listing</span></h5>
+          <h5 id="timer-set-uid" class="mb-0 lead">Buy Now</h5>
         </div>
         <div class="d-flex rounded-bottom p-2">
           <div class="fs-6">
@@ -137,7 +137,7 @@ export default {
     <div class="text-white text-center" v-if="auction">
       <div class="bg-dark rounded">
         <div class="mt-1 text-center rounded-top bg-danger-50" v-bind:class="{'bg-warning-50': item.by == account, 'bg-danger-50': animateTime == '1 day', 'bg-info-50': animateTime != '1 day' }">
-          <h5 id="timer-set-uid" class="mb-0 lead"><span v-if="item.by != account">Ends in {{animateTime}}</span><span v-if="item.by == account">Your Auction</span></h5>
+          <h5 id="timer-set-uid" class="mb-0 lead">Ends in {{animateTime}}</h5>
         </div>
         <div class="d-flex rounded-bottom p-2">
           <div class="fs3">
@@ -153,7 +153,7 @@ export default {
     <!-- OWNER -->
     <div class="text-white text-center" v-if="!trade && !auction && !sale && !inventory">
       <div class="bg-dark rounded">
-        <div class="mt-1 text-center rounded-top bg-primary-50">
+        <div class="mt-1 text-center rounded-top" v-bind:class="{'bg-warning-50': item.owner == account, 'bg-primary-50': item.owner != account}">
           <h5 id="timer-set-uid" class="mb-0 lead d-flex align-items-center justify-content-center"><i class="fs-6 fa-solid fa-hashtag fa-fw"></i>{{uid}}</h5>
         </div>
         <div class="d-flex rounded-bottom p-2">
