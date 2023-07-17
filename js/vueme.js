@@ -2943,7 +2943,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
     getSetDetailsInfo(s) {
       let r = "";
-      console.log('here', s)
       s = this.baseScript[s]
       if (s && s.set) {
         try {
