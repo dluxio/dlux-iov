@@ -553,8 +553,6 @@ export default {
                            </section>
                              <!-- ACCEPT / REJECT  -->
                              <div class="mt-2 mb-3" role="group" v-if="itemmodal.item.to == account">
-                              
-                               
                                  <button type="button" class="btn btn-danger" title="Decline Trade"
                                  @click="cancelXfr()"><i class="fa-solid fa-xmark fa-fw me-2"></i>Decline</button>
                                  <button type="button" class="btn ps-05 pe-05 border-0"
@@ -563,7 +561,7 @@ export default {
                                @click="acceptXfr()"><i class="fa-solid fa-check fa-fw me-2"></i> Accept</button>
                               </div>
                                 <!-- CANCEL  -->
-                                <div class="btn-group" v-if="itemmodal.item.from == account">
+                                <div class="mt-2 mb-3" v-if="itemmodal.item.from == account">
                                 <button type="button" class="btn btn-warning" title="Cancel Trade"
                                  @click="cancelXfr()">
                                  <i class="fa-solid fa-xmark fa-fw me-2"></i> Cancel</button>

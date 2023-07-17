@@ -129,65 +129,6 @@ export default {
                          </div>
                       </div>
 
-                      <!-- Mint Trade -->
-                      <div class="accordion-item" v-if="item.from">
-                      <h2 class="accordion-header">
-                            <button onclick="this.blur();" class="accordion-button" type="button" data-bs-toggle="collapse"
-                               data-bs-target="#collapseftTrade" aria-expanded="false" aria-controls="collapseftTrade">
-                               <i class="fas fa-exchange-alt me-3"></i>TRADE
-                            </button>
-                         </h2>
-                         <div id="collapseftTrade" class="accordion-collapse collapse show"
-                         data-bs-parent="#ftAccordion">
-                         <div class="accordion-body">
-                           </div>
-                           
-                           <div class="p-2 text-white text-center rounded"">
-                           <section>
-                             <div class="d-flex align-items-center">
-                               <div class="text-end mt-auto mb-auto me-1" style="flex: 1">
-                                 <h5 class="small m-0">
-                                   <span v-if="item.to != account">TO:</span>
-                                   <span v-if="item.to == account">FROM:</span>
-                                 </h5>
-                               </div>
-                               <div class="text-start mt-auto mb-auto" style="flex: 2">
-                                 <h5 class="lead m-0">
-                                   <a class="no-decoration text-info" v-if="item.to != account" :href="'/@' + item.to">{{item.to}}</a>
-                                   <a class="no-decoration text-info" v-if="item.to == account" :href="'/@' + item.from">{{item.from}}</a>
-                                 </h5>
-                               </div>
-                             </div>
-                             <div class="d-flex align-items-center my-2">
-                               <div class="text-end mt-auto mb-auto me-1" style="flex: 1">
-                                 <h5 class="small m-0">PRICE:</h5>
-                               </div>
-                               <div class="text-start mt-auto mb-auto" style="flex: 2">
-                                 <h5 class="lead m-0">{{item.priceString}}</h5>
-                               </div>
-                             </div>
-                           </section>
-                             <!-- ACCEPT / REJECT -->
-                             <div class="btn-group" role="group" v-if="item.to == account">
-                              
-                               
-                                 <button type="button" class="btn btn-danger" title="Decline Trade"
-                                 @click="cancelXfr()"><i class="fa-solid fa-xmark fa-fw"></i>Decline</button>
-                                 <button type="button" class="btn ps-05 pe-05 border-0"
-                                 disabled></button>
-                                 <button type="button" class="btn btn-success" title="Accept Trade"
-                               @click="acceptXfr()"><i class="fa-solid fa-check fa-fw"></i> Accept</button>
-                              </div>
-                                <!-- CANCEL -->
-                                <div class="btn-group" v-if="item.from == account">
-                                <button type="button" class="btn btn-warning" title="Cancel Trade"
-                                 @click="cancelXfr()">
-                                 <i class="fa-solid fa-xmark fa-fw"></i> Cancel</button>
-                                </div>
-                           </div>
-
-                           </div>
-                           </div>
                       <!-- Mint Transfer -->
                       <div class="accordion-item" v-if="item.qty > 0 && !item.from ">
                          <h2 class="accordion-header">
@@ -559,7 +500,65 @@ export default {
                             </div>
                          </div>
                       </div>
- 
+
+                      <!-- Mint Trade -->
+                      <div class="accordion-item" v-if="item.from">
+                      <h2 class="accordion-header">
+                            <button onclick="this.blur();" class="accordion-button" type="button" data-bs-toggle="collapse"
+                               data-bs-target="#collapseftTrade" aria-expanded="false" aria-controls="collapseftTrade">
+                               <i class="fa-solid fa-paper-plane fa-fw me-3"></i>TRADE
+                            </button>
+                         </h2>
+                         <div id="collapseftTrade" class="accordion-collapse collapse show"
+                         data-bs-parent="#ftAccordion">
+                         <div class="accordion-body">
+                           
+                           
+                           <div class="p-2 text-white text-center rounded"">
+                           <section>
+                             <div class="d-flex align-items-center">
+                               <div class="text-end mt-auto mb-auto me-1" style="flex: 1">
+                                 <h5 class="small m-0">
+                                   <span v-if="item.to != account">TO:</span>
+                                   <span v-if="item.to == account">FROM:</span>
+                                 </h5>
+                               </div>
+                               <div class="text-start mt-auto mb-auto" style="flex: 2">
+                                 <h5 class="lead m-0">
+                                   <a class="no-decoration text-info" v-if="item.to != account" :href="'/@' + item.to">{{item.to}}</a>
+                                   <a class="no-decoration text-info" v-if="item.to == account" :href="'/@' + item.from">{{item.from}}</a>
+                                 </h5>
+                               </div>
+                             </div>
+                             <div class="d-flex align-items-center my-2">
+                               <div class="text-end mt-auto mb-auto me-1" style="flex: 1">
+                                 <h5 class="small m-0">PRICE:</h5>
+                               </div>
+                               <div class="text-start mt-auto mb-auto" style="flex: 2">
+                                 <h5 class="lead m-0">{{item.priceString}}</h5>
+                               </div>
+                             </div>
+                           </section>
+                             <!-- ACCEPT / REJECT -->
+                             <div class="mt-2 mb-3" role="group" v-if="item.to == account">
+                                 <button type="button" class="btn btn-danger" title="Decline Trade"
+                                 @click="cancelXfr()"><i class="fa-solid fa-xmark fa-fw ms-2"></i>Decline</button>
+                                 <button type="button" class="btn ps-05 pe-05 border-0"
+                                 disabled></button>
+                                 <button type="button" class="btn btn-success" title="Accept Trade"
+                               @click="acceptXfr()"><i class="fa-solid fa-check fa-fw ms-2"></i> Accept</button>
+                              </div>
+                                <!-- CANCEL -->
+                                <div class="mt-2 mb-3" v-if="item.from == account">
+                                <button type="button" class="btn btn-warning" title="Cancel Trade"
+                                 @click="cancelXfr()">
+                                 <i class="fa-solid fa-xmark fa-fw ms-2"></i> Cancel</button>
+                                </div>
+                           </div>
+
+                           </div>
+                           </div>
+
                       <!-- Mint Auctions -->
                       <div class="accordion-item" v-if="item.auction">
                          <h2 class="accordion-header">
@@ -571,9 +570,6 @@ export default {
                          </h2>
                          <div id="collapseftBid" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
                             <div class="accordion-body">
-                            <!-- mint market widget -->
-                            
-                                    
                                         <table class="table table-sm">
                                           <thead>
                                             <tr>
@@ -584,20 +580,15 @@ export default {
                                             </tr>
                                           </thead>
                                           <tbody>
-          
                                             <tr scope="row" v-for="ad in mintSales">
-          
                                               <td style="vertical-align: middle">
                                                 {{formatNumber(ad.qty,0,'.',',')}}</td>
                                               <td style="vertical-align: middle">
                                                 {{naiString(ad.pricenai)}}</td>
                                               <td><span v-show="true" class="text-center">
                                                   <form class="needs-validation" novalidate>
-          
                                                     <input value="1" required type="number" min="1" step="1" max="ad.qty"
                                                       class="form-control text-info" style="max-width: 100px" v-model="ad.buyQty">
-          
-          
                                                     <button type="submit" class="btn btn-info d-none" v-show="ad.by != account"
                                                       @click="buyMint(ad.uid)">Buy</button>{{toFixed(ad.buyQty *
                                                     ad.pricenai.amount,0)}}
@@ -613,20 +604,12 @@ export default {
                                                   <button class="btn btn-warning" v-show="ad.by == account">Cancel</button>
                                                 </div>
                                               </td>
-          
                                             </tr>
                                           </tbody>
                                         </table>
-                                      
-
-                                      
-                                        
-                                     
                                     </div>
                                   </div>
-                                
                               </div>
-
  
                       <!-- Mint Sales -->
                       <div class="accordion-item" v-if="item.sale">
@@ -668,12 +651,9 @@ export default {
                                 <td><input class="form-control " type="number">
                                 </td>
                                 <td><button class="btn btn-secondary" @click="bidNFT(auc)">Bid</button>
-
                                 </td>
-
                               </tr>
                             </tbody>
-
                             <th scope="col" class="small"></th>
                             <th scope="col" class="small"></th>
                             </tr>
