@@ -154,7 +154,7 @@ export default {
     <div class="text-white text-center" v-if="!trade && !auction && !sale && !inventory">
       <div class="bg-dark rounded">
         <div class="mt-1 text-center rounded-top bg-primary-50">
-          <h5 id="timer-set-uid" class="mb-0 lead">#{{uid}}</h5>
+          <h5 id="timer-set-uid" class="mb-0 lead d-flex align-items-center justify-content-center"><i class="fs-6 fa-solid fa-hashtag fa-fw"></i>{{uid}}</h5>
         </div>
         <div class="d-flex rounded-bottom p-2">
           <div class="fs3">
