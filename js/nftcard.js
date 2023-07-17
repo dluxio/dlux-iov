@@ -160,7 +160,7 @@ export default {
             </span>
           </div>
         </div>
-      </div>ƒ
+      </div>
     </div>
 
     <!-- SALE -->
