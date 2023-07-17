@@ -580,7 +580,7 @@ export default {
                                             </tr>
                                           </thead>
                                           <tbody>
-                                            <tr scope="row" v-for="ad in mintSales">
+                                            <tr scope="row" v-for="ad in mintsales">
                                               <td style="vertical-align: middle">
                                                 {{formatNumber(ad.qty,0,'.',',')}}</td>
                                               <td style="vertical-align: middle">
@@ -633,12 +633,12 @@ export default {
                               </tr>
                           </thead>
                             <tbody>
-                              <tr v-for="auc in mintAuctions">
+                              <tr v-for="auc in mintauctions">
                                 <th scope="row" colspan="4" style="background-color: crimson">
                                   <span>{{auc.time}}</span>
                                 </th>
                               </tr>
-                              <tr v-for="auc in mintAuctions">
+                              <tr v-for="auc in mintauctions">
                                 <th scope="row">1</th>
                                 <td>{{naiString(auc.pricenai)}}</td>
                                 <td>&asymp;
@@ -646,7 +646,7 @@ export default {
                                 </td>
                                 <td>{{auc.bidder}}</td>
                               </tr>
-                              <tr v-for="auc in mintAuctions">
+                              <tr v-for="auc in mintauctions">
                                 <th scope="row" colspan="2"></th>
                                 <td><input class="form-control " type="number">
                                 </td>
@@ -684,6 +684,18 @@ export default {
                 return {
                     script: '',
                 };
+            },
+        },
+        mintauctions: {
+            required: false,
+            default: function () {
+                return [];
+            },
+        },
+        mintsales: {
+            required: false,
+            default: function () {
+                return [];
             },
         },
         auctions: {
