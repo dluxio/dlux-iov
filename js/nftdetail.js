@@ -152,7 +152,7 @@ export default {
                          </div>
                       </div>
 
-                      <!-- NFT Trade
+                      <!-- NFT Trade -->
                       <div class="accordion-item" v-if="trade">
                       <h2 class="accordion-header">
                             <button onclick="this.blur();" class="accordion-button" type="button" data-bs-toggle="collapse"
@@ -189,8 +189,8 @@ export default {
                                  <h5 class="lead m-0">{{item.priceString}}</h5>
                                </div>
                              </div>
-                           </section> -->
-                             <!-- ACCEPT / REJECT
+                           </section>
+                             <!-- ACCEPT / REJECT  -->
                              <div class="btn-group" role="group" v-if="item.to == account">
                               
                                
@@ -200,8 +200,8 @@ export default {
                                  disabled></button>
                                  <button type="button" class="btn btn-success" title="Accept Trade"
                                @click="acceptXfr()"><i class="fa-solid fa-check fa-fw"></i> Accept</button>
-                              </div>  -->
-                                <!-- CANCEL 
+                              </div>
+                                <!-- CANCEL  -->
                                 <div class="btn-group" v-if="item.from == account">
                                 <button type="button" class="btn btn-warning" title="Cancel Trade"
                                  @click="cancelXfr()">
@@ -210,7 +210,7 @@ export default {
                            </div>
 
                            </div>
-                           </div> -->
+                           </div>
 
                       <!-- NFT Transfer -->
                       <div class="accordion-item" v-if="itemmodal.item.owner == account">
