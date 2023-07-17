@@ -130,14 +130,14 @@ export default {
                       </div>
 
                       <!-- Mint Trade -->
-                      <div class="accordion-item" v-if="item.qty > 0 && item.from">
+                      <div class="accordion-item" v-if="item.from">
                       <h2 class="accordion-header">
                             <button onclick="this.blur();" class="accordion-button" type="button" data-bs-toggle="collapse"
                                data-bs-target="#collapseftTrade" aria-expanded="false" aria-controls="collapseftTrade">
                                <i class="fas fa-exchange-alt me-3"></i>TRADE
                             </button>
                          </h2>
-                         <div id="collapseftTransfer" class="accordion-collapse collapse show"
+                         <div id="collapseftTrade" class="accordion-collapse collapse show"
                          data-bs-parent="#ftAccordion">
                          <div class="accordion-body">
                            </div>
