@@ -253,11 +253,12 @@ export default {
     },
   },
   methods: {
-    Base64toNumber(chars) {
+    Base64toNumber(chars = "aa") {
       const glyphs =
         "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
       var result = 0;
-      chars = chars.split("");
+      if(typeof chars == 'string')chars = chars.split("")
+      else chars = []
       for (var e = 0; e < chars.length; e++) {
         result = result * 64 + glyphs.indexOf(chars[e]);
       }

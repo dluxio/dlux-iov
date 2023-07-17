@@ -46,7 +46,7 @@ export default {
                                        -webkit-text-fill-color: transparent; 
                                        -moz-background-clip: text;
                                        -moz-text-fill-color: transparent;">
-                                <span>#{{Base64toNumberitemmodal.item.uid)}}</span></h3>
+                                <span>#{{Base64toNumber(itemmodal.item.uid)}}</span></h3>
                       <!--Open-->
                       <div class="ms-auto" v-if="itemmodal.item.owner == account">
                       <button @click="setPFP(itemmodal.item)" class="btn btn-lg btn-outline-primary"
@@ -974,11 +974,12 @@ export default {
                 ops: ["getTokenUser"],
               });
         },
-        Base64toNumber(chars) {
+        Base64toNumber(chars = "aa") {
          const glyphs =
            "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
          var result = 0;
-         chars = chars.split("");
+         if(typeof chars == 'string')chars = chars.split("")
+         else chars = []
          for (var e = 0; e < chars.length; e++) {
            result = result * 64 + glyphs.indexOf(chars[e]);
          }
