@@ -99,7 +99,7 @@ export default {
     </div>
 
     <!-- INVENTORY -->
-    <div class="text-white" v-if="inventory">
+    <div class="text-white d-none" v-if="inventory">
       <div class="bg-dark rounded mt-1">
         <div class="d-flex p-1">
           <div class="fs-5 ms-auto me-auto">
