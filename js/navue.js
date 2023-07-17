@@ -1042,29 +1042,25 @@ export default {
       </div>
     </div>
 
-    <div class="row mb-3">
-      <label class="form-label d-none">Set and store username:</label>
-      <div class="input-group position-relative">
-        <span class="input-group-text">@</span>
-        <input v-model="userField" autocapitalize="off" placeholder="username" @keyup.enter="setUser()" class="form-control text-info">
-        <span v-if="userField"  class="input-group-text border border-start-0 bg-img-none bg-blur-none no-shadow"><a role="button" @click="setUser()" class="link-info"><i class="fa-solid fa-circle-plus"></i></a></span>
+    <div class="row">
+      <label class="form-label">Add user</label>
+      <div class="position-relative has-validation">
+      <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
+      <i class="fa-solid fa-at fa-fw"></i>
+   </span>
+        <input v-model="userField" autocapitalize="off" placeholder="username" @keyup.enter="setUser()" class="px-4 form-control bg-dark border-dark text-info">
+        <span v-if="userField" class="position-absolute end-0 top-50 translate-middle-y pe-2"><a role="button" @click="setUser()" class="text-info"><i class="fa-solid fa-circle-plus fa-fw"></i></a></span>
       </div>
-      <div class="small text-muted text-center mt-2">
-        Usernames are only stored locally. <a class="no-decoration" target="_blank" href="https://signup.hive.io/">Get Account</a>
+      <div class="small text-muted text-center mt-1 mb-3">
+        Usernames are only stored locally. <a class="no-decoration text-info" target="_blank" href="https://signup.hive.io/">Get Account</a>
       </div>
     </div>
 
-    <div class="row" v-if="HAS && haspich > 100">
-      <div>
-        <div class="bg-white rounded text-center">
-          <a class="no-decoration" :href="HAS_.uri"><img :src="haspic" :height="haspich + 'px'" class="img-responsive p-2 mx-3"><p v-show="haspich > 100" class="text-dark">Tap or scan with PKSA App for {{user}}</p></a>
-        </div>
-      </div>
-    </div>
+    
       
-    <div class="row mb-3">
+    <div class="row">
       <div>
-        <label class="form-label">Current user:</label>
+        <label class="form-label">Current user</label>
         <div v-if="!user" class="bg-darkest rounded px-4 py-2 mx-2">
           <img src="#" alt="" width="50" height="50" class="img-fluid rounded-circle bg-light me-1 cover">
           <span>NONE SELECTED</span>
@@ -1073,18 +1069,28 @@ export default {
           <img :src="avatar" id="userImage" alt="" width="50" height="50" class="img-fluid rounded-circle bg-light me-2 cover">
           <span id="userName">{{user}}</span>
           <div class="ms-auto">
-            <a class="btn btn-outline-secondary me-2" :class="[{'btn-outline-success':HAS_.wsconn && HAS_.token},{'btn-outline-warning':!HAS_.wsconn && HAS_.token},{'btn-outline-secondary':!HAS_.token}]" :href="HAS_.uri" v-if="HAS"><i class="fa-solid fa-satellite-dish"></i></a>
-            <a class="btn btn-outline-danger" role="button" @click="logout()"><i class="fas fa-power-off fa-fw"></i></a>
+            <a class="btn btn-outline-secondary btn-sm me-1" :class="[{'btn-outline-success':HAS_.wsconn && HAS_.token},{'btn-outline-warning':!HAS_.wsconn && HAS_.token},{'btn-outline-secondary':!HAS_.token}]" :href="HAS_.uri" v-if="HAS"><i class="fa-solid fa-satellite-dish"></i></a>
+            <a class="btn btn-outline-danger btn-sm" role="button" @click="logout()"><i class="fas fa-power-off fa-fw"></i></a>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="row mb-3" v-if="recentUsers.length">
-        <label class="form-label">Recent usernames:</label>
-        <div class="input-group">
-          <span class="input-group-text">@</span>
-          <input type="search" v-model="filterUsers" autocapitalize="off" placeholder="search" @keyup="searchRecents()" class="form-control text-info">
+    <div class="row my-2" v-if="HAS && haspich > 100">
+      <div>
+        <div class="bg-white rounded text-center">
+          <a class="no-decoration" :href="HAS_.uri"><img :src="haspic" :height="haspich + 'px'" class="img-responsive p-2 mx-3"><p v-show="haspich > 100" class="text-dark">Tap or scan with PKSA App for {{user}}</p></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-1" v-if="recentUsers.length">
+        <label class="form-label">Recent users</label>
+        <div class="position-relative has-validation">
+      <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
+      <i class="fa-solid fa-at fa-fw"></i>
+   </span>
+          <input type="search" v-model="filterUsers" autocapitalize="off" placeholder="search" @keyup="searchRecents()" class="ps-4 form-control bg-dark border-dark text-info">
         </div>
       </div>
       <div class="d-flex justify-content-between align-items-center py-3 border-light border-bottom" v-if="!filterUsers" v-for="name in recentUsers">
