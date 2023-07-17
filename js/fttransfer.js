@@ -49,22 +49,24 @@ export default {
                       </div>
                       <div class="flex-shrink-1">
                         <div class="text-center">
-                            <h3 class="my-1"
+                            
+                        </div>
+                       
+                        </div>
+                      <div class="d-flex px-2 pb-2 mb-2 align-items-center" :alt="item.setname + '-' + item.uid">
+                      <h3 class="m-0"
                                 :style="{'background-image': colors}"
                                 style="-webkit-background-clip: text;
                                        -webkit-text-fill-color: transparent; 
                                        -moz-background-clip: text;
                                        -moz-text-fill-color: transparent;">
                                 <span>sealed NFT</span></h3>
-                        </div>
-                       
-                        </div>
-                      <div :alt="item.setname + '-' + item.uid">
                       <!--Open-->
-                      <div class="text-center my-3" v-if="item.qty > 0">
-                      <button type="button" class="btn btn-success" title="Open Mint" 
+                      <div class="ms-auto" v-if="item.qty > 0 && !item.from">
+                      <button type="button" class="btn btn-outline-success" title="Open Mint" 
                       @click="openNFT()"><i class="fas fa-box-open fa-fw"></i> Open</button>
-                         
+                     </div>
+                     
                       </div>
                          <!--back forward btns-->
                          <div class="d-flex align-items-center">
@@ -83,7 +85,7 @@ export default {
                       </div>
  
                    </div>
-                </div>
+                
  
                 <!-- Mint detail col 2 -->
                 <div class="col-lg-6 px-0 px-sm-2">
@@ -107,31 +109,87 @@ export default {
                                <h3>{{setdetail.name_long}}</h3>
                                <p>{{info}}</p>
                                <div class="d-flex align-items-center"> 
-                               <div class="text-start small border border-secondary rounded text-white px-2 py-1 w-100">
-                                 <div class="d-flex align-items-center justify-content-start flex-wrap">
-                                  <span class="mb-0" title="Total Number of Owners"><i class="fa-solid fa-user-astronaut fa-fw"></i> 269</span>
-                                  <span class="mb-0 ms-2" title="Total Number of Items"><i class="fa-solid fa-star fa-fw"></i> 483</span>     
-                                  <span class="mb-0 ms-2" title="Layer 2 Honeycomb Sidechain"><i class="fa-solid fa-link fa-fw"></i> {{item.token}}</span>
-                                  </div>
-                                  <div class="d-flex align-items-center justify-content-start flex-wrapa">
-                                  <span class="mb-0 me-2" title="Melt Value if Item is Burned"><i class="fa-solid fa-fire fa-fw"></i> {{naiString(setdetail.bond)}}</span>
-                                  <span class="mb-0 me-2" title="Last Market Dividends Paid Out to Owners"><i class="fa-solid fa-money-bill-transfer fa-fw"></i> {{naiString(setdetail.last_div)}}</span>
-                                  <span class="mb-0 me-2" title="Total Market Dividends Paid Out to Owners"><i class="fa-solid fa-money-bill-trend-up fa-fw"></i>{{naiString(setdetail.total_div)}}</span>
-                                  </div>
-
-                                  <p class="m-0" title="Royalties"><i class="fa-solid fa-crown fa-fw"></i> {{royaltySplit(setdetail.royalty_allocation)}}</p>
-
-                               </div>
+                                 <div class="text-start small border border-secondary rounded text-white px-2 py-1 w-100">
+                                    <div class="d-flex align-items-center justify-content-start flex-wrap">
+                                       <span class="mb-0" title="Total Number of Owners"><i class="fa-solid fa-user-astronaut fa-fw"></i> 269</span>
+                                       <span class="mb-0 ms-2" title="Total Number of Items"><i class="fa-solid fa-star fa-fw"></i> 483</span>     
+                                       <span class="mb-0 ms-2" title="Layer 2 Honeycomb Sidechain"><i class="fa-solid fa-link fa-fw"></i> {{item.token}}</span>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-start flex-wrapa">
+                                       <span class="mb-0 me-2" title="Melt Value if Item is Burned"><i class="fa-solid fa-fire fa-fw"></i> {{naiString(setdetail.bond)}}</span>
+                                       <span class="mb-0 me-2" title="Last Market Dividends Paid Out to Owners"><i class="fa-solid fa-money-bill-transfer fa-fw"></i> {{naiString(setdetail.last_div)}}</span>
+                                       <span class="mb-0 me-2" title="Total Market Dividends Paid Out to Owners"><i class="fa-solid fa-money-bill-trend-up fa-fw"></i>{{naiString(setdetail.total_div)}}</span>
+                                    </div>
+                                    <p class="m-0" title="Royalties"><i class="fa-solid fa-crown fa-fw"></i> {{royaltySplit(setdetail.royalty_allocation)}}</p>
+                                 </div>
                                </div>
                                
                           
                             </div>
                          </div>
                       </div>
- 
- 
+
+                      <!-- Mint Trade -->
+                      <div class="accordion-item" v-if="item.qty > 0 && item.from">
+                      <h2 class="accordion-header">
+                            <button onclick="this.blur();" class="accordion-button" type="button" data-bs-toggle="collapse"
+                               data-bs-target="#collapseftTrade" aria-expanded="false" aria-controls="collapseftTrade">
+                               <i class="fas fa-exchange-alt me-3"></i>TRADE
+                            </button>
+                         </h2>
+                         <div id="collapseftTransfer" class="accordion-collapse collapse show"
+                         data-bs-parent="#ftAccordion">
+                         <div class="accordion-body">
+                           </div>
+                           
+                           <div class="p-2 text-white text-center rounded"">
+                           <section>
+                             <div class="d-flex align-items-center">
+                               <div class="text-end mt-auto mb-auto me-1" style="flex: 1">
+                                 <h5 class="small m-0">
+                                   <span v-if="item.to != account">TO:</span>
+                                   <span v-if="item.to == account">FROM:</span>
+                                 </h5>
+                               </div>
+                               <div class="text-start mt-auto mb-auto" style="flex: 2">
+                                 <h5 class="lead m-0">
+                                   <a class="no-decoration text-info" v-if="item.to != account" :href="'/@' + item.to">{{item.to}}</a>
+                                   <a class="no-decoration text-info" v-if="item.to == account" :href="'/@' + item.from">{{item.from}}</a>
+                                 </h5>
+                               </div>
+                             </div>
+                             <div class="d-flex align-items-center my-2">
+                               <div class="text-end mt-auto mb-auto me-1" style="flex: 1">
+                                 <h5 class="small m-0">PRICE:</h5>
+                               </div>
+                               <div class="text-start mt-auto mb-auto" style="flex: 2">
+                                 <h5 class="lead m-0">{{item.priceString}}</h5>
+                               </div>
+                             </div>
+                           </section>
+                             <!-- ACCEPT / REJECT -->
+                             <div class="btn-group" role="group" v-if="item.to == account">
+                              
+                               
+                                 <button type="button" class="btn btn-danger" title="Decline Trade"
+                                 @click="cancelXfr()"><i class="fa-solid fa-xmark fa-fw"></i>Decline</button>
+                                 <button type="button" class="btn ps-05 pe-05 border-0"
+                                 disabled></button>
+                                 <button type="button" class="btn btn-success" title="Accept Trade"
+                               @click="acceptXfr()"><i class="fa-solid fa-check fa-fw"></i> Accept</button>
+                              </div>
+                                <!-- CANCEL -->
+                                <div class="btn-group" v-if="item.from == account">
+                                <button type="button" class="btn btn-warning" title="Cancel Trade"
+                                 @click="cancelXfr()">
+                                 <i class="fa-solid fa-xmark fa-fw"></i> Cancel</button>
+                                </div>
+                           </div>
+
+                           </div>
+                           </div>
                       <!-- Mint Transfer -->
-                      <div class="accordion-item" v-if="item.qty > 0">
+                      <div class="accordion-item" v-if="item.qty > 0 && !item.from ">
                          <h2 class="accordion-header">
                             <button onclick="this.blur();" class="accordion-button" type="button" data-bs-toggle="collapse"
                                data-bs-target="#collapseftTransfer" aria-expanded="false" aria-controls="collapseftTransfer">
