@@ -2374,12 +2374,12 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         //     }, []);
         //   });
     },
-    calc(){
-      const names = ['hive', 'hbd', 'dlux', 'duat']
-        for(var i = 0; i < names.length; i++){
-          console.log(names[i], this.$refs[`show${names[i]}`].classList, this.$refs[`show${names[i]}`].classList.contains('show'))
-        }
-    },
+    // calc(){
+    //   const names = ['hive', 'hbd', 'dlux', 'duat']
+    //     for(var i = 0; i < names.length; i++){
+    //       console.log(names[i], this.$refs[`show${names[i]}`].classList, this.$refs[`show${names[i]}`].classList.contains('show'))
+    //     }
+    // },
     getHiveUser(user) {
       if (user)
         fetch(hapi, {
@@ -2442,14 +2442,14 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         return location;
       },
     },
-    shown: {
-      get() {
-        const names = ['hive', 'hbd', 'dlux', 'duat']
-        for(var i = 0; i < names.length; i++){
-          if(this.$refs[`show${names[i]}`].classList.value.find('show'))return names[i]
-        }
-      }
-    },
+    // shown: {
+    //   get() {
+    //     const names = ['hive', 'hbd', 'dlux', 'duat']
+    //     for(var i = 0; i < names.length; i++){
+    //       if(this.$refs[`show${names[i]}`].classList.value.find('show'))return names[i]
+    //     }
+    //   }
+    // },
     chainSorted:{
       get() {
       return Object.keys(this.chains).sort((a, b) => {
