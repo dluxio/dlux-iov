@@ -12808,6 +12808,18 @@ td {
   border-radius: 0px;
 }
 
+.bg-danger-50 {
+  background-color: rgba(252, 52, 111, 0.7);
+}
+
+.bg-success-50 {
+  background-color: rgba(65, 215, 167, 0.7);
+}
+
+.bg-primary-50 {
+  background-color: rgba(58, 143, 217, 0.7);
+}
+
 .px-05 {
   padding-left: 0.25em !important;
   padding-right: 0.25em !important;

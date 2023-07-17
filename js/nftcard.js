@@ -131,11 +131,11 @@ export default {
     <div class="text-white text-center" v-if="sale">
       
       <!-- SALE PRICE -->
-      
-      <div class="mt-1 text-center rounded-top bg-primary">
+      <div class="bg-dark rounded">
+      <div class="mt-1 text-center rounded-top bg-success-50">
         <h5 id="timer-set-uid" class="mb-0 lead">Buy Now</h5>
       </div>
-        <div class="d-flex bg-dark rounded-bottom p-2">
+        <div class="d-flex rounded-bottom p-2">
           <div class="fs3">
             {{formatNumber(item.price.amount/1000,item.price.precision,'.',',')}}
           </div>
@@ -143,7 +143,7 @@ export default {
             {{item.price.token}}
           </div>
         </div>
- 
+ </div>
 
       <!-- SALE BUTTONS -->
       <div class="ms-auto d-none mt-1">
@@ -164,10 +164,11 @@ export default {
     <div class="text-white text-center" v-if="auction">
 
       <!-- AUCTION PRICE -->
-      <div class="mt-1 text-center rounded-top bg-hive">
+      <div class="bg-dark rounded">
+      <div class="mt-1 text-center rounded-top bg-danger-50">
   <h5 id="timer-set-uid" class="mb-0 lead">Ends in {{animateTime}}</h5>
 </div>
-<div class="d-flex bg-dark rounded-bottom p-2">
+<div class="d-flex rounded-bottom p-2">
           <div class="fs3">
             {{formatNumber(item.price.amount/1000,item.price.precision,'.',',')}}
           </div>
@@ -175,7 +176,7 @@ export default {
             {{item.price.token}}
           </div>
         </div>
-
+</div>
 
       <!-- AUCTION BUTTONS-->
       <div class="d-flex d-none mt-1">
@@ -190,6 +191,24 @@ export default {
     <div class="ms-auto d-none lead d-flex align-items-center"><small class="d-flex align-items-center"><span
           class="badge text-black">{{item.token}}<i class="d-none fa-solid fa-link ms-1"></i></span></small>
     </div>
+
+<!-- OWNER -->
+<div class="text-white text-center" v-if="!auction && !sale && !inventory">
+      <div class="bg-dark rounded">
+        <div class="mt-1 text-center rounded-top bg-primary-50">
+          <h5 id="timer-set-uid" class="mb-0 lead">#{{uid}}</h5>
+        </div>
+        <div class="d-flex rounded-bottom p-2">
+          <div class="fs3">
+           @{{item.owner}}
+          </div>
+          <div class="fs3 ms-auto">
+            
+          </div>
+        </div>
+      </div>
+      </div>
+
   </div>
   <!-- INVENTORY  FOOT -->
   <div class="card-footer d-none border-0" v-if="inventory">
