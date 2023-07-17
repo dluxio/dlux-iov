@@ -19,52 +19,6 @@
 	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 	<script type="module" src="/js/indexvue.js"></script>
 	<script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
-	<style>
-		.border-turq {
-			border-color: #21FFB5;
-		}
-
-		.btn-turq {
-			color: #363636;
-			background: #21FFB5;
-		}
-
-		.border-blue {
-			border-color: #033EFD;
-		}
-
-		.btn-blue {
-			color: #fff;
-			background: #033EFD;
-		}
-
-		.border-fusch {
-			border-color: #FB00FF;
-		}
-
-		.btn-fusch {
-			color: #fff;
-			background: #FB00FF;
-		}
-
-		.border-orange {
-			border-color: orangered;
-		}
-
-		.btn-orange {
-			color: #000;
-			background: orangered;
-		}
-
-		.border-gold {
-			border-color: gold;
-		}
-
-		.btn-gold {
-			color: #000;
-			background: gold;
-		}
-	</style>
 </head>
 
 <body class="d-flex flex-column h-100 padme-t70">
@@ -76,17 +30,18 @@
 		</div>
 		<main role="main" class="flex-shrink-0">
 			<div class="container text-white">
-				<h1 class="mt-2 mb-5">dApps</h1>
-				<div class="row mb-5">
+				<h1 class="my-3">dApps</h1>
+				<div class="row mb-3">
 					<div class="col-md-4">
-						<h2>360° IMG GALLERY</h2>
-						<hr class="bg-light m-0" />
+						<div class="border-turq border-bottom border-3">
+							<h2>360° IMG GALLERY</h2>
+						</div>
 						<p class="lead mt-2">Control looking any direction without player movement
 						</p>
 						<div class="my-3">
-							<div class="card border-turq bg-dark">
+							<div class="card border-turq">
 								<div class="card-header">
-									<h5 class="card-title text-center">Grid link 360° images</h5>
+									<h5 class="m-0 card-title text-center">Grid link 360° images</h5>
 								</div>
 								<div class="card-body">
 									<ul class="text-left">
@@ -97,20 +52,21 @@
 									</ul>
 								</div>
 								<div class="card-footer text-center">
-									<a href="/new/360-gallery" class="btn btn-turq">Get Started</a>
+									<a href="/new/360-gallery" class="btn btn-primary">Get Started</a>
 								</div>
 							</div>
 						</div>
 					</div>
 					<div class="col-md-4">
-						<h2>VIRTUAL REALITY</h2>
-						<hr class="bg-light m-0" />
+						<div class="border-fusch border-bottom border-3">
+							<h2>VIRTUAL REALITY</h2>
+						</div>
 						<p class="lead mt-2">Fully immersive player movement with teleport control</p>
 
 						<div class="my-3">
-							<div class="card border-fusch bg-dark">
+							<div class="card border-fusch">
 								<div class="card-header">
-									<h5 class="card-title text-center">Remixable Glitch Boilerplate</5>
+									<h5 class="m-0 card-title text-center">Remixable Glitch Boilerplate</5>
 								</div>
 								<div class="card-body">
 									<ul class="text-left">
@@ -122,20 +78,21 @@
 								</div>
 								<div class="card-footer text-center">
 									<a href="https://dlux-vr.glitch.me/build.html" target="_blank"
-										class="btn btn-fusch">Get
+										class="btn btn-primary">Get
 										Started</a>
 								</div>
 							</div>
 						</div>
 					</div>
 					<div class="col-md-4">
-						<h2>OPEN UPLOADER</h2>
-						<hr class="bg-light m-0" />
+						<div class="border-blue border-bottom border-3">
+							<h2>OPEN UPLOADER</h2>
+						</div>
 						<p class="lead mt-2">Upload any HTML5 single page app you can imagine</p>
 						<div class="my-3 text-white">
-							<div class="card border-blue bg-dark">
+							<div class="card border-blue">
 								<div class="card-header">
-									<h5 class="card-title text-center">dApp Upload Form</h5>
+									<h5 class="m-0 card-title text-center">dApp Upload Form</h5>
 								</div>
 								<div class="card-body">
 									<ul class="text-left">
@@ -146,22 +103,23 @@
 									</ul>
 								</div>
 								<div class="card-footer text-center">
-									<a href="/new/advanced" class="btn btn-blue">Get Started</a>
+									<a href="/new/advanced" class="btn btn-primary">Get Started</a>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-				<h1 class="mb-5">DeFi</h1>
+				<h1 class="my-3">DeFi</h1>
 				<div class="row mb-5">
 					<div class="col-md-4">
-						<h2>DLUX NFT</h2>
-						<hr class="bg-light m-0" />
+						<div class="border-orange border-bottom border-3">
+							<h2>DLUX NFT</h2>
+						</div>
 						<p class="lead mt-2">Smart NFTs with no gas fees</p>
 						<div class="text-muted">
-							<div class="card border-orange bg-dark">
+							<div class="card">
 								<div class="card-header">
-									<h5 class="card-title text-center">Generative NFT</h5>
+									<h5 class="m-0 card-title text-center">Generative NFT</h5>
 								</div>
 								<div class="card-body">
 									<ul class="text-left">
@@ -171,22 +129,22 @@
 									</ul>
 								</div>
 								<div class="card-footer text-center">
-									<a href="/nfts/create" class="btn btn-orange disabled">Get Started</a>
+									<a href="/nfts/create" class="btn btn-secondary disabled" disabled>Get Started</a>
 								</div>
 							</div>
 						</div>
 					</div>
 					<div class="col-md-8">
-						<div class="">
+						<div class="border-honey border-bottom border-3">
 							<h2>HONEYCOMB</h2>
-							<hr class="bg-light m-0" />
-							<p class="lead mt-2">Launch your own decentralized Hive Layer 2 community</p>
 						</div>
+						<p class="lead mt-2">Launch your own decentralized Hive Layer 2 community</p>
+
 						<div class="row">
 							<div class="col-md-6">
-								<div class="card border-gold bg-dark">
+								<div class="card">
 									<div class="card-header">
-										<h5 class="card-title text-center">Token Ecoysystem</h5>
+										<h5 class="m-0 card-title text-center">Token Ecoysystem</h5>
 									</div>
 									<div class="card-body">
 										<ul class="text-left">
@@ -196,14 +154,14 @@
 										</ul>
 									</div>
 									<div class="card-footer text-center">
-										<a href="/docs/#/new-token" class="btn btn-gold">Get Started</a>
+										<a href="/docs/#/new-token" class="btn btn-primary">Get Started</a>
 									</div>
 								</div>
 							</div>
 							<div class="col-md-6">
-								<div class="card border-gold bg-dark">
+								<div class="card">
 									<div class="card-header">
-										<h5 class="card-title text-center">Node Validator</h5>
+										<h5 class="m-0 card-title text-center">Node Validator</h5>
 									</div>
 									<div class="card-body">
 										<ul class="text-left">
@@ -213,7 +171,7 @@
 										</ul>
 									</div>
 									<div class="card-footer text-center">
-										<a href="/docs/#/new-node" class="btn btn-gold">Get Started</a>
+										<a href="/docs/#/new-node" class="btn btn-primary">Get Started</a>
 									</div>
 								</div>
 							</div>

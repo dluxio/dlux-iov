@@ -526,7 +526,7 @@ color: linear-gradient(45deg,
 }
 
 .border-turq {
-  border-color: #0ed18c;
+  border-color: #0ed18c !important;
 }
 
 .btn-turq {
@@ -547,9 +547,11 @@ color: linear-gradient(45deg,
 }
 
 .border-blue {
-  border-color: #033efd;
+  border-color: #033efd !important;
 }
-
+.border-orange {
+  border-color: orangered !important;
+}
 .btn-blue {
   color: #fff;
   background: #033efd;
@@ -568,7 +570,7 @@ color: linear-gradient(45deg,
 }
 
 .border-fusch {
-  border-color: #fb00ff;
+  border-color: #fb00ff !important;
 }
 
 .btn-fusch {
