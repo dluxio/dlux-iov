@@ -110,7 +110,7 @@ export default {
                                <p>{{info}}</p>
                                <div class="d-flex align-items-center"> 
                                  <div class="text-start small border border-secondary rounded text-white px-2 py-1 w-100">
-                                    <div class="d-flex align-items-center justify-content-start flex-wrap"  v-if="inventory">
+                                    <div class="d-flex align-items-center justify-content-start flex-wrap"  v-if="!inventory">
                                        <span class="mb-0" title="Total Number of Owners"><i class="fa-solid fa-user-astronaut fa-fw"></i> {{setdetail.owners}}</span>
                                        <span class="mb-0 ms-2" title="Total Number of Items"><i class="fa-solid fa-star fa-fw"></i> {{setdetail.minted - setdetail.deleted}}</span>     
                                        <span class="mb-0 ms-2" title="Layer 2 Honeycomb Sidechain"><i class="fa-solid fa-link fa-fw"></i> {{item.token}}</span>
@@ -770,6 +770,9 @@ export default {
         },
         icon: {
             default: ''
+        },
+        inventory: {
+            default: false
         },
         colors: {
             default: 'linear-gradient(chartreuse,lawngreen)'
