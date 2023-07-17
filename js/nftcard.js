@@ -24,7 +24,7 @@ export default {
     <!-- MINT HEAD -->
     <div class="d-flex justify-content-between align-items-center" v-if="mint">
       <div class="rounded px-2 py-1 shimmer border border-dark">
-        <a :href="'/nfts/set/' + item.setname + '#' + item.token" class="no-decoration text-black"
+        <a :href="'/nfts/set/' + item.set + '#' + item.token" class="no-decoration text-black"
           style="font-size: 1.3em;">
           <i class="me-1" :class="[icon]"></i><b>{{item.set}}</b></a>
       </div>
