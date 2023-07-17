@@ -96,11 +96,11 @@ export default {
 
                             <h3>{{longname}}</h3>
                                <p>{{itemmodal.item.set.Description}}</p>
-                               <div class="d-flex align-items-center"> 
+                               <div class="d-flex align-items-center" v-if="itemmodal.item.setname"> 
                                  <div class="text-start small border border-secondary rounded text-white px-2 py-1 w-100">
                                     <div class="d-flex align-items-center justify-content-start flex-wrap">
-                                       <span class="mb-0" title="Total Number of Owners"><i class="fa-solid fa-user-astronaut fa-fw"></i> 269</span>
-                                       <span class="mb-0 ms-2" title="Total Number of Items"><i class="fa-solid fa-star fa-fw"></i> 483</span>     
+                                       <span class="mb-0" title="Total Number of Owners"><i class="fa-solid fa-user-astronaut fa-fw"></i> {{chains[itemmodal.item.token].sets[itemmodal.item.setname].owners}}</span>
+                                       <span class="mb-0 ms-2" title="Total Number of Items"><i class="fa-solid fa-star fa-fw"></i> {{chains[itemmodal.item.token].sets[itemmodal.item.setname].minted}}</span>     
                                        <span class="mb-0 ms-2" title="Layer 2 Honeycomb Sidechain"><i class="fa-solid fa-link fa-fw"></i> {{itemmodal.item.token}}</span>
                                     </div>
                                     <div class="d-flex align-items-center justify-content-start flex-wrapa">
@@ -113,8 +113,8 @@ export default {
                                           chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.token
                                           :
                                           ''}}</span>
-                                       <span class="mb-0 me-2" title="Last Market Dividends Paid Out to Owners"><i class="fa-solid fa-money-bill-transfer fa-fw"></i> last div </span>
-                                       <span class="mb-0 me-2" title="Total Market Dividends Paid Out to Owners"><i class="fa-solid fa-money-bill-trend-up fa-fw"></i> tot div </span>
+                                       <span class="mb-0 me-2" title="Last Market Dividends Paid Out to Owners"><i class="fa-solid fa-money-bill-transfer fa-fw"></i> {{naiString(chains[itemmodal.item.token].sets[itemmodal.item.setname].last_div)}} </span>
+                                       <span class="mb-0 me-2" title="Total Market Dividends Paid Out to Owners"><i class="fa-solid fa-money-bill-trend-up fa-fw"></i> {{naiString(chains[itemmodal.item.token].sets[itemmodal.item.setname].total_div)}} </span>
                                     </div>
                                     <p class="m-0" title="Royalties"><i class="fa-solid fa-crown fa-fw"></i> {{chains[itemmodal.item.token]?.sets[itemmodal.item.setname]?.royalty/100}}</p>
                                  </div>
