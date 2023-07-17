@@ -3,7 +3,7 @@ export default {
   },
   template: `<div class="card h-100 text-white border-start border-end" :style="{'background': colors}">
   <!-- HEAD -->
-  <div class="card-header border-0 px-1">
+  <div class="card-header border-0 p-1">
     <!-- NFT HEAD -->
     <div class="d-flex justify-content-between align-items-center" v-if="!mint">
 
