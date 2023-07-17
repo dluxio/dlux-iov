@@ -153,7 +153,7 @@ export default {
                       </div>
 
                       <!-- NFT Trade -->
-                      <div class="accordion-item" v-if="item.from">
+                      <div class="accordion-item" v-if="trade">
                       <h2 class="accordion-header">
                             <button onclick="this.blur();" class="accordion-button" type="button" data-bs-toggle="collapse"
                                data-bs-target="#collapseTrade" aria-expanded="false" aria-controls="collapseTrade">
