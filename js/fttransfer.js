@@ -110,9 +110,9 @@ export default {
                                <p>{{info}}</p>
                                <div class="d-flex align-items-center"> 
                                  <div class="text-start small border border-secondary rounded text-white px-2 py-1 w-100">
-                                    <div class="d-flex align-items-center justify-content-start flex-wrap" v-if="tot_owners">
-                                       <span class="mb-0" title="Total Number of Owners"><i class="fa-solid fa-user-astronaut fa-fw"></i> {{setdetails.owners}}</span>
-                                       <span class="mb-0 ms-2" title="Total Number of Items"><i class="fa-solid fa-star fa-fw"></i> {{setdetails.minted - setdetails.deleted}}</span>     
+                                    <div class="d-flex align-items-center justify-content-start flex-wrap">
+                                       <span class="mb-0" title="Total Number of Owners"><i class="fa-solid fa-user-astronaut fa-fw"></i> {{setdetail.owners}}</span>
+                                       <span class="mb-0 ms-2" title="Total Number of Items"><i class="fa-solid fa-star fa-fw"></i> {{setdetail.minted - setdetail.deleted}}</span>     
                                        <span class="mb-0 ms-2" title="Layer 2 Honeycomb Sidechain"><i class="fa-solid fa-link fa-fw"></i> {{item.token}}</span>
                                     </div>
                                     <div class="d-flex align-items-center justify-content-start flex-wrapa">
@@ -743,6 +743,7 @@ export default {
                     royalty_allocation:"disregardfiat_5000,markegiles_5000",
                     script:"QmYSRLiGaEmucSXoNiq9RqazmDuEZmCELRDg4wyE7Fo8kX",
                     set:"dlux",
+                    owners: 0,
                     total_div:{
                         amount:0,
                         precision:3,
@@ -1059,7 +1060,7 @@ export default {
             return Math.floor(seconds) + " seconds ago";
         },
         royaltySplit(royalty) {
-            var split = royalty.split(',')
+            var split = royalty?.split(',') || []
             var string = ''
             for (var i = 0; i < split.length; i++) {
                 var s = split[i].split('_')

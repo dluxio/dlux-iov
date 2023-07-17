@@ -381,6 +381,10 @@ var app = new Vue({
       focusItem: {
         token: "dlux",
         set: "dlux",
+        script: "QmYSRLiGaEmucSXoNiq9RqazmDuEZmCELRDg4wyE7Fo8kX",
+      },
+      getAttr(script, att) {
+        if (this.baseScript[script]) return this.baseScript[script].set[att];
       },
       focusSet: {
         computed: {},
