@@ -41,7 +41,7 @@ export default {
                          <div class="mb-3" v-html="itemmodal.item.HTML"></div>
                          <div class="d-flex px-2 pb-2 mb-2 align-items-center" :alt="itemmodal.item.setname + '-' + itemmodal.item.uid">
                       <h3 class="m-0"
-                                :style="{'background-image': colors}"
+                                :style="{'background-image': color}"
                                 style="-webkit-background-clip: text;
                                        -webkit-text-fill-color: transparent; 
                                        -moz-background-clip: text;
