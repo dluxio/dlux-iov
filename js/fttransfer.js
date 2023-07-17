@@ -230,7 +230,7 @@ export default {
                                               <div class="position-relative has-validation mb-3">
                                                  <input type="number" class="pe-5 form-control bg-dark border-dark text-info" v-model="give.qty"
                                                     aria-describedby="giveFTqtyappend" step="1" min="1" required>
-                                                 <span class="position-absolute top-50 end-0 translate-middle-y pe-2 text-white-50">
+                                                 <span class="position-absolute top-50 end-0 translate-middle-y pe-2 text-white">
                                                        {{item.set}} FT
                                                  </span>
                                                  <div class="invalid-feedback"> Please enter the
@@ -346,7 +346,7 @@ export default {
                                                        class="pe-5 form-control bg-dark border-dark text-info" id="sellFTqty"
                                                        aria-describedby="sellFTqtyappend" placeholder="1" step="1"
                                                        min="1" required :readonly="sell.token == item.token">
-                                                       <span class="position-absolute top-50 end-0 translate-middle-y pe-2 text-white-50">
+                                                       <span class="position-absolute top-50 end-0 translate-middle-y pe-2 text-white">
                                                        {{item.set}} FT
                                                  </span>
                                                     <div class="invalid-feedback"> Please enter the

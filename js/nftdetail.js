@@ -251,7 +251,7 @@ export default {
                                               @submit.prevent="validateForm('nftGiveForm', giveNFT)" novalidate>
                                               <div class="form-row my-2">
                                                  <div class="col-12">
-                                                    <label for="giveNFTusername" class="small mb-1">Username:</label>
+                                                    <label for="giveNFTusername" class=" mb-1">Username</label>
                                                     <div class="position-relative mb-3">
                                                        <span class="position-absolute top-50 translate-middle-y ps-2">
                                                           <i class="fa-solid fa-at fa-fw"></i>
@@ -273,7 +273,7 @@ export default {
                                                  </div>
                                               </div>
                                               <div class="text-center">
-                                                 <button class="btn btn-info my-2" type="submit"
+                                                 <button class="btn btn-info mt-2" type="submit"
                                                     :disabled="!giveEnabled">Give</button>
                                               </div>
                                            </form>
@@ -284,7 +284,7 @@ export default {
                                            <form class="needs-validation mt-4" novalidate>
                                               <div class="form-row my-2">
                                                  <div class="col-12">
-                                                    <label for="tradeNFTusername" class="mb-1">Username:</label>
+                                                    <label for="tradeNFTusername" class="mb-1">Username</label>
                                                     <div class="position-relative mb-3">
                                                        <span class="position-absolute top-50 translate-middle-y ps-2">
                                                           <i class="fa-solid fa-at fa-fw"></i>
@@ -301,7 +301,7 @@ export default {
                                                  </div>
                                               </div>
                                               <div class="form-group form-row my-2">
-                                                 <label for="tradeNFTamount" class="mb-1 d-flex">Amount:
+                                                 <label for="tradeNFTamount" class="mb-1 d-flex">Amount
                                                     <small v-if="trade.token == itemmodal.item.token"
                                                        class="ms-auto text-white-50">
                                                        0% FEE
@@ -336,7 +336,7 @@ export default {
                                               </div>
                                               <div class="text-center">
                                                  <button @click="tradeNFT(itemmodal.item)" id="tradeNFTbutton"
-                                                    class="btn btn-info my-2" type="button">
+                                                    class="btn btn-info mt-2" type="button">
                                                     Propose Trade
                                                  </button>
                                               </div>
@@ -347,7 +347,7 @@ export default {
                                            aria-labelledby="sellNFT">
                                            <form class="needs-validation mt-4" novalidate>
                                               <div class="form-group form-row my-2">
-                                                 <label for="sellNFTprice" class="mb-1 d-flex">Sale Price:
+                                                 <label for="sellNFTprice" class="mb-1 d-flex">Sale Price
                                                     <small v-if="sell.token == itemmodal.item.token"
                                                        class="ms-auto text-white-50">
                                                        0% FEE</small>
@@ -378,7 +378,7 @@ export default {
                                                     </div>
                                                  </div>
                                               </div>
-                                              <div class="form-row my-2">
+                                              <div class="form-row mb-2">
                                                  <p class="text-white-50 small">
                                                     Ownership will be transferred to the DAO listing service and sold
                                                     publicly. Cancel anytime to return immediately.
@@ -386,7 +386,7 @@ export default {
                                               </div>
                                               <div class="text-center">
                                                  <button @click="sellNFT(itemmodal.item)" id="sellNFTbutton"
-                                                    class="btn btn-info my-2" type="button">
+                                                    class="btn btn-info mt-2" type="button">
                                                     List Item
                                                  </button>
                                               </div>
@@ -398,7 +398,7 @@ export default {
                                            <form class="needs-validation mt-4" novalidate>
                                               <div class="form-group form-row my-2">
                                                  <label for="auctionNFTprice"
-                                                    class="d-flex align-items-center mb-1">Starting Bid:
+                                                    class="d-flex align-items-center mb-1">Starting Bid
                                                     <small v-if="auction.token == itemmodal.item.token"
                                                        class="ms-auto text-white-50">
                                                        0% FEE</small>
@@ -431,10 +431,11 @@ export default {
                                                     </div>
                                                  </div>
                                               </div>
-                                              <div class="d-flex justify-content-around">
-                                                 <div class="form-row my-2 d-flex align-items-center">
-                                                    <label for="auctionNFTdays" class="m-0">Duration:</label>
-                                                    <select v-model="auction.days" class="mx-2 btn btn-lg btn-dark"
+                                              <div class="d-flex">
+                                              <div class="w-100 mb-3">
+                                                 
+                                                    <label for="auctionNFTdays" class="mb-1 form-label">Duration</label>
+                                                    <select v-model="auction.days" class="btn btn-lg btn-dark form-select"
                                                        id="auctionNFTdays" required>
                                                        <option value="1">
                                                           1 Day
@@ -459,8 +460,9 @@ export default {
                                                        </option>
                                                     </select>
                                                  </div>
-                                              </div>
-                                              <div class="form-row my-2">
+                                          </div>
+
+                                              <div class="form-row mb-2">
                                                  <p class="text-white-50 small">
                                                     Ownership will be transferred to the DAO listing service and
                                                     auctioned publicly. Once submitted this cannot
@@ -470,7 +472,7 @@ export default {
                                                  </p>
                                               </div>
                                               <div class="text-center">
-                                                 <button @click="auctionNFT(itemmodal.item)" class="btn btn-info my-2"
+                                                 <button @click="auctionNFT(itemmodal.item)" class="btn btn-info mt-2"
                                                     type="button">
                                                     List Item
                                                  </button>
