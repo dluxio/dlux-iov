@@ -65,7 +65,7 @@ export default {
                    -webkit-text-fill-color: transparent; 
                    -moz-background-clip: text;
                    -moz-text-fill-color: transparent;">
-            <span v-if="!mint">#{{uid}}</span>
+            <span v-if="!mint">#{{Base64toNumber(uid)}}</span>
             <span v-if="mint">sealed NFT</span>
           </h3>
         </div>
@@ -253,6 +253,16 @@ export default {
     },
   },
   methods: {
+    Base64toNumber(chars) {
+      const glyphs =
+        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
+      var result = 0;
+      chars = chars.split("");
+      for (var e = 0; e < chars.length; e++) {
+        result = result * 64 + glyphs.indexOf(chars[e]);
+      }
+      return result;
+    },
     buyNFT(){
       if(this.item.price.token == 'HIVE' || this.item.price.token == "HBD") this.$emit('tosign', {
         type: "xfr",
