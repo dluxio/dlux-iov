@@ -42,7 +42,7 @@ export default {
 
   <!-- BODY -->
   <div class="card-body mx-1 d-flex flex-column p-0 rounded" style="background: rgba(0,0,0,.75)">
-    
+
     <div class="">
       <!-- NFT BODY -->
       <div class="flex-grow-1" v-if="!mint">
@@ -79,7 +79,7 @@ export default {
     </div>
   </div>
   <!-- TRADE FOOT -->
-  <div class="card-footer border-0 px-1" v-if="trade">
+  <div class="card-footer d-none border-0 px-1" v-if="trade">
     <div class="p-2 text-white text-center rounded" style="background-color: rgba(0,0,0,0.75)">
       <section>
         <div class="d-flex align-items-center">
@@ -124,17 +124,69 @@ export default {
 
   <!-- FOOTER -->
   <div class="card-footer px-1 pb-1 pt-0 border-0">
-  
 
+    <!-- TRADE -->
+    <div class="text-white text-center" v-if="trade">
+      <div class="bg-dark rounded">
+        <div class="mt-1 text-center rounded-top bg-info-50">
+          <h5 id="timer-set-uid" class="mb-0 lead">
+            <a class="no-decoration text-white" v-if="item.to != account" :href="'/@' + item.to">To @{{item.to}}</a>
+            <a class="no-decoration text-white" v-if="item.to == account" :href="'/@' + item.from">From
+              @{{item.from}}</a>
+          </h5>
+        </div>
+        <div class="d-flex rounded-bottom p-2">
+          <div class="fs3">
+            {{formatNumber(item.price/1000,3,'.',',')}}
+          </div>
+          <div class="fs3 text-uppercase ms-auto">
+            {{item.token}}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INVENTORY -->
+    <div class="text-white" v-if="inventory">
+      <div class="bg-dark rounded mt-1">
+        <div class="d-flex p-1">
+          <div class="fs-5 ms-auto me-auto">
+            <span :style="{'background-image': colors}" style="-webkit-background-clip: text;
+                   -webkit-text-fill-color: transparent; 
+                   -moz-background-clip: text;
+                   -moz-text-fill-color: transparent;">
+              <span v-if="!mint">#{{uid}}</span>
+              <span v-if="mint">sealed NFT</span>
+            </span>
+          </div>
+        </div>
+      </div>ƒ
+    </div>
 
     <!-- SALE -->
     <div class="text-white text-center" v-if="sale">
-      
-      <!-- SALE PRICE -->
       <div class="bg-dark rounded">
-      <div class="mt-1 text-center rounded-top bg-success-50">
-        <h5 id="timer-set-uid" class="mb-0 lead">Buy Now</h5>
+        <div class="mt-1 text-center rounded-top bg-success-50">
+          <h5 id="timer-set-uid" class="mb-0 lead">Buy Now</h5>
+        </div>
+        <div class="d-flex rounded-bottom p-2">
+          <div class="fs-6">
+            {{formatNumber(item.price.amount/1000,item.price.precision,'.',',')}}
+          </div>
+          <div class="fs-6 ms-auto">
+            {{item.price.token}}
+          </div>
+        </div>
       </div>
+    </div>
+
+
+    <!-- AUCTION -->
+    <div class="text-white text-center" v-if="auction">
+      <div class="bg-dark rounded">
+        <div class="mt-1 text-center rounded-top bg-danger-50">
+          <h5 id="timer-set-uid" class="mb-0 lead">Ends in {{animateTime}}</h5>
+        </div>
         <div class="d-flex rounded-bottom p-2">
           <div class="fs3">
             {{formatNumber(item.price.amount/1000,item.price.precision,'.',',')}}
@@ -143,71 +195,25 @@ export default {
             {{item.price.token}}
           </div>
         </div>
- </div>
-
-      <!-- SALE BUTTONS -->
-      <div class="ms-auto d-none mt-1">
-        <!-- BUY SALE -->
-        <div class="btn-group" v-if="item.by != account">
-          <button type="button" class="btn btn-dark" title="Buy NFT" @click="buyNFT()">
-            Buy</button>
-        </div>
-        <!-- CANCEL SALE -->
-        <div class="btn-group" v-if="item.by == account">
-          <button type="button" class="btn btn-warning" title="Cancel Sale" @click="cancelNFT()">
-            Cancel Sale</button>
-        </div>
       </div>
     </div>
 
-    <!-- AUCTION -->
-    <div class="text-white text-center" v-if="auction">
-
-      <!-- AUCTION PRICE -->
-      <div class="bg-dark rounded">
-      <div class="mt-1 text-center rounded-top bg-danger-50">
-  <h5 id="timer-set-uid" class="mb-0 lead">Ends in {{animateTime}}</h5>
-</div>
-<div class="d-flex rounded-bottom p-2">
-          <div class="fs3">
-            {{formatNumber(item.price.amount/1000,item.price.precision,'.',',')}}
-          </div>
-          <div class="fs3 ms-auto">
-            {{item.price.token}}
-          </div>
-        </div>
-</div>
-
-      <!-- AUCTION BUTTONS-->
-      <div class="d-flex d-none mt-1">
-        <!-- BID AUCTION -->
-        <div class="ms-auto btn-group" v-if="item.by != account">
-          <button type="button" class="btn btn-dark" title="Buy NFT" @click="buyNFT(item)">
-            Bid </button>
-        </div>
-      </div>
-    </div>
-
-    <div class="ms-auto d-none lead d-flex align-items-center"><small class="d-flex align-items-center"><span
-          class="badge text-black">{{item.token}}<i class="d-none fa-solid fa-link ms-1"></i></span></small>
-    </div>
-
-<!-- OWNER -->
-<div class="text-white text-center" v-if="!trade && !auction && !sale && !inventory">
+    <!-- OWNER -->
+    <div class="text-white text-center" v-if="!trade && !auction && !sale && !inventory">
       <div class="bg-dark rounded">
         <div class="mt-1 text-center rounded-top bg-primary-50">
           <h5 id="timer-set-uid" class="mb-0 lead">#{{uid}}</h5>
         </div>
         <div class="d-flex rounded-bottom p-2">
           <div class="fs3">
-           @{{item.owner}}
+            @{{item.owner}}
           </div>
           <div class="fs3 ms-auto">
-            
+
           </div>
         </div>
       </div>
-      </div>
+    </div>
 
   </div>
   <!-- INVENTORY  FOOT -->
