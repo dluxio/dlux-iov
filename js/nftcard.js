@@ -184,7 +184,7 @@ export default {
     <!-- AUCTION -->
     <div class="text-white text-center" v-if="auction">
       <div class="bg-dark rounded">
-        <div class="mt-1 text-center rounded-top bg-danger-50">
+        <div class="mt-1 text-center rounded-top bg-danger-50" v-bind:class="{'bg-danger-50': animateTime == '1 day', 'bg-info-50': animateTime != '1 day' }">
           <h5 id="timer-set-uid" class="mb-0 lead">Ends in {{animateTime}}</h5>
         </div>
         <div class="d-flex rounded-bottom p-2">
@@ -206,7 +206,7 @@ export default {
         </div>
         <div class="d-flex rounded-bottom p-2">
           <div class="fs3">
-            @{{item.owner}}
+            <a class="no-decoration" :href="'/@' + item.owner">@{{item.owner}}</a>
           </div>
           <div class="fs3 ms-auto">
 
