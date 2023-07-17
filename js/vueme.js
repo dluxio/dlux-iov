@@ -96,6 +96,7 @@ var app = new Vue({
         }
       },
       disablePost: true,
+      inventory: true,
       File: [],
       FileInfo: {},
       postTitle: "",
