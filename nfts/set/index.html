@@ -62,7 +62,7 @@
       height: 55px;
     }
 
-    
+
 
     .widget-accordion {
 
@@ -108,13 +108,15 @@
                   chains[jsontoken].sets[setname].name_long : ''}}</h1>
                 <h4 class="mb-0 small">Created by <a :href="makeLink('/@',chains[jsontoken].sets[setname].author)"
                     class="no-decoration" v-cloak>@{{chains[jsontoken].sets[setname].author}}</a></h4>
-                    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
-                      <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="/nfts/">Market</a></li>
-                        <li class="breadcrumb-item"><a href="/nfts/sets/">Sets</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">{{chains[jsontoken].sets[setname].name}}</li>
-                      </ol>
-                    </nav>
+                <nav
+                  style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);"
+                  aria-label="breadcrumb">
+                  <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/nfts/">Market</a></li>
+                    <li class="breadcrumb-item"><a href="/nfts/sets/">Sets</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{chains[jsontoken].sets[setname].name}}</li>
+                  </ol>
+                </nav>
               </div>
               <!-- stats widget -->
               <div class="d-flex w-100 align-items-center py-2 justify-content-center stats-widget">
@@ -157,8 +159,9 @@
         <div class="accordion widget-accordion my-1" id="accordionWidgets">
           <div class="accordion-item">
             <h2 class="accordion-header">
-              <button onclick="this.blur();" class="accordion-button collapsed pt-2 pb-1" type="button" data-bs-toggle="collapse"
-                data-bs-target="#collapseWidgets" aria-expanded="true" aria-controls="collapseWidgets">
+              <button onclick="this.blur();" class="accordion-button collapsed pt-2 pb-1" type="button"
+                data-bs-toggle="collapse" data-bs-target="#collapseWidgets" aria-expanded="true"
+                aria-controls="collapseWidgets">
                 <div class="w-100 d-flex flex-wrap justify-content-around align-items-center">
                   <!-- info icon -->
                   <div class="d-flex align-items-center me-2 mb-1 rounded-circle bg-dark p-1">
@@ -212,7 +215,8 @@
                     style="background-color: black">
                     <div class=""><small>MINTS OWNED: </small></div>
                     <div class="px-2">
-                      <h2 class="m-0">{{formatNumber(getMint(chains[jsontoken].sets[setname].set, 'qty'),0,'.',',')}}</h2>
+                      <h2 class="m-0">{{formatNumber(getMint(chains[jsontoken].sets[setname].set, 'qty'),0,'.',',')}}
+                      </h2>
                     </div>
                   </div>
 
@@ -227,10 +231,19 @@
                   <div class="p-3 d-flex info-widget">
                     <div class="">
                       <div>
-                        <div class="mb-3">
-                          <p class="text-white-50 m-0" v-cloak>{{chains[jsontoken].sets[setname].computed.set ?
+
+                        <div class="d-flex align-items-center">
+                          <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
+                            @click="focusItem.set = setname; focusItem.token = jsontoken">
+                            <img class="rounded max-160 my-2"
+                              :src="makeLink('https://ipfs.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.wrapped : '')"></img></a>
+                          <p class="text-white-50 mb-0 ms-2" v-cloak>{{chains[jsontoken].sets[setname].computed.set ?
                             chains[jsontoken].sets[setname].computed.set.Description
                             : '...'}}</p>
+                        </div>
+
+                        <div class="mb-3">
+
                         </div>
                         <!-- financial options -->
                         <div class="d-flex align-items-center flex-wrap mb-3">
@@ -428,51 +441,8 @@
                       </div>
                     </div>
                   </div>
-                  <!--mint manager widget-->
-                  <div class="p-2 d-flex flex-shrink-1">
-                    <div class="d-flex align-items-center bg-dark rounded">
-                      <div class="p-2">
-                        <div class="">
-                          <div class="d-flex justify-content-between align-items-center">
-                            <div class="rounded px-2 py-1 shimmer border border-dark">
-                              <a :href="'/nfts/set/' + chains[jsontoken].sets[setname].set"
-                                  class="no-decoration text-black" style="font-size: 1.3em;">
-                                  <i class="me-1" :class="chains[jsontoken].sets[setname].computed.set.faicon"></i><b>{{chains[jsontoken].sets[setname].set}}</b></a>
-                          </div>
-                          <small class="ms-auto">{{formatNumber(getMint(chains[jsontoken].sets[setname].set, 'qty'),0,'.',',')}} mints</small>
-                          </div>
 
-                          <div class="text-center">
-                            <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
-          @click="focusItem.set = setname; focusItem.token = jsontoken">
-                            <img class="rounded max-160 my-2"
-                              :src="makeLink('https://ipfs.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.wrapped : '')"></img></a>
-                            <div >
-                              <div class="text-center">
-                                <h3 class="my-1"
-                                    :style="{'background-image': getSetDetailsColors(chains[jsontoken].sets[setname].computed)}"
-                                    style="-webkit-background-clip: text;
-                                           -webkit-text-fill-color: transparent; 
-                                           -moz-background-clip: text;
-                                           -moz-text-fill-color: transparent;">
-                                           sealed NFT</h3></div>
-                            </div>
-                            
-                          </div>
 
-                          <div class="d-flex flex-wrap justify-content-between"
-                            >
-                            <button type="button" class="btn btn-success me-auto ms-auto mt-1" @click="" oldclick="unwrap custom json" v-bind:class="{'disabled' : getMint(chains[jsontoken].sets[setname].set, 'qty') == 0}">Mint<i class="fas fa-box-open ms-3"></i></button>
-                            <button type="button" class="btn btn-primary me-auto ms-2 mt-1"
-                              data-bs-toggle="modal" data-bs-target="#mintTransferModal"
-                              @click="mint_detail.set = chains[jsontoken].sets[setname].set" v-bind:class="{'disabled' : getMint(chains[jsontoken].sets[setname].set, 'qty') == 0}">Transfer<i
-                                class="fas fa-exchange-alt ms-3"></i></button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                  </div>
                 </div>
               </div>
             </div>
@@ -825,20 +795,12 @@
 
           <!-- mint transfer modal -->
           <div>
-            <fttransfer :account="account" 
-              :item="focusItem" 
-              :mint="transferMint" 
-              @modal="modal($event)" 
-              :icon="getIcon(focusItem.script)" 
-              :setdetail="chains[focusItem.token].sets[focusItem.set]" 
-              :mintsales="mintSales" 
-              :mintauctions="mintAuctions"
-              :api="chains[focusItem.token].api" 
-              :wrapped="getAttr(focusItem.script, 'wrapped')" 
-              :colors="getSetDetailsColors(focusItem.script)" 
-              @tosign="toSign = $event"
-              :info="getSetDetailsInfo(focusItem.script)"/>
-        </div>
+            <fttransfer :account="account" :item="focusItem" :mint="transferMint" @modal="modal($event)"
+              :icon="getIcon(focusItem.script)" :setdetail="chains[focusItem.token].sets[focusItem.set]"
+              :mintsales="mintSales" :mintauctions="mintAuctions" :api="chains[focusItem.token].api"
+              :wrapped="getAttr(focusItem.script, 'wrapped')" :colors="getSetDetailsColors(focusItem.script)"
+              @tosign="toSign = $event" :info="getSetDetailsInfo(focusItem.script)" />
+          </div>
 
         </div>
     </main>

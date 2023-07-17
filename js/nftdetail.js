@@ -38,8 +38,8 @@ export default {
                    <div class="col-12 px-0 px-sm-2">
                       <!-- NFT img -->
                       <div :alt="itemmodal.item.setname + '-' + itemmodal.item.uid">
-                         <div class="mb-3" v-html="itemmodal.item.HTML"></div>
-                         <div class="d-flex px-2 pb-2 mb-2 align-items-center" :alt="itemmodal.item.setname + '-' + itemmodal.item.uid">
+                         <div class="mb-2" v-html="itemmodal.item.HTML"></div>
+                         <div class="d-flex mb-3 align-items-center" :alt="itemmodal.item.setname + '-' + itemmodal.item.uid">
                       <h3 class="m-0"
                                 :style="{'background-image': color}"
                                 style="-webkit-background-clip: text;
@@ -47,13 +47,24 @@ export default {
                                        -moz-background-clip: text;
                                        -moz-text-fill-color: transparent;">
                                 <span>#{{Base64toNumber(itemmodal.item.uid)}}</span></h3>
-                      <!--Open-->
+                     <!-- owner info -->
+                     <div class="ms-auto" v-if="itemmodal.item.owner != account">
+                        <a title="Item Seller" :href="'/@' + itemmodal.item.by" role="button" class="btn btn-lg btn-outline-light" v-if="itemmodal.item.by">
+                        <i class="fa-solid fa-user fa-fw me-1"></i>   
+                           {{itemmodal.item.by}}
+                        </a>
+                        <a title="Item Owner" :href="'/@' + itemmodal.item.owner" role="button" class="btn btn-lg btn-outline-light" v-if="itemmodal.item.owner">
+                           <i class="fa-solid fa-user-astronaut fa-fw me-1"></i>
+                           {{itemmodal.item.owner}}
+                        </a>
+                     </div>
+                      <!--inventory pfp-->
                       <div class="ms-auto" v-if="itemmodal.item.owner == account">
-                      <button @click="setPFP(itemmodal.item)" class="btn btn-lg btn-outline-primary"
-                      v-if="itemmodal.item.uid != pfp.uid">
-                      <i class="far fa-user-circle me-2"></i>Set as pfp
-                   </button>
-                   <button disabled class="btn btn-lg btn-secondary disabled"
+                        <button @click="setPFP(itemmodal.item)" class="btn btn-lg btn-outline-primary"
+                        v-if="itemmodal.item.uid != pfp.uid">
+                           <i class="far fa-user-circle me-2"></i>Set as pfp
+                        </button>
+                        <button disabled class="btn btn-lg btn-secondary disabled"
                             v-if="itemmodal.item.uid == pfp.uid && itemmodal.item.setname == pfp.setname">
                             <i class="far fa-user-circle me-2"></i>Set as pfp
                          </button>
