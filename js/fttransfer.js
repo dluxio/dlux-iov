@@ -62,7 +62,7 @@ export default {
                                        -moz-text-fill-color: transparent;">
                                 <span>sealed NFT</span></h3>
                                 <!-- owner info -->
-                                <div class="ms-auto" v-if="item.owner != account">
+                                <div class="ms-auto" v-if="item.from">
                                    <a title="Item From" :href="'/@' + item.from" role="button" class="btn btn-lg btn-outline-light" v-if="item.from != account">
                                    <i class="fa-solid fa-truck-arrow-right fa-flip-horizontal fa-fw me-1"></i>  
                                       {{item.from}}
