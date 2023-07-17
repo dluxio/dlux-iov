@@ -518,7 +518,7 @@ export default {
                       <h2 class="accordion-header">
                             <button onclick="this.blur();" class="accordion-button" type="button" data-bs-toggle="collapse"
                                data-bs-target="#collapseTrade" aria-expanded="false" aria-controls="collapseTrade">
-                               <i class="fas fa-exchange-alt me-3"></i>TRADE
+                               <i class="fa-solid fa-paper-plane fa-fw me-3"></i>TRADE
                             </button>
                          </h2>
                          <div id="collapseTrade" class="accordion-collapse collapse show"
@@ -552,21 +552,21 @@ export default {
                              </div>
                            </section>
                              <!-- ACCEPT / REJECT  -->
-                             <div class="btn-group" role="group" v-if="itemmodal.item.to == account">
+                             <div class="mt-2 mb-3" role="group" v-if="itemmodal.item.to == account">
                               
                                
                                  <button type="button" class="btn btn-danger" title="Decline Trade"
-                                 @click="cancelXfr()"><i class="fa-solid fa-xmark fa-fw"></i>Decline</button>
+                                 @click="cancelXfr()"><i class="fa-solid fa-xmark fa-fw me-2"></i>Decline</button>
                                  <button type="button" class="btn ps-05 pe-05 border-0"
                                  disabled></button>
                                  <button type="button" class="btn btn-success" title="Accept Trade"
-                               @click="acceptXfr()"><i class="fa-solid fa-check fa-fw"></i> Accept</button>
+                               @click="acceptXfr()"><i class="fa-solid fa-check fa-fw me-2"></i> Accept</button>
                               </div>
                                 <!-- CANCEL  -->
                                 <div class="btn-group" v-if="itemmodal.item.from == account">
                                 <button type="button" class="btn btn-warning" title="Cancel Trade"
                                  @click="cancelXfr()">
-                                 <i class="fa-solid fa-xmark fa-fw"></i> Cancel</button>
+                                 <i class="fa-solid fa-xmark fa-fw me-2"></i> Cancel</button>
                                 </div>
                            </div>
 
