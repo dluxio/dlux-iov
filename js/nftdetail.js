@@ -39,6 +39,27 @@ export default {
                       <!-- NFT img -->
                       <div :alt="itemmodal.item.setname + '-' + itemmodal.item.uid">
                          <div class="mb-3" v-html="itemmodal.item.HTML"></div>
+                         <div class="d-flex px-2 pb-2 mb-2 align-items-center" :alt="itemmodal.item.setname + '-' + itemmodal.item.uid">
+                      <h3 class="m-0"
+                                :style="{'background-image': colors}"
+                                style="-webkit-background-clip: text;
+                                       -webkit-text-fill-color: transparent; 
+                                       -moz-background-clip: text;
+                                       -moz-text-fill-color: transparent;">
+                                <span>sealed NFT</span></h3>
+                      <!--Open-->
+                      <div class="ms-auto" v-if="itemmodal.item.owner == account">
+                      <button @click="setPFP(itemmodal.item)" class="btn btn-lg btn-outline-primary"
+                      v-if="itemmodal.item.uid != pfp.uid">
+                      <i class="far fa-user-circle me-2"></i>Set as PFP
+                   </button>
+                   <button class="btn btn-lg btn-secondary disabled"
+                            v-if="itemmodal.item.uid == pfp.uid && itemmodal.item.setname == pfp.set">
+                            <i class="far fa-user-circle me-2"></i>Currently set as your PFP
+                         </button>
+                     </div>
+                     
+                      </div>
                          <!--back forward btns-->
                          <div class="d-flex align-items-center">
                             <h2><a class="text-muted p-3" role="button" @click="modalPrev()"><i
@@ -54,17 +75,7 @@ export default {
                             </h2>
                          </div>
                       </div>
-                      <!--pfp-->
-                      <div class="text-center my-3" v-if="itemmodal.item.owner == account">
-                         <button @click="setPFP(itemmodal.item)" class="btn btn-lg btn-outline-primary"
-                            v-if="itemmodal.item.uid != pfp.uid">
-                            <i class="far fa-user-circle me-2"></i>Set as PFP
-                         </button>
-                         <button class="btn btn-lg btn-secondary disabled"
-                            v-if="itemmodal.item.uid == pfp.uid && itemmodal.item.setname == pfp.set">
-                            <i class="far fa-user-circle me-2"></i>Currently set as your PFP
-                         </button>
-                      </div>
+
                    </div>
                 </div>
                 <!-- NFT detail col 2 -->
@@ -140,6 +151,67 @@ export default {
                             </div>
                          </div>
                       </div>
+
+                      <!-- NFT Trade
+                      <div class="accordion-item" v-if="trade">
+                      <h2 class="accordion-header">
+                            <button onclick="this.blur();" class="accordion-button" type="button" data-bs-toggle="collapse"
+                               data-bs-target="#collapseTrade" aria-expanded="false" aria-controls="collapseTrade">
+                               <i class="fas fa-exchange-alt me-3"></i>TRADE
+                            </button>
+                         </h2>
+                         <div id="collapseTransfer" class="accordion-collapse collapse show"
+                         data-bs-parent="#ftAccordion">
+                         <div class="accordion-body">
+                           </div>
+                           
+                           <div class="p-2 text-white text-center rounded"">
+                           <section>
+                             <div class="d-flex align-items-center">
+                               <div class="text-end mt-auto mb-auto me-1" style="flex: 1">
+                                 <h5 class="small m-0">
+                                   <span v-if="item.to != account">TO:</span>
+                                   <span v-if="item.to == account">FROM:</span>
+                                 </h5>
+                               </div>
+                               <div class="text-start mt-auto mb-auto" style="flex: 2">
+                                 <h5 class="lead m-0">
+                                   <a class="no-decoration text-info" v-if="item.to != account" :href="'/@' + item.to">{{item.to}}</a>
+                                   <a class="no-decoration text-info" v-if="item.to == account" :href="'/@' + item.from">{{item.from}}</a>
+                                 </h5>
+                               </div>
+                             </div>
+                             <div class="d-flex align-items-center my-2">
+                               <div class="text-end mt-auto mb-auto me-1" style="flex: 1">
+                                 <h5 class="small m-0">PRICE:</h5>
+                               </div>
+                               <div class="text-start mt-auto mb-auto" style="flex: 2">
+                                 <h5 class="lead m-0">{{item.priceString}}</h5>
+                               </div>
+                             </div>
+                           </section> -->
+                             <!-- ACCEPT / REJECT
+                             <div class="btn-group" role="group" v-if="item.to == account">
+                              
+                               
+                                 <button type="button" class="btn btn-danger" title="Decline Trade"
+                                 @click="cancelXfr()"><i class="fa-solid fa-xmark fa-fw"></i>Decline</button>
+                                 <button type="button" class="btn ps-05 pe-05 border-0"
+                                 disabled></button>
+                                 <button type="button" class="btn btn-success" title="Accept Trade"
+                               @click="acceptXfr()"><i class="fa-solid fa-check fa-fw"></i> Accept</button>
+                              </div>  -->
+                                <!-- CANCEL 
+                                <div class="btn-group" v-if="item.from == account">
+                                <button type="button" class="btn btn-warning" title="Cancel Trade"
+                                 @click="cancelXfr()">
+                                 <i class="fa-solid fa-xmark fa-fw"></i> Cancel</button>
+                                </div>
+                           </div>
+
+                           </div>
+                           </div> -->
+
                       <!-- NFT Transfer -->
                       <div class="accordion-item" v-if="itemmodal.item.owner == account">
                          <h2 class="accordion-header">
