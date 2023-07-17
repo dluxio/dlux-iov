@@ -282,7 +282,7 @@ export default {
                             <button class="btn btn-sm btn-dark px-2 text-uppercase" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 {{orderby}}<i class="fa-solid fa-arrow-down-wide-short fa-fw ms-1"></i>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-dark bg-dark">
+                            <ul class="dropdown-menu dropdown-menu-dark bg-black">
                                  <li><a class="dropdown-item" role="button" @click="orderBy('Reward')">Reward</a></li>
                                  <li><a class="dropdown-item" role="button" @click="orderBy('RateUp')">Ratings<i class="fa-solid fa-arrow-down-wide-short"></i></a></li>
                                  <li><a class="dropdown-item" role="button" @click="orderBy('RateDown')">Ratings<i class="fa-solid fa-arrow-down-short-wide"></i></a></li>

@@ -18,25 +18,25 @@
     <script src="https://cdn.jsdelivr.net/npm/marked-linkify-it/lib/index.umd.js"></script>
     <script>
         marked.use(markedLinkifyIt({
-	        '@': {
-		        validate: function (text, pos, self) {
+            '@': {
+                validate: function (text, pos, self) {
                     var tail = text.slice(pos);
 
                     if (!self.re.hive) {
-                    self.re.hive =  new RegExp(
-                        '^([a-z0-9\.\-]){1,16}(?!_)(?=$|' + self.re.src_ZPCc + ')'
-                    );
+                        self.re.hive = new RegExp(
+                            '^([a-z0-9\.\-]){1,16}(?!_)(?=$|' + self.re.src_ZPCc + ')'
+                        );
                     }
                     if (self.re.hive.test(tail)) {
-                    if (pos >= 2 && tail[pos - 2] === '@') {
-                        return false;
-                    }
-                    return tail.match(self.re.hive)[0].length;
+                        if (pos >= 2 && tail[pos - 2] === '@') {
+                            return false;
+                        }
+                        return tail.match(self.re.hive)[0].length;
                     }
                     return 0;
                 },
                 normalize: function (match) {
-                    if(match.url.endsWith('.')){
+                    if (match.url.endsWith('.')) {
                         match.url = match.url.substring(0, match.url.length - 1);
                     }
                     match.url = '/@' + match.url.replace(/^@/, '');
@@ -104,7 +104,7 @@
                 <div class="row my-3">
                     <div class="container-fluid d-flex flex-wrap justify-content-center">
                         <div class="mx-1 d-none">
-                            <a class="btn btn-outline-secondary dropdown-toggle " data-bs-toggle="dropdown"
+                            <a class="btn btn-outline-light dropdown-toggle " data-bs-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false">{{postSelect.entry
                                 == 'new' ? 'NEW' : postSelect.entry == 'trending' ? 'TRENDING' : 'PROMOTED'}}
                                 <span class="sr-only">Toggle Dropdown</span>
@@ -118,12 +118,12 @@
                                     @click="postSelect.searchTerm = '';postSelect.entry = 'promoted';getPosts()">PROMOTED</a>
                             </div>
                         </div>
-                        <div class="mx-1">
-                            <a class="btn btn-outline-secondary dropdown-toggle " data-bs-toggle="dropdown"
+                        <div class="me-2">
+                            <a class="btn btn-outline-light dropdown-toggle " data-bs-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false">TYPE
                                 <span class="sr-only">Toggle Dropdown</span>
                             </a>
-                            <div class="dropdown-menu dropdown-menu-dark bg-blur-darkg">
+                            <div class="dropdown-menu dropdown-menu-dark bg-black">
                                 <a class="dropdown-item" v-for="(value, key, index) in postSelect.types">
                                     <div class="input-group bg-dark rounded d-flex">
                                         <div class="input-group-text d-flex flex-fill"><i
@@ -139,53 +139,35 @@
                             </div>
                         </div>
                         <div class="row">
-                        <div class="input-group flex-nowrap">
-                            <span class="input-group-text"><i class="fa-solid fa-magnifying-glass fa-fw"></i></span>
-                            <input type="search" class="form-control text-info"
-                                placeholder="Search" v-model="postSelect.searchTerm"
-                                @keyup.enter="postSelect.entry = 'search';getPosts()">
-                        </div></div>
+                            <div class="position-relative">
+                                <span class="position-absolute ps-2 top-50 translate-middle-y">
+                                    <i class="fa-solid fa-magnifying-glass fa-fw"></i>
+                                </span>
+                                <input type="search" class="ps-4 form-control text-info border-light"
+                                    placeholder="Search" v-model="postSelect.searchTerm"
+                                    @keyup.enter="postSelect.entry = 'search';getPosts()"
+                                    @search="postSelect.entry = 'search';getPosts()">
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <!--main view-->
                 <div class="row">
                     <div class="col-sm-6 col-lg-4 mb-3" v-for="post in displayPosts" :key="post.url">
-                        <card-vue 
-                            :post="post" 
-                            :account="account"
-                            :has_ipfs="spkapi.storage.length ? true : false" 
-                            :post_select="postSelect" 
-                            :voteval="voteVal" 
-                            :head_block="spkapi.head_block"
-                            :broca_refill="sstats.broca_refill"
-                            :broca="spkapi.broca"
-                            :spk_power="spkapi.spk_power"
-                            :contracts="contracts"
-                            :extendcost="extendcost"
-                            @tosign="toSign=$event"
-                            @modalselect="modalSelect($event)" 
-                            @vote="vote($event)"></card-vue>
+                        <card-vue :post="post" :account="account" :has_ipfs="spkapi.storage.length ? true : false"
+                            :post_select="postSelect" :voteval="voteVal" :head_block="spkapi.head_block"
+                            :broca_refill="sstats.broca_refill" :broca="spkapi.broca" :spk_power="spkapi.spk_power"
+                            :contracts="contracts" :extendcost="extendcost" @tosign="toSign=$event"
+                            @modalselect="modalSelect($event)" @vote="vote($event)"></card-vue>
                     </div>
                 </div>
             </div>
             <!--detail view-->
-            <detail-vue
-                :post="displayPost.item" 
-                :account="account"
-                :modal="true"
-                :post_select="postSelect"
-                :has_ipfs="spkapi.storage?.length ? true : false" 
-                :voteval="voteVal" 
-                :head_block="sstats.head_block"
-                :broca_refill="sstats.broca_refill"
-                :broca="spkapi.broca"
-                :spk_power="spkapi.spk_power"
-                :contracts="contracts"
-                :extendcost="extendcost"
-                @tosign="toSign=$event"
-                @reply="reply($event)"
-                @modalselect="modalSelect($event)" 
-                @vote="vote($event)"></detail-vue>
+            <detail-vue :post="displayPost.item" :account="account" :modal="true" :post_select="postSelect"
+                :has_ipfs="spkapi.storage?.length ? true : false" :voteval="voteVal" :head_block="sstats.head_block"
+                :broca_refill="sstats.broca_refill" :broca="spkapi.broca" :spk_power="spkapi.spk_power"
+                :contracts="contracts" :extendcost="extendcost" @tosign="toSign=$event" @reply="reply($event)"
+                @modalselect="modalSelect($event)" @vote="vote($event)"></detail-vue>
         </main>
         <!-- Footer -->
         <div>

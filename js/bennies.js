@@ -23,13 +23,15 @@ export default {
                 </tr>
                 <tr v-if="bennies.length < 8 && total < 10000" style="border-bottom-style: hidden !important;">
                     <td class="ps-0 w-50">
-                        <div class="input-group">
-                            <span class="input-group-text p-1">@</span>
-                            <input type="text" placeholder="username" class="form-control p-1" v-model="addAccount">
-                            <button class="btn py-1 px-2 btn-outline-secondary dropdown-toggle" :disabled="!favorites.length" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-star me-1 fa-fw"></i></button>
-                            <ul class="dropdown-menu">
+                    <div class="position-relative">
+                    <span class="position-absolute start-0 top-50 translate-middle-y ps-2">
+                       <i class="fa-solid fa-at fa-fw"></i>
+                    </span>
+                            <input type="text" placeholder="username" class="ps-4 pe-5 text-info form-control" v-model="addAccount">
+                            <button class="position-absolute end-0 top-50 translate-middle-y btn btn-outline-secondary border-0 dropdown-toggle square rounded-end" :disabled="!favorites.length" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-star me-1 fa-fw"></i></button>
+                            <ul class="dropdown-menu bg-black dropdown-menu-dark">
                                 <li v-for="acc in favorites" class="d-flex align-items-center justify-content-between">
-                                    <a class="dropdown-item" role="button" @click="addAccount = acc">@{{acc}}</a>
+                                    <a class="dropdown-item rounded-end" role="button" @click="addAccount = acc">@{{acc}}</a>
                                     <a @click="removeFavorite(acc)" class="mx-1 btn btn-sm btn-secondary" role="button">
                                         <i class="fa-solid fa-xmark fa-fw"></i>
                                     </a>
@@ -38,9 +40,12 @@ export default {
                         </div>
                     </td>
                     <td class="text-center">
-                        <div class="input-group">
-                            <input type="number" step="0.01" min="0.01" :max="100 - (total/100)" placeholder="amount" class="form-control p-1 text-center" v-model="addWeight">
-                            <span class="input-group-text p-1">%</span>
+                    <div class="position-relative">
+                            <input type="number" step="0.01" min="0.01" :max="100 - (total/100)" placeholder="amount" class="pe-4 form-control text-center" v-model="addWeight">
+                            <span class="position-absolute end-0 top-50 translate-middle-y pe-2">
+                            <i class="fa-solid fa-percent fa-fw"></i>
+                    </span>
+
                         </div>
                     </td>
                     <td class="pe-0 text-end"><button class="btn btn-success" :disabled="!addAccount || (total + addWeight * 100) > 10000" @click="appendBen()"><i class="fa-solid fa-square-plus fa-fw"></i></button></td>
