@@ -81,7 +81,8 @@ export default {
                 <!-- NFT detail col 2 -->
                 <div class="col-lg-6 px-0 px-sm-2">
                    <div class="accordion" id="nftAccordion">
-                      <!-- NFT Description -->
+                      
+                   <!-- NFT Description -->
                       <div class="accordion-item">
                          <h2 class="accordion-header">
                             <button onclick="this.blur();" class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -93,7 +94,6 @@ export default {
                          <div id="collapseDescription" class="accordion-collapse collapse"
                             data-bs-parent="#nftAccordion">
                             <div class="accordion-body">
-
                             <h3>{{longname}}</h3>
                                <p>{{itemmodal.item.set.Description}}</p>
                                <div class="d-flex align-items-center" v-if="itemmodal.item.setname"> 
@@ -119,12 +119,10 @@ export default {
                                     <p class="m-0" title="Royalties"><i class="fa-solid fa-crown fa-fw"></i> {{chains[itemmodal.item.token]?.sets[itemmodal.item.setname]?.royalty/100}}</p>
                                  </div>
                                </div>
- 
-                              
-                           
                             </div>
                          </div>
                       </div>
+
                       <!-- NFT Attributes -->
                       <div class="accordion-item">
                          <h2 class="accordion-header">
@@ -151,66 +149,6 @@ export default {
                             </div>
                          </div>
                       </div>
-
-                      <!-- NFT Trade -->
-                      <div class="accordion-item" v-if="trade">
-                      <h2 class="accordion-header">
-                            <button onclick="this.blur();" class="accordion-button" type="button" data-bs-toggle="collapse"
-                               data-bs-target="#collapseTrade" aria-expanded="false" aria-controls="collapseTrade">
-                               <i class="fas fa-exchange-alt me-3"></i>TRADE
-                            </button>
-                         </h2>
-                         <div id="collapseTrade" class="accordion-collapse collapse show"
-                         data-bs-parent="#nftAccordion">
-                         <div class="accordion-body">
-                           </div>
-                           
-                           <div class="p-2 text-white text-center rounded"">
-                           <section>
-                             <div class="d-flex align-items-center">
-                               <div class="text-end mt-auto mb-auto me-1" style="flex: 1">
-                                 <h5 class="small m-0">
-                                   <span v-if="itemmodal.item.to != account">TO:</span>
-                                   <span v-if="itemmodal.item.to == account">FROM:</span>
-                                 </h5>
-                               </div>
-                               <div class="text-start mt-auto mb-auto" style="flex: 2">
-                                 <h5 class="lead m-0">
-                                   <a class="no-decoration text-info" v-if="itemmodal.item.to != account" :href="'/@' + itemmodal.item.to">{{itemmodal.item.to}}</a>
-                                   <a class="no-decoration text-info" v-if="itemmodal.item.to == account" :href="'/@' + itemmodal.item.from">{{itemmodal.item.from}}</a>
-                                 </h5>
-                               </div>
-                             </div>
-                             <div class="d-flex align-items-center my-2">
-                               <div class="text-end mt-auto mb-auto me-1" style="flex: 1">
-                                 <h5 class="small m-0">PRICE:</h5>
-                               </div>
-                               <div class="text-start mt-auto mb-auto" style="flex: 2">
-                                 <h5 class="lead m-0">{{itemmodal.item.priceString}}</h5>
-                               </div>
-                             </div>
-                           </section>
-                             <!-- ACCEPT / REJECT  -->
-                             <div class="btn-group" role="group" v-if="itemmodal.item.to == account">
-                              
-                               
-                                 <button type="button" class="btn btn-danger" title="Decline Trade"
-                                 @click="cancelXfr()"><i class="fa-solid fa-xmark fa-fw"></i>Decline</button>
-                                 <button type="button" class="btn ps-05 pe-05 border-0"
-                                 disabled></button>
-                                 <button type="button" class="btn btn-success" title="Accept Trade"
-                               @click="acceptXfr()"><i class="fa-solid fa-check fa-fw"></i> Accept</button>
-                              </div>
-                                <!-- CANCEL  -->
-                                <div class="btn-group" v-if="itemmodal.item.from == account">
-                                <button type="button" class="btn btn-warning" title="Cancel Trade"
-                                 @click="cancelXfr()">
-                                 <i class="fa-solid fa-xmark fa-fw"></i> Cancel</button>
-                                </div>
-                           </div>
-
-                           </div>
-                           </div>
 
                       <!-- NFT Transfer -->
                       <div class="accordion-item" v-if="itemmodal.item.owner == account">
@@ -574,6 +512,112 @@ export default {
                             </div>
                          </div>
                       </div>
+
+                      <!-- NFT Trade -->
+                      <div class="accordion-item" v-if="itemmodal.item.trade">
+                      <h2 class="accordion-header">
+                            <button onclick="this.blur();" class="accordion-button" type="button" data-bs-toggle="collapse"
+                               data-bs-target="#collapseTrade" aria-expanded="false" aria-controls="collapseTrade">
+                               <i class="fas fa-exchange-alt me-3"></i>TRADE
+                            </button>
+                         </h2>
+                         <div id="collapseTrade" class="accordion-collapse collapse show"
+                         data-bs-parent="#nftAccordion">
+                         <div class="accordion-body">
+                           </div>
+                           
+                           <div class="p-2 text-white text-center rounded"">
+                           <section>
+                             <div class="d-flex align-items-center">
+                               <div class="text-end mt-auto mb-auto me-1" style="flex: 1">
+                                 <h5 class="small m-0">
+                                   <span v-if="itemmodal.item.to != account">TO:</span>
+                                   <span v-if="itemmodal.item.to == account">FROM:</span>
+                                 </h5>
+                               </div>
+                               <div class="text-start mt-auto mb-auto" style="flex: 2">
+                                 <h5 class="lead m-0">
+                                   <a class="no-decoration text-info" v-if="itemmodal.item.to != account" :href="'/@' + itemmodal.item.to">{{itemmodal.item.to}}</a>
+                                   <a class="no-decoration text-info" v-if="itemmodal.item.to == account" :href="'/@' + itemmodal.item.from">{{itemmodal.item.from}}</a>
+                                 </h5>
+                               </div>
+                             </div>
+                             <div class="d-flex align-items-center my-2">
+                               <div class="text-end mt-auto mb-auto me-1" style="flex: 1">
+                                 <h5 class="small m-0">PRICE:</h5>
+                               </div>
+                               <div class="text-start mt-auto mb-auto" style="flex: 2">
+                                 <h5 class="lead m-0">{{itemmodal.item.priceString}}</h5>
+                               </div>
+                             </div>
+                           </section>
+                             <!-- ACCEPT / REJECT  -->
+                             <div class="btn-group" role="group" v-if="itemmodal.item.to == account">
+                              
+                               
+                                 <button type="button" class="btn btn-danger" title="Decline Trade"
+                                 @click="cancelXfr()"><i class="fa-solid fa-xmark fa-fw"></i>Decline</button>
+                                 <button type="button" class="btn ps-05 pe-05 border-0"
+                                 disabled></button>
+                                 <button type="button" class="btn btn-success" title="Accept Trade"
+                               @click="acceptXfr()"><i class="fa-solid fa-check fa-fw"></i> Accept</button>
+                              </div>
+                                <!-- CANCEL  -->
+                                <div class="btn-group" v-if="itemmodal.item.from == account">
+                                <button type="button" class="btn btn-warning" title="Cancel Trade"
+                                 @click="cancelXfr()">
+                                 <i class="fa-solid fa-xmark fa-fw"></i> Cancel</button>
+                                </div>
+                           </div>
+
+                           </div>
+                           </div>
+
+                           <!-- NFT Buy -->
+                           <div class="accordion-item" v-if="itemmodal.item.sale">
+                              <h2 class="accordion-header">
+                                 <button onclick="this.blur();" @click="saleData('itemmodal')" class="accordion-button" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#collapseBuy" aria-expanded="true"
+                                    aria-controls="collapseBuy">
+                                    <i class="fas fa-money-bill-wave me-3"></i><span>BUY
+                                       NOW</span><span class="small ms-2">({{naiString(itemmodal.item.price)}})</span>
+                                 </button>
+                              </h2>
+                              <div id="collapseBuy" class="accordion-collapse collapse show" data-bs-parent="#nftAccordion">
+                                 <div class="accordion-body">
+                                    <div class="d-flex align-self-end">
+                                       <div class="col-12">
+                                          <div class="d-flex align-items-center justify-content-between">
+                                             <div class="d-flex me-1">
+                                                <h4>Price:
+                                                   {{naiString(itemmodal.item.price)}}
+                                                </h4>
+                                             </div>
+                                             <div class="d-flex no-wrap ms-1">
+                                                <h4>
+                                                   Seller: @{{itemmodal.item.by}}
+                                                </h4>
+                                             </div>
+                                          </div>
+                                          <div class="pt-2">
+                                             <p class="text-uppercase text-muted">
+                                             </p>
+                                             <div class="d-flex justify-content-around">
+                                                <!-- long name, script, set, uid only other buy data -->
+                                             </div>
+                                             <div class="text-center">
+                                                <button v-if="itemmodal.item.by != account" type="button"
+                                                   class="btn btn-primary" @click="buyNFT()" href="#/">Buy </button>
+                                                <button v-else type="button" class="btn btn-warning" @click="cancelNFT()"
+                                                   href="#/">Cancel </button>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+
                       <!-- NFT Bid -->
                       <div class="accordion-item" v-if="itemmodal.item.auction">
                          <h2 class="accordion-header">
@@ -666,50 +710,8 @@ export default {
                             </div>
                          </div>
                       </div>
-                      <!-- NFT Buy -->
-                      <div class="accordion-item" v-if="itemmodal.item.sale">
-                         <h2 class="accordion-header">
-                            <button onclick="this.blur();" @click="saleData('itemmodal')" class="accordion-button" type="button"
-                               data-bs-toggle="collapse" data-bs-target="#collapseBuy" aria-expanded="true"
-                               aria-controls="collapseBuy">
-                               <i class="fas fa-money-bill-wave me-3"></i><span>BUY
-                                  NOW</span><span class="small ms-2">({{naiString(itemmodal.item.price)}})</span>
-                            </button>
-                         </h2>
-                         <div id="collapseBuy" class="accordion-collapse collapse show" data-bs-parent="#nftAccordion">
-                            <div class="accordion-body">
-                               <div class="d-flex align-self-end">
-                                  <div class="col-12">
-                                     <div class="d-flex align-items-center justify-content-between">
-                                        <div class="d-flex me-1">
-                                           <h4>Price:
-                                              {{naiString(itemmodal.item.price)}}
-                                           </h4>
-                                        </div>
-                                        <div class="d-flex no-wrap ms-1">
-                                           <h4>
-                                              Seller: @{{itemmodal.item.by}}
-                                           </h4>
-                                        </div>
-                                     </div>
-                                     <div class="pt-2">
-                                        <p class="text-uppercase text-muted">
-                                        </p>
-                                        <div class="d-flex justify-content-around">
-                                           <!-- long name, script, set, uid only other buy data -->
-                                        </div>
-                                        <div class="text-center">
-                                           <button v-if="itemmodal.item.by != account" type="button"
-                                              class="btn btn-primary" @click="buyNFT()" href="#/">Buy </button>
-                                           <button v-else type="button" class="btn btn-warning" @click="cancelNFT()"
-                                              href="#/">Cancel </button>
-                                        </div>
-                                     </div>
-                                  </div>
-                               </div>
-                            </div>
-                         </div>
-                      </div>
+
+                     
                    </div>
                 </div>
              </div>
