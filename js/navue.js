@@ -1042,7 +1042,7 @@ export default {
       </div>
     </div>
 
-    <div class="row">
+    <div class="">
       <label class="form-label">Add user</label>
       <div class="position-relative has-validation">
       <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
@@ -1058,7 +1058,7 @@ export default {
 
     
       
-    <div class="row">
+    <div class="mb-3">
       <div>
         <label class="form-label">Current user</label>
         <div v-if="!user" class="bg-darkest rounded px-4 py-2 mx-2">
@@ -1074,17 +1074,18 @@ export default {
           </div>
         </div>
       </div>
-    </div>
-
-    <div class="row my-2" v-if="HAS && haspich > 100">
+      <div class="mt-2" v-if="HAS && haspich > 100">
       <div>
         <div class="bg-white rounded text-center">
           <a class="no-decoration" :href="HAS_.uri"><img :src="haspic" :height="haspich + 'px'" class="img-responsive p-2 mx-3"><p v-show="haspich > 100" class="text-dark">Tap or scan with PKSA App for {{user}}</p></a>
         </div>
       </div>
     </div>
+    </div>
 
-    <div class="row mt-1" v-if="recentUsers.length">
+    
+
+    <div class="mt-1" v-if="recentUsers.length">
         <label class="form-label">Recent users</label>
         <div class="position-relative has-validation">
       <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
