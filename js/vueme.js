@@ -3109,6 +3109,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       if (this.baseScript[script]) return this.baseScript[script].set[att];
     },
     getTokenUser(user = this.account, fu) {
+      this.getPFP();
       fetch(this.lapi + "/@" + user)
         .then((response) => response.json())
         .then((data) => {
