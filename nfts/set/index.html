@@ -443,8 +443,10 @@
                           </div>
 
                           <div class="text-center">
+                            <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
+          @click="modal('transfer')">
                             <img class="rounded max-160 my-2"
-                              :src="makeLink('https://ipfs.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.wrapped : '')"></img>
+                              :src="makeLink('https://ipfs.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.wrapped : '')"></img></a>
                             <div >
                               <div class="text-center">
                                 <h3 class="my-1"
@@ -823,6 +825,12 @@
               :chains="chains" @detail="modalIndex('itemModal', $event);itemModal.hidden = false"
               @tosign="toSign=$event" />
           </div>
+
+          <!-- mint transfer modal -->
+          <div>
+            <fttransfer :account="account" :item="focusItem" :mint="transferMint" @modal="modal($event)" :icon="getIcon(focusItem.script)" :setdetail="chains[focusItem.token].sets[focusItem.set]"
+                :api="chains[focusItem.token].api" :wrapped="getAttr(focusItem.script, 'wrapped')" :colors="getSetDetailsColors(focusItem.script)" @tosign="toSign = $event" :info="getSetDetailsInfo(focusItem.script)"/>
+        </div>
 
         </div>
     </main>
