@@ -43,16 +43,14 @@ export default {
   <!-- BODY -->
   <div class="card-body mx-1 d-flex flex-column p-0 rounded" style="background: rgba(0,0,0,.75)">
 
-    <div class="">
       <!-- NFT BODY -->
       <div class="flex-grow-1" v-if="!mint">
         <a href="#itemModal" class="a-1" data-bs-toggle="modal" @click="modalIndex('details')">
           <div class="card-img-top nft-img rounded" :alt="'image-' +  item.setname + '-' + item.uid" v-html="item.HTML">
           </div>
         </a>
-
-
       </div>
+
       <!-- MINT BODY -->
       <div class="p-2 flex-grow-1 d-flex" v-if="mint">
         <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
@@ -60,9 +58,9 @@ export default {
           <img v-if="wrapped" class="w-100 border border-dark border-2 rounded mt-auto mb-auto"
             :src="'https://ipfs.io/ipfs/' + wrapped"></a>
       </div>
+
       <div class="d-flex d-none flex-column flex-shrink-1">
         <div class="text-center">
-
           <h3 class="my-1" :style="{'background-image': colors}" style="-webkit-background-clip: text;
                    -webkit-text-fill-color: transparent; 
                    -moz-background-clip: text;
@@ -71,54 +69,8 @@ export default {
             <span v-if="mint">sealed NFT</span>
           </h3>
         </div>
-        <!-- both bodies -->
-        <div class="ms-auto lead d-none"><small><span class="badge bg-dark text-muted"><i
-                class="fa-solid fa-link me-2"></i>{{item.token}}</span></small>
-        </div>
       </div>
-    </div>
-  </div>
-  <!-- TRADE FOOT -->
-  <div class="card-footer d-none border-0 px-1" v-if="trade">
-    <div class="p-2 text-white text-center rounded" style="background-color: rgba(0,0,0,0.75)">
-      <section>
-        <div class="d-flex align-items-center">
-          <div class="text-end mt-auto mb-auto me-1" style="flex: 1">
-            <h5 class="small m-0">
-              <span v-if="item.to != account">TO:</span>
-              <span v-if="item.to == account">FROM:</span>
-            </h5>
-          </div>
-          <div class="text-start mt-auto mb-auto" style="flex: 2">
-            <h5 class="lead m-0">
-              <a class="no-decoration text-info" v-if="item.to != account" :href="'/@' + item.to">{{item.to}}</a>
-              <a class="no-decoration text-info" v-if="item.to == account" :href="'/@' + item.from">{{item.from}}</a>
-            </h5>
-          </div>
-        </div>
-        <div class="d-flex align-items-center my-2">
-          <div class="text-end mt-auto mb-auto me-1" style="flex: 1">
-            <h5 class="small m-0">PRICE:</h5>
-          </div>
-          <div class="text-start mt-auto mb-auto" style="flex: 2">
-            <h5 class="lead m-0">{{item.priceString}}</h5>
-          </div>
-        </div>
-      </section>
-      <!-- ACCEPT / REJECT -->
-      <div class="btn-group" role="group" v-if="item.to == account">
-        <button type="button" class="btn btn-success" title="Accept Trade" @click="acceptXfr()"><i
-            class="fa-solid fa-check fa-fw"></i></button>
-        <button type="button" class="btn ps-05 pe-05 border-0" disabled></button>
-        <button type="button" class="btn btn-danger" title="Decline Trade" @click="cancelXfr()"><i
-            class="fa-solid fa-xmark fa-fw"></i></button>
-      </div>
-      <!-- CANCEL -->
-      <div class="btn-group" v-if="item.from == account">
-        <button type="button" class="btn btn-warning" title="Cancel Trade" @click="cancelXfr()">
-          <i class="fa-solid fa-xmark fa-fw"></i></button>
-      </div>
-    </div>
+
   </div>
 
 
@@ -166,8 +118,8 @@ export default {
     <!-- SALE -->
     <div class="text-white text-center" v-if="sale">
       <div class="bg-dark rounded">
-        <div class="mt-1 text-center rounded-top bg-success-50">
-          <h5 id="timer-set-uid" class="mb-0 lead">Buy Now</h5>
+        <div class="mt-1 text-center rounded-top" v-bind:class="{'bg-warning-50': item.by == account, 'bg-success-50': item.by != account}">
+          <h5 id="timer-set-uid" class="mb-0 lead"><span v-if="item.by != account">Buy Now</span><span v-if="item.by == account">Your Listing</span></h5>
         </div>
         <div class="d-flex rounded-bottom p-2">
           <div class="fs-6">
@@ -184,8 +136,8 @@ export default {
     <!-- AUCTION -->
     <div class="text-white text-center" v-if="auction">
       <div class="bg-dark rounded">
-        <div class="mt-1 text-center rounded-top bg-danger-50" v-bind:class="{'bg-danger-50': animateTime == '1 day', 'bg-info-50': animateTime != '1 day' }">
-          <h5 id="timer-set-uid" class="mb-0 lead">Ends in {{animateTime}}</h5>
+        <div class="mt-1 text-center rounded-top bg-danger-50" v-bind:class="{'bg-warning-50': item.by == account, 'bg-danger-50': animateTime == '1 day', 'bg-info-50': animateTime != '1 day' }">
+          <h5 id="timer-set-uid" class="mb-0 lead"><span v-if="item.by != account">Ends in {{animateTime}}</span><span v-if="item.by == account">Your Auction</span></h5>
         </div>
         <div class="d-flex rounded-bottom p-2">
           <div class="fs3">
@@ -215,31 +167,6 @@ export default {
       </div>
     </div>
 
-  </div>
-  <!-- INVENTORY  FOOT -->
-  <div class="card-footer d-none border-0" v-if="inventory">
-    <div class="d-flex text-center rounded-pill py-1" style="background-color: rgba(0,0,0,.5)">
-      <div class="ms-auto me-auto">
-        <!-- MINT ACTIONS -->
-        <div class="btn-group" role="group" v-if="mint">
-          <button type="button" class="btn btn-dark" title="Open Mint" @click="openNFT()"><i
-              class="fas fa-box-open fa-fw"></i></button>
-          <button type="button" class="btn ps-05 pe-05 border-0" disabled></button>
-          <button type="button" class="btn btn-dark" title="Transfer Mint" data-bs-toggle="modal"
-            data-bs-target="#transferModal" @click="modal('transfer')">
-            <i class="fas fa-exchange-alt fa-fw"></i></button>
-        </div>
-        <!-- NFT ACTIONS -->
-        <div class="btn-group" role="group" v-if="!mint">
-          <button type="button" class="btn btn-dark" title="Set pfp"><i
-              class="fa-regular fa-circle-user fa-fw"></i></button>
-          <button type="button" class="btn ps-05 pe-05 border-0" disabled></button>
-          <button type="button" class="btn btn-dark" data-bs-toggle="modal" @click="modalIndex('transfer')"
-            data-bs-target="#itemModal" title="NFT Actions">
-            <i class="fas fa-exchange-alt fa-fw"></i></button>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
 `,

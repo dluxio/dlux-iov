@@ -86,7 +86,7 @@
 
         }
 
-        #dlux-wallet-item {
+        #dluxWallet {
             background-image: linear-gradient(to right,
                     rgb(194, 255, 182),
                     rgb(255, 163, 182),
@@ -94,7 +94,7 @@
                     rgb(162, 209, 255));
         }
 
-        #duat-wallet-item {
+        #duatWallet {
             background-color: #ffc107;
         }
 
@@ -128,25 +128,25 @@
                 <div class="d-flex py-2 align-items-stretch  flex-wrap">
 
                     <div class="px-2 rounded-3 card d-flex w-100">
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center justify-content-around">
 
                             <!-- MESSAGE -->
-                            <div class="p-5 ">
+                            <div class=" ">
                                 <h1 class="display-5 text-uppercase fw-lighter mb-0">Marketplace</h1>
                                 <p class="fs-4 fw-light">Browse, bid, buy</p>
                                 <div class="d-flex">
-                                    <a class="btn btn-primary btn-lg me-2" type="button" href="sets">Explore</a>
-                                    <a class="btn btn-secondary btn-lg disabled" disabled type="button" href="create">Create</a>
+                                    <a class="btn btn-primary btn-lg me-2" type="button" href="sets">Explore Sets</a>
+                                    <a class="btn btn-secondary btn-lg disabled d-none" disabled type="button" href="create">Create</a>
                                 </div>
                             </div>
 
 
                             <!-- MINTS -->
-                            <div id="carouselExampleCaptions" class="carousel slide ms-auto me-auto">
-                                <div class="carousel-inner text-center py-2">
+                            <div id="carouselExampleCaptions" class="carousel">
+                                <div class="carousel-inner text-center">
                                     <h3 class="d-none">MINTS</h3>
                                     <div class="carousel-item active">
-                                        <div class="d-flex mx-5 my-4 align-items-center rounded">
+                                        <div class="d-flex mx-5 mt-2 mb-3 align-items-center rounded">
                                             <img src="https://ipfs.io/ipfs/QmRYrwWuUpjdkn3VW2CY9mD2NcqoGqiJzjN2DmWi49dRZX"
                                                 class="border border-dark border-2 rounded mint-img shadow">
                                             <div class="w-100 d-flex">
@@ -162,7 +162,7 @@
                                         </div>
                                     </div>
                                     <div class="carousel-item">
-                                        <div class="d-flex mx-5 my-4 align-items-center rounded">
+                                        <div class="d-flex mx-5 mt-2 mb-3 align-items-center rounded">
                                             <img src="https://ipfs.io/ipfs/QmV4WZ7sKzvaPG85C2rYNhDS3nVhk3Bv5U9o5Gr9KWx7ir"
                                                 class="ms-auto me-auto border border-dark border-2 rounded d-block mint-img">
 
@@ -179,7 +179,7 @@
                                         </div>
                                     </div>
                                     <div class="carousel-item">
-                                        <div class="d-flex mx-5 my-4 align-items-center rounded">
+                                        <div class="d-flex mx-5 mt-2 mb-3 align-items-center rounded">
                                             <img src="https://ipfs.io/ipfs/QmXwAAQkyqzeqJeJcuqrasApruUewALuhTPhJTPdKckM1M"
                                                 class="ms-auto me-auto border border-dark border-2 rounded d-block mint-img">
 
@@ -220,9 +220,9 @@
 
                             <!-- WALLETS -->
                             <div class="">
-                                <div class="accordion wallet-accordion text-black" id="accordionExample">
+                                <div class="accordion wallet-accordion text-black" id="accordionWallet">
                                     <!-- HIVE -->
-                                    <div class="accordion-item wallet-accordion-item bg-hive shadow">
+                                    <div class="accordion-item wallet-accordion-item bg-hive shadow" id="hiveWallet">
                                         <h2 class="accordion-header">
                                             <button onclick="this.blur();" class="accordion-button text-black collapsed"
                                                 type="button" data-bs-toggle="collapse" data-bs-target="#collapsehive"
@@ -232,7 +232,7 @@
                                             </button>
                                         </h2>
                                         <div id="collapsehive" class="accordion-collapse collapse"
-                                            data-bs-parent="#accordionExample">
+                                            data-bs-parent="#accordionWallet">
                                             <div class="accordion-body">
                                                 <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
                                                     {{barhive}}</h3>
@@ -246,7 +246,7 @@
                                         </div>
                                     </div>
                                     <!-- HBD -->
-                                    <div class="accordion-item wallet-accordion-item bg-hbd shadow">
+                                    <div class="accordion-item wallet-accordion-item bg-hbd shadow" id="hbdWallet">
                                         <h2 class="accordion-header">
                                             <button onclick="this.blur();" class="accordion-button text-black collapsed"
                                                 type="button" data-bs-toggle="collapse" data-bs-target="#collapsehbd"
@@ -256,7 +256,7 @@
                                             </button>
                                         </h2>
                                         <div id="collapsehbd" class="accordion-collapse collapse"
-                                            data-bs-parent="#accordionExample">
+                                            data-bs-parent="#accordionWallet">
                                             <div class="accordion-body">
                                                 <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
                                                     {{barhbd}}</h3>
@@ -270,22 +270,23 @@
                                         </div>
                                     </div>
                                     <!-- HONEYCOMB -->
-                                    <div class="accordion-item wallet-accordion-item shadow" :id="name + '-wallet-item'"
+                                    <div class="accordion-item wallet-accordion-item shadow" :id="name + 'Wallet'"
                                         v-for="name in chainSorted">
                                         <h2 class="accordion-header">
-                                            <button onclick="this.blur();" class="accordion-button text-black"
-                                                type="button" :class="{'collapsed': name != 'dlux'}"
+                                            <!-- :class="{'collapsed': name != 'dlux'}" -->
+                                            <button onclick="this.blur();" class="accordion-button collapsed text-black"
+                                                type="button"
                                                 data-bs-toggle="collapse" :data-bs-target="'#collapse' + name"
                                                 aria-expanded="true" :aria-controls="'#collapse' + name">
-                                                {{toUpperCase(name)}}<span class="ms-auto small" :id="name + 'Bal'"
-                                                    :class="{'d-none': name == 'dlux'}">{{formatNumber(chains[name].account.balance/1000,
+                                                {{toUpperCase(name)}}<span class="ms-auto small" :id="name + 'Bal'"><!-- :class="{'d-none': name == 'dlux'}" -->
+                                                    {{formatNumber(chains[name].account.balance/1000,
                                                     3,
                                                     '.', ',')}}</span>
                                             </button>
                                         </h2>
                                         <div :id="'collapse' + name" :ref="'show' + name"
-                                            class="accordion-collapse collapse" :class="{'show': name == 'dlux'}"
-                                            data-bs-parent="#accordionExample">
+                                            class="accordion-collapse collapse" 
+                                            data-bs-parent="#accordionWallet"><!-- :class="{'show': name == 'dlux'}" -->
                                             <div class="accordion-body">
                                                 <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
                                                     {{formatNumber(chains[name].account.balance/1000, 3, '.', ',')}}
@@ -669,10 +670,16 @@
             hiveCollapse.addEventListener('show.bs.collapse', event => {
                 var hiveCollapse = document.getElementById('hiveBal');
                 hiveBal.classList.add('d-none');
+                hbdWallet.classList.add('d-none');
+                duatWallet.classList.add('d-none');
+                dluxWallet.classList.add('d-none');
             })
             hiveCollapse.addEventListener('hide.bs.collapse', event => {
                 var hiveCollapse = document.getElementById('hiveBal');
                 hiveBal.classList.remove('d-none');
+                hbdWallet.classList.remove('d-none');
+                duatWallet.classList.remove('d-none');
+                dluxWallet.classList.remove('d-none');
             })
             // HBD Balance
             var hbdCollapse = document.getElementById('collapsehbd');
