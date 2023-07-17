@@ -129,14 +129,14 @@ export default {
                       <div class="accordion-item">
                          <h2 class="accordion-header">
                             <button onclick="this.blur();" class="accordion-button"
-                               v-bind:class="{'collapsed' : itemmodal.item.sale || itemmodal.item.auction || itemmodal.item.owner == account }"
+                               v-bind:class="{'collapsed' : itemmodal.item.trade || itemmodal.item.sale || itemmodal.item.auction || itemmodal.item.owner == account }"
                                type="button" data-bs-toggle="collapse" data-bs-target="#collapseAttributes"
                                aria-expanded="false" aria-controls="collapseAttributes">
                                <i class="fas fa-star me-3"></i>ATTRIBUTES
                             </button>
                          </h2>
                          <div id="collapseAttributes" class="accordion-collapse collapse"
-                            v-bind:class="{'show' : !itemmodal.item.sale && !itemmodal.item.auction && itemmodal.item.owner != account }"
+                            v-bind:class="{'show' : !itemmodal.item.trade && !itemmodal.item.sale && !itemmodal.item.auction && itemmodal.item.owner != account }"
                             data-bs-parent="#nftAccordion">
                             <div class="accordion-body">
                                <div class="d-flex flex-wrap">
@@ -160,8 +160,8 @@ export default {
                                <i class="fas fa-exchange-alt me-3"></i>TRADE
                             </button>
                          </h2>
-                         <div id="collapseTransfer" class="accordion-collapse collapse show"
-                         data-bs-parent="#ftAccordion">
+                         <div id="collapseTrade" class="accordion-collapse collapse show"
+                         data-bs-parent="#nftAccordion">
                          <div class="accordion-body">
                            </div>
                            
@@ -170,14 +170,14 @@ export default {
                              <div class="d-flex align-items-center">
                                <div class="text-end mt-auto mb-auto me-1" style="flex: 1">
                                  <h5 class="small m-0">
-                                   <span v-if="item.to != account">TO:</span>
-                                   <span v-if="item.to == account">FROM:</span>
+                                   <span v-if="itemmodal.item.to != account">TO:</span>
+                                   <span v-if="itemmodal.item.to == account">FROM:</span>
                                  </h5>
                                </div>
                                <div class="text-start mt-auto mb-auto" style="flex: 2">
                                  <h5 class="lead m-0">
-                                   <a class="no-decoration text-info" v-if="item.to != account" :href="'/@' + item.to">{{item.to}}</a>
-                                   <a class="no-decoration text-info" v-if="item.to == account" :href="'/@' + item.from">{{item.from}}</a>
+                                   <a class="no-decoration text-info" v-if="itemmodal.item.to != account" :href="'/@' + itemmodal.item.to">{{itemmodal.item.to}}</a>
+                                   <a class="no-decoration text-info" v-if="itemmodal.item.to == account" :href="'/@' + itemmodal.item.from">{{itemmodal.item.from}}</a>
                                  </h5>
                                </div>
                              </div>
@@ -186,12 +186,12 @@ export default {
                                  <h5 class="small m-0">PRICE:</h5>
                                </div>
                                <div class="text-start mt-auto mb-auto" style="flex: 2">
-                                 <h5 class="lead m-0">{{item.priceString}}</h5>
+                                 <h5 class="lead m-0">{{itemmodal.item.priceString}}</h5>
                                </div>
                              </div>
                            </section>
                              <!-- ACCEPT / REJECT  -->
-                             <div class="btn-group" role="group" v-if="item.to == account">
+                             <div class="btn-group" role="group" v-if="itemmodal.item.to == account">
                               
                                
                                  <button type="button" class="btn btn-danger" title="Decline Trade"
@@ -202,7 +202,7 @@ export default {
                                @click="acceptXfr()"><i class="fa-solid fa-check fa-fw"></i> Accept</button>
                               </div>
                                 <!-- CANCEL  -->
-                                <div class="btn-group" v-if="item.from == account">
+                                <div class="btn-group" v-if="itemmodal.item.from == account">
                                 <button type="button" class="btn btn-warning" title="Cancel Trade"
                                  @click="cancelXfr()">
                                  <i class="fa-solid fa-xmark fa-fw"></i> Cancel</button>
