@@ -158,7 +158,7 @@ export default {
         </div>
         <div class="d-flex rounded-bottom p-2">
           <div class="fs3">
-            <a class="no-decoration" :href="'/@' + item.owner">@{{item.owner}}</a>
+            <a class="no-decoration" :href="'/@' + item.owner"><i class="fa-solid fa-user-astronaut fa-fw me-1"></i>{{item.owner}}</a>
           </div>
           <div class="fs3 ms-auto">
 
