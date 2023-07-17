@@ -98,12 +98,12 @@ export default {
                                <p>{{itemmodal.item.set.Description}}</p>
                                <div class="d-flex align-items-center" v-if="itemmodal.item.setname"> 
                                  <div class="text-start small border border-secondary rounded text-white px-2 py-1 w-100">
-                                    <div class="d-flex align-items-center justify-content-start flex-wrap" v-if="!inventory">
+                                    <div class="d-flex align-items-center justify-content-start flex-wrap" v-if="!inventory && chains[itemmodal.item.token]">
                                        <span class="mb-0" title="Total Number of Owners"><i class="fa-solid fa-user-astronaut fa-fw"></i> {{chains[itemmodal.item.token].sets[itemmodal.item.setname].owners}}</span>
                                        <span class="mb-0 ms-2" title="Total Number of Items"><i class="fa-solid fa-star fa-fw"></i> {{chains[itemmodal.item.token].sets[itemmodal.item.setname].minted - chains[itemmodal.item.token].sets[itemmodal.item.setname].deleted}}</span>     
                                        <span class="mb-0 ms-2" title="Layer 2 Honeycomb Sidechain"><i class="fa-solid fa-link fa-fw"></i> {{itemmodal.item.token}}</span>
                                     </div>
-                                    <div class="d-flex align-items-center justify-content-start flex-wrapa">
+                                    <div class="d-flex align-items-center justify-content-start flex-wrapa" v-if="chains[itemmodal.item.token]">
                                        <span class="mb-0 me-2" title="Melt Value if Item is Burned"><i class="fa-solid fa-fire fa-fw"></i> {{chains[itemmodal.item.token]
                                           ?
                                           precision(chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.amount,
@@ -116,7 +116,7 @@ export default {
                                        <span class="mb-0 me-2" title="Last Market Dividends Paid Out to Owners"><i class="fa-solid fa-money-bill-transfer fa-fw"></i> {{naiString(chains[itemmodal.item.token].sets[itemmodal.item.setname].last_div)}} </span>
                                        <span class="mb-0 me-2" title="Total Market Dividends Paid Out to Owners"><i class="fa-solid fa-money-bill-trend-up fa-fw"></i> {{naiString(chains[itemmodal.item.token].sets[itemmodal.item.setname].total_div)}} </span>
                                     </div>
-                                    <p class="m-0" title="Royalties"><i class="fa-solid fa-crown fa-fw"></i> {{chains[itemmodal.item.token]?.sets[itemmodal.item.setname]?.royalty/100}}</p>
+                                    <p class="m-0" title="Royalties" v-if="chains[itemmodal.item.token]"><i class="fa-solid fa-crown fa-fw"></i> {{chains[itemmodal.item.token].sets[itemmodal.item.setname]?.royalty/100}}</p>
                                  </div>
                                </div>
                             </div>
