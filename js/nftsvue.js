@@ -378,7 +378,10 @@ var app = new Vue({
       nftsets: [],
       nftsetsf: [],
       nftscripts: {},
-      focusItem: {},
+      focusItem: {
+        token: "dlux",
+        set: "dlux",
+      },
       focusSet: {
         computed: {},
         link: "",

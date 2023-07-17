@@ -110,9 +110,9 @@ export default {
                                <p>{{info}}</p>
                                <div class="d-flex align-items-center"> 
                                  <div class="text-start small border border-secondary rounded text-white px-2 py-1 w-100">
-                                    <div class="d-flex align-items-center justify-content-start flex-wrap">
-                                       <span class="mb-0" title="Total Number of Owners"><i class="fa-solid fa-user-astronaut fa-fw"></i> 269</span>
-                                       <span class="mb-0 ms-2" title="Total Number of Items"><i class="fa-solid fa-star fa-fw"></i> 483</span>     
+                                    <div class="d-flex align-items-center justify-content-start flex-wrap" v-if="tot_owners">
+                                       <span class="mb-0" title="Total Number of Owners"><i class="fa-solid fa-user-astronaut fa-fw"></i> {{setdetails.owners}}</span>
+                                       <span class="mb-0 ms-2" title="Total Number of Items"><i class="fa-solid fa-star fa-fw"></i> {{setdetails.minted - setdetails.deleted}}</span>     
                                        <span class="mb-0 ms-2" title="Layer 2 Honeycomb Sidechain"><i class="fa-solid fa-link fa-fw"></i> {{item.token}}</span>
                                     </div>
                                     <div class="d-flex align-items-center justify-content-start flex-wrapa">

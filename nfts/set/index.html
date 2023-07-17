@@ -827,7 +827,7 @@
           </div>
 
           <!-- mint transfer modal -->
-          <div>
+          <div v-if="focusItem.script">
             <fttransfer :account="account" :item="focusItem" :mint="transferMint" @modal="modal($event)" :icon="getIcon(focusItem.script)" :setdetail="chains[focusItem.token].sets[focusItem.set]"
                 :api="chains[focusItem.token].api" :wrapped="getAttr(focusItem.script, 'wrapped')" :colors="getSetDetailsColors(focusItem.script)" @tosign="toSign = $event" :info="getSetDetailsInfo(focusItem.script)"/>
         </div>
