@@ -98,7 +98,7 @@ export default {
                                <p>{{itemmodal.item.set.Description}}</p>
                                <div class="d-flex align-items-center" v-if="itemmodal.item.setname"> 
                                  <div class="text-start small border border-secondary rounded text-white px-2 py-1 w-100">
-                                    <div class="d-flex align-items-center justify-content-start flex-wrap" v-if="!inventory">
+                                    <div class="d-flex align-items-center justify-content-start flex-wrap" v-if="inventory == 'true'">
                                        <span class="mb-0" title="Total Number of Owners"><i class="fa-solid fa-user-astronaut fa-fw"></i> {{chains[itemmodal.item.token].sets[itemmodal.item.setname].owners}}</span>
                                        <span class="mb-0 ms-2" title="Total Number of Items"><i class="fa-solid fa-star fa-fw"></i> {{chains[itemmodal.item.token].sets[itemmodal.item.setname].minted - chains[itemmodal.item.token].sets[itemmodal.item.setname].deleted}}</span>     
                                        <span class="mb-0 ms-2" title="Layer 2 Honeycomb Sidechain"><i class="fa-solid fa-link fa-fw"></i> {{itemmodal.item.token}}</span>
