@@ -1200,6 +1200,7 @@ export default {
             return str.toUpperCase();
         },
         naiString(nai) {
+         if(!nai)return ''
           return `${parseFloat(nai.amount / Math.pow(10, nai.precision)).toFixed(
             nai.precision
           )} ${nai.token}`;

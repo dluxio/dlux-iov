@@ -67,6 +67,9 @@ var app = new Vue({
             dlux: {
               mintAuctions: [],
               mintSales: [],
+              computed:{
+                set: {}
+              }
             }
           },
           slot: 1,
@@ -2301,6 +2304,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       return a + b;
     },
     naiString(nai) {
+      if(!nai) return ''
       return `${parseFloat(nai.amount / Math.pow(10, nai.precision)).toFixed(
         nai.precision
       )} ${nai.token}`;
