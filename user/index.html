@@ -1162,7 +1162,7 @@
                                 <!-- MINT TRADES -->
                                 <div v-for="(rnft, index) in FTtrades" :key="index" class="col my-2">
                                     <nftcard :item="rnft" mint="true" trade="true" :account="account"
-                                        :multisig="chains[rnft.token].multisig" @focusitem="focusItem = $event"
+                                        :multisig="chains[rnft.token].multisig" @focusitem="numitems=FTtrades.length;focusItem = $event; focusItem.source = 'FTtrades'"
                                         :wrapped="getAttr(rnft.script, 'wrapped')" :oicon="getIcon(rnft.script)"
                                         @tosign="toSign = $event" :ocolors="getSetDetailsColors(rnft.script)"
                                         @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
@@ -1190,7 +1190,7 @@
                                         :wrapped="getAttr(rnft.script, 'wrapped')" 
                                         :oicon="getIcon(rnft.script)"
                                         @tosign="toSign = $event" 
-                                        @focusitem="injectIndex(index);focusItem = $event"
+                                        @focusitem="numitems=accountRNFTs.length;focusItem.source = 'accountRNFTs';injectIndex(index);focusItem = $event; focusItem.source = 'accountRNFTs'"
                                         :ocolors="getSetDetailsColors(rnft.script)"
                                         @modal="modalIndex('transferModal', $event);transferModal.hidden = false" />
                                 </div>
@@ -1300,7 +1300,7 @@
                         :inventory="true" 
                         :qty="focusItem.qty"
                         :item="focusItem"
-                        :numitems="accountRNFTs.length"
+                        :numitems="numitems"
                         :mint="transferMint" 
                         @modal="injectIndex($event)" 
                         :icon="getIcon(focusItem.script)" 

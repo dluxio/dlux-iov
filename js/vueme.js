@@ -807,6 +807,7 @@ var app = new Vue({
       spkapi: {},
       extendcost: {},
       contracts: {},
+      numitems: 0,
     };
   },
   components: {
@@ -3452,15 +3453,15 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         default:
           this.activeIndex = parseInt(dir)
       }
-      this.focusItem = this.accountRNFTs[this.activeIndex]
+      this.focusItem = this[this.focusItem.source][this.activeIndex]
     },
     activeIndexUp(){
-      if(this.activeIndex < this.accountRNFTs.length - 1) this.activeIndex++
+      if(this.activeIndex < this[this.focusItem.source].length - 1) this.activeIndex++
       else this.activeIndex = 0
     },
     activeIndexDn(){
       if(this.activeIndex > 0) this.activeIndex--
-      else this.activeIndex = this.accountRNFTs.length - 1
+      else this.activeIndex = this[this.focusItem.source].length - 1
     },
   },
   mounted() {
