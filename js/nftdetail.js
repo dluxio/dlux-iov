@@ -86,7 +86,7 @@ export default {
  
                          </div>
                          <!--back forward btns-->
-                         <div class="d-flex align-items-center">
+                         <div class="d-flex align-items-center" v-if="itemmodal.items.length > 1">
                             <h2><a class="text-muted p-3" role="button" @click="modalPrev()"><i
                                      class="fas fa-caret-square-left"></i></a>
                             </h2>
