@@ -139,7 +139,7 @@ export default {
                                              class="fa-solid fa-money-bill-trend-up fa-fw"></i>{{naiString(setdetail.total_div)}}</span>
                                     </div>
                                     <p class="m-0" title="Royalties"><i class="fa-solid fa-crown fa-fw"></i>
-                                       {{royaltySplit(setdetail.royalty_allocation)}}</p>
+                                    {{setdetail.royalty / 100}}% to {{royaltySplit(setdetail.royalty_accounts)}}</p>
                                  </div>
                               </div>
 
