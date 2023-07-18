@@ -268,12 +268,8 @@ export default {
 
                                           <div>
                                              <label for="tradeFTamount" class="form-label d-flex">Amount
-                                                <small v-if="trade.token == item.token"
-                                                   class="ms-auto align-self-center text-white-50">
+                                                <small class="ms-auto align-self-center text-white-50">
                                                    0% FEE
-                                                </small>
-                                                <small v-else class="ms-auto align-self-center text-white-50">
-                                                   1% FEE
                                                 </small>
                                              </label>
                                              <div class="position-relative has-validation mb-3">
@@ -621,10 +617,10 @@ export default {
                                        <td style="vertical-align: middle">
                                        {{formatNumber(auc.price/1000,3,'.',',')}} {{auc.pricenai.token}}</td>
                                        <td>
-                                       <input class="form-control " type="number">
+                                       <input class="form-control " type="number" :step="0.001" :min="auc.price /1000" v-model="auc.bidAmount">
                                        </td>
                                        <td>
-                                       <button class="btn btn-secondary" @click="bidNFT(auc)">Bid</button>
+                                       <button class="btn btn-secondary" @click="bidFT(auc)">Bid</button>
                                        </td>
                                     </tr>
                                     
@@ -673,12 +669,12 @@ export default {
                                     {{naiString(ad.pricenai)}}</td>
                                  <td><span v-show="true" class="text-center">
                                        <form class="needs-validation" novalidate>
-                                          <input value="1" required type="number" min="1" step="1" max="ad.qty"
+                                          <input value="1" required type="number" min="1" step="1" :max="ad.qty"
                                              class="form-control text-info" style="max-width: 100px"
                                              v-model="ad.buyQty">
                                           <button type="submit" class="btn btn-info d-none"
                                              v-show="ad.by != account"
-                                             @click="buyMint(ad.uid)">Buy</button>
+                                             @click="buyFT(ad)">Buy</button>
                                             
                                        </form>
                                     </span>
@@ -1044,6 +1040,69 @@ export default {
                     this.airdropAllowed = false
                 }
               });
+        },
+        bidFT(auc) {
+         const toSign = {
+            type: "cja",
+            cj: {
+               set: auc.set,
+               uid: auc.uid,
+               bid_amount: parseInt(auc.bidAmount * Math.pow(10, auc.pricenai.precision)),
+            },
+            id: `${auc.token}_ft_bid`,
+            msg: `Bidding ${auc.bidAmount} on ${auc.set} mint token...`,
+            ops: ["getTokenUser"],
+            api: this.api,
+            txid: `${auc.token}_ft_bid`,
+          }
+          this.$emit('tosign', toSign)
+        },
+        buyFT(sale){
+         var toSign = {}
+         if(sale.token == 'hive' || sale.token == 'hbd') {
+            toSign = {
+               type: "xfr",
+               cj: {
+                 to: sale.multisig,
+                 [sale.token.toLowerCase()]: sale.price.amount * sale.buyQty,
+                 memo: `NFTbid ${sale.set}:${sale.uid}`,
+               },
+               txid: "sendhive",
+               msg: `Buying ${sale.set}:${sale.uid}`,
+               api: sale.api,
+               ops: ["getTokenUser"],
+             }
+         } else {
+            toSign = {
+               type: "cja",
+               cj: {
+                  set: sale.set,
+                  uid: sale.uid
+               },
+               id: `${sale.token}_ft_buy`,
+               msg: `Buying 1 ${sale.set} mint token...`,
+               ops: ["getTokenUser"],
+               api: this.api,
+               txid: `${sale.token}_ft_buy`,
+            }
+         }
+          this.$emit('tosign', toSign)
+        },
+        cancelSaleFT(sale){
+         const toSign = {
+            type: "cja",
+            cj: {
+               set: auc.set,
+               uid: auc.uid,
+               bid_amount: parseInt(auc.bidAmount * Math.pow(10, auc.pricenai.precision)),
+            },
+            id: `${auc.token}_ft_bid`,
+            msg: `Bidding ${auc.bidAmount} on ${auc.set} mint token...`,
+            ops: ["getTokenUser"],
+            api: this.api,
+            txid: `${auc.token}_ft_bid`,
+          }
+          this.$emit('tosign', toSign)
         },
         giveFT() {
             const toSign = {

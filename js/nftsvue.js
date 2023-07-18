@@ -2012,6 +2012,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                           ? "HBD"
                           : "TOKEN";
                     mintSales[i].buyQty = 1;
+                    mintSales[i].api = this.chains[chain].api
+                    mintSales[i].multisig = this.chains[chain].multisig
                     if (
                       mintSales[i].price < this.chains[chain].sets[set].smf[token] ||
                       !this.chains[chain].sets[set].smf[token]
@@ -2028,7 +2030,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                           ? "HBD"
                           : "TOKEN";
                     mintAuctions[i].bidAmount =
-                      mintAuctions[i].price + 1000;
+                      (mintAuctions[i].price + 1000)/Math.pow(10, mintAuctions[i].pricenai.precision);
                     if (
                       mintAuctions[i].price < this.chains[chain].sets[set].amf[token] ||
                       !this.chains[chain].sets[set].amf[token]
