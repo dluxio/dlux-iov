@@ -608,62 +608,7 @@ export default {
                         </h2>
                         <div id="collapseftBid" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
                            <div class="accordion-body">
-                              <table class="table table-sm">
-                                 <thead>
-                                    <tr>
-                                       <th scope="col" class="small">SUPPLY</th>
-                                       <th scope="col" class="small">PRICE</th>
-                                       <th scope="col" class="small">QTY</th>
-                                       <th scope="col"></th>
-                                    </tr>
-                                 </thead>
-                                 <tbody>
-                                    <tr scope="row" v-for="ad in setdetail.mintSales">
-                                       <td style="vertical-align: middle">
-                                          {{formatNumber(ad.qty,0,'.',',')}}</td>
-                                       <td style="vertical-align: middle">
-                                          {{naiString(ad.pricenai)}}</td>
-                                       <td><span v-show="true" class="text-center">
-                                             <form class="needs-validation" novalidate>
-                                                <input value="1" required type="number" min="1" step="1" max="ad.qty"
-                                                   class="form-control text-info" style="max-width: 100px"
-                                                   v-model="ad.buyQty">
-                                                <button type="submit" class="btn btn-info d-none"
-                                                   v-show="ad.by != account"
-                                                   @click="buyMint(ad.uid)">Buy</button>{{toFixed(ad.buyQty *
-                                                ad.pricenai.amount,0)}}
-                                                {{ad.pricenai.tokrn}}
-                                             </form>
-                                          </span>
-                                          </span></td>
-                                       <td>
-                                          <div>
-                                             <button type="submit" class="btn btn-info" v-show="ad.by != account"
-                                                onclick="submit()">Buy</button>
-                                             <!-- <button class="btn btn-primary" v-show="ad.by != account">Buy</button> -->
-                                             <button class="btn btn-warning" v-show="ad.by == account">Cancel</button>
-                                          </div>
-                                       </td>
-                                    </tr>
-                                 </tbody>
-                              </table>
-                           </div>
-                        </div>
-                     </div>
-
-                     <!-- Mint Sales -->
-                     <div class="accordion-item">
-                        <h2 class="accordion-header">
-                           <button onclick="this.blur();"
-                              class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                              data-bs-target="#collapseftBuy" aria-expanded="true" aria-controls="collapseftBuy">
-                              <i class="fas fa-money-bill-wave me-3"></i><span>BUY
-                                 NOW</span><span class="small ms-2" v-if="setdetail.mintSales">{{naiString(setdetail.mintSales[0].pricenai)}}</span>
-                           </button>
-                        </h2>
-                        <div id="collapseftBuy" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
-                           <div class="accordion-body">
-                              <table class="table table-sm">
+                           <table class="table table-sm">
                                  <thead>
                                     <tr>
                                        <th scope="col" class="small">QTY</th>
@@ -698,6 +643,62 @@ export default {
                                  <th scope="col" class="small"></th>
                                  </tr>
                               </table>
+                              
+                           </div>
+                        </div>
+                     </div>
+
+                     <!-- Mint Sales -->
+                     <div class="accordion-item">
+                        <h2 class="accordion-header">
+                           <button onclick="this.blur();"
+                              class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                              data-bs-target="#collapseftBuy" aria-expanded="true" aria-controls="collapseftBuy">
+                              <i class="fas fa-money-bill-wave me-3"></i><span>BUY
+                                 NOW</span><span class="small ms-2" v-if="setdetail.mintSales">{{naiString(setdetail.mintSales[0].pricenai)}}</span>
+                           </button>
+                        </h2>
+                        <div id="collapseftBuy" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
+                           <div class="accordion-body">
+                           <table class="table table-sm">
+                           <thead>
+                              <tr>
+                                 <th scope="col" class="small">SUPPLY</th>
+                                 <th scope="col" class="small">PRICE</th>
+                                 <th scope="col" class="small">QTY</th>
+                                 <th scope="col"></th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr scope="row" v-for="ad in setdetail.mintSales">
+                                 <td style="vertical-align: middle">
+                                    {{formatNumber(ad.qty,0,'.',',')}}</td>
+                                 <td style="vertical-align: middle">
+                                    {{naiString(ad.pricenai)}}</td>
+                                 <td><span v-show="true" class="text-center">
+                                       <form class="needs-validation" novalidate>
+                                          <input value="1" required type="number" min="1" step="1" max="ad.qty"
+                                             class="form-control text-info" style="max-width: 100px"
+                                             v-model="ad.buyQty">
+                                          <button type="submit" class="btn btn-info d-none"
+                                             v-show="ad.by != account"
+                                             @click="buyMint(ad.uid)">Buy</button>{{toFixed(ad.buyQty *
+                                          ad.pricenai.amount,0)}}
+                                          {{ad.pricenai.tokrn}}
+                                       </form>
+                                    </span>
+                                    </span></td>
+                                 <td>
+                                    <div>
+                                       <button type="submit" class="btn btn-info" v-show="ad.by != account"
+                                          onclick="submit()">Buy</button>
+                                       <!-- <button class="btn btn-primary" v-show="ad.by != account">Buy</button> -->
+                                       <button class="btn btn-warning" v-show="ad.by == account">Cancel</button>
+                                    </div>
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
                            </div>
                         </div>
                      </div>
