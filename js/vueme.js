@@ -3300,7 +3300,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this.NFTtrades = []
       this.accountNFTs = []
       this.accountRNFTs = []
-
+      this.displayNFTs = []
       this.postSelect = {
         sort: "time",
         searchTerm: "",
