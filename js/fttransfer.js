@@ -61,7 +61,7 @@ export default {
                            <span>sealed NFT</span>
                         </h3>
                         <!-- owner info -->
-                        <!--<div class="ms-auto" v-if="item.from">
+                        <div class="ms-auto" v-if="item.from">
                                    <a title="Item From" :href="'/@' + item.from" role="button" class="btn btn-lg btn-outline-light" v-if="item.from != account">
                                    <i class="fa-solid fa-truck-arrow-right fa-flip-horizontal fa-fw me-1"></i>  
                                       {{item.from}}
@@ -70,7 +70,8 @@ export default {
                                    <i class="fa-solid fa-truck-arrow-right fa-fw me-1"></i>
                                       {{item.to}}
                                    </a>
-                                </div>-->
+                                </div>
+                                
                         <!--Open-->
                         <div class="ms-auto" v-if="qty > 0 && !item.from">
                            <button type="button" class="btn btn-outline-success" title="Open Mint" @click="openFT()"><i
