@@ -3437,6 +3437,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     getIcon(s) {
       return this.baseScript[s] ? this.baseScript[s].set.faicon : "";
     },
+    mintsQty(item){
+      return this.getMint(this.chains[item.token]?.sets[item.set]?.set, 'qty')
+    },
   },
   mounted() {
     if (location.pathname.split("/@")[1]) {
