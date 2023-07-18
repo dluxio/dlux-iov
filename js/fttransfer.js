@@ -631,7 +631,7 @@ export default {
                                        </td>
                                     </tr>
                                     
-                                    <tr v-for="auc in setdetail.mintAuctions" class="bg-danger-50 text-center border-top-0">
+                                    <tr v-for="auc in setdetail.mintAuctions" class="bg-danger-50 text-center">
                                        <th scope="row" colspan="4">
                                           <span>{{animateCountdown(auc.time)}}<span v-if="auc.bidder"> - {{auc.bidder}} is winning</span></span>
                                        </th>
@@ -665,7 +665,7 @@ export default {
                                  <th scope="col" class="small">SUPPLY</th>
                                  <th scope="col" class="small">PRICE</th>
                                  <th scope="col" class="small">QTY</th>
-                                 <th scope="col"></th>
+                                 <th scope="col" class="small"></th>
                               </tr>
                            </thead>
                            <tbody>
@@ -682,9 +682,7 @@ export default {
                                           <button type="submit" class="btn btn-info d-none"
                                              v-show="ad.by != account"
                                              @click="buyMint(ad.uid)">Buy</button>
-                                             {{formatNumber(toFixed(ad.buyQty *
-                                          ad.pricenai.amount/1000,0),3,'.',',')}}
-                                          {{ad.pricenai.token}}
+                                            
                                        </form>
                                     </span>
                                     </span></td>
@@ -697,6 +695,13 @@ export default {
                                     </div>
                                  </td>
                               </tr>
+                              <tr v-for="ad in setdetail.mintSales" class="bg-success-50 text-center">
+                                       <th scope="row" colspan="4">
+                                          <span> {{formatNumber(toFixed(ad.buyQty *
+                                             ad.pricenai.amount/1000,0),3,'.',',')}}
+                                             {{ad.pricenai.token}}</span>
+                                       </th>
+                                    </tr>
                            </tbody>
                         </table>
                            </div>
