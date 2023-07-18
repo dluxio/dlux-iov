@@ -144,14 +144,13 @@
                             <!-- MINTS -->
                             <div id="carouselExampleCaptions" class="carousel">
                                 <div class="carousel-inner text-center">
-                                    <h3 class="d-none">MINTS</h3>
                                     <div v-for="mint in mintData">
                                         <div class="carousel-item" :class="{'active': mint.set == mintData[activeIndex].set && mint.chain == mintData[activeIndex].chain}">
                                             <div v-if="chains[mint.chain].sets[mint.set].forAuctionMint || chains[mint.chain].sets[mint.set].mintSales?.length" class="d-flex mx-5 mt-2 mb-3 align-items-center rounded">
                                                 <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
                                                     @click="focusItem.set = mint.set; focusItem.token = mint.chain">
                                                 <img v-if="chains[mint.chain].sets[mint.set].computed" :src="'https://ipfs.io/ipfs/' + chains[mint.chain].sets[mint.set].computed.set.wrapped"
-                                                    class="border border-dark border-2 rounded mint-img shadow"></a>
+                                                    class="mint-img rounded"></a>
                                                 <div class="w-100 d-flex">
                                                     <div class="ms-auto text-end">
                                                         <h5>{{chains[mint.chain].sets[mint.set].name_long}}</h5>
@@ -165,7 +164,7 @@
                                                         </div>
                                                         <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
                                                             @click="focusItem.set = mint.set; focusItem.token = mint.chain">
-                                                            <button class="btn btn-sm btn-outline-light">{{chains[mint.chain].sets[mint.set].forAuctionMint + chains[mint.chain].sets[mint.set].forSaleMint}} Available</button>
+                                                            <button class="btn btn-sm btn-outline-light">{{formatNumber((chains[mint.chain].sets[mint.set].forAuctionMint + chains[mint.chain].sets[mint.set].forSaleMint),0,'.',',')}} Available</button>
                                                         </a>
                                                     </div>
                                                 </div>
