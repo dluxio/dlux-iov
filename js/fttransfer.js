@@ -592,7 +592,7 @@ export default {
                                     <i class="fa-solid fa-xmark fa-fw ms-2"></i> Cancel</button>
                               </div>
                            </div>
-
+</div>
                         </div>
                      </div>
 
@@ -707,7 +707,7 @@ export default {
             </div>
          </div>
       </div>
-      </div>
+     
    </div>
 </div>`,
     // @click="modalIndex('itemModal', item.set + ':' + item.uid );hidden = false"
