@@ -536,7 +536,7 @@ var app = new Vue({
       price: {},
       mintAuctions: [],
       mintSales: [],
-      mintData: {},
+      mintData: [],
       compiledScript: "",
       baseScript: `<!DOCTYPE html>
 //<html><head><script>
@@ -1975,7 +1975,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                   var mintSales = []
                   var mintAuctions = []
                   this.chains[chain].sets[set].mintData = data.result.filter((a) => a.set == set) || [];
-                  if (this.mintData.length) this.mintData = this.mintData[0];
+                  this.mintData.push({set, chain})
                   mintSales = data.result.filter((a) => a.set == set) || [];
                   if (mintSales.length) mintSales = mintSales[0].sales;
                   mintAuctions = data.result.filter((a) => a.set == set) || [];
@@ -2507,6 +2507,11 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         else if (this.chains[a].slot < this.chains[b].slot)return -1
         else return 0
        })
+      }
+    },
+    mintIndexing: {
+      get() {
+        return this.mintData.length ? this.mintData[0].indexing : [];
       }
     },
     includes: {

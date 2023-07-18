@@ -145,27 +145,25 @@
                             <div id="carouselExampleCaptions" class="carousel">
                                 <div class="carousel-inner text-center">
                                     <h3 class="d-none">MINTS</h3>
-                                    <div v-for="(chain, chainname, chainindex) in chains">
-                                        <div v-for="(set, setName, setindex) in chains[chainname].sets">
-                                            <div class="carousel-item" :class="{'active': setName == 'dlux'}">
-                                                <div v-if="chains[chainname].sets[setName].forAuctionMint || chains[chainname].sets[setName].mintSales?.length" class="d-flex mx-5 mt-2 mb-3 align-items-center rounded">
-                                                    <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
-                                                        @click="focusItem.set = setName; focusItem.token = chainname">
-                                                    <img v-if="chains[chainname].sets[setName].computed" :src="'https://ipfs.io/ipfs/' + chains[chainname].sets[setName].computed.set.wrapped"
-                                                        class="border border-dark border-2 rounded mint-img shadow"></a>
-                                                    <div class="w-100 d-flex">
-                                                        <div class="ms-auto text-end">
-                                                            <h5>{{chains[chainname].sets[setName].name_long}}</h5>
-                                                            <div v-if="chains[chainname].sets[setName].mintSales.length">
-                                                                <small>Lowest Price</small>
-                                                                <p>{{naiString(chains[chainname].sets[setName].mintSales[0].pricenai)}}</p>
-                                                            </div>
-                                                            <div v-if="chains[chainname].sets[setName].mintAuctions.length">
-                                                                <small>Lowest Bid</small>
-                                                                <p>{{naiString(chains[chainname].sets[setName].mintAuctions[0].pricenai)}}</p>
-                                                            </div>
-                                                            <button class="btn btn-sm btn-outline-light">{{chains[chainname].sets[setName].forAuctionMint + chains[chainname].sets[setName].forSaleMint}} Available</button>
+                                    <div v-for="mint in mintData">
+                                        <div class="carousel-item" :class="{'active': mint.set == 'dlux'}">
+                                            <div v-if="chains[mint.chain].sets[mint.set].forAuctionMint || chains[mint.chain].sets[mint.set].mintSales?.length" class="d-flex mx-5 mt-2 mb-3 align-items-center rounded">
+                                                <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
+                                                    @click="focusItem.set = mint.set; focusItem.token = mint.chain">
+                                                <img v-if="chains[mint.chain].sets[mint.set].computed" :src="'https://ipfs.io/ipfs/' + chains[mint.chain].sets[mint.set].computed.set.wrapped"
+                                                    class="border border-dark border-2 rounded mint-img shadow"></a>
+                                                <div class="w-100 d-flex">
+                                                    <div class="ms-auto text-end">
+                                                        <h5>{{chains[mint.chain].sets[mint.set].name_long}}</h5>
+                                                        <div v-if="chains[mint.chain].sets[mint.set].mintSales.length">
+                                                            <small>Lowest Price</small>
+                                                            <p>{{naiString(chains[mint.chain].sets[mint.set].mintSales[0].pricenai)}}</p>
                                                         </div>
+                                                        <div v-if="chains[mint.chain].sets[mint.set].mintAuctions.length">
+                                                            <small>Lowest Bid</small>
+                                                            <p>{{naiString(chains[mint.chain].sets[mint.set].mintAuctions[0].pricenai)}}</p>
+                                                        </div>
+                                                        <button class="btn btn-sm btn-outline-light">{{chains[mint.chain].sets[mint.set].forAuctionMint + chains[mint.chain].sets[mint.set].forSaleMint}} Available</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -183,12 +181,10 @@
                                     <span class="visually-hidden">Next</span>
                                 </button>
                                 <div class="carousel-indicators">
-                                    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0"
-                                        class="active" aria-current="true" aria-label="Slide 1"></button>
-                                    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1"
-                                        aria-label="Slide 2"></button>
-                                    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2"
-                                        aria-label="Slide 3"></button>
+                                    <div v-for="(mint, name, index) in mintData">
+                                        <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0"
+                                            class="active" aria-current="true" :aria-label="'Slide ' + index"></button>
+                                    </div>
                                 </div>
                             </div>
 
