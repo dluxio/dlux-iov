@@ -678,7 +678,8 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
         term += arguments[i] + ':'
       }
       if(term)term = term.substring(0, term.length - 1)
-      for(var i = 0; i < this.NFTselect.keys.length; i++){
+      const start = this.setPage ? 2 : 0
+      for(var i = start; i < this.NFTselect.keys.length; i++){
         if((!term || term ==  this.NFTselect.keys[i]) && this.NFTselect.keys[i].indexOf('Chain') == 0){
           this.chains[this.NFTselect.keys[i].split(':')[1]].enabled = false
           this.NFTselect.keys.splice(i, 1)
@@ -704,7 +705,8 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           continue
         }
       }
-      if(!term)this.NFTselect.keys = []
+      if(!term && !start)this.NFTselect.keys = []
+      else if (!term)this.NFTselect.keys = this.NFTselect.keys.slice(0, 2)
       this.displaynfts()
     },
     smart(name, del = ':', i = 0){
@@ -713,9 +715,9 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
     displaynfts(){
       this.displayNFTs = []
       chainlabel: for(var chain in this.chains){
-        if(this.NFTselect.keys.find(a => a.indexOf('Chain') >= 0) || !this.chains[chain].enabled)continue chainlabel;
+        if(this.NFTselect.keys.find(a => a.indexOf('Chain') >= 0) && !this.chains[chain].enabled)continue chainlabel;
         setlabel: for(var set in this.chains[chain].sets){
-          if(this.NFTselect.keys.find(a => a.indexOf('Set') >= 0) || !this.chains[chain].sets[set].enabled)continue setlabel;
+          if(this.NFTselect.keys.find(a => a.indexOf('Set') >= 0) && !this.chains[chain].sets[set].enabled)continue setlabel;
           salelabel: for(var i = 0; i < this.chains[chain].sets[set].sales.length; i++){
             if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && !(this.selectors['For Sale'].checked || this.selectors['Affordable'].checked || this.selectors['Mint'].checked || this.selectors['Yours'].checked))break salelabel;
             if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && this.selectors['Mint'].checked && this.chains[chain].sets[set].sales[i].uid)continue salelabel;
@@ -2504,6 +2506,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     if (setName) {
       this.setPage = true;
       this.jsontoken = location.hash.replace('#', '').split(':')[0] || 'dlux'
+      this.NFTselect.keys = [`Chain:${this.jsontoken}`, `Set:${setName}:${this.jsontoken}`]
       for (var chain in this.chains) {
         this.chains[chain].enabled = false;
       }
