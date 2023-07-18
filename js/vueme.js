@@ -2994,6 +2994,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
     finishPFT(s) {
       if (this.baseScript[s.script]) {
+        s.source = 'FTtrades'
         this.FTtrades.push(s);
       } else
         setTimeout(() => {
@@ -3094,6 +3095,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           for (var j = 0; j < rNFTs.length; j++) {
             rNFTs[j].token = p[i].token;
             scripts[rNFTs[j].script] = 1;
+            rNFTs[j].source = 'accountRNFTs'
             this.accountRNFTs.push(rNFTs[j]);
           }
           for (var script in scripts) {
@@ -3456,6 +3458,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this.focusItem = this[this.focusItem.source][this.activeIndex]
     },
     activeIndexUp(){
+      console.log(this.activeIndex,this[this.focusItem.source].length,this.focusItem)
       if(this.activeIndex < this[this.focusItem.source].length - 1) this.activeIndex++
       else this.activeIndex = 0
     },
