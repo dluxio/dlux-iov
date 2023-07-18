@@ -655,50 +655,46 @@
     </script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            //WALLET WIDGET
+
             // HIVE Balance
             var hiveCollapse = document.getElementById('collapsehive');
             hiveCollapse.addEventListener('show.bs.collapse', event => {
-                var hiveCollapse = document.getElementById('hiveBal');
+                var hiveBal = document.getElementById('hiveBal');
                 hiveBal.classList.add('d-none');
-                hbdWallet.classList.add('d-none');
-                duatWallet.classList.add('d-none');
-                dluxWallet.classList.add('d-none');
             })
             hiveCollapse.addEventListener('hide.bs.collapse', event => {
-                var hiveCollapse = document.getElementById('hiveBal');
+                var hiveBal = document.getElementById('hiveBal');
                 hiveBal.classList.remove('d-none');
-                hbdWallet.classList.remove('d-none');
-                duatWallet.classList.remove('d-none');
-                dluxWallet.classList.remove('d-none');
             })
             // HBD Balance
             var hbdCollapse = document.getElementById('collapsehbd');
             hbdCollapse.addEventListener('show.bs.collapse', event => {
-                var hbdCollapse = document.getElementById('hbdBal');
+                var hbdBal = document.getElementById('hbdBal');
                 hbdBal.classList.add('d-none');
             })
             hbdCollapse.addEventListener('hide.bs.collapse', event => {
-                var hbdCollapse = document.getElementById('hbdBal');
+                var hbdBal = document.getElementById('hbdBal');
                 hbdBal.classList.remove('d-none');
             })
             // DUAT Balance
             var duatCollapse = document.getElementById('collapseduat');
             duatCollapse.addEventListener('show.bs.collapse', event => {
-                var duatCollapse = document.getElementById('duatBal');
+                var duatBal = document.getElementById('duatBal');
                 duatBal.classList.add('d-none');
             })
             duatCollapse.addEventListener('hide.bs.collapse', event => {
-                var duatCollapse = document.getElementById('duatBal');
+                var duatBal = document.getElementById('duatBal');
                 duatBal.classList.remove('d-none');
             })
             // DLUX Balance
             var dluxCollapse = document.getElementById('collapsedlux');
             dluxCollapse.addEventListener('show.bs.collapse', event => {
-                var dluxCollapse = document.getElementById('dluxBal');
+                var dluxBal = document.getElementById('dluxBal');
                 dluxBal.classList.add('d-none');
             })
             dluxCollapse.addEventListener('hide.bs.collapse', event => {
-                var dluxCollapse = document.getElementById('dluxBal');
+                var dluxBal = document.getElementById('dluxBal');
                 dluxBal.classList.remove('d-none');
             })
         });
