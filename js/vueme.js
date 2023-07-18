@@ -3467,7 +3467,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         this.getFeedPrice();
         this.getSapi(this.pageAccount, false);
         //this.getTokenUser(this.pageAccount, false);
-        this.getNFTs(this.pageAccount);
+        //this.getNFTs(this.pageAccount);
       }
       deepLink();
     }
