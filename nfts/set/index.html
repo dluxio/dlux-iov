@@ -799,14 +799,14 @@
             :item="focusItem" 
             :mint="true" 
             @modal="modal($event)"
-            :icon="getIcon(focusItem.script)" 
+            :icon="chains[focusItem.token].sets[focusItem.set].computed.set.faicon" 
             :setdetail="chains[focusItem.token].sets[focusItem.set]"
             :api="chains[focusItem.token].api"
-            :wrapped="getAttr(focusItem.script, 'wrapped')"
+            :wrapped="chains[focusItem.token].sets[focusItem.set].computed.set.wrapped"
             :qty="mintsQty(focusItem)"
-            :colors="getSetDetailsColors(focusItem.script)"
+            :colors="'linear-gradient(' + chains[focusItem.token].sets[focusItem.set].computed.set.Color1 + ',' + chains[focusItem.token].sets[focusItem.set].computed.set.Color2 + ')'"
             @tosign="toSign = $event" 
-            :info="getSetDetailsInfo(focusItem.script)" />
+            :info="chains[focusItem.token].sets[focusItem.set].computed.set.description" />
           </div>
 
         </div>

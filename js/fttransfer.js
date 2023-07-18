@@ -603,7 +603,7 @@ export default {
                               data-bs-toggle="collapse" data-bs-target="#collapseftBid" aria-expanded="true"
                               aria-controls="collapseftBid">
                               <i class="fas fa-comment-dollar me-3"></i><span>BID
-                                 NOW</span><span class="small ms-2" v-if="setdetail.mintSales">{{naiString(setdetail.mintSales[0].pricenai)}}</span>
+                                 NOW</span><span class="small ms-2" v-if="setdetail.mintSales?.length">{{naiString(setdetail.mintSales[0].pricenai)}}</span>
                            </button>
                         </h2>
                         <div id="collapseftBid" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">

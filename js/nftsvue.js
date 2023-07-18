@@ -771,6 +771,9 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
             if(!this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid]){
               this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid] = true
               this.callScript(this.allNFTs[i], i).then(d => {
+                // this.baseScript[d.script] = comp
+                // this.baseScript[d.script].token = this.jsontoken;
+                // this.baseScript[d.script].setname = set
                 const index = d.i
                 delete d.i
                 this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[index].uid] = {
@@ -779,6 +782,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
                 }
                 this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[index].uid].token = this.jsontoken
                 this.displayNFTs.push(this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[index].uid])
+              
               })
             } else {
               this.displayNFTs.push(this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid])
