@@ -2432,6 +2432,24 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           this.hiveprice = parseFloat(data.result.base)
         });
     },
+    animateCountdown(timeString){
+      // get current time
+      const now = new Date().getTime();
+      // get time to countdown to
+      const countDownDate = new Date(timeString).getTime();
+      // get the difference
+      const distance = countDownDate - now;
+      // calculate time
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor(
+        (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      );
+      const minutes = Math.floor(
+        (distance % (1000 * 60 * 60)) / (1000 * 60)
+      );
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    }
   },
   mounted() {
     //get hash and set it

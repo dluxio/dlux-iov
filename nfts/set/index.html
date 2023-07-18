@@ -409,7 +409,7 @@
                                 <tbody>
                                   <tr v-for="auc in chains[jsontoken].sets[setname].mintAuctions">
                                     <th scope="row" colspan="4" style="background-color: crimson">
-                                      <span>{{auc.time}}</span>
+                                      <span>{{animateCountdown(auc.time)}}</span>
                                     </th>
                                   </tr>
                                   <tr v-for="auc in chains[jsontoken].sets[setname].mintAuctions">
