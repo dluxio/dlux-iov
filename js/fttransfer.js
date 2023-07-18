@@ -603,7 +603,7 @@ export default {
                               data-bs-toggle="collapse" data-bs-target="#collapseftBid" aria-expanded="true"
                               aria-controls="collapseftBid">
                               <i class="fas fa-comment-dollar me-3"></i><span>BID
-                                 NOW</span><span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em" v-if="setdetail.mintAuctions">{{setdetail.mintAuctions.length}}</span><span class="small ms-auto" v-if="setdetail.mintSales?.length">{{naiString(setdetail.mintAuctions[0].pricenai)}}</span>
+                                 NOW</span><span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em" v-if="setdetail.mintAuctions">{{setdetail.mintAuctions.length}}</span><span class="small ms-auto" v-if="setdetail.mintSales?.length">{{formatNumber(setdetail.mintAuctions[0].pricenai.amount/1000,3,'.',',')}} {{setdetail.mintAuctions[0].pricenai.token}}</span>
                            </button>
                         </h2>
                         <div id="collapseftBid" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
@@ -655,7 +655,7 @@ export default {
                               class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                               data-bs-target="#collapseftBuy" aria-expanded="true" aria-controls="collapseftBuy">
                               <i class="fas fa-money-bill-wave me-3"></i><span>BUY
-                                 NOW</span><span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em" v-if="setdetail.mintSales">{{setdetail.forSaleMint}}</span><span class="small ms-auto" v-if="setdetail.mintSales.length">Lowest Price {{naiString(setdetail.mintSales[0].pricenai)}}</span>
+                                 NOW</span><span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em" v-if="setdetail.mintSales">{{setdetail.forSaleMint}}</span><span class="small ms-auto" v-if="setdetail.mintSales.length">{{formatNumber(setdetail.mintSales[0].pricenai.amount/1000,3,'.',',')}} {{setdetail.mintSales[0].pricenai.token}}</span>
                            </button>
                         </h2>
                         <div id="collapseftBuy" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
@@ -682,9 +682,10 @@ export default {
                                              v-model="ad.buyQty">
                                           <button type="submit" class="btn btn-info d-none"
                                              v-show="ad.by != account"
-                                             @click="buyMint(ad.uid)">Buy</button>{{toFixed(ad.buyQty *
-                                          ad.pricenai.amount,0)}}
-                                          {{ad.pricenai.tokrn}}
+                                             @click="buyMint(ad.uid)">Buy</button>
+                                             {{formatNumber(toFixed(ad.buyQty *
+                                          ad.pricenai.amount/1000,0),3,'.',',')}}
+                                          {{ad.pricenai.token}}
                                        </form>
                                     </span>
                                     </span></td>
