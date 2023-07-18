@@ -1265,7 +1265,7 @@
                                 <div class="col my-2" v-for="(item, name, index) in displayNFTs">
                                     <nftcard :item="item" :uid="Base64toNumber(item.uid)"
                                         :multisig="chains[item.token].multisig" :index="index" :inventory="true"
-                                        @focusitem="focusItem = $event" @tosign="toSign = $event" @setpfp="setPFP($event)"
+                                        @focusitem="focusItem = $event" @tosign="toSign = $event" 
                                         @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                                 </div>
                             </div>
@@ -1277,7 +1277,7 @@
 
                 <!--NFT item detail modal-->
                 <div>
-                    <nftdetail :account="account" :itemmodal="itemModal" :pfp="pfp" :chains="chains" :inventory="true"
+                    <nftdetail :account="account" :itemmodal="itemModal" :pfp="pfp" :chains="chains" :inventory="true" @setpfp="setPFP($event)"
                         @tosign="toSign = $event" @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                 </div>
 

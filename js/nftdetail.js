@@ -1074,6 +1074,7 @@ export default {
             });
         },
         setPFP(item){
+         console.log('setpfp', item)
          this.$emit('setpfp', item);
         },
         modalIndex(name) {

@@ -1603,6 +1603,7 @@ function setPFP(setname, uid, callback){
  }
 */
     setPFP(item) {
+      console.log('trigger', item)
       var pjm = JSON.parse(this.accountinfo.posting_json_metadata);
       if (pjm.profile)
         pjm.profile.profile_image = `${this.dataAPI}/pfp/${this.account}?${item.setname}-${item.uid}`;
@@ -3183,6 +3184,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       return Math.floor(seconds) + " seconds";
     },
     getHiveUser(user = this.account) {
+      console.log('hive info', user)
       fetch(hapi, {
         body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[["${user}"]], "id":1}`,
         headers: {
@@ -3416,6 +3418,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this.sapi = sapi;
       this.checkAccount("pageAccount", "focus");
       this.getHiveStats();
+      this.getHiveUser()
       this.getQuotes();
       this.getSNodes();
       this.getPosts();
