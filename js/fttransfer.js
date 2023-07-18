@@ -89,7 +89,7 @@ export default {
                                  class="fas fa-caret-square-left"></i></a>
                         </h2>
                         <small class="ms-auto text-muted"><i>
-                                {{numitems}} sets</i></small>
+                                {{numitems}} set{{numitems > 1 ? 's' : ''}}</i></small>
                         <h2 class="ms-auto"><a class="text-muted p-3" role="button" @click="modalNext()"><i
                                  class="fas fa-caret-square-right"></i></a>
                         </h2>
