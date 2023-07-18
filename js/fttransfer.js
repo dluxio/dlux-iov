@@ -108,14 +108,14 @@ export default {
                         <h2 class="accordion-header">
                            <button onclick="this.blur();" class="accordion-button" type="button"
                               data-bs-toggle="collapse"
-                              v-bind:class="{'collapsed' : setdetail.forSaleMint || setdetail.forAuctionMint || qty != 0 }"
+                              v-bind:class="{'collapsed' : setdetail.forSaleMint || setdetail.forAuctionMint || qty != 0 || item.from}"
                               data-bs-target="#collapseftDescription" aria-expanded="true"
                               aria-controls="collapseftDescription">
                               <i class="fas fa-list me-3"></i>DESCRIPTION
                            </button>
                         </h2>
                         <div id="collapseftDescription" class="accordion-collapse collapse"
-                           v-bind:class="{'show' : !setdetail.forAuctionMint && !setdetail.forSaleMint && qty == 0 }"
+                           v-bind:class="{'show' : !setdetail.forAuctionMint && !setdetail.forSaleMint && qty == 0 && !item.from }"
                            data-bs-parent="#ftAccordion">
                            <div class="accordion-body">
 
