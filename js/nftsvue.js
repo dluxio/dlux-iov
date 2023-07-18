@@ -77,7 +77,12 @@ var app = new Vue({
         duat: {
           enabled: false,
           api: "https://duat.hivehoneycomb.com",
-          sets: {},
+          sets: {
+            rct: {
+              mintAuctions: [],
+              mintSales: [],
+            }
+          },
           slot: 0,
           account:{
             balance: 0,
