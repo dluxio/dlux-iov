@@ -2450,6 +2450,15 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           this.hiveprice = parseFloat(data.result.base)
         });
     },
+    pairMints(){
+        for(var i = 0; i < this.mintData.length; i++){
+          if(this.chains[this.mintData[i].chain].sets[this.mintData[i].set].forAuctionMint || this.chains[this.mintData[i].chain].sets[this.mintData[i].set].mintSales?.length)continue
+          else {
+            this.mintData.splice(i, 1)
+            i--
+          }
+        }
+    },
     animateCountdown(timeString){
       // get current time
       const now = new Date().getTime();
@@ -2516,11 +2525,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         else if (this.chains[a].slot < this.chains[b].slot)return -1
         else return 0
        })
-      }
-    },
-    mintIndexing: {
-      get() {
-        return this.mintData.length ? this.mintData[0].indexing : [];
       }
     },
     includes: {
