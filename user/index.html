@@ -1160,12 +1160,12 @@
                                 class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
 
                                 <!-- MINT TRADES -->
-                                <div v-for="(rnft, index) in FTtrades" :key="index" class="col my-2">
+                                <div v-for="(rnft, named, index) in FTtrades" :key="named" class="col my-2">
                                     <nftcard :item="rnft" mint="true" trade="true" :account="account"
-                                        :multisig="chains[rnft.token].multisig" @focusitem=";activeIndex = index;numitems=FTtrades.length;focusItem = $event;"
+                                        :multisig="chains[rnft.token].multisig" @focusitem="activeIndex = named;numitems=FTtrades.length;focusItem = $event;"
                                         :wrapped="getAttr(rnft.script, 'wrapped')" :oicon="getIcon(rnft.script)"
                                         @tosign="toSign = $event" :ocolors="getSetDetailsColors(rnft.script)"
-                                        @detail="activeIndex = index;itemModal.hidden = false" />
+                                        @detail="itemModal.hidden = false" />
                                 </div>
                                 <!-- NFT TRADES -->
                                 <div v-for="item in NFTtrades" class="col my-2" id="trade-nft-cards">
