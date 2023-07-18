@@ -775,7 +775,7 @@ export default {
             default: ''
         },
     },
-    emits: ['tosign', 'detail'],
+    emits: ['tosign', 'detail', 'setpfp'],
     data() {
         return {
             give: {
@@ -1073,8 +1073,8 @@ export default {
                 ops: ["getTokenUser"],
             });
         },
-        setPFP(){
-            
+        setPFP(item){
+         this.$emit('setpfp', item);
         },
         modalIndex(name) {
             this.$emit('detail', name);
