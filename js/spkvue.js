@@ -3111,6 +3111,7 @@ function tradeFTreject(setname, uid, callback){
       this.getSpkStats();
       this.getRewardFund();
       this.getFeedPrice();
+      this.getIPFSproviders();
       this.getSapi(this.pageAccount, false);
       this.getTokenUser(this.pageAccount, false);
       //this.getNFTs();

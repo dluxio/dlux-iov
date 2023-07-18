@@ -151,7 +151,7 @@
 <body class="d-flex flex-column text-center text-white">
     <div id="app">
         <div>
-            <nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event)"
+            <nav-vue @login="account = $event;newme($event)"
                 @logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
                 :lapi="lapi" />
         </div>
