@@ -2028,11 +2028,11 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       return this.baseScript[s] ? this.baseScript[s].set.faicon : "";
     },
     getUserNFTs() {
-      fetch(this.lapi + "/api/nfts/" + this.account)
+      fetch("https://token.dlux.io/api/nfts/" + this.account)
         .then((r) => r.json())
         .then((res) => {
-          this.accountNFTs = res.result;
-          this.accountRNFTs = res.mint_tokens;
+          this.accountNFTs = [...res.result, ...this.accountNFTs];
+          this.accountRNFTs = [...res.mint_tokens, ...this.accountRNFTs];
         });
       this.getPFP();
     },
