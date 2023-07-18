@@ -598,32 +598,23 @@ export default {
                                  <button onclick="this.blur();" @click="saleData('itemmodal')" class="accordion-button" type="button"
                                     data-bs-toggle="collapse" data-bs-target="#collapseBuy" aria-expanded="true"
                                     aria-controls="collapseBuy">
-                                    <i class="fas fa-money-bill-wave me-3"></i><span>BUY
-                                       NOW</span><span class="small ms-2">({{naiString(itemmodal.item.price)}})</span>
+                                    <i class="fas fa-money-bill-wave me-3"></i>BUY
+                                       NOW<span class="small ms-auto">{{formatNumber(itemmodal.item.price.amount/1000,itemmodal.item.price.precision,'.',',')}}
+                                       <span class="text-uppercase">{{itemmodal.item.price.token}}</span><span>
                                  </button>
                               </h2>
                               <div id="collapseBuy" class="accordion-collapse collapse show" data-bs-parent="#nftAccordion">
                                  <div class="accordion-body">
                                     <div class="d-flex align-self-end">
                                        <div class="col-12">
-                                          <div class="d-flex align-items-center justify-content-between">
-                                             <div class="d-flex me-1">
-                                                <h4>Price:
-                                                   {{naiString(itemmodal.item.price)}}
-                                                </h4>
+                                          
+                                             <div class="d-flex bg-dark border-dark rounded p-2 mb-3">
+                                                {{formatNumber(itemmodal.item.price.amount/1000,itemmodal.item.price.precision,'.',',')}}
+                                                   <span class="ms-auto text-uppercase">{{itemmodal.item.price.token}}</span>
+                                                
                                              </div>
-                                             <div class="d-flex no-wrap ms-1">
-                                                <h4>
-                                                   Seller: @{{itemmodal.item.by}}
-                                                </h4>
-                                             </div>
-                                          </div>
-                                          <div class="pt-2">
-                                             <p class="text-uppercase text-muted">
-                                             </p>
-                                             <div class="d-flex justify-content-around">
-                                                <!-- long name, script, set, uid only other buy data -->
-                                             </div>
+                                          <div class="mb-2">
+                                          
                                              <div class="text-center">
                                                 <button v-if="itemmodal.item.by != account" type="button"
                                                    class="btn btn-primary" @click="buyNFT()" href="#/">Buy </button>
