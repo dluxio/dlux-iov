@@ -3294,7 +3294,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       return 0;
     },
     newme(user) {
-      console.log('yes')
       this.posturls = {};
       this.FTtrades = []
       this.NFTtrades = []
@@ -3467,8 +3466,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         this.getRewardFund();
         this.getFeedPrice();
         this.getSapi(this.pageAccount, false);
-        this.getTokenUser(this.pageAccount, false);
-        this.getNFTs(this.pageAccount);
+        //this.getTokenUser(this.pageAccount, false);
+        //this.getNFTs(this.pageAccount);
       }
       deepLink();
     }
