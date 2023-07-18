@@ -176,13 +176,10 @@
     </div>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            //MODAL LISTEN
+            //MODAL URL UPDATE
             var detailMod = document.getElementById('detailModal');
-            detailMod.addEventListener('show.bs.modal', event => {
-                console.log('show (add url)');
-            })
             detailMod.addEventListener('hide.bs.modal', event => {
-                console.log('hide (remove url)');
+                window.history.back();
             })
         });
         (function () {
