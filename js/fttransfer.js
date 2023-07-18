@@ -141,7 +141,7 @@ export default {
                       </div>
 
                       <!-- Mint Transfer -->
-                      <div class="accordion-item" v-if="item.qty > 0 && !item.from ">
+                      <div class="accordion-item" v-if="qty > 0 && !item.from ">
                          <h2 class="accordion-header">
                             <button onclick="this.blur();" class="accordion-button" type="button" data-bs-toggle="collapse"
                                data-bs-target="#collapseftTransfer" aria-expanded="false" aria-controls="collapseftTransfer">
