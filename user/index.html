@@ -1190,7 +1190,7 @@
                                         :wrapped="getAttr(rnft.script, 'wrapped')" 
                                         :oicon="getIcon(rnft.script)"
                                         @tosign="toSign = $event" 
-                                        @focusitem="numitems=accountRNFTs.length;focusItem.source = 'accountRNFTs';injectIndex(index);focusItem = $event; focusItem.source = 'accountRNFTs'"
+                                        @focusitem="numitems=accountRNFTs.length;activeIndex = name;focusItem = $event;"
                                         :ocolors="getSetDetailsColors(rnft.script)"
                                         @modal="modalIndex('transferModal', $event);transferModal.hidden = false" />
                                 </div>
