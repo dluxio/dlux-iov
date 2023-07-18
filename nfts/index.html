@@ -146,7 +146,7 @@
                                 <div class="carousel-inner text-center">
                                     <h3 class="d-none">MINTS</h3>
                                     <div v-for="mint in mintData">
-                                        <div class="carousel-item" :class="{'active': mint.set == 'dlux'}">
+                                        <div class="carousel-item" :class="{'active': mint.set == mintData[activeIndex].set && mint.chain == mintData[activeIndex].chain}">
                                             <div v-if="chains[mint.chain].sets[mint.set].forAuctionMint || chains[mint.chain].sets[mint.set].mintSales?.length" class="d-flex mx-5 mt-2 mb-3 align-items-center rounded">
                                                 <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
                                                     @click="focusItem.set = mint.set; focusItem.token = mint.chain">
@@ -170,19 +170,19 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button class="carousel-control-prev" type="button"
+                                <button class="carousel-control-prev" type="button" @click="activeIndexDn()"
                                     data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
                                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                     <span class="visually-hidden">Previous</span>
                                 </button>
-                                <button class="carousel-control-next" type="button"
+                                <button class="carousel-control-next" type="button" @click="activeIndexUp()"
                                     data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
                                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                     <span class="visually-hidden">Next</span>
                                 </button>
                                 <div class="carousel-indicators">
                                     <div v-for="(mint, name, index) in mintData">
-                                        <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0"
+                                        <button type="button" data-bs-target="#carouselExampleCaptions" :data-bs-slide-to="index" @click="activeIndex = index"
                                             class="active" aria-current="true" :aria-label="'Slide ' + index"></button>
                                     </div>
                                 </div>
