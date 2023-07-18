@@ -2511,7 +2511,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         this.chains[chain].enabled = false;
       }
       this.chains[this.jsontoken].enabled = true;
-      this.chains[this.jsontoken].sets[setName].enabled = true;
       this.getNFTset(setName, this.jsontoken);
       this.getProtocol(this.jsontoken);
     } else if (location.pathname.indexOf('nfts/sets') > 0) {
