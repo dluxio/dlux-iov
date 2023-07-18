@@ -255,7 +255,8 @@ var app = new Vue({
       price: {},
       mintAuctions: [],
       mintSales: [],
-      mintData: {},
+      mintData: [],
+      activeIndex: 0,
       giveFTusername: "",
       giveFTqty: 1,
       NFTselect: {
@@ -3439,6 +3440,27 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
     mintsQty(item){
       return this.getMint(this.chains[item.token]?.sets[item.set]?.set, 'qty')
+    },
+    injectIndex(dir){
+      switch(dir){
+        case 'up':
+          this.activeIndexUp()
+          break;
+        case 'dn':
+          this.activeIndexDn()
+          break;
+        default:
+          this.activeIndex = parseInt(dir)
+      }
+      this.focusItem = this.accountRNFTs[this.activeIndex]
+    },
+    activeIndexUp(){
+      if(this.activeIndex < this.accountRNFTs.length - 1) this.activeIndex++
+      else this.activeIndex = 0
+    },
+    activeIndexDn(){
+      if(this.activeIndex > 0) this.activeIndex--
+      else this.activeIndex = this.accountRNFTs.length - 1
     },
   },
   mounted() {

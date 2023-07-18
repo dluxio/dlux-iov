@@ -1182,7 +1182,7 @@
                             <!-- MINT INVENTORY -->
                             <div v-if="accountRNFTs.length"
                                 class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
-                                <div v-for="rnft in accountRNFTs" class="col my-2">
+                                <div v-for="(rnft, name, index) in accountRNFTs" class="col my-2">
                                     <nftcard :item="rnft" 
                                         :inventory="true" 
                                         :mint="true"
@@ -1190,9 +1190,8 @@
                                         :wrapped="getAttr(rnft.script, 'wrapped')" 
                                         :oicon="getIcon(rnft.script)"
                                         @tosign="toSign = $event" 
-                                        @focusitem="focusItem = $event"
+                                        @focusitem="injectIndex(index);focusItem = $event"
                                         :ocolors="getSetDetailsColors(rnft.script)"
-                                        :qty="mintsQty(focusItem)"
                                         @modal="modalIndex('transferModal', $event);transferModal.hidden = false" />
                                 </div>
                             </div>
@@ -1296,11 +1295,21 @@
                 </div>
                 <!-- mint transfer modal -->
                 <div>
-                    <fttransfer :account="account" 
+                    <fttransfer 
+                        :account="account" 
                         :inventory="true" 
-                        :qty="mintsQty(focusItem)"
-                        :item="focusItem" :mint="transferMint" @modal="modal($event)" :icon="getIcon(focusItem.script)" :setdetail="chains[focusItem.token].sets[focusItem.set]"
-                        :api="chains[focusItem.token].api" :wrapped="getAttr(focusItem.script, 'wrapped')" :colors="getSetDetailsColors(focusItem.script)" @tosign="toSign = $event" :info="getSetDetailsInfo(focusItem.script)"/>
+                        :qty="focusItem.qty"
+                        :item="focusItem"
+                        :numitems="accountRNFTs.length"
+                        :mint="transferMint" 
+                        @modal="injectIndex($event)" 
+                        :icon="getIcon(focusItem.script)" 
+                        :setdetail="chains[focusItem.token].sets[focusItem.set]"
+                        :api="chains[focusItem.token].api" 
+                        :wrapped="getAttr(focusItem.script, 'wrapped')" 
+                        :colors="getSetDetailsColors(focusItem.script)" 
+                        @tosign="toSign = $event" 
+                        :info="getSetDetailsInfo(focusItem.script)"/>
                 </div>
 
 
