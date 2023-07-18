@@ -668,13 +668,13 @@ export default {
                                  <td style="vertical-align: middle">
                                     {{naiString(ad.pricenai)}}</td>
                                  <td><span v-show="true" class="text-center">
-                                       <form class="needs-validation" novalidate>
+                                       <form class="needs-validation" novalidate @submit.prevent="buyFT(ad)">
                                           <input value="1" required type="number" min="1" step="1" :max="ad.qty"
                                              class="form-control text-info" style="max-width: 100px"
                                              v-model="ad.buyQty">
                                           <button type="submit" class="btn btn-info d-none"
                                              v-show="ad.by != account"
-                                             @click="buyFT(ad)">Buy</button>
+                                             >Buy</button>
                                             
                                        </form>
                                     </span>
