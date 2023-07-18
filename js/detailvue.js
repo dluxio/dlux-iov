@@ -24,7 +24,7 @@ export default {
             <div class="card bg-img-none bg-blur-none">
                 <div class="ms-auto">
                     <button :class="{'invisible' : !modal}" type="button" class="btn-close mt-3 me-3"
-                        data-bs-dismiss="modal" aria-label="Close" @click="goBack()"></button>
+                        data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="ms-auto me-auto px-2" style="max-width: 750px">
                     <div class="">
@@ -446,9 +446,6 @@ methods: {
             }
         }
         return found
-    },
-    goBack(){
-        window.history.back();
     },
     extend(contract, amount, up = false){
         if(amount > this.broca_calc(this.broca))return
