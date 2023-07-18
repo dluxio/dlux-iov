@@ -607,7 +607,7 @@ export default {
                            </button>
                         </h2>
                         <div id="collapseftBid" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
-                           <div class="accordion-body">
+                           <div class="accordion-body px-0">
                            <table class="table table-sm">
                                  <thead>
                                     <tr>
@@ -618,11 +618,7 @@ export default {
                                     </tr>
                                  </thead>
                                  <tbody>
-                                    <tr v-for="auc in setdetail.mintAuctions">
-                                       <th scope="row" colspan="4" style="background-color: crimson">
-                                          <span>{{animateCountdown(auc.time)}}<span v-if="auc.bidder"> - {{auc.bidder}} is winning</span></span>
-                                       </th>
-                                    </tr>
+                                    
                                     <tr v-for="auc in setdetail.mintAuctions">
                                        <td style="vertical-align: middle">1</td>
                                        <td style="vertical-align: middle">
@@ -633,9 +629,14 @@ export default {
                                        <td>
                                        <button class="btn btn-secondary" @click="bidNFT(auc)">Bid</button>
                                        </td>
-                                       
                                     </tr>
                                     
+                                    <tr v-for="auc in setdetail.mintAuctions" class="bg-danger-50 text-center border-top-0">
+                                       <th scope="row" colspan="4">
+                                          <span>{{animateCountdown(auc.time)}}<span v-if="auc.bidder"> - {{auc.bidder}} is winning</span></span>
+                                       </th>
+                                    </tr>
+
                                  </tbody>
                                  <th scope="col" class="small"></th>
                                  <th scope="col" class="small"></th>
@@ -657,7 +658,7 @@ export default {
                            </button>
                         </h2>
                         <div id="collapseftBuy" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
-                           <div class="accordion-body">
+                           <div class="accordion-body px-0">
                            <table class="table table-sm">
                            <thead>
                               <tr>
