@@ -1840,7 +1840,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               const init = {
                 owners: 0,
                 deleted: 0,
-                enabled: false,
+                enabled: this.setname == set ? true : false,
                 mintSales: [],
                 sales: [],
                 mintAuctions: [],
@@ -2510,8 +2510,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       for (var chain in this.chains) {
         this.chains[chain].enabled = false;
       }
-      console.log(this.jsontoken)
       this.chains[this.jsontoken].enabled = true;
+      this.chains[this.jsontoken].sets[setName].enabled = true;
       this.getNFTset(setName, this.jsontoken);
       this.getProtocol(this.jsontoken);
     } else if (location.pathname.indexOf('nfts/sets') > 0) {
