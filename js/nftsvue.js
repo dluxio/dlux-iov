@@ -2012,6 +2012,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                           ? "HBD"
                           : "TOKEN";
                     mintSales[i].buyQty = 1;
+                    mintSales[i].token = chain
                     mintSales[i].api = this.chains[chain].api
                     mintSales[i].multisig = this.chains[chain].multisig
                     if (

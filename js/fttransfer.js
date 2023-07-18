@@ -681,10 +681,9 @@ export default {
                                     </span></td>
                                  <td>
                                     <div>
-                                       <button type="submit" class="btn btn-info" v-show="ad.by != account"
-                                          onclick="submit()">Buy</button>
-                                       <!-- <button class="btn btn-primary" v-show="ad.by != account">Buy</button> -->
-                                       <button class="btn btn-warning" v-show="ad.by == account">Cancel</button>
+                                       <button type="button" class="btn btn-info" v-show="ad.by != account"
+                                          @click="buyFT(ad)">Buy</button>
+                                       <button class="btn btn-warning" v-show="ad.by == account" @click="cancelSaleFT(ad)">Cancel</button>
                                     </div>
                                  </td>
                               </tr>
@@ -1092,15 +1091,14 @@ export default {
          const toSign = {
             type: "cja",
             cj: {
-               set: auc.set,
-               uid: auc.uid,
-               bid_amount: parseInt(auc.bidAmount * Math.pow(10, auc.pricenai.precision)),
+               set: sale.set,
+               uid: sale.uid,
             },
-            id: `${auc.token}_ft_bid`,
-            msg: `Bidding ${auc.bidAmount} on ${auc.set} mint token...`,
+            id: `${sale.token}_ft_sell_cancel`,
+            msg: `Canceling ${sale.set} mint token sell...`,
             ops: ["getTokenUser"],
-            api: this.api,
-            txid: `${auc.token}_ft_bid`,
+            api: sale.api,
+            txid: `${sale.token}_ft_bid`,
           }
           this.$emit('tosign', toSign)
         },
