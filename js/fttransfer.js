@@ -603,7 +603,7 @@ export default {
                               data-bs-toggle="collapse" data-bs-target="#collapseftBid" aria-expanded="true"
                               aria-controls="collapseftBid">
                               <i class="fas fa-comment-dollar me-3"></i><span>BID
-                                 NOW</span><span class="small ms-2">lowest bid</span>
+                                 NOW</span><span class="small ms-2" >{{naiString(setdetail.mintSales[0].pricenai)}}</span>
                            </button>
                         </h2>
                         <div id="collapseftBid" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
@@ -654,11 +654,11 @@ export default {
                      <!-- Mint Sales -->
                      <div class="accordion-item">
                         <h2 class="accordion-header">
-                           <button @click="saleData('itemmodal')" onclick="this.blur();"
+                           <button onclick="this.blur();"
                               class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                               data-bs-target="#collapseftBuy" aria-expanded="true" aria-controls="collapseftBuy">
                               <i class="fas fa-money-bill-wave me-3"></i><span>BUY
-                                 NOW</span><span class="small ms-2">lowest price</span>
+                                 NOW</span><span class="small ms-2" v-if="setdetail.mintSales">{{naiString(setdetail.mintSales[0].pricenai)}}</span>
                            </button>
                         </h2>
                         <div id="collapseftBuy" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
