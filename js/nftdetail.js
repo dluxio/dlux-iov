@@ -636,58 +636,47 @@ export default {
                             <button onclick="this.blur();" class="accordion-button" type="button" data-bs-toggle="collapse"
                                data-bs-target="#collapseBid" aria-expanded="true" aria-controls="collapseBid">
                                <i class="fas fa-comment-dollar me-3"></i><span>BID
-                                  NOW</span><span class="small ms-2">({{naiString(itemmodal.item.price)}})</span>
+                                  NOW</span><span class="small ms-2">({{formatNumber(itemmodal.item.price.amount/1000,itemmodal.item.price.precision,'.',',')}} {{itemmodal.item.price.token}})</span>
                             </button>
                          </h2>
                          <div id="collapseBid" class="accordion-collapse collapse show" data-bs-parent="#nftAccordion">
-                            <div class="accordion-body">
-                               <div class="d-flex align-self-end">
-                                  <div class="col-12">
-                                     <div class="d-flex align-items-center justify-content-between">
-                                        <div class="d-flex me-1">
-                                           <h4>Current
-                                              Bid:{{naiString(itemmodal.item.price)}}
-                                           </h4>
+                            <div class="accordion-body px-0 pt-0">
+                                    <div class="d-flex align-items-baseline justify-content-center bg-danger-50">
+                                       <h4 class="m-0">Ends in {{animateCountdown(itemmodal.item.time)}}</h4>
+                                    </div>
+                                    <div class="p-2">
+                                     <div class="d-flex align-items-center mt-1">
+                                       
+                                       <h2 class="mb-0 text-info">{{formatNumber(itemmodal.item.price.amount/1000,itemmodal.item.price.precision,'.',',')}} {{itemmodal.item.price.token}}</h2>
+                                       
+                                       <h4 class="mb-0 ms-auto"><u>
+                                       {{itemmodal.item.bids}} Bids
+                                       </u></h4>
                                         </div>
-                                        <div class="d-flex no-wrap ms-1">
-                                           <u>
-                                              <h4>
-                                                 Number of
-                                                 Bids:{{itemmodal.item.bids}}
-                                              </h4>
-                                           </u>
-                                        </div>
-                                     </div>
-                                     <div class="">
-                                        <div class="d-flex justify-content-around">
-                                           <div class="d-flex align-items-center">
-                                              <div class="text-center p-4">
-                                                 <h1 class="text-warning" style="font-size: 4em">
-                                                    <i class="fa-solid fa-gavel"></i>
-                                                 </h1>
-                                              </div>
+                                     
+
+                                        
+                                           <div class="d-flex align-items-start mt-3 mb-2">
+                                             
                                               <ul>
-                                                 <li>Time Left:
-                                                    {{itemmodal.item.time}}
+
+                                                 <li>
+                                                    {{itemmodal.item.days}} day auction
                                                  </li>
-                                                 <li>Opening Price:
+                                                 <li>
+                                                    <span v-if="itemmodal.item.bidder">{{itemmodal.item.bidder}} is high bidder</span>
+                                                    <span v-if="!itemmodal.item.bidder">No bidders</span>
+                                                 </li>
+                                                 <li>Starting price: 
                                                     {{naiString(itemmodal.item.initial_price)}}
-                                                 </li>
-                                                 <li>Seller:
-                                                    {{itemmodal.item.by}}
-                                                 </li>
-                                                 <li>Bidder:
-                                                    {{itemmodal.item.bidder}}
-                                                 </li>
-                                                 <li>Days:
-                                                    {{itemmodal.item.days}}
+                                                    
                                                  </li>
                                               </ul>
                                            </div>
-                                        </div>
+                                    
                                         <div>
                                            <form class="needs-validation" novalidate>
-                                              <label for="bidNFTprice" class="mb-1">Bid:</label>
+                                              <label for="bidNFTprice" class="mb-1">Bid</label>
                                               <div class="position-relative mb-3">
                                                  <input v-model="auction.bid" type="number"
                                                     class="pe-5 form-control bg-dark border-dark text-info"
@@ -709,7 +698,7 @@ export default {
                                                     </div>
                                                  </div>
                                               </div>
-                                              <div class="text-center">
+                                              <div class="text-center mb-2">
                                                  <button @click="bidNFT(itemmodal.item)" type="button"
                                                     class="btn btn-primary">Bid
                                                  </button>
@@ -719,8 +708,7 @@ export default {
                                      </div>
                                   </div>
                                </div>
-                            </div>
-                         </div>
+</div>
                       </div>
 
                      
@@ -852,6 +840,24 @@ export default {
         }
     },
     methods: {
+      animateCountdown(timeString){
+         // get current time
+         const now = new Date().getTime();
+         // get time to countdown to
+         const countDownDate = new Date(timeString).getTime();
+         // get the difference
+         const distance = countDownDate - now;
+         // calculate time
+         const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+         const hours = Math.floor(
+           (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+         );
+         const minutes = Math.floor(
+           (distance % (1000 * 60 * 60)) / (1000 * 60)
+         );
+         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+         return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+       },
         validateForm(formKey,  op) {
             var Container = document.getElementById(formKey);
             if (Container.querySelector('input:invalid'))
