@@ -478,7 +478,7 @@ export default {
                                data-bs-toggle="collapse" data-bs-target="#collapseMelt" aria-expanded="false"
                                aria-controls="collapseMelt">
                                <i class="fa-solid fa-fire me-3"></i>MELT<span
-                                  class="ms-2 small">({{chains[itemmodal.item.token]
+                                  class="ms-auto small">{{chains[itemmodal.item.token]
                                   ?
                                   precision(chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.amount,
                                   chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.precision)
@@ -486,7 +486,7 @@ export default {
                                   {{chains[itemmodal.item.token]?
                                   chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.token
                                   :
-                                  ''}})</span>
+                                  ''}}</span>
                             </button>
                          </h2>
                          <div id="collapseMelt" class="accordion-collapse collapse" data-bs-parent="#nftAccordion">
@@ -496,7 +496,7 @@ export default {
                                      <div class="">
                                         <div class="d-flex align-items-center justify-content-between">
                                            <div class="d-flex me-1">
-                                              <h4>Melt Value:</h4>
+                                              <h4>Melt Value</h4>
                                            </div>
                                            <div class="d-flex no-wrap ms-1">
                                               <h1>
