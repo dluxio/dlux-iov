@@ -14,7 +14,7 @@ export default {
              <div class="card-header border-0 d-flex align-items-center" :style="{'background': colors}">
                 <div class="nft-header">
                 <div class="me-auto rounded px-2 py-1 shimmer border border-dark">
-    <a :href="'/nfts/set/' + item.setname + '#' + item.token"
+    <a :href="'/nfts/set/' + item.set + '#' + item.token"
         class="no-decoration text-black" style="font-size: 1.3em;">
         <i class="me-1" :class="[icon]"></i><b>{{item.set}}</b></a>
     </div>
@@ -26,7 +26,7 @@ export default {
                    <small>QTY: </small>
                    </div>
                    <div class="ms-1">
-                     <h2 class="m-0">{{formatNumber(item.qty,'0','.',',')}}</h2>
+                     <h2 class="m-0">{{qty}}</h2>
                    </div>
                    </div>
                 </div>
@@ -53,7 +53,7 @@ export default {
                         </div>
                        
                         </div>
-                      <div class="d-flex px-2 pb-2 mb-2 align-items-center" :alt="item.setname + '-' + item.uid">
+                      <div class="d-flex px-2 pb-2 mb-2 align-items-center" :alt="item.set + '-' + item.uid">
                       <h3 class="m-0"
                                 :style="{'background-image': colors}"
                                 style="-webkit-background-clip: text;
@@ -62,7 +62,7 @@ export default {
                                        -moz-text-fill-color: transparent;">
                                 <span>sealed NFT</span></h3>
                                 <!-- owner info -->
-                                <div class="ms-auto" v-if="item.from">
+                                <!--<div class="ms-auto" v-if="item.from">
                                    <a title="Item From" :href="'/@' + item.from" role="button" class="btn btn-lg btn-outline-light" v-if="item.from != account">
                                    <i class="fa-solid fa-truck-arrow-right fa-flip-horizontal fa-fw me-1"></i>  
                                       {{item.from}}
@@ -71,11 +71,11 @@ export default {
                                    <i class="fa-solid fa-truck-arrow-right fa-fw me-1"></i>
                                       {{item.to}}
                                    </a>
-                                </div>
+                                </div>-->
                       <!--Open-->
-                      <div class="ms-auto" v-if="item.qty > 0 && !item.from">
+                      <div class="ms-auto" v-if="qty > 0 && !item.from">
                       <button type="button" class="btn btn-outline-success" title="Open Mint" 
-                      @click="openNFT()"><i class="fas fa-box-open fa-fw"></i> Open</button>
+                      @click="openFT()"><i class="fas fa-box-open fa-fw"></i> Open</button>
                      </div>
                      
                       </div>
@@ -85,10 +85,10 @@ export default {
                                      class="fas fa-caret-square-left"></i></a>
                             </h2>
                             <!--<small class="ms-auto text-muted"><i>Item
-                        index + 1 of
-                        {{NFTselect.auctionOnly || NFTselect.saleOnly ||
-                        NFTselect.sort == 'price' ||
-                        items.length}}</i></small>-->
+                                index + 1 of
+                                {{NFTselect.auctionOnly || NFTselect.saleOnly ||
+                                NFTselect.sort == 'price' ||
+                                items.length}}</i></small>-->
                             <h2 class="ms-auto"><a class="text-muted p-3" role="button" @click="modalNext()"><i
                                      class="fas fa-caret-square-right"></i></a>
                             </h2>
@@ -571,7 +571,7 @@ export default {
                            </div>
 
                       <!-- Mint Auctions -->
-                      <div class="accordion-item" v-if="mintauctions.length">
+                      <div class="accordion-item" v-if="setdetail.mintAuctions.length">
                          <h2 class="accordion-header">
                             <button onclick="this.blur();" class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                data-bs-target="#collapseftBid" aria-expanded="true" aria-controls="collapseftBid">
@@ -591,7 +591,7 @@ export default {
                                             </tr>
                                           </thead>
                                           <tbody>
-                                            <tr scope="row" v-for="ad in mintsales">
+                                            <tr scope="row" v-for="ad in setdetail.mintSales">
                                               <td style="vertical-align: middle">
                                                 {{formatNumber(ad.qty,0,'.',',')}}</td>
                                               <td style="vertical-align: middle">
@@ -623,7 +623,7 @@ export default {
                               </div>
  
                       <!-- Mint Sales -->
-                      <div class="accordion-item" v-if="mintauctions.length">
+                      <div class="accordion-item" v-if="setdetail.mintAuctions.length">
                          <h2 class="accordion-header">
                             <button @click="saleData('itemmodal')" onclick="this.blur();" class="accordion-button collapsed" type="button"
                                data-bs-toggle="collapse" data-bs-target="#collapseftBuy" aria-expanded="true"
@@ -644,12 +644,12 @@ export default {
                               </tr>
                           </thead>
                             <tbody>
-                              <tr v-for="auc in mintauctions">
+                              <tr v-for="auc in setdetail.mintAuctions">
                                 <th scope="row" colspan="4" style="background-color: crimson">
                                   <span>{{auc.time}}</span>
                                 </th>
                               </tr>
-                              <tr v-for="auc in mintauctions">
+                              <tr v-for="auc in setdetail.mintAuctions">
                                 <th scope="row">1</th>
                                 <td>{{naiString(auc.pricenai)}}</td>
                                 <td>&asymp;
@@ -657,7 +657,7 @@ export default {
                                 </td>
                                 <td>{{auc.bidder}}</td>
                               </tr>
-                              <tr v-for="auc in mintauctions">
+                              <tr v-for="auc in setdetail.mintAuctions">
                                 <th scope="row" colspan="2"></th>
                                 <td><input class="form-control " type="number">
                                 </td>
@@ -686,7 +686,7 @@ export default {
     </div>
  </div>
  </div>`,
-    // @click="modalIndex('itemModal', item.setname + ':' + item.uid );hidden = false"
+    // @click="modalIndex('itemModal', item.set + ':' + item.uid );hidden = false"
     // set PFP
     props: {
         item: {
@@ -697,29 +697,32 @@ export default {
                 };
             },
         },
-        mintauctions: {
-            required: false,
-            default: function () {
-                return [];
-            },
-        },
-        mintsales: {
-            required: false,
-            default: function () {
-                return [];
-            },
-        },
-        auctions: {
-            required: false,
-            default: function () {
-                return [];
-            },
-        },
-        sales: {
-            required: false,
-            default: function () {
-                return []
-            },
+        // mintauctions: {
+        //     required: false,
+        //     default: function () {
+        //         return [];
+        //     },
+        // },
+        // mintsales: {
+        //     required: false,
+        //     default: function () {
+        //         return [];
+        //     },
+        // },
+        // auctions: {
+        //     required: false,
+        //     default: function () {
+        //         return [];
+        //     },
+        // },
+        // sales: {
+        //     required: false,
+        //     default: function () {
+        //         return []
+        //     },
+        // },
+        qty: {
+            default: 0
         },
         api: {
             default: '',
@@ -758,6 +761,8 @@ export default {
                     max:4096,
                     max_exe_length:0,
                     max_opt_length:0,
+                    mintAuctions:[],
+                    mintSales:[],
                     minted:"1x",
                     name:"dlux",
                     name_long:"DLUX Founders",
@@ -847,9 +852,31 @@ export default {
         addDistro(){
             this.sell.distro.push({name: '', percent: 0})
         },
+        apiFor(prefix) {
+          if (prefix == "dlux_") return "https://token.dlux.io";
+          if (prefix == "spkcc_") return "https://spkinstant.hivehoneycomb.com";
+          if (prefix == "duat_") return "https://duat.hivehoneycomb.com";
+          else return "";
+        },
         removeDistro(index){
             this.sell.distro.splice(index, 1)
         },
+        openFT() {
+            var cja = {
+                set: this.item.set,
+              },
+              type = "cja";
+            this.toSign = {
+              type,
+              cj: cja,
+              id: `${this.item.token}_nft_mint`,
+              msg: `Minting: ${this.item.set} NFT`,
+              ops: ["getUserNFTs"],
+              api: this.apiFor(this.item.token),
+              txid: `${this.item.set}_nft_mint`,
+            };
+            this.$emit("tosign", this.toSign);
+          },
         validateDistro(){
             var total = 0
             for (var i = 0; i < this.sell.distro.length; i++) {
@@ -1064,7 +1091,7 @@ export default {
               this.$emit('tosign', toSign)
         },
         modalIndex() {
-            this.$emit('detail', this.item.setname + ':' + this.item.uid);
+            this.$emit('detail', this.item.set + ':' + this.item.uid);
         },
         timeSince(date) {
             var seconds = Math.floor((new Date() - new Date(date + ".000Z")) / 1000);

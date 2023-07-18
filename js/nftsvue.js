@@ -768,7 +768,6 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
       if(this.setPage){
         if(!( this.selectors['At Auction'].checked || this.selectors['For Sale'].checked)){
           for(var i = 0; (i < this.allNFTs.length && i < this.wantedNum); i++){
-            console.log(chain, set, this.chains[this.jsontoken].sets[set])
             if(!this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid]){
               this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid] = true
               this.callScript(this.allNFTs[i], i).then(d => {
@@ -824,6 +823,9 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           }
         }
       }
+    },
+    mintsQty(item){
+      return this.getMint(this.chains[item.token]?.sets[item.set]?.set, 'qty')
     },
     ipfsUpload(event) {
       console.log("1", event);
