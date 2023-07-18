@@ -789,7 +789,7 @@
           <!-- NFT Detail Modal -->
           <div>
             <nftdetail :sets="focusSet" :account="account" :itemmodal="itemModal" :pfp="pfp" :item="focusItem"
-              :chains="chains" @detail="modalIndex('itemModal', $event);itemModal.hidden = false"
+              :chains="chains" @detail="modalIndex('itemModal', $event);itemModal.hidden = false" @setpfp="setPFP($event)"
               @tosign="toSign=$event" />
           </div>
 
