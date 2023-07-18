@@ -636,7 +636,7 @@ export default {
                             <button onclick="this.blur();" class="accordion-button" type="button" data-bs-toggle="collapse"
                                data-bs-target="#collapseBid" aria-expanded="true" aria-controls="collapseBid">
                                <i class="fas fa-comment-dollar me-3"></i><span>BID
-                                  NOW</span><span class="small ms-2">({{formatNumber(itemmodal.item.price.amount/1000,itemmodal.item.price.precision,'.',',')}} {{itemmodal.item.price.token}})</span>
+                                  NOW</span><span class="small ms-auto">{{formatNumber(itemmodal.item.price.amount/1000,itemmodal.item.price.precision,'.',',')}} {{itemmodal.item.price.token}}</span>
                             </button>
                          </h2>
                          <div id="collapseBid" class="accordion-collapse collapse show" data-bs-parent="#nftAccordion">
