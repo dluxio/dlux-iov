@@ -147,8 +147,10 @@
                                     <h3 class="d-none">MINTS</h3>
                                     <div class="carousel-item active">
                                         <div class="d-flex mx-5 mt-2 mb-3 align-items-center rounded">
+                                            <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
+                            @click="focusItem.set = setname; focusItem.token = jsontoken">
                                             <img src="https://ipfs.io/ipfs/QmRYrwWuUpjdkn3VW2CY9mD2NcqoGqiJzjN2DmWi49dRZX"
-                                                class="border border-dark border-2 rounded mint-img shadow">
+                                                class="border border-dark border-2 rounded mint-img shadow"></a>
                                             <div class="w-100 d-flex">
                                                 <div class="ms-auto text-end">
                                                     <h5>Hive Folks</h5>
@@ -608,6 +610,22 @@
                     :chains="chains" @detail="modalIndex('itemModal', $event);itemModal.hidden = false"
                     @tosign="toSign=$event" />
             </div>
+
+            <!-- Mint Detail modal -->
+          <div>
+            <fttransfer :account="account" 
+            :item="focusItem" 
+            :mint="true" 
+            @modal="modal($event)"
+            :icon="chains[focusItem.token].sets[focusItem.set].computed.set.faicon" 
+            :setdetail="chains[focusItem.token].sets[focusItem.set]"
+            :api="chains[focusItem.token].api"
+            :wrapped="chains[focusItem.token].sets[focusItem.set].computed.set.wrapped"
+            :qty="mintsQty(focusItem)"
+            :colors="'linear-gradient(' + chains[focusItem.token].sets[focusItem.set].computed.set.Color1 + ',' + chains[focusItem.token].sets[focusItem.set].computed.set.Color2 + ')'"
+            @tosign="toSign = $event" 
+            :info="chains[focusItem.token].sets[focusItem.set].computed.set.Description" />
+          </div>
     </div>
     </main>
     <div>
