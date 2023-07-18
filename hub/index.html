@@ -175,6 +175,16 @@
         </div>
     </div>
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            //MODAL LISTEN
+            var detailMod = document.getElementById('detailModal');
+            detailMod.addEventListener('show.bs.modal', event => {
+                console.log('show (add url)');
+            })
+            detailMod.addEventListener('hide.bs.modal', event => {
+                console.log('hide (remove url)');
+            })
+        });
         (function () {
             "use strict";
             window.addEventListener(

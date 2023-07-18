@@ -119,13 +119,14 @@ export default {
                                <p>{{itemmodal.item.set.Description}}</p>
                                <div class="d-flex align-items-center" v-if="itemmodal.item.setname"> 
                                  <div class="text-start small border border-secondary rounded text-white px-2 py-1 w-100">
-                                    <div class="d-flex align-items-center justify-content-start flex-wrap" v-if="!inventory && chains[itemmodal.item.token]">
-                                       <span class="mb-0" title="Total Number of Owners"><i class="fa-solid fa-user-astronaut fa-fw"></i> {{chains[itemmodal.item.token].sets[itemmodal.item.setname].owners}}</span>
-                                       <span class="mb-0 ms-2" title="Total Number of Items"><i class="fa-solid fa-star fa-fw"></i> {{chains[itemmodal.item.token].sets[itemmodal.item.setname].minted - chains[itemmodal.item.token].sets[itemmodal.item.setname].deleted}}</span>     
+                                    <div class="d-flex align-items-center justify-content-start flex-wrap">
+                                       <span class="mb-0" title="Royalties" v-if="chains[itemmodal.item.token]"><i class="fa-solid fa-crown fa-fw"></i> {{chains[itemmodal.item.token].sets[itemmodal.item.setname]?.royalty/100}}%</span>
+                                       <span class="mb-0 ms-2" title="Total Number of Owners" v-if="!inventory && chains[itemmodal.item.token]"><i class="fa-solid fa-user-astronaut fa-fw"></i> {{chains[itemmodal.item.token].sets[itemmodal.item.setname].owners}}</span>
+                                       <span class="mb-0 ms-2" title="Total Number of Items" v-if="!inventory && chains[itemmodal.item.token]"><i class="fa-solid fa-star fa-fw"></i> {{chains[itemmodal.item.token].sets[itemmodal.item.setname].minted - chains[itemmodal.item.token].sets[itemmodal.item.setname].deleted}}</span>     
                                        <span class="mb-0 ms-2" title="Layer 2 Honeycomb Sidechain"><i class="fa-solid fa-link fa-fw"></i> {{itemmodal.item.token}}</span>
                                     </div>
-                                    <div class="d-flex align-items-center justify-content-start flex-wrapa" v-if="chains[itemmodal.item.token]">
-                                       <span class="mb-0 me-2" title="Melt Value if Item is Burned"><i class="fa-solid fa-fire fa-fw"></i> {{chains[itemmodal.item.token]
+                                    <div class="d-flex align-items-center justify-content-start flex-wrap" v-if="chains[itemmodal.item.token]"> 
+                                          <span class="mb-0 me-2" title="Melt Value if Item is Burned"><i class="fa-solid fa-fire fa-fw"></i> {{chains[itemmodal.item.token]
                                           ?
                                           precision(chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.amount,
                                           chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.precision)
@@ -134,10 +135,10 @@ export default {
                                           chains[itemmodal.item.token].sets[itemmodal.item.setname].bond.token
                                           :
                                           ''}}</span>
+                                    
                                        <span class="mb-0 me-2" title="Last Market Dividends Paid Out to Owners"><i class="fa-solid fa-money-bill-transfer fa-fw"></i> {{naiString(chains[itemmodal.item.token].sets[itemmodal.item.setname].last_div)}} </span>
                                        <span class="mb-0 me-2" title="Total Market Dividends Paid Out to Owners"><i class="fa-solid fa-money-bill-trend-up fa-fw"></i> {{naiString(chains[itemmodal.item.token].sets[itemmodal.item.setname].total_div)}} </span>
-                                    </div>
-                                    <p class="m-0" title="Royalties" v-if="chains[itemmodal.item.token]"><i class="fa-solid fa-crown fa-fw"></i> {{chains[itemmodal.item.token].sets[itemmodal.item.setname]?.royalty/100}}</p>
+                                       </div>
                                  </div>
                                </div>
                             </div>
@@ -535,18 +536,16 @@ export default {
                       </div>
 
                       <!-- NFT Trade -->
-                      <div class="accordion-item" v-if="itemmodal.item.trade">
-                      <h2 class="accordion-header">
+                  <div class="accordion-item" v-if="itemmodal.item.trade">
+                         <h2 class="accordion-header">
                             <button onclick="this.blur();" class="accordion-button" type="button" data-bs-toggle="collapse"
                                data-bs-target="#collapseTrade" aria-expanded="false" aria-controls="collapseTrade">
                                <i class="fa-solid fa-paper-plane fa-fw me-3"></i>TRADE
                             </button>
                          </h2>
-                         <div id="collapseTrade" class="accordion-collapse collapse show"
+                     <div id="collapseTrade" class="accordion-collapse collapse show"
                          data-bs-parent="#nftAccordion">
-                         <div class="accordion-body">
-                           </div>
-                           
+                        <div class="accordion-body">
                            <div class="p-2 text-white text-center rounded"">
                            <section>
                              <div class="d-flex align-items-center">
@@ -572,8 +571,9 @@ export default {
                                </div>
                              </div>
                            </section>
+                           <div class="mt-3 mb-1">
                              <!-- ACCEPT / REJECT  -->
-                             <div class="mt-2 mb-3" role="group" v-if="itemmodal.item.to == account">
+                             <div role="group" v-if="itemmodal.item.to == account">
                                  <button type="button" class="btn btn-danger" title="Decline Trade"
                                  @click="cancelXfr()"><i class="fa-solid fa-xmark fa-fw me-2"></i>Decline</button>
                                  <button type="button" class="btn ps-05 pe-05 border-0"
@@ -581,16 +581,17 @@ export default {
                                  <button type="button" class="btn btn-success" title="Accept Trade"
                                @click="acceptXfr()"><i class="fa-solid fa-check fa-fw me-2"></i> Accept</button>
                               </div>
-                                <!-- CANCEL  -->
-                                <div class="mt-2 mb-3" v-if="itemmodal.item.from == account">
+                              <!-- CANCEL  -->
+                              <div role="group" v-if="itemmodal.item.from == account">
                                 <button type="button" class="btn btn-warning" title="Cancel Trade"
                                  @click="cancelXfr()">
                                  <i class="fa-solid fa-xmark fa-fw me-2"></i> Cancel</button>
-                                </div>
+                              </div>
                            </div>
+                        </div>
 
-                           </div>
-                           </div>
+                     </div>
+                  </div>
 
                            <!-- NFT Buy -->
                            <div class="accordion-item" v-if="itemmodal.item.sale">

@@ -120,17 +120,18 @@ export default {
                               <div class="d-flex align-items-center">
                                  <div
                                     class="text-start small border border-secondary rounded text-white px-2 py-1 w-100">
-                                    <div class="d-flex align-items-center justify-content-start flex-wrap"
-                                       v-if="!inventory">
-                                       <span class="mb-0" title="Total Number of Owners"><i
+                                    <div class="d-flex align-items-center justify-content-start flex-wrap">
+                                     <span class="mb-0" title="Royalties"><i class="fa-solid fa-crown fa-fw"></i>
+                                    {{setdetail.royalty / 100}}%</span>
+                                       <span v-if="!inventory" class="mb-0 ms-2" title="Total Number of Owners"><i
                                              class="fa-solid fa-user-astronaut fa-fw"></i> {{setdetail.owners}}</span>
-                                       <span class="mb-0 ms-2" title="Total Number of Items"><i
+                                       <span v-if="!inventory" class="mb-0 ms-2" title="Total Number of Items"><i
                                              class="fa-solid fa-star fa-fw"></i> {{setdetail.minted -
                                           setdetail.deleted}}</span>
                                        <span class="mb-0 ms-2" title="Layer 2 Honeycomb Sidechain"><i
                                              class="fa-solid fa-link fa-fw"></i> {{item.token}}</span>
                                     </div>
-                                    <div class="d-flex align-items-center justify-content-start flex-wrapa">
+                                    <div class="d-flex align-items-center justify-content-start flex-wrap">
                                        <span class="mb-0 me-2" title="Melt Value if Item is Burned"><i
                                              class="fa-solid fa-fire fa-fw"></i> {{naiString(setdetail.bond)}}</span>
                                        <span class="mb-0 me-2" title="Last Market Dividends Paid Out to Owners"><i
@@ -139,8 +140,7 @@ export default {
                                        <span class="mb-0 me-2" title="Total Market Dividends Paid Out to Owners"><i
                                              class="fa-solid fa-money-bill-trend-up fa-fw"></i>{{naiString(setdetail.total_div)}}</span>
                                     </div>
-                                    <p class="m-0" title="Royalties"><i class="fa-solid fa-crown fa-fw"></i>
-                                    {{setdetail.royalty / 100}}% to {{royaltySplit(setdetail.royalty_accounts)}}</p>
+                                   
                                  </div>
                               </div>
 
@@ -567,23 +567,25 @@ export default {
                                     <h5 class="small m-0">PRICE:</h5>
                                  </div>
                                  <div class="text-start mt-auto mb-auto" style="flex: 2">
-                                    <h5 class="lead m-0">{{item.priceString}}</h5>
+                                    <h5 class="lead m-0 text-uppercase">{{formatNumber(item.price/1000,3,'.',',')}} {{item.token}}</h5>
                                  </div>
                               </div>
                               </section>
+                              <div class="mt-3 mb-1">
                               <!-- ACCEPT / REJECT -->
-                              <div class="mt-2 mb-3" role="group" v-if="item.to == account">
+                              <div role="group" v-if="item.to == account">
                                  <button type="button" class="btn btn-danger" title="Decline Trade"
-                                    @click="cancelXfr()"><i class="fa-solid fa-xmark fa-fw ms-2"></i>Decline</button>
+                                    @click="cancelXfr()"><i class="fa-solid fa-xmark fa-fw me-2"></i>Decline</button>
                                  <button type="button" class="btn ps-05 pe-05 border-0" disabled></button>
                                  <button type="button" class="btn btn-success" title="Accept Trade"
-                                    @click="acceptXfr()"><i class="fa-solid fa-check fa-fw ms-2"></i> Accept</button>
+                                    @click="acceptXfr()"><i class="fa-solid fa-check fa-fw me-2"></i> Accept</button>
                               </div>
                               <!-- CANCEL -->
-                              <div class="mt-2 mb-3" v-if="item.from == account">
+                              <div role="group" v-if="item.from == account">
                                  <button type="button" class="btn btn-warning" title="Cancel Trade"
                                     @click="cancelXfr()">
-                                    <i class="fa-solid fa-xmark fa-fw ms-2"></i> Cancel</button>
+                                    <i class="fa-solid fa-xmark fa-fw me-2"></i> Cancel</button>
+                              </div>
                               </div>
                            </div>
 </div>
