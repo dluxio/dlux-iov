@@ -158,11 +158,11 @@
                                                             <h5>{{chains[chainname].sets[setName].name_long}}</h5>
                                                             <div v-if="chains[chainname].sets[setName].mintSales.length">
                                                                 <small>Lowest Price</small>
-                                                                <p>{{naiString(chains[chainname].sets[setName].mintSales[0].naiprice)}}</p>
+                                                                <p>{{naiString(chains[chainname].sets[setName].mintSales[0].pricenai)}}</p>
                                                             </div>
                                                             <div v-if="chains[chainname].sets[setName].mintAuctions.length">
                                                                 <small>Lowest Bid</small>
-                                                                <p>{{naiString(chains[chainname].sets[setName].mintAuctions[0].naiprice)}}</p>
+                                                                <p>{{naiString(chains[chainname].sets[setName].mintAuctions[0].pricenai)}}</p>
                                                             </div>
                                                             <button class="btn btn-sm btn-outline-light">{{chains[chainname].sets[setName].forAuctionMint + chains[chainname].sets[setName].forSaleMint}} Available</button>
                                                         </div>
