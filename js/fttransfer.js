@@ -26,7 +26,7 @@ export default {
                         <small>QTY: </small>
                      </div>
                      <div class="ms-1">
-                        <h2 class="m-0">{{qty}}</h2>
+                        <h2 class="m-0">{{formatNumber(qty,0,'.',',')}}</h2>
                      </div>
                   </div>
                </div>
@@ -603,7 +603,7 @@ export default {
                               data-bs-toggle="collapse" data-bs-target="#collapseftBid" aria-expanded="true"
                               aria-controls="collapseftBid">
                               <i class="fas fa-comment-dollar me-3"></i><span>BID
-                                 NOW</span><span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em" v-if="setdetail.mintAuctions">{{setdetail.mintAuctions.length}}</span><span class="small ms-auto" v-if="setdetail.mintSales?.length">{{formatNumber(setdetail.mintAuctions[0].pricenai.amount/1000,3,'.',',')}} {{setdetail.mintAuctions[0].pricenai.token}}</span>
+                                 NOW</span><span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em" v-if="setdetail.mintAuctions">{{formatNumber(setdetail.mintAuctions.length,0,'.',',')}}</span><span class="small ms-auto" v-if="setdetail.mintSales?.length">{{formatNumber(setdetail.mintAuctions[0].pricenai.amount/1000,3,'.',',')}} {{setdetail.mintAuctions[0].pricenai.token}}</span>
                            </button>
                         </h2>
                         <div id="collapseftBid" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
@@ -612,32 +612,30 @@ export default {
                                  <thead>
                                     <tr>
                                        <th scope="col" class="small">QTY</th>
+                                       <th scope="col" class="small">MIN</th>
                                        <th scope="col" class="small">BID</th>
-                                       <th scope="col" class="small">TOTAL</th>
-                                       <th scope="col" class="small">HIGH BIDDER</th>
+                                       <th scope="col" class="small"></th>
                                     </tr>
                                  </thead>
                                  <tbody>
                                     <tr v-for="auc in setdetail.mintAuctions">
                                        <th scope="row" colspan="4" style="background-color: crimson">
-                                          <span>{{animateCountdown(auc.time)}}</span>
+                                          <span>{{animateCountdown(auc.time)}}<span v-if="auc.bidder"> - {{auc.bidder}} is winning</span></span>
                                        </th>
                                     </tr>
                                     <tr v-for="auc in setdetail.mintAuctions">
-                                       <th scope="row">1</th>
-                                       <td>{{naiString(auc.pricenai)}}</td>
-                                       <td>&asymp;
-                                          {{auc.price}}
+                                       <td style="vertical-align: middle">1</td>
+                                       <td style="vertical-align: middle">
+                                       {{formatNumber(auc.price/1000,3,'.',',')}} {{auc.pricenai.token}}</td>
+                                       <td>
+                                       <input class="form-control " type="number">
                                        </td>
-                                       <td>{{auc.bidder}}</td>
+                                       <td>
+                                       <button class="btn btn-secondary" @click="bidNFT(auc)">Bid</button>
+                                       </td>
+                                       
                                     </tr>
-                                    <tr v-for="auc in setdetail.mintAuctions">
-                                       <th scope="row" colspan="2"></th>
-                                       <td><input class="form-control " type="number">
-                                       </td>
-                                       <td><button class="btn btn-secondary" @click="bidNFT(auc)">Bid</button>
-                                       </td>
-                                    </tr>
+                                    
                                  </tbody>
                                  <th scope="col" class="small"></th>
                                  <th scope="col" class="small"></th>
@@ -655,7 +653,7 @@ export default {
                               class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                               data-bs-target="#collapseftBuy" aria-expanded="true" aria-controls="collapseftBuy">
                               <i class="fas fa-money-bill-wave me-3"></i><span>BUY
-                                 NOW</span><span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em" v-if="setdetail.mintSales">{{setdetail.forSaleMint}}</span><span class="small ms-auto" v-if="setdetail?.mintSales?.length">{{formatNumber(setdetail.mintSales[0].pricenai.amount/1000,3,'.',',')}} {{setdetail.mintSales[0].pricenai.token}}</span>
+                                 NOW</span><span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em" v-if="setdetail.mintSales">{{formatNumber(setdetail.forSaleMint,0,'.',',')}}</span><span class="small ms-auto" v-if="setdetail?.mintSales?.length">{{formatNumber(setdetail.mintSales[0].pricenai.amount/1000,3,'.',',')}} {{setdetail.mintSales[0].pricenai.token}}</span>
                            </button>
                         </h2>
                         <div id="collapseftBuy" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
