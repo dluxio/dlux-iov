@@ -3294,7 +3294,13 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       return 0;
     },
     newme(user) {
+      console.log('yes')
       this.posturls = {};
+      this.FTtrades = []
+      this.NFTtrades = []
+      this.accountNFTs = []
+      this.accountRNFTs = []
+
       this.postSelect = {
         sort: "time",
         searchTerm: "",
@@ -3445,23 +3451,23 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     if(this.pagePermlink){
       this.getContent(this.pageAccount, this.pagePermlink, true)
     } else {
-      this.focus.account = this.pageAccount;
-      this.sapi = sapi;
-      this.checkAccount("pageAccount", "focus");
-      this.getHiveUser();
-      this.getSPKUser()
-      if(!this.me)this.accountRelations(this.pageAccount);
-      this.getHiveStats();
-      this.getQuotes();
-      this.getSNodes();
-      this.getPosts();
-      this.getProtocol();
-      this.getSpkStats();
-      this.getRewardFund();
-      this.getFeedPrice();
-      this.getSapi(this.pageAccount, false);
-      this.getTokenUser(this.pageAccount, false);
-      this.getNFTs(this.pageAccount);
+      // this.focus.account = this.pageAccount;
+      // this.sapi = sapi;
+      // this.checkAccount("pageAccount", "focus");
+      // this.getHiveUser();
+      // this.getSPKUser()
+      // if(!this.me)this.accountRelations(this.pageAccount);
+      // this.getHiveStats();
+      // this.getQuotes();
+      // this.getSNodes();
+      // this.getPosts();
+      // this.getProtocol();
+      // this.getSpkStats();
+      // this.getRewardFund();
+      // this.getFeedPrice();
+      // this.getSapi(this.pageAccount, false);
+      // this.getTokenUser(this.pageAccount, false);
+      // this.getNFTs(this.pageAccount);
       deepLink();
     }
   },
