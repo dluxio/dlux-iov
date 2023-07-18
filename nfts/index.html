@@ -170,19 +170,19 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button class="carousel-control-prev" type="button" @click="activeIndexDn()"
+                                <button class="carousel-control-prev" type="button" @click="pairMints();activeIndexDn()"
                                     data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
                                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                     <span class="visually-hidden">Previous</span>
                                 </button>
-                                <button class="carousel-control-next" type="button" @click="activeIndexUp()"
+                                <button class="carousel-control-next" type="button" @click="pairMints();activeIndexUp()"
                                     data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
                                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                     <span class="visually-hidden">Next</span>
                                 </button>
                                 <div class="carousel-indicators">
                                     <div v-for="(mint, name, index) in mintData">
-                                        <button type="button" data-bs-target="#carouselExampleCaptions" :data-bs-slide-to="index" @click="activeIndex = index"
+                                        <button type="button" data-bs-target="#carouselExampleCaptions" :data-bs-slide-to="index" @click="pairMints();activeIndex = index"
                                             class="active" aria-current="true" :aria-label="'Slide ' + index"></button>
                                     </div>
                                 </div>
