@@ -655,7 +655,7 @@ export default {
                               class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                               data-bs-target="#collapseftBuy" aria-expanded="true" aria-controls="collapseftBuy">
                               <i class="fas fa-money-bill-wave me-3"></i><span>BUY
-                                 NOW</span><span class="small ms-2" v-if="setdetail.mintSales">{{naiString(setdetail.mintSales[0].pricenai)}}</span>
+                                 NOW</span><span class="small ms-2" v-if="setdetail.mintSales.length">{{naiString(setdetail.mintSales[0].pricenai)}}</span>
                            </button>
                         </h2>
                         <div id="collapseftBuy" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
@@ -1184,6 +1184,9 @@ export default {
           return `${parseFloat(nai.amount / Math.pow(10, nai.precision)).toFixed(
             nai.precision
           )} ${nai.token}`;
+        },
+        toFixed(num = "", fixed = 2){
+            return typeof num == 'number' ? num.toFixed(fixed) : parseFloat(num).toFixed(fixed)
         }
     },
     mounted() {

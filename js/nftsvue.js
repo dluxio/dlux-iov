@@ -1807,7 +1807,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 owners: 0,
                 deleted: 0,
                 enabled: false,
+                mintSales: [],
                 sales: [],
+                mintAuctions: [],
                 auctions: [],
                 loaded: {},
                 af: {
