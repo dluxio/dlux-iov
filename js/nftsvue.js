@@ -491,6 +491,7 @@ var app = new Vue({
           uid: "",
         },
       },
+      activeIndex: 0,
       nftTradeTabToken: "",
       nftTradeAllowed: false,
       nftTradeTabTo: "",
@@ -1689,6 +1690,14 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             });
         });
       })
+    },
+    activeIndexUp(){
+      if(this.activeIndex < this.mintData.length - 1) this.activeIndex++
+      else this.activeIndex = 0
+    },
+    activeIndexDn(){
+      if(this.activeIndex > 0) this.activeIndex--
+      else this.activeIndex = this.mintData.length - 1
     },
     removeUser() {
       this.balance = 0;
