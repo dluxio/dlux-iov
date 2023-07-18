@@ -598,9 +598,11 @@ export default {
                                  <button onclick="this.blur();" @click="saleData('itemmodal')" class="accordion-button" type="button"
                                     data-bs-toggle="collapse" data-bs-target="#collapseBuy" aria-expanded="true"
                                     aria-controls="collapseBuy">
-                                    <i class="fas fa-money-bill-wave me-3"></i>BUY
-                                       NOW<span class="small ms-auto">{{formatNumber(itemmodal.item.price.amount/1000,itemmodal.item.price.precision,'.',',')}}
-                                       <span class="text-uppercase">{{itemmodal.item.price.token}}</span><span>
+                                    <i class="fas fa-money-bill-wave me-3"></i>
+                                    BUY NOW
+                                    <span class="small ms-auto">
+                                    {{formatNumber(itemmodal.item.price.amount/1000,itemmodal.item.price.precision,'.',',')}}
+                                       <span class="text-uppercase">{{itemmodal.item.price.token}}</span></span>
                                  </button>
                               </h2>
                               <div id="collapseBuy" class="accordion-collapse collapse show" data-bs-parent="#nftAccordion">
