@@ -655,7 +655,7 @@ export default {
                               class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                               data-bs-target="#collapseftBuy" aria-expanded="true" aria-controls="collapseftBuy">
                               <i class="fas fa-money-bill-wave me-3"></i><span>BUY
-                                 NOW</span><span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em" v-if="setdetail.mintSales">{{setdetail.forSaleMint}}</span><span class="small ms-auto" v-if="setdetail.mintSales.length">{{formatNumber(setdetail.mintSales[0].pricenai.amount/1000,3,'.',',')}} {{setdetail.mintSales[0].pricenai.token}}</span>
+                                 NOW</span><span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em" v-if="setdetail.mintSales">{{setdetail.forSaleMint}}</span><span class="small ms-auto" v-if="setdetail?.mintSales?.length">{{formatNumber(setdetail.mintSales[0].pricenai.amount/1000,3,'.',',')}} {{setdetail.mintSales[0].pricenai.token}}</span>
                            </button>
                         </h2>
                         <div id="collapseftBuy" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
