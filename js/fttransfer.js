@@ -83,11 +83,8 @@ export default {
                         <h2><a class="text-muted p-3" role="button" @click="modalPrev()"><i
                                  class="fas fa-caret-square-left"></i></a>
                         </h2>
-                        <!--<small class="ms-auto text-muted"><i>Item
-                                index + 1 of
-                                {{NFTselect.auctionOnly || NFTselect.saleOnly ||
-                                NFTselect.sort == 'price' ||
-                                items.length}}</i></small>-->
+                        <small class="ms-auto text-muted"><i>
+                                {{numitems}} sets</i></small>
                         <h2 class="ms-auto"><a class="text-muted p-3" role="button" @click="modalNext()"><i
                                  class="fas fa-caret-square-right"></i></a>
                         </h2>
@@ -597,13 +594,13 @@ export default {
                      </div>
 
                      <!-- Mint Auctions -->
-                     <div class="accordion-item">
+                     <div class="accordion-item" v-if="setdetail.forAuctionMint">
                         <h2 class="accordion-header">
                            <button onclick="this.blur();" class="accordion-button collapsed" type="button"
                               data-bs-toggle="collapse" data-bs-target="#collapseftBid" aria-expanded="true"
                               aria-controls="collapseftBid">
                               <i class="fas fa-comment-dollar me-3"></i><span>BID
-                                 NOW</span><span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em" v-if="setdetail.mintAuctions">{{formatNumber(setdetail.mintAuctions.length,0,'.',',')}}</span><span class="small ms-auto" v-if="setdetail.mintSales?.length">{{formatNumber(setdetail.mintAuctions[0].pricenai.amount/1000,3,'.',',')}} {{setdetail.mintAuctions[0].pricenai.token}}</span>
+                                 NOW</span><span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em">{{formatNumber(setdetail.mintAuctions.length,0,'.',',')}}</span><span class="small ms-auto" v-if="setdetail.mintSales?.length">{{formatNumber(setdetail.mintAuctions[0].pricenai.amount/1000,3,'.',',')}} {{setdetail.mintAuctions[0].pricenai.token}}</span>
                            </button>
                         </h2>
                         <div id="collapseftBid" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
@@ -648,13 +645,13 @@ export default {
                      </div>
 
                      <!-- Mint Sales -->
-                     <div class="accordion-item">
+                     <div class="accordion-item" v-if="setdetail.mintSales">
                         <h2 class="accordion-header">
                            <button onclick="this.blur();"
                               class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                               data-bs-target="#collapseftBuy" aria-expanded="true" aria-controls="collapseftBuy">
                               <i class="fas fa-money-bill-wave me-3"></i><span>BUY
-                                 NOW</span><span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em" v-if="setdetail.mintSales">{{formatNumber(setdetail.forSaleMint,0,'.',',')}}</span><span class="small ms-auto" v-if="setdetail?.mintSales?.length">{{formatNumber(setdetail.mintSales[0].pricenai.amount/1000,3,'.',',')}} {{setdetail.mintSales[0].pricenai.token}}</span>
+                                 NOW</span><span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em">{{formatNumber(setdetail.forSaleMint,0,'.',',')}}</span><span class="small ms-auto" v-if="setdetail?.mintSales?.length">{{formatNumber(setdetail.mintSales[0].pricenai.amount/1000,3,'.',',')}} {{setdetail.mintSales[0].pricenai.token}}</span>
                            </button>
                         </h2>
                         <div id="collapseftBuy" class="accordion-collapse collapse" data-bs-parent="#ftAccordion">
@@ -727,6 +724,10 @@ export default {
                 };
             },
         },
+        numitems: {
+            required: false,
+            default: 1
+         },
         // mintauctions: {
         //     required: false,
         //     default: function () {
@@ -836,7 +837,7 @@ export default {
             default: ''
         },
     },
-    emits: ['tosign', 'detail'],
+    emits: ['tosign', 'detail', 'modal'],
     data() {
         return {
             give: {
@@ -879,6 +880,12 @@ export default {
         };
     },
     methods: {
+      modalNext(){
+         this.$emit('modal', 'up')
+      },
+      modalPrev(){
+         this.$emit('modal', 'dn')
+      },
         addDistro(){
             this.sell.distro.push({name: '', percent: 0})
         },

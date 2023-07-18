@@ -163,7 +163,10 @@
                                                             <small>Lowest Bid</small>
                                                             <p>{{naiString(chains[mint.chain].sets[mint.set].mintAuctions[0].pricenai)}}</p>
                                                         </div>
-                                                        <button class="btn btn-sm btn-outline-light">{{chains[mint.chain].sets[mint.set].forAuctionMint + chains[mint.chain].sets[mint.set].forSaleMint}} Available</button>
+                                                        <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
+                                                            @click="focusItem.set = mint.set; focusItem.token = mint.chain">
+                                                            <button class="btn btn-sm btn-outline-light">{{chains[mint.chain].sets[mint.set].forAuctionMint + chains[mint.chain].sets[mint.set].forSaleMint}} Available</button>
+                                                        </a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -584,7 +587,8 @@
             <fttransfer :account="account" 
             :item="focusItem" 
             :mint="true" 
-            @modal="modal($event)"
+            :numitems="mintData.length"
+            @modal="injectIndex($event)"
             :icon="chains[focusItem.token].sets[focusItem.set].computed.set.faicon" 
             :setdetail="chains[focusItem.token].sets[focusItem.set]"
             :api="chains[focusItem.token].api"

@@ -1691,6 +1691,21 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         });
       })
     },
+    injectIndex(dir){
+      this.pairMints()
+      switch(dir){
+        case 'up':
+          this.activeIndexUp()
+          break;
+        case 'dn':
+          this.activeIndexDn()
+          break;
+        default:
+          this.activeIndex = parseInt(dir)
+      }
+      this.focusItem.set = this.mintData[this.activeIndex].set 
+      this.focusItem.token = this.mintData[this.activeIndex].chain
+    },
     activeIndexUp(){
       if(this.activeIndex < this.mintData.length - 1) this.activeIndex++
       else this.activeIndex = 0
