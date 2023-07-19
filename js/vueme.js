@@ -3003,7 +3003,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         });
     },
     finishPFT(s) {
-      if (this.baseScript[s.script]) {
+      if (this.baseScript[s.script] && (s.to == this.pageAccount || s.from == this.pageAccount)) {
         s.source = 'FTtrades'
         this.FTtrades.push(s);
       } else
@@ -3012,7 +3012,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         }, 250);
     },
     finishPNFT(s) {
-      if (this.baseScript[s.script]) {
+      if (this.baseScript[s.script] && (s.to == this.pageAccount || s.from == this.pageAccount)) {
         s.setname = s.set
         s.trade = true
         s.HTML = s.comp.HTML
