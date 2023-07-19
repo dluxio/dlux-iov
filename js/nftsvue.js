@@ -1852,7 +1852,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                   this.nftsetsf.push(data.result[i]);
                   this.chains[chain].sets[data.result[i].set] = data.result[i]
                   this.denoms[chain.toUpperCase()] = {
-                    checked: false
+                    checked: this.denoms[chain.toUpperCase()] ? this.denoms[chain.toUpperCase()].checked : false,
+                    balance: this.denoms[chain.toUpperCase()] ? this.denoms[chain.toUpperCase()].balance : 0,
                   }
                   this.getNFTset(data.result[i].set, chain)
                 }
@@ -2430,7 +2431,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             this.chains[chain].account = data;
             this.denoms[chain.toUpperCase()] = {
               balance: `${(data.balance / 1000).toFixed(3)} ${chain.toUpperCase()}`,
-              checked: false
+              checked: this.denoms[chain.toUpperCase()] ? this.denoms[chain.toUpperCase()].checked : false
             }
           })
       }
@@ -2588,7 +2589,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     this.getUserNFTs();
     //this.getQuotes();
     //this.getNodes();
-    //if (user != "GUEST") this.getTokenUser();
+    if (user != "GUEST") this.getTokenUser();
     if (user != "GUEST") this.getHiveUser();
   },
   computed: {
