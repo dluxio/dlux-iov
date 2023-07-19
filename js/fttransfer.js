@@ -159,7 +159,7 @@ export default {
                            <button onclick="this.blur();" class="accordion-button" type="button" v-bind:class="{'collapsed' : setdetail.forSaleMint || setdetail.forAuctionMint}"
                               data-bs-toggle="collapse" data-bs-target="#collapseftTransfer" aria-expanded="false"
                               aria-controls="collapseftTransfer">
-                              <i class="fas fa-exchange-alt me-3"></i>TRANSFER
+                              <i class="fas fa-exchange-alt me-3"></i>TRANSFER<span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em">{{formatNumber(qty,0,'.',',')}}</span>
                            </button>
                         </h2>
                         <div id="collapseftTransfer" class="accordion-collapse collapse" v-bind:class="{'show' : !setdetail.forSaleMint && !setdetail.forAuctionMint}"
@@ -672,7 +672,7 @@ export default {
                               data-bs-toggle="collapse" data-bs-target="#collapseftBid" aria-expanded="true"
                               aria-controls="collapseftBid">
                               <i class="fas fa-comment-dollar me-3"></i><span>BID
-                                 NOW</span><span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em">{{formatNumber(setdetail.mintAuctions.length,0,'.',',')}}</span><span class="small ms-auto" v-if="setdetail.mintSales?.length">{{formatNumber(setdetail.mintAuctions[0].pricenai.amount/1000,3,'.',',')}} {{setdetail.mintAuctions[0].pricenai.token}}</span>
+                                 </span><span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em">{{formatNumber(setdetail.mintAuctions.length,0,'.',',')}}</span><span class="small ms-auto" v-if="setdetail.mintSales?.length">{{formatNumber(setdetail.mintAuctions[0].pricenai.amount/1000,3,'.',',')}} {{setdetail.mintAuctions[0].pricenai.token}}</span>
                            </button>
                         </h2>
                         <div id="collapseftBid" class="accordion-collapse collapse show" data-bs-parent="#ftAccordion">
