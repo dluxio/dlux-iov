@@ -3135,7 +3135,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             this.balance = (data.balance / 1000).toFixed(3);
             this.bargov = (data.gov / 1000).toFixed(3);
             this.accountapi = data;
-            this.denoms.DLUX = `${(data.balance).toFixed(3) / 1000} DLUX`;
+            this.denoms.DLUX = {
+              balance: `${(data.balance).toFixed(3) / 1000} DLUX`
+            }
             this.dluxval =
               (data.balance + data.gov + data.poweredUp + data.claim) / 1000;
           } else {

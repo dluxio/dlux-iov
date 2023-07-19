@@ -599,7 +599,7 @@ export default {
                                      </div>
                                   </div>
                                   <div class="d-flex mb-3">
-                                  <small class="ms-auto text-white-50 me-1">You have {{denoms[itemmodal.item.price.token].balance}}</small>
+                                  <small class="ms-auto text-white-50 me-1">You have {{denoms[toUpperCase(itemmodal.item.token)].balance}}</small>
                                </div>
                                   <div class="mb-1">
                                      <!-- ACCEPT / REJECT  -->
