@@ -490,6 +490,7 @@ var app = new Vue({
           uid: "",
         },
       },
+      initialLoad: false,
       activeIndex: 0,
       nftTradeTabToken: "",
       nftTradeAllowed: false,
@@ -796,6 +797,10 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
             } else {
               this.displayNFTs.push(this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid])
             }
+          }
+          if(this.setPage && !this.initialLoad){
+            this.handleScroll()
+            this.initialLoad = true
           }
         }
       }
