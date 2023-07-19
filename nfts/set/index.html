@@ -808,6 +808,7 @@
             :item="focusItem"
             :mint="true" 
             @modal="modal($event)"
+            :denoms="denoms"
             :icon="chains[focusItem.token].sets[focusItem.set].computed.set.faicon" 
             :setdetail="chains[focusItem.token].sets[focusItem.set]"
             :api="chains[focusItem.token].api"

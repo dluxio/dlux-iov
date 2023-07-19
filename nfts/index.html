@@ -593,6 +593,7 @@
             :item="focusItem" 
             :mint="true" 
             :numitems="mintData.length"
+            :denoms="denoms"
             @modal="injectIndex($event)"
             :activeindex="activeIndex"
             :icon="chains[focusItem.token].sets[focusItem.set].computed.set.faicon" 

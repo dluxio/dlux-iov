@@ -661,7 +661,6 @@ export default {
                            </div>
                            </tbody>
                         </table>
-                        <p>Your Balance: 12345 TOKEN</p>
                            </div>
                         </div>
                      </div>
@@ -710,7 +709,7 @@ export default {
                                  </tbody>
                               </table>
                               <div class="d-flex mb-3 text-center">
-                                       <small class="text-white-50">You have {{denoms[item.price.token].balance}}</small>
+                                       <small class="text-white-50" v-if="denoms[toUpperCase(item.token)]">You have {{denoms[toUpperCase(item.token)].balance}}</small>
                                     </div>
                            </div>
                         </div>
@@ -1124,6 +1123,9 @@ export default {
             }
          }
           this.$emit('tosign', toSign)
+        },
+        parseFloat(num) {
+            return parseFloat(num)
         },
         cancelSaleFT(sale){
          const toSign = {
