@@ -645,7 +645,7 @@ export default {
                                         <span class="ms-auto text-uppercase">{{itemmodal.item.price.token}}</span>
                                      </div>
                                     <div>
-                                       <p>Your Balance: 12345 TOKEN</p>
+                                       <p>Your Balance: {{denoms[itemmodal.item.price.token].balance}}</p>
                                     </div>
                                      <div class="mb-2">
                                         <div class="text-center">
@@ -766,6 +766,22 @@ export default {
                             }
                         }
                     }
+                };
+            },
+        },
+        denoms: {
+            required: false,
+            default: function () {
+                return {
+                    HIVE: {
+                     balance: 0,
+                    },
+                     HBD: {
+                        balance: 0,
+                     },
+                     DLUX: {
+                        balance: 0,
+                     },
                 };
             },
         },

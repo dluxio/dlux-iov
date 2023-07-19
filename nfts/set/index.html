@@ -790,15 +790,22 @@
 
           <!-- NFT Detail Modal -->
           <div>
-            <nftdetail :sets="focusSet" :account="account" :itemmodal="itemModal" :pfp="pfp" :item="focusItem"
-              :chains="chains" @detail="modalIndex('itemModal', $event);itemModal.hidden = false" @setpfp="setPFP($event)"
+            <nftdetail :sets="focusSet" 
+              :account="account" 
+              :denoms="denoms"
+              :itemmodal="itemModal" 
+              :pfp="pfp" 
+              :item="focusItem"
+              :chains="chains" 
+              @detail="modalIndex('itemModal', $event);itemModal.hidden = false" 
+              @setpfp="setPFP($event)"
               @tosign="toSign=$event" />
           </div>
 
           <!-- mint transfer modal -->
           <div>
             <fttransfer :account="account" 
-            :item="focusItem" 
+            :item="focusItem"
             :mint="true" 
             @modal="modal($event)"
             :icon="chains[focusItem.token].sets[focusItem.set].computed.set.faicon" 

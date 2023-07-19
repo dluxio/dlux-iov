@@ -443,6 +443,16 @@ var app = new Vue({
         total_vesting_fund_hive: 0,
         total_vesting_shares: 0,
       },
+      denoms: {
+        HIVE: {
+          checked: false,
+          balance: 0
+        },
+        HBD: {
+          checked: false,
+          balance: 0
+        },
+      },
       behindTitle: "",
       TOKEN: "DLUX",
       sendTo: "",
@@ -3125,6 +3135,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             this.balance = (data.balance / 1000).toFixed(3);
             this.bargov = (data.gov / 1000).toFixed(3);
             this.accountapi = data;
+            this.denoms.DLUX = `${(data.balance).toFixed(3) / 1000} DLUX`;
             this.dluxval =
               (data.balance + data.gov + data.poweredUp + data.claim) / 1000;
           } else {
@@ -3200,7 +3211,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         .then((data) => {
           this.accountinfo = data.result[0];
           this.barhive = this.accountinfo.balance;
+          this.denoms.HIVE.balance = this.accountinfo.balance;
           this.barhbd = this.accountinfo.hbd_balance;
+          this.denoms.HBD.balance = this.accountinfo.hbd_balance;
           var pfp = "";
           try {
             pfp = this.accountinfo.posting_json_metadata.profile.profile_image;

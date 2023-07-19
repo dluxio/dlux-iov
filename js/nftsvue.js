@@ -175,9 +175,13 @@ var app = new Vue({
       showTokens: {},
       denoms: {
         HIVE: {
-          checked: false},
+          checked: false,
+          balance: 0
+        },
         HBD: {
-          checked: false},
+          checked: false,
+          balance: 0
+        },
       },
       selectors: {
         ['For Sale']: {
@@ -2424,6 +2428,10 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           .then((response) => response.json())
           .then((data) => {
             this.chains[chain].account = data;
+            this.denoms[chain.toUpperCase()] = {
+              balance: `${(data.balance / 1000).toFixed(3)} ${chain.toUpperCase()}`,
+              checked: false
+            }
           })
       }
       for(var token in this.chains){
@@ -2507,7 +2515,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           .then((data) => {
             this.accountinfo = data.result[0];
             this.barhive = this.accountinfo.balance;
+            this.denoms.HIVE.balance = this.accountinfo.balance;
             this.barhbd = this.accountinfo.hbd_balance;
+            this.denoms.HBD.balance = this.accountinfo.hbd_balance;
           });
     },
     getHiveInfo() {
