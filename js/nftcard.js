@@ -143,7 +143,7 @@ export default {
       <div class="text-white text-center" v-if="auction">
         <div class="bg-dark rounded">
           <div class="mt-1 text-center rounded-top bg-danger-50"
-            v-bind:class="{'bg-warning-50': item.by == account, 'bg-danger-50': animateTime == '1 day', 'bg-info-50': animateTime != '1 day' }">
+            v-bind:class="{'bg-warning-50': item.by == account, 'bg-danger-50': item.by != account}">
             <h5 id="timer-set-uid" class="mb-0 lead">Ends in {{animateTime}}</h5>
           </div>
           <div class="d-flex rounded-bottom p-2">

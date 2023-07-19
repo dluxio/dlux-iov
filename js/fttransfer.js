@@ -696,21 +696,18 @@ export default {
                                        <input class="form-control " type="number" :step="0.001" :min="auc.price /1000" v-model="auc.bidAmount">
                                        </td>
                                        <td>
-                                       <button class="btn btn-secondary" @click="bidFT(auc)">Bid</button>
+                                       <button class="btn btn-primary" @click="bidFT(auc)">Bid</button>
                                        </td>
                                     </tr>
                                     
                                     <tr scope="row">
                                        <th scope="row" colspan="4" class="bg-danger-50 text-center">
-                                          <span>{{animateCountdown(auc.time)}}<span v-if="auc.bidder"> - {{auc.bidder}} is winning</span></span>
+                                          <span>Ends in {{animateCountdown(auc.time)}}<span v-if="auc.bidder"> - {{auc.bidder}} is winning</span></span>
                                        </th>
                                     </tr>
                                     </div>
                                  </tbody>
                               </table>
-                              <div class="d-flex mb-3 text-center">
-                                       <small class="text-white-50" v-if="denoms[toUpperCase(item.token)]">You have {{denoms[toUpperCase(item.token)].balance}}</small>
-                                    </div>
                            </div>
                         </div>
                      </div>
