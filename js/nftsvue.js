@@ -490,7 +490,6 @@ var app = new Vue({
           uid: "",
         },
       },
-      initialLoad: false,
       activeIndex: 0,
       nftTradeTabToken: "",
       nftTradeAllowed: false,
@@ -777,6 +776,8 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
       if(this.selectors['Yours'].checked || (this.setPage && !(this.NFTselect.keys.find(a => a.indexOf('Currency') >= 0) || this.selectors['Affordable'].checked || this.selectors['Your Bids'].checked || this.selectors['Has Bids'].checked))){
         if(!( this.selectors['At Auction'].checked || this.selectors['For Sale'].checked)){
           for(var i = 0; (i < this.allNFTs.length && i < this.wantedNum); i++){
+            if(!this.NFTselect.showDeleted && this.allNFTs[i].owner == "D")continue
+            if(this.allNFTs[i].owner == "ls" || this.allNFTs[i].owner == "ah" || this.allNFTs[i].owner == "hh")continue
             if(this.selectors['Yours'].checked && this.allNFTs[i].owner != this.account)continue
             if(!this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid]){
               this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid] = true
@@ -1263,12 +1264,12 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       out = out.replace(/\.?0+$/, "");
       return out + post;
     },
-    handleScroll: function (doIt) {
-      if ( doIt || (this.setPage &&
+    handleScroll: function () {
+      if ( this.setPage &&
         Date.now() - this.lastLoad > 2000 &&
         document.documentElement.clientHeight + window.scrollY >
         document.documentElement.scrollHeight -
-        document.documentElement.clientHeight * 2)
+        document.documentElement.clientHeight * 2
       ) {
         this.lastLoad = Date.now();
         this.NFTselect.amount += 30;
