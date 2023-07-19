@@ -798,10 +798,6 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
               this.displayNFTs.push(this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid])
             }
           }
-          if(this.setPage && !this.initialLoad){
-            this.handleScroll()
-            this.initialLoad = true
-          }
         }
       }
       if(this.NFTselect.dir == 'asc'){
@@ -1267,12 +1263,12 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       out = out.replace(/\.?0+$/, "");
       return out + post;
     },
-    handleScroll: function () {
-      if ( this.setPage &&
+    handleScroll: function (doIt) {
+      if ( doIt || (this.setPage &&
         Date.now() - this.lastLoad > 2000 &&
         document.documentElement.clientHeight + window.scrollY >
         document.documentElement.scrollHeight -
-        document.documentElement.clientHeight * 2
+        document.documentElement.clientHeight * 2)
       ) {
         this.lastLoad = Date.now();
         this.NFTselect.amount += 30;
@@ -2050,6 +2046,10 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                   this.chains[chain].sets[set].mintSales = mintSales;
                   this.chains[chain].sets[set].mintAuctions = mintAuctions;
                 });
+                if(this.setPage && !this.initialLoad){
+                  this.handleScroll(true)
+                  this.initialLoad = true
+                }
             });
           })
           .catch((e) => {
