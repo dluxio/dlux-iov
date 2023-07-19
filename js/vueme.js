@@ -3136,7 +3136,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             this.bargov = (data.gov / 1000).toFixed(3);
             this.accountapi = data;
             this.denoms.DLUX = {
-              balance: `${(data.balance).toFixed(3) / 1000} DLUX`
+              balance:  `${this.formatNumber((data.balance / 1000).toFixed(3), 3, '.', ',')} DLUX`
             }
             this.dluxval =
               (data.balance + data.gov + data.poweredUp + data.claim) / 1000;
@@ -3213,9 +3213,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         .then((data) => {
           this.accountinfo = data.result[0];
           this.barhive = this.accountinfo.balance;
-          this.denoms.HIVE.balance = this.accountinfo.balance;
+          this.denoms.HIVE.balance = `${this.formatNumber((parseFloat(this.accountinfo.balance)).toFixed(3), 3, '.', ',')} HIVE`
           this.barhbd = this.accountinfo.hbd_balance;
-          this.denoms.HBD.balance = this.accountinfo.hbd_balance;
+          this.denoms.HBD.balance = `${this.formatNumber((parseFloat(this.accountinfo.hbd_balance)).toFixed(3), 3, '.', ',')} HBD`
           var pfp = "";
           try {
             pfp = this.accountinfo.posting_json_metadata.profile.profile_image;

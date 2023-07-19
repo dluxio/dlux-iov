@@ -2518,7 +2518,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             this.barhive = this.accountinfo.balance;
             this.denoms.HIVE.balance = `${this.formatNumber((parseFloat(this.accountinfo.balance)).toFixed(3), 3, '.', ',')} HIVE`;
             this.barhbd = this.accountinfo.hbd_balance;
-            this.denoms.HBD.balance = `${this.formatNumber((parseFloat(this.accountinfo.hbd_balance)).toFixed(3), 3, '.', ',')} HIVE`;
+            this.denoms.HBD.balance = `${this.formatNumber((parseFloat(this.accountinfo.hbd_balance)).toFixed(3), 3, '.', ',')} HBD`;
           });
     },
     getHiveInfo() {
