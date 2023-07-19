@@ -1130,7 +1130,7 @@ export default {
                set: sale.set,
                uid: sale.uid,
             },
-            id: `${sale.token}_fts_sell_cancel`,
+            id: `${sale.token}_ft${(sale.pricenai.token == "HBD" || sale.pricenai.token == "HIVE") ? 's' : ''}_sell_cancel`,
             msg: `Canceling ${sale.set} mint token sell...`,
             ops: ["getTokenUser"],
             api: sale.api,
