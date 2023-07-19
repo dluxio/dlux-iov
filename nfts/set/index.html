@@ -197,8 +197,8 @@
                         v-cloak>{{formatNumber((((chains[jsontoken].sets[setname].max-chains[jsontoken].sets[setname].minted)/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
                     </div>
                   </div>
-                  <!-- mint supply -->
 
+                  <!-- mint supply -->
                   <div class="rounded-pill me-2 d-flex align-items-center px-2 py-1 mb-1 me-2"
                     style="background-color: black">
                     <div class=""><small>MINT MARKET: </small></div>
@@ -212,7 +212,6 @@
                   </div>
 
                   <!-- mints owned -->
-
                   <div class="rounded-pill d-flex align-items-center px-2 py-1 mb-1 me-2"
                     style="background-color: black">
                     <div class=""><small>MINTS OWNED: </small></div>
@@ -259,8 +258,12 @@
                       <div class="d-flex align-items-center">
                         <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
                           @click="focusItem.set = setname; focusItem.token = jsontoken">
-                          <img class="rounded max-160 my-2"
-                            :src="makeLink('https://ipfs.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.wrapped : '')"></img></a>
+                          <div class="position-relative">
+                          <img class="rounded max-160"
+                            :src="makeLink('https://ipfs.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.wrapped : '')">
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{formatNumber(chains[jsontoken].sets[setname].forAuctionMint +
+                              chains[jsontoken].sets[setname].forSaleMint + getMint(chains[jsontoken].sets[setname].set, 'qty'),0,'.',',')}}</span></div>
+                          </a>
                         <div class="ms-4">
                           <p class="text-white-50 description" v-cloak>{{chains[jsontoken].sets[setname].computed.set ?
                             chains[jsontoken].sets[setname].computed.set.Description
