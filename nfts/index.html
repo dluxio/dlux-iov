@@ -576,8 +576,14 @@
             </div>
             <!-- NFT Detail Modal -->
             <div>
-                <nftdetail :sets="focusSet" :account="account" :itemmodal="itemModal" :pfp="pfp" :item="focusItem"
-                    :chains="chains" @detail="modalIndex('itemModal', $event);itemModal.hidden = false"
+                <nftdetail :sets="focusSet" 
+                    :account="account" 
+                    :denoms="denoms"
+                    :itemmodal="itemModal" 
+                    :pfp="pfp" 
+                    :item="focusItem"
+                    :chains="chains" 
+                    @detail="modalIndex('itemModal', $event);itemModal.hidden = false"
                     @tosign="toSign=$event" />
             </div>
 
@@ -589,7 +595,6 @@
             :numitems="mintData.length"
             @modal="injectIndex($event)"
             :activeindex="activeIndex"
-            :denoms="denoms"
             :icon="chains[focusItem.token].sets[focusItem.set].computed.set.faicon" 
             :setdetail="chains[focusItem.token].sets[focusItem.set]"
             :api="chains[focusItem.token].api"
