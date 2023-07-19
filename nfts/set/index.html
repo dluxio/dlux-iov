@@ -310,7 +310,7 @@
                                 <div class="d-flex align-items-center">
                                   <div @click="">SALES</div>
                                   <div class="mb-3"><span class=" badge rounded-pill bg-danger" style="font-size: .7em">
-                                      {{chains[jsontoken].sets[setname].forSaleMint}}</span>
+                                      {{formatNumber(chains[jsontoken].sets[setname].forSaleMint,0,'.',',')}}</span>
                                   </div>
                                 </div>
                               </a></li>
@@ -321,13 +321,14 @@
                                 <div class="d-flex align-items-center">
                                   <div>AUCTIONS</div>
                                   <div class="mb-3"><span class=" badge rounded-pill bg-danger"
-                                      style="font-size: .7em">{{chains[jsontoken].sets[setname].mintAuctions ? chains[jsontoken].sets[setname].mintAuctions.length : 0}}</span>
+                                      style="font-size: .7em">{{formatNumber(chains[jsontoken].sets[setname].mintAuctions ? chains[jsontoken].sets[setname].mintAuctions.length : 0,0,'.',',')}}</span>
                                   </div>
                                 </div>
                               </a></li>
                           </ul>
 
                           <div :id="chains[jsontoken].sets[setname].set + '-mint-tabs'" class="tab-content">
+                            <!-- MINT SALES-->
                             <div :id="chains[jsontoken].sets[setname].set + '-mint-salestab'" role="tabpanel"
                               class="tab-pane fade show active" aria-labelledby="mintsalestab">
                               <table class="table table-sm">
@@ -340,20 +341,16 @@
                                   </tr>
                                 </thead>
                                 <tbody>
-
+                                  
                                   <tr scope="row" v-for="ad in chains[jsontoken].sets[setname].mintSales">
-
                                     <td style="vertical-align: middle">
                                       {{formatNumber(ad.qty,0,'.',',')}}</td>
                                     <td style="vertical-align: middle">
                                       {{naiString(ad.pricenai)}}</td>
                                     <td><span v-show="true" class="text-center">
                                         <form class="needs-validation" novalidate>
-
                                           <input value="1" required type="number" min="1" step="1" max="ad.qty"
                                             class="form-control text-info" style="max-width: 100px" v-model="ad.buyQty">
-
-
                                           <button type="submit" class="btn btn-info d-none" v-show="ad.by != account"
                                             @click="buyMint(ad.uid)">Buy</button>{{toFixed(ad.buyQty *
                                           ad.pricenai.amount,0)}}
@@ -365,15 +362,15 @@
                                       <div>
                                         <button type="submit" class="btn btn-info" v-show="ad.by != account"
                                           onclick="submit()">Buy</button>
-                                        <!-- <button class="btn btn-primary" v-show="ad.by != account">Buy</button> -->
                                         <button class="btn btn-warning" v-show="ad.by == account">Cancel</button>
                                       </div>
                                     </td>
-
                                   </tr>
+
                                 </tbody>
                               </table>
                             </div>
+                            <!-- MINT AUCTIONS -->
                             <div role="tabpanel" class="tab-pane fade show"
                               :id="chains[jsontoken].sets[setname].set + '-mint-auctionstab'"
                               aria-labelledby="mintauctionstab">
@@ -385,6 +382,7 @@
                                     <th scope="col" class="small">TOTAL</th>
                                     <th scope="col" class="small">HIGH BIDDER</th>
                                 <tbody>
+                                 
                                   <tr v-for="auc in chains[jsontoken].sets[setname].mintAuctions">
                                     <th scope="row" colspan="4" style="background-color: crimson">
                                       <span>{{animateCountdown(auc.time)}}</span>
@@ -408,10 +406,6 @@
 
                                   </tr>
                                 </tbody>
-
-                                <th scope="col" class="small"></th>
-                                <th scope="col" class="small"></th>
-                                </tr>
                               </table>
                             </div>
                           </div>
