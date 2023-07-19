@@ -792,11 +792,30 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
                   ...d
                 }
                 this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[index].uid].token = this.jsontoken
-                this.displayNFTs.push(this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[index].uid])
-              
+                //this.displayNFTs.push(this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[index].uid])
+                if(this.NFTselect.searchTerm){
+                  if(this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[index].uid].uid.toLowerCase().indexOf(this.NFTselect.searchTerm.toLowerCase()) >= 0){
+                    this.displayNFTs.push(this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[index].uid])
+                  }
+                  if(this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[index].uid].owner.toLowerCase().indexOf(this.NFTselect.searchTerm.toLowerCase()) >= 0){
+                    this.displayNFTs.push(this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[index].uid])
+                  }
+                } else {
+                  this.displayNFTs.push(this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[index].uid])
+                }
               })
             } else {
-              this.displayNFTs.push(this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid])
+              //this.displayNFTs.push(this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid])
+              if(this.NFTselect.searchTerm){
+                if(this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid].uid.toLowerCase().indexOf(this.NFTselect.searchTerm.toLowerCase()) >= 0){
+                  this.displayNFTs.push(this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid])
+                }
+                if(this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid].owner.toLowerCase().indexOf(this.NFTselect.searchTerm.toLowerCase()) >= 0){
+                  this.displayNFTs.push(this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid])
+                }
+              } else {
+                this.displayNFTs.push(this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid])
+              }
             }
           }
         }

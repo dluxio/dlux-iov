@@ -658,7 +658,7 @@
                 </button>
                 <ul class="dropdown-menu bg-black">
                   <li v-for="(item, name, index) in selectors">
-                    <div class="py-1 px-2">
+                    <div class="py-1 px-2" v-if="name != ''">
                       <div class="form-check">
                         <input @change="addFilters('Status', name);displaynfts()" class="form-check-input"
                           type="checkbox" v-model="item.checked" :id="name + 'StatusCheck'">
@@ -696,7 +696,7 @@
                     class="fa-solid fa-magnifying-glass fa-fw"></i></span>
                 <input @keyup="displaynfts()" @change="displaynfts()" @search="displaynfts()"
                   class="ps-4 form-control border-white" type="search" v-model="NFTselect.searchTerm"
-                  placeholder="Search sets, items, and accounts">
+                  placeholder="Search items and accounts">
               </div>
 
               <!-- Sort -->
@@ -751,10 +751,10 @@
                 </button>
                 <ul class="dropdown-menu dropdown-menu-dark bg-black" aria-labelledby="deletedDropdown">
                   <li><a class="dropdown-item" :class="{'active':!NFTselect.showDeleted}" href="#/"
-                      @click="setValue('NFTselect.showDeleted', false);selectNFTs(true)">Hide
+                      @click="setValue('NFTselect.showDeleted', false);displaynfts()">Hide
                       Deleted</a></li>
                   <li><a class="dropdown-item" :class="{'active':NFTselect.showDeleted}" href="#/"
-                      @click="setValue('NFTselect.showDeleted', true);selectNFTs(true)">Show
+                      @click="setValue('NFTselect.showDeleted', true);displaynfts()">Show
                       Deleted</a></li>
                 </ul>
               </div>
