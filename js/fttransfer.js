@@ -708,9 +708,6 @@ export default {
                                     </div>
                                  </tbody>
                               </table>
-                              <div class="d-flex mb-3 text-center">
-                                       <small class="text-white-50" v-if="denoms[toUpperCase(item.token)]">You have {{denoms[toUpperCase(item.token)].balance}}</small>
-                                    </div>
                            </div>
                         </div>
                      </div>
