@@ -90,10 +90,10 @@ export default {
             </h5>
           </div>
           <div class="d-flex rounded-bottom p-2">
-            <div class="fs3">
+            <div class="fs-6">
               {{formatNumber(item.price/1000,3,'.',',')}}
             </div>
-            <div class="fs3 text-uppercase ms-auto">
+            <div class="fs-6 text-uppercase ms-auto">
               {{item.token}}
             </div>
           </div>

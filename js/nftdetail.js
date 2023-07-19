@@ -598,9 +598,15 @@ export default {
                                         <h5 class="lead m-0">{{itemmodal.item.priceString}}</h5>
                                      </div>
                                   </div>
-                                  <div class="d-flex mb-3">
-                                  <small class="ms-auto text-white-50 me-1">You have {{denoms[toUpperCase(itemmodal.item.token)].balance}}</small>
-                               </div>
+                                  <div class="d-flex align-items-center my-2">
+                                     <div class="text-end mt-auto mb-auto me-1" style="flex: 1">
+                                        <h5 class="small m-0">BALANCE:</h5>
+                                     </div>
+                                     <div class="text-start mt-auto mb-auto" style="flex: 2">
+                                        <h5 class="lead m-0">{{denoms[toUpperCase(itemmodal.item.token)].balance}}</h5>
+                                     </div>
+                                  </div>
+                                 
                                   <div class="mb-1">
                                      <!-- ACCEPT / REJECT  -->
                                      <div role="group" v-if="itemmodal.item.to == account">
