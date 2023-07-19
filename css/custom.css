@@ -12812,6 +12812,10 @@ td {
   background-color: rgba(252, 52, 111, 0.7);
 }
 
+.bg-white-50 {
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
 .bg-success-50 {
   background-color: rgba(65, 215, 167, 0.7);
 }
