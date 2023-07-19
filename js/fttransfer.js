@@ -546,8 +546,6 @@ export default {
                         <div id="collapseftTrade" class="accordion-collapse collapse show"
                            data-bs-parent="#ftAccordion">
                            <div class="accordion-body">
-
-
                               <div class="p-2 text-white text-center rounded"">
                            <section>
                              <div class=" d-flex align-items-center">
@@ -592,7 +590,7 @@ export default {
                               </div>
                               </div>
                            </div>
-</div>
+                        </div>
                         </div>
                      </div>
 
@@ -652,6 +650,7 @@ export default {
                                     </tr>
                            </tbody>
                         </table>
+                        <p>Your Balance: 12345 TOKEN</p>
                            </div>
                         </div>
                      </div>
