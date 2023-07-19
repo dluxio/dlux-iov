@@ -1094,14 +1094,14 @@ export default {
          const toSign = {
             type: "cja",
             cj: {
-               set: item.set,
-               uid: item.uid,
+               set: this.item.set,
+               uid: this.item.uid,
             },
-            id: `${item.token}_ft_escrow_cancel`,
-            msg: `Canceling trade of ${item.set} mint token...`,
+            id: `${this.item.token}_ft_escrow_cancel`,
+            msg: `Canceling trade of ${this.item.set} mint token...`,
             ops: ["getTokenUser"],
             api: this.api,
-            txid: `${item.token}_ft_bid`,
+            txid: `${this.item.token}_ft_bid`,
           }
           this.$emit('tosign', toSign)
         },
