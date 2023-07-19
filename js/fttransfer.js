@@ -671,7 +671,7 @@ export default {
                            <button onclick="this.blur();" class="accordion-button" type="button"
                               data-bs-toggle="collapse" data-bs-target="#collapseftBid" aria-expanded="true"
                               aria-controls="collapseftBid">
-                              <i class="fas fa-comment-dollar me-3"></i><span>BID
+                              <i class="fas fa-comment-dollar me-3"></i><span>AUCTIONS
                                  </span><span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em">{{formatNumber(setdetail.mintAuctions.length,0,'.',',')}}</span><span class="small ms-auto" v-if="setdetail.mintSales?.length">{{formatNumber(setdetail.mintAuctions[0].pricenai.amount/1000,3,'.',',')}} {{setdetail.mintAuctions[0].pricenai.token}}</span>
                            </button>
                         </h2>
