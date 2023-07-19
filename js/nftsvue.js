@@ -57,6 +57,7 @@ var app = new Vue({
   data() {
     return {
       ready: false,
+      lastLoad: 0,
       ohlcv: [],
       toSign: {},
       chains: {
@@ -188,8 +189,6 @@ var app = new Vue({
         ['Your Bids']: {
           checked: false},
         Affordable: {
-          checked: false},
-        Mint: {
           checked: false},
         Yours: {
           checked: false},
@@ -719,8 +718,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
         setlabel: for(var set in this.chains[chain].sets){
           if(this.NFTselect.keys.find(a => a.indexOf('Set') >= 0) && !this.chains[chain].sets[set].enabled)continue setlabel;
           salelabel: for(var i = 0; i < this.chains[chain].sets[set].sales.length; i++){
-            if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && !(this.selectors['For Sale'].checked || this.selectors['Affordable'].checked || this.selectors['Mint'].checked || this.selectors['Yours'].checked))break salelabel;
-            if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && this.selectors['Mint'].checked && this.chains[chain].sets[set].sales[i].uid)continue salelabel;
+            if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && !(this.selectors['For Sale'].checked || this.selectors['Affordable'].checked || this.selectors['Yours'].checked))break salelabel;
             if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && this.selectors['Yours'].checked && this.chains[chain].sets[set].sales[i].by != this.account)continue salelabel;
             if(this.NFTselect.keys.find(a => a.indexOf('Currency') >= 0) && !this.denoms[this.chains[chain].sets[set].sales[i].price.token].checked)continue salelabel;
             if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && this.selectors['Affordable'].checked && this.chains[chain].sets[set].sales[i].price.amount > (this.chains[chain].sets[set].sales[i].price.token == chain.toUpperCase() ? this.chains[chain].account.balance : this.chains[chain].sets[set].sales[i].price.token == 'HIVE' ? parseFloat(this.barhive) * 1000 : parseFloat(this.barhbd) * 1000))continue salelabel;
@@ -749,7 +747,6 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
             if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && !( this.selectors['At Auction'].checked || this.selectors['Has Bids'].checked || this.selectors['Your Bids'].checked || this.selectors['Affordable'].checked || this.selectors['Mint'].checked || this.selectors['Yours'].checked))break auctionlabel;
             if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && this.selectors['Yours'].checked && this.chains[chain].sets[set].auctions[i].by != this.account)continue auctionlabel;
             if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && this.selectors['Has Bids'].checked && !this.chains[chain].sets[set].auctions[i].bids)continue auctionlabel;
-            if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && this.selectors['Mint'].checked && this.chains[chain].sets[set].auctions[i].uid)continue auctionlabel;
             if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && this.selectors['Your Bids'].checked && this.chains[chain].sets[set].auctions[i].bidder != this.account)continue auctionlabel; //track historic bids
             if(this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && this.selectors['Affordable'].checked && this.chains[chain].sets[set].auctions[i].price.amount > (this.chains[chain].sets[set].auctions[i].price.token == chain.toUpperCase() ? this.chains[chain].account.balance : this.chains[chain].sets[set].auctions[i].price.token == 'HIVE' ? parseFloat(this.barhive) * 1000 : parseFloat(this.barhbd) * 1000))continue auctionlabel;
             if(this.NFTselect.keys.find(a => a.indexOf('Currency') >= 0) && !this.denoms[this.chains[chain].sets[set].auctions[i].price.token].checked)continue auctionlabel;
@@ -776,9 +773,10 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           }
         }
       }
-      if(this.setPage){
+      if(this.selectors['Yours'].checked || (this.setPage && !(this.NFTselect.keys.find(a => a.indexOf('Currency') >= 0) || this.selectors['Affordable'].checked || this.selectors['Your Bids'].checked || this.selectors['Has Bids'].checked))){
         if(!( this.selectors['At Auction'].checked || this.selectors['For Sale'].checked)){
           for(var i = 0; (i < this.allNFTs.length && i < this.wantedNum); i++){
+            if(this.selectors['Yours'].checked && this.allNFTs[i].owner != this.account)continue
             if(!this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid]){
               this.chains[this.jsontoken].sets[set].loaded[this.allNFTs[i].uid] = true
               this.callScript(this.allNFTs[i], i).then(d => {
@@ -1266,10 +1264,12 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
     handleScroll: function () {
       if ( this.setPage &&
+        Date.now() - this.lastLoad > 2000 &&
         document.documentElement.clientHeight + window.scrollY >
         document.documentElement.scrollHeight -
         document.documentElement.clientHeight * 2
       ) {
+        this.lastLoad = Date.now();
         this.NFTselect.amount += 30;
         this.wantedNum += 30;
         this.selectNFTs();
@@ -2506,6 +2506,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     if (setName) {
       this.setPage = true;
       this.jsontoken = location.hash.replace('#', '').split(':')[0] || 'dlux'
+      this.denoms[this.jsontoken.toUpperCase()] = {
+        checked: false
+      }
       this.NFTselect.keys = [`Chain:${this.jsontoken}`, `Set:${setName}:${this.jsontoken}`]
       for (var chain in this.chains) {
         this.chains[chain].enabled = false;
