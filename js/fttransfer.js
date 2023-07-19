@@ -371,7 +371,7 @@ export default {
                                                 return immediately.</p>
                                           </div>
                                           <div class="text-center">
-                                             <button id="sellFTbutton" class="btn btn-info my-2" @click="sellFT()">List
+                                             <button type="submit" id="sellFTbutton" class="btn btn-info my-2" @click="sellFT()">List
                                                 Item</button>
                                           </div>
                                        </form>
