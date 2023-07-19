@@ -80,7 +80,7 @@ export default {
             default: false
         },
     },
-    emits: ['updateBennies'],
+    emits: ['updatebennies'],
     methods:{
         appendBen(){
             if(this.addAccount != '' && this.addWeight > 0){
@@ -163,7 +163,7 @@ export default {
                     this.bennies[0].weight -= this.total - 10000;
                 }
             }
-            this.$emit('updateBennies', this.bennies);
+            this.$emit('updatebennies', this.bennies);
         },
         getFavorites(){
             let favorites = localStorage.getItem('favoriteBens');

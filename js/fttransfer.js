@@ -360,7 +360,7 @@ export default {
                                           <div v-if="sell.token != item.token">
                                              You can choose to have sells distributed to multiple accounts. Must
                                              equal 100%.
-                                             <bennies eq100="true" :list="bens" @update-bennies="bens=$event">
+                                             <bennies eq100="true" :list="bens" @updatebennies="bens=$event">
                                              </bennies>
                                           </div>
                                           <div class="row mb-3">
