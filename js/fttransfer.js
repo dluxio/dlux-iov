@@ -1228,7 +1228,7 @@ export default {
                 type: "cja",
                 cj: {
                     set: this.item.set,
-                    price: parseInt(parseFloat(this.sell.amount) * 1000),
+                    price: parseInt(parseFloat(this.sell.price) * 1000),
                 },
                 id: `${this.item.token}_ft_sell`,
                 msg: `Selling ${this.item.set} mint token...`,
