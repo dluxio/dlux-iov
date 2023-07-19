@@ -735,6 +735,22 @@ export default {
             required: false,
             default: 1
          },
+         denoms: {
+            required: false,
+            default: function () {
+                return {
+                    HIVE: {
+                     balance: 0,
+                    },
+                     HBD: {
+                        balance: 0,
+                     },
+                     DLUX: {
+                        balance: 0,
+                     },
+                };
+            },
+        },
         // mintauctions: {
         //     required: false,
         //     default: function () {
