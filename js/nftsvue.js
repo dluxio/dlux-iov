@@ -2430,7 +2430,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           .then((data) => {
             this.chains[chain].account = data;
             this.denoms[chain.toUpperCase()] = {
-              balance: `${(data.balance / 1000).toFixed(3)} ${chain.toUpperCase()}`,
+              balance: `${this.formatNumber((data.balance / 1000).toFixed(3), 3, '.', ',')} ${chain.toUpperCase()}`,
               checked: this.denoms[chain.toUpperCase()] ? this.denoms[chain.toUpperCase()].checked : false
             }
           })
@@ -2516,9 +2516,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           .then((data) => {
             this.accountinfo = data.result[0];
             this.barhive = this.accountinfo.balance;
-            this.denoms.HIVE.balance = this.accountinfo.balance;
+            this.denoms.HIVE.balance = `${this.formatNumber((parseFloat(this.accountinfo.balance)).toFixed(3), 3, '.', ',')} HIVE`;
             this.barhbd = this.accountinfo.hbd_balance;
-            this.denoms.HBD.balance = this.accountinfo.hbd_balance;
+            this.denoms.HBD.balance = `${this.formatNumber((parseFloat(this.accountinfo.hbd_balance)).toFixed(3), 3, '.', ',')} HIVE`;
           });
     },
     getHiveInfo() {
