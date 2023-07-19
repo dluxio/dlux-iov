@@ -438,7 +438,7 @@ var app = new Vue({
         saleOnly: false,
         auctionOnly: false,
         dir: "asc",
-        sort: "uid",
+        sort: "",
         showDeleted: false,
         searching: false,
       },

@@ -703,7 +703,7 @@
               <div class="dropdown me-2">
                 <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown"
                   aria-expanded="false">
-                  {{NFTselect.sort == 'uid' ? 'Sort' : ('Sort by ' + (NFTselect.sort == 'price' ? 'Price: ' : 'Time: ')
+                  {{NFTselect.sort == '' ? 'Sort' : ('Sort by ' + (NFTselect.sort == 'price' ? 'Price: ' : (NFTselect.sort == 'time' ? 'Time: ' :(NFTselect.sort == 'uid' ? 'UID: ' : 'Owner: ')))
                   +
                   (NFTselect.dir == 'asc' ? 'Low to High' : 'High to Low'))}}
                 </button>
