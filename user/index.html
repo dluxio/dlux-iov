@@ -1281,17 +1281,34 @@
 
                 <!--NFT item detail modal-->
                 <div>
-                    <nftdetail :account="account" :itemmodal="itemModal" :pfp="pfp" :chains="chains" :inventory="true" @setpfp="setPFP($event)"
-                        @tosign="toSign = $event" @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
+                    <nftdetail :account="account" 
+                        :itemmodal="itemModal" 
+                        :pfp="pfp" 
+                        :chains="chains"
+                        :denoms="denoms" 
+                        :inventory="true"
+                         @setpfp="setPFP($event)"
+                        @tosign="toSign = $event" 
+                        @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                 </div>
 
                 <!--blog detail view-->
                 <div>
-                    <detail-vue :post="displayPost.item" :account="account" :modal="true" :post_select="postSelect"
-                        :voteval="voteVal" :head_block="sstats.head_block" :broca_refill="sstats.broca_refill"
-                        :broca="spkapi.broca" :spk_power="spkapi.spk_power" :contracts="contracts"
-                        :extendcost="extendcost" @tosign="toSign=$event" @modalselect="modalSelect($event)"
-                        @reply="reply($event)" @vote="vote($event)"></detail-vue>
+                    <detail-vue :post="displayPost.item" 
+                        :account="account" 
+                        :modal="true" 
+                        :post_select="postSelect"
+                        :voteval="voteVal" 
+                        :head_block="sstats.head_block" 
+                        :broca_refill="sstats.broca_refill"
+                        :broca="spkapi.broca" 
+                        :spk_power="spkapi.spk_power" 
+                        :contracts="contracts"
+                        :extendcost="extendcost" 
+                        @tosign="toSign=$event" 
+                        @modalselect="modalSelect($event)"
+                        @reply="reply($event)" 
+                        @vote="vote($event)"></detail-vue>
                 </div>
                 <!-- mint transfer modal -->
                 <div>
