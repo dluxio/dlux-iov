@@ -643,10 +643,11 @@ export default {
                                      <div class="d-flex bg-dark border-dark rounded p-2 mb-3">
                                         {{formatNumber(itemmodal.item.price.amount/1000,itemmodal.item.price.precision,'.',',')}}
                                         <span class="ms-auto text-uppercase">{{itemmodal.item.price.token}}</span>
- 
                                      </div>
+                                    <div>
+                                       <p>Your Balance: 12345 TOKEN</p>
+                                    </div>
                                      <div class="mb-2">
- 
                                         <div class="text-center">
                                            <button v-if="itemmodal.item.by != account" type="button"
                                               class="btn btn-primary" @click="buyNFT()">Buy </button>
