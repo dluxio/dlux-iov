@@ -1020,6 +1020,22 @@ export default {
                 txid: `${this.itemmodal.item.setname}:${this.itemmodal.item.uid}_nft_cancel`
             });
         },
+        cancelXfr(){
+         const toSign = {
+            type: "cja",
+            cj: {
+                set: this.itemmodal.item.setname,
+                uid: this.itemmodal.item.uid,
+            },
+            id: `${this.itemmodal.item.token}_nft_transfer_cancel`,
+            msg: `Canceling ${this.itemmodal.item.setname}:${this.itemmodal.item.uid} trade...`,
+            ops: ["getTokenUser"],
+            api: this.chains[this.itemmodal.item.token].api,
+            txid: `${this.itemmodal.item.token}_nft_transfer_cancel`,
+          }
+          console.log(toSign);
+          this.$emit('tosign', toSign)
+        },
         giveNFT(){
             const toSign = {
                 type: "cja",
