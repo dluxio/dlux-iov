@@ -53,7 +53,7 @@
       max-width: 30%;
     }
     .description {
-      max-width: 400px;
+      max-width: 500px;
     }
     .stats-widget {
       max-width: 700px;
@@ -228,37 +228,13 @@
             <div id="collapseWidgets" class="accordion-collapse collapse" data-bs-parent="#accordionWidgets">
               <div class="accordion-body p-0 m-0">
 
-                <div class="d-flex align-items-stretch  flex-wrap">
+                
                   <!--info widget -->
                   <div class="p-3 d-flex">
-                    <div class="d-flex flex-wrap align-items-center">
-                      <div class="d-flex align-items-center">
-                        <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
-                          @click="focusItem.set = setname; focusItem.token = jsontoken">
-                          <img class="rounded max-160 my-2"
-                            :src="makeLink('https://ipfs.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.wrapped : '')"></img></a>
-                        <div class="ms-2">
-                          <p class="text-white-50 description" v-cloak>{{chains[jsontoken].sets[setname].computed.set ?
-                            chains[jsontoken].sets[setname].computed.set.Description
-                            : '...'}}</p>
-                          <p>Permlink: <a :href="makeLink('/blog/@',chains[jsontoken].sets[setname].link)"
-                              v-cloak>{{chains[jsontoken].sets[setname].permlink}}</a></p>
-                        </div>
-                      </div>
-                      <div class="ms-2">
-
-
-                        <p class="mb-0" v-cloak>Type: {{chains[jsontoken].sets[setname].type}}</p>
-                        <p class="mb-0" v-cloak>Encoding: {{chains[jsontoken].sets[setname].encoding}}</p>
-                        <p class="mb-0" v-cloak>Fee: {{naiString(chains[jsontoken].sets[setname].fee)}}</p>
-                        <p class="mb-0">Script:</p>
-                        <p class="mb-0 text-break" style="max-width: 250px;" v-cloak>
-                          {{chains[jsontoken].sets[setname].script}}
-                        </p>
-                      </div>
-
-                      <!-- mint progress stats -->
-                      <div class="d-flex justify-content-between align-items-center text-center">
+                    <div class="d-flex w-100 flex-wrap align-items-center justify-content-center">
+                      
+                      <!-- MINT PROGRESS -->
+                      <div class="d-flex justify-content-between align-items-center text-center me-4">
                         <div v-cloak class="col-3 p-2 d-flex flex-column">
                           <h5 class="mb-1"><i class="fa-solid fa-fire"></i></h3><span
                               class="mb-2 small">burned</span><span>{{chains[jsontoken].sets[setname].deleted}}</span>
@@ -278,10 +254,39 @@
                             <span>{{formatNumber(chains[jsontoken].sets[setname].max,0,'.',',')}}</span>
                         </div>
                       </div>
+
+                      <!-- MINT INFO -->
+                      <div class="d-flex align-items-center">
+                        <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
+                          @click="focusItem.set = setname; focusItem.token = jsontoken">
+                          <img class="rounded max-160 my-2"
+                            :src="makeLink('https://ipfs.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.wrapped : '')"></img></a>
+                        <div class="ms-4">
+                          <p class="text-white-50 description" v-cloak>{{chains[jsontoken].sets[setname].computed.set ?
+                            chains[jsontoken].sets[setname].computed.set.Description
+                            : '...'}}</p>
+                          <p>Permlink: <a :href="makeLink('/blog/@',chains[jsontoken].sets[setname].link)"
+                              v-cloak>{{chains[jsontoken].sets[setname].permlink}}</a></p>
+                        </div>
+                      </div>
+
+                      <!-- MINT STATS -->
+                      <div class="ms-2 d-none">
+                        <p class="mb-0" v-cloak>Type: {{chains[jsontoken].sets[setname].type}}</p>
+                        <p class="mb-0" v-cloak>Encoding: {{chains[jsontoken].sets[setname].encoding}}</p>
+                        <p class="mb-0" v-cloak>Fee: {{naiString(chains[jsontoken].sets[setname].fee)}}</p>
+                        <p class="mb-0">Script:</p>
+                        <p class="mb-0 text-break" style="max-width: 250px;" v-cloak>
+                          {{chains[jsontoken].sets[setname].script}}
+                        </p>
+                      </div>
+
+                      
+
                     </div>
                   </div>
 
-                </div>
+                
               </div>
             </div>
           </div>
