@@ -820,18 +820,50 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           }
         }
       }
-      if(this.NFTselect.dir == 'asc'){
-        this.displayNFTs.sort((a, b) => {
-          if(a.hbd_price < b.hbd_price) return -1
-          if(a.hbd_price > b.hbd_price) return 1
-          return 0
-        })
-      } else if(this.NFTselect.dir == 'dec'){
-        this.displayNFTs.sort((a, b) => {
-          if(a.hbd_price > b.hbd_price) return -1
-          if(a.hbd_price < b.hbd_price) return 1
-          return 0
-        })
+      if(this.NFTselect.sort == 'price'){
+        if(this.NFTselect.dir == 'asc'){
+          this.displayNFTs.sort((a, b) => {
+            if(a.hbd_price < b.hbd_price) return -1
+            if(a.hbd_price > b.hbd_price) return 1
+            return 0
+          })
+        } else if(this.NFTselect.dir == 'dec'){
+          this.displayNFTs.sort((a, b) => {
+            if(a.hbd_price > b.hbd_price) return -1
+            if(a.hbd_price < b.hbd_price) return 1
+            return 0
+          })
+        }
+      }
+      if(this.NFTselect.sort == 'owner'){
+        if(this.NFTselect.dir == 'asc'){
+          this.displayNFTs.sort((a, b) => {
+            if(a.owner < b.owner) return -1
+            if(a.owner > b.owner) return 1
+            return 0
+          })
+        } else if(this.NFTselect.dir == 'dec'){
+          this.displayNFTs.sort((a, b) => {
+            if(a.owner > b.owner) return -1
+            if(a.owner < b.owner) return 1
+            return 0
+          })
+        }
+      }
+      if(this.NFTselect.sort == 'uid'){
+        if(this.NFTselect.dir == 'asc'){
+          this.displayNFTs.sort((a, b) => {
+            if(a.uid < b.uid) return -1
+            if(a.uid > b.uid) return 1
+            return 0
+          })
+        } else if(this.NFTselect.dir == 'dec'){
+          this.displayNFTs.sort((a, b) => {
+            if(a.uid > b.uid) return -1
+            if(a.uid < b.uid) return 1
+            return 0
+          })
+        }
       }
       if(this.NFTselect.sort == 'time'){
         this.displayNFTs.sort((a, b) => {
