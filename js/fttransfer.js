@@ -572,6 +572,9 @@ export default {
                                     <h5 class="lead m-0 text-uppercase">{{formatNumber(item.price/1000,3,'.',',')}} {{item.token}}</h5>
                                  </div>
                               </div>
+                              <div class="text-start mt-auto mb-auto" style="flex: 2">
+                                        <h5 class="lead m-0">{{denoms[toUpperCase(itemmodal.item.token)].balance}}</h5>
+                                     </div>
                               </section>
                               <div class="mt-3 mb-1">
                               <!-- ACCEPT / REJECT -->
