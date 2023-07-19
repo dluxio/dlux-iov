@@ -1914,6 +1914,12 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
     getNFTset(set, chain = 'dlux') {
       const api = this.chains[chain].api
+      if(this.hiveprice == 1){
+        setTimeout(() => {
+          this.getNFTset(set, chain)
+        },300)
+        return
+      }
       if (set != "index.html") {
         fetch(api + "/api/set/" + set)
           .then((response) => response.json())
