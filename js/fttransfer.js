@@ -336,7 +336,7 @@ export default {
                                                    1% FEE
                                                 </small>
                                                 <div class="position-relative has-validation mb-3">
-                                                   <input type="number"
+                                                   <input type="number" v-model="sell.price"
                                                       class="pe-5 form-control bg-dark border-dark text-info"
                                                       id="sellFTprice" aria-describedby="sellFTpriceappend"
                                                       placeholder="0.000" step="0.001" min="0.001" required>
@@ -1205,17 +1205,18 @@ export default {
             var toSign = {}
             var distro = ''
             for (var i = 0; i < this.bens.length; i++) {
+               if(!this.bens[i].name)break
                 distro += `${this.bens[i].name}_${this.bens[i].weight},`
             }
             //remove last comma
-            distro = distro.slice(0, -1)
+            if(distro)distro = distro.slice(0, -1)
             if(this.sell.token == 'hive' || this.sell.token == 'hbd')toSign = {
                 type: "cja",
                 cj: {
                     set: this.item.set,
-                    [this.sell.token]: parseInt(parseFloat(this.sell.amount) * 1000),
+                    [this.sell.token]: parseInt(parseFloat(this.sell.price) * 1000),
                     quantity: this.sell.qty,
-                    distro: distro,
+                    distro,
                 },
                 id: `${this.item.token}_fts_sell_h`,
                 msg: `Selling ${this.item.set} mint token...`,
