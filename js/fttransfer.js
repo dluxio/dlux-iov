@@ -1205,8 +1205,8 @@ export default {
             var toSign = {}
             var distro = ''
             for (var i = 0; i < this.bens.length; i++) {
-               if(!this.bens[i].name)break
-                distro += `${this.bens[i].name}_${this.bens[i].weight},`
+               if(!this.bens[i].account)break
+                distro += `${this.bens[i].account}_${this.bens[i].weight},`
             }
             //remove last comma
             if(distro)distro = distro.slice(0, -1)
