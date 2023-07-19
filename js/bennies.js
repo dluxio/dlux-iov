@@ -15,9 +15,9 @@ export default {
                 <tr v-for="ben in bennies">
                     <td class="ps-0 w-50">@{{ben.account}}</td>
                     <td class="text-center">
-                        <span class="pe-05"><button class="btn btn-sm btn-secondary" @click="decBen(ben)">-</button></span>
+                        <span class="pe-05"><button type="button" class="btn btn-sm btn-secondary" @click="decBen(ben)">-</button></span>
                         <span>{{ben.weight/100}}%</span>
-                        <span class="ps-05"><button class="btn btn-sm btn-secondary" @click="incBen(ben)">+</button></span>
+                        <span class="ps-05"><button type="button" class="btn btn-sm btn-secondary" @click="incBen(ben)">+</button></span>
                     </td>
                     <td class="pe-0 text-end"><button class="btn btn-danger" @click="subBenny(ben.account)"><i class="fa-solid fa-trash-can fa-fw"></i></button></td>
                 </tr>
