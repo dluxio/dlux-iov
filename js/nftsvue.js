@@ -1871,10 +1871,41 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         fetch(this.chains[chain].api + "/api/mintsupply/" + set)
           .then((response) => response.json())
           .then((data) => {
-            this.chains[chain].sets[set].mintSales = data.result[0].sales
-            this.chains[chain].sets[set].mintAuctions = data.result[0].auctions
-            this.mintSales = [...this.mintSales, ...data.result[0].sales]
-            this.mintAuctions = [...this.mintAuctions, ...data.result[0].auctions]
+            for (var i = 0; i < data.result[0].sales.length; i++) {
+              const token =
+              data.result[0].sales[i].pricenai.token == "HIVE" ? "HIVE" : data.result[0].sales[i].pricenai.token == "HBD" ? "HBD" : "TOKEN"
+              var hbdPrice = 0
+              switch (token) {
+                case "HIVE":
+                  hbdPrice = parseInt(data.result[0].sales[i].pricenai.amount * this.hiveprice)
+                  break;
+                case "HBD": 
+                  hbdPrice = data.result[0].sales[i].pricenai.amount
+                  break;
+                default:
+                  hbdPrice = parseInt(data.result[0].sales[i].pricenai.amount * this.hiveprice * this.parseFloat(this.chains[data.result[0].sales[i].pricenai.token.toLowerCase()].account.tick))
+              }
+              data.result[0].sales[i].hbdPrice = hbdPrice
+            }
+            for (var i = 0; i < data.result[0].auctions.length; i++) {
+              const token = data.result[0].auctions[i].pricenai.token == "HIVE" ? "HIVE" : data.result[0].auctions[i].pricenai.token == "HBD" ? "HBD" : "TOKEN"
+              var hbdPrice = 0
+              switch (token) {
+                case "HIVE":
+                  hbdPrice = parseInt(data.result[0].auctions[i].pricenai.amount * this.hiveprice)
+                  break;
+                case "HBD":
+                  hbdPrice = data.result[0].auctions[i].pricenai.amount
+                  break;
+                default:
+                  hbdPrice = parseInt(data.result[0].auctions[i].pricenai.amount * this.hiveprice * this.parseFloat(this.chains[data.result[0].auctions[i].pricenai.token.toLowerCase()].account.tick))
+              }
+              data.result[0].auctions[i].hbdPrice = hbdPrice
+            }
+            this.chains[chain].sets[set].mintSales = data.result[0].sales.sort((a, b) => b.hbdPrice - a.hbdPrice)
+            this.chains[chain].sets[set].mintAuctions = data.result[0].auctions.sort((a, b) => b.hbdPrice - a.hbdPrice)
+            this.mintSales = [...this.mintSales, ...data.result[0].sales].sort((a, b) => b.hbdPrice - a.hbdPrice)
+            this.mintAuctions = [...this.mintAuctions, ...data.result[0].auctions].sort((a, b) => b.hbdPrice - a.hbdPrice)
           })
           .catch((e) => {
             console.log(e);
@@ -2071,6 +2102,18 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                         : mintSales[i].pricenai.token == "HBD"
                           ? "HBD"
                           : "TOKEN";
+                          var hbdPrice = 0
+                          switch (token) {
+                            case "HIVE":
+                              hbdPrice = parseInt(mintSales[i].pricenai.amount * this.hiveprice)
+                              break;
+                            case "HBD": 
+                              hbdPrice = mintSales[i].pricenai.amount
+                              break;
+                            default:
+                              hbdPrice = parseInt(mintSales[i].pricenai.amount * this.hiveprice * this.parseFloat(this.chains[mintSales[i].pricenai.token.toLowerCase()].account.tick))
+                          }
+                          mintSales[i].hbdPrice = hbdPrice
                     mintSales[i].buyQty = 1;
                     mintSales[i].token = chain
                     mintSales[i].api = this.chains[chain].api
@@ -2090,6 +2133,18 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                         : mintAuctions[i].pricenai.token == "HBD"
                           ? "HBD"
                           : "TOKEN";
+                      var hbdPrice = 0
+                      switch (token) {
+                        case "HIVE":
+                          hbdPrice = parseInt(mintAuctions[i].pricenai.amount * this.hiveprice)
+                          break;
+                        case "HBD":
+                          hbdPrice = mintAuctions[i].pricenai.amount
+                          break;
+                        default:
+                          hbdPrice = parseInt(mintAuctions[i].pricenai.amount * this.hiveprice * this.parseFloat(this.chains[mintAuctions[i].pricenai.token.toLowerCase()].account.tick))
+                      }
+                      mintAuctions[i].hbdPrice = hbdPrice
                     mintAuctions[i].bidAmount =
                       (mintAuctions[i].price + 1000)/Math.pow(10, mintAuctions[i].pricenai.precision);
                     if (
@@ -2100,8 +2155,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                     }
                     this.chains[chain].sets[set].forAuctionMint++;
                   }
-                  this.chains[chain].sets[set].mintSales = mintSales;
-                  this.chains[chain].sets[set].mintAuctions = mintAuctions;
+                  this.chains[chain].sets[set].mintSales = mintSales.sort((a, b) => a.hbdPrice - b.hbdPrice)
+                  this.chains[chain].sets[set].mintAuctions = mintAuctions.sort((a, b) => a.hbdPrice - b.hbdPrice)
                 });
             });
           })
