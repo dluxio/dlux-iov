@@ -341,8 +341,7 @@
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  <div v-for="ad in chains[jsontoken].sets[setname].mintSales">
-                                  <tr scope="row" >
+                                  <tr scope="row" v-for="ad in chains[jsontoken].sets[setname].mintSales">
                                     <td style="vertical-align: middle">
                                       {{formatNumber(ad.qty,0,'.',',')}}</td>
                                     <td style="vertical-align: middle">
@@ -366,7 +365,6 @@
                                       </div>
                                     </td>
                                   </tr>
-                                </div>
                                 </tbody>
                               </table>
                             </div>
