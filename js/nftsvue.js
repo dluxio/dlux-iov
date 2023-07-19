@@ -2046,10 +2046,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                   this.chains[chain].sets[set].mintSales = mintSales;
                   this.chains[chain].sets[set].mintAuctions = mintAuctions;
                 });
-                if(this.setPage && !this.initialLoad){
-                  this.handleScroll(true)
-                  this.initialLoad = true
-                }
             });
           })
           .catch((e) => {
