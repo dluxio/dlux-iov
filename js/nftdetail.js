@@ -598,7 +598,10 @@ export default {
                                         <h5 class="lead m-0">{{itemmodal.item.priceString}}</h5>
                                      </div>
                                   </div>
-                                  <div class="mt-3 mb-1">
+                                  <div class="d-flex mb-3">
+                                  <small class="ms-auto text-white-50 me-1">You have {{denoms[itemmodal.item.price.token].balance}}</small>
+                               </div>
+                                  <div class="mb-1">
                                      <!-- ACCEPT / REJECT  -->
                                      <div role="group" v-if="itemmodal.item.to == account">
                                         <button type="button" class="btn btn-danger" title="Decline Trade"
@@ -638,14 +641,14 @@ export default {
                          <div id="collapseBuy" class="accordion-collapse collapse show" data-bs-parent="#nftAccordion">
                             <div class="accordion-body">
                                <div class="d-flex align-self-end">
-                                  <div class="col-12">
+                                  <div class="d-flex flex-column w-100">
  
-                                     <div class="d-flex bg-dark border-dark rounded p-2 mb-3">
+                                     <div class="d-flex bg-dark border-dark rounded p-2 mb-1">
                                         {{formatNumber(itemmodal.item.price.amount/1000,itemmodal.item.price.precision,'.',',')}}
                                         <span class="ms-auto text-uppercase">{{itemmodal.item.price.token}}</span>
                                      </div>
-                                    <div>
-                                       <p>Your Balance: {{denoms[itemmodal.item.price.token].balance}}</p>
+                                    <div class="d-flex mb-3">
+                                       <small class="ms-auto text-white-50 me-1">You have {{denoms[itemmodal.item.price.token].balance}}</small>
                                     </div>
                                      <div class="mb-2">
                                         <div class="text-center">
@@ -689,13 +692,8 @@ export default {
                                            {{itemmodal.item.bids}} Bids
                                         </u></h4>
                                   </div>
- 
- 
- 
                                   <div class="d-flex align-items-start mt-3 mb-2">
- 
                                      <ul>
- 
                                         <li>
                                            {{itemmodal.item.days}} day auction
                                         </li>
@@ -706,15 +704,13 @@ export default {
                                         </li>
                                         <li>Starting price:
                                            {{naiString(itemmodal.item.initial_price)}}
- 
                                         </li>
                                      </ul>
                                   </div>
- 
-                                  <div>
+                                  <div class="d-flex flex-column w-100">
                                      <form class="needs-validation" novalidate>
                                         <label for="bidNFTprice" class="mb-1">Bid</label>
-                                        <div class="position-relative mb-3">
+                                        <div class="position-relative mb-1">
                                            <input v-model="auction.bid" type="number"
                                               class="pe-5 form-control bg-dark border-dark text-info"
                                               id="auctionNFTprice"
@@ -735,6 +731,11 @@ export default {
                                               </div>
                                            </div>
                                         </div>
+
+                                        <div class="d-flex mb-3">
+                                       <small class="ms-auto text-white-50 me-1">You have {{denoms[itemmodal.item.price.token].balance}}</small>
+                                    </div>
+
                                         <div class="text-center mb-2">
                                            <button @click="bidNFT(itemmodal.item)" type="button"
                                               class="btn btn-primary">Bid
