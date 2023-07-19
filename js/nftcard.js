@@ -4,27 +4,29 @@ export default {
   template: `<div class="card h-100 text-white border-start border-end" :style="{'background': colors}">
   <!-- HEAD -->
   <div class="card-header border-0 p-1">
-    <!-- NFT HEAD -->
-    <div class="d-flex justify-content-between align-items-center" v-if="!mint">
 
-      <div class="rounded px-2 py-1" style="background: rgba(0,0,0,1)">
-        <a :href="'/nfts/set/' + item.setname + '#' + item.token" class="no-decoration" style="font-size: 1.3em;">
+    <!-- NFT HEAD -->
+    <div class="d-flex justify-content-between align-items-stretch" v-if="!mint">
+      <div class="d-flex rounded align-items-stretch" style="background: rgba(0,0,0,1)">
+        <a :href="'/nfts/set/' + item.setname + '#' + item.token" class="d-flex align-items-center px-2 no-decoration"
+          style="font-size: 1.3em;">
           <span class="rainbow-text" style="background-image: linear-gradient(rgb(194, 255, 182), rgb(255, 163, 182), rgb(221, 169, 255), rgb(162, 209, 255));
             -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent; 
-        -moz-background-clip: text;
-        -moz-text-fill-color: transparent;;"><i class="me-1" :class="[icon]"></i><b>{{item.setname}}</b></span></a>
+            -webkit-text-fill-color: transparent; 
+            -moz-background-clip: text;
+            -moz-text-fill-color: transparent;;"><i class="me-1" :class="[icon]"></i><b>{{item.setname}}</b>
+          </span>
+        </a>
       </div>
-
       <div class="rounded-pill d-flex align-items-center p-1" style="background: black">
         <h2 class="m-0 px-1">{{item.uid}}</h2>
       </div>
-
     </div>
+
     <!-- MINT HEAD -->
-    <div class="d-flex justify-content-between align-items-center" v-if="mint">
-      <div class="rounded px-2 py-1 shimmer border border-dark">
-        <a :href="'/nfts/set/' + item.set + '#' + item.token" class="no-decoration text-black"
+    <div class="d-flex justify-content-between align-items-stretch" v-if="mint">
+      <div class="d-flex rounded align-items-stretch shimmer border border-dark align-items-center">
+        <a :href="'/nfts/set/' + item.set + '#' + item.token" class="d-flex align-items-center px-2 no-decoration text-black"
           style="font-size: 1.3em;">
           <i class="me-1" :class="[icon]"></i><b>{{item.set}}</b></a>
       </div>
@@ -36,40 +38,40 @@ export default {
           <h2 class="m-0">{{formatNumber(item.qty,'0','.',',')}}</h2>
         </div>
       </div>
-
     </div>
+
   </div>
 
   <!-- BODY -->
   <div class="card-body mx-1 d-flex flex-column p-0 rounded" style="background: rgba(0,0,0,.75)">
 
-      <!-- NFT BODY -->
-      <div class="flex-grow-1" v-if="!mint">
-        <a href="#itemModal" class="a-1" data-bs-toggle="modal" @click="modalIndex('details')">
-          <div class="card-img-top nft-img rounded" :alt="'image-' +  item.setname + '-' + item.uid" v-html="item.HTML">
-          </div>
-        </a>
-      </div>
+    <!-- NFT BODY -->
+    <div class="flex-grow-1" v-if="!mint">
+      <a href="#itemModal" class="a-1" data-bs-toggle="modal" @click="modalIndex('details')">
+        <div class="card-img-top nft-img rounded" :alt="'image-' +  item.setname + '-' + item.uid" v-html="item.HTML">
+        </div>
+      </a>
+    </div>
 
-      <!-- MINT BODY -->
-      <div class="p-2 flex-grow-1 d-flex" v-if="mint">
-        <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
-          @click="modal('transfer')">
-          <img v-if="wrapped" class="w-100 border border-dark border-2 rounded mt-auto mb-auto"
-            :src="'https://ipfs.io/ipfs/' + wrapped"></a>
-      </div>
+    <!-- MINT BODY -->
+    <div class="p-2 flex-grow-1 d-flex" v-if="mint">
+      <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
+        @click="modal('transfer')">
+        <img v-if="wrapped" class="w-100 border border-dark border-2 rounded mt-auto mb-auto"
+          :src="'https://ipfs.io/ipfs/' + wrapped"></a>
+    </div>
 
-      <div class="d-flex d-none flex-column flex-shrink-1">
-        <div class="text-center">
-          <h3 class="my-1" :style="{'background-image': colors}" style="-webkit-background-clip: text;
+    <div class="d-flex d-none flex-column flex-shrink-1">
+      <div class="text-center">
+        <h3 class="my-1" :style="{'background-image': colors}" style="-webkit-background-clip: text;
                    -webkit-text-fill-color: transparent; 
                    -moz-background-clip: text;
                    -moz-text-fill-color: transparent;">
-            <span v-if="!mint">#{{Base64toNumber(uid)}}</span>
-            <span v-if="mint">sealed NFT</span>
-          </h3>
-        </div>
+          <span v-if="!mint">#{{Base64toNumber(uid)}}</span>
+          <span v-if="mint">sealed NFT</span>
+        </h3>
       </div>
+    </div>
 
   </div>
 
@@ -78,25 +80,26 @@ export default {
   <div class="card-footer px-1 pb-1 pt-0 border-0">
 
     <!-- TRADE -->
-    <div class="text-white text-center" v-if="trade">
-      <div class="bg-dark rounded">
-        <div class="mt-1 text-center rounded-top bg-info-50">
-          <h5 id="timer-set-uid" class="mb-0 lead">
-            <a class="no-decoration text-white" v-if="item.to != account" :href="'/@' + item.to">To @{{item.to}}</a>
-            <a class="no-decoration text-white" v-if="item.to == account" :href="'/@' + item.from">From
-              @{{item.from}}</a>
-          </h5>
-        </div>
-        <div class="d-flex rounded-bottom p-2">
-          <div class="fs3">
-            {{formatNumber(item.price/1000,3,'.',',')}}
+    <a href="#itemModal" class="no-decoration" data-bs-toggle="modal" @click="modalIndex('details')">
+      <div class="text-white text-center" v-if="trade">
+        <div class="bg-dark rounded">
+          <div class="mt-1 text-center rounded-top bg-info-50">
+            <h5 id="timer-set-uid" class="mb-0 lead">
+              <p class="no-decoration text-white" v-if="item.to != account">To @{{item.to}}</p>
+              <p class="no-decoration text-white" v-if="item.to == account">From @{{item.from}}</p>
+            </h5>
           </div>
-          <div class="fs3 text-uppercase ms-auto">
-            {{item.token}}
+          <div class="d-flex rounded-bottom p-2">
+            <div class="fs3">
+              {{formatNumber(item.price/1000,3,'.',',')}}
+            </div>
+            <div class="fs3 text-uppercase ms-auto">
+              {{item.token}}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </a>
 
     <!-- INVENTORY -->
     <div class="text-white d-none" v-if="inventory">
@@ -116,49 +119,57 @@ export default {
     </div>
 
     <!-- SALE -->
-    <div class="text-white text-center" v-if="sale">
-      <div class="bg-dark rounded">
-        <div class="mt-1 text-center rounded-top" v-bind:class="{'bg-warning-50': item.by == account, 'bg-success-50': item.by != account}">
-          <h5 id="timer-set-uid" class="mb-0 lead">Buy Now</h5>
-        </div>
-        <div class="d-flex rounded-bottom p-2">
-          <div class="fs-6">
-            {{formatNumber(item.price.amount/1000,item.price.precision,'.',',')}}
+    <a href="#itemModal" class="no-decoration" data-bs-toggle="modal" @click="modalIndex('details')">
+      <div class="text-white text-center" v-if="sale">
+        <div class="bg-dark rounded">
+          <div class="mt-1 text-center rounded-top"
+            v-bind:class="{'bg-warning-50': item.by == account, 'bg-success-50': item.by != account}">
+            <h5 id="timer-set-uid" class="mb-0 lead">Buy Now</h5>
           </div>
-          <div class="fs-6 ms-auto">
-            {{item.price.token}}
+          <div class="d-flex rounded-bottom p-2">
+            <div class="fs-6">
+              {{formatNumber(item.price.amount/1000,item.price.precision,'.',',')}}
+            </div>
+            <div class="fs-6 ms-auto">
+              {{item.price.token}}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-
+    </a>
 
     <!-- AUCTION -->
-    <div class="text-white text-center" v-if="auction">
-      <div class="bg-dark rounded">
-        <div class="mt-1 text-center rounded-top bg-danger-50" v-bind:class="{'bg-warning-50': item.by == account, 'bg-danger-50': animateTime == '1 day', 'bg-info-50': animateTime != '1 day' }">
-          <h5 id="timer-set-uid" class="mb-0 lead">Ends in {{animateTime}}</h5>
-        </div>
-        <div class="d-flex rounded-bottom p-2">
-          <div class="fs3">
-            {{formatNumber(item.price.amount/1000,item.price.precision,'.',',')}}
+    <a href="#itemModal" class="no-decoration" data-bs-toggle="modal" @click="modalIndex('details')">
+      <div class="text-white text-center" v-if="auction">
+        <div class="bg-dark rounded">
+          <div class="mt-1 text-center rounded-top bg-danger-50"
+            v-bind:class="{'bg-warning-50': item.by == account, 'bg-danger-50': animateTime == '1 day', 'bg-info-50': animateTime != '1 day' }">
+            <h5 id="timer-set-uid" class="mb-0 lead">Ends in {{animateTime}}</h5>
           </div>
-          <div class="fs3 ms-auto">
-            {{item.price.token}}
+          <div class="d-flex rounded-bottom p-2">
+            <div class="fs3">
+              {{formatNumber(item.price.amount/1000,item.price.precision,'.',',')}}
+            </div>
+            <div class="fs3 ms-auto">
+              {{item.price.token}}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </a>
 
     <!-- OWNER -->
     <div class="text-white text-center" v-if="!trade && !auction && !sale && !inventory">
       <div class="bg-dark rounded">
-        <div class="mt-1 text-center rounded-top" v-bind:class="{'bg-warning-50': item.owner == account, 'bg-primary-50': item.owner != account}">
-          <h5 id="timer-set-uid" class="mb-0 lead d-flex align-items-center justify-content-center"><i class="fs-6 fa-solid fa-hashtag fa-fw"></i>{{uid}}</h5>
+        <div class="mt-1 text-center rounded-top"
+          v-bind:class="{'bg-warning-50': item.owner == account, 'bg-primary-50': item.owner != account}">
+          <h5 id="timer-set-uid" class="mb-0 lead d-flex align-items-center justify-content-center"><i
+              class="fs-6 fa-solid fa-hashtag fa-fw"></i>{{uid}}</h5>
         </div>
         <div class="d-flex rounded-bottom p-2">
           <div class="fs3">
-            <a class="no-decoration" :href="'/@' + item.owner"><i class="fa-solid fa-user-astronaut fa-fw me-1"></i>{{item.owner}}</a>
+            <a class="no-decoration" :href="'/@' + item.owner"><i
+                class="fa-solid fa-user-astronaut fa-fw me-1"></i>{{item.owner}}</a>
           </div>
           <div class="fs3 ms-auto">
 
@@ -168,6 +179,7 @@ export default {
     </div>
 
   </div>
+  
 </div>
 `,
   // @click="modalIndex('itemModal', item.setname + ':' + item.uid );itemModal.hidden = false"
