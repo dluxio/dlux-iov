@@ -1161,7 +1161,7 @@
 
                                 <!-- MINT TRADES -->
                                 <div v-for="(rnft, named, index) in FTtrades" :key="named" class="col my-2">
-                                    <nftcard :item="rnft" mint="true" trade="true" :account="account"
+                                    <nftcard v-if="item.to == account || item.from == account" :item="rnft" mint="true" trade="true" :account="account"
                                         :multisig="chains[rnft.token].multisig" @focusitem="activeIndex = named;numitems=FTtrades.length;focusItem = $event;"
                                         :wrapped="getAttr(rnft.script, 'wrapped')" :oicon="getIcon(rnft.script)"
                                         @tosign="toSign = $event" :ocolors="getSetDetailsColors(rnft.script)"
@@ -1169,7 +1169,7 @@
                                 </div>
                                 <!-- NFT TRADES -->
                                 <div v-for="item in NFTtrades" class="col my-2" id="trade-nft-cards">
-                                    <nftcard :item="item" trade="true" :account="account"
+                                    <nftcard v-if="item.to == account || item.from == account" :item="item" trade="true" :account="account"
                                         :multisig="chains[item.token].multisig" :uid="Base64toNumber(item.uid)"
                                         :oicon="getIcon(item.script)" @tosign="toSign = $event"
                                         :ocolors="getSetDetailsColors(item.script)" @focusitem="focusItem = $event"
