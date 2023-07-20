@@ -418,6 +418,7 @@ createApp({
   methods: {
     reply(deets){
       console.log('getReply:', deets)
+      if(!deets.json_metadata)deets.json_metadata = JSON.stringify({})
       var operations = []
       if(deets.bens){
         operations.push(["comment_options",
