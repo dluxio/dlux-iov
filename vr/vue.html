@@ -10,13 +10,31 @@
 
   <script src="https://unpkg.com/aframe-environment-component@1.3.1/dist/aframe-environment-component.min.js"></script>
   <!-- vue.js -->
-  <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script> -->
   <script type="module" src="/js/vrvue.js"></script>
   <style>
     #app {
       width: 100%; height: 100%;
     }
   </style>
+  <script>
+    // navigator.serviceWorker.getRegistrations().then(function(registrations) {
+    //     for(let registration of registrations) {
+    //         registration.unregister();
+    //     } 
+    // });
+    if ('serviceWorker' in navigator) {
+        navigator
+            .serviceWorker
+            .register(
+                // path to the service worker file
+                '/sw.js'
+            )
+            // the registration is async and it returns a promise
+            .then(function (reg) {
+                console.log('Registration Successful');
+            });
+    }
+</script>
 </head>
 <body>
   <div id="app">

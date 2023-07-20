@@ -10,7 +10,25 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/img/dlux-icon-192.png">
   <meta name="theme-color" content="#111222"/>
-   
+  <script>
+    // navigator.serviceWorker.getRegistrations().then(function(registrations) {
+    //     for(let registration of registrations) {
+    //         registration.unregister();
+    //     } 
+    // });
+    if ('serviceWorker' in navigator) {
+        navigator
+            .serviceWorker
+            .register(
+                // path to the service worker file
+                '/sw.js'
+            )
+            // the registration is async and it returns a promise
+            .then(function (reg) {
+                console.log('Registration Successful');
+            });
+    }
+</script>
   <!-- Icons -->
   <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
 </head>
