@@ -23,24 +23,24 @@
   <meta name="theme-color" content="#111222" />
 
   <script>
-    // navigator.serviceWorker.getRegistrations().then(function(registrations) {
-    //     for(let registration of registrations) {
-    //         registration.unregister();
-    //     } 
-    // });
-    if ('serviceWorker' in navigator) {
-        navigator
-            .serviceWorker
-            .register(
-                // path to the service worker file
-                '/sw.js'
-            )
-            // the registration is async and it returns a promise
-            .then(function (reg) {
-                console.log('Registration Successful');
-            });
-    }
-</script>
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+            registration.unregister();
+        } 
+    });
+    // if ('serviceWorker' in navigator) {
+    //     navigator
+    //         .serviceWorker
+    //         .register(
+    //             // path to the service worker file
+    //             '/sw.js'
+    //         )
+    //         // the registration is async and it returns a promise
+    //         .then(function (reg) {
+    //             console.log('Registration Successful');
+    //         });
+    // }
+  </script>
   <style>
     .vh100 {
       height: 100vh;

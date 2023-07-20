@@ -51,24 +51,24 @@
     <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
 
     <script>
-        // navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        //     for(let registration of registrations) {
-        //         registration.unregister();
-        //     } 
-        // });
-        if ('serviceWorker' in navigator) {
-            navigator
-                .serviceWorker
-                .register(
-                    // path to the service worker file
-                    '/sw.js'
-                )
-                // the registration is async and it returns a promise
-                .then(function (reg) {
-                    console.log('Registration Successful');
-                });
-        }
-    </script>
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for(let registration of registrations) {
+                registration.unregister();
+            } 
+        });
+        // if ('serviceWorker' in navigator) {
+        //     navigator
+        //         .serviceWorker
+        //         .register(
+        //             // path to the service worker file
+        //             '/sw.js'
+        //         )
+        //         // the registration is async and it returns a promise
+        //         .then(function (reg) {
+        //             console.log('Registration Successful');
+        //         });
+        // }
+      </script>
 
 </head>
 
