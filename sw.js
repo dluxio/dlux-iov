@@ -48,7 +48,7 @@ var urlsToCache = [
   "/img/hiveauth.svg",
   "/img/hivesigner.svg",
   "/img/hub-logo.png",
-  "/img/ipfs-logo.sbg",
+  "/img/ipfs-logo.svg",
   "/img/jtree-comp.jpg",
   "/img/keychain.png",
   "/img/metaverse-vr-comp.jpg",
