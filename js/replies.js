@@ -71,6 +71,7 @@ export default {
         edit: false,
         view: true,
         mde: '',
+        postCustom_json: {},
         makeReply: false,
         makeVote: false,
         warn: false,
@@ -114,7 +115,7 @@ export default {
                 "permlink": 're-' + this.post.permlink,
                 "title": '',
                 "body": this.mde,
-                "json_metadata": JSON.stringify(this.postCustom_json || {}),
+                "json_metadata": JSON.stringify(this.postCustom_json),
             }
             this.$emit('reply', deets)
         },
