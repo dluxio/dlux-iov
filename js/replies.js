@@ -108,6 +108,8 @@ export default {
             this.mde = event
         },
         reply(deets){
+          var json_metadata = JSON.stringify(this.postCustom_json)
+          if(!json_metadata)json_metadata = JSON.stringify({})
             if(!deets)deets = {
                 "parent_author": this.post.author,
                 "parent_permlink": this.post.permlink,
@@ -115,7 +117,7 @@ export default {
                 "permlink": 're-' + this.post.permlink,
                 "title": '',
                 "body": this.mde,
-                "json_metadata": JSON.stringify(this.postCustom_json),
+                json_metadata
             }
             this.$emit('reply', deets)
         },
