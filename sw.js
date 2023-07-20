@@ -33,7 +33,7 @@ var urlsToCache = [
   "/docs/token-actions.md",
   "/hub/index.html",
   "/img/aframe.png",
-  "/img/ar-vr.svg",
+  "/img/ar-vr-icon.svg",
   "/img/dex-vr-comp.jpg",
   "/img/chatgpt-icon.png",
   "/img/dex-vr-comp.jpg",
@@ -78,6 +78,7 @@ self.addEventListener("install", function (event) {
   event.waitUntil(
     caches.open(CACHE_NAME).then(function (cache) {
       console.log("Opened cache:" + CACHE_NAME);
+      
       return cache.addAll(urlsToCache);
     })
   );
