@@ -30,7 +30,7 @@ export default {
   <!-- Footer Elements -->
 
   <!-- Copyright -->
-  <div class="footer-copyright bg-darker text-center text-white py-3">© 2022 Copyright: 
+  <div class="footer-copyright bg-darker text-center text-white py-3">© 2023 Copyright: 
     <a href="https://www.dlux.io/about/" class="">dlux.io</a>
   </div>
   <!-- Copyright -->
