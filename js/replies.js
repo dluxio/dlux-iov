@@ -109,7 +109,8 @@ export default {
         },
         reply(deets){
           var json_metadata = JSON.stringify(this.postCustom_json)
-          if(!json_metadata)json_metadata = ""
+          console.log(json_metadata)
+          if(!json_metadata)json_metadata = JSON.stringify({})
             if(!deets)deets = {
                 "parent_author": this.post.author,
                 "parent_permlink": this.post.permlink,
