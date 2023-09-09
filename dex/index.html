@@ -51,42 +51,143 @@
     <main role="main" class="flex-shrink-0 text-white">
       <div class="container-fluid px-0">
         <div class="container-fluid fixed-top px-0" style="margin-top: 72px; z-index: 900">
-          <div class="d-flex flex-column justify-content-between align-items-center nav-blur px-3 py-1"
+          <div class="d-flex flex-column justify-content-between align-items-center nav-blur px-2"
             style="background-color: rgba(0,0,0,0.6)">
             <div class="d-flex align-itmes-center justify-content-between w-100">
-              <div class="d-flex align-items-center">
+              <div class="d-flex w-100 pt-2 pb-1 align-items-center">
                 <!-- token select -->
-                <div id="userApiSelect">
-                  <div class="dropdown">
-                    <a class="btn btn-sm btn-dark dropdown-toggle" role="button" id="tokenDropdownBtn"
+                <div id="userApiSelect" class="me-1">
+                  <div v-cloak class="dropdown">
+                    <a class="btn btn-lg btn-outline-warning d-flex align-items-center" role="button" id="tokenDropdownBtn"
                       data-bs-toggle="dropdown" aria-expanded="false">
-                      Token
+                      <i class="fa-solid fa-atom force-parent-lh"></i>
+                      <span class="d-none d-lg-block ms-1">{{TOKEN}} </span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-dark bg-black" aria-labelledby="tokenDropdownBtn">
                       <li>
                         <h6 class="dropdown-header">HIVE / HBD</h6>
                       </li>
                       <li>
-                        <a class="dropdown-item" role="button" @click="setApi('https://token.dlux.io')">DLUX</a>
+                        <a class="dropdown-item" role="button" @click="setApi('https://token.dlux.io')" v-bind:class="{'active': TOKEN == 'DLUX'}">DLUX</a>
+                      </li>
+                      
+                      <li>
+                        <a class="dropdown-item" role="button" @click="setApi('https://duat.hivehoneycomb.com')" v-bind:class="{'active': TOKEN == 'DUAT'}">DUAT</a>
                       </li>
                       <li>
                         <a class="dropdown-item" role="button"
-                          @click="setApi('https://spkinstant.hivehoneycomb.com')">LARYNX</a>
-                      </li>
-                      <li>
-                        <a class="dropdown-item" role="button" @click="setApi('https://duat.hivehoneycomb.com')">DUAT</a>
+                          @click="setApi('https://spkinstant.hivehoneycomb.com')" v-bind:class="{'active': TOKEN == 'LARYNX'}">LARYNX</a>
                       </li>
                       <li>
                         <hr class="dropdown-divider" />
                       </li>
-                      <li>
-                        <a class="dropdown-item disabled" role="button" @click="setApi()">Other...</a>
+                      
+                      <li >
+                        <!-- runner status  -->
+      <div :title="behindTitle" class="d-flex mx-2 align-items-center text-center">
+        <a class="btn btn d-flex w-100 align-items-center text-center no-decoration" style="font-size: 0.7em;"
+          :class="[{'btn-outline-success':behind < 30},{'btn-outline-warning':behind >= 30 && behind < 60},{'btn-outline-danger':behind >= 60}]"
+          data-bs-toggle="collapse" href="#nodeDrawer" role="button" aria-expanded="false"
+          aria-controls="nodeDrawer">
+          <span v-cloak>{{runners.length}}
+            <i class="fas fa-user-lock ms-1"></i></span>
+        </a>
+      </div></a>
                       </li>
+                    
+                        <li class="d-flex mt-2 mb-1">
+                                <!-- token settings modal button -->
+<button v-if="isnode" type="button" class="btn btn-outline-secondary mx-2 w-100" data-bs-toggle="modal" data-bs-target="#tokenSettingsModal">
+  Node<i class="fas fa-cog ms-1"></i>
+</button>
+                          
+                                                </li>
                     </ul>
                   </div>
                 </div>
-                <!-- node settings -->
 
+
+
+<!-- claim tokens -->
+<div v-if="hasDrop || accountapi.claim" class="d-flex me-1 dropdown align-items-center">
+  <a class="btn btn-lg btn-outline-danger" data-bs-auto-close="outside"
+    role="button" id="claimDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="fas fa-gift fa-fw"></i></a>
+  <ul class="dropdown-menu dropdown-menu-dark p-2 bg-black text-white-50 text-left"
+    aria-labelledby="claimDropdownBtn" style="width: 300px">
+    <li>
+      <h6 class="dropdown-header text-center">
+        CLAIM {{TOKEN}}
+      </h6>
+    </li>
+    <li v-if="hasDrop">
+      <form>
+        <div class="row mb-3">
+          <label class="form-label">Airdrop:</label>
+          <div class="input-group">
+            <div id="nodeDrop" class="form-control bg-black border-rb text-white text-center square">
+              {{dropnai}}
+            </div>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="text-center mt-3">
+            <button id="claimDrop" type="button" class="btn background-rb" @click="dropClaim()">
+              Claim<i class="fas fa-coins ms-2"></i>
+            </button>
+          </div>
+        </div>
+      </form>
+    </li>
+    <li v-if="accountapi.claim">
+      <form>
+        <div class="row mb-2">
+          <label class="form-label">Rewards:</label>
+          <div class="input-group">
+            <div id="nodeRewards" class="form-control bg-black border-rb border-2 text-white text-center square">
+              {{toFixed(accountapi.claim/1000,3)}} {{TOKEN}}
+            </div>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="form-check form-switch d-flex justify-content-center"
+            v-if="isnode && features.rewardSel">
+            <input type="checkbox" class="form-check-input me-2" v-model="features.reward2Gov"
+              role="switch" />
+            <label class="form-check-label">Claim 1/2 to Gov</label>
+          </div>
+        </div>
+        <div class="row mb-2">
+          <div class="text-center">
+            <button type="button" class="btn btn-danger" @click="rewardClaim()">
+              Claim<i class="fas fa-coins ms-2"></i>
+            </button>
+          </div>
+        </div>
+      </form>
+    </li>
+  </ul>
+</div>
+
+
+
+<!-- token balance wallet button -->
+<button type="button" class="btn btn-lg d-lg-none btn-outline-success ms-auto d-flex align-items-center" 
+        data-bs-toggle="modal" data-bs-target="#dexWallet">
+  <i class="fa-solid fa-paper-plane force-parent-lh me-1"></i>
+  <p class="me-1 mb-0 fs-6" v-cloak>{{formatNumber(bartoken,3,'.',',')}} {{TOKEN}}
+  <i class="fa-fw fa-solid fa-caret-down"></i></p>
+</button>
+
+
+
+
+
+
+              <!--xl honeycomb settings-->
+              <div class="d-none">
+
+                <!-- node settings -->
                 <div id="userNode" class="ms-2" v-if="isnode">
                   <a class="dropdown btn btn-sm btn-dark" data-bs-auto-close="outside" role="button"
                     id="settingsDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
@@ -135,11 +236,9 @@
                       <i class="fas fa-user-lock ms-1"></i></span>
                   </a>
                 </div>
-              </div>
-
-              <div class="d-flex align-items-center">
-                <!-- claim tokens form -->
-                <div v-if="hasDrop || accountapi.claim" class="mx-1">
+              
+                <!-- claim tokens -->
+                <div v-if="hasDrop || accountapi.claim" class="d-flex ms-2 align-items-center">
                   <a class="dropdown btn-sm btn-outline-rb no-decoration" data-bs-auto-close="outside"
                     role="button" id="claimDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">Claim <i
                       class="fas fa-gift"></i></a>
@@ -198,8 +297,13 @@
                     </li>
                   </ul>
                 </div>
+                
               </div>
-              <div class="d-flex align-items-center text-white-50">
+
+              </div>
+
+              <!-- xl wallet-->
+              <div class="d-none d-lg-flex align-items-center text-white-50">
                 
                 <!-- send token form -->
                 <div v-if="account" id="userSendToken" class="mx-1" v-if="features.send_B">
@@ -261,7 +365,6 @@
                 </div>
 
                 <!-- power form -->
-
                 <div id="userPwr" class="mx-1" v-if="account && (features.powup_B || features.powdn_B)">
                   <a class="dropdown-toggle text-primary no-decoration" data-bs-auto-close="outside"
                     role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak><span
@@ -336,7 +439,6 @@
                 </div>
 
                 <!-- gov form -->
-
                 <div id="userGov" class="mx-1" v-if="isnode && (features.govup_B || features.govdn_B)">
                   <a class="dropdown-toggle text-info no-decoration" role="button" data-bs-auto-close="outside" role="button"
                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak><span class="me-1"
@@ -473,7 +575,6 @@
                 </div>
 
                 <!-- send hbd form -->
-
                 <div v-if="account" id="userHbd" class="mx-1">
                   <a class="dropdown-toggle text-hbd no-decoration" data-bs-auto-close="outside"
                     role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
@@ -527,6 +628,7 @@
                     </li>
                   </ul>
                 </div>
+
               </div>
             </div>
             <!-- node collapse region -->
@@ -1618,7 +1720,404 @@
           </div>
         </div>
       </div>
+
+
+
+<!-- token settings Modal -->
+<div class="modal fade" id="tokenSettingsModal" tabindex="-1" aria-labelledby="tokenSettingsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="tokenSettingsModalLabel">{{TOKEN}} Settings</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- node settings -->
+        <div id="userNode" class="" >
+
+              <h4 class="text-center text-white-50">@{{account}}</h4>
+            
+              <form name="nodeSettings" class="needs-validation" novalidate>
+                <div class="row mb-3" v-for="opt in features.node.opts">
+                  <label :for="opt.json" class="form-label">{{opt.S}}:</label>
+                  <div class="input-group">
+                    <input v-if="opt.type == 'text'" :type="opt.type" v-model="opt.val"
+                      class="form-control text-info" :id="opt.json"
+                      :placeholder="opt.info" />
+                    <input v-if="opt.type == 'number'" :type="opt.type" v-model="opt.val"
+                      class="form-control text-info" :id="opt.json" :placeholder="opt.info"
+                      :max="opt.max" :min="opt.min" />
+                  </div>
+                </div>
+                <div class="text-center mt-3 mb-2">
+                  <button id="saveSettingsBtn" type="button" class="btn btn-secondary"
+                    @click="saveNodeSettings()">
+                    Save<i class="far fa-save ms-2"></i>
+                  </button>
+                </div>
+              </form>
+            
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+      
+      <!-- dexWallet Modal -->
+<div class="modal fade" id="dexWallet" tabindex="-1" aria-labelledby="dexWalletLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header border-bottom-0">
+        <h1 class="modal-title fs-5" id="dexWalletLabel"> <span class="px-2 py-1 rounded border border-warning text-warning"><i class="fa-solid fa-atom fa-fw me-1"></i>{{TOKEN}}</span></h1>
+        <h1 class="small mb-0 d-none" title="Honeycomb Hive Layer 2 Wallet"><span >Honeycomb</span><br><span class="fw-lighter">HL2 Wallet</span></h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="accordion wallet-accordion rounded-0 bg-darkg" id="accordionWallet">
+          <!-- token -->
+          <div class="accordion-item  bg-warning rounded-0" v-if="account" v-if="features.send_B">
+            <h2 class="accordion-header rounded-0">
+              <button class="accordion-button collapsed rounded-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseWalletOne" aria-expanded="true" aria-controls="collapseWalletOne">
+                {{TOKEN}}<span class="ms-auto small">{{formatNumber(bartoken,3,'.',',')}}</span>
+              </button>
+            </h2>
+            <div id="collapseWalletOne" class="accordion-collapse collapse " data-bs-parent="#accordionWallet">
+              <div class="accordion-body bg-darkg">
+                <!-- send token form -->
+                <div  class="mx-1">
+                      <h6 class="dropdown-header text-center">
+                        SEND {{TOKEN}}
+                      </h6>
+                      <form id="sendForm" @submit.prevent="validateForm('sendForm', 'sendFormValid');tokenSend()"
+                        class="needs-validation" novalidate>
+                        <div class="row mb-3">
+                          <label class="form-label">To:</label>
+                          <div class="input-group">
+                            <span class="input-group-text k text-white-50">
+                              @</span>
+                            <input class="form-control text-info" v-model="sendTo"
+                              @blur="checkAccount('sendTo', 'sendAllowed')" required id="sendTokenTo" type="text"
+                              placeholder="Recipient" />
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label class="form-label">Amount:</label>
+                          <div class="input-group">
+                            <input class="form-control text-info" v-model="sendAmount" required
+                              type="number" step="0.001" min="0.001" :max="parseFloat(bartoken)" placeholder="0.000" />
+
+                            <span class="input-group-text text-white-50">
+                              {{TOKEN}}
+                            </span>
+                          </div>
+                          <div class="small text-center pt-2">
+                            <a role="button" @click="setValue('sendAmount', parseFloat(bartoken))"
+                              class="text-honey no-decoration">{{formatNumber(bartoken,3,'.',',')}}
+                              {{TOKEN}}</a>
+                            Available
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label class="form-label">Memo:</label>
+                          <div class="input-group">
+                            <input class="form-control text-info" v-model="sendMemo" type="text"
+                              placeholder="memo (optional)" />
+                          </div>
+                        </div>
+                        <div class="text-center mb-2">
+                          <button type="submit" class="btn btn-honey">
+                            Send<i class="fas fa-paper-plane ms-2"></i>
+                          </button>
+                        </div>
+                      </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- token power -->
+          <div class="accordion-item bg-primary" v-if="account && (features.powup_B || features.powdn_B)">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseWalletTwo" aria-expanded="false" aria-controls="collapseWalletTwo">
+                {{TOKEN}}P<span class="ms-auto small">{{formatNumber(barpow,3,'.',',')}}</span> 
+              </button>
+            </h2>
+            <div id="collapseWalletTwo" class="accordion-collapse collapse" data-bs-parent="#accordionWallet">
+              <div class="accordion-body bg-darkg">
+                <!-- power form -->
+                <div>
+                 
+                      <h6 class="dropdown-header text-center">
+                        {{TOKEN}} POWER
+                      </h6>
+           
+                      <form id="powForm" @submit.prevent="validateForm('powForm', 'powFormValid');power()"
+                        class="needs-validation" novalidate>
+                        <div class="row mb-3 text-center">
+                          <div>
+                            <div class="btn-group text-nowrap">
+                              <input class="btn-check" type="radio" name="pwrPair" id="pwrUp"
+                                :checked="features.powsel_up" @click="setValue('features.powsel_up', true)" />
+                              <label for="pwrUp" class="btn btn-outline-primary">
+                                PWR UP
+                              </label>
+                              <input class="btn-check" type="radio" name="pwrPair" id="pwrDown"
+                                :checked="!features.powsel_up" @click="setValue('features.powsel_up', false)" />
+                              <label for="pwrDown" class="btn btn-outline-primary">PWR DOWN
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label class="form-label">Amount:</label>
+                          <div class="input-group">
+                            <input class="form-control text-primary" v-if="features.powsel_up"
+                              v-model="features.pow_val" required type="number" step="0.001" min="0.001"
+                              :max="parseFloat(bartoken)" placeholder="0.000" />
+                            <input class="form-control text-primary" v-if="!features.powsel_up"
+                              v-model="features.pow_val" required type="number" step="0.001" min="0.001"
+                              :max="parseFloat(barpow)" placeholder="0.000" />
+
+                            <span class="input-group-text text-white-50" v-if="features.powsel_up">
+                              {{TOKEN}}
+                            </span>
+                            <span class="input-group-text text-white-50"
+                              v-if="!features.powsel_up">
+                              {{TOKEN}}P
+                            </span>
+                          </div>
+                          <div class="small text-center py-2" v-if="features.powsel_up">
+                            <a type="button" @click="setValue('features.pow_val',balance)"
+                              class="text-primary no-decoration">{{formatNumber(bartoken,3,'.',',')}}
+                              {{TOKEN}}</a>
+                            Available
+                          </div>
+                          <div class="small text-center py-2" v-if="!features.powsel_up">
+                            <a role="button" @click="setValue('features.pow_val',accountapi.poweredUp/1000)"
+                              class="text-primary no-decoration">{{formatNumber(barpow,3,'.',',')}}
+                              {{TOKEN}}P</a>
+                            Available
+                          </div>
+                        </div>
+                        <div class="text-center mb-2">
+                          <button type="submit" class="btn btn-primary" v-if="features.powsel_up">
+                            Power Up<i class="fas fa-arrow-alt-circle-up ms-2"></i>
+                          </button>
+                          <button type="submit" class="btn btn-primary" v-if="!features.powsel_up">
+                            Power Down<i class="fas fa-arrow-alt-circle-down ms-2"></i>
+                          </button>
+                        </div>
+                      </form>
+                 
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item bg-info" v-if="isnode && (features.govup_B || features.govdn_B)">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseWalletThree" aria-expanded="false" aria-controls="collapseWalletThree">
+                 {{TOKEN}}G<span class="ms-auto small">{{formatNumber(bargov,3,'.',',')}}</span>
+              </button>
+            </h2>
+            <div id="collapseWalletThree" class="accordion-collapse collapse" data-bs-parent="#accordionWallet">
+              <div class="accordion-body bg-darkg">
+               
+                <!-- gov form -->
+                
+                      <h6 class="dropdown-header text-center">
+                        {{TOKEN}} GOVERNANCE
+                      </h6>
+                    
+                      <h4 class="dropdown-header">
+                        Current Threshold:
+                        {{formatNumber(stats.gov_threshhold/1000,3,'.',',')}}
+                      </h4>
+                  
+                      <form id="govForm" @submit.prevent="validateForm('govForm', 'govFormValid');gov()"
+                        class="needs-validation" novalidate>
+                        <div class="row mb-3 text-center">
+                          <div>
+                            <div class="btn-group">
+                              <input class="btn-check" type="radio" name="govPair" id="govLock"
+                                :checked="features.govsel_up" @click="setValue('features.govsel_up', true)" />
+                              <label for="govLock" class="btn btn-outline-info">
+                                LOCK
+                              </label>
+                              <input class="btn-check" type="radio" name="govPair" id="govUnlock"
+                                :checked="!features.govsel_up" @click="setValue('features.govsel_up', false)" />
+                              <label for="govUnlock" class="btn btn-outline-info">
+                                UNLOCK
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label class="form-label">Amount:</label>
+                          <div class="input-group">
+                            <input class="form-control text-info" v-if="features.govsel_up"
+                              v-model="features.gov_val" required type="number" step="0.001" min="0.001"
+                              :max="parseFloat(bartoken)" placeholder="0.000" />
+                            <input class="form-control text-info" v-if="!features.govsel_up"
+                              v-model="features.gov_val" required type="number" step="0.001" min="0.001"
+                              :max="parseFloat(bargov)" placeholder="0.000" />
+                            <span class="input-group-text text-white-50" v-if="features.govsel_up">
+                              {{TOKEN}}
+                            </span>
+                            <span class="input-group-text text-white-50"
+                              v-if="!features.govsel_up">
+                              {{TOKEN}}G
+                            </span>
+                          </div>
+                          <div class="small text-center py-2" v-if="features.govsel_up">
+                            <a role="button" @click="setValue('features.gov_val',balance)"
+                              class="text-info no-decoration">{{formatNumber(bartoken,3,'.',',')}}
+                              {{TOKEN}}</a>
+                            Available
+                          </div>
+                          <div class="small text-center py-2" v-if="!features.govsel_up">
+                            <a role="button" @click="setValue('features.gov_val',accountapi.gov/1000)"
+                              class="text-info no-decoration">{{formatNumber(bargov,3,'.',',')}}
+                              {{TOKEN}}G</a>
+                            Locked
+                          </div>
+                        </div>
+                        <div class="text-center mb-2">
+                          <button type="submit" class="btn btn-info" v-if="features.govsel_up">
+                            Lock Gov<i class="fas fa-lock ms-2"></i>
+                          </button>
+                          <button type="submit" class="btn btn-info" v-if="!features.govsel_up">
+                            Unlock Gov<i class="fas fa-lock-open ms-2"></i>
+                          </button>
+                        </div>
+                      </form>
+                  
+                
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item bg-hive" v-if="account">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseWalletFour" aria-expanded="false" aria-controls="collapseWalletFour">
+                 HIVE<span class="ms-auto small">{{formatNumber(barhive,3,'.',',')}}</span>
+              </button>
+            </h2>
+            <div id="collapseWalletFour" class="accordion-collapse collapse" data-bs-parent="#accordionWallet">
+              <div class="accordion-body bg-darkg">
+                <!-- send hive form -->
+                
+                      <h6 class="dropdown-header text-center">SEND HIVE</h6>
+                   
+                      <form id="hiveForm" @submit.prevent="validateForm('hiveForm', 'hiveFormValid');sendhive()"
+                        class="needs-validation" novalidate>
+                        <div class="row mb-3">
+                          <label for="sendHiveTo">To:</label>
+                          <div class="input-group">
+                              <span class="input-group-text text-white-50">
+                                @
+                              </span>
+                            <input id="" class="form-control text-info"
+                              @blur="checkAccount('sendHiveTo', 'sendHiveAllowed')" required v-model="sendHiveTo"
+                              type="text" placeholder="Recipient" />
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label class="form-label">Amount:</label>
+                          <div class="input-group">
+                            <input class="form-control text-info" required v-model="sendHiveAmount"
+                              type="number" step="0.001" min="0.001" :max="parseFloat(barhive)" placeholder="0.000" />
+                            <span class="input-group-text text-white-50">
+                              HIVE
+                            </span>
+                          </div>
+                          <div class="small text-center pt-2">
+                            <a type="button" @click="setValue('sendHiveAmount',parseFloat(barhive))"
+                              class="text-hive no-decoration">{{formatNumber(barhive,3,'.',',')}} HIVE</a>
+                            Available
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label class="form-label">Memo:</label>
+                          <div class="input-group">
+                            <input class="form-control text-info" type="text"
+                              v-model="sendHiveMemo" placeholder="memo (optional)" />
+                          </div>
+                        </div>
+                        <div class="text-center mb-2">
+                          <button type="submit" class="btn btn-hive">
+                            Send<i class="fas fa-paper-plane ms-2"></i>
+                          </button>
+                        </div>
+                      </form>
+                   
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item bg-hbd rounded-0" v-if="account">
+            <h2 class="accordion-header rounded-0">
+              <button class="accordion-button collapsed rounded-0 " type="button" data-bs-toggle="collapse" data-bs-target="#collapseWalletFive" aria-expanded="false" aria-controls="collapseWalletFive">
+                 HBD <span class="ms-auto small">{{formatNumber(barhbd,3,'.',',')}}</span>
+              </button>
+            </h2>
+            <div id="collapseWalletFive" class="accordion-collapse collapse" data-bs-parent="#accordionWallet">
+              <div class="accordion-body bg-darkg">
+                <!-- send hbd form -->
+                
+                      <h6 class="dropdown-header text-center">SEND HBD</h6>
+                    
+                      <form id="hbdForm" @submit.prevent="validateForm('hbdForm', 'hbdFormValid');sendhbd()"
+                        class="needs-validation" novalidate>
+                        <div class="row mb-3">
+                          <label class="form-label">To:</label>
+                          <div class="input-group">
+                            <span class="input-group-text text-white-50">
+                              @</span>
+                            <input class="form-control text-info"
+                              @blur="checkAccount('sendHBDTo', 'sendHBDAllowed')" required v-model="sendHBDTo"
+                              type="text" placeholder="Recipient" />
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label class="form-label">Amount:</label>
+                          <div class="input-group">
+                            <input class="form-control text-info" required v-model="sendHBDAmount"
+                              type="number" step="0.001" min="0.001" :max="parseFloat(barhbd)" placeholder="0.000" />
+                            <span class="input-group-text text-white-50">
+                              HBD
+                            </span>
+                          </div>
+                          <div class="small text-center pt-2">
+                            <a role="button" @click="setValue('sendHBDAmount',parseFloat(barhbd))"
+                              class="text-hbd no-decoration">{{formatNumber(barhbd,3,'.',',')}} HBD</a>
+                            Available
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label class="form-label">Memo:</label>
+                          <div class="input-group">
+                            <input class="form-control text-info" v-model="sendHBDMemo" type="text"
+                              placeholder="memo (optional)" />
+                          </div>
+                        </div>
+                        <div class="text-center mb-2">
+                          <button type="submit" class="btn btn-hbd">
+                            Send<i class="fas fa-paper-plane ms-2"></i>
+                          </button>
+                        </div>
+                      </form>
+                    
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
     </main>
+    
     <div>
       <foot-vue />
     </div>
