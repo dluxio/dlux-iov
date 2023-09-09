@@ -1612,7 +1612,11 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-      
+      <!-- API Status -->
+<div class="d-flex align-items-center w-100">
+  <span class="small" :class="[{'text-success':behind < 30},{'text-warning':behind >= 30 && behind < 60},{'text-danger':behind >= 60}]">
+  {{lapi}}<i class="fa-solid fa-satellite-dish mx-1"></i>{{behind}} block<span v-if="behind > 1 || behind == 0">s</span> behind HIVE</span>
+</div>
       
         <!-- Search -->
         <div class="w-100">
@@ -1630,11 +1634,7 @@
 
     </div>
       <div class="modal-body p-0">
-<!-- API Status -->
-<div class="d-flex align-items-center w-100 pb-2 px-3">
-  <span class="small" :class="[{'text-success':behind < 30},{'text-warning':behind >= 30 && behind < 60},{'text-danger':behind >= 60}]">
-  {{lapi}}<br><i class="fa-solid fa-satellite-dish me-1"></i>{{behind}} block<span v-if="behind > 1 || behind == 0">s</span> behind HIVE</span>
-</div>
+
                   <div class="table-responsive table-blur border">
                     <table role="table" aria-busy="false" aria-colcount="3"
                       class="table table-striped table-hover">
