@@ -55,6 +55,7 @@
             style="background-color: rgba(0,0,0,0.6)">
             <div class="d-flex align-itmes-center justify-content-between w-100">
               <div class="d-flex w-100 pt-2 pb-1 align-items-center">
+
                 <!-- token select -->
                 <div id="userApiSelect" class="me-1">
                   <div v-cloak class="dropdown">
@@ -68,40 +69,36 @@
                         <h6 class="dropdown-header">HIVE / HBD</h6>
                       </li>
                       <li>
-                        <a class="dropdown-item" role="button" @click="setApi('https://token.dlux.io')" v-bind:class="{'active': TOKEN == 'DLUX'}">DLUX</a>
+                        <a class="dropdown-item" role="button" @click="setApi('https://token.dlux.io')" v-bind:class="{'text-warning': TOKEN == 'DLUX'}">DLUX</a>
                       </li>
                       
                       <li>
-                        <a class="dropdown-item" role="button" @click="setApi('https://duat.hivehoneycomb.com')" v-bind:class="{'active': TOKEN == 'DUAT'}">DUAT</a>
+                        <a class="dropdown-item" role="button" @click="setApi('https://duat.hivehoneycomb.com')" v-bind:class="{'text-warning': TOKEN == 'DUAT'}">DUAT</a>
                       </li>
                       <li>
                         <a class="dropdown-item" role="button"
-                          @click="setApi('https://spkinstant.hivehoneycomb.com')" v-bind:class="{'active': TOKEN == 'LARYNX'}">LARYNX</a>
+                          @click="setApi('https://spkinstant.hivehoneycomb.com')" v-bind:class="{'text-warning': TOKEN == 'LARYNX'}">LARYNX</a>
                       </li>
                       <li>
                         <hr class="dropdown-divider" />
                       </li>
                       
-                      <li >
-                        <!-- runner status  -->
-      <div :title="behindTitle" class="d-flex mx-2 align-items-center text-center">
-        <a class="btn btn d-flex w-100 align-items-center text-center no-decoration" style="font-size: 0.7em;"
-          :class="[{'btn-outline-success':behind < 30},{'btn-outline-warning':behind >= 30 && behind < 60},{'btn-outline-danger':behind >= 60}]"
-          data-bs-toggle="collapse" href="#nodeDrawer" role="button" aria-expanded="false"
-          aria-controls="nodeDrawer">
-          <span v-cloak>{{runners.length}}
-            <i class="fas fa-user-lock ms-1"></i></span>
-        </a>
-      </div></a>
+                      <li class="d-flex mt-2 mb-1">
+                        <!-- runner status modal button -->
+                        <button :title="behindTitle" type="button" class="btn btn-sm mx-2 w-100" 
+                        :class="[{'btn-outline-success':behind < 30},{'btn-outline-warning':behind >= 30 && behind < 60},{'btn-outline-danger':behind >= 60}]"
+                        data-bs-toggle="modal" data-bs-target="#runnerStatusModal">
+                        {{runners.length}}<i class="fas fa-user-lock ms-1"></i></span>
+                          </button>
                       </li>
                     
-                        <li class="d-flex mt-2 mb-1">
-                                <!-- token settings modal button -->
-<button v-if="isnode" type="button" class="btn btn-outline-secondary mx-2 w-100" data-bs-toggle="modal" data-bs-target="#tokenSettingsModal">
-  Node<i class="fas fa-cog ms-1"></i>
-</button>
+                      <li class="d-flex mt-2 mb-1" v-if="isnode">
+                        <!-- token settings modal button -->
+                        <button type="button" class="btn btn-outline-light btn-sm mx-2 w-100" data-bs-toggle="modal" data-bs-target="#tokenSettingsModal">
+                        Node<i class="fas fa-cog ms-1"></i>
+                        </button>
                           
-                                                </li>
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -178,127 +175,6 @@
   <p class="me-1 mb-0 fs-6" v-cloak>{{formatNumber(bartoken,3,'.',',')}} {{TOKEN}}
   <i class="fa-fw fa-solid fa-caret-down"></i></p>
 </button>
-
-
-
-
-
-
-              <!--xl honeycomb settings-->
-              <div class="d-none">
-
-                <!-- node settings -->
-                <div id="userNode" class="ms-2" v-if="isnode">
-                  <a class="dropdown btn btn-sm btn-dark" data-bs-auto-close="outside" role="button"
-                    id="settingsDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-cog"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-dark p-2 text-white-50 text-left bg-black dropdown-menu-left"
-                    aria-labelledby="settingsDropdownBtn" style="width: 300px">
-                    <li>
-                      <h6 class="dropdown-header text-center">
-                        {{TOKEN}} NODE SETTINGS
-                      </h6>
-                    </li>
-                    <li>
-                      <h4 class="text-center text-white-50">@{{account}}</h4>
-                    </li>
-                    <li>
-                      <form name="nodeSettings" class="needs-validation" novalidate>
-                        <div class="row mb-3" v-for="opt in features.node.opts">
-                          <label :for="opt.json" class="form-label">{{opt.S}}:</label>
-                          <div class="input-group">
-                            <input v-if="opt.type == 'text'" :type="opt.type" v-model="opt.val"
-                              class="form-control text-info" :id="opt.json"
-                              :placeholder="opt.info" />
-                            <input v-if="opt.type == 'number'" :type="opt.type" v-model="opt.val"
-                              class="form-control text-info" :id="opt.json" :placeholder="opt.info"
-                              :max="opt.max" :min="opt.min" />
-                          </div>
-                        </div>
-                        <div class="text-center mt-3 mb-2">
-                          <button id="saveSettingsBtn" type="button" class="btn btn-secondary"
-                            @click="saveNodeSettings()">
-                            Save<i class="far fa-save ms-2"></i>
-                          </button>
-                        </div>
-                      </form>
-                    </li>
-                  </ul>
-                </div>
-
-                <!-- runner status  -->
-                <div :title="behindTitle" class="d-flex align-items-center ms-2">
-                  <a class="btn btn-sm d-flex align-items-center text-center no-decoration" style="font-size: 0.7em;"
-                    :class="[{'btn-outline-success':behind < 30},{'btn-outline-warning':behind >= 30 && behind < 60},{'btn-outline-danger':behind >= 60}]"
-                    data-bs-toggle="collapse" href="#nodeDrawer" role="button" aria-expanded="false"
-                    aria-controls="nodeDrawer">
-                    <span v-cloak>{{runners.length}}
-                      <i class="fas fa-user-lock ms-1"></i></span>
-                  </a>
-                </div>
-              
-                <!-- claim tokens -->
-                <div v-if="hasDrop || accountapi.claim" class="d-flex ms-2 align-items-center">
-                  <a class="dropdown btn-sm btn-outline-rb no-decoration" data-bs-auto-close="outside"
-                    role="button" id="claimDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">Claim <i
-                      class="fas fa-gift"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-dark p-2 bg-black text-white-50 text-left"
-                    aria-labelledby="claimDropdownBtn" style="width: 300px">
-                    <li>
-                      <h6 class="dropdown-header text-center">
-                        CLAIM {{TOKEN}}
-                      </h6>
-                    </li>
-                    <li v-if="hasDrop">
-                      <form>
-                        <div class="row mb-3">
-                          <label class="form-label">Airdrop:</label>
-                          <div class="input-group">
-                            <div id="nodeDrop" class="form-control border-rb text-white text-center">
-                              {{dropnai}}
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <div class="text-center mt-3">
-                            <button id="claimDrop" type="button" class="btn background-rb" @click="dropClaim()">
-                              Claim<i class="fas fa-coins ms-2"></i>
-                            </button>
-                          </div>
-                        </div>
-                      </form>
-                    </li>
-                    <li v-if="accountapi.claim">
-                      <form>
-                        <div class="row mb-2">
-                          <label class="form-label">Rewards:</label>
-                          <div class="input-group">
-                            <div id="nodeRewards" class="form-control bg-black border-rb text-white text-center">
-                              {{toFixed(accountapi.claim/1000,3)}} {{TOKEN}}
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <div class="form-check form-switch d-flex justify-content-center"
-                            v-if="isnode && features.rewardSel">
-                            <input type="checkbox" class="form-check-input me-2" v-model="features.reward2Gov"
-                              role="switch" />
-                            <label class="form-check-label">Claim 1/2 to Gov</label>
-                          </div>
-                        </div>
-                        <div class="row mb-2">
-                          <div class="text-center">
-                            <button type="button" class="btn background-rb" @click="rewardClaim()">
-                              Claim<i class="fas fa-coins ms-2"></i>
-                            </button>
-                          </div>
-                        </div>
-                      </form>
-                    </li>
-                  </ul>
-                </div>
-                
-              </div>
 
               </div>
 
@@ -1722,6 +1598,152 @@
       </div>
 
 
+<!-- runner status Modal -->
+<div class="modal fade" id="runnerStatusModal" tabindex="-1" aria-labelledby="runnerStatusModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-xl">
+    <div class="modal-content bg-black">
+      <div class="modal-header pb-1 flex-column border-bottom-0">
+        <div class="d-flex mb-1 justify-content-between w-100 align-items-center">
+
+          <!-- Title -->
+          <h1 class="modal-title fs-5" id="runnerStatusModalLabel">{{TOKEN}} Nodes</h1>
+
+          <!-- Close -->
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- API Status -->
+      <div class="d-flex align-items-center w-100 text-start mb-1">
+        <span class="small" :class="[{'text-success':behind < 30},{'text-warning':behind >= 30 && behind < 60},{'text-danger':behind >= 60}]">
+        {{lapi}}<i class="fa-solid fa-satellite-dish mx-1"></i>{{behind}} block<span v-if="behind > 1 || behind == 0">s</span> behind HIVE</span>
+      </div>
+      
+        <!-- Search -->
+        <div class="w-100">
+        <div class="position-relative my-1 flex-grow-1">
+          <span class="position-absolute top-50 translate-middle-y ps-2"><i
+              class="fa-solid fa-magnifying-glass fa-fw"></i></span>
+          <input @keyup="searchRunners()" @change="searchRunners()" @search="searchRunners()"
+          class="ps-4 form-control border-white" type="search" v-model="filteraccount.value"
+          placeholder="Filter users and APIs">
+         
+        </div>
+      </div>
+
+      
+
+    </div>
+      <div class="modal-body p-0">
+
+                  <div class="table-responsive table-blur border">
+                    <table role="table" aria-busy="false" aria-colcount="3"
+                      class="table table-striped table-hover">
+                      <thead role="rowgroup" class="">
+                        <tr role="row" class="">
+                          <th role="columnheader" style="border-top-left-radius: .375em;" v-bind:class="{'col-sort':filteraccount.usera || filteraccount.userd}"
+                            class="" aria-colindex="1">
+                            <div class="d-flex align-items-center">
+                              <div class="me-3">USER  <span v-if="!filteraccount.value">({{runners.length}})</span>
+                                <span v-if="filteraccount.value">({{runnersSearch.length}})</span></div>
+                              <button title="Sort Ascending" type="button" class="mx-1 btn btn-sm btn-outline-primary"
+                                v-bind:class="{'bg-primary text-white':filteraccount.usera}"
+                                @click="sort(!filteraccount.value ? 'runners' : 'runnersSearch','account','asc');toggleAPI('usera')">
+                                <i class="fas fa-caret-up"></i>
+                              </button>
+                              <button title="Sort Descending" type="button" class="mx-1 btn btn-sm btn-outline-primary"
+                                v-bind:class="{'bg-primary text-white':filteraccount.userd}"
+                                @click="sort(!filteraccount.value ? 'runners' : 'runnersSearch','account','desc');toggleAPI('userd')">
+                                <i class="fas fa-caret-down"></i>
+                              </button>
+                            </div>
+                          </th>
+                          <th role="columnheader" v-bind:class="{'col-sort':filteraccount.gova || filteraccount.govd}"
+                            class="" aria-colindex="2">
+                            <div class="d-flex align-items-center">
+                              <div class="me-3">GOV</div>
+                              <button title="Sort Ascending" type="button" class="mx-1 btn btn-sm btn-outline-primary"
+                                v-bind:class="{'bg-primary text-white':filteraccount.gova}"
+                                @click="sort(!filteraccount.value ? 'runners' : 'runnersSearch','g','asc');toggleAPI('gova')">
+                                <i class="fas fa-caret-up"></i>
+                              </button>
+                              <button title="Sort Descending" type="button" class="mx-1 btn btn-sm btn-outline-primary"
+                                v-bind:class="{'bg-primary text-white':filteraccount.govd}"
+                                @click="sort(!filteraccount.value ? 'runners' : 'runnersSearch','g','desc');toggleAPI('govd')">
+                                <i class="fas fa-caret-down"></i>
+                              </button>
+                            </div>
+                          </th>
+                          <th class="d-none d-lg-block" role="columnheader" style="border-top-right-radius: .375em;" v-bind:class="{'col-sort':filteraccount.apia || filteraccount.apid}"
+                            class="" aria-colindex="3">
+                            <div class="d-flex align-items-center">
+                              <div class="me-3">API (Click to load)</div>
+                              <button title="Sort Ascending" type="button" class="mx-1 btn btn-sm btn-outline-primary"
+                                v-bind:class="{'bg-primary text-white':filteraccount.apia}"
+                                @click="sort(!filteraccount.value ? 'runners' : 'runnersSearch','api','asc');toggleAPI('apia')">
+                                <i class="fas fa-caret-up"></i>
+                              </button>
+                              <button title="Sort Descending" type="button" class="mx-1 btn btn-sm btn-outline-primary"
+                                v-bind:class="{'bg-primary text-white':filteraccount.apid}"
+                                @click="sort(!filteraccount.value ? 'runners' : 'runnersSearch','api','desc');toggleAPI('apid')">
+                                <i class="fas fa-caret-down"></i>
+                              </button>
+                            </div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                    
+                        <template v-for="node in runners" v-if="!filteraccount.value">
+                          <tr>
+                            <td role="cell" class="" aria-colindex="1">
+                            <a :href="atref(node.account)" class="no-decoration text-primary">@{{node.account}}</a>
+                          </td>
+                          <td role="cell" class="" aria-colindex="2">
+                            {{formatNumber(node.g/1000,3,'.',',')}}
+                          </td>
+                          <td role="cell" class="d-none d-lg-block" aria-colindex="3">
+                            <a role="button" @click="setApi(node.api)" class="no-decoration text-break" :class="{'text-danger': typeof proven[node.api] != 'number'}">{{node.api}}</a>
+                          </td>
+                          </tr>
+                          <tr class="d-lg-none">
+                            <td colspan="4" class="text-center">
+                              <a role="button" @click="setApi(node.api)" class="no-decoration fw-normal" :class="{'text-danger': typeof proven[node.api] != 'number'}">{{node.api}}</a>
+                        </td>
+                          </tr>
+                        </template>
+                      
+
+                      <template v-for="node in runnersSearch" v-if="filteraccount.value">
+                        <tr class="" role="row" >
+                          <td role="cell" class="" aria-colindex="1">
+                            <a :href="atref(node.account)" class="no-decoration text-primary">@{{node.account}}</a>
+                          </td>
+                          <td role="cell" class="" aria-colindex="2">
+                            {{formatNumber(node.g/1000,3,'.',',')}}
+                          </td>
+                          <td role="cell" class="d-none d-lg-block" aria-colindex="3">
+                            <a role="button" @click="setApi(node.api)" class="no-decoration" :class="{'text-danger': typeof proven[node.api] != 'number'}">{{node.api}}</a>
+                          </td>
+                        </tr>
+                        <tr scope="row" class="d-lg-none">
+                          <td colspan="4" class="text-center">
+                            <a role="button" @click="setApi(node.api)" class="no-decoration" :class="{'text-danger': typeof proven[node.api] != 'number'}">{{node.api}}</a>
+                        </td>
+                        </tr>
+                      </template>
+
+                      </tbody>
+                    </table>
+                  </div>
+               
+      </div>
+      <div class="modal-footer  border-top-0">
+        
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <!-- token settings Modal -->
 <div class="modal fade" id="tokenSettingsModal" tabindex="-1" aria-labelledby="tokenSettingsModalLabel" aria-hidden="true">
@@ -1749,19 +1771,13 @@
                       :max="opt.max" :min="opt.min" />
                   </div>
                 </div>
-                <div class="text-center mt-3 mb-2">
-                  <button id="saveSettingsBtn" type="button" class="btn btn-secondary"
-                    @click="saveNodeSettings()">
-                    Save<i class="far fa-save ms-2"></i>
-                  </button>
-                </div>
               </form>
             
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="button" id="saveSettingsBtn" @click="saveNodeSettings()" class="btn btn-primary">Save changes</button>
       </div>
     </div>
   </div>
