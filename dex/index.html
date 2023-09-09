@@ -1866,7 +1866,7 @@
                 <!-- power form -->
                 <div>
                  
-                      <h6 class="dropdown-header text-center">
+                      <h6 class="dropdown-header text-center mb-2">
                         {{TOKEN}} POWER
                       </h6>
            
@@ -1943,11 +1943,11 @@
                
                 <!-- gov form -->
                 
-                      <h6 class="dropdown-header text-center">
+                      <h6 class="dropdown-header text-center mb-2">
                         {{TOKEN}} GOVERNANCE
                       </h6>
                     
-                      <h4 class="dropdown-header">
+                      <h4 class="dropdown-header text-center mb-1">
                         Current Threshold:
                         {{formatNumber(stats.gov_threshhold/1000,3,'.',',')}}
                       </h4>
@@ -1997,7 +1997,7 @@
                             <a role="button" @click="setValue('features.gov_val',accountapi.gov/1000)"
                               class="text-info no-decoration">{{formatNumber(bargov,3,'.',',')}}
                               {{TOKEN}}G</a>
-                            Locked
+                            Available
                           </div>
                         </div>
                         <div class="text-center mb-2">
@@ -2029,7 +2029,7 @@
                       <form id="hiveForm" @submit.prevent="validateForm('hiveForm', 'hiveFormValid');sendhive()"
                         class="needs-validation" novalidate>
                         <div class="row mb-3">
-                          <label for="sendHiveTo">To:</label>
+                          <label class="form-label" for="sendHiveTo">To:</label>
                           <div class="input-group">
                               <span class="input-group-text text-white-50">
                                 @
