@@ -62,7 +62,8 @@
                     <a class="btn btn-lg btn-outline-warning d-flex align-items-center" role="button" id="tokenDropdownBtn"
                       data-bs-toggle="dropdown" aria-expanded="false">
                       <i class="fa-solid fa-atom force-parent-lh"></i>
-                      <span class="d-none d-md-block ms-1">{{TOKEN}} </span>
+                      <span class="d-none d-md-block ms-1">{{TOKEN}}</span>
+                      <span v-if="!account" class="ms-1">{{TOKEN}}</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-dark bg-black" aria-labelledby="tokenDropdownBtn">
                       <li>
@@ -169,7 +170,7 @@
 
 
 <!-- token balance wallet button -->
-<button type="button" class="btn btn-lg d-lg-none btn-outline-success ms-auto d-flex align-items-center" 
+<button v-if="account" type="button" class="btn btn-lg d-lg-none btn-outline-success ms-auto d-flex align-items-center" 
         data-bs-toggle="modal" data-bs-target="#dexWallet">
   <i class="fa-solid fa-paper-plane force-parent-lh me-1"></i>
   <p class="me-1 mb-0 fs-6" v-cloak>{{formatNumber(bartoken,3,'.',',')}} {{TOKEN}}
