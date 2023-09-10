@@ -1511,7 +1511,9 @@
       <!-- API Status -->
 <div class="d-flex align-items-center w-100">
   <span class="small" :class="[{'text-success':behind < 30},{'text-warning':behind >= 30 && behind < 60},{'text-danger':behind >= 60}]">
-  {{lapi}}<i class="fa-solid fa-satellite-dish mx-1"></i>{{behind}} block<span v-if="behind > 1 || behind == 0">s</span> behind HIVE</span>
+    <i class="fas fa-user-lock me-1"></i>{{lapi}}
+  <br>
+  <i class="fa-solid fa-satellite-dish me-1"></i>{{behind}} block<span v-if="behind > 1 || behind == 0">s</span> behind HIVE</span>
 </div>
       
         <!-- Search -->
