@@ -917,24 +917,24 @@ export default {
   },
   template: `
 <div>
-<header class="navbar navbar-expand-sm navbar-dark dnav fixed-top">
+<header class="navbar navbar-expand navbar-dark dnav fixed-top">
   <div class="container-fluid">
     <!--pwa nav toggle-->
-    <a class="text-white d-sm-none" style="font-size: 1.5em;" data-bs-toggle="offcanvas" href="#offcanvasNav" role="button" aria-controls="offcanvasExample">
+    <a class="d-none text-white d-sm-none" style="font-size: 1.5em;" data-bs-toggle="offcanvas" href="#offcanvasNav" role="button" aria-controls="offcanvasExample">
       <i class="fa-solid fa-bars"></i>
     </a>
     <!--desktop nav collapse-->
       <div class="collapse navbar-collapse " id="navbarSupportedContent">
         <!-- MAIN NAV -->
-        <ul class="navbar-nav me-auto">
+        <ul class="navbar-nav me-auto align-items-center">
           <li><a class="navbar-brand" href="/"><img src="/img/dlux-hive-logo-alpha.svg" alt="dlux-logo" width="40" height="40"></a></li> 
-          <li class="nav-item"><a class="nav-link" href="/hub/"><i class="fa-solid fa-mountain-sun me-2"></i>HUB</a></li>
-          <li class="nav-item"><a class="nav-link" href="/nfts/"><i class="fa-solid fa-store me-2"></i>NFTS</a></li>
-          <li class="nav-item"><a class="nav-link" href="/dex/"><i class="fa-solid fa-building-columns me-2"></i>DEX</a></li>
-          <li class="nav-item"><a class="nav-link" href="/docs/"><i class="fa-solid fa-book me-2"></i>DOCS</a></li>
+          <li class="nav-item px-1"><a class="nav-link text-center" href="/hub/"><i class="fa-solid fs-5 fa-mountain-sun"></i><br><span class="small">HUB</span></a></li>
+          <li class="nav-item px-1"><a class="nav-link text-center" href="/nfts/"><i class="fa-solid fs-5 fa-store"></i><br><span class="small">NFT</span></a></li>
+          <li class="nav-item px-1"><a class="nav-link text-center" href="/dex/"><i class="fa-solid fs-5 fa-building-columns"></i><br><span class="small">DEX</span></a></li>
+          
         </ul>
         <!-- USER NAV -->
-	      <ul class="navbar-nav" v-show="user" id="userMenu">
+	      <ul class="navbar-nav d-none d-md-flex" v-show="user" id="userMenu">
           <li class="nav-item d-flex align-items-center"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus fa-fw me-1"></i></a></li>
           <li class="nav-item d-flex align-items-center"><a class="nav-link" role="button" @click="toggleChat"><i class="fa-solid fa-message fa-fw me-2"></i></a></li>
           <a href="#" v-show="user" class="p-0 nav-link d-flex align-items-center text-white-50" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
@@ -947,14 +947,14 @@ export default {
 			        <li class=""><a class="dropdown-item" :href="'/me#inventory/'" @click="showTab('inventory')"><i class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
               <li class=""><hr class="dropdown-divider"></li>
 			        <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
+              <li class=""><a class="dropdown-item" href="/docs/"><i class="fa-solid fa-book me-2 fa-fw"></i>DOCS</a></li>
               <li class=""><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" role="button" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers"><i class="fas fa-user-friends me-2"></i>Users</a></li>
 			        <li><a class="dropdown-item" role="button" @click="logout()"><i class="fas fa-power-off fa-fw me-2"></i>Logout</a></li>
 		        </ul>
         </ul>
       </div>
-      <!--pwa brand-->
-      <a class="navbar-brand d-sm-none d-flex align-items-center" href="/"><img src="/img/dlux-hive-logo-alpha.svg" alt="dlux-logo" width="40" height="40" class="me-2"><h1 class="m-0">DLUX</h1></a>
+      
       <div>
         <ul class="navbar-nav" id="loginMenu" v-show="!user">
           <li class="nav-item d-none"><a class="nav-link" href="/about/">About</a></li>
@@ -973,6 +973,7 @@ export default {
 			        <li class="d-none"><a class="dropdown-item" :href="'/me#settings/'" @click="showTab('settings')"><i class="fas fa-cog fa-fw me-2"></i>Settings</a></li>
               <li class=""><hr class="dropdown-divider"></li>
 			        <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
+              <li class=""><a class="dropdown-item" href="/docs/"><i class="fa-solid fa-book fa-fw me-2"></i>DOCS</a></li>
               <li class=""><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" role="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers"><i class="fas fa-user-friends me-2"></i>Users</a></li>
 			        <li><a class="dropdown-item" role="button" @click="logout()"><i class="fas fa-power-off fa-fw me-2"></i>Logout</a></li>
@@ -988,9 +989,10 @@ export default {
   </div>
 </div>
 
+<!-- sting chat -->
 <div v-show="chatVisible" id="stingChat"></div>
 
-
+<!-- off canvas nav -->
 <div class="offcanvas offcanvas-start bg-blur-darkg bg-img-none text-white-50" style="max-width:200px" tabindex="-1" id="offcanvasNav" aria-labelledby="offcanvasLeftLabel">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title" id="offcanvasLeftLabel"><a class="navbar-brand d-sm-none text-white d-flex align-items-center" href="/"><img src="/img/dlux-hive-logo-alpha.svg" class="me-2" alt="dlux-logo" width="40" height="40">DLUX</a></h5>
@@ -1008,7 +1010,7 @@ export default {
   </div>
 </div>
 
-
+<!-- off canvas user login -->
 <div class="offcanvas offcanvas-end bg-blur-darkg bg-img-none text-white-50" tabindex="-1" id="offcanvasUsers" aria-labelledby="offcanvasRightLabel">
   <div class="offcanvas-header d-flex align-items-center justify-content-between">
     <h5 id="offcanvasRightLabel" class="m-0 p-0">User Management</h5>
