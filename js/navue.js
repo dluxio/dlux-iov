@@ -939,7 +939,7 @@ export default {
           <li class="nav-item d-flex align-items-center"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus fa-fw me-1"></i></a></li>
           <li class="nav-item d-flex align-items-center"><a class="nav-link" role="button" @click="toggleChat"><i class="fa-regular fa-message fa-flip-horizontal me-2"></i></a></li>
           <a role="button" v-show="user" class="p-0 nav-link d-flex align-items-center text-white-50" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
-            <img :src="avatar" id="userImage" alt="" width="44" height="44" class="img-fluid rounded-circle bg-light cover"></a>
+            <img :src="avatar" id="userImage" alt="" width="40" height="40" class="img-fluid rounded-circle bg-light cover"></a>
 		        <a class="nav-link mt-auto mb-auto dropdown-toggle dropdown-bs-toggle text-white-50" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
 			      <span id="userName" class="mx-1">{{user}}</span></a>
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black me-1" aria-labelledby="userDropdown">
@@ -966,7 +966,7 @@ export default {
           <li>
           <li class="nav-item d-flex align-items-center"><a class="nav-link" role="button" @click="toggleChat"><i class="fa-regular fa-message fa-flip-horizontal fa-fw"></i></a></li>
 		        <a class="nav-link dropdown-toggle dropdown-bs-toggle text-white-50 text-end" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
-			      <span id="userName" class="ms-auto me-1"><img :src="avatar" id="userImage" alt="" width="44" height="44" class="img-fluid rounded-circle bg-light cover"></span></a>
+			      <span id="userName" class="ms-auto me-1"><img :src="avatar" id="userImage" alt="" width="40" height="40" class="img-fluid rounded-circle bg-light cover"></span></a>
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black me-1" aria-labelledby="userDropdown" style="position: absolute;">
               <li class=""><a class="dropdown-item" href="/new/"><i class="fa-solid fa-plus fa-fw me-2"></i>New</a></li>
 			        <li class=""><a class="dropdown-item" :href="'/me#blog/'" @click="showTab('blog')"><i class="fas fa-user fa-fw me-2"></i>Profile</a></li>
