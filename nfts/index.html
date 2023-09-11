@@ -301,7 +301,145 @@
                 </div>
                 <!-- ACTION BAR -->
                 <div class="d-flex flex-wrap">
+
+                    <!-- Filter button -->
+                    <div class="d-xl-none order-2 mb-1 me-2">
+                    <p class="d-inline-flex gap-1">
+                        <button class="btn btn-outline-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilter" aria-expanded="false" aria-controls="collapseFilter">
+                            <i class="fa-solid fa-filter me-1"></i>Filters
+                        </button>
+                      </p>
+                      
+                    </div>
+
                     <!-- Chain -->
+                    <div class="order-1 dropdown d-none d-xl-block mb-1">
+                        <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Chain
+                        </button>
+                        <ul class="dropdown-menu bg-black">
+                            <li v-for="(item, name, index) in chainSorted">
+                                <div class="py-1 px-2">
+                                    <div class="form-check">
+                                        <input @change="addFilters('Chain', item);displaynfts()"
+                                            class="form-check-input" type="checkbox" v-model="chains[item].enabled"
+                                            :id="item +'ChainCheck'">
+                                        <label class="form-check-label" :for="item +'ChainCheck'">
+                                            {{item}}
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Set -->
+                    <div class="order-2 dropdown d-none d-xl-block mb-1">
+                        <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Set
+                        </button>
+                        <ul class="dropdown-menu bg-black">
+                            <div v-for="(item, name, index) in chains">
+                                <li v-for="(set, setname, setindex) in chains[name].sets">
+                                    <div class="py-1 px-2">
+                                        <div class="form-check">
+                                            <input @change="addFilters('Set', setname, name);displaynfts()"
+                                                class="form-check-input" type="checkbox"
+                                                v-model="chains[name].sets[setname].enabled" :id="setname + 'SetCheck'">
+                                            <label class="form-check-label" :for="setname + 'SetCheck'">
+                                                {{set.name_long}}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </li>
+                            </div>
+                        </ul>
+                    </div>
+                    <!-- Status -->
+                    <div class="order-3 dropdown d-none d-xl-block mb-1">
+                        <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Status
+                        </button>
+                        <ul class="dropdown-menu bg-black">
+                            <li v-for="(item, name, index) in selectors">
+                                <div class="py-1 px-2">
+                                    <div class="form-check">
+                                        <input @change="addFilters('Status', name);displaynfts()"
+                                            class="form-check-input" type="checkbox" v-model="item.checked"
+                                            :id="name + 'StatusCheck'">
+                                        <label class="form-check-label" :for="name + 'StatusCheck'">
+                                            {{name}}
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- Currency -->
+                    <div class="order-4 dropdown d-none d-xl-block mb-1 ">
+                        <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Currency
+                        </button>
+                        <ul class="dropdown-menu bg-black">
+                            <li v-for="(item, name, index) in denoms">
+                                <div class="py-1 px-2">
+                                    <div class="form-check">
+                                        <input @change="addFilters('Currency', name);displaynfts()"
+                                            class="form-check-input" type="checkbox" v-model="item.checked"
+                                            :id="name + 'CurrencyCheck'">
+                                        <label class="form-check-label" :for="name + 'CurrencyCheck'">
+                                            {{name}}
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- Search -->
+                    <div class="position-relative mb-1 flex-grow-1 order-md-5" >
+                        <span class="position-absolute top-50 translate-middle-y ps-2"><i
+                                class="fa-solid fa-magnifying-glass fa-fw"></i></span>
+                        <input @keyup="displaynfts()" @change="displaynfts()" @search="displaynfts()"
+                            class="ps-4 form-control border-white" type="search" v-model="NFTselect.searchTerm"
+                            placeholder="Search sets, items, and accounts">
+                    </div>
+                    <!-- Sort -->
+                    <div class="dropdown mb-1 ms-auto order-last">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false"><i class="fa-solid fa-sort fa-fw ms-1"></i>
+                            {{NFTselect.sort == 'uid' ? 'Sort' : ( (NFTselect.sort == 'price' ?
+                            'Price: ' :
+                            'Time: ') + (NFTselect.dir == 'asc' ? 'Low to High' : 'High to Low'))}}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end bg-black">
+                            <li>
+                                <a @click="NFTselect.dir='asc';NFTselect.sort='price';displaynfts()"
+                                    class="dropdown-item" role="button">Price low to high</a>
+                            </li>
+                            <li>
+                                <a @click="NFTselect.dir='dec';NFTselect.sort='price';displaynfts()"
+                                    class="dropdown-item" role="button">Price high to low</a>
+                            </li>
+                            <li>
+                                <a @click="NFTselect.dir='asc';NFTselect.sort='time';displaynfts()"
+                                    class="dropdown-item" role="button">Time ending soonest</a>
+                            </li>
+                            <li>
+                                <a @click="NFTselect.dir='dec';NFTselect.sort='time';displaynfts()"
+                                    class="dropdown-item" role="button">Time ending latest</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- filter collapse-->
+                    <div class="collapse order-last" id="collapseFilter">
+                        <div class="d-flex flex-row flex-wrap">
+
+                         <!-- Chain -->
                     <div class="order-1 dropdown mb-1">
                         <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
@@ -387,46 +525,31 @@
                             </li>
                         </ul>
                     </div>
-                    <!-- Search -->
-                    <div class="position-relative mb-1 me-2 flex-grow-1 order-md-5" >
-                        <span class="position-absolute top-50 translate-middle-y ps-2"><i
-                                class="fa-solid fa-magnifying-glass fa-fw"></i></span>
-                        <input @keyup="displaynfts()" @change="displaynfts()" @search="displaynfts()"
-                            class="ps-4 form-control border-white" type="search" v-model="NFTselect.searchTerm"
-                            placeholder="Search sets, items, and accounts">
-                    </div>
-                    <!-- Sort -->
-                    <div class="dropdown mb-1 order-last">
-                        <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            {{NFTselect.sort == 'uid' ? 'Sort' : ('Sort by ' + (NFTselect.sort == 'price' ?
-                            'Price: ' :
-                            'Time: ') + (NFTselect.dir == 'asc' ? 'Low to High' : 'High to Low'))}}
+
+                </div>
+
+                    <div class="d-flex flex-row flex-wrap mt-2 order-last" v-if="NFTselect.keys.length">
+                        <!-- Active Filters -->
+                        <div v-for="(item, name, index) in NFTselect.keys"
+                            class="rounded bg-secondary text-black filter-bubble me-1 mb-1 d-flex align-items-center">
+                            <span>{{item}}</span>
+                            <button @click="clearFilters(item)" type="button"
+                                class="ms-1 btn-close btn-close-white"></button>
+                        </div>
+                        <button @click="clearFilters()" type="button" v-if="NFTselect.keys.length > 1"
+                            class="btn btn-secondary mb-1">
+                            Clear All
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end bg-black">
-                            <li>
-                                <a @click="NFTselect.dir='asc';NFTselect.sort='price';displaynfts()"
-                                    class="dropdown-item" role="button">Price low to high</a>
-                            </li>
-                            <li>
-                                <a @click="NFTselect.dir='dec';NFTselect.sort='price';displaynfts()"
-                                    class="dropdown-item" role="button">Price high to low</a>
-                            </li>
-                            <li>
-                                <a @click="NFTselect.dir='asc';NFTselect.sort='time';displaynfts()"
-                                    class="dropdown-item" role="button">Time ending soonest</a>
-                            </li>
-                            <li>
-                                <a @click="NFTselect.dir='dec';NFTselect.sort='time';displaynfts()"
-                                    class="dropdown-item" role="button">Time ending latest</a>
-                            </li>
-                        </ul>
                     </div>
+
+                        
+                      </div>
+
                 </div>
                 <div class="mt-2 ms-1">
                     <h5 class="mb-0">{{displayNFTs.length}} Items</h5>
                 </div>
-                <div class="d-flex flex-wrap mt-2" v-if="NFTselect.keys.length">
+                <div class="d-flex flex-wrap mt-2 d-none d-lg-block" v-if="NFTselect.keys.length">
                     <!-- Active Filters -->
                     <div v-for="(item, name, index) in NFTselect.keys"
                         class="rounded bg-secondary text-black filter-bubble me-1 mb-1 d-flex align-items-center">
@@ -438,6 +561,7 @@
                         class="btn btn-secondary mb-1">
                         Clear All
                     </button>
+                </div>
                 </div>
                 <div class="row row-cols-xxl-6 row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
                     <!-- NFTCARD REPEAT AUCTION -->
