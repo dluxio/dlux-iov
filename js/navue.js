@@ -928,10 +928,10 @@ export default {
         <!-- MAIN NAV -->
         <ul class="navbar-nav me-auto align-items-center">
           <li><a class="navbar-brand" href="/"><img src="/img/dlux-hive-logo-alpha.svg" alt="dlux-logo" width="40" height="40"></a></li> 
-          <li class="nav-item px-1"><a class="nav-link text-center" href="/hub/"><i class="fa-solid fs-5 fa-mountain-sun"></i><br><span class="small">HUB</span></a></li>
-          <li class="nav-item px-1"><a class="nav-link text-center" href="/nfts/"><i class="fa-solid fs-5 fa-store"></i><br><span class="small">NFT</span></a></li>
-          <li class="nav-item px-1"><a class="nav-link text-center" href="/dex/"><i class="fa-solid fs-5 fa-building-columns"></i><br><span class="small">DEX</span></a></li>
-          <li class="nav-item px-1"><a class="nav-link text-center" role="button" @click="toggleChat"><i class="fa-solid fa-message fs-5"></i><br><span class="small">STING</span></a></li>
+          <li class="nav-item"><a class="nav-link text-center" href="/hub/"><i class="fa-solid fs-5 px-1 fa-mountain-sun"></i><br><span class="small">HUB</span></a></li>
+          <li class="nav-item"><a class="nav-link text-center" href="/nfts/"><i class="fa-solid fs-5 px-1 fa-store"></i><br><span class="small">NFT</span></a></li>
+          <li class="nav-item"><a class="nav-link text-center" href="/dex/"><i class="fa-solid fs-5 px-1 fa-building-columns"></i><br><span class="small">DEX</span></a></li>
+          <li class="nav-item"><a class="nav-link text-center" role="button" @click="toggleChat"><i class="fa-solid fa-message fs-5 px-1"></i><br><span class="small">CHAT</span></a></li>
           
         </ul>
         <!-- USER NAV -->
