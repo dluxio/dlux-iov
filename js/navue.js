@@ -931,7 +931,7 @@ export default {
           <li class="nav-item"><a class="nav-link text-center" href="/hub/"><i class="fa-solid fs-5 px-1 fa-mountain-sun"></i><br><span class="small">HUB</span></a></li>
           <li class="nav-item"><a class="nav-link text-center" href="/nfts/"><i class="fa-solid fs-5 px-1 fa-store"></i><br><span class="small">NFT</span></a></li>
           <li class="nav-item"><a class="nav-link text-center" href="/dex/"><i class="fa-solid fs-5 px-1 fa-building-columns"></i><br><span class="small">DEX</span></a></li>
-          <li class="nav-item"><a class="nav-link text-center" role="button" @click="toggleChat"><i class="fa-solid fa-message fs-5 px-1"></i><br><span class="small">CHAT</span></a></li>
+
           
         </ul>
         <!-- USER NAV -->
@@ -962,11 +962,11 @@ export default {
           <li class="nav-item"></li>
           <li class="nav-item"><button class="btn btn-sm btn-primary ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button></li>
         </ul>
-        <ul class="navbar-nav d-sm-none" v-show="user">
+        <ul class="navbar-nav d-md-none" v-show="user">
           <li>
-          
+          <li class="nav-item d-flex align-items-center"><a class="nav-link" role="button" @click="toggleChat"><i class="fa-solid fa-message fa-fw"></i></a></li>
 		        <a class="nav-link dropdown-toggle dropdown-bs-toggle text-white-50 text-end" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
-			      <span id="userName" class="ms-auto me-1"><img :src="avatar" id="userImage" alt="" width="30" height="30" class="img-fluid rounded-circle bg-light cover"></span></a>
+			      <span id="userName" class="ms-auto me-1"><img :src="avatar" id="userImage" alt="" width="40" height="40" class="img-fluid rounded-circle bg-light cover"></span></a>
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black me-1" aria-labelledby="userDropdown" style="position: absolute;">
               <li class=""><a class="dropdown-item" href="/new/"><i class="fa-solid fa-plus fa-fw me-2"></i>New</a></li>
 			        <li class=""><a class="dropdown-item" :href="'/me#blog/'" @click="showTab('blog')"><i class="fas fa-user fa-fw me-2"></i>Profile</a></li>
