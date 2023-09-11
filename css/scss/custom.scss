@@ -357,6 +357,11 @@ color: linear-gradient(45deg,
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
 }
+.bg-blur-darkg-50 {
+  background-color: rgba(#343a40, 0.5);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+}
 .dnav {
   background-color: rgba(42, 48, 54, 0.8);
   -webkit-backdrop-filter: blur(10px);
@@ -558,6 +563,13 @@ color: linear-gradient(45deg,
 .btn-outline-turq {
   color: #fff;
   border-color: #14d695;
+ 
+}
+
+.btn-outline-turq:hover {
+  color: #fff;
+  border-color: #14d695;
+  background: #0ed18d3e;
 }
 
 .dlux-blue {
@@ -573,6 +585,18 @@ color: linear-gradient(45deg,
 .border-orange {
   border-color: orangered !important;
 }
+
+.btn-outline-orange {
+  color: #fff;
+  border-color: orangered !important;
+}
+
+.btn-outline-orange {
+  color: #fff;
+  border-color: orangered !important;
+  background: rgba(255, 68, 0, 0.226);
+}
+
 .btn-blue {
   color: #fff;
   background: #033efd;
@@ -581,6 +605,12 @@ color: linear-gradient(45deg,
 .btn-outline-blue {
   color: #fff;
   border-color: #033efd;
+}
+
+.btn-outline-blue:hover {
+  color: #fff;
+  border-color: #033efd;
+  background: #033dfd3a;
 }
 
 .dlux-fusch {
@@ -602,6 +632,11 @@ color: linear-gradient(45deg,
 .btn-outline-fusch {
   color: #fff;
   border-color: #fb00ff;
+}
+.btn-outline-fusch:hover {
+  color: #fff;
+  border-color: #fb00ff;
+  background: #fb00ff3b;
 }
 
 .dlux-tang {
@@ -673,6 +708,12 @@ color: linear-gradient(45deg,
 .btn-outline-honey {
   color: #fff !important;
   border-color: #EBA937 !important;
+}
+
+.btn-outline-honey:hover {
+  color: #fff !important;
+  border-color: #EBA937 !important;
+  background: #b07f2a3e !important;
 }
 // HIVE ELEMENTS
 .text-hive {

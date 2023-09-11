@@ -12694,6 +12694,12 @@ td {
   backdrop-filter: blur(5px);
 }
 
+.bg-blur-darkg-50 {
+  background-color: rgba(52, 58, 64, 0.5);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+}
+
 .dnav {
   background-color: rgba(42, 48, 54, 0.8);
   -webkit-backdrop-filter: blur(10px);
@@ -12908,6 +12914,12 @@ td {
   border-color: #14d695;
 }
 
+.btn-outline-turq:hover {
+  color: #fff;
+  border-color: #14d695;
+  background: rgba(14, 209, 141, 0.2431372549);
+}
+
 .dlux-blue {
   color: #033efd;
   border-color: #033efd;
@@ -12923,6 +12935,17 @@ td {
   border-color: orangered !important;
 }
 
+.btn-outline-orange {
+  color: #fff;
+  border-color: orangered !important;
+}
+
+.btn-outline-orange {
+  color: #fff;
+  border-color: orangered !important;
+  background: rgba(255, 68, 0, 0.226);
+}
+
 .btn-blue {
   color: #fff;
   background: #033efd;
@@ -12931,6 +12954,12 @@ td {
 .btn-outline-blue {
   color: #fff;
   border-color: #033efd;
+}
+
+.btn-outline-blue:hover {
+  color: #fff;
+  border-color: #033efd;
+  background: rgba(3, 61, 253, 0.2274509804);
 }
 
 .dlux-fusch {
@@ -12952,6 +12981,12 @@ td {
 .btn-outline-fusch {
   color: #fff;
   border-color: #fb00ff;
+}
+
+.btn-outline-fusch:hover {
+  color: #fff;
+  border-color: #fb00ff;
+  background: rgba(251, 0, 255, 0.231372549);
 }
 
 .dlux-tang {
@@ -13028,6 +13063,12 @@ td {
 .btn-outline-honey {
   color: #fff !important;
   border-color: #EBA937 !important;
+}
+
+.btn-outline-honey:hover {
+  color: #fff !important;
+  border-color: #EBA937 !important;
+  background: rgba(176, 127, 42, 0.2431372549) !important;
 }
 
 .text-hive {
