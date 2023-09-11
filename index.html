@@ -40,15 +40,15 @@
   </script>
 </head>
 
-<body class="d-flex flex-column h-100" style="margin-top: 94px;">
+<body class="d-flex flex-column h-100">
   <div id="app">
     <div>
       <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
         @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" />
     </div>
     <main class="d-flex flex-column text-center flex-shrink-0" >
-      <div id="dapps" class="d-flex flex-row px-2">
-        <div class="d-flex flex-column dlux-turq jumbo-dlux container p-5 mx-auto mb-auto mt-5" >
+      <div id="dapps" class="d-flex flex-row px-2"  style="margin-top: 94px;">
+        <div class="d-flex flex-column dlux-turq jumbo-dlux container p-5 m-auto" >
           <div class="dlux-header">
             <h1>
               <span class="text-white">dlux is:</span>
