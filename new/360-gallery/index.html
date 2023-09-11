@@ -155,14 +155,14 @@
                 @logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
                 :lapi="lapi" />
         </div>
-        <main role="main" class="px-3 flex-shrink-0">
-            <section class="flex">
+        <main role="main" class="">
+   
 
-                <div class="row w-100" style="height: 100vh;">
+                <div class="row ms-auto me-auto w-100" style="height: 100vh;">
                     <div class="text-center padme-t70">
                         <h2 class="d-none">DLUX 360 Image Gallery</h2>
                     </div>
-                    <div class="col-xl-6 scroll">
+                    <div class="col-xl-6 px-0 px-md-1 scroll">
                         <h3 class="d-none">Build</h3>
                         <div class="accordion text-start bg-blur-darkg rounded" id="360accordion">
                             <div class="accordion-item bg-img-none">
@@ -1632,7 +1632,7 @@
                         </div>
 
                     </div>
-                    <div class="col-xl-6 scroll">
+                    <div class="col-xl-6  px-0 px-md-1 scroll">
                         <h3 class="d-none">Preview</h3>
                         <div class="accordion bg-blur-darkg rounded" id="previewCol">
                             <div class="accordion-item bg-img-none">
@@ -1681,7 +1681,7 @@
                         </div>
                     </div>
                 </div>
-            </section>
+          
         </main>
     </div>
     <!-- Bootstrap -->
