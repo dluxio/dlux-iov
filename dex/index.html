@@ -1524,7 +1524,11 @@
           <input @keyup="searchRunners()" @change="searchRunners()" @search="searchRunners()"
           class="ps-4 form-control border-white" type="search" v-model="filteraccount.value"
           placeholder="Filter users and APIs">
-         
+          
+        </div>
+        <div class="mt-1">
+          <span v-if="!filteraccount.value">( {{runners.length}} result<span v-if="runners.length > 1 || runners.length == 0">s</span> )</span>
+          <span v-if="filteraccount.value">( {{runnersSearch.length}} result<span v-if="runnersSearch.length > 1 || runners.length == 0">s</span> )</span>
         </div>
       </div>
 
@@ -1541,8 +1545,7 @@
                           <th role="columnheader" style="border-top-left-radius: .375em;" v-bind:class="{'col-sort':filteraccount.usera || filteraccount.userd}"
                             class="" aria-colindex="1">
                             <div class="d-flex align-items-center">
-                              <div class="me-3">USER <span v-if="!filteraccount.value">({{runners.length}})</span>
-                                <span v-if="filteraccount.value">({{runnersSearch.length}})</span></div>
+                              <div class="me-3">USER</div>
                               <button title="Sort Ascending" type="button" class="mx-1 btn btn-sm btn-outline-primary"
                                 v-bind:class="{'bg-primary text-white':filteraccount.usera}"
                                 @click="sort(!filteraccount.value ? 'runners' : 'runnersSearch','account','asc');toggleAPI('usera')">
