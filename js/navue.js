@@ -960,7 +960,20 @@ export default {
         <ul class="navbar-nav" id="loginMenu" v-show="!user">
           <li class="nav-item d-none"><a class="nav-link" href="/about/">About</a></li>
           <li class="nav-item"></li>
-          <li class="nav-item"><button class="btn btn-sm btn-primary ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button></li>
+          <li class="nav-item">
+            <div class="btn-group">
+              <button class="btn btn-sm px-2 btn-secondary" data-bs-toggle="dropdown">
+                <i class="fa-solid fa-circle-info"></i></button>
+              <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black me-1" aria-labelledby="infoDropdown" style="position: absolute;">
+             
+              <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
+              <li class=""><a class="dropdown-item" href="/new/"><i class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
+              <li class=""><a class="dropdown-item" href="/docs/"><i class="fa-solid fa-book fa-fw me-2"></i>Docs</a></li>
+              </ul>
+              <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
+              <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
+            </div>
+          </li>
         </ul>
         <ul class="navbar-nav d-md-none" v-show="user">
           <li>
