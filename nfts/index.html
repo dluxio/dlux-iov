@@ -148,9 +148,12 @@
                       style="background-color: rgba(0,0,0,0.6)">
                       <div class="d-flex py-1 align-itmes-center justify-content-between w-100">
                         
-                        <a class="btn btn-lg btn-outline-primary" href="sets" type="button"><i class="fa-solid fa-book-open me-1 force-parent-lh"></i> SETS</a>
+                        <a class="btn btn-lg btn-outline-primary d-flex" href="sets" type="button">
+                            <i class="fa-solid fa-book-open me-1 force-parent-lh"></i> 
+                            <span class="d-none d-md-block ms-1">SETS</span>
+                            <span v-if="!account" class="d-md-none" class="ms-1">SETS</span></a>
                         <!-- wallet modal button -->
-                        <button type="button" class="ms-auto btn btn-lg btn-outline-success d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#walletModal">
+                        <button type="button" v-if="account" class="ms-auto btn btn-lg btn-outline-success d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#walletModal">
                             <i class="fa-solid fa-wallet force-parent-lh me-2"></i>
                             <p class="me-1 mb-0 fs-6" v-cloak>
                             {{formatNumber(chains['dlux'].account.balance/1000,
