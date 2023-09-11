@@ -1541,7 +1541,7 @@
                           <th role="columnheader" style="border-top-left-radius: .375em;" v-bind:class="{'col-sort':filteraccount.usera || filteraccount.userd}"
                             class="" aria-colindex="1">
                             <div class="d-flex align-items-center">
-                              <div class="me-3">USER  <span v-if="!filteraccount.value">({{runners.length}})</span>
+                              <div class="me-3">USER <span v-if="!filteraccount.value">({{runners.length}})</span>
                                 <span v-if="filteraccount.value">({{runnersSearch.length}})</span></div>
                               <button title="Sort Ascending" type="button" class="mx-1 btn btn-sm btn-outline-primary"
                                 v-bind:class="{'bg-primary text-white':filteraccount.usera}"
