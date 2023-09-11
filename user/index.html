@@ -71,7 +71,7 @@
       </script>
 </head>
 
-<body class="d-flex flex-column h-100 padme-t70 text-white" id="explore">
+<body class="d-flex flex-column h-100 text-white" style="margin-top: 94px;" id="explore">
     <div id="app" v-cloak>
         <div v-scroll="handleScroll">
             <nav-vue @login="account = $event;newme($event)" @logout="account = '';removeUser()" @ack="removeOp($event)"
