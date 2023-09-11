@@ -1496,8 +1496,8 @@
 
 <!-- runner status Modal -->
 <div class="modal fade" id="runnerStatusModal" tabindex="-1" aria-labelledby="runnerStatusModalLabel" aria-hidden="true">
-  <div class="modal-dialog  modal-xl">
-    <div class="modal-content bg-black">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content bg-blur-darkg bg-img-none">
       <div class="modal-header pb-1 flex-column border-bottom-0">
         <div class="d-flex mb-1 justify-content-between w-100 align-items-center">
 
@@ -1511,9 +1511,9 @@
       <!-- API Status -->
 <div class="d-flex align-items-center w-100">
   <span class="small" :class="[{'text-success':behind < 30},{'text-warning':behind >= 30 && behind < 60},{'text-danger':behind >= 60}]">
-    <i class="fas fa-user-lock me-1"></i><span class="text-break">{{lapi}}</span>
+    <i class="fa-solid fa-satellite-dish fa-fw me-1"></i><span class="text-break">{{lapi}}</span>
   <br>
-  <i class="fa-solid fa-satellite-dish me-1"></i>{{behind}} block<span v-if="behind > 1 || behind == 0">s</span> behind HIVE</span>
+  <i class="fa-solid fa-link fa-fw me-1"></i><span>{{behind}} block<span v-if="behind > 1 || behind == 0">s</span> behind HIVE</span></span>
 </div>
       
         <!-- Search -->
@@ -1646,7 +1646,7 @@
 <!-- token settings Modal -->
 <div class="modal fade" id="tokenSettingsModal" tabindex="-1" aria-labelledby="tokenSettingsModalLabel" aria-hidden="true">
   <div class="modal-dialog">
-    <div class="modal-content">
+    <div class="modal-content bg-blur-darkg bg-img-none">
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="tokenSettingsModalLabel">{{TOKEN}} Settings</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -1684,7 +1684,7 @@
       <!-- dexWallet Modal -->
 <div class="modal fade" id="dexWallet" tabindex="-1" aria-labelledby="dexWalletLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-fullscreen">
-    <div class="modal-content">
+    <div class="modal-content bg-blur-darkg bg-img-none">
       <div class="modal-header border-bottom-0">
         <h1 class="modal-title fs-5" id="dexWalletLabel"> <span class="px-2 py-1 rounded border border-warning text-warning"><i class="fa-solid fa-atom fa-fw me-1"></i>{{TOKEN}}</span></h1>
         <h1 class="small mb-0 d-none" title="Honeycomb Hive Layer 2 Wallet"><span >Honeycomb</span><br><span class="fw-lighter">HL2 Wallet</span></h1>
