@@ -1648,7 +1648,7 @@
   <div class="modal-dialog">
     <div class="modal-content bg-blur-darkg bg-img-none">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="tokenSettingsModalLabel">{{TOKEN}} Node Settings</h1>
+        <h1 class="modal-title fs-5" id="tokenSettingsModalLabel">{{TOKEN}} Settings</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -1683,8 +1683,8 @@
       
       <!-- dexWallet Modal -->
 <div class="modal fade" id="dexWallet" tabindex="-1" aria-labelledby="dexWalletLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-fullscreen">
-    <div class="modal-content bg-blur-darkg bg-img-none">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
       <div class="modal-header border-bottom-0">
         <h1 class="modal-title fs-5" id="dexWalletLabel"> <span class="px-2 py-1 rounded border border-warning text-warning"><i class="fa-solid fa-atom fa-fw me-1"></i>{{TOKEN}}</span></h1>
         <h1 class="small mb-0 d-none" title="Honeycomb Hive Layer 2 Wallet"><span >Honeycomb</span><br><span class="fw-lighter">HL2 Wallet</span></h1>
@@ -1750,7 +1750,9 @@
                       </form>
                 </div>
               </div>
+              
             </div>
+            
           </div>
           <!-- token power -->
           <div class="accordion-item bg-primary" v-if="account && (features.powup_B || features.powdn_B)">
@@ -1968,6 +1970,7 @@
                    
               </div>
             </div>
+            
           </div>
           <div class="accordion-item bg-hbd rounded-0" v-if="account">
             <h2 class="accordion-header rounded-0">
@@ -2024,8 +2027,13 @@
                     
               </div>
             </div>
+            
           </div>
+          
         </div>
+      </div>
+      <div class="modal-footer">
+                
       </div>
     </div>
   </div>
