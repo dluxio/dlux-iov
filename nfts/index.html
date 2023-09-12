@@ -521,7 +521,7 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header border-bottom-0">
-          <h1 class="modal-title fs-5 text-honey border-honey border rounded py-1 px-2" id="walletModalLabel">Wallet</h1>
+          <h1 class="modal-title fs-5" id="walletModalLabel">Wallet</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body p-0">
@@ -542,7 +542,8 @@
                         data-bs-parent="#accordionWallet">
                         <div class="accordion-body">
                             <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
-                                {{barhive}}</h3>
+                                {{formatNumber(barhive, 3,
+                                    '.', ',')}}</h3>
                             <div class="mt-1 text-end">
                                 <button class="btn btn-outline-dark invisible disabled btn-sm" class="a-1"
                                     data-bs-toggle="modal">
@@ -566,7 +567,8 @@
                         data-bs-parent="#accordionWallet">
                         <div class="accordion-body">
                             <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
-                                {{barhbd}}</h3>
+                                {{formatNumber(barhbd, 3,
+                                    '.', ',')}}</h3>
                             <div class="mt-1 text-end">
                                 <button class="btn btn-outline-dark invisible disabled btn-sm" class="a-1"
                                     data-bs-toggle="modal">
