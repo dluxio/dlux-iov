@@ -62,8 +62,8 @@
                     <a class="btn btn-lg btn-outline-warning d-flex align-items-center" role="button" id="tokenDropdownBtn"
                       data-bs-toggle="dropdown" aria-expanded="false">
                       <i class="fa-solid fa-atom force-parent-lh"></i>
-                      <span class="d-none d-md-block ms-1">{{TOKEN}}</span>
-                      <span v-if="!account" class="ms-1 d-md-none">{{TOKEN}}</span>
+                      <span class="d-none d-sm-block ms-1">{{TOKEN}}</span>
+                      <span v-if="!account" class="ms-1 d-sm-none">{{TOKEN}}</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-dark bg-black" aria-labelledby="tokenDropdownBtn">
                       <li>
@@ -513,11 +513,13 @@
         </div>
         <div class="container text-white pt-3">
           <div v-if="!hidePrompt && !hasHiddenPrompt" class="alert alert-info p-2 mb-3" role="alert">
-            <div class="d-flex align-items-center">
-              <div>Help contribute to further development by supporting the <a href="https://peakd.com/proposals/234"
+            <div class="d-flex align-items-center justify-content-around flex-wrap">
+              <div class="text-center">Help contribute to further development by supporting the <a href="https://peakd.com/proposals/234"
                   target="_blank">HoneyComb Improvement Proposal</a></div>
+                  <div class=" mt-1">
               <button @click="voteProposal(234)" class="btn btn-primary ms-auto">Vote Now</button>
               <button @click="banishPrompt" class="btn btn-secondary ms-2">Maybe Later</button>
+            </div>
             </div>
           </div>
           <!-- current token tick -->

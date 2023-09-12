@@ -12477,6 +12477,11 @@ body {
     overflow: visible;
   }
 }
+@media (max-width: 600px) {
+  .w-sm-100 {
+    width: 100%;
+  }
+}
 .text-hbd {
   color: green;
 }

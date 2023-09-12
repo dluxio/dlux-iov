@@ -142,16 +142,16 @@
                 :op="toSign" :lapi="lapi" />
         </div>
         <main role="main">
-            <div class="container" style="max-width: 1800px !important">
+            <div class="" style="max-width: 1800px !important">
                 <div class="container-fluid fixed-top px-0" style="margin-top: 94px; z-index: 900">
                     <div class="d-flex flex-column justify-content-between align-items-center nav-blur px-2"
                       style="background-color: rgba(0,0,0,0.6)">
                       <div class="d-flex py-1 align-itmes-center justify-content-between w-100">
                         
                         <a class="btn btn-lg btn-outline-primary d-flex" href="sets" type="button">
-                            <i class="fa-solid fa-book-open me-1 force-parent-lh"></i> 
-                            <span class="d-none d-md-block ms-1">SETS</span>
-                            <span v-if="!account" class="d-md-none" class="ms-1">SETS</span></a>
+                            <i class="fa-solid fa-book-open force-parent-lh"></i> 
+                            <span class="d-none d-sm-block ms-1">SETS</span>
+                            <span v-if="!account" class="d-sm-none ms-1">SETS</span></a>
                         <!-- wallet modal button -->
                         <button type="button" v-if="account" class="ms-auto btn btn-lg btn-outline-success d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#walletModal">
                             <i class="fa-solid fa-wallet force-parent-lh me-2"></i>
@@ -167,13 +167,13 @@
                         </div>
                         </div>
                         </div>
-                <div class="d-flex py-2 align-items-stretch  flex-wrap">
+                <div class="d-flex py-2 mx-1 align-items-stretch flex-wrap">
 
                     <div class="px-2 rounded-3 card d-flex w-100">
                         <div class="d-flex align-items-center justify-content-around">
 
                             <!-- MESSAGE -->
-                            <div class="d-none d-xl-block">
+                            <div class="">
                                 <h1 class="display-5 text-uppercase fw-lighter mb-0">Marketplace</h1>
                                 <p class="fs-4 fw-light">Browse, bid, buy</p>
                                 <div class="d-flex">
@@ -184,7 +184,7 @@
 
 
                             <!-- MINTS -->
-                            <div id="carouselExampleCaptions" class="carousel">
+                            <div id="carouselExampleCaptions" class="carousel d-none">
                                 <div class="carousel-inner text-center">
                                     <div v-for="mint in mintData">
                                         <div class="carousel-item" :class="{'active': mint.set == mintData[activeIndex].set && mint.chain == mintData[activeIndex].chain}">
@@ -238,13 +238,13 @@
 
                 </div>
                 <!-- ACTION BAR -->
-                <div class="d-flex flex-wrap">
+                <div class="d-flex flex-wrap align-items-center justify-content-center">
 
                     
 
                     <!-- Chain -->
                     <div class="order-1 dropdown d-none d-xl-block mb-1">
-                        <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
+                        <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                             Chain
                         </button>
@@ -266,7 +266,7 @@
 
                     <!-- Set -->
                     <div class="order-2 dropdown d-none d-xl-block mb-1">
-                        <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
+                        <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                             Set
                         </button>
@@ -289,7 +289,7 @@
                     </div>
                     <!-- Status -->
                     <div class="order-3 dropdown d-none d-xl-block mb-1">
-                        <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
+                        <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                             Status
                         </button>
@@ -310,7 +310,7 @@
                     </div>
                     <!-- Currency -->
                     <div class="order-4 dropdown d-none d-xl-block mb-1 ">
-                        <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
+                        <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                             Currency
                         </button>
@@ -330,26 +330,25 @@
                         </ul>
                     </div>
                     <!-- Search -->
-                    <div class="position-relative me-sm-2 mb-1 flex-fill order-md-5" >
+                    <div class="position-relative flex-grow-1 mb-1 mx-1 order-md-5" >
                         <span class="position-absolute top-50 translate-middle-y ps-2"><i
                                 class="fa-solid fa-magnifying-glass fa-fw"></i></span>
                         <input @keyup="displaynfts()" @change="displaynfts()" @search="displaynfts()"
                             class="ps-4 form-control border-white" type="search" v-model="NFTselect.searchTerm"
                             placeholder="Search sets, items, and accounts">
                     </div>
-                    <div class="d-flex order-last ms-auto me-auto">
+                    <div class="d-flex order-last mx-1 w-sm-100 justify-content-between ">
                     <!-- Filter button -->
-                    <div class="d-xl-none mb-1 me-2">
-                        <p class="d-inline-flex gap-1">
-                            <button class="btn btn-outline-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilter" aria-expanded="false" aria-controls="collapseFilter">
+                    <div class="d-xl-none mb-1 me-2 flex-fill">
+                            <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilter" aria-expanded="false" aria-controls="collapseFilter">
                                 <i class="fa-solid fa-filter me-1"></i>Filters
                             </button>
-                          </p>
+                          
                           
                         </div>
                     <!-- Sort -->
-                    <div class="dropdown mb-1 ms-auto">
-                        <button class="btn btn-outline-light" type="button" data-bs-toggle="dropdown"
+                    <div class="dropdown mb-1 flex-fill">
+                        <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="dropdown"
                             aria-expanded="false"><i class="fa-solid fa-sort fa-fw ms-1"></i>
                             {{NFTselect.sort == 'uid' ? 'Sort' : ( (NFTselect.sort == 'price' ?
                             'Price: ' :
@@ -377,7 +376,7 @@
                 </div>
 
                     <!-- filter collapse-->
-                    <div class="collapse order-last d-xl-none" id="collapseFilter">
+                    <div class="collapse order-last d-xl-none mx-1" id="collapseFilter">
                         <div class="d-flex flex-row flex-wrap">
 
                          <!-- Chain -->
@@ -487,10 +486,10 @@
                       </div>
 
                 </div>
-                <div class="mt-2 ms-1">
+                <div class="mt-2 mx-1">
                     <h5 class="mb-0">{{displayNFTs.length}} Items</h5>
                 </div>
-                <div class="d-flex flex-wrap mt-2 d-none d-lg-flex" v-if="NFTselect.keys.length">
+                <div class="d-flex flex-wrap mt-2 d-none d-xl-flex mx-1" v-if="NFTselect.keys.length">
                     <!-- Active Filters -->
                     <div v-for="(item, name, index) in NFTselect.keys"
                         class="rounded bg-secondary text-black filter-bubble me-1 mb-1 d-flex align-items-center">
@@ -504,7 +503,7 @@
                     </button>
                 </div>
                 
-                <div class="row row-cols-xxl-6 row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
+                <div class="px-1 row row-cols-xxl-6 row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
                     <!-- NFTCARD REPEAT AUCTION -->
                     <div class="col my-2" v-for="(item, name, index) in displayNFTs">
                         <nftcard :item="item" :uid="Base64toNumber(item.uid)" :icon="getIcon(item.script)"
