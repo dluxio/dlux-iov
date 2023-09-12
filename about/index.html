@@ -71,7 +71,7 @@
 	</style>
 </head>
 
-<body class="d-flex flex-column padme-t70">
+<body class="d-flex flex-column" style="padding-top: 150px;">
 	<div id="app">
 		<div>
 			<nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event)"
@@ -79,46 +79,46 @@
 				:lapi="lapi" />
 		</div>
 		<main role="main" class="flex-shrink-0 text-white bg-color h-100">
+
+			<div class="container-fluid fixed-top px-0" style="margin-top: 94px; z-index: 900;">
+				<nav class="navbar navbar-dark navbar-expand-lg nav-blur ">
+					<div class="m-auto">
+						<ul class="nav nav-tabs navbar py-0 border-bottom-0 rounded justify-content-center" role="tablist">
+							<li class="nav-item">
+								<a class="nav-link active" id="aboutTab" role="tab" data-bs-toggle="tab"
+									aria-controls="about" aria-expanded="true" href="#about">About</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" id="newsroomTab" role="tab" data-bs-toggle="tab"
+									aria-controls="newsroom" aria-expanded="true" href="#newsroom">Newsroom</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" id="brandTab" role="tab" data-bs-toggle="tab"
+									aria-controls="brand" aria-expanded="true" href="#brand">Brand Kit</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link " id="techTab" role="tab" data-bs-toggle="tab"
+									aria-controls="tech" aria-expanded="true" href="#tech">Technologies</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link " id="faqTab" role="tab" data-bs-toggle="tab" aria-controls="faq"
+									aria-expanded="true" href="#faq">FAQ</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link " id="privacyTab" role="tab" data-bs-toggle="tab"
+									aria-controls="privacy" aria-expanded="true" href="#privacy">Privacy Policy</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link " id="tosTab" role="tab" data-bs-toggle="tab" aria-controls="tos"
+									aria-expanded="true" href="#tos">Terms Of Service</a>
+							</li>
+						</ul>
+					</div>
+				</nav>
+			</div>
+
 			<div class="container-fluid px-0">
-				<div class="container-fluid fixed-top" style="margin-top: 66px; z-index: 900;">
-
-					<nav class="navbar navbar-dark navbar-expand-lg">
-						<div class="m-auto">
-							<ul class="nav nav-tabs navbar py-0 border-bottom-0 nav-blur rounded" role="tablist">
-								<li class="nav-item">
-									<a class="nav-link active" id="aboutTab" role="tab" data-bs-toggle="tab"
-										aria-controls="about" aria-expanded="true" href="#about">About</a>
-								</li>
-								<li class="nav-item">
-									<a class="nav-link" id="newsroomTab" role="tab" data-bs-toggle="tab"
-										aria-controls="newsroom" aria-expanded="true" href="#newsroom">Newsroom</a>
-								</li>
-								<li class="nav-item">
-									<a class="nav-link" id="brandTab" role="tab" data-bs-toggle="tab"
-										aria-controls="brand" aria-expanded="true" href="#brand">Brand Kit</a>
-								</li>
-								<li class="nav-item">
-									<a class="nav-link " id="techTab" role="tab" data-bs-toggle="tab"
-										aria-controls="tech" aria-expanded="true" href="#tech">Technologies</a>
-								</li>
-								<li class="nav-item">
-									<a class="nav-link " id="faqTab" role="tab" data-bs-toggle="tab" aria-controls="faq"
-										aria-expanded="true" href="#faq">FAQ</a>
-								</li>
-								<li class="nav-item">
-									<a class="nav-link " id="privacyTab" role="tab" data-bs-toggle="tab"
-										aria-controls="privacy" aria-expanded="true" href="#privacy">Privacy Policy</a>
-								</li>
-								<li class="nav-item">
-									<a class="nav-link " id="tosTab" role="tab" data-bs-toggle="tab" aria-controls="tos"
-										aria-expanded="true" href="#tos">Terms Of Service</a>
-								</li>
-
-
-							</ul>
-						</div>
-					</nav>
-				</div>
+				
 				<div id="pagecontent" class="tab-content padme-t70 pb-5 text-white">
 
 					<div role="tabpanel" class="tab-pane fade show active" id="about" aria-labelledby="aboutTab">
