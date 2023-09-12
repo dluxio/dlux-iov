@@ -127,7 +127,7 @@ export default {
             <h5 id="timer-set-uid" class="mb-0 lead">Buy Now</h5>
           </div>
           <div class="d-flex rounded-bottom p-2">
-            <div class="fs-6">
+            <div class="fs-6 text-break">
               {{formatNumber(item.price.amount/1000,item.price.precision,'.',',')}}
             </div>
             <div class="fs-6 ms-auto">
