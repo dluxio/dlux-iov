@@ -127,8 +127,9 @@
                                 <span class="sr-only">Toggle Dropdown</span>
                             </a>
                             <div class="dropdown-menu dropdown-menu-dark bg-black">
-                                <a class="dropdown-item" v-for="(value, key, index) in postSelect.types">
-                                    <div class="input-group bg-dark rounded d-flex">
+                                <a class="dropdown-item" v-for="(value, key, index) in postSelect.types"
+                                :class="{'d-none' : key == 'XR' || key == '3D' || key == 'Audio' || key == 'Video' || key == 'Blog'}">
+                                    <div class="input-group bg-dark rounded d-flex" >
                                         <div class="input-group-text d-flex flex-fill"><i
                                                 :class="value.icon"></i>{{key}}</div>
                                         <div class="input-group-text">
