@@ -6,6 +6,9 @@
 body {
   background-color: #001a33;
 }
+[v-cloak] {
+  display: none !important;
+}
 .vh100 {
   height: 100vh;
 }
