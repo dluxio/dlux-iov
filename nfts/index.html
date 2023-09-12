@@ -527,11 +527,11 @@
         <div class="modal-body p-0">
           <!-- WALLETS -->
           <div class="d-flex justify-content-center">
-            <div class="accordion wallet-accordion w-100 px-2 text-black" id="accordionWallet">
+            <div class="accordion wallet-accordion w-100 rounded-0 text-black" id="accordionWallet">
                 <!-- HIVE -->
-                <div class="accordion-item wallet-accordion-item bg-hive shadow" id="hiveWallet">
-                    <h2 class="accordion-header">
-                        <button onclick="this.blur();" class="accordion-button text-black collapsed"
+                <div class="accordion-item wallet-accordion-item rounded-0 bg-hive shadow" id="hiveWallet">
+                    <h2 class="accordion-header rounded-0">
+                        <button onclick="this.blur();" class="accordion-button rounded-0 text-black collapsed"
                             type="button" data-bs-toggle="collapse" data-bs-target="#collapsehive"
                             aria-expanded="false" aria-controls="collapsehive">
                             HIVE<span class="ms-auto small" id="hiveBal">{{formatNumber(barhive, 3,
@@ -541,11 +541,11 @@
                     <div id="collapsehive" class="accordion-collapse collapse"
                         data-bs-parent="#accordionWallet">
                         <div class="accordion-body">
-                            <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
+                            <h3 class="pt-3 pb-4 m-0 font-weight-bolder text-black text-end">
                                 {{formatNumber(barhive, 3,
                                     '.', ',')}} HIVE</h3>
                             <div class="mt-1 text-end">
-                                <button class="btn btn-outline-dark invisible disabled btn-sm" class="a-1"
+                                <button class="btn btn-outline-dark d-none disabled btn-sm" class="a-1"
                                     data-bs-toggle="modal">
                                     Get HIVE
                                 </button>
@@ -566,11 +566,11 @@
                     <div id="collapsehbd" class="accordion-collapse collapse"
                         data-bs-parent="#accordionWallet">
                         <div class="accordion-body">
-                            <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
+                            <h3 class="pt-3 pb-4 m-0 font-weight-bolder text-black text-end">
                                 {{formatNumber(barhbd, 3,
                                     '.', ',')}} HBD</h3>
                             <div class="mt-1 text-end">
-                                <button class="btn btn-outline-dark invisible disabled btn-sm" class="a-1"
+                                <button class="btn btn-outline-dark d-none disabled btn-sm" class="a-1"
                                     data-bs-toggle="modal">
                                     Get HBD
                                 </button>
@@ -579,11 +579,11 @@
                     </div>
                 </div>
                 <!-- HONEYCOMB -->
-                <div class="accordion-item wallet-accordion-item shadow" :id="name + 'Wallet'"
+                <div class="accordion-item rounded-0 wallet-accordion-item shadow" :id="name + 'Wallet'"
                     v-for="name in chainSorted">
-                    <h2 class="accordion-header">
+                    <h2 class="accordion-header rounded-0">
                         
-                        <button onclick="this.blur();" class="accordion-button text-black"
+                        <button onclick="this.blur();" class="accordion-button rounded-0 text-black"
                             :class="{'collapsed': name != 'dlux'}"
                             type="button"
                             data-bs-toggle="collapse" :data-bs-target="'#collapse' + name"
@@ -598,7 +598,7 @@
                         class="accordion-collapse collapse" 
                         data-bs-parent="#accordionWallet" :class="{'show': name == 'dlux'}">
                         <div class="accordion-body">
-                            <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
+                            <h3 class="pt-2 pb-3 m-0 font-weight-bolder text-black text-end">
                                 {{formatNumber(chains[name].account.balance/1000, 3, '.', ',')}}
                                 {{toUpperCase(name)}}
                             </h3>
