@@ -171,7 +171,7 @@
             </div>
 
             <!--main view-->
-            <div class="row px-1">
+            <div class="row w-100 m-auto">
                 <div class="col-sm-6 col-lg-4 mb-3" v-for="post in displayPosts" :key="post.url">
                     <card-vue :post="post" :account="account" :has_ipfs="spkapi.storage.length ? true : false"
                         :post_select="postSelect" :voteval="voteVal" :head_block="spkapi.head_block"
