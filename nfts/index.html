@@ -91,7 +91,7 @@
         }
 
         .wallet-accordion-item {
-            width: 350px;
+            // width: 350px;
         }
 
         .wallet-accordion {
@@ -173,7 +173,7 @@
                         <div class="d-flex align-items-center justify-content-around">
 
                             <!-- MESSAGE -->
-                            <div class="">
+                            <div class="pt-2">
                                 <h1 class="display-5 text-uppercase fw-lighter mb-0">Marketplace</h1>
                                 <p class="fs-4 fw-light">Browse, bid, buy</p>
                                 <div class="d-flex">
@@ -519,15 +519,15 @@
             <!-- wallet modal -->
 <div class="modal fade" id="walletModal" tabindex="-1" aria-labelledby="walletModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-blur-darkg-50 bg-img-none">
-        <div class="modal-header">
+      <div class="modal-content">
+        <div class="modal-header border-bottom-0">
           <h1 class="modal-title fs-5 text-honey border-honey border rounded py-1 px-2" id="walletModalLabel">Wallet</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body p-0">
           <!-- WALLETS -->
           <div class="d-flex justify-content-center">
-            <div class="accordion wallet-accordion text-black" id="accordionWallet">
+            <div class="accordion wallet-accordion w-100 px-2 text-black" id="accordionWallet">
                 <!-- HIVE -->
                 <div class="accordion-item wallet-accordion-item bg-hive shadow" id="hiveWallet">
                     <h2 class="accordion-header">
@@ -544,7 +544,7 @@
                             <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
                                 {{barhive}}</h3>
                             <div class="mt-1 text-end">
-                                <button class="btn btn-outline-dark disabled btn-sm" class="a-1"
+                                <button class="btn btn-outline-dark invisible disabled btn-sm" class="a-1"
                                     data-bs-toggle="modal">
                                     Get HIVE
                                 </button>
@@ -568,7 +568,7 @@
                             <h3 class="py-2 m-0 font-weight-bolder text-black text-end">
                                 {{barhbd}}</h3>
                             <div class="mt-1 text-end">
-                                <button class="btn btn-outline-dark disabled btn-sm" class="a-1"
+                                <button class="btn btn-outline-dark invisible disabled btn-sm" class="a-1"
                                     data-bs-toggle="modal">
                                     Get HBD
                                 </button>
@@ -613,7 +613,7 @@
 
         </div>
         </div>
-        <div class="modal-footer">
+        <div class="modal-footer border-top-0">
           
         </div>
       </div>
