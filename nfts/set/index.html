@@ -22,10 +22,10 @@
 
 
   <script>
-    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for(let registration of registrations) {
-            registration.unregister();
-        } 
+    navigator.serviceWorker.getRegistrations().then(function (registrations) {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
     });
     // if ('serviceWorker' in navigator) {
     //     navigator
@@ -52,9 +52,11 @@
     .info-widget {
       max-width: 30%;
     }
+
     .description {
       max-width: 500px;
     }
+
     .stats-widget {
       max-width: 700px;
     }
@@ -227,69 +229,72 @@
             <div id="collapseWidgets" class="accordion-collapse collapse" data-bs-parent="#accordionWidgets">
               <div class="accordion-body p-0 m-0">
 
-                
-                  <!--info widget -->
-                  <div class="p-3 d-flex">
-                    <div class="d-flex w-100 flex-wrap align-items-center justify-content-center">
-                      
-                      <!-- MINT PROGRESS -->
-                      <div class="d-flex justify-content-between align-items-center text-center me-4">
-                        <div v-cloak class="col-3 p-2 d-flex flex-column">
-                          <h5 class="mb-1"><i class="fa-solid fa-fire"></i></h3><span
-                              class="mb-2 small">burned</span><span>{{chains[jsontoken].sets[setname].deleted}}</span>
-                        </div>
-                        <div v-cloak class="col-3 p-2 d-flex flex-column">
-                          <h5 class="mb-1"><i class="fa-solid fa-box-open"></i></h3><span
-                              class="mb-2 small">opened</span>
-                            <span>{{formatNumber(chains[jsontoken].sets[setname].minted,0,'.',',')}}</span>
-                        </div>
-                        <div v-cloak class="col-3 p-2 d-flex flex-column">
-                          <h5 class="mb-1"><i class="fa-solid fa-box"></i></h4><span class="mb-2 small">sealed</span>
-                            <span>{{formatNumber((chains[jsontoken].sets[setname].max-chains[jsontoken].sets[setname].minted),0,'.',',')}}</span>
-                        </div>
-                        <div v-cloak class="col-3 p-2 d-flex flex-column">
-                          <h5 class="mb-1"><i class="fa-solid fa-boxes-stacked"></i></h4><span
-                              class="mb-2 small">total</span>
-                            <span>{{formatNumber(chains[jsontoken].sets[setname].max,0,'.',',')}}</span>
-                        </div>
-                      </div>
 
-                      <!-- MINT INFO -->
-                      <div class="d-flex align-items-center">
-                        <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
-                          @click="focusItem.set = setname; focusItem.token = jsontoken">
-                          <div class="position-relative">
+                <!--info widget -->
+                <div class="p-3 d-flex">
+                  <div class="d-flex w-100 flex-wrap align-items-center justify-content-center">
+
+                    <!-- MINT PROGRESS -->
+                    <div class="d-flex justify-content-between align-items-center text-center me-4">
+                      <div v-cloak class="col-3 p-2 d-flex flex-column">
+                        <h5 class="mb-1"><i class="fa-solid fa-fire"></i></h3><span
+                            class="mb-2 small">burned</span><span>{{chains[jsontoken].sets[setname].deleted}}</span>
+                      </div>
+                      <div v-cloak class="col-3 p-2 d-flex flex-column">
+                        <h5 class="mb-1"><i class="fa-solid fa-box-open"></i></h3><span class="mb-2 small">opened</span>
+                          <span>{{formatNumber(chains[jsontoken].sets[setname].minted,0,'.',',')}}</span>
+                      </div>
+                      <div v-cloak class="col-3 p-2 d-flex flex-column">
+                        <h5 class="mb-1"><i class="fa-solid fa-box"></i></h4><span class="mb-2 small">sealed</span>
+                          <span>{{formatNumber((chains[jsontoken].sets[setname].max-chains[jsontoken].sets[setname].minted),0,'.',',')}}</span>
+                      </div>
+                      <div v-cloak class="col-3 p-2 d-flex flex-column">
+                        <h5 class="mb-1"><i class="fa-solid fa-boxes-stacked"></i></h4><span
+                            class="mb-2 small">total</span>
+                          <span>{{formatNumber(chains[jsontoken].sets[setname].max,0,'.',',')}}</span>
+                      </div>
+                    </div>
+
+                    <!-- MINT INFO -->
+                    <div class="d-flex align-items-center">
+                      <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
+                        @click="focusItem.set = setname; focusItem.token = jsontoken">
+                        <div class="position-relative">
                           <img class="rounded max-160"
                             :src="makeLink('https://ipfs.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.wrapped : '')">
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{formatNumber(chains[jsontoken].sets[setname].forAuctionMint +
-                              chains[jsontoken].sets[setname].forSaleMint + getMint(chains[jsontoken].sets[setname].set, 'qty'),0,'.',',')}}</span></div>
-                          </a>
-                        <div class="ms-4">
-                          <p class="text-white-50 description" v-cloak>{{chains[jsontoken].sets[setname].computed.set ?
-                            chains[jsontoken].sets[setname].computed.set.Description
-                            : '...'}}</p>
-                          <p>Permlink: <a :href="makeLink('/blog/@',chains[jsontoken].sets[setname].link)"
-                              v-cloak>{{chains[jsontoken].sets[setname].permlink}}</a></p>
+                          <span
+                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{formatNumber(chains[jsontoken].sets[setname].forAuctionMint
+                            +
+                            chains[jsontoken].sets[setname].forSaleMint + getMint(chains[jsontoken].sets[setname].set,
+                            'qty'),0,'.',',')}}</span>
                         </div>
+                      </a>
+                      <div class="ms-4">
+                        <p class="text-white-50 description" v-cloak>{{chains[jsontoken].sets[setname].computed.set ?
+                          chains[jsontoken].sets[setname].computed.set.Description
+                          : '...'}}</p>
+                        <p>Permlink: <a :href="makeLink('/blog/@',chains[jsontoken].sets[setname].link)"
+                            v-cloak>{{chains[jsontoken].sets[setname].permlink}}</a></p>
                       </div>
-
-                      <!-- MINT STATS -->
-                      <div class="ms-2 d-none">
-                        <p class="mb-0" v-cloak>Type: {{chains[jsontoken].sets[setname].type}}</p>
-                        <p class="mb-0" v-cloak>Encoding: {{chains[jsontoken].sets[setname].encoding}}</p>
-                        <p class="mb-0" v-cloak>Fee: {{naiString(chains[jsontoken].sets[setname].fee)}}</p>
-                        <p class="mb-0">Script:</p>
-                        <p class="mb-0 text-break" style="max-width: 250px;" v-cloak>
-                          {{chains[jsontoken].sets[setname].script}}
-                        </p>
-                      </div>
-
-                      
-
                     </div>
-                  </div>
 
-                
+                    <!-- MINT STATS -->
+                    <div class="ms-2 d-none">
+                      <p class="mb-0" v-cloak>Type: {{chains[jsontoken].sets[setname].type}}</p>
+                      <p class="mb-0" v-cloak>Encoding: {{chains[jsontoken].sets[setname].encoding}}</p>
+                      <p class="mb-0" v-cloak>Fee: {{naiString(chains[jsontoken].sets[setname].fee)}}</p>
+                      <p class="mb-0">Script:</p>
+                      <p class="mb-0 text-break" style="max-width: 250px;" v-cloak>
+                        {{chains[jsontoken].sets[setname].script}}
+                      </p>
+                    </div>
+
+
+
+                  </div>
+                </div>
+
+
               </div>
             </div>
           </div>
@@ -427,7 +432,7 @@
           <div class="d-flex flex-column flex-grow-1">
 
             <!-- ACTION BAR -->
-            <div class="d-flex flex-wrap">
+            <div class="d-flex flex-wrap align-items-center justify-content-center">
 
               <!--filter-->
               <div class="d-none me-2">
@@ -497,7 +502,7 @@
               </div>
 
               <!-- Status -->
-              <div class="dropdown">
+              <div class="mb-1 dropdown d-none d-xl-block">
                 <button class="btn btn-outline-light dropdown-toggle me-2" type="button" data-bs-toggle="dropdown"
                   aria-expanded="false">
                   Status
@@ -516,8 +521,9 @@
                   </li>
                 </ul>
               </div>
+
               <!-- Currency -->
-              <div class="dropdown">
+              <div class="mb-1 dropdown d-none d-xl-block">
                 <button class="btn btn-outline-light dropdown-toggle me-2" type="button" data-bs-toggle="dropdown"
                   aria-expanded="false">
                   Currency
@@ -536,8 +542,10 @@
                   </li>
                 </ul>
               </div>
+
+
               <!-- Search -->
-              <div class="position-relative me-2 flex-grow-1">
+              <div class="position-relative mx-1 mb-1 flex-grow-1">
                 <span class="position-absolute top-50 translate-middle-y ps-2"><i
                     class="fa-solid fa-magnifying-glass fa-fw"></i></span>
                 <input @keyup="displaynfts()" @change="displaynfts()" @search="displaynfts()"
@@ -545,53 +553,65 @@
                   placeholder="Search items and accounts">
               </div>
 
-              <!-- Sort -->
-              <div class="dropdown me-2">
-                <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                  aria-expanded="false">
-                  {{NFTselect.sort == '' ? 'Sort' : ('Sort by ' + (NFTselect.sort == 'price' ? 'Price: ' :
-                  (NFTselect.sort
-                  == 'time' ? 'Time: ' :(NFTselect.sort == 'uid' ? 'UID: ' : 'Owner: ')))
-                  +
-                  (NFTselect.dir == 'asc' ? 'Low to High' : 'High to Low'))}}
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end bg-black">
-                  <li>
-                    <a @click="NFTselect.dir='asc';NFTselect.sort='price';displaynfts()" class="dropdown-item"
-                      role="button">Price low to high</a>
-                  </li>
-                  <li>
-                    <a @click="NFTselect.dir='dec';NFTselect.sort='price';displaynfts()" class="dropdown-item"
-                      role="button">Price high to low</a>
-                  </li>
-                  <li>
-                    <a @click="NFTselect.dir='asc';NFTselect.sort='time';displaynfts()" class="dropdown-item"
-                      role="button">Time ending soonest</a>
-                  </li>
-                  <li>
-                    <a @click="NFTselect.dir='dec';NFTselect.sort='time';displaynfts()" class="dropdown-item"
-                      role="button">Time ending latest</a>
-                  </li>
-                  <li>
-                    <a @click="NFTselect.dir='asc';NFTselect.sort='owner';displaynfts()" class="dropdown-item"
-                      role="button">Owner Ascending</a>
-                  </li>
-                  <li>
-                    <a @click="NFTselect.dir='dec';NFTselect.sort='owner';displaynfts()" class="dropdown-item"
-                      role="button">Owner Descending</a>
-                  </li>
-                  <li>
-                    <a @click="NFTselect.dir='asc';NFTselect.sort='uid';displaynfts()" class="dropdown-item"
-                      role="button">UID Ascending</a>
-                  </li>
-                  <li>
-                    <a @click="NFTselect.dir='dec';NFTselect.sort='uid';displaynfts()" class="dropdown-item"
-                      role="button">UID Descending</a>
-                  </li>
-                </ul>
+              <div class="d-flex mx-1 w-sm-100 justify-content-between ">
+                
+                <!-- Filter button -->
+                <div class="d-xl-none mb-1 me-2 flex-fill">
+                  <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseFilter" aria-expanded="false" aria-controls="collapseFilter">
+                    <i class="fa-solid fa-filter me-1"></i>Filters
+                  </button>
+                </div>
+
+                <!-- Sort -->
+                <div class="dropdown mb-1 flex-fill">
+                  <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="dropdown"
+                    aria-expanded="false"><i class="fa-solid fa-sort fa-fw ms-1"></i>
+                    {{NFTselect.sort == '' ? 'Sort' : ('Sort by ' + (NFTselect.sort == 'price' ? 'Price: ' :
+                    (NFTselect.sort
+                    == 'time' ? 'Time: ' :(NFTselect.sort == 'uid' ? 'UID: ' : 'Owner: ')))
+                    +
+                    (NFTselect.dir == 'asc' ? 'Low to High' : 'High to Low'))}}
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end bg-black">
+                    <li>
+                      <a @click="NFTselect.dir='asc';NFTselect.sort='price';displaynfts()" class="dropdown-item"
+                        role="button">Price low to high</a>
+                    </li>
+                    <li>
+                      <a @click="NFTselect.dir='dec';NFTselect.sort='price';displaynfts()" class="dropdown-item"
+                        role="button">Price high to low</a>
+                    </li>
+                    <li>
+                      <a @click="NFTselect.dir='asc';NFTselect.sort='time';displaynfts()" class="dropdown-item"
+                        role="button">Time ending soonest</a>
+                    </li>
+                    <li>
+                      <a @click="NFTselect.dir='dec';NFTselect.sort='time';displaynfts()" class="dropdown-item"
+                        role="button">Time ending latest</a>
+                    </li>
+                    <li>
+                      <a @click="NFTselect.dir='asc';NFTselect.sort='owner';displaynfts()" class="dropdown-item"
+                        role="button">Owner Ascending</a>
+                    </li>
+                    <li>
+                      <a @click="NFTselect.dir='dec';NFTselect.sort='owner';displaynfts()" class="dropdown-item"
+                        role="button">Owner Descending</a>
+                    </li>
+                    <li>
+                      <a @click="NFTselect.dir='asc';NFTselect.sort='uid';displaynfts()" class="dropdown-item"
+                        role="button">UID Ascending</a>
+                    </li>
+                    <li>
+                      <a @click="NFTselect.dir='dec';NFTselect.sort='uid';displaynfts()" class="dropdown-item"
+                        role="button">UID Descending</a>
+                    </li>
+                  </ul>
+                </div>
               </div>
+
               <!-- Deleted-->
-              <div class="dropdown">
+              <div class="mb-1 ms-1 dropdown d-none d-xl-block">
                 <button class="btn btn-outline-light dropdown-toggle" type="button" id="deletedDropdown"
                   data-bs-toggle="dropdown" aria-expanded="false">
                   <span v-if="!NFTselect.showDeleted">Deleted: Hiding</span>
@@ -605,6 +625,73 @@
                       @click="setValue('NFTselect.showDeleted', true);displaynfts()">Show
                       Deleted</a></li>
                 </ul>
+              </div>
+
+
+
+              <!-- filter collapse-->
+              <div class="collapse order-last d-xl-none mx-1" id="collapseFilter">
+                <div class="d-flex flex-row flex-wrap">
+
+                  <!-- Status -->
+                  <div class="dropdown mb-1">
+                    <button class="btn btn-outline-light dropdown-toggle me-2" type="button" data-bs-toggle="dropdown"
+                      aria-expanded="false">
+                      Status
+                    </button>
+                    <ul class="dropdown-menu bg-black">
+                      <li v-for="(item, name, index) in selectors">
+                        <div class="py-1 px-2" v-if="name != ''">
+                          <div class="form-check">
+                            <input @change="addFilters('Status', name);displaynfts()" class="form-check-input"
+                              type="checkbox" v-model="item.checked" :id="name + 'StatusCheck'">
+                            <label class="form-check-label" :for="name + 'StatusCheck'">
+                              {{name}}
+                            </label>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <!-- Currency -->
+                  <div class="dropdown mb-1">
+                    <button class="btn btn-outline-light dropdown-toggle me-2" type="button" data-bs-toggle="dropdown"
+                      aria-expanded="false">
+                      Currency
+                    </button>
+                    <ul class="dropdown-menu bg-black">
+                      <li v-for="(item, name, index) in denoms">
+                        <div class="py-1 px-2">
+                          <div class="form-check">
+                            <input @change="addFilters('Currency', name);displaynfts()" class="form-check-input"
+                              type="checkbox" v-model="item.checked" :id="name + 'CurrencyCheck'">
+                            <label class="form-check-label" :for="name + 'CurrencyCheck'">
+                              {{name}}
+                            </label>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                  <!-- Deleted-->
+                  <div class="dropdown mb-1">
+                    <button class="btn btn-outline-light dropdown-toggle" type="button" id="deletedDropdown"
+                      data-bs-toggle="dropdown" aria-expanded="false">
+                      <span v-if="!NFTselect.showDeleted">Deleted: Hiding</span>
+                      <span v-if="NFTselect.showDeleted">Deleted: Showing</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark bg-black" aria-labelledby="deletedDropdown">
+                      <li><a class="dropdown-item" :class="{'active':!NFTselect.showDeleted}" href="#/"
+                          @click="setValue('NFTselect.showDeleted', false);displaynfts()">Hide
+                          Deleted</a></li>
+                      <li><a class="dropdown-item" :class="{'active':NFTselect.showDeleted}" href="#/"
+                          @click="setValue('NFTselect.showDeleted', true);displaynfts()">Show
+                          Deleted</a></li>
+                    </ul>
+                  </div>
+
+                </div>
               </div>
 
             </div>
