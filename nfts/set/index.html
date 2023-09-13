@@ -434,7 +434,7 @@
             <!-- ACTION BAR -->
             <div class="d-flex flex-wrap align-items-center justify-content-center">
 
-              <!--filter-->
+              <!--complicated filter-->
               <div class="d-none me-2">
                 <div class="dropdown">
                   <button class="btn btn-secondary dropdown-toggle" data-bs-auto-close="outside" type="button"
@@ -501,7 +501,7 @@
                 </div>
               </div>
 
-              <!-- Status -->
+              <!-- Status xl -->
               <div class="mb-1 dropdown d-none d-xl-block">
                 <button class="btn btn-outline-light dropdown-toggle me-2" type="button" data-bs-toggle="dropdown"
                   aria-expanded="false">
@@ -522,7 +522,7 @@
                 </ul>
               </div>
 
-              <!-- Currency -->
+              <!-- Currency xl -->
               <div class="mb-1 dropdown d-none d-xl-block">
                 <button class="btn btn-outline-light dropdown-toggle me-2" type="button" data-bs-toggle="dropdown"
                   aria-expanded="false">
@@ -555,11 +555,11 @@
 
               <div class="d-flex w-sm-100 justify-content-between ">
 
-                <!-- Filter button -->
+                <!-- Filter lg button -->
                 <div class="d-xl-none mb-1 ms-sm-2 flex-fill">
                   <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="collapse"
                     data-bs-target="#collapseFilter" aria-expanded="false" aria-controls="collapseFilter">
-                    <i class="fa-solid fa-filter me-1"></i>Filters
+                    <i class="fa-solid fa-filter me-1"></i>Filter
                   </button>
                 </div>
 
@@ -610,7 +610,7 @@
                 </div>
               </div>
 
-              <!-- Deleted-->
+              <!-- Deleted xl -->
               <div class="mb-1 ms-2 dropdown d-none d-xl-block">
                 <button class="btn btn-outline-light dropdown-toggle" type="button" id="deletedDropdown"
                   data-bs-toggle="dropdown" aria-expanded="false">
@@ -635,7 +635,7 @@
 
                 <div class="d-flex flex-row flex-wrap">
 
-                  <!-- Status -->
+                  <!-- Status lg -->
                   <div class="dropdown mb-1">
                     <button class="btn btn-outline-light dropdown-toggle me-2" type="button" data-bs-toggle="dropdown"
                       aria-expanded="false">
@@ -656,7 +656,7 @@
                     </ul>
                   </div>
 
-                  <!-- Currency -->
+                  <!-- Currency lg -->
                   <div class="dropdown mb-1">
                     <button class="btn btn-outline-light dropdown-toggle me-2" type="button" data-bs-toggle="dropdown"
                       aria-expanded="false">
@@ -676,7 +676,7 @@
                       </li>
                     </ul>
                   </div>
-                  <!-- Deleted-->
+                  <!-- Deleted lg -->
                   <div class="dropdown mb-1">
                     <button class="btn btn-outline-light dropdown-toggle" type="button" id="deletedDropdown"
                       data-bs-toggle="dropdown" aria-expanded="false">
@@ -695,7 +695,7 @@
 
                 </div>
 
-                <!-- Active Filters -->
+                <!-- Active Filters lg -->
                 <div class="d-flex flex-wrap mt-2 d-xl-none" v-if="NFTselect.keys.length">
                   <div v-for="(item, index) in NFTselect.keys">
                     <div v-if="index > 1"
@@ -716,7 +716,7 @@
               <h5 class="mb-0">Showing {{displayNFTs.length}} items of {{allNFTs.length}}</h5>
             </div>
 
-            <!-- Active Filters -->
+            <!-- Active Filters xl -->
             <div class="d-flex flex-wrap mt-2 d-none d-xl-flex" v-if="NFTselect.keys.length">
               <div v-for="(item, index) in NFTselect.keys">
                 <div v-if="index > 1"
