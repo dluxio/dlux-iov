@@ -62,7 +62,7 @@
     }
 
     .mint-bar {
-      min-width: 400px;
+      min-width: 200px;
       height: 55px;
     }
 
@@ -554,7 +554,7 @@
               </div>
 
               <div class="d-flex mx-1 w-sm-100 justify-content-between ">
-                
+
                 <!-- Filter button -->
                 <div class="d-xl-none mb-1 me-2 flex-fill">
                   <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="collapse"
@@ -627,10 +627,12 @@
                 </ul>
               </div>
 
-
+            </div>
+            <div class="d-flex align-items-center">
 
               <!-- filter collapse-->
-              <div class="collapse order-last d-xl-none mx-1" id="collapseFilter">
+              <div class="collapse d-xl-none mx-1" id="collapseFilter">
+
                 <div class="d-flex flex-row flex-wrap">
 
                   <!-- Status -->
@@ -692,26 +694,44 @@
                   </div>
 
                 </div>
+
+                <!-- Active Filters -->
+                <div class="d-flex flex-wrap mt-2 d-xl-none" v-if="NFTselect.keys.length">
+                  <div v-for="(item, index) in NFTselect.keys">
+                    <div v-if="index > 1"
+                      class="rounded bg-secondary text-black filter-bubble me-1 mb-1 d-flex align-items-center">
+                      <span>{{item}}</span>
+                      <button @click="clearFilters(item)" type="button" class="ms-1 btn-close btn-close-white"></button>
+                    </div>
+                  </div>
+                  <button @click="clearFilters()" type="button" v-if="NFTselect.keys.length > 3"
+                    class="btn btn-secondary mb-1">
+                    Clear All
+                  </button>
+                </div>
               </div>
 
             </div>
             <div class="mt-2 ms-1">
               <h5 class="mb-0">Showing {{displayNFTs.length}} items of {{allNFTs.length}}</h5>
             </div>
-            <div class="d-flex flex-wrap mt-2" v-if="NFTselect.keys.length">
-              <!-- Active Filters -->
+
+            <!-- Active Filters -->
+            <div class="d-flex flex-wrap mt-2 d-none d-xl-flex" v-if="NFTselect.keys.length">
               <div v-for="(item, index) in NFTselect.keys">
                 <div v-if="index > 1"
-                  class="rounded bg-secondary text-black filter-bubble me-1 d-flex align-items-center">
-
+                  class="rounded bg-secondary text-black filter-bubble me-1 mb-1 d-flex align-items-center">
                   <span>{{item}}</span>
                   <button @click="clearFilters(item)" type="button" class="ms-1 btn-close btn-close-white"></button>
                 </div>
               </div>
-              <button @click="clearFilters()" type="button" v-if="NFTselect.keys.length > 2" class="btn btn-secondary">
+              <button @click="clearFilters()" type="button" v-if="NFTselect.keys.length > 3"
+                class="btn btn-secondary mb-1">
                 Clear All
               </button>
             </div>
+
+            <!-- cards -->
             <div class="row row-cols-xxl-6 row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-1">
               <!-- NFTCARD REPEAT AUCTION -->
               <div class="col my-2" v-for="(item, name, index) in displayNFTs">
