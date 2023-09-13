@@ -16,10 +16,10 @@
     <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
     <script type="module" src="/js/nftsvue.js"></script>
     <script>
-        navigator.serviceWorker.getRegistrations().then(function(registrations) {
-            for(let registration of registrations) {
+        navigator.serviceWorker.getRegistrations().then(function (registrations) {
+            for (let registration of registrations) {
                 registration.unregister();
-            } 
+            }
         });
         // if ('serviceWorker' in navigator) {
         //     navigator
@@ -33,7 +33,7 @@
         //             console.log('Registration Successful');
         //         });
         // }
-      </script>
+    </script>
     <style>
         .circle {
             width: 50px;
@@ -145,28 +145,32 @@
             <div class="m-auto" style="max-width: 1800px !important">
                 <div class="container-fluid fixed-top px-0" style="margin-top: 94px; z-index: 900">
                     <div class="d-flex flex-column justify-content-between align-items-center nav-blur px-2"
-                      style="background-color: rgba(0,0,0,0.6)">
-                      <div class="d-flex py-1 align-itmes-center justify-content-between w-100"  style="max-width: 1400px;">
-                        
-                        <a class="btn btn-lg btn-outline-primary d-flex" href="sets" type="button">
-                            <i class="fa-solid fa-book-open force-parent-lh"></i> 
-                            <span class="d-none d-sm-block ms-1">SETS</span>
-                            <span v-if="!account" class="d-sm-none ms-1">SETS</span></a>
-                        <!-- wallet modal button -->
-                        <button type="button" v-if="account" class="ms-auto btn btn-lg btn-outline-success d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#walletModal">
-                            <i class="fa-solid fa-wallet force-parent-lh me-2"></i>
-                            <p class="me-1 mb-0 fs-6" v-cloak>
-                            {{formatNumber(chains['dlux'].account.balance/1000,
-                                3,
-                                '.', ',')}} DLUX
-                                <i class="fa-fw fa-solid fa-caret-down"></i></p>
-                        </button>
-  
+                        style="background-color: rgba(0,0,0,0.6)">
+                        <div class="d-flex py-1 align-itmes-center justify-content-between w-100"
+                            style="max-width: 1400px;">
 
-               
+                            <a class="btn btn-lg btn-outline-primary d-flex" href="sets" type="button">
+                                <i class="fa-solid fa-book-open force-parent-lh"></i>
+                                <span class="d-none d-sm-block ms-1">SETS</span>
+                                <span v-if="!account" class="d-sm-none ms-1">SETS</span></a>
+                            <!-- wallet modal button -->
+                            <button type="button" v-if="account"
+                                class="ms-auto btn btn-lg btn-outline-success d-flex align-items-center"
+                                data-bs-toggle="modal" data-bs-target="#walletModal">
+                                <i class="fa-solid fa-wallet force-parent-lh me-2"></i>
+                                <p class="me-1 mb-0 fs-6" v-cloak>
+                                    {{formatNumber(chains['dlux'].account.balance/1000,
+                                    3,
+                                    '.', ',')}} DLUX
+                                    <i class="fa-fw fa-solid fa-caret-down"></i>
+                                </p>
+                            </button>
+
+
+
                         </div>
-                        </div>
-                        </div>
+                    </div>
+                </div>
                 <div class="d-flex py-2 mx-1 align-items-stretch flex-wrap">
 
                     <div class="px-2 rounded-3 card d-flex w-100">
@@ -177,8 +181,10 @@
                                 <h1 class="display-5 text-uppercase fw-lighter mb-0">Marketplace</h1>
                                 <p class="fs-4 fw-light">Browse, bid, buy</p>
                                 <div class="d-flex">
-                                    <a class="btn btn-primary btn-lg me-2 d-none" type="button" href="sets">Explore Sets</a>
-                                    <a class="btn btn-secondary btn-lg disabled d-none" disabled type="button" href="create">Create</a>
+                                    <a class="btn btn-primary btn-lg me-2 d-none" type="button" href="sets">Explore
+                                        Sets</a>
+                                    <a class="btn btn-secondary btn-lg disabled d-none" disabled type="button"
+                                        href="create">Create</a>
                                 </div>
                             </div>
 
@@ -187,26 +193,38 @@
                             <div id="carouselExampleCaptions" class="carousel d-none">
                                 <div class="carousel-inner text-center">
                                     <div v-for="mint in mintData">
-                                        <div class="carousel-item" :class="{'active': mint.set == mintData[activeIndex].set && mint.chain == mintData[activeIndex].chain}">
-                                            <div v-if="chains[mint.chain].sets[mint.set].forAuctionMint || chains[mint.chain].sets[mint.set].mintSales?.length" class="d-flex mx-5 mt-2 mb-3 align-items-center rounded">
-                                                <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
+                                        <div class="carousel-item"
+                                            :class="{'active': mint.set == mintData[activeIndex].set && mint.chain == mintData[activeIndex].chain}">
+                                            <div v-if="chains[mint.chain].sets[mint.set].forAuctionMint || chains[mint.chain].sets[mint.set].mintSales?.length"
+                                                class="d-flex mx-5 mt-2 mb-3 align-items-center rounded">
+                                                <a role="button" title="Mint Details" data-bs-toggle="modal"
+                                                    data-bs-target="#transferModal"
                                                     @click="focusItem.set = mint.set; focusItem.token = mint.chain">
-                                                <img v-if="chains[mint.chain].sets[mint.set].computed" :src="'https://ipfs.io/ipfs/' + chains[mint.chain].sets[mint.set].computed.set.wrapped"
-                                                    class="mint-img responsive rounded" ></a>
+                                                    <img v-if="chains[mint.chain].sets[mint.set].computed"
+                                                        :src="'https://ipfs.io/ipfs/' + chains[mint.chain].sets[mint.set].computed.set.wrapped"
+                                                        class="mint-img responsive rounded"></a>
                                                 <div class="w-100 d-flex">
                                                     <div class="ms-auto text-end">
                                                         <h5>{{chains[mint.chain].sets[mint.set].name_long}}</h5>
                                                         <div v-if="chains[mint.chain].sets[mint.set].mintSales.length">
                                                             <small>Lowest Price</small>
-                                                            <p>{{naiString(chains[mint.chain].sets[mint.set].mintSales[0].pricenai)}}</p>
+                                                            <p>{{naiString(chains[mint.chain].sets[mint.set].mintSales[0].pricenai)}}
+                                                            </p>
                                                         </div>
-                                                        <div v-if="chains[mint.chain].sets[mint.set].mintAuctions.length">
+                                                        <div
+                                                            v-if="chains[mint.chain].sets[mint.set].mintAuctions.length">
                                                             <small>Lowest Bid</small>
-                                                            <p>{{naiString(chains[mint.chain].sets[mint.set].mintAuctions[0].pricenai)}}</p>
+                                                            <p>{{naiString(chains[mint.chain].sets[mint.set].mintAuctions[0].pricenai)}}
+                                                            </p>
                                                         </div>
-                                                        <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
+                                                        <a role="button" title="Mint Details" data-bs-toggle="modal"
+                                                            data-bs-target="#transferModal"
                                                             @click="focusItem.set = mint.set; focusItem.token = mint.chain">
-                                                            <button class="btn btn-sm btn-outline-light">{{formatNumber((chains[mint.chain].sets[mint.set].forAuctionMint + chains[mint.chain].sets[mint.set].forSaleMint),0,'.',',')}} Available</button>
+                                                            <button
+                                                                class="btn btn-sm btn-outline-light">{{formatNumber((chains[mint.chain].sets[mint.set].forAuctionMint
+                                                                +
+                                                                chains[mint.chain].sets[mint.set].forSaleMint),0,'.',',')}}
+                                                                Available</button>
                                                         </a>
                                                     </div>
                                                 </div>
@@ -226,13 +244,14 @@
                                 </button>
                                 <div class="carousel-indicators">
                                     <div v-for="(mint, name, index) in mintData">
-                                        <button type="button" data-bs-target="#carouselExampleCaptions" :data-bs-slide-to="index" @click="pairMints();activeIndex = index"
+                                        <button type="button" data-bs-target="#carouselExampleCaptions"
+                                            :data-bs-slide-to="index" @click="pairMints();activeIndex = index"
                                             class="active" aria-current="true" :aria-label="'Slide ' + index"></button>
                                     </div>
                                 </div>
                             </div>
 
-                            
+
                         </div>
                     </div>
 
@@ -240,7 +259,7 @@
                 <!-- ACTION BAR -->
                 <div class="d-flex flex-wrap align-items-center justify-content-center">
 
-                    
+
 
                     <!-- Chain -->
                     <div class="order-1 dropdown d-none d-xl-block mb-1">
@@ -330,7 +349,7 @@
                         </ul>
                     </div>
                     <!-- Search -->
-                    <div class="position-relative flex-grow-1 mb-1 mx-1 order-md-5" >
+                    <div class="position-relative flex-grow-1 mb-1 mx-1 order-md-5">
                         <span class="position-absolute top-50 translate-middle-y ps-2"><i
                                 class="fa-solid fa-magnifying-glass fa-fw"></i></span>
                         <input @keyup="displaynfts()" @change="displaynfts()" @search="displaynfts()"
@@ -338,156 +357,170 @@
                             placeholder="Search sets, items, and accounts">
                     </div>
                     <div class="d-flex order-last mx-1 w-sm-100 justify-content-between ">
-                    <!-- Filter button -->
-                    <div class="d-xl-none mb-1 me-2 flex-fill">
-                            <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilter" aria-expanded="false" aria-controls="collapseFilter">
+                        <!-- Filter button -->
+                        <div class="d-xl-none mb-1 me-2 flex-fill">
+                            <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseFilter" aria-expanded="false" aria-controls="collapseFilter">
                                 <i class="fa-solid fa-filter me-1"></i>Filter
                             </button>
-                          
-                          
+
+
                         </div>
-                    <!-- Sort -->
-                    <div class="dropdown mb-1 flex-fill">
-                        <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="dropdown"
-                            aria-expanded="false"><i class="fa-solid fa-sort fa-fw ms-1"></i>
-                            {{NFTselect.sort == 'uid' ? 'Sort' : ( (NFTselect.sort == 'price' ?
-                            'Price: ' :
-                            'Time: ') + (NFTselect.dir == 'asc' ? 'Low to High' : 'High to Low'))}}
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end bg-black">
-                            <li>
-                                <a @click="NFTselect.dir='asc';NFTselect.sort='price';displaynfts()"
-                                    class="dropdown-item" role="button">Price low to high</a>
-                            </li>
-                            <li>
-                                <a @click="NFTselect.dir='dec';NFTselect.sort='price';displaynfts()"
-                                    class="dropdown-item" role="button">Price high to low</a>
-                            </li>
-                            <li>
-                                <a @click="NFTselect.dir='asc';NFTselect.sort='time';displaynfts()"
-                                    class="dropdown-item" role="button">Time ending soonest</a>
-                            </li>
-                            <li>
-                                <a @click="NFTselect.dir='dec';NFTselect.sort='time';displaynfts()"
-                                    class="dropdown-item" role="button">Time ending latest</a>
-                            </li>
-                        </ul>
+                        <!-- Sort -->
+                        <div class="dropdown mb-1 flex-fill">
+                            <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="dropdown"
+                                aria-expanded="false"><i class="fa-solid fa-sort fa-fw ms-1"></i>
+                                {{NFTselect.sort == 'uid' ? 'Sort' : ( (NFTselect.sort == 'price' ?
+                                'Price: ' :
+                                'Time: ') + (NFTselect.dir == 'asc' ? 'Low to High' : 'High to Low'))}}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end bg-black">
+                                <li>
+                                    <a @click="NFTselect.dir='asc';NFTselect.sort='price';displaynfts()"
+                                        class="dropdown-item" role="button">Price low to high</a>
+                                </li>
+                                <li>
+                                    <a @click="NFTselect.dir='dec';NFTselect.sort='price';displaynfts()"
+                                        class="dropdown-item" role="button">Price high to low</a>
+                                </li>
+                                <li>
+                                    <a @click="NFTselect.dir='asc';NFTselect.sort='time';displaynfts()"
+                                        class="dropdown-item" role="button">Time ending soonest</a>
+                                </li>
+                                <li>
+                                    <a @click="NFTselect.dir='dec';NFTselect.sort='time';displaynfts()"
+                                        class="dropdown-item" role="button">Time ending latest</a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                </div>
 
                     <!-- filter collapse-->
                     <div class="collapse order-last d-xl-none mx-1" id="collapseFilter">
                         <div class="d-flex flex-row flex-wrap">
 
-                         <!-- Chain -->
-                        <div class="order-1 dropdown mb-1">
-                        <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Chain
-                        </button>
-                        <ul class="dropdown-menu bg-black">
-                            <li v-for="(item, name, index) in chainSorted">
-                                <div class="py-1 px-2">
-                                    <div class="form-check">
-                                        <input @change="addFilters('Chain', item);displaynfts()"
-                                            class="form-check-input" type="checkbox" v-model="chains[item].enabled"
-                                            :id="item +'ChainCheck'">
-                                        <label class="form-check-label" :for="item +'ChainCheck'">
-                                            {{item}}
-                                        </label>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                    <!-- Set -->
-                    <div class="order-2 dropdown mb-1">
-                        <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Set
-                        </button>
-                        <ul class="dropdown-menu bg-black">
-                            <div v-for="(item, name, index) in chains">
-                                <li v-for="(set, setname, setindex) in chains[name].sets">
-                                    <div class="py-1 px-2">
-                                        <div class="form-check">
-                                            <input @change="addFilters('Set', setname, name);displaynfts()"
-                                                class="form-check-input" type="checkbox"
-                                                v-model="chains[name].sets[setname].enabled" :id="setname + 'SetCheck'">
-                                            <label class="form-check-label" :for="setname + 'SetCheck'">
-                                                {{set.name_long}}
-                                            </label>
+                            <!-- Chain -->
+                            <div class="order-1 dropdown mb-1">
+                                <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    Chain
+                                </button>
+                                <ul class="dropdown-menu bg-black">
+                                    <li v-for="(item, name, index) in chainSorted">
+                                        <div class="py-1 px-2">
+                                            <div class="form-check">
+                                                <input @change="addFilters('Chain', item);displaynfts()"
+                                                    class="form-check-input" type="checkbox"
+                                                    v-model="chains[item].enabled" :id="item +'ChainCheck'">
+                                                <label class="form-check-label" :for="item +'ChainCheck'">
+                                                    {{item}}
+                                                </label>
+                                            </div>
                                         </div>
-                                    </div>
-                                </li>
+                                    </li>
+                                </ul>
                             </div>
-                        </ul>
-                    </div>
-                    <!-- Status -->
-                    <div class="order-3 dropdown mb-1">
-                        <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Status
-                        </button>
-                        <ul class="dropdown-menu bg-black">
-                            <li v-for="(item, name, index) in selectors">
-                                <div class="py-1 px-2">
-                                    <div class="form-check">
-                                        <input @change="addFilters('Status', name);displaynfts()"
-                                            class="form-check-input" type="checkbox" v-model="item.checked"
-                                            :id="name + 'StatusCheck'">
-                                        <label class="form-check-label" :for="name + 'StatusCheck'">
-                                            {{name}}
-                                        </label>
+                            <!-- Set -->
+                            <div class="order-2 dropdown mb-1">
+                                <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    Set
+                                </button>
+                                <ul class="dropdown-menu bg-black">
+                                    <div v-for="(item, name, index) in chains">
+                                        <li v-for="(set, setname, setindex) in chains[name].sets">
+                                            <div class="py-1 px-2">
+                                                <div class="form-check">
+                                                    <input @change="addFilters('Set', setname, name);displaynfts()"
+                                                        class="form-check-input" type="checkbox"
+                                                        v-model="chains[name].sets[setname].enabled"
+                                                        :id="setname + 'SetCheck'">
+                                                    <label class="form-check-label" :for="setname + 'SetCheck'">
+                                                        {{set.name_long}}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </li>
                                     </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                    <!-- Currency -->
-                    <div class="order-4 dropdown mb-1 ">
-                        <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Currency
-                        </button>
-                        <ul class="dropdown-menu bg-black">
-                            <li v-for="(item, name, index) in denoms">
-                                <div class="py-1 px-2">
-                                    <div class="form-check">
-                                        <input @change="addFilters('Currency', name);displaynfts()"
-                                            class="form-check-input" type="checkbox" v-model="item.checked"
-                                            :id="name + 'CurrencyCheck'">
-                                        <label class="form-check-label" :for="name + 'CurrencyCheck'">
-                                            {{name}}
-                                        </label>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
+                                </ul>
+                            </div>
+                            <!-- Status -->
+                            <div class="order-3 dropdown mb-1">
+                                <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    Status
+                                </button>
+                                <ul class="dropdown-menu bg-black">
+                                    <li v-for="(item, name, index) in selectors">
+                                        <div class="py-1 px-2">
+                                            <div class="form-check">
+                                                <input @change="addFilters('Status', name);displaynfts()"
+                                                    class="form-check-input" type="checkbox" v-model="item.checked"
+                                                    :id="name + 'StatusCheck'">
+                                                <label class="form-check-label" :for="name + 'StatusCheck'">
+                                                    {{name}}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- Currency -->
+                            <div class="order-4 dropdown mb-1 ">
+                                <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    Currency
+                                </button>
+                                <ul class="dropdown-menu bg-black">
+                                    <li v-for="(item, name, index) in denoms">
+                                        <div class="py-1 px-2">
+                                            <div class="form-check">
+                                                <input @change="addFilters('Currency', name);displaynfts()"
+                                                    class="form-check-input" type="checkbox" v-model="item.checked"
+                                                    :id="name + 'CurrencyCheck'">
+                                                <label class="form-check-label" :for="name + 'CurrencyCheck'">
+                                                    {{name}}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
 
-                </div>
-
-                    <div class="d-flex flex-row flex-wrap mt-2 order-last" v-if="NFTselect.keys.length">
-                        <!-- Active Filters -->
-                        <div v-for="(item, name, index) in NFTselect.keys"
-                            class="rounded bg-secondary text-black filter-bubble me-1 mb-1 d-flex align-items-center">
-                            <span>{{item}}</span>
-                            <button @click="clearFilters(item)" type="button"
-                                class="ms-1 btn-close btn-close-white"></button>
                         </div>
-                        <button @click="clearFilters()" type="button" v-if="NFTselect.keys.length > 1"
-                            class="btn btn-secondary mb-1">
-                            Clear All
-                        </button>
+
+                        <div class="d-flex flex-row flex-wrap mt-2 order-last" v-if="NFTselect.keys.length">
+                            <!-- Active Filters -->
+                            <div v-for="(item, name, index) in NFTselect.keys"
+                                class="rounded bg-secondary text-black filter-bubble me-1 mb-1 d-flex align-items-center">
+                                <span>{{item}}</span>
+                                <button @click="clearFilters(item)" type="button"
+                                    class="ms-1 btn-close btn-close-white"></button>
+                            </div>
+                            <button @click="clearFilters()" type="button" v-if="NFTselect.keys.length > 1"
+                                class="btn btn-secondary mb-1">
+                                Clear All
+                            </button>
+                        </div>
+
+
                     </div>
 
-                        
-                      </div>
-
                 </div>
-                <div class="mt-2 mx-1">
+                <div class="d-flex align-items-center mx-1">
                     <h5 class="mb-0">{{displayNFTs.length}} Items</h5>
+                    <div class="d-none d-sm-flex d-md-none ms-auto">
+                        <div class="btn-group">
+                            <input type="radio" class="btn-check" name="smView" id="setSingle" autocomplete="off" />
+                            <label class="btn btn-outline-warning" for="setSingle"><i
+                                    class="fa-regular fa-square fa-fw"></i></label>
+                            <input type="radio" class="btn-check" name="smView" id="setDouble" autocomplete="off"
+                                checked />
+                            <label class="btn btn-outline-warning" for="setDouble"><i
+                                    class="fa-solid fa-table-cells-large fa-fw"></i></label>
+                        </div>
+                    </div>
+
                 </div>
                 <div class="d-flex flex-wrap mt-2 d-none d-xl-flex mx-1" v-if="NFTselect.keys.length">
                     <!-- Active Filters -->
@@ -502,8 +535,11 @@
                         Clear All
                     </button>
                 </div>
-                
-                <div class="w-100 ms-0 row row-cols-xxl-6 row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-sm-2 row-cols-2">
+
+
+
+                <div class="w-100 ms-0 row row-cols-xxl-6 row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-xs-1"
+                    :class="{'row-cols-sm-2' : buyhive.checked, 'row-cols-sm-1' : buyhbd.checked }">
                     <!-- NFTCARD REPEAT AUCTION -->
                     <div class="col my-1" v-for="(item, name, index) in displayNFTs">
                         <nftcard :item="item" :uid="Base64toNumber(item.uid)" :icon="getIcon(item.script)"
@@ -517,110 +553,113 @@
             </div>
 
             <!-- wallet modal -->
-<div class="modal fade" id="walletModal" tabindex="-1" aria-labelledby="walletModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header border-bottom-0">
-          <h1 class="modal-title fs-5" id="walletModalLabel">Wallet</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body p-0">
-          <!-- WALLETS -->
-          <div class="d-flex justify-content-center">
-            <div class="accordion wallet-accordion w-100 rounded-0 text-black" id="accordionWallet">
-                <!-- HIVE -->
-                <div class="accordion-item wallet-accordion-item rounded-0 bg-hive shadow" id="hiveWallet">
-                    <h2 class="accordion-header rounded-0">
-                        <button onclick="this.blur();" class="accordion-button rounded-0 text-black collapsed"
-                            type="button" data-bs-toggle="collapse" data-bs-target="#collapsehive"
-                            aria-expanded="false" aria-controls="collapsehive">
-                            HIVE<span class="ms-auto small" id="hiveBal">{{formatNumber(barhive, 3,
-                                '.', ',')}}</span>
-                        </button>
-                    </h2>
-                    <div id="collapsehive" class="accordion-collapse collapse"
-                        data-bs-parent="#accordionWallet">
-                        <div class="accordion-body">
-                            <h3 class="pt-3 pb-4 m-0 font-weight-bolder text-black text-end">
-                                {{formatNumber(barhive, 3,
-                                    '.', ',')}} HIVE</h3>
-                            <div class="mt-1 text-end">
-                                <button class="btn btn-outline-dark d-none disabled btn-sm" class="a-1"
-                                    data-bs-toggle="modal">
-                                    Get HIVE
-                                </button>
+            <div class="modal fade" id="walletModal" tabindex="-1" aria-labelledby="walletModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header border-bottom-0">
+                            <h1 class="modal-title fs-5" id="walletModalLabel">Wallet</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-0">
+                            <!-- WALLETS -->
+                            <div class="d-flex justify-content-center">
+                                <div class="accordion wallet-accordion w-100 rounded-0 text-black" id="accordionWallet">
+                                    <!-- HIVE -->
+                                    <div class="accordion-item wallet-accordion-item rounded-0 bg-hive shadow"
+                                        id="hiveWallet">
+                                        <h2 class="accordion-header rounded-0">
+                                            <button onclick="this.blur();"
+                                                class="accordion-button rounded-0 text-black collapsed" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#collapsehive"
+                                                aria-expanded="false" aria-controls="collapsehive">
+                                                HIVE<span class="ms-auto small" id="hiveBal">{{formatNumber(barhive, 3,
+                                                    '.', ',')}}</span>
+                                            </button>
+                                        </h2>
+                                        <div id="collapsehive" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionWallet">
+                                            <div class="accordion-body">
+                                                <h3 class="pt-3 pb-4 m-0 font-weight-bolder text-black text-end">
+                                                    {{formatNumber(barhive, 3,
+                                                    '.', ',')}} HIVE</h3>
+                                                <div class="mt-1 text-end">
+                                                    <button class="btn btn-outline-dark d-none disabled btn-sm"
+                                                        class="a-1" data-bs-toggle="modal">
+                                                        Get HIVE
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- HBD -->
+                                    <div class="accordion-item wallet-accordion-item bg-hbd shadow" id="hbdWallet">
+                                        <h2 class="accordion-header">
+                                            <button onclick="this.blur();" class="accordion-button text-black collapsed"
+                                                type="button" data-bs-toggle="collapse" data-bs-target="#collapsehbd"
+                                                aria-expanded="false" aria-controls="collapsehbd">
+                                                HBD<span class="ms-auto small" id="hbdBal">{{formatNumber(barhbd, 3,
+                                                    '.', ',')}}</span>
+                                            </button>
+                                        </h2>
+                                        <div id="collapsehbd" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionWallet">
+                                            <div class="accordion-body">
+                                                <h3 class="pt-3 pb-4 m-0 font-weight-bolder text-black text-end">
+                                                    {{formatNumber(barhbd, 3,
+                                                    '.', ',')}} HBD</h3>
+                                                <div class="mt-1 text-end">
+                                                    <button class="btn btn-outline-dark d-none disabled btn-sm"
+                                                        class="a-1" data-bs-toggle="modal">
+                                                        Get HBD
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- HONEYCOMB -->
+                                    <div class="accordion-item rounded-0 wallet-accordion-item shadow"
+                                        :id="name + 'Wallet'" v-for="name in chainSorted">
+                                        <h2 class="accordion-header rounded-0">
+
+                                            <button onclick="this.blur();" class="accordion-button rounded-0 text-black"
+                                                :class="{'collapsed': name != 'dlux'}" type="button"
+                                                data-bs-toggle="collapse" :data-bs-target="'#collapse' + name"
+                                                aria-expanded="true" :aria-controls="'#collapse' + name">
+                                                {{toUpperCase(name)}}<span class="ms-auto small" :id="name + 'Bal'"
+                                                    :class="{'d-none': name == 'dlux'}">
+                                                    {{formatNumber(chains[name].account.balance/1000,
+                                                    3,
+                                                    '.', ',')}}</span>
+                                            </button>
+                                        </h2>
+                                        <div :id="'collapse' + name" :ref="'show' + name"
+                                            class="accordion-collapse collapse" data-bs-parent="#accordionWallet"
+                                            :class="{'show': name == 'dlux'}">
+                                            <div class="accordion-body">
+                                                <h3 class="pt-2 pb-3 m-0 font-weight-bolder text-black text-end">
+                                                    {{formatNumber(chains[name].account.balance/1000, 3, '.', ',')}}
+                                                    {{toUpperCase(name)}}
+                                                </h3>
+                                                <div class="mt-1 text-end">
+                                                    <button class="btn btn-outline-dark btn-sm" href="#buyTokenModal"
+                                                        class="a-1" data-bs-toggle="modal" @click="popDex(name)">
+                                                        Get {{toUpperCase(name)}}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
-                    </div>
-                </div>
-                <!-- HBD -->
-                <div class="accordion-item wallet-accordion-item bg-hbd shadow" id="hbdWallet">
-                    <h2 class="accordion-header">
-                        <button onclick="this.blur();" class="accordion-button text-black collapsed"
-                            type="button" data-bs-toggle="collapse" data-bs-target="#collapsehbd"
-                            aria-expanded="false" aria-controls="collapsehbd">
-                            HBD<span class="ms-auto small" id="hbdBal">{{formatNumber(barhbd, 3,
-                                '.', ',')}}</span>
-                        </button>
-                    </h2>
-                    <div id="collapsehbd" class="accordion-collapse collapse"
-                        data-bs-parent="#accordionWallet">
-                        <div class="accordion-body">
-                            <h3 class="pt-3 pb-4 m-0 font-weight-bolder text-black text-end">
-                                {{formatNumber(barhbd, 3,
-                                    '.', ',')}} HBD</h3>
-                            <div class="mt-1 text-end">
-                                <button class="btn btn-outline-dark d-none disabled btn-sm" class="a-1"
-                                    data-bs-toggle="modal">
-                                    Get HBD
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- HONEYCOMB -->
-                <div class="accordion-item rounded-0 wallet-accordion-item shadow" :id="name + 'Wallet'"
-                    v-for="name in chainSorted">
-                    <h2 class="accordion-header rounded-0">
-                        
-                        <button onclick="this.blur();" class="accordion-button rounded-0 text-black"
-                            :class="{'collapsed': name != 'dlux'}"
-                            type="button"
-                            data-bs-toggle="collapse" :data-bs-target="'#collapse' + name"
-                            aria-expanded="true" :aria-controls="'#collapse' + name">
-                            {{toUpperCase(name)}}<span class="ms-auto small" :id="name + 'Bal'" :class="{'d-none': name == 'dlux'}">
-                                {{formatNumber(chains[name].account.balance/1000,
-                                3,
-                                '.', ',')}}</span>
-                        </button>
-                    </h2>
-                    <div :id="'collapse' + name" :ref="'show' + name"
-                        class="accordion-collapse collapse" 
-                        data-bs-parent="#accordionWallet" :class="{'show': name == 'dlux'}">
-                        <div class="accordion-body">
-                            <h3 class="pt-2 pb-3 m-0 font-weight-bolder text-black text-end">
-                                {{formatNumber(chains[name].account.balance/1000, 3, '.', ',')}}
-                                {{toUpperCase(name)}}
-                            </h3>
-                            <div class="mt-1 text-end">
-                                <button class="btn btn-outline-dark btn-sm" href="#buyTokenModal"
-                                    class="a-1" data-bs-toggle="modal" @click="popDex(name)">
-                                    Get {{toUpperCase(name)}}
-                                </button>
-                            </div>
+                        <div class="modal-footer border-top-0">
+
                         </div>
                     </div>
                 </div>
             </div>
-
-        </div>
-        </div>
-        <div class="modal-footer border-top-0">
-          
-        </div>
-      </div>
-    </div>
-  </div>
             <!-- Get Token Modal-->
             <div class="modal fade" id="buyTokenModal" tabindex="-1" role="dialog" aria-labelledby="buyDluxModalTitle"
                 aria-hidden="true">
@@ -764,38 +803,26 @@
             </div>
             <!-- NFT Detail Modal -->
             <div>
-                <nftdetail :sets="focusSet" 
-                    :account="account" 
-                    :denoms="denoms"
-                    :itemmodal="itemModal" 
-                    :pfp="pfp" 
-                    :item="focusItem"
-                    :chains="chains" 
-                    @detail="modalIndex('itemModal', $event);itemModal.hidden = false"
-                    @tosign="toSign=$event" />
+                <nftdetail :sets="focusSet" :account="account" :denoms="denoms" :itemmodal="itemModal" :pfp="pfp"
+                    :item="focusItem" :chains="chains"
+                    @detail="modalIndex('itemModal', $event);itemModal.hidden = false" @tosign="toSign=$event" />
             </div>
 
             <!-- Mint Detail modal -->
-          <div>
-            <fttransfer :account="account" 
-            :item="focusItem" 
-            :mint="true" 
-            :numitems="mintData.length"
-            :denoms="denoms"
-            @modal="injectIndex($event)"
-            :activeindex="activeIndex"
-            :icon="chains[focusItem.token].sets[focusItem.set].computed.set.faicon" 
-            :setdetail="chains[focusItem.token].sets[focusItem.set]"
-            :api="chains[focusItem.token].api"
-            :wrapped="chains[focusItem.token].sets[focusItem.set].computed.set.wrapped"
-            :qty="mintsQty(focusItem)"
-            :colors="'linear-gradient(' + chains[focusItem.token].sets[focusItem.set].computed.set.Color1 + ',' + chains[focusItem.token].sets[focusItem.set].computed.set.Color2 + ')'"
-            @tosign="toSign = $event" 
-            :info="chains[focusItem.token].sets[focusItem.set].computed.set.Description" />
-          </div>
+            <div>
+                <fttransfer :account="account" :item="focusItem" :mint="true" :numitems="mintData.length"
+                    :denoms="denoms" @modal="injectIndex($event)" :activeindex="activeIndex"
+                    :icon="chains[focusItem.token].sets[focusItem.set].computed.set.faicon"
+                    :setdetail="chains[focusItem.token].sets[focusItem.set]" :api="chains[focusItem.token].api"
+                    :wrapped="chains[focusItem.token].sets[focusItem.set].computed.set.wrapped"
+                    :qty="mintsQty(focusItem)"
+                    :colors="'linear-gradient(' + chains[focusItem.token].sets[focusItem.set].computed.set.Color1 + ',' + chains[focusItem.token].sets[focusItem.set].computed.set.Color2 + ')'"
+                    @tosign="toSign = $event"
+                    :info="chains[focusItem.token].sets[focusItem.set].computed.set.Description" />
+            </div>
 
 
-          
+
     </div>
     </main>
     <div>
