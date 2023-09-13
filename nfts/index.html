@@ -16,24 +16,24 @@
     <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
     <script type="module" src="/js/nftsvue.js"></script>
     <script>
-        navigator.serviceWorker.getRegistrations().then(function (registrations) {
-            for (let registration of registrations) {
-                registration.unregister();
-            }
-        });
-        // if ('serviceWorker' in navigator) {
-        //     navigator
-        //         .serviceWorker
-        //         .register(
-        //             // path to the service worker file
-        //             '/sw.js'
-        //         )
-        //         // the registration is async and it returns a promise
-        //         .then(function (reg) {
-        //             console.log('Registration Successful');
-        //         });
-        // }
-    </script>
+        // navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        //     for(let registration of registrations) {
+        //         registration.unregister();
+        //     } 
+        // });
+        if ('serviceWorker' in navigator) {
+            navigator
+                .serviceWorker
+                .register(
+                    // path to the service worker file
+                    '/sw.js'
+                )
+                // the registration is async and it returns a promise
+                .then(function (reg) {
+                    console.log('Registration Successful');
+                });
+        }
+      </script>
     <style>
         .circle {
             width: 50px;
@@ -91,7 +91,7 @@
         }
 
         .wallet-accordion-item {
-            // width: 350px;
+             /* width: 350px; */
         }
 
         .wallet-accordion {
