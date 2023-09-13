@@ -80,7 +80,7 @@
   </style>
 </head>
 
-<body class="d-flex flex-column h-100 padme-t70 text-white" id="explore">
+<body class="d-flex flex-column h-100 text-white" style="margin-top: 94px;" id="explore">
   <div id="app" v-cloak>
     <div v-scroll="handleScroll">
       <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event);getUserNFTs()"
@@ -545,7 +545,7 @@
 
 
               <!-- Search -->
-              <div class="position-relative mx-1 mb-1 flex-grow-1">
+              <div class="position-relative mb-1 flex-grow-1">
                 <span class="position-absolute top-50 translate-middle-y ps-2"><i
                     class="fa-solid fa-magnifying-glass fa-fw"></i></span>
                 <input @keyup="displaynfts()" @change="displaynfts()" @search="displaynfts()"
@@ -553,10 +553,10 @@
                   placeholder="Search items and accounts">
               </div>
 
-              <div class="d-flex mx-1 w-sm-100 justify-content-between ">
+              <div class="d-flex w-sm-100 justify-content-between ">
 
                 <!-- Filter button -->
-                <div class="d-xl-none mb-1 me-2 flex-fill">
+                <div class="d-xl-none mb-1 ms-sm-2 flex-fill">
                   <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="collapse"
                     data-bs-target="#collapseFilter" aria-expanded="false" aria-controls="collapseFilter">
                     <i class="fa-solid fa-filter me-1"></i>Filters
@@ -564,7 +564,7 @@
                 </div>
 
                 <!-- Sort -->
-                <div class="dropdown mb-1 flex-fill">
+                <div class="dropdown mb-1 ms-2 flex-fill">
                   <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="dropdown"
                     aria-expanded="false"><i class="fa-solid fa-sort fa-fw ms-1"></i>
                     {{NFTselect.sort == '' ? 'Sort' : ('Sort by ' + (NFTselect.sort == 'price' ? 'Price: ' :
@@ -611,7 +611,7 @@
               </div>
 
               <!-- Deleted-->
-              <div class="mb-1 ms-1 dropdown d-none d-xl-block">
+              <div class="mb-1 ms-2 dropdown d-none d-xl-block">
                 <button class="btn btn-outline-light dropdown-toggle" type="button" id="deletedDropdown"
                   data-bs-toggle="dropdown" aria-expanded="false">
                   <span v-if="!NFTselect.showDeleted">Deleted: Hiding</span>
