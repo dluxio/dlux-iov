@@ -183,7 +183,7 @@
 
             <!--detail view-->
             <detail-vue :post="displayPost.item" :account="account" :modal="true" :post_select="postSelect"
-                :has_ipfs="spkapi?.storage?.length ? true : false" :voteval="voteVal" :head_block="sstats.head_block"
+                :has_ipfs="spkapi.storage?.length ? true : false" :voteval="voteVal" :head_block="sstats.head_block"
                 :broca_refill="sstats.broca_refill" :broca="spkapi.broca" :spk_power="spkapi.spk_power"
                 :contracts="contracts" :extendcost="extendcost" @tosign="toSign=$event" @reply="reply($event)"
                 @modalselect="modalSelect($event)" @vote="vote($event)"></detail-vue>
