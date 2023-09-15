@@ -1,150 +1,150 @@
 import ToastVue from "/js/toastvue.js";
 
 class StWidget {
-  constructor(url) { 
-      this.url = url.indexOf('?')===-1?(url+'?embed'):(url+'&embed');
-      this.element = null;
-      this.iframe = null;
-      this.user = null;
-      this.properties = null;
-      this.initialized = false;
-      this.enableKeychainPassthrough = true;
-      this.allowedCustomJson = ["community", "follow"];
-      this.messageListener = null;
-      this.onLastRead = null;
-      this.frameOrigin = '*';
+  constructor(url) {
+    this.url = url.indexOf('?') === -1 ? (url + '?embed') : (url + '&embed');
+    this.element = null;
+    this.iframe = null;
+    this.user = null;
+    this.properties = null;
+    this.initialized = false;
+    this.enableKeychainPassthrough = true;
+    this.allowedCustomJson = ["community", "follow"];
+    this.messageListener = null;
+    this.onLastRead = null;
+    this.frameOrigin = '*';
   }
-  createElement(width=450, height=556, overlay=true, resizable=true) {
-      this.initialize();
-      var div = document.createElement('div');
-      this.element = div;
-      var style = { border: '1px solid gray' };
-      if(overlay) {
-          style['position'] = 'absolute';
-          style['z-index'] = '10000';
-      }
-      if(resizable) {
-          style['resize'] = 'both';
-          style['overflow'] = 'hidden';
-      }
-      
-      this.setStyle(style);
-      this.resize(width, height);
+  createElement(width = 450, height = 556, overlay = true, resizable = true) {
+    this.initialize();
+    var div = document.createElement('div');
+    this.element = div;
+    var style = { border: '1px solid gray' };
+    if (overlay) {
+      style['position'] = 'absolute';
+      style['z-index'] = '10000';
+    }
+    if (resizable) {
+      style['resize'] = 'both';
+      style['overflow'] = 'hidden';
+    }
 
-      var iframe = document.createElement('iframe');
-      this.iframe = iframe;
-      iframe.src = this.url;
-      iframe.style.width = "100%";
-      iframe.style.height = "100%";
-      div.appendChild(iframe);
+    this.setStyle(style);
+    this.resize(width, height);
 
-      return div;
+    var iframe = document.createElement('iframe');
+    this.iframe = iframe;
+    iframe.src = this.url;
+    iframe.style.width = "100%";
+    iframe.style.height = "100%";
+    div.appendChild(iframe);
+
+    return div;
   }
-  resize(width=450, height=556) {
-      this.setStyle({
-          width: typeof width === 'string'?width:(width+'px'),
-          height: typeof height === 'string'?height:(height+'px'),
-      });
+  resize(width = 450, height = 556) {
+    this.setStyle({
+      width: typeof width === 'string' ? width : (width + 'px'),
+      height: typeof height === 'string' ? height : (height + 'px'),
+    });
   }
   setStyle(style) {
-      for(var name in style) this.element.style.setProperty(name, style[name]);
+    for (var name in style) this.element.style.setProperty(name, style[name]);
   }
   setLastReadCallback(fn) {
-      this.onLastRead = fn;
-  } 
+    this.onLastRead = fn;
+  }
   postMessage(message) {
-      if(this.initialized) {
-          var _this = this;
-          if(this.iframe.contentWindow != null)
-              this.iframe.contentWindow.postMessage(message, this.frameOrigin);
-          else this.iframe.addEventListener( "load", ()=>{
-              _this.iframe.contentWindow.postMessage(message, this.frameOrigin);
-          });
-          return true;
-      }
-      return false;
-  } 
+    if (this.initialized) {
+      var _this = this;
+      if (this.iframe.contentWindow != null)
+        this.iframe.contentWindow.postMessage(message, this.frameOrigin);
+      else this.iframe.addEventListener("load", () => {
+        _this.iframe.contentWindow.postMessage(message, this.frameOrigin);
+      });
+      return true;
+    }
+    return false;
+  }
   setProperties(properties) {
-      this.properties = properties;
-      this.postMessage(["stlib", "setProperties", JSON.stringify(this.properties)]);
+    this.properties = properties;
+    this.postMessage(["stlib", "setProperties", JSON.stringify(this.properties)]);
   }
   pause(value) { return this.postMessage(["stlib", "pause", JSON.stringify(value)]); }
-  setUser(user) { 
-      this.user = user;
-      this.postMessage(["stlib", "setUser", JSON.stringify(user)])
-      this.reload();
+  setUser(user) {
+    this.user = user;
+    this.postMessage(["stlib", "setUser", JSON.stringify(user)])
+    this.reload();
   }
   reload() {
-      this.postMessage(["stlib", "reload", JSON.stringify("")])
+    this.postMessage(["stlib", "reload", JSON.stringify("")])
   }
   navigate(url) {
-      this.url = url.indexOf('?')===-1?(url+'?embed'):(url+'&embed');
-      this.postMessage(["stlib", "navigate", JSON.stringify(this.url)]);
+    this.url = url.indexOf('?') === -1 ? (url + '?embed') : (url + '&embed');
+    this.postMessage(["stlib", "navigate", JSON.stringify(this.url)]);
   }
 
   initialize() {
-      if(this.messageListener != null) return;
-      var _this = this;
-      this.messageListener = (event) => {
-          try {
-              if(event.data != null && Array.isArray(event.data)) {
-                  var data = event.data;
-                  if(data.length > 2 && data[0] === 'stlib') {
-                      _this.onMessage(event, data[1], data[2], data.length > 3?data[3]:[]);
-                  }
-              }
+    if (this.messageListener != null) return;
+    var _this = this;
+    this.messageListener = (event) => {
+      try {
+        if (event.data != null && Array.isArray(event.data)) {
+          var data = event.data;
+          if (data.length > 2 && data[0] === 'stlib') {
+            _this.onMessage(event, data[1], data[2], data.length > 3 ? data[3] : []);
           }
-          catch(e) { console.log(e); }
-      };
-      window.addEventListener("message", this.messageListener);
+        }
+      }
+      catch (e) { console.log(e); }
+    };
+    window.addEventListener("message", this.messageListener);
   }
   onMessage(event, msgId, name, args) {
-      switch(name) {
-          case "initialize":
-              this.initialized = true;
-              this.frameOrigin = event.origin; 
-              if(this.properties != null) 
-                  event.source.postMessage(["stlib", "setProperties", JSON.stringify(this.properties)], event.origin);
-              if(this.user != null)
-                  event.source.postMessage(["stlib", "setUser", JSON.stringify(this.user)], event.origin);
-              event.source.postMessage(["stlib", "initMain", JSON.stringify("")], event.origin);
-              break;
-          case "notifications":
-              if(this.onLastRead) this.onLastRead(args);
-              break;
-          case "requestCustomJson":
-              if(this.enableKeychainPassthrough && 
-                  this.allowedCustomJson.indexOf(args[1]) !== -1 &&
-                  args[2] === 'Posting') 
-                  window.hive_keychain.requestCustomJson(args[0], args[1], 'Posting', args[3], args[4], (r)=>{
-                      event.source.postMessage(["stlib", msgId, JSON.stringify(r)], event.origin);
-                  });
-          break;
-          case "requestVerifyKey":
-              if(this.enableKeychainPassthrough && args[2] === 'Posting') 
-                  window.hive_keychain.requestVerifyKey(args[0], args[1], 'Posting', (r)=>{
-                      event.source.postMessage(["stlib", msgId, JSON.stringify(r)], event.origin);
-                  });
-          break;
-          case "requestSignBuffer":
-              if(this.enableKeychainPassthrough && args[2] === 'Posting') 
-                  window.hive_keychain.requestSignBuffer(args[0], args[1], 'Posting', (r)=>{
-                      event.source.postMessage(["stlib", msgId, JSON.stringify(r)], event.origin);
-                  });
-          break;
-          case "requestEncodeMessage":
-              if(this.enableKeychainPassthrough && args[3] === 'Posting') 
-                  window.hive_keychain.requestEncodeMessage(args[0], args[1], args[2], 'Posting', (r)=>{
-                      event.source.postMessage(["stlib", msgId, JSON.stringify(r)], event.origin);
-                  });
-          break;
-      }
+    switch (name) {
+      case "initialize":
+        this.initialized = true;
+        this.frameOrigin = event.origin;
+        if (this.properties != null)
+          event.source.postMessage(["stlib", "setProperties", JSON.stringify(this.properties)], event.origin);
+        if (this.user != null)
+          event.source.postMessage(["stlib", "setUser", JSON.stringify(this.user)], event.origin);
+        event.source.postMessage(["stlib", "initMain", JSON.stringify("")], event.origin);
+        break;
+      case "notifications":
+        if (this.onLastRead) this.onLastRead(args);
+        break;
+      case "requestCustomJson":
+        if (this.enableKeychainPassthrough &&
+          this.allowedCustomJson.indexOf(args[1]) !== -1 &&
+          args[2] === 'Posting')
+          window.hive_keychain.requestCustomJson(args[0], args[1], 'Posting', args[3], args[4], (r) => {
+            event.source.postMessage(["stlib", msgId, JSON.stringify(r)], event.origin);
+          });
+        break;
+      case "requestVerifyKey":
+        if (this.enableKeychainPassthrough && args[2] === 'Posting')
+          window.hive_keychain.requestVerifyKey(args[0], args[1], 'Posting', (r) => {
+            event.source.postMessage(["stlib", msgId, JSON.stringify(r)], event.origin);
+          });
+        break;
+      case "requestSignBuffer":
+        if (this.enableKeychainPassthrough && args[2] === 'Posting')
+          window.hive_keychain.requestSignBuffer(args[0], args[1], 'Posting', (r) => {
+            event.source.postMessage(["stlib", msgId, JSON.stringify(r)], event.origin);
+          });
+        break;
+      case "requestEncodeMessage":
+        if (this.enableKeychainPassthrough && args[3] === 'Posting')
+          window.hive_keychain.requestEncodeMessage(args[0], args[1], args[2], 'Posting', (r) => {
+            event.source.postMessage(["stlib", msgId, JSON.stringify(r)], event.origin);
+          });
+        break;
+    }
   }
   cleanup() {
-      if(this.messageListener != null) {
-          window.removeEventListener("message", this.messageListener);
-          this.messageListener = null;
-      }
+    if (this.messageListener != null) {
+      window.removeEventListener("message", this.messageListener);
+      this.messageListener = null;
+    }
   }
 }
 
@@ -873,7 +873,7 @@ export default {
       };
       var element = stwidget.createElement('450px', '556px', true, true);
       //optionally add style/positioning
-      stwidget.setStyle({ direction: 'rtl', top: '80px', right: '32px', position: 'fixed',});
+      stwidget.setStyle({ direction: 'rtl', top: '80px', right: '32px', position: 'fixed', });
       //Add the element to webpage
       document.getElementById("stingChat").appendChild(element);
     },
@@ -936,25 +936,22 @@ export default {
 
         <!-- LOGIN MENU -->
         <ul class="navbar-nav" id="loginMenu" v-show="!user">
-            <li class="nav-item d-none"><a class="nav-link" href="/about/">About</a></li>
-            <li class="nav-item"></li>
-            <li class="nav-item">
-              <div class="btn-group">
-                <button class="btn btn-sm px-2 btn-secondary" data-bs-toggle="dropdown">
-                  <i class="fa-solid fa-circle-info"></i></button>
-                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black me-1" aria-labelledby="infoDropdown" style="position: absolute;">
-               
+          <li class="nav-item">
+            <div class="btn-group">
+              <button class="btn btn-sm px-2 btn-secondary" data-bs-toggle="dropdown">
+                <i class="fa-solid fa-circle-info"></i></button>
+              <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black me-1" aria-labelledby="infoDropdown" style="position: absolute;"> 
                 <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
                 <li class=""><a class="dropdown-item" href="/new/"><i class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
                 <li class=""><a class="dropdown-item" href="/docs/"><i class="fa-solid fa-book fa-fw me-2"></i>Docs</a></li>
-                </ul>
-                <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
-                <button class="btn btn-sm btn-fusch" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
-              </div>
-            </li>
-          </ul>
+              </ul>
+              <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
+              <button class="btn btn-sm btn-fusch" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
+            </div>
+          </li>
+        </ul>
 
-          <!-- SM USER MENU -->
+        <!-- SM USER MENU -->
         <ul class="navbar-nav d-md-none" v-show="user">
           <li class="nav-item d-flex align-items-center"><a class="nav-link" role="button" @click="toggleChat"><i class="fa-regular fa-message fa-flip-horizontal fa-fw"></i></a></li>
           <li>
