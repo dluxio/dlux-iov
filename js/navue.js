@@ -924,7 +924,7 @@ export default {
       <i class="fa-solid fa-bars"></i>
     </a>
     <!-- nav -->
-      <div class="d-flex w-100 ms-auto me-auto align-items-center container" style="max-width: 1400px;" id="navbarSupportedContent">
+      <div class="d-flex w-100 ms-auto me-auto align-items-center container" style="max-width: 1800px;" id="navbarSupportedContent">
 
         <!-- MAIN NAV -->
         <ul class="navbar-nav me-auto align-items-center">
@@ -939,7 +939,8 @@ export default {
           <li class="nav-item">
             <div class="btn-group">
               <button class="btn btn-sm px-2 btn-secondary" data-bs-toggle="dropdown">
-                <i class="fa-solid fa-circle-info"></i></button>
+                <i class="fa-solid fa-circle-info"></i>
+              </button>
               <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black me-1" aria-labelledby="infoDropdown" style="position: absolute;"> 
                 <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
                 <li class=""><a class="dropdown-item" href="/new/"><i class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
