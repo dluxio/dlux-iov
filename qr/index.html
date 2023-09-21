@@ -19,10 +19,10 @@
   <meta name="apple-mobile-web-app-title" content="DLUX">
   <meta name="theme-color" content="#111222" />
   <script>
-    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for(let registration of registrations) {
-            registration.unregister();
-        } 
+    navigator.serviceWorker.getRegistrations().then(function (registrations) {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
     });
     // if ('serviceWorker' in navigator) {
     //   navigator
@@ -47,45 +47,49 @@
         @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" />
     </div>
     <main class="d-flex flex-column text-center flex-shrink-0 px-1">
-      <div class="container pt-5" style="width: 18rem;">
-
-        <!-- contact card qr code -->
-        <div class="card" >
-          <img class="card-img-top" src="/img/Example-QR-code.jpg">
-          <div class="card-title mt-2">
-            Scan this QR code to find @markegiles on HIVE
+      <div class="container pt-5">
+        <div class="d-flex justify-content-center">
+          <!-- contact card qr code -->
+          <div class="card" style="width: 18rem;">
+            <img class="card-img-top" src="/img/Example-QR-code.jpg">
+            <div class="card-title mt-2">
+              Scan this QR code to find @markegiles on HIVE
+            </div>
           </div>
         </div>
+
+        <!-- add to apple wallet -->
         <img src="/img/US-UK_Add_to_Apple_Wallet_RGB_101421.svg" class="py-4">
 
         <!-- account creation info widget -->
-        <h1 class="fs-3">Account Creation Requests</h1>
-        <div class="p-1">
-          <div class="d-flex">
-            <div>Balance: {{accountinfo.balance}}</div>
-            <div class="ms-auto">ACTs: {{accountinfo.pending_claimed_accounts}}</div>
+        <div class="d-flex justify-content-center">
+          <div class="p-1 mb-4 bg-blur-darkg rounded-3" style="max-width: 25rem;">
+            <div class="container-fluid py-5">
+              <h1 class="display-5 fw-bold">Account Creation Requests</h1>
+              <div class="d-flex ms-auto me-auto" style="width: 18rem;">
+                <div>Balance: {{accountinfo.balance}}</div>
+                <div class="ms-auto">ACTs: {{accountinfo.pending_claimed_accounts}}</div>
+              </div>
+              <p class=" fs-4 ">The current cost of account creation is 3.000 HIVE</p>
+              <button class="btn btn-primary btn-lg" type="button">Claim ACT</button>
+            </div>
           </div>
-          <div class="my-3 fs-3">
-            Account Creation: 3.000 HIVE
-          </div>
-          <button class="btn btn-primary">Claim 1 ACT</button>
         </div>
 
         <!-- account creation request notifications -->
-        <div class="toast fade show" role="alert" aria-live="assertive" aria-atomic="true">
-          <div class="toast-header">
-            <img src="..." class="rounded me-2" alt="...">
-            <strong class="me-auto">Bootstrap</strong>
-            <small>11 mins ago</small>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-          <div class="toast-body">
-            @disregardfiat requested account creation
-            <div>
-              <button class="btn btn-sm btn-success">Approve</button>
-              <button class="btn btn-sm btn-secondary">Forward</button>
+        <div class="d-flex justify-content-center mb-3">
+          <div class="card" style="max-width: 25rem;">
+            <div class="card-body">
+              @disregardfiat requested account creation
+              </div>
+              <div class="card-footer">
+              <div class="btn-group">
+                <button class="btn btn-sm btn-success">3.000 HIVE</button>
+                <button class="btn btn-sm btn-primary">1 ACT</button>
+                <button class="btn btn-sm btn-secondary">Forward</button>
+                <button class="btn btn-sm btn-danger">Deny</button>
+              </div>
             </div>
-
           </div>
         </div>
 
