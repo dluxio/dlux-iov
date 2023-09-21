@@ -155,6 +155,8 @@ export default {
       HAS: false,
       HKC: true,
       HSR: false,
+      PEN: false,
+      PWA: false,
       user: "",
       userField: "",
       accountMenu: false,
@@ -225,6 +227,7 @@ export default {
       this.HAS = true;
       this.HKC = false;
       this.HSR = false;
+      this.PEN = false;
       localStorage.setItem("signer", "HAS");
       if (this.user) this.HASsetup();
     },
@@ -232,13 +235,22 @@ export default {
       this.HAS = false;
       this.HKC = false;
       this.HSR = true;
+      this.PEN = false;
       localStorage.setItem("signer", "HSR");
     },
     useKC() {
       this.HAS = false;
       this.HKC = true;
       this.HSR = false;
+      this.PEN = false;
       localStorage.setItem("signer", "HKC");
+    },
+    usePEN() {
+      this.HAS = false;
+      this.HKC = false;
+      this.HSR = false;
+      this.PEN = true;
+      localStorage.setItem("signer", "PEN");
     },
     broadcastCJA(obj) {
       var op = [
@@ -292,11 +304,7 @@ export default {
         });
     },
     broadcastRaw(obj) {
-      var op = [
-        this.user,
-        obj.op,
-        obj.key || 'active',
-      ];
+      var op = [this.user, obj.op, obj.key || "active"];
       this.sign(op)
         .then((r) => {
           if (obj.id) this.statusFinder(r, obj);
@@ -306,20 +314,13 @@ export default {
         });
     },
     signHeaders(obj) {
-      var op = [
-        this.user,
-        obj.challenge,
-        obj.key || 'posting',
-      ];
+      var op = [this.user, obj.challenge, obj.key || "posting"];
       this.signOnly(op)
         .then((r) => {
-          console.log('signHeaders Return', r)
+          console.log("signHeaders Return", r);
           if (r) {
-            localStorage.setItem(
-              `${this.user}:auth`,
-              `${obj.challenge}:${r}`
-            );
-            obj.callbacks[0](`${obj.challenge}:${r}`, console.log('callback?'));
+            localStorage.setItem(`${this.user}:auth`, `${obj.challenge}:${r}`);
+            obj.callbacks[0](`${obj.challenge}:${r}`, console.log("callback?"));
           }
         })
         .catch((e) => {
@@ -388,6 +389,11 @@ export default {
           console.log(op);
           this.HASsign(op);
           reject("No TXID");
+        } else if (this.PEN) {
+          console.log(op);
+          this.PENsign(op)
+            .then((r) => resolve(r))
+            .catch((e) => reject(e));
         } else {
           console.log("HSR");
           this.HSRsign(op);
@@ -402,13 +408,18 @@ export default {
           this.HKCsignOnly(op)
             .then((r) => resolve(r))
             .catch((e) => reject(e));
+        } else if (this.PEN) {
+          console.log({ op });
+          this.PENsignOnly(op)
+            .then((r) => resolve(r))
+            .catch((e) => reject(e));
         } else if (this.HAS) {
           console.log({ op });
           this.HASsignOnly(op)
             .then((r) => resolve(r))
-            .catch((e) => reject(e))
+            .catch((e) => reject(e));
         } else {
-          alert('This feature is not supported with Hive Signer')
+          alert("This feature is not supported with Hive Signer");
           //this.HSRsignOnly(op);
           reject("Not Supported");
         }
@@ -423,7 +434,7 @@ export default {
         }
         const sign_data = {
           key_type: op[2],
-          challenge: `${op[0]}:${op[1]}`
+          challenge: `${op[0]}:${op[1]}`,
         };
         const data = CryptoJS.AES.encrypt(
           JSON.stringify(sign_data),
@@ -437,11 +448,11 @@ export default {
         };
         this.HAS_.ws.send(JSON.stringify(payload));
         alert("Review and Sign on your PKSA App");
-      })
+      });
     },
     HKCsignOnly(op) {
       return new Promise((res, rej) => {
-        console.log(op)
+        console.log(op);
         window.hive_keychain.requestSignBuffer(
           op[0],
           `${op[0]}:${op[1]}`,
@@ -453,20 +464,49 @@ export default {
         );
       });
     },
+    PENsignOnly(op) {
+      return new Promise((res, rej) => {
+        if (typeof op[1] == "string") op[1] = JSON.parse(op[1]);
+        console.log(op);
+        // get private keys from local storage
+        var key = localStorage.getItem(this.user + ":" + op[2]);
+        if (!key) {
+          key = prompt(
+            "Please enter your private " +
+              op[2] +
+              " key for @" +
+              this.user +
+              ":",
+            ""
+          );
+          localStorage.setItem(this.user + ":" + op[2], key);
+        }
+        const tx = new hiveTx.Transaction();
+        tx.create(op[0]).then(() => console.log(tx.transaction));
+        const privateKey = hiveTx.PrivateKey.from(key);
+        tx.sign(privateKey);
+        if (!tx.signedTransaction)reject('Failed to Sign')
+          resolve(tx.signedTransaction)
+      });
+    },
     HSRsign(op) {
       if (op[1][0][0] == "custom_json") {
         if (window.confirm("Open Hive Signer in a new tab?")) {
           window.open(
-            `https://hivesigner.com/sign/custom-json?authority=active&required_auths=%5B%22${this.user
-            }%22%5D&required_posting_auths=%5B%5D&id=${op[1][0][1].id
+            `https://hivesigner.com/sign/custom-json?authority=active&required_auths=%5B%22${
+              this.user
+            }%22%5D&required_posting_auths=%5B%5D&id=${
+              op[1][0][1].id
             }&json=${encodeURIComponent(op[1][0][1].json)}`,
             "_blank"
           );
         }
       } else if (op[1][0][0] == "transfer") {
         window.open(
-          `https://hivesigner.com/sign/transfer?authority=active&from=${op[1][0][1].from
-          }&to=${op[1][0][1].to}&amount=${op[1][0][1].amount
+          `https://hivesigner.com/sign/transfer?authority=active&from=${
+            op[1][0][1].from
+          }&to=${op[1][0][1].to}&amount=${
+            op[1][0][1].amount
           }&memo=${encodeURIComponent(op[1][0][1].memo)}`,
           "_blank"
         );
@@ -648,8 +688,8 @@ export default {
     HKCsign(op) {
       return new Promise((resolve, reject) => {
         if (window.hive_keychain) {
-          if (typeof op[1] == "string") op[1] = JSON.parse(op[1])
-          console.log(op)
+          if (typeof op[1] == "string") op[1] = JSON.parse(op[1]);
+          console.log(op);
           try {
             window.hive_keychain.requestBroadcast(
               op[0],
@@ -665,6 +705,32 @@ export default {
         } else {
           reject({ error: "Hive Keychain is not installed." }); //fallthrough?
         }
+      });
+    },
+    PENsign(op) {
+      return new Promise((resolve, reject) => {
+        if (typeof op[1] == "string") op[1] = JSON.parse(op[1]);
+        console.log(op);
+        // get private keys from local storage
+        var key = localStorage.getItem(this.user + ":" + op[2]);
+        if (!key) {
+          key = prompt(
+            "Please enter your private " +
+              op[2] +
+              " key for @" +
+              this.user +
+              ":",
+            ""
+          );
+          localStorage.setItem(this.user + ":" + op[2], key);
+        }
+        const tx = new hiveTx.Transaction();
+        tx.create(op[0]).then(() => console.log(tx.transaction));
+        const privateKey = hiveTx.PrivateKey.from(key);
+        tx.sign(privateKey);
+        tx.broadcast()
+          .then((res) => resolve(res))
+          .catch((e) => reject(e));
       });
     },
     statusFinder(response, obj) {
@@ -735,8 +801,8 @@ export default {
         });
     },
     showTab(link) {
-      if (!deepLink) return
-      deepLink(link)
+      if (!deepLink) return;
+      deepLink(link);
     },
     searchRecents() {
       this.filterRecents = this.recentUsers.reduce((a, b) => {
@@ -843,37 +909,40 @@ export default {
       localStorage.setItem("pending", JSON.stringify(this.ops));
     },
     addStingChat() {
-      var stwidget = new StWidget('https://chat.peakd.com/t/hive-163399/0');
+      var stwidget = new StWidget("https://chat.peakd.com/t/hive-163399/0");
       stwidget.properties = {
-        "requireLogin": true,
-        "showSidebar": true,
-        "sidebar": 2,
-        "sidebar2enableSharedView": false,
-        "sidebarToggleByChannelNameOnDirectGroup": false,
-        "streambarExpand": true,
-        "streambarMode": 1,
-        "sidebarAddButton": 1,
-        "communityChannelNameFormat": "C/<title>/<name>",
-        "messageIconFlexClass": "block text-justify lg:text-left sm:flex",
-        "messageIconClass": "iconFloat",
+        requireLogin: true,
+        showSidebar: true,
+        sidebar: 2,
+        sidebar2enableSharedView: false,
+        sidebarToggleByChannelNameOnDirectGroup: false,
+        streambarExpand: true,
+        streambarMode: 1,
+        sidebarAddButton: 1,
+        communityChannelNameFormat: "C/<title>/<name>",
+        messageIconFlexClass: "block text-justify lg:text-left sm:flex",
+        messageIconClass: "iconFloat",
         "--appCommunityIconFontSize": "18px",
         "--appCommunityIconSize": "42px",
-        "homeTabCommunities": false,
-        "homeTabPreferences": true,
-        "homeTabThemes": true,
-        "onlyPrependCommunities": false,
-        "prependCommunities": [
-          "hive-163399"
-        ],
-        "defaultTheme": "Dark",
+        homeTabCommunities: false,
+        homeTabPreferences: true,
+        homeTabThemes: true,
+        onlyPrependCommunities: false,
+        prependCommunities: ["hive-163399"],
+        defaultTheme: "Dark",
         "--appFontFamily": "'Lato'",
         "--appFontSize": "16px",
         "--appMessageFontFamily": "'Lato'",
-        "--appMessageFontSize": "16px"
+        "--appMessageFontSize": "16px",
       };
-      var element = stwidget.createElement('450px', '556px', true, true);
+      var element = stwidget.createElement("450px", "556px", true, true);
       //optionally add style/positioning
-      stwidget.setStyle({ direction: 'rtl', top: '80px', right: '32px', position: 'fixed', });
+      stwidget.setStyle({
+        direction: "rtl",
+        top: "80px",
+        right: "32px",
+        position: "fixed",
+      });
       //Add the element to webpage
       document.getElementById("stingChat").appendChild(element);
     },
@@ -894,8 +963,8 @@ export default {
     if ("WebSocket" in window) this.HAS_.wsa = true;
     else this.HAS_.wsa = false;
     // add sting script
-    const script = document.createElement('script');
-    script.src = '/js/stwidget.js';
+    const script = document.createElement("script");
+    script.src = "/js/stwidget.js";
     document.head.appendChild(script);
     // add sting chat
     this.addStingChat();

@@ -18,24 +18,25 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="DLUX">
   <meta name="theme-color" content="#111222" />
+  <script src="https://cdn.jsdelivr.net/npm/hive-tx/dist/hive-tx.min.js"></script>
   <script>
-    navigator.serviceWorker.getRegistrations().then(function (registrations) {
-      for (let registration of registrations) {
-        registration.unregister();
-      }
-    });
-    // if ('serviceWorker' in navigator) {
-    //   navigator
-    //     .serviceWorker
-    //     .register(
-    //       // path to the service worker file
-    //       '/sw.js'
-    //     )
-    //     // the registration is async and it returns a promise
-    //     .then(function (reg) {
-    //       console.log('Registration Successful');
-    //     });
-    // }
+    // navigator.serviceWorker.getRegistrations().then(function(registrations) {
+    //     for(let registration of registrations) {
+    //         registration.unregister();
+    //     } 
+    // });
+    if ('serviceWorker' in navigator) {
+      navigator
+        .serviceWorker
+        .register(
+          // path to the service worker file
+          '/sw.js'
+        )
+        // the registration is async and it returns a promise
+        .then(function (reg) {
+          console.log('Registration Successful');
+        });
+    }
   </script>
   <script type="module" src="/js/vueqr.js"></script>
 </head>
@@ -62,17 +63,14 @@
         <img src="/img/US-UK_Add_to_Apple_Wallet_RGB_101421.svg" class="py-4">
 
         <!-- account creation info widget -->
-        <div class="d-flex justify-content-center">
-          <div class="p-1 mb-4 bg-blur-darkg rounded-3" style="max-width: 25rem;">
-            <div class="container-fluid py-5">
-              <h1 class="display-5 fw-bold">Account Creation Requests</h1>
-              <div class="d-flex ms-auto me-auto" style="width: 18rem;">
-                <div>Balance: {{accountinfo.balance}}</div>
-                <div class="ms-auto">ACTs: {{accountinfo.pending_claimed_accounts}}</div>
-              </div>
-              <p class=" fs-4 ">The current cost of account creation is 3.000 HIVE</p>
-              <button class="btn btn-primary btn-lg" type="button">Claim ACT</button>
-            </div>
+        <h1 class="fs-3">Account Creation Requests</h1>
+        <div class="p-1">
+          <div class="d-flex">
+            <div>Balance: {{accountinfo.balance}}</div>
+            <div class="ms-auto">ACTs: {{accountinfo.pending_claimed_accounts}}</div>
+          </div>
+          <div class="my-3 fs-3">
+            Account Creation: {{hivestats.account_creation_fee}}
           </div>
         </div>
 

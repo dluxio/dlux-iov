@@ -68,6 +68,7 @@ var app = new Vue({
       lapi: lapi,
       hapi: hapi,
       accountapi: {},
+      hivestats: {},
       hiveprice: {
         hive: {
           usd: 1,
@@ -475,6 +476,19 @@ var app = new Vue({
       //         }, []);
       //       });
     },
+    getHiveStats() {
+      fetch(hapi, {
+        body: `{"jsonrpc":"2.0", "method":"condenser_api.get_chain_properties", "params":[], "id":1}`,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        method: "POST",
+      })
+        .then((r) => r.json())
+        .then((r) => {
+          this.hivestats = r.result;
+        });
+    },
     getHiveUser(user = this.account) {
       console.log("hive info", user);
       fetch(hapi, {
@@ -487,20 +501,20 @@ var app = new Vue({
         .then((response) => response.json())
         .then((data) => {
           this.accountinfo = data.result[0];
-          this.barhive = this.accountinfo.balance;
-          this.denoms.HIVE.balance = `${this.formatNumber(
-            parseFloat(this.accountinfo.balance).toFixed(3),
-            3,
-            ".",
-            ","
-          )} HIVE`;
-          this.barhbd = this.accountinfo.hbd_balance;
-          this.denoms.HBD.balance = `${this.formatNumber(
-            parseFloat(this.accountinfo.hbd_balance).toFixed(3),
-            3,
-            ".",
-            ","
-          )} HBD`;
+        //   this.barhive = this.accountinfo.balance;
+        //   this.denoms.HIVE.balance = `${this.formatNumber(
+        //     parseFloat(this.accountinfo.balance).toFixed(3),
+        //     3,
+        //     ".",
+        //     ","
+        //   )} HIVE`;
+        //   this.barhbd = this.accountinfo.hbd_balance;
+        //   this.denoms.HBD.balance = `${this.formatNumber(
+        //     parseFloat(this.accountinfo.hbd_balance).toFixed(3),
+        //     3,
+        //     ".",
+        //     ","
+        //   )} HBD`;
           var pfp = "";
           try {
             pfp = this.accountinfo.posting_json_metadata.profile.profile_image;
@@ -520,7 +534,7 @@ var app = new Vue({
     //this.getQuotes();
     //this.getNodes();
     this.getProtocol();
-    //this.getTickers();
+    this.getHiveStats();
     // if (user != "GUEST") this.getTokenUser(user);
     this.getHiveUser(user);
   },
