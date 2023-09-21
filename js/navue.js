@@ -932,6 +932,7 @@ export default {
           <li class="nav-item"><a class="nav-link text-center" href="/hub/"><i class="fa-solid fs-5 px-1 fa-mountain-sun"></i><br><span class="small">HUB</span></a></li>
           <li class="nav-item"><a class="nav-link text-center" href="/nfts/"><i class="fa-solid fs-5 px-1 fa-store"></i><br><span class="small">NFT</span></a></li>
           <li class="nav-item"><a class="nav-link text-center" href="/dex/"><i class="fa-solid fs-5 px-1 fa-building-columns"></i><br><span class="small">DEX</span></a></li>
+          <li class="nav-item"><a class="nav-link text-center" href="/qr/"><i class="fa-solid fs-5 px-1 fa-qrcode"></i><br><span class="small">QR</span></a></li>
         </ul>
 
         <!-- LOGIN MENU -->
