@@ -63,24 +63,24 @@
         <img src="/img/US-UK_Add_to_Apple_Wallet_RGB_101421.svg" class="py-4">
 
         <!-- account creation info widget -->
-        <h1 class="fs-3">Account Creation Requests</h1>
-        <div class="p-1">
-          <div class="d-flex">
-            <div>Balance: {{accountinfo.balance}}</div>
-            <div class="ms-auto">ACTs: {{accountinfo.pending_claimed_accounts}}</div>
-          </div>
-          <div class="my-3 fs-3">
-            Account Creation: {{hivestats.account_creation_fee}}
+        <div class="d-flex justify-content-center mb-3">
+          <div class="d-flex flex-column bg-blur-darkg rounded p-2" style="max-width: 25rem;">
+            <h1 class="fs-3">Account Creation Requests</h1>
+
+              <div class="d-flex">
+                <div>Balance: {{accountinfo.balance}}</div>
+                <div class="ms-auto">ACTs: {{accountinfo.pending_claimed_accounts}}</div>
+              </div>
+
           </div>
         </div>
-
         <!-- account creation request notifications -->
         <div class="d-flex justify-content-center mb-3">
           <div class="card" style="max-width: 25rem;">
             <div class="card-body">
               @disregardfiat requested account creation
-              </div>
-              <div class="card-footer">
+            </div>
+            <div class="card-footer">
               <div class="btn-group">
                 <button class="btn btn-sm btn-success">3.000 HIVE</button>
                 <button class="btn btn-sm btn-primary">1 ACT</button>
