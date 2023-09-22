@@ -12951,6 +12951,11 @@ td {
   background: #0ed18c;
 }
 
+.btn-turq:hover {
+  color: #fff;
+  background: rgba(14, 209, 141, 0.3490196078);
+}
+
 .btn-outline-turq {
   color: #fff;
   border-color: #14d695;
