@@ -1214,10 +1214,12 @@ export default {
       </div>
       <div class="d-flex justify-content-between align-items-center py-3 border-light border-bottom" v-if="!filterUsers" v-for="name in recentUsers">
         <div class="flex-fill text-center"><a class="text-info" role="button" @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
+        <div class="flex-shrink"><i class="fa-solid fa-feather-pointed fa-fw"></i></div>
         <div class="flex-shrink"><a class="text-danger ms-auto" role="button" @click="deleteRecentUser(name)" alt="Remove username"><i class="fa-solid fa-trash-can"></i></a></div>
       </div>
       <div class="d-flex justify-content-between align-items-center py-3 border-light border-bottom" v-if="filterUsers" v-for="name in filterRecents">
         <div class="flex-fill text-center"><a class="text-info" role="button" @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
+        <div class="flex-shrink"><i class="fa-solid fa-feather-pointed fa-fw"></i></div>
         <div class="flex-shrink"><a class="text-danger ms-auto" role="button" @click="deleteRecentUser(name);searchRecents()" alt="Remove username"><i class="fa-solid fa-trash-can"></i></a></div>
       </div>
     </div>
