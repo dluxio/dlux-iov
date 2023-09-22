@@ -76,8 +76,10 @@
 
             <div class="text-start mb-3">
               <div>HIVE Balance: {{formatNumber(accountinfo.balance, 3, '.', ',')}}<i class="fa-brands fa-hive fa-fw ms-1"></i></div>
-              <div>HIVE Price: {{formatNumber(hivestats.account_creation_fee, 3, '.', ',')}}<i class="fa-brands fa-hive fa-fw ms-1"></i></div>
-              <div>ACT Balance: {{accountinfo.pending_claimed_accounts}}</div>
+              <div v-bind:class="{'text-success': (formatNumber(accountinfo.balance, 3)-formatNumber(hivestats.account_creation_fee, 3)) >= 0, 'text-danger': (formatNumber(accountinfo.balance, 3)-formatNumber(hivestats.account_creation_fee, 3)) < 0}">HIVE Price:
+                  {{formatNumber(hivestats.account_creation_fee, 3, '.', ',')}}<i class="fa-brands fa-hive fa-fw ms-1"></i></div>
+              <div v-bind:class="{'text-success': accountinfo.pending_claimed_accounts > 0, 'text-danger': accountinfo.pending_claimed_accounts <= 0}">ACT Balance:
+                 {{accountinfo.pending_claimed_accounts}}<i class="fa-solid fa-circle-dot fa-fw ms-1"></i></div>
             </div>
             <div class="d-flex">
               <button class="btn btn-outline-info ms-auto" @click="claimACT">Claim ACT</button>
