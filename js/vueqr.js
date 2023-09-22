@@ -188,6 +188,23 @@ var app = new Vue({
           else this[key] = false;
         });
     },
+    claimACT(){
+        this.toSign = {
+          type: "raw",
+          key: "active",
+          op: [
+            "claim_account",
+            {
+              creator: this.account,
+              fee: "0.000 HIVE",
+              extensions: [],
+            },
+          ],
+          txid: "claimACT",
+          msg: ``,
+          ops: ["getHiveUser"],
+        };
+    },
     localStoreSet(k, v) {
       localStorage.setItem(k, v);
     },
