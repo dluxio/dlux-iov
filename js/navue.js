@@ -1158,19 +1158,19 @@ export default {
         </span>
       </div>
       <div class="small text-muted text-center mt-1 mb-3">
-        Usernames are only stored locally. <a class="no-decoration text-info" target="_blank" href="https://signup.hive.io/">Get Account</a>
+        Usernames are stored locally. <a class="no-decoration text-info" target="_blank" href="https://signup.hive.io/">Get Account</a>
       </div>
     </div>
     <div v-if="PEN">
       <label class="form-label">Active Key</label>
       <div class="position-relative has-validation">
         <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
-          <i class="fa-solid fa-at fa-fw"></i>
+          <i class="fa-solid fa-key fa-fw"></i>
         </span>
         <input v-model="passwordField" autocapitalize="off" placeholder="active key" class="px-4 form-control bg-dark border-dark text-info">
       </div>
       <div class="small text-muted text-center mt-1 mb-3">
-        Usernames are only stored locally. <a class="no-decoration text-info" target="_blank" href="https://signup.hive.io/">Get Account</a>
+        Keys are stored locally. Only enter your keys on websites you trust.
       </div>
     </div>
 
