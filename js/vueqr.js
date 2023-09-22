@@ -193,19 +193,24 @@ var app = new Vue({
         this.toSign = {
           type: "raw",
           key: "active",
-          op: [
+          op: [[
             "claim_account",
             {
               creator: this.account,
               fee: "0.000 HIVE",
               extensions: [],
             },
-          ],
+          ]],
           txid: "claimACT",
           msg: ``,
           ops: ["getHiveUser"],
         }
         console.log('OK')
+    },
+    removeOp(txid) {
+      if (this.toSign.txid == txid) {
+        this.toSign = {};
+      }
     },
     localStoreSet(k, v) {
       localStorage.setItem(k, v);

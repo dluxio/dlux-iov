@@ -186,7 +186,7 @@ export default {
       },
       haspich: 50,
       haspic: "/img/hiveauth.svg",
-      decryptPEN: {},
+      decrypted: {},
       PIN: "1234",
       PENstatus: "",
     };
@@ -246,9 +246,10 @@ export default {
           PrivateKey.sign("Testing123")
         );
         if (success) {
-          this.decryptPEN[this.account][level] = key;
+          if (!this.decrypted[this.account]) this.decrypted[this.account] = {};
+            this.decrypted[this.account][level] = key;
           var encrypted = CryptoJS.AES.encrypt(
-            JSON.stringify(this.decryptPEN),
+            JSON.stringify(this.decrypted),
             this.PIN
           );
           localStorage.setItem("PEN" + this.account, encrypted);
@@ -1205,11 +1206,11 @@ export default {
     <div v-if="PEN">
     <label class="form-label">Key Type</label>
       <select class="form-select bg-dark border-dark text-info mb-2" aria-label="Default select example">
-        <option selected>Owner Private Key</option>
-        <option value="1">Master Password</option>
-        <option value="2">Active Private Key</option>
-        <option value="3">Posting Private Key</option>
-        <option value="3">Memo Private Key</option>
+        <option selected :value="owner">Owner Private Key</option>
+        <option :value="master">Master Password</option>
+        <option :value="active">Active Private Key</option>
+        <option :value="posting">Posting Private Key</option>
+        <option :value="memo">Memo Private Key</option>
       </select>
       <label class="form-label">Key</label>
       <div class="position-relative has-validation">

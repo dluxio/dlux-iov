@@ -45,8 +45,8 @@
 <body class="d-flex flex-column h-100" style="margin-top: 94px;">
   <div id="app">
     <div>
-      <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
-        @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" />
+      <nav-vue @login="account = $event" @logout="account = '';removeUser()" @ack="removeOp($event)"
+                @refresh="run($event)" :op="toSign" :lapi="lapi" />
     </div>
     <main class="d-flex flex-column text-center flex-shrink-0 px-1">
       <div class="container pt-5">
