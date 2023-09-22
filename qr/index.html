@@ -41,6 +41,7 @@
         });
     }
   </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script type="module" src="/js/vueqr.js"></script>
 </head>
 
@@ -55,8 +56,8 @@
         <div class="d-flex justify-content-center">
           <!-- contact card qr code -->
           <div class="card mb-3">
-            <div >
-              <img class="card-img-top ms-auto me-auto p-3" src="/img/Example-QR-code.jpg">
+            <div>
+              <div class="card-img-top ms-auto me-auto p-3" ref="qrcode"></div>
               <div class="card-title m-2">
                 Scan this QR code to find @markegiles on HIVE
               </div>

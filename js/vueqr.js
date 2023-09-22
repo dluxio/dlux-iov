@@ -172,6 +172,10 @@ var app = new Vue({
     "foot-vue": FootVue,
   },
   methods: {
+    makeQr(ref, link = "test", opts = {}){
+      var qrcode = new QRCode(this.$refs[ref], opts);
+      qrcode.makeCode(link);
+    },
     checkAccount(name, key) {
       fetch("https://anyx.io", {
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${this[name]}\"]], \"id\":1}`,
@@ -557,6 +561,9 @@ var app = new Vue({
   mounted() {
     //this.getQuotes();
     //this.getNodes();
+    //get query params
+    var follow = this.account ? `https://dlux.io/@${this.account}?follow=true` : 'https://dlux.io'
+    this.makeQr('qrcode', follow)
     this.getProtocol();
     this.getHiveStats();
     // if (user != "GUEST") this.getTokenUser(user);

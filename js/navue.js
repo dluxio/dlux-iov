@@ -153,6 +153,8 @@ export default {
     return {
       chatVisible: false,
       passwordField: "",
+      level: "posting",
+      decrypted: false,
       HAS: false,
       HKC: true,
       HSR: false,
@@ -262,7 +264,7 @@ export default {
       var PEN = localStorage.getItem("PEN" + user);
       if(PEN){
         var decrypted = CryptoJS.AES.decrypt(encrypted, this.PIN);
-        this.decryptPEN = JSON.parse(decrypted);
+        this.decrypt = JSON.parse(decrypted);
       }
     },
     useHAS() {
@@ -1204,12 +1206,12 @@ export default {
     </div>
     <div v-if="PEN">
     <label class="form-label">Key Type</label>
-      <select class="form-select bg-dark border-dark text-info mb-2" aria-label="Default select example">
-        <option selected :value="owner">Owner Private Key</option>
-        <option :value="master">Master Password</option>
-        <option :value="active">Active Private Key</option>
-        <option :value="posting">Posting Private Key</option>
-        <option :value="memo">Memo Private Key</option>
+      <select :value="level" class="form-select bg-dark border-dark text-info mb-2" aria-label="Default select example">
+        <option selected value="owner">Owner Private Key</option>
+        <option value="master">Master Password</option>
+        <option value="active">Active Private Key</option>
+        <option value="posting">Posting Private Key</option>
+        <option value="memo">Memo Private Key</option>
       </select>
       <label class="form-label">Key</label>
       <div class="position-relative has-validation">
