@@ -18,7 +18,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="DLUX">
   <meta name="theme-color" content="#111222" />
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
+    integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="https://cdn.jsdelivr.net/npm/hive-tx/dist/hive-tx.min.js"></script>
   <script>
     // navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -49,37 +51,41 @@
         @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" />
     </div>
     <main class="d-flex flex-column text-center flex-shrink-0 px-1">
-      <div class="container pt-5">
+      <div class="container mt-3" style="max-width: 25rem;">
         <div class="d-flex justify-content-center">
           <!-- contact card qr code -->
-          <div class="card" style="width: 18rem;">
-            <img class="card-img-top" src="/img/Example-QR-code.jpg">
-            <div class="card-title mt-2">
-              Scan this QR code to find @markegiles on HIVE
+          <div class="card mb-3">
+            <div >
+              <img class="card-img-top ms-auto me-auto p-3" src="/img/Example-QR-code.jpg">
+              <div class="card-title m-2">
+                Scan this QR code to find @markegiles on HIVE
+              </div>
+              <!-- add to apple wallet -->
+              <div>
+                <img src="/img/US-UK_Add_to_Apple_Wallet_RGB_101421.svg" class="my-2">
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- add to apple wallet -->
-        <img src="/img/US-UK_Add_to_Apple_Wallet_RGB_101421.svg" class="py-4">
 
         <!-- account creation info widget -->
         <div class="d-flex justify-content-center mb-3">
-          <div class="d-flex flex-column bg-blur-darkg rounded p-2" style="max-width: 25rem;">
-            <h1 class="fs-3">Account Creation Requests</h1>
+          <div class="d-flex flex-column bg-blur-darkg rounded p-2 w-100">
+            <h1 class="fs-4">Account Creation Requests</h1>
 
-            <div class="d-flex mb-3">
-              <div>Balance: {{accountinfo.balance}}</div>
-              <div class="ms-auto">ACTs: {{accountinfo.pending_claimed_accounts}}</div>
+            <div class="text-start mb-3">
+              <div>HIVE Balance: {{formatNumber(accountinfo.balance, 3, '.', ',')}}<i class="fa-brands fa-hive fa-fw ms-1"></i></div>
+              <div>ACT Balance: {{accountinfo.pending_claimed_accounts}}</div>
             </div>
-            <div class="">
-              <button class="btn btn-info" @click="claimACT">Claim ACT</button>
+            <div class="d-flex">
+              <button class="btn btn-outline-info ms-auto" @click="claimACT">Claim ACT</button>
             </div>
           </div>
         </div>
         <!-- account creation request notifications -->
         <div class="d-flex justify-content-center mb-3">
-          <div class="card" style="max-width: 25rem;">
+          <div class="card w-100">
             <div class="card-body">
               @{{account}} requested account creation
             </div>
