@@ -1203,12 +1203,20 @@ export default {
       </div>
     </div>
     <div v-if="PEN">
-      <label class="form-label">Active Key</label>
+    <label class="form-label">Key Type</label>
+      <select class="form-select" aria-label="Default select example">
+        <option selected>Owner Private Key</option>
+        <option value="1">Master Password</option>
+        <option value="2">Active Private Key</option>
+        <option value="3">Posting Private Key</option>
+        <option value="3">Memo Private Key</option>
+      </select>
+      <label class="form-label">Key</label>
       <div class="position-relative has-validation">
         <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
           <i class="fa-solid fa-key fa-fw"></i>
         </span>
-        <input v-model="passwordField" autocapitalize="off" placeholder="active key" class="px-4 form-control bg-dark border-dark text-info">
+        <input v-model="passwordField" autocapitalize="off" placeholder="key" class="px-4 form-control bg-dark border-dark text-info">
       </div>
       <div class="small text-muted text-center mt-1 mb-3">
         Keys are stored locally. Only enter your keys on websites you trust.
