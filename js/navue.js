@@ -1124,11 +1124,13 @@ export default {
             <button v-if="HKC" class="btn btn-hivekeychain h-100 w-100 dropdown-toggle"><img src="/img/keychain.png" style="height:50px !important;" class="img-responsive p-2 mx-3"></button>
             <button v-if="HAS" class="btn btn-hiveauth h-100 w-100 dropdown-toggle"><img src="/img/hiveauth.svg" style="height:50px !important;" class="img-responsive p-2 mx-3"></button>
             <button v-if="HSR" class="btn btn-hivesigner h-100 w-100 dropdown-toggle"><img src="/img/hivesigner.svg" style="height:50px !important;" class="img-responsive p-2 mx-3"></button>
+            <button v-if="PEN" class="btn btn-pen h-100 w-100 dropdown-toggle"><img src="/img/hivesigner.svg" style="height:50px !important;" class="img-responsive p-2 mx-3"></button>
           </button>
           <ul class="dropdown-menu dropdown-menu-dark text-center bg-black p-2" aria-labelledby="authDropdown">
             <li class="p-2"><button class="btn btn-hivekeychain h-100 w-100" @click="useKC()"><img src="/img/keychain.png" class="img-responsive" style="height:50px !important;" ></button></li>
             <li class="p-2"><button class="btn btn-hiveauth h-100 w-100" @click="useHAS()"><img src="/img/hiveauth.svg" class="img-responsive" style="height:50px !important;" ></button></li>
             <li class="p-2"><button class="btn btn-hivesigner h-100 w-100" @click="useHS()"><img src="/img/hivesigner.svg" class="img-responsive" style="height:50px !important;" ></button></li>
+            <li class="p-2"><button class="btn btn-pen h-100 w-100" @click="usePEN()"><img src="/img/hivesigner.svg" class="img-responsive" style="height:50px !important;" ></button></li>
           </ul>
         </div>
 
@@ -1137,6 +1139,7 @@ export default {
           <span v-if="HKC">Hive Keychain requires a Firefox or Chrome extension</span>
           <span v-if="HAS">Hive Auth requires websockets and a PKSA Application</span>
           <span v-if="HSR">Hive Signer generates a link</span>
+          <span v-if="PEN">Hive Signer generates a link</span>
         </div>
           
 
