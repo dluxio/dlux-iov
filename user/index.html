@@ -82,7 +82,7 @@
                 <!-- Page header area -->
                 <div class="container-fluid mt-2">
                     <div v-if="!account" class="alert alert-fusch d-flex flex-wrap align-items-center" role="alert">
-                        <span class="my-1">To follow @{{account}}</span>
+                        <span class="my-1">To follow @{{pageAccount}}</span>
                         <span class="ms-auto">
                             <button class="btn btn-fusch me-1 my-1">Login</button><button
                                 class="btn btn-primary my-1">Signup</button>
@@ -110,7 +110,7 @@
                                     class="btn btn-outline-danger btn-lg m-1" role="button"
                                     :href="'/vr/@' + pageAccount">VR Page<i
                                         class="fas fa-vr-cardboard mx-2 fa-lg"></i></a>
-                                <button type="button" v-show="!me" class="btn btn-outline-primary btn-lg"
+                                <button type="button" v-show="!me && account" class="btn btn-outline-primary btn-lg"
                                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions<i
                                         class="fas fa-ellipsis-h ms-2"></i></button>
                                 <div class="dropdown-menu bg-black nav-item dropdown-menu-right"> <a
