@@ -18,6 +18,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="DLUX">
   <meta name="theme-color" content="#111222" />
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="https://cdn.jsdelivr.net/npm/hive-tx/dist/hive-tx.min.js"></script>
   <script>
     // navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -72,7 +73,7 @@
               <div class="ms-auto">ACTs: {{accountinfo.pending_claimed_accounts}}</div>
             </div>
             <div class="">
-              <button class="btn btn-info" @click="claimACT()">Claim ACT</button>
+              <button class="btn btn-info" @click="claimACT">Claim ACT</button>
             </div>
           </div>
         </div>

@@ -189,6 +189,7 @@ var app = new Vue({
         });
     },
     claimACT(){
+        console.log("OK");
         this.toSign = {
           type: "raw",
           key: "active",
@@ -203,7 +204,8 @@ var app = new Vue({
           txid: "claimACT",
           msg: ``,
           ops: ["getHiveUser"],
-        };
+        }
+        console.log('OK')
     },
     localStoreSet(k, v) {
       localStorage.setItem(k, v);

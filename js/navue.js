@@ -152,6 +152,7 @@ export default {
   data() {
     return {
       chatVisible: false,
+      passwordField: "",
       HAS: false,
       HKC: true,
       HSR: false,
@@ -185,6 +186,9 @@ export default {
       },
       haspich: 50,
       haspic: "/img/hiveauth.svg",
+      decryptPEN: {},
+      PIN: "1234",
+      PENstatus: "",
     };
   },
   components: {
@@ -222,6 +226,43 @@ export default {
   methods: {
     toggleChat() {
       this.chatVisible = !this.chatVisible;
+    },
+    storeKey(level, key){
+      //get hive user
+      fetch("https://api.hive.blog", {
+        method: "POST",
+        body: JSON.stringify([
+          "get_accounts",
+          [[this.account]],
+        ]),
+
+      }).then(r=>{
+        var PublicKey = hiveTx.PublicKey.from(
+          r[0][level].key_auths[0][0]
+        );
+        var PrivateKey = hiveTx.PrivateKey.from(key);
+        var success = PublicKey.verify(
+          "Testing123",
+          PrivateKey.sign("Testing123")
+        );
+        if (success) {
+          this.decryptPEN[this.account][level] = key;
+          var encrypted = CryptoJS.AES.encrypt(
+            JSON.stringify(this.decryptPEN),
+            this.PIN
+          );
+          localStorage.setItem("PEN" + this.account, encrypted);
+        } else {
+          this.PENstatus = "Invalid Key";
+        }
+      })
+    },
+    decryptPEN(user = this.account){
+      var PEN = localStorage.getItem("PEN" + user);
+      if(PEN){
+        var decrypted = CryptoJS.AES.decrypt(encrypted, this.PIN);
+        this.decryptPEN = JSON.parse(decrypted);
+      }
     },
     useHAS() {
       this.HAS = true;
