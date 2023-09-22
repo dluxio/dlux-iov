@@ -76,6 +76,7 @@
 
             <div class="text-start mb-3">
               <div>HIVE Balance: {{formatNumber(accountinfo.balance, 3, '.', ',')}}<i class="fa-brands fa-hive fa-fw ms-1"></i></div>
+              <div>HIVE Price: {{formatNumber(hivestats.account_creation_fee, 3, '.', ',')}}<i class="fa-brands fa-hive fa-fw ms-1"></i></div>
               <div>ACT Balance: {{accountinfo.pending_claimed_accounts}}</div>
             </div>
             <div class="d-flex">
@@ -90,11 +91,11 @@
               @{{account}} requested account creation
             </div>
             <div class="card-footer">
-              <div class="btn-group">
-                <button class="btn btn-sm btn-success">3.000 HIVE</button>
-                <button class="btn btn-sm btn-primary">1 ACT</button>
-                <button class="btn btn-sm btn-secondary">Forward</button>
-                <button class="btn btn-sm btn-danger">Deny</button>
+              <div class="btn-group" style="height: 60px;">
+                <button class="btn btn-sm btn-success h-100 text-center">{{formatNumber(hivestats.account_creation_fee, 3, '.', ',')}}<i class="fa-brands fa-hive fa-fw"></i></button>
+                <button class="btn btn-sm btn-primary h-100 text-center">1 ACT<i class="fa-solid fa-circle-dot fa-fw"></i></button>
+                <button class="btn btn-sm btn-secondary h-100 text-center">Forward<i class="fa-solid fa-circle-arrow-right fa-fw"></i></button>
+                <button class="btn btn-sm btn-danger h-100 text-center">Deny<i class="fa-solid fa-ban fa-fw"></i></button>
               </div>
             </div>
           </div>
