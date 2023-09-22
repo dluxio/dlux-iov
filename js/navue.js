@@ -1139,7 +1139,7 @@ export default {
           <span v-if="HKC">Hive Keychain requires a Firefox or Chrome extension</span>
           <span v-if="HAS">Hive Auth requires websockets and a PKSA Application</span>
           <span v-if="HSR">Hive Signer generates a link</span>
-          <span v-if="PEN">Hive Signer generates a link</span>
+          <span v-if="PEN">Store your active key locally</span>
         </div>
           
 
@@ -1149,14 +1149,28 @@ export default {
     <div class="">
       <label class="form-label">Add user</label>
       <div class="position-relative has-validation">
-      <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
-      <i class="fa-solid fa-at fa-fw"></i>
-   </span>
+        <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
+          <i class="fa-solid fa-at fa-fw"></i>
+        </span>
         <input v-model="userField" autocapitalize="off" placeholder="username" @keyup.enter="setUser()" class="px-4 form-control bg-dark border-dark text-info">
-        <span v-if="userField" class="position-absolute end-0 top-50 translate-middle-y pe-2"><a role="button" @click="setUser()" class="text-info"><i class="fa-solid fa-circle-plus fa-fw"></i></a></span>
+        <span v-if="userField" class="position-absolute end-0 top-50 translate-middle-y pe-2">
+          <a role="button" @click="setUser()" class="text-info"><i class="fa-solid fa-circle-plus fa-fw"></i></a>
+        </span>
       </div>
       <div class="small text-muted text-center mt-1 mb-3">
-        Usernames are only stored locally. <a class="no-decoration text-info" target="_blank" href="https://signup.hive.io/">Get Account</a>
+        Usernames are stored locally. <a class="no-decoration text-info" target="_blank" href="https://signup.hive.io/">Get Account</a>
+      </div>
+    </div>
+    <div v-if="PEN">
+      <label class="form-label">Active Key</label>
+      <div class="position-relative has-validation">
+        <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
+          <i class="fa-solid fa-key fa-fw"></i>
+        </span>
+        <input v-model="passwordField" autocapitalize="off" placeholder="active key" class="px-4 form-control bg-dark border-dark text-info">
+      </div>
+      <div class="small text-muted text-center mt-1 mb-3">
+        Keys are stored locally. Only enter your keys on websites you trust.
       </div>
     </div>
 
@@ -1200,10 +1214,12 @@ export default {
       </div>
       <div class="d-flex justify-content-between align-items-center py-3 border-light border-bottom" v-if="!filterUsers" v-for="name in recentUsers">
         <div class="flex-fill text-center"><a class="text-info" role="button" @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
+        <div class="flex-shrink me-2"><i class="fa-solid fa-feather-pointed fa-fw"></i></div>
         <div class="flex-shrink"><a class="text-danger ms-auto" role="button" @click="deleteRecentUser(name)" alt="Remove username"><i class="fa-solid fa-trash-can"></i></a></div>
       </div>
       <div class="d-flex justify-content-between align-items-center py-3 border-light border-bottom" v-if="filterUsers" v-for="name in filterRecents">
         <div class="flex-fill text-center"><a class="text-info" role="button" @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
+        <div class="flex-shrink me-2"><i class="fa-solid fa-feather-pointed fa-fw"></i></div>
         <div class="flex-shrink"><a class="text-danger ms-auto" role="button" @click="deleteRecentUser(name);searchRecents()" alt="Remove username"><i class="fa-solid fa-trash-can"></i></a></div>
       </div>
     </div>
