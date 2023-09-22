@@ -1066,8 +1066,7 @@ export default {
 
         <!-- SM USER MENU -->
         <ul class="navbar-nav d-md-none" v-show="user">
-          <li class="nav-item d-flex align-items-center"><a class="nav-link" role="button" @click="toggleChat"><i class="fa-regular fa-message fa-flip-horizontal fa-fw"></i></a></li>
-          <li>
+         <li>
             <div class="btn-group dropdown">  
               <a class="nav-link dropdown-toggle dropdown-bs-toggle text-white-50 text-end" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
 			          <span id="userName" class="ms-auto me-1">
