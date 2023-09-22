@@ -16,6 +16,16 @@ body {
   text-decoration: none;
 }
 
+.alert-fusch::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0.5rem;
+  height: 100%;
+  content: "";
+  background-color: #fb00ff;
+}
+
 .btn-hivekeychain {
   color: #fff;
   background-color: rgb(32, 36, 51);

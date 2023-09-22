@@ -58,7 +58,7 @@
             <div >
               <img class="card-img-top ms-auto me-auto p-3" src="/img/Example-QR-code.jpg">
               <div class="card-title m-2">
-                Scan this QR code to find @markegiles on HIVE
+                Scan this QR code to find @{{account}} on HIVE
               </div>
               <!-- add to apple wallet -->
               <div>
@@ -68,12 +68,10 @@
           </div>
         </div>
 
-
+        <h1 class="fs-4 mb-2">Account Creation Requests</h1>
         <!-- account creation info widget -->
-        <div class="d-flex justify-content-center mb-3">
-          <div class="d-flex flex-column bg-blur-darkg rounded p-2 w-100">
-            <h1 class="fs-4">Account Creation Requests</h1>
-
+        <div class="d-flex justify-content-center mb-2">
+          <div class="d-flex flex-column bg-blur-darkg rounded p-3 w-100">
             <div class="text-start mb-3">
               <div>HIVE Balance: {{formatNumber(accountinfo.balance, 3, '.', ',')}}<i class="fa-brands fa-hive fa-fw ms-1"></i></div>
               <div v-bind:class="{'text-success': (formatNumber(accountinfo.balance, 3)-formatNumber(hivestats.account_creation_fee, 3)) >= 0, 'text-danger': (formatNumber(accountinfo.balance, 3)-formatNumber(hivestats.account_creation_fee, 3)) < 0}">HIVE Price:
@@ -90,14 +88,14 @@
         <div class="d-flex justify-content-center mb-3">
           <div class="card w-100">
             <div class="card-body">
-              @{{account}} requested account creation
+              @username
             </div>
             <div class="card-footer">
               <div class="btn-group" style="height: 60px;">
-                <button class="btn btn-sm btn-success h-100 text-center">{{formatNumber(hivestats.account_creation_fee, 3, '.', ',')}}<i class="fa-brands fa-hive fa-fw"></i></button>
-                <button class="btn btn-sm btn-primary h-100 text-center">1 ACT<i class="fa-solid fa-circle-dot fa-fw"></i></button>
-                <button class="btn btn-sm btn-secondary h-100 text-center">Forward<i class="fa-solid fa-circle-arrow-right fa-fw"></i></button>
-                <button class="btn btn-sm btn-danger h-100 text-center">Deny<i class="fa-solid fa-ban fa-fw"></i></button>
+                <button class="btn btn-sm btn-success h-100 text-center">{{formatNumber(hivestats.account_creation_fee, 3, '.', ',')}} <i class="fa-brands fa-hive fa-fw"></i></button>
+                <button class="btn btn-sm btn-primary h-100 text-center">1 ACT <i class="fa-solid fa-circle-dot fa-fw"></i></button>
+                <button class="btn btn-sm btn-secondary h-100 text-center">Forward <i class="fa-solid fa-circle-arrow-right fa-fw"></i></button>
+                <button class="btn btn-sm btn-danger h-100 text-center">Deny <i class="fa-solid fa-ban fa-fw"></i></button>
               </div>
             </div>
           </div>
