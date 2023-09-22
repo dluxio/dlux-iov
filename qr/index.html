@@ -50,8 +50,14 @@
       <nav-vue @login="account = $event" @logout="account = '';removeUser()" @ack="removeOp($event)"
                 @refresh="run($event)" :op="toSign" :lapi="lapi" />
     </div>
-    <main class="d-flex flex-column text-center flex-shrink-0 px-1">
-      <div class="container mt-3" style="max-width: 25rem;">
+    <main class="d-flex flex-column text-center flex-shrink-0 px-1 mt-2">
+      <div v-if="!account" class="alert alert-fusch d-flex flex-wrap align-items-center" role="alert">
+        <span class="my-1">To view and share your HIVE account QR link</span>
+        <span class="ms-auto">
+            <button class="btn btn-fusch me-1 my-1">Login</button>
+        </span>
+    </div>
+      <div class="container mt-3" style="max-width: 25rem;" v-if="account">
         <div class="d-flex justify-content-center">
           <!-- contact card qr code -->
           <div class="card mb-3">
