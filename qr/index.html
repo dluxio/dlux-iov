@@ -54,7 +54,7 @@
       <div v-if="!account" class="alert alert-fusch d-flex flex-wrap align-items-center" role="alert">
         <span class="my-1">To share your HIVE account</span>
         <span class="ms-auto">
-            <button class="btn btn-fusch me-1 my-1">Login</button>
+            <button class="btn btn-fusch me-1 my-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
         </span>
     </div>
       <div class="container mt-3" style="max-width: 25rem;" v-if="account">
