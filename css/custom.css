@@ -12430,6 +12430,29 @@ body {
   background: #212529;
 }
 
+.btn-hivekeychain:hover {
+  color: #fff;
+  background-color: rgba(32, 36, 51, 0.453);
+}
+
+.btn-hiveauth:hover {
+  color: #fff;
+  border-color: #404244;
+  background: rgba(64, 66, 68, 0.5137254902);
+}
+
+.btn-hivesigner:hover {
+  color: #000;
+  border-color: #d1d5da;
+  background: rgba(209, 213, 218, 0.6392156863);
+}
+
+.btn-pen:hover {
+  color: #000;
+  border-color: #36393b;
+  background: rgba(33, 37, 41, 0.6039215686);
+}
+
 .bg-darkest {
   background-color: #1a1e20;
 }
