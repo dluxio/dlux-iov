@@ -1198,13 +1198,13 @@ export default {
           <a role="button" @click="setUser()" class="text-info"><i class="fa-solid fa-circle-plus fa-fw"></i></a>
         </span>
       </div>
-      <div class="small text-muted text-center mt-1 mb-3">
+      <div class="small text-muted text-center mt-1 mb-2">
         Usernames are stored locally. <a class="no-decoration text-info" target="_blank" href="https://signup.hive.io/">Get Account</a>
       </div>
     </div>
     <div v-if="PEN">
     <label class="form-label">Key Type</label>
-      <select class="form-select" aria-label="Default select example">
+      <select class="form-select bg-dark border-dark text-info mb-2" aria-label="Default select example">
         <option selected>Owner Private Key</option>
         <option value="1">Master Password</option>
         <option value="2">Active Private Key</option>
