@@ -1411,7 +1411,7 @@ var app = new Vue({
             .then((data) => {
               console.log(data);
               if (
-                data.result[0].proposal.proposal_id == 234 &&
+                data.result[0].proposal.proposal_id == 275 &&
                 data.result[0].voter == user
               )
                 this.hidePrompt = true;
