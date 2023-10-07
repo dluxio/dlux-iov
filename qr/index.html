@@ -54,14 +54,17 @@
     <main class="d-flex flex-column text-center flex-shrink-0 px-1 mt-2">
       <div v-if="!account">
         <div class="alert alert-fusch d-flex flex-wrap align-items-center" role="alert">
-          <span class="my-1">To share your HIVE account</span>
+          <span class="my-1">Share your HIVE account</span>
           <span class="ms-auto">
             <button class="btn btn-fusch me-1 my-1" type="button" data-bs-toggle="offcanvas"
               data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
           </span>
         </div>
-        <div class="ms-auto me-auto" style="max-width: 25rem;">
-          <div class="fs-3 mb-2">Check Account Status</div>
+      </div>
+      <div class="ms-auto me-auto" style="max-width: 25rem;">
+      <div v-if="!account">
+        <div class="ms-auto me-auto" >
+          <div class="fs-3 mb-2">Check New Account Status</div>
           <div class="text-start">
             <div class="mb-3">
               <label class="form-label">Username</label>
@@ -79,45 +82,53 @@
           </div>
         </div>
       </div>
-      <div class="container mt-3" style="max-width: 25rem;" v-if="account">
+
+      <div class="container mt-3" v-if="account">
         <div class="d-flex justify-content-center">
           <!-- contact card qr code -->
-          <div class="card mb-3">
+          <a v-bind:href="'/@' + account" class="card w-100 mb-3 no-decoration">
             <div>
-              <div class="card-img-top d-flex justify-content-center p-3 w-100" ref="qrcode"></div>
-              <div class="card-title m-2">
-                Scan this QR code to find @{{account}} on HIVE
+              <div class="card-img-top d-flex justify-content-center mt-3 w-100" ref="qrcode"></div>
+              <div class="card-title mt-2">
+                <div>Scan this QR code to find</div>
+                <div class="fs-5 mt-1 mb-3 text-primary">@{{account}} on HIVE</div>
               </div>
               <!-- add to apple wallet -->
-              <div>
+              <div class="d-none">
                 <img src="/img/US-UK_Add_to_Apple_Wallet_RGB_101421.svg" class="my-2">
               </div>
             </div>
-          </div>
+          </a>
         </div>
 
-        <h1 class="fs-4 mb-2">Account Creation Requests</h1>
+        
         <!-- account creation info widget -->
-        <div class="d-flex justify-content-center mb-2">
+        <div class="d-flex justify-content-center mb-4">
           <div class="d-flex flex-column bg-blur-darkg rounded p-3 w-100">
             <div class="text-start mb-3">
               <div>HIVE Balance: {{formatNumber(accountinfo.balance, 3, '.', ',')}}<i
                   class="fa-brands fa-hive fa-fw ms-1"></i></div>
               <div
                 v-bind:class="{'text-success': (formatNumber(accountinfo.balance, 3)-formatNumber(hivestats.account_creation_fee, 3)) >= 0, 'text-danger': (formatNumber(accountinfo.balance, 3)-formatNumber(hivestats.account_creation_fee, 3)) < 0}">
-                HIVE Price:
+                Account Creation Price:
                 {{formatNumber(hivestats.account_creation_fee, 3, '.', ',')}}<i
                   class="fa-brands fa-hive fa-fw ms-1"></i></div>
               <div
                 v-bind:class="{'text-success': accountinfo.pending_claimed_accounts > 0, 'text-danger': accountinfo.pending_claimed_accounts <= 0}">
-                ACT Balance:
+                Account Creation Tokens:
                 {{accountinfo.pending_claimed_accounts}}<i class="fa-solid fa-circle-dot fa-fw ms-1"></i></div>
             </div>
             <div class="d-flex">
               <button class="btn btn-outline-info ms-auto" @click="claimACT">Claim ACT</button>
             </div>
+            <div class="mt-2 text-end">
+              <small>Claiming ACTs requires ≈15,000 HIVE Power</small>
+            </div>
           </div>
         </div>
+        
+        <div class="d-none">
+          <h1 class="fs-5 mb-2">Pending Account Creation Requests (0)</h1>
         <!-- account creation request notifications -->
         <div class="d-flex justify-content-center mb-3">
           <div class="card w-100">
@@ -158,8 +169,10 @@
             </div>
           </div>
         </div>
+      </div>
 
       </div>
+    </div>
     </main>
     <div>
       <foot-vue />
