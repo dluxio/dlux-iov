@@ -109,9 +109,10 @@
 
 <!-- claim tokens -->
 <div v-if="hasDrop || accountapi.claim" class="d-flex me-1 dropdown align-items-center">
-  <a class="btn btn-lg btn-outline-danger" data-bs-auto-close="outside"
+  <a class="btn btn-lg btn-outline-danger d-flex align-items-center" data-bs-auto-close="outside"
     role="button" id="claimDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
-    <i class="fas fa-gift fa-fw"></i></a>
+    <i class="fas fa-gift fa-fw force-parent-lh"></i>
+    <span class="d-none d-sm-block ms-1">CLAIM</span></a>
   <ul class="dropdown-menu dropdown-menu-dark p-2 bg-black text-white-50 text-left"
     aria-labelledby="claimDropdownBtn" style="width: 300px">
     <li>
@@ -144,7 +145,7 @@
           <label class="form-label">Rewards:</label>
           <div class="input-group">
             <div id="nodeRewards" class="form-control bg-black border-rb border-2 text-white text-center square">
-              {{toFixed(accountapi.claim/1000,3)}} {{TOKEN}}
+              {{formatNumber(accountapi.claim/1000,3,'.',',')}} {{TOKEN}}
             </div>
           </div>
         </div>
@@ -171,7 +172,7 @@
 
 
 <!-- token balance wallet button -->
-<button v-if="account" type="button" class="btn btn-lg d-lg-none btn-outline-success ms-auto d-flex align-items-center" 
+<button v-if="account" type="button" class="btn btn-lg d-xl-none btn-outline-success ms-auto d-flex align-items-center" 
         data-bs-toggle="modal" data-bs-target="#dexWallet">
   <i class="fa-solid fa-paper-plane force-parent-lh me-1"></i>
   <p class="me-1 mb-0 fs-6" v-cloak>{{formatNumber(bartoken,3,'.',',')}} {{TOKEN}}
@@ -181,7 +182,7 @@
               </div>
 
               <!-- xl wallet-->
-              <div class="d-none d-lg-flex align-items-center text-white-50">
+              <div class="d-none d-xl-flex align-items-center text-white-50">
                 
                 <!-- send token form -->
                 <div v-if="account" id="userSendToken" class="mx-1" v-if="features.send_B">
@@ -515,7 +516,7 @@
         <div class="container text-white pt-3">
           <div v-if="!hidePrompt && !hasHiddenPrompt" class="alert alert-info p-2 mb-3" role="alert">
             <div class="d-flex align-items-center justify-content-around flex-wrap">
-              <div class="text-center">Help contribute to further development by supporting the <a href="https://peakd.com/proposals/234"
+              <div class="text-center">Help contribute to further development by supporting the <a href="https://peakd.com/proposals/275"
                   target="_blank">HoneyComb Improvement Proposal</a></div>
                   <div class=" mt-1">
               <button @click="voteProposal(275)" class="btn btn-primary ms-auto">Vote Now</button>
@@ -907,12 +908,12 @@
           <!-- trade forms -->
           <div id="tradeForms">
             <div class="row">
-              <div class="mt-3 col-md-6">
+              <div class="mt-3 col-lg-6">
                 <h4>Buy {{TOKEN}}</h4>
                 <form name="buy" id="buyForm" @submit.prevent="validateForm('buyForm', 'buyFormValid');buyDEX()"
                   class="form-horizontal needs-validation" novalidate>
                   <div class="row mb-3">
-                    <legend tabindex="-1" class="col-sm-4 bv-no-focus-ring col-form-label" id="buy-type-label">
+                    <legend tabindex="-1" class="col-md-4 bv-no-focus-ring col-form-label" id="buy-type-label">
                       Order Type
                     </legend>
                     <div tabindex="-1" class="col">
@@ -947,7 +948,7 @@
                   </div>
 
                   <div class="row mb-3" v-if="buylimit.checked">
-                    <legend tabindex="-1" class="col-sm-4 col-form-label" for="buyQuantity">
+                    <legend tabindex="-1" class="col-md-4 col-form-label" for="buyQuantity">
                       Quantity
                     </legend>
                     <div tabindex="-1" role="group" class="col">
@@ -969,7 +970,7 @@
                   </div>
 
                   <div class="row mb-3" v-if="buylimit.checked">
-                    <legend tabindex="-1" class="col-sm-4 col-form-label" for="buyPrice">
+                    <legend tabindex="-1" class="col-md-4 col-form-label" for="buyPrice">
                       Price
                     </legend>
                     <div tabindex="-1" role="group" class="col">
@@ -992,7 +993,7 @@
                   </div>
 
                   <div class="row mb-3" v-if="buyhive.checked">
-                    <legend tabindex="-1" class="col-sm-4 col-form-label" id="buy-hive-total-label">
+                    <legend tabindex="-1" class="col-md-4 col-form-label" id="buy-hive-total-label">
                       Total
                     </legend>
                     <div tabindex="-1" role="group" class="col">
@@ -1017,34 +1018,35 @@
                     </div>
 
                     <div class="row mb-3" v-if="buyhbd.checked">
-                      <legend tabindex="-1" class="col-sm-4 col-form-label" for="buyHbdTotal">
+                      <legend tabindex="-1" class="col-md-4 col-form-label" for="buyHbdTotal">
                         Total
                       </legend>
                       <div tabindex="-1" role="group" class="col">
                         <div role="group" class="input-group">
-                          <input type="number" class="form-control bg-darkg border-dark" :readonly="bform.cl"
+                          <input type="number" class="form-control" :readonly="bform.cl"
                             :class="{'text-info':!bform.cl, ' text-white-50':bform.cl}" v-model="buyHbdTotal"
                             id="buyHbdTotal" required v-on:keyup="bcalc('c')" placeholder="0" :min="minbuy" step="0.001"
                             :max="parseFloat(barhbd) < parseFloat(maxdbuy) ? toFixed(parseFloat(barhbd),3) : maxdbuy"
                             aria-required="true" />
-                          <div class="input-group-append">
-                            <div class="input-group-text bg-darkg border-dark text-white-50 r-radius-hotfix">
+                         
+                            <span class="input-group-text">
                               HBD
                               <a href="#/" class="ms-3 text-secondary" @click="block('c')" v-if="buylimit.checked"><i
                                   class="fas"
                                   :class="{'fa-lock':bform.cl, 'fa-unlock-alt':!bform.cl, 'text-info':!bform.cl}"></i></a>
-                            </div>
-                          </div>
-                          <div class="invalid-feedback">
+                              </span>
+                         </div>
+                         <div class="invalid-feedback">
                             Your balance is {{barhbd}} - minimum: {{minbuy}} -
                             max: {{parseFloat(barhbd) < parseFloat(maxdbuy) ? toFixed(parseFloat(barhbd),3) :
-                              maxdbuy}}{{parseFloat(barhbd) < parseFloat(maxdbuy) ? '' : '(Liquidity)' }} </div>
-                          </div>
+                              maxdbuy}}{{parseFloat(barhbd) < parseFloat(maxdbuy) ? '' : '(Liquidity)' }} 
+                         </div>
                         </div>
                       </div>
 
+
                       <div class="row mb-3" v-if="buylimit.checked">
-                        <legend tabindex="-1" class="col-sm-4 col-form-label" for="buyHours">
+                        <legend tabindex="-1" class="col-md-4 col-form-label" for="buyHours">
                           Expiration
                         </legend>
                         <div tabindex="-1" role="group" class="col">
@@ -1071,12 +1073,12 @@
                       </div>
                 </form>
               </div>
-              <div class="mt-3 col-md-6">
+              <div class="mt-3 col-lg-6">
                 <h4>Sell {{TOKEN}}</h4>
                 <form id="sellForm" @submit.prevent="validateForm('sellForm', 'sellFormValid');sellDEX()" name="sell"
                   class="form-horizontal needs-validation" novalidate>
                   <div class="row mb-3">
-                    <legend tabindex="-1" class="col-sm-4 bv-no-focus-ring col-form-label" id="sell-type-label">
+                    <legend tabindex="-1" class="col-md-4 bv-no-focus-ring col-form-label" id="sell-type-label">
                       Order Type
                     </legend>
                     <div tabindex="-1" role="group" class="col">
@@ -1106,7 +1108,7 @@
                   </div>
 
                   <div class="row mb-3">
-                    <legend tabindex="-1" class="col-sm-4 col-form-label" for="sellQuantity">
+                    <legend tabindex="-1" class="col-md-4 col-form-label" for="sellQuantity">
                       Quantity
                     </legend>
                     <div tabindex="-1" role="group" class="col">
@@ -1131,7 +1133,7 @@
 
 
                   <div class="row mb-3" v-if="!sellmarket.checked">
-                    <legend tabindex="-1" class="col-sm-4 col-form-label" for="sellPrice">
+                    <legend tabindex="-1" class="col-md-4 col-form-label" for="sellPrice">
                       Price
                     </legend>
                     <div tabindex="-1" role="group" class="col">
@@ -1153,7 +1155,7 @@
                   </div>
 
                   <div class="row mb-3" v-if="buyhive.checked && selllimit.checked">
-                    <legend tabindex="-1" class="col-sm-4 col-form-label" for="sellHiveTotal">
+                    <legend tabindex="-1" class="col-md-4 col-form-label" for="sellHiveTotal">
                       Total
                     </legend>
                     <div tabindex="-1" role="group" class="col">
@@ -1177,7 +1179,7 @@
 
 
                   <div class="row mb-3" v-if="buyhbd.checked && selllimit.checked">
-                    <legend tabindex="-1" class="col-sm-4 col-form-label" for="sellHbdTotal">
+                    <legend tabindex="-1" class="col-md-4 col-form-label" for="sellHbdTotal">
                       Total
                     </legend>
                     <div tabindex="-1" role="group" class="col">
@@ -1201,7 +1203,7 @@
 
 
                   <div class="row mb-3" v-if="!sellmarket.checked">
-                    <legend tabindex="-1" class="col-sm-4 col-form-label" for="sellHours">
+                    <legend tabindex="-1" class="col-md-4 col-form-label" for="sellHours">
                       Expiration
                     </legend>
                     <div tabindex="-1" role="group" class="col">
@@ -1234,7 +1236,7 @@
           <div id="hiveData" v-if="buyhive.checked" class="mb-3">
             <div id="hiveMarketOrders">
               <div class="row">
-                <div class="mt-3 col-md-6">
+                <div class="mt-3 col-lg-6">
                   <h4>Buy Orders</h4>
                   <div class="table-responsive table-blur rounded border">
                     <table role="table" aria-busy="false" aria-colcount="4"
@@ -1276,7 +1278,7 @@
                     </table>
                   </div>
                 </div>
-                <div class="mt-3 col-md-6">
+                <div class="mt-3 col-lg-6">
                   <h4>Sell Orders</h4>
                   <div class="table-responsive table-blur rounded border">
                     <table role="table" aria-busy="false" aria-colcount="4"
@@ -1365,7 +1367,7 @@
           <div id="hbdData" v-if="buyhbd.checked" class="mb-3">
             <div id="hbdMarketOrders">
               <div class="row">
-                <div class="mt-3 col-md-6">
+                <div class="mt-3 col-lg-6">
                   <h4>Buy Orders</h4>
                   <div class="table-responsive table-blur rounded border">
                     <table role="table" aria-busy="false" aria-colcount="4"
@@ -1407,7 +1409,7 @@
                     </table>
                   </div>
                 </div>
-                <div class="mt-3 col-md-6">
+                <div class="mt-3 col-lg-6">
                   <h4>Sell Orders</h4>
                   <div class="table-responsive table-blur rounded border">
                     <table role="table" aria-busy="false" aria-colcount="4"
@@ -1529,9 +1531,9 @@
           placeholder="Filter users and APIs">
           
         </div>
-        <div class="mt-1">
-          <span v-if="!filteraccount.value">( {{runners.length}} result<span v-if="runners.length > 1 || runners.length == 0">s</span> )</span>
-          <span v-if="filteraccount.value">( {{runnersSearch.length}} result<span v-if="runnersSearch.length > 1 || runners.length == 0">s</span> )</span>
+        <div class="mt-2 text-center display-5">
+          <span v-if="!filteraccount.value">{{runners.length}} Runner<span v-if="runners.length > 1 || runners.length == 0">s</span></span>
+          <span v-if="filteraccount.value">{{runnersSearch.length}} Result<span v-if="runnersSearch.length > 1 || runnersSearch.length == 0">s</span></span>
         </div>
       </div>
 
