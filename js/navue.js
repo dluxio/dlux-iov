@@ -265,6 +265,7 @@ export default {
       if(PEN){
         var decrypted = CryptoJS.AES.decrypt(encrypted, this.PIN);
         this.decrypt = JSON.parse(decrypted);
+        sessionStorage.setItem('pen', decrypted)
       }
     },
     useHAS() {
@@ -993,8 +994,11 @@ export default {
   },
   mounted() {
     const signer = localStorage.getItem("signer");
+    const decrypted = sessionStorage.getItem('pen')
+    if(decrypted)this.decrypted = JSON.parse(decrypted)
     if (signer == "HSR") this.useHS();
     else if (signer == "HAS") this.useHAS();
+    else if (signer == "PEN") this.usePEN();
     else this.useKC();
     this.getUser();
     this.getRecentUsers();
