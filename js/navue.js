@@ -1186,14 +1186,14 @@ export default {
           <span v-if="HKC">Hive Keychain requires a Firefox or Chrome extension</span>
           <span v-if="HAS">Hive Auth requires websockets and a PKSA Application</span>
           <span v-if="HSR">Hive Signer generates a link</span>
-          <span v-if="PEN">Store your active key locally</span>
+          <span v-if="PEN">dlux Pen stores your active key locally</span>
         </div>
           
 
       </div>
     </div>
 
-    <div class="">
+    <div v-if="!PEN">
       <label class="form-label">Add user</label>
       <div class="position-relative has-validation">
         <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
@@ -1208,7 +1208,129 @@ export default {
         Usernames are stored locally. <a class="no-decoration text-info" target="_blank" href="https://signup.hive.io/">Get Account</a>
       </div>
     </div>
+
     <div v-if="PEN">
+    <!-- v-if no pin -->
+      <div>
+        <div class="fs-4 mb-1 text-center">
+        Set a PIN
+        </div>
+        
+        <table class="w-100 fs-5 mb-2">
+          <tr class="text-center border-bottom row">
+            <td class="p-0 pin-number col">
+              <a role="button" class="no-decoration">
+                <div class="p-2" style="height:100%; width:100%">
+                1
+                </div>
+              </a>
+            </td>
+            <td class="border-start border-end p-0 pin-number col">
+            <a role="button" class="no-decoration">
+                <div class="p-2" style="height:100%; width:100%">
+                2
+                </div>
+              </a></td>
+            <td class="p-0 pin-number col">
+            <a role="button" class="no-decoration">
+                <div class="p-2" style="height:100%; width:100%">
+                3
+                </div>
+              </a>
+            </td>
+          </tr>
+          <tr class="text-center border-bottom row">
+          <td class="p-0 pin-number col">
+            <a role="button" class="no-decoration">
+              <div class="p-2" style="height:100%; width:100%">
+              4
+              </div>
+            </a>
+             </td>
+      <td class="border-start border-end p-0 pin-number col">
+      <a role="button" class="no-decoration">
+          <div class="p-2" style="height:100%; width:100%">
+          5
+          </div>
+        </a></td>
+      <td class="p-0 pin-number col">
+      <a role="button" class="no-decoration">
+          <div class="p-2" style="height:100%; width:100%">
+          6
+          </div>
+        </a>
+          </tr>
+          <tr class="text-center border-bottom row">
+          <td class="p-0 pin-number col">
+          <a role="button" class="no-decoration">
+          <div class="p-2" style="height:100%; width:100%">
+          7
+          </div>
+        </a>
+      </td>
+      <td class="border-start border-end p-0 pin-number col">
+      <a role="button" class="no-decoration">
+          <div class="p-2" style="height:100%; width:100%">
+          8
+          </div>
+        </a></td>
+      <td class="p-0 pin-number col">
+      <a role="button" class="no-decoration">
+          <div class="p-2" style="height:100%; width:100%">
+          9
+          </div>
+        </a>
+          </tr>
+          <tr class="text-center row">
+          <td class="p-0  pin-number col">
+          <a role="button" class="no-decoration">
+          <div class="p-2" style="height:100%; width:100%">
+          <i class="fa-solid fa-delete-left fa-fw fa-1x force-parent-lh"></i>
+          </div>
+        </a>
+      </td>
+      <td class="border-start border-end p-0 pin-number col">
+      <a role="button" class="no-decoration">
+          <div class="p-2" style="height:100%; width:100%">
+          0
+          </div>
+        </a></td>
+      <td class="p-0 pin-number col">
+      <a role="button" class="no-decoration">
+          <div class="p-2" style="height:100%; width:100%">
+          <i class="fa-solid fa-check fa-fw fa-1x force-parent-lh"></i>
+          </div>
+        </a>
+          </tr>
+        </table>
+        <div class="fs-5 mb-2 text-center">
+        to encrypt and decrypt your keys
+        </div>
+      </div>
+
+      <!-- v-if pin is set and entered in -->
+      <div>
+        <div class="d-flex justify-content-center align-items-center">
+          <div><a role="button" class="no-decoration">Lock<i class="fa-solid fa-lock ms-1"></i></a></div>
+          <div class="form-check form-switch ms-2 fs-2">
+            <div><input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked></div>
+          </div>
+          <div><a role="button" class="no-decoration"><i class="fa-solid fa-lock-open me-1"></i>Unlock</a></div>
+        </div>
+      
+      <label class="form-label">Add user</label>
+      <div class="position-relative has-validation">
+        <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
+          <i class="fa-solid fa-at fa-fw"></i>
+        </span>
+        <input v-model="userField" autocapitalize="off" placeholder="username" @keyup.enter="setUser()" class="px-4 form-control bg-dark border-dark text-info">
+        <span v-if="userField" class="position-absolute end-0 top-50 translate-middle-y pe-2">
+          <a role="button" @click="setUser()" class="text-info"><i class="fa-solid fa-circle-plus fa-fw"></i></a>
+        </span>
+      </div>
+      <div class="small text-muted text-center mt-1 mb-2">
+        Usernames are stored locally. <a class="no-decoration text-info" target="_blank" href="https://signup.hive.io/">Get Account</a>
+      </div>
     <label class="form-label">Key Type</label>
       <select :value="level" class="form-select bg-dark border-dark text-info mb-2" aria-label="Default select example">
         <option selected value="owner">Owner Private Key</option>
@@ -1227,6 +1349,7 @@ export default {
       <div class="small text-muted text-center mt-1 mb-3">
         Keys are stored locally. Only enter your keys on websites you trust.
       </div>
+    </div>
     </div>
 
     

@@ -575,6 +575,15 @@ color: linear-gradient(45deg,
   min-height: 600px;
 }
 
+.pin-number:hover {
+  background: #535353;
+}
+
+.pin-number:active {
+  background: #cecece;
+  color:#000;
+}
+
 .dlux-header {
   border-bottom: solid;
   border-bottom-color: gray;
