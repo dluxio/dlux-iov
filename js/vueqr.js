@@ -164,6 +164,9 @@ var app = new Vue({
         },
       },
       accountinfo: {},
+      rcCost: {
+        claim_account_operation: {"operation":"claim_account_operation","rc_needed":"11789110900859","hp_needed":6713.599180835442}
+      },
     };
   },
   beforeDestroy() {},
@@ -175,6 +178,17 @@ var app = new Vue({
     makeQr(ref, link = "test", opts = {}){
       var qrcode = new QRCode(this.$refs[ref], opts);
       qrcode.makeCode(link);
+    },
+    rcCosts(name, key) {
+      fetch("https://beacon.peakd.com/api/rc/costs")
+        .then((r) => {
+          return r.json();
+        })
+        .then((re) => {
+          for(var i = 0; i < re.costs.length; i++){
+            this.rcCost[re.costs[i].operation] = re.costs[i]
+          }
+        });
     },
     checkAccount(name, key) {
       fetch("https://anyx.io", {
@@ -569,5 +583,11 @@ var app = new Vue({
     // if (user != "GUEST") this.getTokenUser(user);
     this.getHiveUser(user);
   },
-  computed: {},
+  computed: {
+    canClaim: {
+      get() {
+        return this.account?.rcs > this.rcCosts["claim_account_operation"] ? true : false
+      },
+    }
+  },
 });
