@@ -1065,7 +1065,7 @@ export default {
               </span>
               </span>
               </button>
-              <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black me-4" aria-labelledby="infoDropdown" style="position: absolute;"> 
+              <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black me-05 me-sm-4" aria-labelledby="infoDropdown" style="position: absolute;"> 
                 <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
                 <li class=""><a class="dropdown-item" href="/qr/"><i class="fa-solid fa-qrcode fa-fw me-2"></i>Invite</a></li>
                 <li class=""><a class="dropdown-item" href="/new/"><i class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
