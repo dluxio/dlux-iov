@@ -934,3 +934,35 @@ color: linear-gradient(45deg,
 .btn-outline-warning {
   --bs-btn-active-color: #000;
 }
+
+// HUB Banner Vertical Scroll
+$scroll-count: 5;
+$scroll: 1 / $scroll-count;
+
+.box {
+  height: 60px;
+  overflow: hidden;
+  position: relative;
+}
+
+ul.scroll {
+  margin: 0;
+  padding: 0;
+  animation: scrollUp 4s 1s infinite forwards;
+  li.scroll {
+    opacity: 1;
+    height: 80px;
+    padding-left: 20px;
+    padding-right: 20px;
+    list-style: none; 
+  }
+}
+
+@keyframes scrollUp {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY((-100% / $scroll-count) * ($scroll-count - 1));
+  }
+}

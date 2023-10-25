@@ -13300,4 +13300,32 @@ td {
 
 .btn-outline-warning {
   --bs-btn-active-color: #000;
+}
+
+.box {
+  height: 60px;
+  overflow: hidden;
+  position: relative;
+}
+
+ul.scroll {
+  margin: 0;
+  padding: 0;
+  animation: scrollUp 4s 1s infinite forwards;
+}
+ul.scroll li.scroll {
+  opacity: 1;
+  height: 80px;
+  padding-left: 20px;
+  padding-right: 20px;
+  list-style: none;
+}
+
+@keyframes scrollUp {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-80%);
+  }
 }/*# sourceMappingURL=custom.css.map */
