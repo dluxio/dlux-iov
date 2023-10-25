@@ -1045,11 +1045,10 @@ export default {
 
         <!-- MAIN NAV -->
         <ul class="navbar-nav me-auto align-items-center">
-          <li><a class="navbar-brand d-none d-md-flex" href="/"><img src="/img/dlux-hive-logo-alpha.svg" alt="dlux-logo" width="40" height="40"></a></li> 
+          <li><a class="navbar-brand d-md-flex" href="/"><img src="/img/dlux-hive-logo-alpha.svg" alt="dlux-logo" width="40" height="40"></a></li> 
           <li class="nav-item"><a class="nav-link text-center" href="/hub/"><i class="fa-solid fs-5 px-1 fa-mountain-sun"></i><br><span class="small">HUB</span></a></li>
           <li class="nav-item"><a class="nav-link text-center" href="/nfts/"><i class="fa-solid fs-5 px-1 fa-store"></i><br><span class="small">NFT</span></a></li>
           <li class="nav-item"><a class="nav-link text-center" href="/dex/"><i class="fa-solid fs-5 px-1 fa-building-columns"></i><br><span class="small">DEX</span></a></li>
-          <li class="nav-item"><a class="nav-link text-center" href="/qr/"><i class="fa-solid fs-5 px-1 fa-qrcode"></i><br><span class="small">QR</span></a></li>
         </ul>
 
         <!-- LOGIN MENU -->
@@ -1070,54 +1069,33 @@ export default {
           </li>
         </ul>
 
-        <!-- SM USER MENU -->
-        <ul class="navbar-nav d-md-none" v-show="user">
-         <li>
-            <div class="btn-group dropdown">  
-              <a class="nav-link dropdown-toggle dropdown-bs-toggle text-white-50 text-end" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
-			          <span id="userName" class="ms-auto me-1">
-                  <img :src="avatar" id="userImage" alt="" width="40" height="40" class="img-fluid rounded-circle bg-light cover">
-                </span>
-              </a>
-              <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black mt-2" aria-labelledby="userDropdown">
-			          <li class=""><a class="dropdown-item" :href="'/me#blog/'" @click="showTab('blog')"><i class="fas fa-user fa-fw me-2"></i>Profile</a></li>
-			          <li class=""><a class="dropdown-item" :href="'/me#wallet/'" @click="showTab('wallet')"><i class="fas fa-wallet fa-fw me-2"></i>Wallet</a></li>
-			          <li class=""><a class="dropdown-item" :href="'/me#inventory/'" @click="showTab('inventory')"><i class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
-			          <li class="d-none"><a class="dropdown-item" :href="'/me#node/'" @click="showTab('node')"><i class="fas fa-robot fa-fw me-2"></i>Node</a></li>
-			          <li class="d-none"><a class="dropdown-item" :href="'/me#settings/'" @click="showTab('settings')"><i class="fas fa-cog fa-fw me-2"></i>Settings</a></li>
-                <li class=""><hr class="dropdown-divider"></li>
-			          <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
-                <li class=""><a class="dropdown-item" href="/new/"><i class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
-                <li class=""><a class="dropdown-item" href="/docs/"><i class="fa-solid fa-book fa-fw me-2"></i>Docs</a></li>
-                <li class=""><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" role="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers"><i class="fas fa-user-friends me-2"></i>Users</a></li>
-			          <li><a class="dropdown-item" role="button" @click="logout()"><i class="fas fa-power-off fa-fw me-2"></i>Logout</a></li>
-		          </ul>
-            </div>
-          </li>
-        </ul>
 
-        <!-- MD USER MENU -->
-	      <ul class="navbar-nav d-none d-md-flex" v-if="user" id="userMenu">
-          <li class="nav-item d-flex align-items-center"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus fa-fw me-1"></i></a></li>
-          <li class="nav-item d-flex align-items-center"><a class="nav-link" role="button" @click="toggleChat"><i class="fa-regular fa-message fa-flip-horizontal me-2"></i></a></li>
-          <a role="button" v-show="user" class="p-0 nav-link d-flex align-items-center text-white-50" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
-            <img :src="avatar" id="userImage" alt="" width="40" height="40" class="img-fluid rounded-circle bg-light cover">
+        <!-- USER MENU -->
+	      <ul class="navbar-nav" v-if="user" id="userMenu">
+          <li class="nav-item d-flex align-items-center d-none d-md-flex"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus fa-fw me-1"></i></a></li>
+          <li class="nav-item d-flex align-items-center d-none d-md-flex"><a class="nav-link" role="button" @click="toggleChat"><i class="fa-solid fa-comment fa-flip-horizontal me-2"></i></a></li>
+          <a role="button" v-show="user" class="p-0 d-none d-md-flex nav-link d-flex align-items-center text-white-50" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
+            <img :src="avatar" id="userImage" alt="" width="40" height="40" class="img-fluid rounded-circle bg-light cover">  
           </a>
           <div class="btn-group dropdown">
-		      <a class="nav-link mt-auto mb-auto dropdown-toggle dropdown-bs-toggle text-white-50" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
-			      <span id="userName" class="mx-1">{{user}}</span>
+		      <a class="nav-link mt-auto mb-auto d-flex align-items-center dropdown-toggle dropdown-bs-toggle text-white-50" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
+			    <a role="button" v-show="user" class="p-0 d-md-none me-1 nav-link d-flex align-items-center text-white-50">
+            <img :src="avatar" id="userImage" alt="" width="40" height="40" class="img-fluid rounded-circle bg-light cover">  
+          </a>  
+          <span id="userName" class="mx-1 d-none d-md-flex">{{user}}</span>
           </a>
           <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black mt-2" aria-labelledby="userDropdown" >
 			        <li class=""><a class="dropdown-item" :href="'/me#blog/'" @click="showTab('blog')"><i class="fas fa-user fa-fw me-2"></i>Profile</a></li>
 			        <li class=""><a class="dropdown-item" :href="'/me#wallet/'" @click="showTab('wallet')"><i class="fas fa-wallet fa-fw me-2"></i>Wallet</a></li>
 			        <li class=""><a class="dropdown-item" :href="'/me#inventory/'" @click="showTab('inventory')"><i class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
+              <li class=""><a class="dropdown-item" :href="'/me#files/'" @click="showTab('files')"><i class="fas fa-cloud fa-fw me-2"></i>Files</a></li>
               <li class=""><hr class="dropdown-divider"></li>
+              <li class="d-md-none"><a class="dropdown-item" href="/new/"><i class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
 			        <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
-              <li class=""><a class="dropdown-item" href="/new/"><i class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
               <li class=""><a class="dropdown-item" href="/docs/"><i class="fa-solid fa-book me-2 fa-fw"></i>Docs</a></li>
               <li class=""><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" role="button" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers"><i class="fas fa-user-friends me-2"></i>Users</a></li>
+              <li><a class="dropdown-item" role="button" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers"><i class="fas fa-user-friends me-2"></i>User</a></li>
+              <li class=""><a class="dropdown-item" href="/qr/"><i class="fa-solid fa-qrcode me-2 fa-fw"></i>Invite</a></li>
 			        <li><a class="dropdown-item" role="button" @click="logout()"><i class="fas fa-power-off fa-fw me-2"></i>Logout</a></li>
 		      </ul>
           </div>
