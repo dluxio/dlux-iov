@@ -1056,9 +1056,16 @@ export default {
           <li class="nav-item">
             <div class="btn-group">
               <button class="btn btn-sm px-2 btn-secondary" data-bs-toggle="dropdown">
-                <i class="fa-solid fa-circle-info"></i>
+              <span class="d-flex align-items-center"> 
+               <i class="fa-solid fa-circle-info"></i>
+                <span class=" d-none d-sm-block">
+                <i class="fa-solid fa-qrcode fa-fw mx-2"></i>
+                <i class="fa-solid fa-shapes fa-fw me-2"></i>
+                <i class="fa-solid fa-book fa-fw"></i>
+              </span>
+              </span>
               </button>
-              <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black me-1" aria-labelledby="infoDropdown" style="position: absolute;"> 
+              <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black me-4" aria-labelledby="infoDropdown" style="position: absolute;"> 
                 <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
                 <li class=""><a class="dropdown-item" href="/qr/"><i class="fa-solid fa-qrcode fa-fw me-2"></i>Invite</a></li>
                 <li class=""><a class="dropdown-item" href="/new/"><i class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
