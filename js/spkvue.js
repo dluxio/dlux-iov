@@ -3133,6 +3133,7 @@ function tradeFTreject(setname, uid, callback){
     this.sapi = sapi;
     this.checkAccount("pageAccount", "focus");
     this.getHiveStats();
+    this.getHiveUser();
     this.getQuotes();
     this.getSNodes();
     this.getProtocol();
