@@ -1055,25 +1055,22 @@ export default {
         <ul class="navbar-nav" id="loginMenu" v-show="!user">
           <li class="nav-item">
             <div class="btn-group">
-              <button class="btn btn-sm px-2 btn-secondary" data-bs-toggle="dropdown">
+              <button class="btn btn-sm btn-fusch" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
+              <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
+              <button class="btn btn-sm px-2 btn-secondary e-radius-hotfix" data-bs-toggle="dropdown">
               <span class="d-flex align-items-center"> 
-               <i class="fa-solid fa-circle-info"></i>
-                <span class=" d-none d-sm-block">
-                <i class="fa-solid fa-qrcode fa-fw mx-2"></i>
-                <i class="fa-solid fa-shapes fa-fw me-2"></i>
-                <i class="fa-solid fa-book fa-fw"></i>
-              </span>
+               <i class="fa-solid fa-bars"></i>
               </span>
               </button>
-              <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black me-05 me-sm-4" aria-labelledby="infoDropdown" style="position: absolute;"> 
-                <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
-                <li class=""><a class="dropdown-item" href="/qr/"><i class="fa-solid fa-qrcode fa-fw me-2"></i>Invite</a></li>
-                <li class=""><a class="dropdown-item" href="/new/"><i class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
-                <li class=""><a class="dropdown-item" href="/docs/"><i class="fa-solid fa-book fa-fw me-2"></i>Docs</a></li>
-              </ul>
-              <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
-              <button class="btn btn-sm btn-fusch" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
-            </div>
+              <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black" aria-labelledby="infoDropdown" style="position: absolute;"> 
+                  <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
+                  <li class=""><a class="dropdown-item" href="/qr/"><i class="fa-solid fa-qrcode fa-fw me-2"></i>Invite</a></li>
+                  <li class=""><a class="dropdown-item" href="/new/"><i class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
+                  <li class=""><a class="dropdown-item" href="/docs/"><i class="fa-solid fa-book fa-fw me-2"></i>Docs</a></li>
+                </ul>
+              </div>
+                
+            
           </li>
         </ul>
 
