@@ -86,8 +86,7 @@
                         <span class="ms-auto">
                             <button class="btn btn-fusch me-1 my-1" type="button" data-bs-toggle="offcanvas"
                                 data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
-                            <button
-                                class="btn btn-turq my-1" type="button" data-bs-toggle="modal"
+                            <button class="btn btn-turq my-1" type="button" data-bs-toggle="modal"
                                 data-bs-target="#signUpModal">Signup</button>
                         </span>
                     </div>
@@ -139,10 +138,9 @@
                                 <li class="nav-item"> <a class="nav-link" id="inventorytab" role="tab"
                                         data-bs-toggle="tab" aria-controls="inventory" aria-expanded="true"
                                         href="#inventory">Inventory</a></li>
-                                <li class="nav-item"> <a class="nav-link" id="filestab" role="tab"
-                                    data-bs-toggle="tab" aria-controls="files" aria-expanded="true"
-                                    href="#files">Files</a></li>
-                            <!--<li class="nav-item d-none" v-show="me"> <a class="nav-link" id="settingstab" role="tab"
+                                <li class="nav-item"> <a class="nav-link" id="filestab" role="tab" data-bs-toggle="tab"
+                                        aria-controls="files" aria-expanded="true" href="#files">Files</a></li>
+                                <!--<li class="nav-item d-none" v-show="me"> <a class="nav-link" id="settingstab" role="tab"
                                     data-bs-toggle="tab" aria-controls="settings" aria-expanded="true"
                                     href="#settings">Settings</a></li>-->
                             </ul>
@@ -1303,13 +1301,20 @@
                             </div>
                         </div>
                     </div>
-                     <!-- files tab -->
-                     <div role="tabpanel" class="tab-pane fade" id="files" aria-labelledby="filestab">
+                    <!-- files tab -->
+                    <div role="tabpanel" class="tab-pane fade" id="files" aria-labelledby="filestab">
                         <div class="">
                             <div class="card mx-2 my-3">
                                 <div class="card-body">
-                                    <p class="mb-0 text-center">Looks like there's nothing here yet.</p>
-                                </div> </div>
+                                    <files-vue :post="post" :account="account"
+                                        :has_ipfs="spkapi.storage?.length ? true : false" :post_select="postSelect"
+                                        :voteval="voteVal" :head_block="spkapi.head_block"
+                                        :broca_refill="sstats.broca_refill" :broca="spkapi.broca"
+                                        :spk_power="spkapi.spk_power" :contracts="contracts" :extendcost="extendcost"
+                                        @tosign="toSign=$event" @modalselect="modalSelect($event)"
+                                        @vote="vote($event)"></files-vue>
+                                </div>
+                            </div>
                         </div>
 
                     </div>
@@ -1329,24 +1334,26 @@
                                 <div class="mb-3">
                                     <label class="form-label">Username</label>
                                     <div class="position-relative has-validation">
-                                      <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
-                                        <i class="fa-solid fa-at fa-fw"></i>
-                                      </span>
-                                      <input  autocapitalize="off" placeholder="username" class="px-4 form-control bg-dark border-dark text-info">
+                                        <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
+                                            <i class="fa-solid fa-at fa-fw"></i>
+                                        </span>
+                                        <input autocapitalize="off" placeholder="username"
+                                            class="px-4 form-control bg-dark border-dark text-info">
                                     </div>
-                                  </div>
-                                  <div class="mb-3">
+                                </div>
+                                <div class="mb-3">
                                     <label class="form-label">Password</label>
                                     <div class="position-relative has-validation">
-                                      <input class="form-control bg-dark border-dark">
-                                      <span class="position-absolute top-50 end-0 translate-middle-y pe-2 text-white">
-                                        <a class="text-white no-decoration" href=""><i class="fa-solid fa-copy fa-fw"></i></a>
-                                      </span>
+                                        <input class="form-control bg-dark border-dark">
+                                        <span class="position-absolute top-50 end-0 translate-middle-y pe-2 text-white">
+                                            <a class="text-white no-decoration" href=""><i
+                                                    class="fa-solid fa-copy fa-fw"></i></a>
+                                        </span>
                                     </div>
                                     <div class="small text-muted text-center mt-1 mb-2">
                                         You must save your password somewhere, it cannot be recovered.
-                                      </div>
-                                  </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-primary">Join</button>

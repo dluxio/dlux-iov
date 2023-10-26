@@ -1225,67 +1225,73 @@ export default {
             </td>
           </tr>
           <tr class="text-center border-bottom row">
-          <td class="p-0 pin-number col">
-            <a role="button" class="no-decoration">
-              <div class="p-2" style="height:100%; width:100%">
-              4
-              </div>
-            </a>
-             </td>
-      <td class="border-start border-end p-0 pin-number col">
-      <a role="button" class="no-decoration">
-          <div class="p-2" style="height:100%; width:100%">
-          5
-          </div>
-        </a></td>
-      <td class="p-0 pin-number col">
-      <a role="button" class="no-decoration">
-          <div class="p-2" style="height:100%; width:100%">
-          6
-          </div>
-        </a>
+            <td class="p-0 pin-number col">
+              <a role="button" class="no-decoration">
+                <div class="p-2" style="height:100%; width:100%">
+                4
+                </div>
+              </a>
+            </td>
+            <td class="border-start border-end p-0 pin-number col">
+              <a role="button" class="no-decoration">
+                <div class="p-2" style="height:100%; width:100%">
+                5
+                </div>
+              </a>
+            </td>
+            <td class="p-0 pin-number col">
+              <a role="button" class="no-decoration">
+                <div class="p-2" style="height:100%; width:100%">
+                6
+                </div>
+              </a>
+            </td>
           </tr>
           <tr class="text-center border-bottom row">
-          <td class="p-0 pin-number col">
-          <a role="button" class="no-decoration">
-          <div class="p-2" style="height:100%; width:100%">
-          7
-          </div>
-        </a>
-      </td>
-      <td class="border-start border-end p-0 pin-number col">
-      <a role="button" class="no-decoration">
-          <div class="p-2" style="height:100%; width:100%">
-          8
-          </div>
-        </a></td>
-      <td class="p-0 pin-number col">
-      <a role="button" class="no-decoration">
-          <div class="p-2" style="height:100%; width:100%">
-          9
-          </div>
-        </a>
+            <td class="p-0 pin-number col">
+              <a role="button" class="no-decoration">
+                <div class="p-2" style="height:100%; width:100%">
+                7
+                </div>
+              </a>
+            </td>
+            <td class="border-start border-end p-0 pin-number col">
+              <a role="button" class="no-decoration">
+                <div class="p-2" style="height:100%; width:100%">
+                8
+                </div>
+              </a>
+            </td>
+            <td class="p-0 pin-number col">
+              <a role="button" class="no-decoration">
+                <div class="p-2" style="height:100%; width:100%">
+                9
+                </div>
+              </a>
+            </td>
           </tr>
           <tr class="text-center row">
-          <td class="p-0  pin-number col">
-          <a role="button" class="no-decoration">
-          <div class="p-2" style="height:100%; width:100%">
-          <i class="fa-solid fa-delete-left fa-fw fa-1x force-parent-lh"></i>
-          </div>
-        </a>
-      </td>
-      <td class="border-start border-end p-0 pin-number col">
-      <a role="button" class="no-decoration">
-          <div class="p-2" style="height:100%; width:100%">
-          0
-          </div>
-        </a></td>
-      <td class="p-0 pin-number col">
-      <a role="button" class="no-decoration">
-          <div class="p-2" style="height:100%; width:100%">
-          <i class="fa-solid fa-check fa-fw fa-1x force-parent-lh"></i>
-          </div>
-        </a>
+            <td class="p-0  pin-number col">
+              <a role="button" class="no-decoration">
+                <div class="p-2" style="height:100%; width:100%">
+                <i class="fa-solid fa-delete-left fa-fw fa-1x force-parent-lh"></i>
+                </div>
+              </a>
+            </td>
+            <td class="border-start border-end p-0 pin-number col">
+              <a role="button" class="no-decoration">
+                <div class="p-2" style="height:100%; width:100%">
+                0
+                </div>
+              </a>
+            </td>
+            <td class="p-0 pin-number col">
+              <a role="button" class="no-decoration">
+                <div class="p-2" style="height:100%; width:100%">
+                <i class="fa-solid fa-check fa-fw fa-1x force-parent-lh"></i>
+                </div>
+              </a>
+            </td>
           </tr>
         </table>
         <div class="fs-5 mb-2 text-center">
