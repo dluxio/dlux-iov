@@ -966,3 +966,9 @@ ul.scroll {
     transform: translateY((-100% / $scroll-count) * ($scroll-count - 1));
   }
 }
+
+.dropdown-menu {
+  overflow: hidden;
+  overflow-y: auto;
+  max-height: calc(100vh - 84px);
+}

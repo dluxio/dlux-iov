@@ -13328,4 +13328,9 @@ ul.scroll li.scroll {
   to {
     transform: translateY(-80%);
   }
+}
+.dropdown-menu {
+  overflow: hidden;
+  overflow-y: auto;
+  max-height: calc(100vh - 84px);
 }/*# sourceMappingURL=custom.css.map */
