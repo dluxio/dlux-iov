@@ -812,7 +812,7 @@ export default {
           cj: {
             amount: parseInt(this.amount * 1000),
           },
-          id: `${this.spkprefix}${this.test ? 'T' : ''}_power_up`,
+          id: `${this.spkprefix}_${this.test ? 'T' : ''}power_up`,
           msg: `Trying to power up ${this.token}...`,
           ops: ["getSapi"],
           api: "https://spkinstant.hivehoneycomb.com",
@@ -824,7 +824,7 @@ export default {
           cj: {
             amount: parseInt(this.amount * 1000),
           },
-          id: `${this.spkprefix}${this.test ? 'T' : ''}_gov_down`,
+          id: `${this.spkprefix}_${this.test ? 'T' : ''}gov_down`,
           msg: `Trying to unlock ${this.token}...`,
           ops: ["getSapi"],
           api: "https://spkinstant.hivehoneycomb.com",
@@ -836,7 +836,7 @@ export default {
           cj: {
             amount: parseInt(this.amount * 1000),
           },
-          id: `${this.spkprefix}${this.test ? 'T' : ''}_gov_up`,
+          id: `${this.spkprefix}_${this.test ? 'T' : ''}gov_up`,
           msg: `Trying to lock ${this.token}...`,
           ops: ["getSapi"],
           api: "https://spkinstant.hivehoneycomb.com",
