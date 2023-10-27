@@ -52,7 +52,7 @@ export default {
                                             Waiting for upload
                                             </span>
                                             <span v-if="contract.c == 2">
-                                            Waiting for post
+                                            Waiting for post with {{split(contract.s, ',', 1)/100}}% Beneficiary to @{{split(contract.s, ',', 0)}}
                                             </span>
                                             <span v-if="contract.c == 3 && !contract.s">
                                             1/3 Nodes hosting
@@ -304,6 +304,9 @@ export default {
         },
         replace(string, char = ':') {
         return string.replaceAll(char, '_')
+        },
+        split(string, del, index) {
+            return string.split(del)[index]
         },
         slotDecode(slot, index) {
             var item = slot.split(',')
