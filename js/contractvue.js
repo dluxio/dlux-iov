@@ -1,12 +1,12 @@
 import Pop from "/js/pop.js";
 import ExtensionVue from "/js/extensionvue.js";
-import FileVue from "/js/filevue.js";
+import FilesVue from "/js/filesvue.js";
 
 export default {
     components: {
         "pop-vue": Pop,
         "extension-vue": ExtensionVue,
-        "file-vue": FileVue
+        "files-vue": FilesVue
     },
     template: `
     <table class="table table-dark table-striped table-hover text-center align-middle mb-0">
