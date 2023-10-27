@@ -58,13 +58,13 @@ export default {
                                                 class="btn btn-outline-success m-1"
                                                 v-bind:class="{'invisible': contract.id}"
                                                 @click="selectContract(channel.i, channel.b)"><i
-                                                    class="fa-solid fa-file-import fa-fw"></i></button>
+                                                    class="fa-solid fa-file-medical fa-fw"></i></button>
 
                                             <button type="button"
                                                 class="btn btn-success m-1"
                                                 v-bind:class="{'d-none': !contract.id || contract.id != channel.i}"
                                                 @click="contract.id = ''; contract.api = ''"><i
-                                                    class="fa-solid fa-file-import fa-fw"></i></button>
+                                                    class="fa-solid fa-file-medical fa-fw"></i></button>
 
 
 
@@ -137,11 +137,6 @@ export default {
                         </div>
                     </td>
                 </tr>
-
-        </tbody>
-        <h3>Finalized</h3>
-        <tbody>
-
                 <tr v-for="(contract, key, index) in saccountapi.file_contracts">
                     <td colspan="4" class="p-0">
                         <div class="table-responsive">
@@ -168,37 +163,50 @@ export default {
                                             v-if="contract.c == 1 && !contract.s">
                                         </td>
                                         <td class="border-0 text-end" v-if="contract.c == 3">
-                                            <a class="collapsed m-1" data-bs-toggle="collapse"
-                                            :href="'#' + replace(contract.i) + 'files'">
-                                            <span class="if-collapsed">
-                                                <button class="btn btn-outline-primary">
-                                                    <i class="fa-solid fa-file fa-fw"></i>
-                                                </button>
-                                            </span>
-                                            <span class="if-not-collapsed">
-                                                <button class="btn btn-primary">
-                                                    <i class="fa-solid fa-file fa-fw"></i>
-                                                </button>
-                                            </span>
-                                            </a>
-                                            <a class="collapsed"
+                                        <a class="collapsed no-decoration"
                                                 data-bs-toggle="collapse"
                                                 :href="'#' + replace(contract.i)">
                                                 <span
                                                     class="if-collapsed"><button
-                                                        class="btn btn-outline-secondary"><i
+                                                        class="btn btn-outline-light"><i
+                                                            class="fa-solid fa-clock-rotate-left fa-fw"></i></button></span>
+                                                <span
+                                                    class="if-not-collapsed"><button
+                                                        class="btn btn-light"><i
+                                                            class="fa-solid fa-clock-rotate-left fa-fw"></i></button></span>
+                                            </a>
+                                            <a class="collapsed no-decoration" data-bs-toggle="collapse"
+                                            :href="'#' + replace(contract.i) + 'files'">
+                                            <span class="if-collapsed">
+                                                <button class="btn btn-outline-info">
+                                                    <i class="fa-solid fa-file fa-fw"></i>
+                                                </button>
+                                            </span>
+                                            <span class="if-not-collapsed">
+                                                <button class="btn btn-info">
+                                                    <i class="fa-solid fa-file fa-fw"></i>
+                                                </button>
+                                            </span>
+                                            </a>
+                                            <a class="collapsed no-decoration"
+                                                data-bs-toggle="collapse"
+                                                :href="'#' + replace(contract.i)">
+                                                <span
+                                                    class="if-collapsed"><button
+                                                        class="btn btn-outline-primary"><i
                                                             class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
                                                 <span
                                                     class="if-not-collapsed"><button
-                                                        class="btn btn-secondary"><i
+                                                        class="btn btn-primary"><i
                                                             class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
                                             </a>
+                                            
+                                            
                                         </td>
                                     </tr>
                                     <tr class="collapse" :id="replace(contract.i)">
                                         <td  class="border-0"
-                                            colspan="4" 
-                                            >
+                                            colspan="4">
                                             <ul class="text-start">
                                                 <li>Contract ID: {{contract.i}}
                                                 </li>
