@@ -79,11 +79,11 @@ export default {
                                                 <span
                                                     class="if-collapsed"><button
                                                         class="btn btn-sm btn-outline-warning"><i
-                                                            class="fa-solid fa-plus fa-fw"></i></button></span>
+                                                            class="fa-solid fa-pen-to-square fa-fw"></i></button></span>
                                                 <span
                                                     class="if-not-collapsed"><button
                                                         class="btn btn-sm btn-warning"><i
-                                                            class="fa-solid fa-plus fa-fw"></i></button></span>
+                                                            class="fa-solid fa-pen-to-square fa-fw"></i></button></span>
                                             </a>
                                             <a v-if="contract.c == 3" class="collapsed no-decoration"
                                                 data-bs-toggle="collapse"
