@@ -20,7 +20,7 @@ export default {
                 <th scope="col"><i
                         class="fa-solid fa-clock fa-fw me-2"></i>Expiration</th>
                 <th scope="col"><i
-                        class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>Benificiary
+                        class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>Status
                 </th>
                 <th scope="col"></th>
             </tr>
@@ -48,7 +48,14 @@ export default {
                                             </span>
                                         </td>
                                         <td class="border-0" scope="row">
-                                            <span v-if="contract.c == 1 && !contract.s">
+                                        <span v-if="contract.c == 1 && !contract.s">
+                                            Waiting for upload
+                                            </span>
+                                            <span v-if="contract.c == 2">
+                                            Waiting for post
+                                            </span>
+                                            <span v-if="contract.c == 3 && !contract.s">
+                                            1/3 Nodes hosting
                                             </span>
                                         </td>
                                         <td class="border-0 text-end">
@@ -133,7 +140,7 @@ export default {
                                                 <li v-if="contract.s">Terms:
                                                     {{slotDecode(contract.s,
                                                     1)}}%
-                                                    Bennificiary to
+                                                    Beneficiary to
                                                     @{{slotDecode(contract.s,
                                                     0)}}</li>
                                                 <li>Status: {{contract.c == 1 ?
