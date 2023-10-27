@@ -198,8 +198,7 @@ export default {
                                     <tr class="collapse" :id="replace(contract.i)">
                                         <td  class="border-0"
                                             colspan="4" 
-                                            
-                                            v-if="contract.c == 3">
+                                            >
                                             <ul class="text-start">
                                                 <li>Contract ID: {{contract.i}}
                                                 </li>
@@ -395,6 +394,17 @@ export default {
         },
         replace(string, char = ':') {
         return string.replaceAll(char, '_')
+        },
+        slotDecode(slot, index) {
+            var item = slot.split(',')
+            switch (index) {
+              case 1:
+                return parseFloat(item[1] / 100).toFixed(2)
+                break;
+              default:
+                return item[0]
+                break;
+            } index
         },
         getSapi(user = this.account) {
             fetch(this.sapi + "/@" + user)
