@@ -9,7 +9,9 @@ import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
 import Replies from "/js/replies.js";
 import CardVue from "./cardvue.js";
+import ContractsVue from "/js/contractsvue.js";
 import FilesVue from "/js/filesvue.js";
+import ExtensionVue from "/js/extensionvue.js";
 import DetailVue from "./detailvue.js";
 import NFTCard from "./nftcard.js";
 import FTTransfer from "./fttransfer.js";
@@ -832,7 +834,9 @@ var app = new Vue({
     "mde": MDE,
     "replies": Replies,
     "card-vue": CardVue,
+    "contract-vue": ContractVue,
     "files-vue": FilesVue,
+    "extension-vue": ExtensionVue,
     "detail-vue": DetailVue,
     "nftcard": NFTCard,
     "fttransfer": FTTransfer,

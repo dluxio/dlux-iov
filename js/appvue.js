@@ -9,7 +9,9 @@ import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
 import Replies from "/js/replies.js";
 import CardVue from "/js/cardvue.js";
+import ContractsVue from "/js/contractsvue.js";
 import FilesVue from "/js/filesvue.js";
+import ExtensionVue from "/js/extensionvue.js";
 import DetailVue from "/js/detailvue.js";
 
 let url = location.href.replace(/\/$/, "");
@@ -414,7 +416,9 @@ createApp({
     "mde": MDE,
     "replies": Replies,
     "card-vue": CardVue,
+    "contracts-vue": ContractsVue,
     "files-vue": FilesVue,
+    "extension-vue": ExtensionVue,
     "detail-vue": DetailVue,
   },
   methods: {
