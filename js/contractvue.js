@@ -72,7 +72,19 @@ export default {
                                                 @click="contract.id = ''; contract.api = ''"><i
                                                     class="fa-solid fa-file-medical fa-fw"></i></button>
                                             </span>
-                                            <a class="collapsed no-decoration"
+                                            <a v-if="contract.c == 2" class="collapsed no-decoration"
+                                                data-bs-toggle="collapse"
+                                                href="/new/">
+                                                <span
+                                                    class="if-collapsed"><button
+                                                        class="btn btn-sm btn-outline-warning"><i
+                                                            class="fa-solid fa-plus fa-fw"></i></button></span>
+                                                <span
+                                                    class="if-not-collapsed"><button
+                                                        class="btn btn-sm btn-warning"><i
+                                                            class="fa-solid fa-plus fa-fw"></i></button></span>
+                                            </a>
+                                            <a v-if="contract.c == 3" class="collapsed no-decoration"
                                                 data-bs-toggle="collapse"
                                                 :href="'#' + replace(contract.i) + 'extension'">
                                                 <span
@@ -84,7 +96,7 @@ export default {
                                                         class="btn btn-sm btn-light"><i
                                                             class="fa-solid fa-clock-rotate-left fa-fw"></i></button></span>
                                             </a>
-                                            <a class="ms-1 collapsed no-decoration" data-bs-toggle="collapse"
+                                            <a v-if="contract.c != 1" class="ms-1 collapsed no-decoration" data-bs-toggle="collapse"
                                             :href="'#' + replace(contract.i) + 'files'">
                                             <span class="if-collapsed">
                                                 <button class="btn btn-sm btn-outline-info">
@@ -112,9 +124,9 @@ export default {
                                             </a>
                                         </td>
                                     </tr>
-                                    <tr>
-                                        <td class="collapse border-0"
-                                            colspan="4" :id="replace(contract.i)">
+                                    <tr class="collapse" :id="replace(contract.i)">
+                                        <td class="border-0"
+                                            colspan="4">
                                             <ul class="text-start">
                                                 <li>Contract ID: {{contract.i}}
                                                 </li>
@@ -158,6 +170,18 @@ export default {
                                                     </p>
                                                 </li>
                                             </ul>
+                                        </td>
+                                    </tr>
+                                    <tr class="collapse" :id="replace(contract.i) + 'files'">
+                                        <td class=" border-0"
+                                            colspan="4">
+                                            <p>put files-vue here</p>
+                                        </td>
+                                    </tr>
+                                    <tr class="collapse" :id="replace(contract.i) + 'extension'">
+                                        <td class=" border-0"
+                                            colspan="4" v-if="contract.c == 3">
+                                            <p>put extension-vue here</p>
                                         </td>
                                     </tr>
                                 </tbody>
