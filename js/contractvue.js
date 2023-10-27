@@ -24,7 +24,7 @@ export default {
             </tr>
         </thead>
         <tbody>
-            <Transition>
+
                 <tr v-for="(sponsor, key, index) in saccountapi.channels">
                     <td colspan="4" class="p-0">
                         <div class="table-responsive">
@@ -137,9 +137,11 @@ export default {
                         </div>
                     </td>
                 </tr>
+
         </tbody>
         <h3>Finalized</h3>
         <tbody>
+
                 <tr v-for="(contract, key, index) in saccountapi.file_contracts">
                     <td colspan="4" class="p-0">
                         <div class="table-responsive">
@@ -256,7 +258,6 @@ export default {
                         </div>
                     </td>
                 </tr>
-            </Transition>
         </tbody>
     </table>`,
     props: {
