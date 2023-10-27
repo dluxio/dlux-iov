@@ -16,11 +16,19 @@ export default {
             <tr>
 
                 <th scope="col"><i
-                        class="fa-solid fa-database fa-fw me-2"></i>Storage</th>
+                        class="fa-solid fa-database fa-fw me-2"></i>Storage 
+                        <button class="btn btn-sm btn-secondary ms-1"><i class="fa-solid fa-caret-up"></i></button>
+                        <button class="btn btn-sm btn-secondary ms-1"><i class="fa-solid fa-caret-down"></i></button>
+                        </th>
                 <th scope="col"><i
-                        class="fa-solid fa-clock fa-fw me-2"></i>Expiration</th>
+                        class="fa-solid fa-clock fa-fw me-2"></i>Expiration
+                        <button class="btn btn-sm btn-secondary ms-1"><i class="fa-solid fa-caret-up"></i></button>
+                        <button class="btn btn-sm btn-secondary ms-1"><i class="fa-solid fa-caret-down"></i></button>
+                        </th>
                 <th scope="col"><i
                         class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>Status
+                        <button class="btn btn-sm btn-secondary ms-1"><i class="fa-solid fa-caret-up"></i></button>
+                        <button class="btn btn-sm btn-secondary ms-1"><i class="fa-solid fa-caret-down"></i></button>
                 </th>
                 <th scope="col"></th>
             </tr>
