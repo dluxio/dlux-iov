@@ -139,6 +139,7 @@ export default {
                 </tr>
             </Transition>
         </tbody>
+        <h3>Finalized</h3>
         <tbody>
             <Transition>
                 <tr v-for="(sponsor, key, index) in saccountapi.file_contracts">
