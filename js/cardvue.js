@@ -112,7 +112,7 @@ export default {
                                             <span v-if="!isStored(contracts[name].i)"><i class="fa-solid fa-square-plus fa-fw me-1"></i>Add</span>
                                             <span v-if="isStored(contracts[name].i)"><i class="fa-solid fa-trash-can fa-fw me-1"></i>Remove</span>
                                         </button>
-                                        <button type="button" class="btn btn-sm btn-danger ms-1" @click="">
+                                        <button type="button" class="btn btn-sm btn-warning ms-1" @click="">
                                             <i class="fa-solid fa-flag fa-fw me-1"></i>Flag</button>
                                         </div>
                                     </div>
