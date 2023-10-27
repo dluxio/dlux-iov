@@ -1,16 +1,12 @@
-import Marker from "/js/marker.js";
-import Ratings from "/js/ratings.js";
-import MDE from "/js/mde.js";
-import Vote from "/js/vote.js";
 import Pop from "/js/pop.js";
+import ExtensionVue from "/js/extensionvue.js";
+import FileVue from "/js/filevue.js";
 
 export default {
     components: {
-        "vue-markdown": Marker,
-        "vue-ratings": Ratings,
-        "mde": MDE,
-        "vote": Vote,
-        "pop-vue": Pop
+        "pop-vue": Pop,
+        "extension-vue": ExtensionVue,
+        "file-vue": FileVue
     },
     template: `
     <table class="table table-dark table-striped table-hover text-center align-middle mb-0">
@@ -84,8 +80,6 @@ export default {
                                                         class="btn btn-primary"><i
                                                             class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
                                             </a>
-
-
                                         </td>
                                     </tr>
                                     <tr>
@@ -145,75 +139,91 @@ export default {
                 </tr>
             </Transition>
         </tbody>
-    </table>
-    `,
+    </table>`,
     props: {
-        head_block: {
-            default: 0
-        },
-        TOKEN: {
-            default: 'DLUX'
-        },
-        post: {
-            required: true,
-            default: function () {
-                return {
-
-                };
-            },
-        },
         account: {
             default: ''
         },
-        has_ipfs: {
-            default: false
+        sapi: {
+            default: 'https://spktest.dlux.io'
         },
-        voteval: 0,
-        post_select: {
-            default: function () {
-                return {}
-            }
-        },
-        contracts: {
-            default: function () {
-                return {}
-            }
-        },
-        extendcost: {
-            default: function () {
-                return {}
-            }
-        },
-        broca_refill:{
-            default: 0
-        },
-        broca: {
-            default: 0
-        },
-        spk_power: {
-            default: 0
-        }
     },
     data() {
         return {
-            collapse: false,
-            edit: false,
-            view: true,
-            mde: '',
-            makeReply: false,
-            warn: false,
-            flag: false,
-            slider: 10000,
-            spread: false,
-            showNodes: false,
-            bens: [],
+            tick: "1",
+            larynxbehind: 999999,
+            lbalance: 0,
+            lbargov: 0,
+            spkval: 0,
+            saccountapi: {
+                spk: 0,
+                balance: 0,
+                gov: 0,
+                poweredUp: 0,
+                claim: 0,
+                granted: {
+                    t: 0
+                },
+                granting: {
+                    t: 0
+                }
+            }
         };
     },
-    emits: ['vote', 'reply', 'modalselect', 'tosign'],
+    emits: ['tosign'],
     methods: {
         modalSelect(url) {
             this.$emit('modalselect', url);
         },
+        getSapi(user = this.account) {
+            fetch(this.sapi + "/@" + user)
+              .then((response) => response.json())
+              .then((data) => {
+                data.tick = data.tick || 0.01;
+                this.larynxbehind = data.behind;
+                  this.lbalance = (data.balance / 1000).toFixed(3);
+                  this.lbargov = (data.gov / 1000).toFixed(3);
+                  data.powerDowns = Object.keys(data.power_downs);
+                  for (var i = 0; i < data.powerDowns.length; i++) {
+                    data.powerDowns[i] = data.powerDowns[i].split(":")[0];
+                  }
+                  this.saccountapi = data;
+                  this.saccountapi.spk += this.reward_spk();
+                  if (!this.saccountapi.granted.t) this.saccountapi.granted.t = 0;
+                  if (!this.saccountapi.granting.t) this.saccountapi.granting.t = 0;
+                  this.spkval =
+                    (data.balance +
+                      data.gov +
+                      data.poweredUp +
+                      this.saccountapi.granting.t +
+                      data.claim +
+                      data.spk) /
+                    1000;
+              });
+          },
+        getSpkStats() {
+            fetch(this.sapi + "/stats")
+              .then((response) => response.json())
+              .then((data) => {
+                console.log(data);
+                this.spkStats = data.result;
+                for (var i = 0; i < this.tokenGov.options.length; i++) {
+                  this.tokenGov.options[i].val = data.result[this.tokenGov.options[i].id]
+                  this.tokenGov.options[i].range_high = parseFloat(this.tokenGov.options[i].val * 1.01).toFixed(6)
+                  this.tokenGov.options[i].range_low = parseFloat(this.tokenGov.options[i].val * 0.99).toFixed(6)
+                  this.tokenGov.options[i].step = "0.000001"
+                }
+              });
+        },
+        selectContract(id, broker) {  //needs PeerID of broker
+            this.contract.id = id
+            fetch(`${sapi}/user_services/${broker}`)
+              .then(r => r.json())
+              .then(res => {
+                console.log(res)
+                this.contract.api = res.services.IPFS[Object.keys(res.services.IPFS)[0]].a
+              })
+          },
         isStored(contract){
             var found = false
             for (var i in this.contracts[contract].n) {
@@ -433,8 +443,7 @@ export default {
         }
     },
     mounted() {
-        this.hideLowRep()
-        this.getContracts()
+        this.getSapi()
     },
 };
 

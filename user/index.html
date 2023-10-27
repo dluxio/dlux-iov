@@ -1306,13 +1306,7 @@
                         <div class="">
                             <div class="card mx-2 my-3">
                                 <div class="card-body">
-                                    <contract-vue :post="post" :account="account"
-                                        :has_ipfs="spkapi.storage?.length ? true : false" :post_select="postSelect"
-                                        :voteval="voteVal" :head_block="spkapi.head_block"
-                                        :broca_refill="sstats.broca_refill" :broca="spkapi.broca"
-                                        :spk_power="spkapi.spk_power" :contracts="contracts" :extendcost="extendcost"
-                                        @tosign="toSign=$event" @modalselect="modalSelect($event)"
-                                        @vote="vote($event)"></contract-vue>
+                                    <contract-vue :account="account" @tosign="toSign=$event" ></contract-vue>
                                 </div>
                             </div>
                         </div>
