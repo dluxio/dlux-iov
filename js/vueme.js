@@ -9,7 +9,7 @@ import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
 import Replies from "/js/replies.js";
 import CardVue from "./cardvue.js";
-import ContractVue from "/js/contractsvue.js";
+import ContractVue from "/js/contractvue.js";
 import FilesVue from "/js/filesvue.js";
 import ExtensionVue from "/js/extensionvue.js";
 import DetailVue from "./detailvue.js";
