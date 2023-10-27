@@ -34,23 +34,23 @@
     <script type="module" src="/js/spkvue.js"></script>
     <link href="/css/custom.css" rel="stylesheet" />
     <script>
-        navigator.serviceWorker.getRegistrations().then(function(registrations) {
-            for(let registration of registrations) {
-                registration.unregister();
-            } 
-        });
-        // if ('serviceWorker' in navigator) {
-        //     navigator
-        //         .serviceWorker
-        //         .register(
-        //             // path to the service worker file
-        //             '/sw.js'
-        //         )
-        //         // the registration is async and it returns a promise
-        //         .then(function (reg) {
-        //             console.log('Registration Successful');
-        //         });
-        // }
+        // navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        //     for(let registration of registrations) {
+        //         registration.unregister();
+        //     } 
+        // });
+        if ('serviceWorker' in navigator) {
+            navigator
+                .serviceWorker
+                .register(
+                    // path to the service worker file
+                    '/sw.js'
+                )
+                // the registration is async and it returns a promise
+                .then(function (reg) {
+                    console.log('Registration Successful');
+                });
+        }
       </script>
     <style>
         .form-switch.form-switch-lg .form-check-input {
