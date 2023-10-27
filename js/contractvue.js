@@ -22,8 +22,8 @@ export default {
                         </th>
                 <th scope="col"><i
                         class="fa-solid fa-clock fa-fw me-2"></i>Expiration
-                        <button class="btn btn-sm btn-secondary ms-1"  @click="sortContracts('exp','dec')"><i class="fa-solid fa-caret-up"></i></button>
-                        <button class="btn btn-sm btn-secondary ms-1"  @click="sortContracts('exp','asc')"><i class="fa-solid fa-caret-down"></i></button>
+                        <button class="btn btn-sm btn-secondary ms-1"  @click="sortContracts('e','dec')"><i class="fa-solid fa-caret-up"></i></button>
+                        <button class="btn btn-sm btn-secondary ms-1"  @click="sortContracts('e','asc')"><i class="fa-solid fa-caret-down"></i></button>
                         </th>
                 <th scope="col"><i
                         class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>Status
