@@ -155,6 +155,7 @@ export default {
             lbalance: 0,
             lbargov: 0,
             spkval: 0,
+            sstats: {},
             saccountapi: {
                 spk: 0,
                 balance: 0,
@@ -167,13 +168,113 @@ export default {
                 granting: {
                     t: 0
                 }
-            }
+            },
+            tokenGov: {
+                title: "SPK VOTE",
+                options: [
+                  {
+                    id: "spk_cycle_length",
+                    range_low: 28800,
+                    range_high: 2592000,
+                    info: "Time in blocks to complete a power down cycle. 4 cycles to completely divest. 28800 blocks per day.",
+                    val: 200000,
+                    step: 1,
+                    unit: "Blocks",
+                    title: "Down Power Period"
+                  },
+                  {
+                    id: "dex_fee",
+                    range_low: 0,
+                    range_high: 0.01,
+                    info: "Share of DEX completed DEX trades to allocate over the collateral group.",
+                    val: 0.00505,
+                    step: 0.000001,
+                    unit: "",
+                    title: "DEX Fee"
+                  },
+                  {
+                    id: "dex_max",
+                    range_low: 28800,
+                    range_high: 2592000,
+                    info: "Largest open trade size in relation to held collateral.",
+                    val: 97.38,
+                    step: 1,
+                    unit: "%",
+                    title: "Max Trade Size"
+                  },
+                  {
+                    id: "dex_slope",
+                    range_low: 0,
+                    range_high: 100,
+                    info: "0 Allows any size buy orders to be placed. 1 will disallow large buy orders at low prices.",
+                    val: 48.02,
+                    step: 0.01,
+                    unit: "%",
+                    title: "Max Lowball Trade Size"
+                  },
+                  {
+                    id: "spk_rate_ldel",
+                    range_low: 0.00001, //current lpow
+                    range_high: 0.0001, //current lgov
+                    info: "SPK generation rate for delegated LARYNX Power",
+                    val: 0.00015,
+                    step: 1,
+                    unit: "",
+                    title: "SPK Gen Rate: Delegated"
+                  },
+                  {
+                    id: "spk_rate_lgov",
+                    range_low: 0.00015, //current ldel
+                    range_high: 0.01,
+                    info: "SPK generation rate for Larynx Locked",
+                    val: 0.001,
+                    step: 0.000001,
+                    unit: "",
+                    title: "SPK Gen Rate: Locked"
+                  },
+                  {
+                    id: "spk_rate_lpow",
+                    range_low: 0.000001,
+                    range_high: 0.00015, //current ldel
+                    info: "SPK generation rate for undelegated Larynx Power",
+                    val: 0.0001,
+                    step: 0.000001,
+                    unit: "",
+                    title: "Min SPK Gen Rate: Min"
+                  },
+                  {
+                    id: "max_coll_members",
+                    range_low: 25,
+                    range_high: 79,
+                    info: "The Max number of accounts that can share DEX fees. The richer half of this group controls outflows from the multisig wallet.",
+                    val: 25,
+                    step: 1,
+                    unit: "Accounts",
+                    title: "Size of collateral group"
+                  }
+                ]
+              },
+              contract: {
+                api: '',
+                id: '',
+                files: '',
+                fosig: '', //file-owner
+                spsig: '', //service-provider 
+                s: 10485760,
+                t: 0
+              }
         };
     },
     emits: ['tosign'],
     methods: {
         modalSelect(url) {
             this.$emit('modalselect', url);
+        },
+        exp_to_time(exp = '0:0') {
+            return this.when([parseInt(exp.split(':')[0])])
+        },
+        replace(string, char = ':') {
+        return string.replaceAll(char, '_')
         },
         getSapi(user = this.account) {
             fetch(this.sapi + "/@" + user)
@@ -213,8 +314,83 @@ export default {
                   this.tokenGov.options[i].range_low = parseFloat(this.tokenGov.options[i].val * 0.99).toFixed(6)
                   this.tokenGov.options[i].step = "0.000001"
                 }
+                this.getSapi()
               });
         },
+        when(arr) {
+            if (!arr.length) return "";
+            var seconds =
+              (parseInt(arr[0]) - parseInt(this.saccountapi.head_block)) * 3;
+            var interval = Math.floor(seconds / 86400);
+            if (interval >= 1) {
+              return interval + ` day${interval > 1 ? "s" : ""}`;
+            }
+            interval = Math.floor(seconds / 3600);
+            if (interval >= 1) {
+              return interval + ` hour${interval > 1 ? "s" : ""}`;
+            }
+            interval = Math.floor(seconds / 60);
+            if (interval >= 1) {
+              return `${interval} minute${interval > 1 ? "s" : ""}`;
+            }
+            return Math.floor(seconds) + " seconds";
+          },
+        reward_spk() {
+            var r = 0,
+              a = 0,
+              b = 0,
+              c = 0,
+              t = 0,
+              diff = (this.saccountapi.head_block ? this.saccountapi.head_block : this.sstats.lastIBlock) - this.saccountapi.spk_block;
+              console.log(diff, this.saccountapi.head_block , this.sstats)
+              if (!this.saccountapi.spk_block) {
+              console.log("No SPK seconds");
+              return 0;
+            } else if (diff < 28800) {
+              console.log("Wait for SPK");
+              return 0;
+            } else {
+              t = parseInt(diff / 28800);
+              a = this.saccountapi.gov
+                ? simpleInterest(this.saccountapi.gov, t, this.sstats.spk_rate_lgov)
+                : 0;
+              b = this.saccountapi.pow
+                ? simpleInterest(this.saccountapi.pow, t, this.sstats.spk_rate_lpow)
+                : 0;
+              c = simpleInterest(
+                parseInt(
+                  this.saccountapi.granted?.t > 0 ? this.saccountapi.granted.t : 0
+                ) +
+                parseInt(
+                  this.saccountapi.granting?.t > 0 ? this.saccountapi.granting.t : 0
+                ),
+                t,
+                this.sstats.spk_rate_ldel
+              );
+              console.log({
+                t,
+                a,
+                b,
+                c,
+                d: this.saccountapi.granted?.t > 0 ? this.saccountapi.granted.t : 0,
+                g: this.saccountapi.granting?.t > 0 ? this.saccountapi.granting.t : 0,
+              });
+              const i = a + b + c;
+              if (i) {
+                console.log(i, "Phantom SPK");
+                return i;
+              } else {
+                console.log("0 SPK");
+                return 0;
+              }
+            }
+            function simpleInterest(p, t, r) {
+              console.log({ p, t, r });
+              const amount = p * (1 + parseFloat(r) / 365);
+              const interest = amount - p;
+              return parseInt(interest * t);
+            }
+          },
         selectContract(id, broker) {  //needs PeerID of broker
             this.contract.id = id
             fetch(`${sapi}/user_services/${broker}`)
@@ -443,7 +619,7 @@ export default {
         }
     },
     mounted() {
-        this.getSapi()
+        this.getSpkStats()
     },
 };
 
