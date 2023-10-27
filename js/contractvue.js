@@ -11,7 +11,7 @@ export default {
         "files-vue": FilesVue
     },
     template: `
-    <table class="table table-dark table-striped table-hover text-center align-middle mb-0">
+    <table class="table table-hover text-center align-middle mb-0">
         <thead>
             <tr>
 
@@ -26,7 +26,7 @@ export default {
                         <button class="btn btn-sm btn-secondary ms-1"  @click="sortContracts('e','asc')"><i class="fa-solid fa-caret-down"></i></button>
                         </th>
                 <th scope="col"><i
-                        class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>Status
+                        class="fa-solid fa-signal fa-fw me-2"></i>Status
                         <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('c','asc')"><i class="fa-solid fa-caret-up"></i></button>
                         <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('c','dec')"><i class="fa-solid fa-caret-down"></i></button>
                 </th>
@@ -50,17 +50,11 @@ export default {
                                             </span>
                                         </td>
                                         <td class="border-0" scope="row">
-                                            <span v-if="contract.c == 1 && contract.s">
-                                            @{{slotDecode(contract.s, 0)}}
-                                            ({{slotDecode(contract.s, 1)}}%)
-                                            </span>
-                                        </td>
-                                        <td class="border-0" scope="row">
                                         <span v-if="contract.c == 1 && !contract.s">
                                             Waiting for upload
                                             </span>
                                             <span v-if="contract.c == 2">
-                                            Waiting for post with {{split(contract.s, ',', 1)/100}}% Beneficiary to @{{split(contract.s, ',', 0)}}
+                                            Post {{split(contract.s, ',', 1)/100}}% to @{{split(contract.s, ',', 0)}}
                                             </span>
                                             <span v-if="contract.c == 3 && !contract.s">
                                             1/3 Nodes hosting
@@ -96,22 +90,22 @@ export default {
                                                 :href="'#' + replace(contract.i) + 'extension'">
                                                 <span
                                                     class="if-collapsed"><button
-                                                        class="btn btn-sm btn-outline-light"><i
+                                                        class="btn btn-sm btn-outline-info"><i
                                                             class="fa-solid fa-clock-rotate-left fa-fw"></i></button></span>
                                                 <span
                                                     class="if-not-collapsed"><button
-                                                        class="btn btn-sm btn-light"><i
+                                                        class="btn btn-sm btn-info"><i
                                                             class="fa-solid fa-clock-rotate-left fa-fw"></i></button></span>
                                             </a>
                                             <a v-if="contract.c != 1" class="ms-1 collapsed no-decoration" data-bs-toggle="collapse"
                                             :href="'#' + replace(contract.i) + 'files'">
                                             <span class="if-collapsed">
-                                                <button class="btn btn-sm btn-outline-info">
+                                                <button class="btn btn-sm btn-outline-primary">
                                                     <i class="fa-solid fa-file fa-fw"></i>
                                                 </button>
                                             </span>
                                             <span class="if-not-collapsed">
-                                                <button class="btn btn-sm btn-info">
+                                                <button class="btn btn-sm btn-primary">
                                                     <i class="fa-solid fa-file fa-fw"></i>
                                                 </button>
                                             </span>
@@ -122,12 +116,12 @@ export default {
                                                 :href="'#' + replace(contract.i)">
                                                 <span
                                                     class="if-collapsed"><button
-                                                        class="btn btn-sm btn-outline-primary"><i
-                                                            class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
+                                                        class="btn btn-sm btn-outline-light"><i
+                                                            class="fa-solid fa-ellipsis-vertical fa-fw"></i></button></span>
                                                 <span
                                                     class="if-not-collapsed"><button
-                                                        class="btn btn-sm btn-primary"><i
-                                                            class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
+                                                        class="btn btn-sm btn-light"><i
+                                                            class="fa-solid fa-ellipsis-vertical fa-fw"></i></button></span>
                                             </a>
                                         </td>
                                     </tr>
