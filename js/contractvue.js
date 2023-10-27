@@ -25,15 +25,14 @@ export default {
         </thead>
         <tbody>
 
-                <tr v-for="(sponsor, key, index) in saccountapi.channels">
+                <tr v-for="contract in contracts">
                     <td colspan="4" class="p-0">
                         <div class="table-responsive">
                             <table class="table text-white align-middle mb-0">
                                 <tbody>
                                     <tr>
                                         <th class="border-0"
-                                            v-for="channel in sponsor"
-                                            v-if="channel.c == 1">
+                                            v-for="channel in sponsor">
                                             {{channel.a/1000000}}
                                             MB</th>
                                         <td class="border-0"
@@ -85,8 +84,7 @@ export default {
                                     <tr>
                                         <td class="collapse border-0"
                                             colspan="4" :id="replace(channel.i)"
-                                            v-for="channel in sponsor"
-                                            v-if="channel.c == 1">
+                                            v-for="channel in sponsor">
                                             <ul class="text-start">
                                                 <li>Contract ID: {{channel.i}}
                                                 </li>
@@ -287,6 +285,8 @@ export default {
             lbargov: 0,
             spkval: 0,
             sstats: {},
+            contracts: [],
+            contractIDs: {},
             saccountapi: {
                 spk: 0,
                 balance: 0,
@@ -429,6 +429,21 @@ export default {
                   data.powerDowns = Object.keys(data.power_downs);
                   for (var i = 0; i < data.powerDowns.length; i++) {
                     data.powerDowns[i] = data.powerDowns[i].split(":")[0];
+                  }
+                  for (var node in data.file_contracts) {
+                    this.contractIDs[data.file_contracts[node].i] = data.file_contracts[node];
+                    this.contracts.push(data.file_contracts[node]);
+                    this.contractIDs[data.file_contracts[node].i].index = this.contracts.length - 1;
+                  }
+                  for (var user in data.channels) {
+                    for (var node in data.channels[user]) {
+                        if(this.contractIDs[data.channels[user][node].i])continue
+                        else {
+                            this.contractIDs[data.channels[user][node].i] = data.channels[user][node];
+                            this.contracts.push(data.channels[user][node]);
+                            this.contractIDs[data.channels[user][node].i].index = this.contracts.length - 1;
+                        }
+                    }
                   }
                   this.saccountapi = data;
                   this.saccountapi.spk += this.reward_spk();
