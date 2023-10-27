@@ -2,43 +2,7 @@ import Pop from "/js/pop.js";
 import ExtensionVue from "/js/extensionvue.js";
 import FilesVue from "/js/filesvue.js";
 
-/* <a class="collapsed no-decoration"
-                                                data-bs-toggle="collapse"
-                                                :href="'#' + replace(contract.i) + 'extension'">
-                                                <span
-                                                    class="if-collapsed"><button
-                                                        class="btn btn-sm btn-outline-light"><i
-                                                            class="fa-solid fa-clock-rotate-left fa-fw"></i></button></span>
-                                                <span
-                                                    class="if-not-collapsed"><button
-                                                        class="btn btn-sm btn-light"><i
-                                                            class="fa-solid fa-clock-rotate-left fa-fw"></i></button></span>
-                                            </a>
-                                            <a class="ms-1 collapsed no-decoration" data-bs-toggle="collapse"
-                                            :href="'#' + replace(contract.i) + 'files'">
-                                            <span class="if-collapsed">
-                                                <button class="btn btn-sm btn-outline-info">
-                                                    <i class="fa-solid fa-file fa-fw"></i>
-                                                </button>
-                                            </span>
-                                            <span class="if-not-collapsed">
-                                                <button class="btn btn-sm btn-info">
-                                                    <i class="fa-solid fa-file fa-fw"></i>
-                                                </button>
-                                            </span>
-                                            </a>
-                                            <a class="ms-1 collapsed no-decoration"
-                                                data-bs-toggle="collapse"
-                                                :href="'#' + replace(contract.i)">
-                                                <span
-                                                    class="if-collapsed"><button
-                                                        class="btn btn-sm btn-outline-primary"><i
-                                                            class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
-                                                <span
-                                                    class="if-not-collapsed"><button
-                                                        class="btn btn-sm btn-primary"><i
-                                                            class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
-                                            </a> */
+/*  */
 
 export default {
     components: {
@@ -72,20 +36,23 @@ export default {
                                         <th class="border-0">
                                             {{contract.a/1000000}}
                                             MB</th>
-                                        <td class="border-0"
-                                            v-if="contract.c == 1">
+                                        <td class="border-0">
+                                            <span v-if="contract.c == 1">
                                             {{exp_to_time(contract.e)}}
+                                            </span>
                                         </td>
-                                        <td class="border-0" scope="row"
-                                            v-if="contract.c == 1 && contract.s">
+                                        <td class="border-0" scope="row">
+                                            <span v-if="contract.c == 1 && contract.s">
                                             @{{slotDecode(contract.s, 0)}}
-                                            ({{slotDecode(contract.s, 1)}}%)</td>
-                                        <td class="border-0" scope="row"
-                                            v-if="contract.c == 1 && !contract.s">
+                                            ({{slotDecode(contract.s, 1)}}%)
+                                            </span>
                                         </td>
-                                        <td class="border-0 text-end"
-                                            v-if="contract.c == 1">
-
+                                        <td class="border-0" scope="row">
+                                            <span v-if="contract.c == 1 && !contract.s">
+                                            </span>
+                                        </td>
+                                        <td class="border-0 text-end">
+                                            <span v-if="contract.c == 1">
                                             <button type="button"
                                                 class="btn btn-sm btn-outline-success"
                                                 v-bind:class="{'invisible': contract.id}"
@@ -97,9 +64,33 @@ export default {
                                                 v-bind:class="{'d-none': !contract.id || contract.id != contract.i}"
                                                 @click="contract.id = ''; contract.api = ''"><i
                                                     class="fa-solid fa-file-medical fa-fw"></i></button>
-
-
-
+                                            </span>
+                                            <a class="collapsed no-decoration"
+                                                data-bs-toggle="collapse"
+                                                :href="'#' + replace(contract.i) + 'extension'">
+                                                <span
+                                                    class="if-collapsed"><button
+                                                        class="btn btn-sm btn-outline-light"><i
+                                                            class="fa-solid fa-clock-rotate-left fa-fw"></i></button></span>
+                                                <span
+                                                    class="if-not-collapsed"><button
+                                                        class="btn btn-sm btn-light"><i
+                                                            class="fa-solid fa-clock-rotate-left fa-fw"></i></button></span>
+                                            </a>
+                                            <a class="ms-1 collapsed no-decoration" data-bs-toggle="collapse"
+                                            :href="'#' + replace(contract.i) + 'files'">
+                                            <span class="if-collapsed">
+                                                <button class="btn btn-sm btn-outline-info">
+                                                    <i class="fa-solid fa-file fa-fw"></i>
+                                                </button>
+                                            </span>
+                                            <span class="if-not-collapsed">
+                                                <button class="btn btn-sm btn-info">
+                                                    <i class="fa-solid fa-file fa-fw"></i>
+                                                </button>
+                                            </span>
+                                            </a>
+                                            
                                             <a class="collapsed ms-1"
                                                 data-bs-toggle="collapse"
                                                 :href="'#' + replace(contract.i)">
