@@ -1054,10 +1054,8 @@ export default {
         <!-- LOGIN MENU -->
         <ul class="navbar-nav" id="loginMenu" v-show="!user">
           <li class="nav-item">
-            <div class="btn-group">
-              <button class="btn btn-sm btn-fusch" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
-              <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
-              <button class="btn btn-sm px-2 btn-secondary e-radius-hotfix" data-bs-toggle="dropdown">
+            <div class="btn-group p-05 rounded-3" style="background: linear-gradient(145deg, #8E8E8E, #6C6C6C);">
+              <button class="btn  border-0 px-2" data-bs-toggle="dropdown">
               <span class="d-flex align-items-center"> 
                <i class="fa-solid fa-bars"></i>
               </span>
@@ -1068,6 +1066,10 @@ export default {
                   <li class=""><a class="dropdown-item" href="/new/"><i class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
                   <li class=""><a class="dropdown-item" href="/docs/"><i class="fa-solid fa-book fa-fw me-2"></i>Docs</a></li>
                 </ul>
+              <button type="button" class="btn d-none btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
+              <button class="btn btn-fusch s-radius-hotfix border border-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers" style="font-family:'Lucida Console', Monaco, monospace;">login</button>
+              
+              
               </div>
                 
             
