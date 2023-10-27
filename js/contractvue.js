@@ -142,44 +142,44 @@ export default {
         <h3>Finalized</h3>
         <tbody>
             <Transition>
-                <tr v-for="(sponsor, key, index) in saccountapi.file_contracts">
+                <tr v-for="(contract, key, index) in saccountapi.file_contracts">
                     <td colspan="4" class="p-0">
                         <div class="table-responsive">
                             <table class="table text-white align-middle mb-0">
                                 <tbody>
                                     <tr>
                                         <th class="border-0"
-                                            v-for="channel in sponsor"
-                                            v-if="channel.c == 1">
-                                            {{channel.a/1000000}}
+                                            
+                                            v-if="contract.c == 3">
+                                            {{contract.a/1000000}}
                                             MB</th>
                                         <td class="border-0"
-                                            v-for="channel in sponsor"
-                                            v-if="channel.c == 1">
-                                            {{exp_to_time(channel.e)}}
+                                            
+                                            v-if="contract.c == 3">
+                                            {{exp_to_time(contract.e)}}
                                         </td>
                                         <td class="border-0" scope="row"
-                                            v-for="channel in sponsor"
-                                            v-if="channel.c == 1 && channel.s">
-                                            @{{slotDecode(channel.s, 0)}}
-                                            ({{slotDecode(channel.s, 1)}}%)</td>
+                                            
+                                            v-if="contract.c == 1 && contract.s">
+                                            @{{slotDecode(contract.s, 0)}}
+                                            ({{slotDecode(contract.s, 1)}}%)</td>
                                         <td class="border-0" scope="row"
-                                            v-for="channel in sponsor"
-                                            v-if="channel.c == 1 && !channel.s">
+                                            
+                                            v-if="contract.c == 1 && !contract.s">
                                         </td>
                                         <td class="border-0 text-end"
-                                            v-for="channel in sponsor"
-                                            v-if="channel.c == 1">
+                                            
+                                            v-if="contract.c == 3">
 
                                             <button type="button"
                                                 class="btn btn-outline-success m-1"
                                                 v-bind:class="{'invisible': contract.id}"
-                                                @click="selectContract(channel.i, channel.b)"><i
+                                                @click="selectContract(contract.i, contract.b)"><i
                                                     class="fa-solid fa-file-import fa-fw"></i></button>
 
                                             <button type="button"
                                                 class="btn btn-success m-1"
-                                                v-bind:class="{'d-none': !contract.id || contract.id != channel.i}"
+                                                v-bind:class="{'d-none': !contract.id || contract.id != contract.i}"
                                                 @click="contract.id = ''; contract.api = ''"><i
                                                     class="fa-solid fa-file-import fa-fw"></i></button>
 
@@ -187,7 +187,7 @@ export default {
 
                                             <a class="collapsed"
                                                 data-bs-toggle="collapse"
-                                                :href="'#' + replace(channel.i)">
+                                                :href="'#' + replace(contract.i)">
                                                 <span
                                                     class="if-collapsed"><button
                                                         class="btn btn-outline-primary"><i
@@ -201,48 +201,48 @@ export default {
                                     </tr>
                                     <tr>
                                         <td class="collapse border-0"
-                                            colspan="4" :id="replace(channel.i)"
-                                            v-for="channel in sponsor"
-                                            v-if="channel.c == 1">
+                                            colspan="4" :id="replace(contract.i)"
+                                            
+                                            v-if="contract.c == 3">
                                             <ul class="text-start">
-                                                <li>Contract ID: {{channel.i}}
+                                                <li>Contract ID: {{contract.i}}
                                                 </li>
-                                                <li v-if="channel.c == 1">Size
+                                                <li v-if="contract.c == 3">Size
                                                     Allowed:
-                                                    {{channel.a}} bytes</li>
-                                                <li v-if="channel.c == 2">Size:
-                                                    {{channel.u}} bytes
+                                                    {{contract.a}} bytes</li>
+                                                <li v-if="contract.c == 2">Size:
+                                                    {{contract.u}} bytes
                                                 </li>
-                                                <li>File Owner: @{{channel.t}}
+                                                <li>File Owner: @{{contract.t}}
                                                 </li>
                                                 <li>Service Provider:
-                                                    @{{channel.b}}
+                                                    @{{contract.b}}
                                                 </li>
-                                                <li>Sponsor: @{{channel.f}}</li>
+                                                <li>Sponsor: @{{contract.f}}</li>
                                                 <li>Expiration:
-                                                    {{exp_to_time(channel.e)}}
+                                                    {{exp_to_time(contract.e)}}
                                                 </li>
-                                                <li>Price: {{channel.r}} Broca
+                                                <li>Price: {{contract.r}} Broca
                                                 </li>
-                                                <li>Redundancy: {{channel.p}}
+                                                <li>Redundancy: {{contract.p}}
                                                 </li>
-                                                <li v-if="channel.s">Terms:
-                                                    {{slotDecode(channel.s,
+                                                <li v-if="contract.s">Terms:
+                                                    {{slotDecode(contract.s,
                                                     1)}}%
                                                     Bennificiary to
-                                                    @{{slotDecode(channel.s,
+                                                    @{{slotDecode(contract.s,
                                                     0)}}</li>
-                                                <li>Status: {{channel.c == 1 ?
+                                                <li>Status: {{contract.c == 1 ?
                                                     'Waiting For Upload' :
                                                     'Uploaded'}}
                                                 </li>
-                                                <li v-if="channel.df">Files:<p
-                                                        v-for="file in channel.df">
+                                                <li v-if="contract.df">Files:<p
+                                                        v-for="file in contract.df">
                                                         {{file}}
                                                     </p>
                                                 </li>
-                                                <li v-if="channel.n">Stored by:
-                                                    <p v-for="acc in channel.n">
+                                                <li v-if="contract.n">Stored by:
+                                                    <p v-for="acc in contract.n">
                                                         @{{acc}}
                                                     </p>
                                                 </li>
