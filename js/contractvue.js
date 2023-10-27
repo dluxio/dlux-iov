@@ -37,7 +37,7 @@ export default {
                                             {{contract.a/1000000}}
                                             MB</th>
                                         <td class="border-0">
-                                            <span v-if="contract.c == 1">
+                                            <span v-if="contract.c">
                                             {{exp_to_time(contract.e)}}
                                             </span>
                                         </td>
@@ -73,8 +73,7 @@ export default {
                                                     class="fa-solid fa-file-medical fa-fw"></i></button>
                                             </span>
                                             <a v-if="contract.c == 2" class="collapsed no-decoration"
-                                                data-bs-toggle="collapse"
-                                                href="/new/">
+                                                data-bs-toggle="collapse">
                                                 <span
                                                     class="if-collapsed"><button
                                                         class="btn btn-sm btn-outline-warning"><i
