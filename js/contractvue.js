@@ -513,7 +513,7 @@ export default {
           },
         selectContract(id, broker) {  //needs PeerID of broker
             this.contract.id = id
-            fetch(`${sapi}/user_services/${broker}`)
+            fetch(`${this.sapi}/user_services/${broker}`)
               .then(r => r.json())
               .then(res => {
                 console.log(res)
