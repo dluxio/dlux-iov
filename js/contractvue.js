@@ -55,29 +55,29 @@ export default {
                                             v-if="channel.c == 1">
 
                                             <button type="button"
-                                                class="btn btn-outline-success m-1"
+                                                class="btn btn-sm btn-outline-success"
                                                 v-bind:class="{'invisible': contract.id}"
                                                 @click="selectContract(channel.i, channel.b)"><i
                                                     class="fa-solid fa-file-medical fa-fw"></i></button>
 
                                             <button type="button"
-                                                class="btn btn-success m-1"
+                                                class="btn btn-sm btn-success"
                                                 v-bind:class="{'d-none': !contract.id || contract.id != channel.i}"
                                                 @click="contract.id = ''; contract.api = ''"><i
                                                     class="fa-solid fa-file-medical fa-fw"></i></button>
 
 
 
-                                            <a class="collapsed"
+                                            <a class="collapsed ms-1"
                                                 data-bs-toggle="collapse"
                                                 :href="'#' + replace(channel.i)">
                                                 <span
                                                     class="if-collapsed"><button
-                                                        class="btn btn-outline-primary"><i
+                                                        class="btn btn-sm btn-outline-primary"><i
                                                             class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
                                                 <span
                                                     class="if-not-collapsed"><button
-                                                        class="btn btn-primary"><i
+                                                        class="btn btn-sm btn-primary"><i
                                                             class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
                                             </a>
                                         </td>
@@ -165,39 +165,39 @@ export default {
                                         <td class="border-0 text-end" v-if="contract.c == 3">
                                         <a class="collapsed no-decoration"
                                                 data-bs-toggle="collapse"
-                                                :href="'#' + replace(contract.i)">
+                                                :href="'#' + replace(contract.i) + 'extension'">
                                                 <span
                                                     class="if-collapsed"><button
-                                                        class="btn btn-outline-light"><i
+                                                        class="btn btn-sm btn-outline-light"><i
                                                             class="fa-solid fa-clock-rotate-left fa-fw"></i></button></span>
                                                 <span
                                                     class="if-not-collapsed"><button
-                                                        class="btn btn-light"><i
+                                                        class="btn btn-sm btn-light"><i
                                                             class="fa-solid fa-clock-rotate-left fa-fw"></i></button></span>
                                             </a>
-                                            <a class="collapsed no-decoration" data-bs-toggle="collapse"
+                                            <a class="ms-1 collapsed no-decoration" data-bs-toggle="collapse"
                                             :href="'#' + replace(contract.i) + 'files'">
                                             <span class="if-collapsed">
-                                                <button class="btn btn-outline-info">
+                                                <button class="btn btn-sm btn-outline-info">
                                                     <i class="fa-solid fa-file fa-fw"></i>
                                                 </button>
                                             </span>
                                             <span class="if-not-collapsed">
-                                                <button class="btn btn-info">
+                                                <button class="btn btn-sm btn-info">
                                                     <i class="fa-solid fa-file fa-fw"></i>
                                                 </button>
                                             </span>
                                             </a>
-                                            <a class="collapsed no-decoration"
+                                            <a class="ms-1 collapsed no-decoration"
                                                 data-bs-toggle="collapse"
                                                 :href="'#' + replace(contract.i)">
                                                 <span
                                                     class="if-collapsed"><button
-                                                        class="btn btn-outline-primary"><i
+                                                        class="btn btn-sm btn-outline-primary"><i
                                                             class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
                                                 <span
                                                     class="if-not-collapsed"><button
-                                                        class="btn btn-primary"><i
+                                                        class="btn btn-sm btn-primary"><i
                                                             class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
                                             </a>
                                             
@@ -254,10 +254,14 @@ export default {
                                     </tr>
                                     <tr class="collapse" :id="replace(contract.i) + 'files'">
                                         <td class=" border-0"
-                                            colspan="4"
-                                            
-                                            v-if="contract.c == 3">
+                                            colspan="4" v-if="contract.c == 3">
                                             <p>put files-vue here</p>
+                                        </td>
+                                    </tr>
+                                    <tr class="collapse" :id="replace(contract.i) + 'extension'">
+                                        <td class=" border-0"
+                                            colspan="4" v-if="contract.c == 3">
+                                            <p>put extension-vue here</p>
                                         </td>
                                     </tr>
                                 </tbody>
