@@ -137,11 +137,9 @@ export default {
                         </div>
                     </td>
                 </tr>
-            </Transition>
         </tbody>
         <h3>Finalized</h3>
         <tbody>
-            <Transition>
                 <tr v-for="(contract, key, index) in saccountapi.file_contracts">
                     <td colspan="4" class="p-0">
                         <div class="table-responsive">
