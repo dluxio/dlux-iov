@@ -1066,10 +1066,7 @@ export default {
                   <li class=""><a class="dropdown-item" href="/new/"><i class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
                   <li class=""><a class="dropdown-item" href="/docs/"><i class="fa-solid fa-book fa-fw me-2"></i>Docs</a></li>
                 </ul>
-              <button type="button" class="btn d-none btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
               <button class="btn btn-fusch s-radius-hotfix border border-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers" style="font-family:'Lucida Console', Monaco, monospace;">login</button>
-              
-              
               </div>
                 
             
