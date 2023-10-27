@@ -972,3 +972,11 @@ ul.scroll {
   overflow-y: auto;
   max-height: calc(100vh - 86px);
 }
+
+[data-bs-toggle="collapse"].collapsed .if-not-collapsed {
+  display: none;
+}
+
+[data-bs-toggle="collapse"]:not(.collapsed) .if-collapsed {
+  display: none;
+}

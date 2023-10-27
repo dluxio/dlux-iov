@@ -167,41 +167,37 @@ export default {
                                             
                                             v-if="contract.c == 1 && !contract.s">
                                         </td>
-                                        <td class="border-0 text-end"
-                                            
-                                            v-if="contract.c == 3">
-
-                                            <button type="button"
-                                                class="btn btn-outline-success m-1"
-                                                v-bind:class="{'invisible': contract.id}"
-                                                @click="selectContract(contract.i, contract.b)"><i
-                                                    class="fa-solid fa-file-import fa-fw"></i></button>
-
-                                            <button type="button"
-                                                class="btn btn-success m-1"
-                                                v-bind:class="{'d-none': !contract.id || contract.id != contract.i}"
-                                                @click="contract.id = ''; contract.api = ''"><i
-                                                    class="fa-solid fa-file-import fa-fw"></i></button>
-
-
-
+                                        <td class="border-0 text-end" v-if="contract.c == 3">
+                                            <a class="collapsed m-1" data-bs-toggle="collapse"
+                                            :href="'#' + replace(contract.i) + 'files'">
+                                            <span class="if-collapsed">
+                                                <button class="btn btn-outline-primary">
+                                                    <i class="fa-solid fa-file fa-fw"></i>
+                                                </button>
+                                            </span>
+                                            <span class="if-not-collapsed">
+                                                <button class="btn btn-primary">
+                                                    <i class="fa-solid fa-file fa-fw"></i>
+                                                </button>
+                                            </span>
+                                            </a>
                                             <a class="collapsed"
                                                 data-bs-toggle="collapse"
                                                 :href="'#' + replace(contract.i)">
                                                 <span
                                                     class="if-collapsed"><button
-                                                        class="btn btn-outline-primary"><i
+                                                        class="btn btn-outline-secondary"><i
                                                             class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
                                                 <span
                                                     class="if-not-collapsed"><button
-                                                        class="btn btn-primary"><i
+                                                        class="btn btn-secondary"><i
                                                             class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
                                             </a>
                                         </td>
                                     </tr>
-                                    <tr>
-                                        <td class="collapse border-0"
-                                            colspan="4" :id="replace(contract.i)"
+                                    <tr class="collapse" :id="replace(contract.i)">
+                                        <td  class="border-0"
+                                            colspan="4" 
                                             
                                             v-if="contract.c == 3">
                                             <ul class="text-start">
@@ -247,6 +243,14 @@ export default {
                                                     </p>
                                                 </li>
                                             </ul>
+                                        </td>
+                                    </tr>
+                                    <tr class="collapse" :id="replace(contract.i) + 'files'">
+                                        <td class=" border-0"
+                                            colspan="4"
+                                            
+                                            v-if="contract.c == 3">
+                                            <p>put files-vue here</p>
                                         </td>
                                     </tr>
                                 </tbody>
