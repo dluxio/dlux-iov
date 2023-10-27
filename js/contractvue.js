@@ -322,6 +322,21 @@ export default {
         modalSelect(url) {
             this.$emit('modalselect', url);
         },
+        sortContracts(on = 'c', dir = 'asc') {
+            this.contracts.sort((a, b) => {
+                if (a[on] > b[on]) {
+                    return dir == 'asc' ? 1 : -1
+                } else if (a[on] < b[on]) {
+                    return dir == 'asc' ? -1 : 1
+                } else {
+                    return 0
+                }
+            })
+            for(var i=0; i<this.contracts.length; i++){
+                this.contracts[i].index = i
+                this.contractIDs[this.contracts[i].i].index = i
+            }
+        },
         exp_to_time(exp = '0:0') {
             return this.when([parseInt(exp.split(':')[0])])
         },
@@ -369,6 +384,7 @@ export default {
                         }
                     }
                   }
+                  this.sortContracts()
                   this.saccountapi = data;
                   this.saccountapi.spk += this.reward_spk();
                   if (!this.saccountapi.granted.t) this.saccountapi.granted.t = 0;
