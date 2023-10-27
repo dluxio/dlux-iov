@@ -2,166 +2,7 @@ import Pop from "/js/pop.js";
 import ExtensionVue from "/js/extensionvue.js";
 import FilesVue from "/js/filesvue.js";
 
-export default {
-    components: {
-        "pop-vue": Pop,
-        "extension-vue": ExtensionVue,
-        "files-vue": FilesVue
-    },
-    template: `
-    <table class="table table-dark table-striped table-hover text-center align-middle mb-0">
-        <thead>
-            <tr>
-
-                <th scope="col"><i
-                        class="fa-solid fa-database fa-fw me-2"></i>Storage</th>
-                <th scope="col"><i
-                        class="fa-solid fa-clock fa-fw me-2"></i>Expiration</th>
-                <th scope="col"><i
-                        class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>Benificiary
-                </th>
-                <th scope="col"></th>
-            </tr>
-        </thead>
-        <tbody>
-
-                <tr v-for="contract in contracts">
-                    <td colspan="4" class="p-0">
-                        <div class="table-responsive">
-                            <table class="table text-white align-middle mb-0">
-                                <tbody>
-                                    <tr>
-                                        <th class="border-0"
-                                            v-for="channel in sponsor">
-                                            {{channel.a/1000000}}
-                                            MB</th>
-                                        <td class="border-0"
-                                            v-for="channel in sponsor"
-                                            v-if="channel.c == 1">
-                                            {{exp_to_time(channel.e)}}
-                                        </td>
-                                        <td class="border-0" scope="row"
-                                            v-for="channel in sponsor"
-                                            v-if="channel.c == 1 && channel.s">
-                                            @{{slotDecode(channel.s, 0)}}
-                                            ({{slotDecode(channel.s, 1)}}%)</td>
-                                        <td class="border-0" scope="row"
-                                            v-for="channel in sponsor"
-                                            v-if="channel.c == 1 && !channel.s">
-                                        </td>
-                                        <td class="border-0 text-end"
-                                            v-for="channel in sponsor"
-                                            v-if="channel.c == 1">
-
-                                            <button type="button"
-                                                class="btn btn-sm btn-outline-success"
-                                                v-bind:class="{'invisible': contract.id}"
-                                                @click="selectContract(channel.i, channel.b)"><i
-                                                    class="fa-solid fa-file-medical fa-fw"></i></button>
-
-                                            <button type="button"
-                                                class="btn btn-sm btn-success"
-                                                v-bind:class="{'d-none': !contract.id || contract.id != channel.i}"
-                                                @click="contract.id = ''; contract.api = ''"><i
-                                                    class="fa-solid fa-file-medical fa-fw"></i></button>
-
-
-
-                                            <a class="collapsed ms-1"
-                                                data-bs-toggle="collapse"
-                                                :href="'#' + replace(channel.i)">
-                                                <span
-                                                    class="if-collapsed"><button
-                                                        class="btn btn-sm btn-outline-primary"><i
-                                                            class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
-                                                <span
-                                                    class="if-not-collapsed"><button
-                                                        class="btn btn-sm btn-primary"><i
-                                                            class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="collapse border-0"
-                                            colspan="4" :id="replace(channel.i)"
-                                            v-for="channel in sponsor">
-                                            <ul class="text-start">
-                                                <li>Contract ID: {{channel.i}}
-                                                </li>
-                                                <li v-if="channel.c == 1">Size
-                                                    Allowed:
-                                                    {{channel.a}} bytes</li>
-                                                <li v-if="channel.c == 2">Size:
-                                                    {{channel.u}} bytes
-                                                </li>
-                                                <li>File Owner: @{{channel.t}}
-                                                </li>
-                                                <li>Service Provider:
-                                                    @{{channel.b}}
-                                                </li>
-                                                <li>Sponsor: @{{channel.f}}</li>
-                                                <li>Expiration:
-                                                    {{exp_to_time(channel.e)}}
-                                                </li>
-                                                <li>Price: {{channel.r}} Broca
-                                                </li>
-                                                <li>Redundancy: {{channel.p}}
-                                                </li>
-                                                <li v-if="channel.s">Terms:
-                                                    {{slotDecode(channel.s,
-                                                    1)}}%
-                                                    Bennificiary to
-                                                    @{{slotDecode(channel.s,
-                                                    0)}}</li>
-                                                <li>Status: {{channel.c == 1 ?
-                                                    'Waiting For Upload' :
-                                                    'Uploaded'}}
-                                                </li>
-                                                <li v-if="channel.df">Files:<p
-                                                        v-for="file in channel.df">
-                                                        {{file}}
-                                                    </p>
-                                                </li>
-                                                <li v-if="channel.n">Stored by:
-                                                    <p v-for="acc in channel.n">
-                                                        @{{acc}}
-                                                    </p>
-                                                </li>
-                                            </ul>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </td>
-                </tr>
-                <tr v-for="(contract, key, index) in saccountapi.file_contracts">
-                    <td colspan="4" class="p-0">
-                        <div class="table-responsive">
-                            <table class="table text-white align-middle mb-0">
-                                <tbody>
-                                    <tr>
-                                        <th class="border-0"
-                                            
-                                            v-if="contract.c == 3">
-                                            {{contract.a/1000000}}
-                                            MB</th>
-                                        <td class="border-0"
-                                            
-                                            v-if="contract.c == 3">
-                                            {{exp_to_time(contract.e)}}
-                                        </td>
-                                        <td class="border-0" scope="row"
-                                            
-                                            v-if="contract.c == 1 && contract.s">
-                                            @{{slotDecode(contract.s, 0)}}
-                                            ({{slotDecode(contract.s, 1)}}%)</td>
-                                        <td class="border-0" scope="row"
-                                            
-                                            v-if="contract.c == 1 && !contract.s">
-                                        </td>
-                                        <td class="border-0 text-end" v-if="contract.c == 3">
-                                        <a class="collapsed no-decoration"
+/* <a class="collapsed no-decoration"
                                                 data-bs-toggle="collapse"
                                                 :href="'#' + replace(contract.i) + 'extension'">
                                                 <span
@@ -197,18 +38,89 @@ export default {
                                                     class="if-not-collapsed"><button
                                                         class="btn btn-sm btn-primary"><i
                                                             class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
+                                            </a> */
+
+export default {
+    components: {
+        "pop-vue": Pop,
+        "extension-vue": ExtensionVue,
+        "files-vue": FilesVue
+    },
+    template: `
+    <table class="table table-dark table-striped table-hover text-center align-middle mb-0">
+        <thead>
+            <tr>
+
+                <th scope="col"><i
+                        class="fa-solid fa-database fa-fw me-2"></i>Storage</th>
+                <th scope="col"><i
+                        class="fa-solid fa-clock fa-fw me-2"></i>Expiration</th>
+                <th scope="col"><i
+                        class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>Benificiary
+                </th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+
+                <tr v-for="contract in contracts">
+                    <td colspan="4" class="p-0">
+                        <div class="table-responsive">
+                            <table class="table text-white align-middle mb-0">
+                                <tbody>
+                                    <tr>
+                                        <th class="border-0">
+                                            {{contract.a/1000000}}
+                                            MB</th>
+                                        <td class="border-0"
+                                            v-if="contract.c == 1">
+                                            {{exp_to_time(contract.e)}}
+                                        </td>
+                                        <td class="border-0" scope="row"
+                                            v-if="contract.c == 1 && contract.s">
+                                            @{{slotDecode(contract.s, 0)}}
+                                            ({{slotDecode(contract.s, 1)}}%)</td>
+                                        <td class="border-0" scope="row"
+                                            v-if="contract.c == 1 && !contract.s">
+                                        </td>
+                                        <td class="border-0 text-end"
+                                            v-if="contract.c == 1">
+
+                                            <button type="button"
+                                                class="btn btn-sm btn-outline-success"
+                                                v-bind:class="{'invisible': contract.id}"
+                                                @click="selectContract(contract.i, contract.b)"><i
+                                                    class="fa-solid fa-file-medical fa-fw"></i></button>
+
+                                            <button type="button"
+                                                class="btn btn-sm btn-success"
+                                                v-bind:class="{'d-none': !contract.id || contract.id != contract.i}"
+                                                @click="contract.id = ''; contract.api = ''"><i
+                                                    class="fa-solid fa-file-medical fa-fw"></i></button>
+
+
+
+                                            <a class="collapsed ms-1"
+                                                data-bs-toggle="collapse"
+                                                :href="'#' + replace(contract.i)">
+                                                <span
+                                                    class="if-collapsed"><button
+                                                        class="btn btn-sm btn-outline-primary"><i
+                                                            class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
+                                                <span
+                                                    class="if-not-collapsed"><button
+                                                        class="btn btn-sm btn-primary"><i
+                                                            class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
                                             </a>
-                                            
-                                            
                                         </td>
                                     </tr>
-                                    <tr class="collapse" :id="replace(contract.i)">
-                                        <td  class="border-0"
-                                            colspan="4">
+                                    <tr>
+                                        <td class="collapse border-0"
+                                            colspan="4" :id="replace(contract.i)">
                                             <ul class="text-start">
                                                 <li>Contract ID: {{contract.i}}
                                                 </li>
-                                                <li v-if="contract.c == 3">Size
+                                                <li>Size
                                                     Allowed:
                                                     {{contract.a}} bytes</li>
                                                 <li v-if="contract.c == 2">Size:
@@ -250,23 +162,11 @@ export default {
                                             </ul>
                                         </td>
                                     </tr>
-                                    <tr class="collapse" :id="replace(contract.i) + 'files'">
-                                        <td class=" border-0"
-                                            colspan="4" v-if="contract.c == 3">
-                                            <p>put files-vue here</p>
-                                        </td>
-                                    </tr>
-                                    <tr class="collapse" :id="replace(contract.i) + 'extension'">
-                                        <td class=" border-0"
-                                            colspan="4" v-if="contract.c == 3">
-                                            <p>put extension-vue here</p>
-                                        </td>
-                                    </tr>
                                 </tbody>
                             </table>
                         </div>
                     </td>
-                </tr>
+                </tr>                       
         </tbody>
     </table>`,
     props: {
