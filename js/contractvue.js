@@ -15,29 +15,51 @@ export default {
         <thead>
             <tr>
 
-                <th scope="col"><i
-                        class="fa-solid fa-database fa-fw me-2"></i>Storage 
-                        <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('a','asc')"><i class="fa-solid fa-caret-up"></i></button>
-                        <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('a','dec')"><i class="fa-solid fa-caret-down"></i></button>
-                        </th>
-                <th scope="col"><i
-                        class="fa-solid fa-clock fa-fw me-2"></i>Expires
-                        <button class="btn btn-sm btn-secondary ms-1"  @click="sortContracts('e','dec')"><i class="fa-solid fa-caret-up"></i></button>
-                        <button class="btn btn-sm btn-secondary ms-1"  @click="sortContracts('e','asc')"><i class="fa-solid fa-caret-down"></i></button>
-                        </th>
-                <th scope="col"><i
-                        class="fa-solid fa-signal fa-fw me-2"></i>Status
-                        <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('c','asc')"><i class="fa-solid fa-caret-up"></i></button>
-                        <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('c','dec')"><i class="fa-solid fa-caret-down"></i></button>
+                <th scope="col">
+                    <div class="d-flex flex-wrap align-items-center justify-content-center">
+                        <div class="d-flex flex-wrap align-items-center justify-content-center">
+                            <i class="fa-solid fa-database fa-fw"></i>
+                            <span class="m-1">Storage</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <button class="btn btn-sm btn-secondary" @click="sortContracts('a','asc')"><i class="fa-solid fa-caret-up"></i></button>
+                            <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('a','dec')"><i class="fa-solid fa-caret-down"></i></button>
+                        </div>
+                    </div>
                 </th>
-                <th scope="col" class="text-end">
-                
-                <button type="button" class="ms-1 btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                SPK<i class="fa-solid fa-wallet fa-fw ms-1"></i>
+                <th scope="col">
+                    <div class="d-flex flex-wrap align-items-center justify-content-center">
+                        <div class="d-flex flex-wrap align-items-center justify-content-center">
+                            <i class="fa-solid fa-clock fa-fw"></i>
+                            <span class="m-1">Expires</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <button class="btn btn-sm btn-secondary"  @click="sortContracts('e','dec')"><i class="fa-solid fa-caret-up"></i></button>
+                            <button class="btn btn-sm btn-secondary ms-1"  @click="sortContracts('e','asc')"><i class="fa-solid fa-caret-down"></i></button>
+                        </div>
+                    </div>            
+                </th>
+                <th scope="col">
+                    <div class="d-flex flex-wrap align-items-center justify-content-center">
+                        <div class="d-flex flex-wrap align-items-center justify-content-center">
+                            <i class="fa-solid fa-signal fa-fw"></i>
+                            <span class="m-1">Status</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('c','asc')"><i class="fa-solid fa-caret-up"></i></button>
+                            <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('c','dec')"><i class="fa-solid fa-caret-down"></i></button>
+                        </div>
+                    </div>    
+                </th>
+                <th scope="col" class="">
+                <div class="d-flex flex-wrap">
+                <button type="button" class="ms-auto mb-1 mb-lg-0 btn btn-sm btn-secondary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    <span class="d-none d-sm-flex me-1">SPK</span><i class="fa-solid fa-wallet fa-fw"></i>
                 </button>
-                <button type="button" class="ms-1 btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-            New<i class="fa-solid fa-plus fa-fw ms-1"></i>
+                <button type="button" class="ms-auto mb-1 mb-lg-0 btn btn-sm btn-secondary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                <span class="d-none d-sm-flex me-1">New</span><i class="fa-solid fa-plus fa-fw"></i>
                 </button>
+                </div>
                 </th>
             </tr>
         </thead>
@@ -58,13 +80,13 @@ export default {
                                             </span>
                                         </td>
                                         <td class="border-0" scope="row">
-                                        <span v-if="contract.c == 1 && !contract.s">
+                                        <span v-if="contract.c == 1">
                                             Waiting for upload
                                             </span>
                                             <span v-if="contract.c == 2">
                                             Pending {{split(contract.s, ',', 1)/100}}% to @{{split(contract.s, ',', 0)}}
                                             </span>
-                                            <span v-if="contract.c == 3 && !contract.s">
+                                            <span v-if="contract.c == 3">
                                             1/3 Nodes hosting
                                             </span>
                                         </td>
