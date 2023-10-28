@@ -14,21 +14,22 @@ export default {
     <thead>
         <tr>
 
-        <!-- expires -->
+        <!-- storage -->
         <th scope="col">
             <div class="d-flex flex-wrap align-items-center justify-content-center">
                 <div class="d-flex flex-wrap align-items-center justify-content-center">
-                    <i class="fa-solid fa-clock fa-fw"></i>
-                    <span class="m-1">Expires</span>
+                    <i class="fa-solid fa-database fa-fw"></i>
+                    <span class="m-1">Storage</span>
                 </div>
                 <div class="d-flex align-items-center">
-                    <button class="btn btn-sm btn-secondary" @click="sortContracts('e','dec')"><i
+                    <button class="btn btn-sm btn-secondary" @click="sortContracts('a','asc')"><i
                             class="fa-solid fa-caret-up"></i></button>
-                    <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('e','asc')"><i
+                    <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('a','dec')"><i
                             class="fa-solid fa-caret-down"></i></button>
                 </div>
             </div>
         </th>
+
 
             <!-- status -->
             <th scope="col">
@@ -46,24 +47,23 @@ export default {
                 </div>
             </th>
 
-            
-
-            <!-- storage -->
+            <!-- expires -->
             <th scope="col">
                 <div class="d-flex flex-wrap align-items-center justify-content-center">
                     <div class="d-flex flex-wrap align-items-center justify-content-center">
-                        <i class="fa-solid fa-database fa-fw"></i>
-                        <span class="m-1">Storage</span>
+                        <i class="fa-solid fa-clock fa-fw"></i>
+                        <span class="m-1">Expires</span>
                     </div>
                     <div class="d-flex align-items-center">
-                        <button class="btn btn-sm btn-secondary" @click="sortContracts('a','asc')"><i
+                        <button class="btn btn-sm btn-secondary" @click="sortContracts('e','dec')"><i
                                 class="fa-solid fa-caret-up"></i></button>
-                        <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('a','dec')"><i
+                        <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('e','asc')"><i
                                 class="fa-solid fa-caret-down"></i></button>
                     </div>
                 </div>
             </th>
 
+            
 
 
         </tr>
@@ -80,27 +80,43 @@ export default {
 
                                 
 
-                                <!-- expires -->
-                                <td class="border-0">
+                                
+
+                                <!-- storage -->
+                                <th class="border-0">
                                     <div class="d-flex align-items-center">
                                         
 
-                                        <a class="no-decoration collapsed" data-bs-toggle="collapse"
-                                                :href="'#' + replace(contract.i)">
+                                        <!-- files btn 1 -->
+                                        <a v-if="contract.c == 1" class=" collapsed no-decoration"
+                                                data-bs-toggle="collapse" disabled>
                                                 <span class="if-collapsed"><button
-                                                        class="my-1 me-2 btn btn-sm btn-outline-light"><i
-                                                            class="fa-solid fa-circle-info fa-fw"></i></button></span>
-                                                <span class="if-not-collapsed"><button
-                                                        class="my-1 me-2 btn btn-sm btn-light"><i
-                                                            class="fa-solid fa-info fa-fw"></i></button></span>
-                                            </a>
+                                            class="my-1 me-2 btn btn-sm btn-outline-secondary disabled"><i
+                                                class="fa-solid fa-file fa-fw"></i></button></span>
+                                            <span class="if-not-collapsed"><button
+                                            class="my-1 me-2 btn btn-sm btn-secondary disabled"><i
+                                                class="fa-solid fa-file fa-fw"></i></button></span>
+                                        </a>
+                                        <!-- files btn 2 -->
 
-                                            <span v-if="contract.c">
-                                            {{exp_to_time(contract.e)}}
-                                        </span>
-
+                                        <!-- files btn 3 -->
+                                        <a v-if="contract.c !=1" class="collapsed no-decoration"
+                                            data-bs-toggle="collapse" :href="'#' + replace(contract.i) + 'files'">
+                                            <span class="if-collapsed">
+                                            <button class="my-1 me-2 btn btn-sm btn-outline-light">
+                                            <i class="fa-solid fa-file fa-fw"></i>
+                                            </button>
+                                            </span>
+                                            <span class="if-not-collapsed">
+                                            <button class="my-1 me-2 btn btn-sm btn-light">
+                                            <i class="fa-solid fa-file fa-fw"></i>
+                                            </button>
+                                            </span>
+                                        </a>
+                                        {{contract.a/1000000}} MB
+                                        
                                     </div>
-                                </td>
+                                </th>
 
                                 <!-- status -->
                                 <td class="border-0">
@@ -151,53 +167,29 @@ export default {
                                     </div>
                                 </td>
 
-                                <!-- storage -->
-                                <th class="border-0">
+                                <!-- expires -->
+                                <td class="border-0">
                                     <div class="d-flex align-items-center">
                                         
 
-                                        <!-- files btn 1 -->
-                                        <a v-if="contract.c == 1" class=" collapsed no-decoration"
-                                                data-bs-toggle="collapse" disabled>
+                                        <a  class="no-decoration collapsed" data-bs-toggle="collapse"
+                                                :href="'#' + replace(contract.i)">
                                                 <span class="if-collapsed"><button
-                                            class="my-1 me-2 btn btn-sm btn-outline-secondary disabled"><i
-                                                class="fa-solid fa-file fa-fw"></i></button></span>
-                                            <span class="if-not-collapsed"><button
-                                            class="my-1 me-2 btn btn-sm btn-secondary disabled"><i
-                                                class="fa-solid fa-file fa-fw"></i></button></span>
-                                        </a>
-                                        <!-- files btn 2 -->
-                                        <a v-if="contract.c == 2" class="collapsed no-decoration"
-                                             data-bs-toggle="collapse" :href="'#' + replace(contract.i) + 'files'">
-                                            <span class="if-collapsed">
-                                            <button class="my-1 me-2 btn btn-sm btn-outline-warning">
-                                            <i class="fa-solid fa-file fa-fw"></i>
-                                            </button>
-                                             </span>
-                                            <span class="if-not-collapsed">
-                                            <button class="my-1 me-2 btn btn-sm btn-warning">
-                                            <i class="fa-solid fa-file fa-fw"></i>
-                                            </button>
-                                            </span>
-                                        </a>
-                                        <!-- files btn 3 -->
-                                        <a v-if="contract.c == 3" class="collapsed no-decoration"
-                                            data-bs-toggle="collapse" :href="'#' + replace(contract.i) + 'files'">
-                                            <span class="if-collapsed">
-                                            <button class="my-1 me-2 btn btn-sm btn-outline-info">
-                                            <i class="fa-solid fa-file fa-fw"></i>
-                                            </button>
-                                            </span>
-                                            <span class="if-not-collapsed">
-                                            <button class="my-1 me-2 btn btn-sm btn-info">
-                                            <i class="fa-solid fa-file fa-fw"></i>
-                                            </button>
-                                            </span>
-                                        </a>
-                                        {{contract.a/1000000}} MB
-                                        
+                                                        class="my-1 me-2 btn btn-sm btn-outline-light"><i
+                                                            class="fa-solid fa-circle-info fa-fw"></i></button></span>
+                                                <span class="if-not-collapsed"><button
+                                                        class="my-1 me-2 btn btn-sm btn-light"><i
+                                                            class="fa-solid fa-info fa-fw"></i></button></span>
+                                            </a>
+
+                                            
+
+                                            <span v-if="contract.c">
+                                            {{exp_to_time(contract.e)}}
+                                        </span>
+
                                     </div>
-                                </th>
+                                </td>
                                 
                             </tr>
 
