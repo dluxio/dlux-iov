@@ -13,7 +13,7 @@ export default {
         "pop-vue": Pop
     },
     template: `
-    <div class="accordion-body p-0">
+    <div>
         <div v-if="!hasFiles" class="p-3">
             <p class="m-0 text-center">Looks like there's nothing here yet.</p>
         </div>

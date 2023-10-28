@@ -13341,4 +13341,8 @@ ul.scroll li.scroll {
 
 [data-bs-toggle=collapse]:not(.collapsed) .if-collapsed {
   display: none;
+}
+
+#files-table tbody > tr:last-child > td {
+  border-bottom: 0;
 }/*# sourceMappingURL=custom.css.map */
