@@ -364,6 +364,9 @@ export default {
                                 res.result.extend = "7"
                                 this.contracts[id] = res.result
                                 this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
+                            } else {
+                                delete this.contracts[id]
+                                delete this.post.contract[id]
                             }
                         });
                 }

@@ -2697,6 +2697,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 res.result.extend = "7"
                 this.contracts[id] = res.result
                 this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
+              } else {
+                delete this.contracts[id]
               }
             });
         }
