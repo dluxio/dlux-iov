@@ -8,10 +8,10 @@ export default {
        
             <div>
                 <div class="card-group">
-                    <div v-for="(size, file) in files" class="card p-0 m-2" style="max-width: 300px;">
-                        <a :href="'https://ipfs.dlux.io/ipfs/' + file" target="_blank" class="d-flex flex-wrap no-decoration" >
+                    <div v-for="(size, file) in files" class="card rounded p-0 m-2" style="max-width: 300px;">
+                        <a :href="'https://ipfs.dlux.io/ipfs/' + file" target="_blank" class="no-decoration" >
                             <img :src="'https://ipfs.dlux.io/ipfs/' + file" onerror="this.style.display='none'"
-                                class="card-img-top" :alt="file">
+                                class="card-img-top rounded-top" :alt="file">
                                 <div class="card-body">
                                     <span class="text-break small text-muted">{{file}}</span>
                                 </div>
