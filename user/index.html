@@ -1316,8 +1316,7 @@
                                                 <span class=""></span><i class="fa-solid fa-plus"></i>
                                             </button>
                                             <!-- lucky petition -->
-                                            <button type="button" class="btn btn-secondary me-1" data-bs-toggle="modal"
-                                                data-bs-target="#contractModal">
+                                            <button type="button" class="btn btn-secondary me-1">
                                                 <span class=""></span><i class="fa-solid fa-wand-magic-sparkles"></i>
                                             </button>
                                             <!-- spk wallet modal button -->
@@ -1344,11 +1343,6 @@
                                     </div>
                                 </div>
                                 <div class="card-body p-0">
-
-
-
-
-
                                     <contract-vue :account="pageAccount" @tosign="toSign=$event"></contract-vue>
                                 </div>
                             </div>
@@ -1407,13 +1401,34 @@
                         @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                 </div>
 
+                <!-- new contract Modal -->
+                <div class="modal fade" id="contractModal" tabindex="-1" aria-labelledby="contractModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="contractModalLabel">New Hosting Contract</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                ...
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Save changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- SPK Wallet Modal -->
                 <div class="modal fade" id="spkWalletModal" tabindex="-1" aria-labelledby="spkWalletModalLabel"
                     aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="spkWalletModalLabel">Modal title</h1>
+                                <h1 class="modal-title fs-5" id="spkWalletModalLabel">SPK Testnet Wallet</h1>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
