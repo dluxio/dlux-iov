@@ -12,6 +12,8 @@ import CardVue from "/js/cardvue.js";
 import ContractsVue from "/js/contractvue.js";
 import FilesVue from "/js/filesvue.js";
 import ExtensionVue from "/js/extensionvue.js";
+import UploadVue from "/js/uploadvue.js";
+import PostVue from "/js/postvue.js";
 import DetailVue from "/js/detailvue.js";
 
 let url = location.href.replace(/\/$/, "");
@@ -419,6 +421,8 @@ createApp({
     "contracts-vue": ContractsVue,
     "files-vue": FilesVue,
     "extension-vue": ExtensionVue,
+    "upload-vue": UploadVue,
+    "post-vue": PostVue,
     "detail-vue": DetailVue,
   },
   methods: {

@@ -12,6 +12,8 @@ import CardVue from "./cardvue.js";
 import ContractVue from "/js/contractvue.js";
 import FilesVue from "/js/filesvue.js";
 import ExtensionVue from "/js/extensionvue.js";
+import UploadVue from "/js/uploadvue.js";
+import PostVue from "/js/postvue.js";
 import DetailVue from "./detailvue.js";
 import NFTCard from "./nftcard.js";
 import FTTransfer from "./fttransfer.js";
@@ -837,6 +839,8 @@ var app = new Vue({
     "contract-vue": ContractVue,
     "files-vue": FilesVue,
     "extension-vue": ExtensionVue,
+    "upload-vue": UploadVue,
+    "post-vue": PostVue,
     "detail-vue": DetailVue,
     "nftcard": NFTCard,
     "fttransfer": FTTransfer,
