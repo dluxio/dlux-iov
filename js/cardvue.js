@@ -360,8 +360,8 @@ export default {
                     fetch('https://spktest.dlux.io/api/fileContract/' + id)
                         .then((r) => r.json())
                         .then((res) => {
-                            res.result.extend = "7"
-                            if (res.result) {
+                            if(typeof res.result != "string"){
+                                res.result.extend = "7"
                                 this.contracts[id] = res.result
                                 this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
                             }

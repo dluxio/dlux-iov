@@ -2692,8 +2692,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           fetch('https://spktest.dlux.io/api/fileContract/' + id)
             .then((r) => r.json())
             .then((res) => {
-              res.result.extend = "7"
-              if (res.result) {
+              console.log(id, res)
+              if(typeof res.result != "string"){
+                res.result.extend = "7"
                 this.contracts[id] = res.result
                 this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
               }
