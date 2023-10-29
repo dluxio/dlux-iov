@@ -461,6 +461,7 @@ export default {
               .then((response) => response.json())
               .then((data) => {
                 console.log(data);
+                this.loaded = true;
                 this.spkStats = data.result;
                 for (var i = 0; i < this.tokenGov.options.length; i++) {
                   this.tokenGov.options[i].val = data.result[this.tokenGov.options[i].id]
@@ -774,22 +775,24 @@ export default {
     },
     watch: {
         'account'(newValue) {
-            this.contracts =  []
-            this.contractIDs = {}
-            this.saccountapi = {
-                spk: 0,
-                balance: 0,
-                gov: 0,
-                poweredUp: 0,
-                claim: 0,
-                granted: {
-                    t: 0
+            if(this.loaded == true){
+                this.contracts =  []
+                this.contractIDs = {}
+                this.saccountapi = {
+                    spk: 0,
+                    balance: 0,
+                    gov: 0,
+                    poweredUp: 0,
+                    claim: 0,
+                    granted: {
+                        t: 0
+                    },
+                    granting: {
+                        t: 0
+                    }
                 },
-                granting: {
-                    t: 0
-                }
-            },
-            this.getSpkStats()
+                this.getSpkStats()
+            }
         }
       },
     mounted() {
