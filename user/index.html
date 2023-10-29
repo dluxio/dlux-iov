@@ -51,10 +51,10 @@
     <link href="/css/smde-comment.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
     <script>
-        navigator.serviceWorker.getRegistrations().then(function(registrations) {
-            for(let registration of registrations) {
+        navigator.serviceWorker.getRegistrations().then(function (registrations) {
+            for (let registration of registrations) {
                 registration.unregister();
-            } 
+            }
         });
         // if ('serviceWorker' in navigator) {
         //     navigator
@@ -1305,32 +1305,51 @@
                     <div role="tabpanel" class="tab-pane fade" id="files" aria-labelledby="filestab">
                         <div class="container">
                             <div class="card my-3">
+                                <div class="card-head p-3">
+                                    <!-- top menu -->
+                                    <div class="mb-3 d-flex flex-wrap justify-content-center">
+                                        <!-- search bar -->
+                                        
+                                            <div class="position-relative flex-grow-1 me-1">
+                                                <span class="position-absolute ps-2 top-50 translate-middle-y">
+                                                    <i class="fa-solid fa-magnifying-glass fa-fw"></i>
+                                                </span>
+                                                <input type="search" class="ps-4 form-control text-info border-light"
+                                                    placeholder="Search" v-model="postSelect.searchTerm"
+                                                    @keyup.enter="postSelect.entry = 'search';getPosts()"
+                                                    @search="postSelect.entry = 'search';getPosts()">
+                                            </div>
+                                        
+                                        <div class="d-flex ms-auto flex-wrap">
+                                            <button type="button" class="btn btn-secondary me-1" data-bs-toggle="modal"
+                                                data-bs-target="#contractModal">
+                                                <span class=""></span><i class="fa-solid fa-plus"></i>
+                                            </button>
+
+                                            <button type="button" class="btn btn-secondary me-1" data-bs-toggle="modal"
+                                                data-bs-target="#contractModal">
+                                                <span class=""></span><i class="fa-solid fa-wand-magic-sparkles"></i>
+                                            </button>
+
+                                            <button type="button" class="btn btn-secondary me-1" data-bs-toggle="modal"
+                                                data-bs-target="#spkWalletModal">
+                                                <span class=""></span><i class="fa-solid fa-wallet"></i>
+                                            </button>
+
+                                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal"
+                                                data-bs-target="#spkWalletModal">
+                                                <span class=""></span><i class="fa-solid fa-filter"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="card-body p-0">
-                                    <!-- Button trigger modal -->
-                <button type="button" class="btn btn-secondary d-none" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                    <i class="fa-solid fa-wallet"></i>
-                    </button>
-                   
-                    
-                    <!-- Modal -->
-                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                      <div class="modal-dialog">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          <div class="modal-body">
-                            ...
-                          </div>
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary">Save changes</button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                                    <contract-vue :account="pageAccount" @tosign="toSign=$event" ></contract-vue>
+
+
+
+
+
+                                    <contract-vue :account="pageAccount" @tosign="toSign=$event"></contract-vue>
                                 </div>
                             </div>
                         </div>
@@ -1338,7 +1357,8 @@
                     </div>
                 </div>
                 <!-- MODALS -->
-                <!-- Modal -->
+
+                <!-- Create User Modal -->
                 <div class="modal fade" id="signUpModal" tabindex="-1" aria-labelledby="signUpModalLabel"
                     aria-hidden="true">
                     <div class="modal-dialog">
@@ -1385,6 +1405,27 @@
                     <nftdetail :account="account" :itemmodal="itemModal" :pfp="pfp" :chains="chains" :denoms="denoms"
                         :inventory="true" @setpfp="setPFP($event)" @tosign="toSign = $event"
                         @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
+                </div>
+
+                <!-- SPK Wallet Modal -->
+                <div class="modal fade" id="spkWalletModal" tabindex="-1" aria-labelledby="spkWalletModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="spkWalletModalLabel">Modal title</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                ...
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Save changes</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!--blog detail view-->
