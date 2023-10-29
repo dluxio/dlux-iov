@@ -1305,42 +1305,42 @@
                     <div role="tabpanel" class="tab-pane fade" id="files" aria-labelledby="filestab">
                         <div class="container">
                             <div class="card my-3">
-                                <div class="card-head p-3">
+                                <div class="card-head p-2">
                                     <!-- top menu -->
-                                    <div class="mb-3 d-flex flex-wrap justify-content-center">
+                                    <div class="mb-2 d-flex flex-wrap justify-content-center">
                                         <!-- search bar -->
-                                        
-                                            <div class="position-relative flex-grow-1 me-1">
-                                                <span class="position-absolute ps-2 top-50 translate-middle-y">
-                                                    <i class="fa-solid fa-magnifying-glass fa-fw"></i>
-                                                </span>
-                                                <input type="search" class="ps-4 form-control text-info border-light"
-                                                    placeholder="Search" v-model="postSelect.searchTerm"
-                                                    @keyup.enter="postSelect.entry = 'search';getPosts()"
-                                                    @search="postSelect.entry = 'search';getPosts()">
-                                            </div>
-                                        
-                                        <div class="d-flex ms-auto flex-wrap">
+                                        <div class="d-flex flex-wrap order-md-last">
+                                            <!-- new contract modal button -->
                                             <button type="button" class="btn btn-secondary me-1" data-bs-toggle="modal"
                                                 data-bs-target="#contractModal">
                                                 <span class=""></span><i class="fa-solid fa-plus"></i>
                                             </button>
-
+                                            <!-- lucky petition -->
                                             <button type="button" class="btn btn-secondary me-1" data-bs-toggle="modal"
                                                 data-bs-target="#contractModal">
                                                 <span class=""></span><i class="fa-solid fa-wand-magic-sparkles"></i>
                                             </button>
-
-                                            <button type="button" class="btn btn-secondary me-1" data-bs-toggle="modal"
+                                            <!-- spk wallet modal button -->
+                                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal"
                                                 data-bs-target="#spkWalletModal">
                                                 <span class=""></span><i class="fa-solid fa-wallet"></i>
                                             </button>
-
-                                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal"
-                                                data-bs-target="#spkWalletModal">
+                                            <!-- filter button hidden -->
+                                            <button type="button" class="btn btn-secondary d-none">
                                                 <span class=""></span><i class="fa-solid fa-filter"></i>
                                             </button>
                                         </div>
+
+                                        <div class="position-relative invisible flex-grow-1 me-1 order-md-first">
+                                            <span class="position-absolute ps-2 top-50 translate-middle-y">
+                                                <i class="fa-solid fa-magnifying-glass fa-fw"></i>
+                                            </span>
+                                            <input type="search" class="ps-4 form-control text-info border-light"
+                                                placeholder="Search" v-model="postSelect.searchTerm"
+                                                @keyup.enter="postSelect.entry = 'search';getPosts()"
+                                                @search="postSelect.entry = 'search';getPosts()">
+                                        </div>
+
                                     </div>
                                 </div>
                                 <div class="card-body p-0">
