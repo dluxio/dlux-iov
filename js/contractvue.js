@@ -772,6 +772,26 @@ export default {
             return `Expires in ${parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60) < 24 ? parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60) + ' hours' : parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60 / 24) + ' days'}`
         }
     },
+    watch: {
+        'account'(newValue) {
+            this.contracts =  []
+            this.contractIDs = {}
+            this.saccountapi = {
+                spk: 0,
+                balance: 0,
+                gov: 0,
+                poweredUp: 0,
+                claim: 0,
+                granted: {
+                    t: 0
+                },
+                granting: {
+                    t: 0
+                }
+            },
+            this.getSpkStats()
+        }
+      },
     mounted() {
         this.getSpkStats()
     },

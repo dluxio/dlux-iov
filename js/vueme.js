@@ -3453,6 +3453,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this.getPosts();
       this.getProtocol();
       this.getSpkStats();
+      this.getSPKUser()
       this.getRewardFund();
       this.getFeedPrice();
       this.getSapi(this.pageAccount, false);
