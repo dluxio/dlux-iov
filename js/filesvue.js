@@ -13,8 +13,7 @@ export default {
                         <a :href="'https://ipfs.io/ipfs/' + file" target="_blank"><img
                                 :src="'https://ipfs.io/ipfs/' + file" onerror="this.style.display='none'"
                                 class="img-fluid" style="max-width: 300px;" :alt="file"></a>
-                        <button type="button" class="btn btn-primary mt-2" 
-                            @click="addAsset(file, contract.i)"><i class="fa-solid fa-square-plus me-2"></i>Add</button>
+                        
                     </div>
                 </div>
             </div>

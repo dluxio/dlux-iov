@@ -77,30 +77,10 @@ export default {
                         <tbody class="border-0">
                             <tr class="border-0">
 
-
-                                
-
-                                
-
                                 <!-- storage -->
                                 <th class="border-0">
                                     <div class="d-flex align-items-center">
-                                        
-
-                                        <!-- files btn 1 -->
-                                        <a v-if="contract.c == 1" class=" collapsed no-decoration"
-                                                data-bs-toggle="collapse" disabled>
-                                                <span class="if-collapsed"><button
-                                            class="my-1 me-2 btn btn-sm btn-outline-secondary disabled"><i
-                                                class="fa-solid fa-file fa-fw"></i></button></span>
-                                            <span class="if-not-collapsed"><button
-                                            class="my-1 me-2 btn btn-sm btn-secondary disabled"><i
-                                                class="fa-solid fa-file fa-fw"></i></button></span>
-                                        </a>
-                                        <!-- files btn 2 -->
-
-                                        <!-- files btn 3 -->
-                                        <a v-if="contract.c !=1" class="collapsed no-decoration"
+                                        <a  class="collapsed no-decoration"
                                             data-bs-toggle="collapse" :href="'#' + replace(contract.i) + 'files'">
                                             <span class="if-collapsed">
                                             <button class="my-1 me-2 btn btn-sm btn-outline-light">
