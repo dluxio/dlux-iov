@@ -190,7 +190,7 @@ export default {
                             </tr>
                             <tr class="collapse" :id="replace(contract.i) + 'extension'">
                                 <td class=" border-0" colspan="4" v-if="contract.c == 3">
-                                <extension-vue :files="contract.df" ></extension-vue>
+                                <extension-vue :contract="contracts[contract.i]" :sstats="sstats" :account="account" :saccountapi="saccountapi" ></extension-vue>
                                 </td>
                             </tr>
 
