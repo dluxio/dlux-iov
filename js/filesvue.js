@@ -13,94 +13,21 @@ export default {
         "pop-vue": Pop
     },
     template: `
-    <div>
-        <div v-if="!hasFiles" class="p-3">
-            <p class="m-0 text-center">Looks like there's nothing here yet.</p>
-        </div>
-        <div v-if="hasFiles" style="background-color: #16191C;" class="p-2">
-
-
-            <div v-for="(contract, key, index) in saccountapi.file_contracts"
-                class="bg-darkg rounded my-2 p-2">
-                <div class="d-flex flex-wrap align-items-center p-2">
-                    <div class="rounded bg-info px-2 py-1 me-2 text-black"
-                        title="Contract Size">
-                        <i
-                            class="fa-solid fa-database fa-fw me-2"></i>{{contract.u/1000000}}
-                        MB
-                    </div>
-                    <div class="rounded bg-info px-2 py-1 me-2 text-black"
-                        title="Expiration">
-                        <i
-                            class="fa-solid fa-clock fa-fw me-2"></i>{{exp_to_time(contract.e)}}
-                    </div>
-                    <div v-if="contract.s"
-                        class="rounded bg-warning px-2 py-1 me-2 text-black"
-                        title="Beneficiary">
-                        <i
-                            class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>@{{slotDecode(contract.s,
-                        0)}} ({{slotDecode(contract.s, 1)}}%)
-                    </div>
-                    <div class="btn-group ms-auto" role="group"
-                        aria-label="Contract Actions">
-                        <button class="btn btn-secondary">
-                        <modal-vue type="extend" token="BROCA" :contract="contract" v-if="contract.c == 3"
-                                        :balance="saccountapi.broca" :account="account"
-                                        @modalsign="sendIt($event)">
-                                        <span slot="trigger"
-                                            :test="lapi == 'https://spktest.dlux.io' ? true : false"><i
-                                            class="fa-solid fa-clock-rotate-left fa-fw me-2"></i>Extend</span></modal-vue></button>
-                        <!-- <button type="button"
-                            class="btn btn-secondary" @click=""><i
-                                class="fa-solid fa-clock-rotate-left fa-fw me-2"></i>Extend</button> -->
-                        <button v-if="contract.c == 2" type="button"
-                            class="btn btn-warning" @click="addBen(slotDecode(contract.s,
-        0), slotDecode(contract.s, 1) * 100)"><i
-                                class="fa-solid fa-file-pen fa-fw me-2"></i>Finalize</button>
-                                <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                                disabled></button>
-                        <button type="button" class="btn btn-secondary"
-                            data-bs-toggle="collapse"
-                            :data-bs-target="'#' + replace(contract.i)"><i
-                                class="fa-solid fa-magnifying-glass fa-fw me-2"></i>Details</button>
-                    </div>
-                </div>
-                <div class="collapse" :id="replace(contract.i)">
-                    <ul class="text-start">
-                        <li>Contract ID: {{contract.i}}</li>
-                        <li>Size: {{contract.u/1000000}} MB</li>
-                        <li>File Owner: @{{contract.t}}</li>
-                        <li>Service Provider: @{{contract.b}}</li>
-                        <li>Sponsor: @{{contract.f}}</li>
-                        <li>Expiration: {{exp_to_time(contract.e)}}</li>
-                        <li>Price: {{contract.r}} Broca</li>
-                        <li>Redundancy: {{contract.p}}</li>
-                        <li v-if="contract.s">Terms: {{slotDecode(contract.s, 1)}}%
-                            Bennificiary to
-                            @{{slotDecode(contract.s, 0)}}</li>
-                        <li>Status: {{contract.c == 2 ? 'Waiting For Post' :
-                            'Decentralizing'}}</li>
-                        <li v-if="contract.n">Stored by:<p v-for="acc in contract.n">
-                                @{{acc}} </p>
-                        </li>
-                    </ul>
-                </div>
-                <div v-if="contract.df">
-                    <div class="d-flex flex-wrap">
-                        <div v-for="(size, file) in contract.df"
-                            class="d-flex flex-column p-2 rounded m-1"
-                            style="background-color: #000000;">
-                            <a :href="'https://ipfs.io/ipfs/' + file"
-                                target="_blank"><img
-                                    :src="'https://ipfs.io/ipfs/' + file"
-                                    onerror="this.style.display='none'"
-                                    class="img-fluid" style="max-width: 300px;"
-                                    :alt="file"></a>
-                            <button type="button" class="btn btn-primary mt-2"
-                                v-if="publishPage"
-                                @click="addAsset(file, contract.i)"><i
-                                    class="fa-solid fa-square-plus me-2"></i>Add</button>
-                        </div>
+<div>
+    <div v-if="!hasFiles" class="p-3">
+        <p class="m-0 text-center">Looks like there's nothing here yet.</p>
+    </div>
+    <div v-if="hasFiles" style="background-color: #16191C;" class="p-2">
+        <div v-for="(contract, key, index) in saccountapi.file_contracts" class="bg-darkg rounded my-2 p-2">
+            <div v-if="contract.df">
+                <div class="d-flex flex-wrap">
+                    <div v-for="(size, file) in contract.df" class="d-flex flex-column p-2 rounded m-1"
+                        style="background-color: #000000;">
+                        <a :href="'https://ipfs.io/ipfs/' + file" target="_blank"><img
+                                :src="'https://ipfs.io/ipfs/' + file" onerror="this.style.display='none'"
+                                class="img-fluid" style="max-width: 300px;" :alt="file"></a>
+                        <button type="button" class="btn btn-primary mt-2" v-if="publishPage"
+                            @click="addAsset(file, contract.i)"><i class="fa-solid fa-square-plus me-2"></i>Add</button>
                     </div>
                 </div>
             </div>

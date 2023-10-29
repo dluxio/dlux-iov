@@ -200,7 +200,7 @@ export default {
                             </tr>
                             <tr class="collapse" :id="replace(contract.i) + 'files'">
                                 <td class=" border-0" colspan="4">
-                                    <p>put files-vue here</p>
+                                    <files-vue></files-vue>
                                 </td>
                             </tr>
                             <tr class="collapse" :id="replace(contract.i) + 'beneficiary'">
