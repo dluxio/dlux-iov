@@ -954,9 +954,9 @@ export default {
       localStorage.setItem("pending", JSON.stringify(this.ops));
     },
     addStingChat() {
-      var stwidget = new StWidget("https://chat.peakd.com/t/hive-163399/0");
+      var stwidget = new StWidget("https://chat.peakd.com/t/hive-150900/0");
       stwidget.properties = {
-        requireLogin: true,
+        requireLogin: false,
         showSidebar: true,
         sidebar: 2,
         sidebar2enableSharedView: false,
@@ -973,19 +973,18 @@ export default {
         homeTabPreferences: true,
         homeTabThemes: true,
         onlyPrependCommunities: false,
-        prependCommunities: ["hive-163399"],
+        prependCommunities: ["hive-150900"],
         defaultTheme: "Dark",
         "--appFontFamily": "'Lato'",
         "--appFontSize": "16px",
         "--appMessageFontFamily": "'Lato'",
         "--appMessageFontSize": "16px",
       };
-      var element = stwidget.createElement("450px", "556px", true, true);
+      var element = stwidget.createElement( true, true);
       //optionally add style/positioning
       stwidget.setStyle({
         direction: "rtl",
-        top: "80px",
-        right: "32px",
+
         position: "fixed",
       });
       //Add the element to webpage
