@@ -1,7 +1,7 @@
 export default {
     template: `<div :id="'contract-' +  contract.i">
     <form id="contractForm">
-        <div>
+        <div class="px-3 py-2">
 
             <!-- detail banner -->
             <div class="d-flex d-none flex-column mb-2">
@@ -49,21 +49,47 @@ export default {
                         <i class="fa-solid fa-flag fa-fw me-1"></i>Flag</button>
                 </div>
             </div>
+            <div class="row">
+            <!-- storage nodes -->
+            <div class="d-flex mx-auto flex-column justify-content-around px-2 mb-2 col-md-6" style="max-width: 300px">
+                <div class=" mx-2">
+                    <div class="text-lead text-uppercase text-white-50 text-center pb-05 mt-1 border-bottom">Storage Nodes</div>
+                    <ol type="1" class="my-1">
+                        <div v-for="(acc, prop, index) in contract.n">
+                            <li><a :href="'/@' + acc " class="no-decoration text-info">@{{acc}}</a></li>
+                            <div v-if="index == Object.keys(contract.n).length - 1 && index + 1 < contract.p"
+                                v-for="i in (contract.p - (index + 1))">
+                                <li>Open</li>
+                            </div>
+                            <p class="d-none"
+                                v-if="index == Object.keys(contract.n).length - 1 && index + 1 < contract.p">
+                                {{contract.p - (index + 1) }} slots are open!</p>
+                        </div>
+                    </ol>
+                </div>
+                <div v-if="has_ipfs" class="mx-auto mt-auto d-flex flex-wrap align-items-center justify-content-center mb-1">
 
-
+                    <button style="max-width:100px;" @click="store(contract.i, isStored(contract.i))"
+                        class="flex-grow-1 ms-1 mt-1 btn btn-sm text-nowrap"
+                        :class="{'btn-success': !isStored(contract.i), 'btn-danger': isStored(contract.i)}">
+                        <span v-if="!isStored(contract.i)"><i class="fa-solid fa-square-plus fa-fw me-1"></i>Store</span>
+                        <span v-if="isStored(contract.i)"><i class="fa-solid fa-trash-can fa-fw me-1"></i>Delete</span>
+                    </button>
+                    <button style="max-width:100px;" type="button" class="flex-grow-1 btn btn-sm btn-warning ms-1 mt-1"
+                        @click="">
+                        <i class="fa-solid fa-flag fa-fw me-1"></i>Flag</button>
+                </div>
+                <button type="button" class="mx-auto mt-auto btn btn-sm btn-danger mt-1" v-if="contract.t != account"
+                    @click="cancel_contract(contract)">
+                    <i class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Sever</button>
+            </div>
 
             <!-- extend time input -->
-            <div class="d-flex flex-wrap justify-content-around px-2 mb-2" style="max-width: 300px">
-            <!-- add node button-->
-                <div class="d-flex align-items-center text-wrap me-auto mt-1 btn btn-sm btn-outline-light p-0">
-                    <label :for="'spread-' + contract.i" role="button" class="ps-1">&nbsp;</label>
-                    <input class="form control" :id="'spread-' + contract.i" type="checkbox" role="button"
-                        v-model="spread" @change="updateCost(contract.i)">
-                     <label :for="'spread-' + contract.i" role="button" class="px-1 py-05">Add<i
-                        class="fa-solid fa-tower-broadcast fa-fw ms-1"></i></label>
-                </div>
+            <div class="d-flex mx-auto flex-column justify-content-around px-2 mb-2 col-md-6" style="max-width: 300px">
+            
+                
                 <!-- selector -->
-                <div class="btn-group ms-auto mt-1">
+                <div class="btn-group me-auto mt-1">
                     <input name="time" @change="updateCost(contract.i);customTime = false" title="1 Day"
                         class="btn-check" :id="'option1-' + contract.i" type="radio" value="1" v-model="contract.extend"
                         checked>
@@ -82,30 +108,47 @@ export default {
                     <label class="btn btn-sm btn-outline-info" :for="'option4-' + contract.i">1Y</label>
                 </div>
                 
+                
+
                 <!-- input -->
                 <div class=" mt-1">
-                    <div class="input-group flex-nowrap col">
-                        <input type="number" step="1" class="form-control btn-sm text-end border-info text-info"
-                            v-model="contract.extend" @change="updateCost(contract.i)" style="min-width: 60px;">
-                        <span class="input-group-text btn-sm">Days</span>
+                    <div class="position-relative">
+                        <input type="number" step="1" min="1" class="pe-4 form-control btn-sm text-start border-info text-info"
+                            v-model="contract.extend" @change="updateCost(contract.i)" style="min-width: 60px;" placeholder="0">
+                            <span class="position-absolute text-info me-1 end-0 top-50 translate-middle-y">
+                            Day<span v-if="contract.extend != 1">s</span>
+                        </span>
                     </div>
                 </div>
                 
+                <!-- add node button-->
+                <div class="d-flex align-items-center text-wrap ms-auto mt-1 btn btn-sm btn-outline-info p-0">
+                    <label :for="'spread-' + contract.i" role="button" class="ps-1">&nbsp;</label>
+                    <input class="form control" :id="'spread-' + contract.i" type="checkbox" role="button"
+                        v-model="spread" @change="updateCost(contract.i)">
+                     <label :for="'spread-' + contract.i" role="button" class="px-1 py-05">Add<i
+                        class="fa-solid fa-tower-broadcast fa-fw ms-1"></i></label>
+                </div>
 
                 <!-- cost -->
-                <div class="ms-auto mt-1 text-primary fw-bold">{{formatNumber(extendcost, 0, '.',',')}}
-                    Broca</div>
-            </div>
+                <div class="ms-auto d-flex align-items-center my-2 text-white fw-bold display-6">{{formatNumber(extendcost, 0, '.',',')}}
+                    <span class="ms-2 fs-6 border-bottom border-2 border-white">BROCA<i class="fa-solid fa-atom ms-1"></i></span></div>
 
+                    <button type="button" class="btn btn-sm btn-primary mx-auto mt-1"
+                    :disabled="extendcost > broca_calc(saccountapi.broca)" @click="extend(contract, extendcost[name])">
+                    <i class="fa-solid fa-clock-rotate-left fa-fw me-1"></i>Extend</button>
+
+            </div>
+</div>
             <!-- action buttons -->
-            <div class="px-2 mb-2 d-flex flex-wrap text-wrap align-items-center text-white-50">
-                <button type="button" class="d-none btn btn-sm btn-secondary mt-1 me-1" data-bs-toggle="collapse"
+            <div class="px-2 mb-2 d-none d-flex justify-content-between flex-wrap text-wrap align-items-center text-white-50">
+                <button type="button" class="d-none btn btn-sm btn-secondary mt-1" data-bs-toggle="collapse"
                     :data-bs-target="'#contract-' + contract.i">
                     <i class="fa-solid fa-xmark fa-fw me-1"></i>Cancel</button>
                 <button type="button" class="btn btn-sm btn-danger mt-1" v-if="contract.t != account"
                     @click="cancel_contract(contract)">
-                    <i class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>End</button>
-                <button type="button" class="btn btn-sm btn-primary ms-auto mt-1"
+                    <i class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Sever</button>
+                <button type="button" class="btn btn-sm btn-primary mt-1"
                     :disabled="extendcost > broca_calc(saccountapi.broca)" @click="extend(contract, extendcost[name])">
                     <i class="fa-solid fa-clock-rotate-left fa-fw me-1"></i>Extend</button>
 
