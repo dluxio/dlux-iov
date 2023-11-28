@@ -80,7 +80,7 @@ export default {
                                 <!-- storage -->
                                 <th class="border-0">
                                     <div class="d-flex align-items-center">
-                                        <a  class="collapsed no-decoration"
+                                        <a  class="ms-md-2 collapsed no-decoration"
                                             data-bs-toggle="collapse" :href="'#' + replace(contract.i) + 'files'">
                                             <span class="if-collapsed">
                                             <button class="my-1 me-2 btn btn-sm btn-outline-light">
