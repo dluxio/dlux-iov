@@ -753,7 +753,7 @@ export default {
         op = {
           type: "cja",
           cj: {
-            amount: parseInt(this.amount * 1000),
+            amount: 200000,
             type: this.api,
             Long_Name: this.id,
           },
