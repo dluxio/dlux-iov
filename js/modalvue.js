@@ -737,7 +737,7 @@ export default {
         op = {
           type: "cja",
           cj: {
-            amount: parseInt(this.amount * 1000),
+            amount: 2000,
             type: this.to,
             memo: this.memo,
             id: this.id,
