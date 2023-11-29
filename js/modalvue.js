@@ -204,6 +204,10 @@ export default {
                             <div class="input-group" id="type"> 
                               <input class="form-control text-white border-dark bg-dark" type="text" v-model="to"> 
                             </div>
+                            <label for="json" class="small mb-1">Memo</label>
+                            <div class="input-group mb-3" id="json"> 
+                              <input class="form-control text-white border-dark bg-dark" type="text" v-model="memo"> 
+                            </div>
                           </div>
                           <div class="modal-footer">
                               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -735,6 +739,7 @@ export default {
           cj: {
             amount: parseInt(this.amount * 1000),
             type: this.to,
+            memo: this.memo,
             id: this.id,
             api: this.api,
           },
