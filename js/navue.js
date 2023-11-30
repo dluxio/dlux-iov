@@ -1074,7 +1074,7 @@ export default {
 
         <!-- USER MENU -->
 	      <ul class="navbar-nav" v-if="user" id="userMenu">
-          <li class="nav-item d-flex align-items-center d-none d-md-flex"><a class="nav-link" href="/new/"><i class="fa-solid fa-shapes fa-fw me-1"></i></a></li>
+          <li class="nav-item d-flex align-items-center d-none d-md-flex"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus fa-fw me-1"></i></a></li>
           <li class="nav-item d-flex align-items-center d-none d-md-flex"><a class="nav-link" role="button" @click="toggleChat"><i class="fa-solid fa-comment fa-flip-horizontal me-2"></i></a></li>
           <a role="button" v-show="user" class="p-0 d-none d-md-flex nav-link d-flex align-items-center text-white-50" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
             <img :src="avatar" id="userImage" alt="" width="40" height="40" class="img-fluid rounded-circle bg-light cover">  
@@ -1092,7 +1092,7 @@ export default {
 			        <li class=""><a class="dropdown-item" :href="'/me#inventory/'" @click="showTab('inventory')"><i class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
               <li class=""><a class="dropdown-item" :href="'/me#files/'" @click="showTab('files')"><i class="fas fa-cloud fa-fw me-2"></i>Files</a></li>
               <li class=""><hr class="dropdown-divider"></li>
-              <li class="d-md-none"><a class="dropdown-item" href="/new/"><i class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
+              <li class=""><a class="dropdown-item" href="/new/"><i class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
 			        <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
               <li class=""><a class="dropdown-item" href="/docs/"><i class="fa-solid fa-book me-2 fa-fw"></i>Docs</a></li>
               <li class=""><hr class="dropdown-divider"></li>
