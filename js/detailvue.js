@@ -17,7 +17,7 @@ export default {
         "bennies": Bennies
     },
     template: `
-<div :class="{'fade': modal, 'modal': modal}" id="detailModal" tabindex="-1" role="dialog" aria-hidden="true" @focus="orderBy('Reward')">
+<div :class="{'fade': modal, 'modal': modal}" class="my-3" id="detailModal" tabindex="-1" role="dialog" aria-hidden="true" @focus="orderBy('Reward')">
     <div class="modal-dialog modal-full modal-xl modal-dialog-centered" style="max-width: 1000px;"
         role="document">
         <div class="modal-content rounded bg-img-none">
