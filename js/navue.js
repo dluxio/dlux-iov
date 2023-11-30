@@ -1054,6 +1054,7 @@ export default {
         <ul class="navbar-nav" id="loginMenu" v-show="!user">
           <li class="nav-item">
             <div class="btn-group p-05 rounded-3" style="background: linear-gradient(145deg, #8E8E8E, #6C6C6C);">
+              <button style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: 1 rem;" class="btn btn-success text-black e-radius-hotfix border border-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers" style="font-family:'Lucida Console', Monaco, monospace;">login</button>
               <button class="btn  border-0 px-2" data-bs-toggle="dropdown">
               <span class="d-flex align-items-center"> 
                <i class="fa-solid fa-bars"></i>
@@ -1065,8 +1066,7 @@ export default {
                   <li class=""><a class="dropdown-item" href="/new/"><i class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
                   <li class=""><a class="dropdown-item" href="/docs/"><i class="fa-solid fa-book fa-fw me-2"></i>Docs</a></li>
                 </ul>
-              <button class="btn btn-fusch s-radius-hotfix border border-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers" style="font-family:'Lucida Console', Monaco, monospace;">login</button>
-              </div>
+            </div>
                 
             
           </li>
@@ -1074,7 +1074,7 @@ export default {
 
         <!-- USER MENU -->
 	      <ul class="navbar-nav" v-if="user" id="userMenu">
-          <li class="nav-item d-flex align-items-center d-none d-md-flex"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus fa-fw me-1"></i></a></li>
+          <li class="nav-item d-flex align-items-center d-none d-md-flex"><a class="nav-link" href="/new/"><i class="fa-solid fa-shapes fa-fw me-1"></i></a></li>
           <li class="nav-item d-flex align-items-center d-none d-md-flex"><a class="nav-link" role="button" @click="toggleChat"><i class="fa-solid fa-comment fa-flip-horizontal me-2"></i></a></li>
           <a role="button" v-show="user" class="p-0 d-none d-md-flex nav-link d-flex align-items-center text-white-50" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
             <img :src="avatar" id="userImage" alt="" width="40" height="40" class="img-fluid rounded-circle bg-light cover">  
