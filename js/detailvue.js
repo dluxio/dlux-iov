@@ -26,7 +26,7 @@ export default {
                     <button :class="{'invisible' : !modal}" type="button" class="btn-close mt-3 me-3"
                         data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="ms-auto me-auto px-2" style="max-width: 750px">
+                <div class="ms-auto me-auto w-100 px-2" style="max-width: 750px">
                     <div class="">
                         <div class="d-flex">
                             <div><a class=" no-decoration"
