@@ -1054,8 +1054,8 @@ export default {
         <ul class="navbar-nav" id="loginMenu" v-show="!user">
           <li class="nav-item">
             <div class="btn-group p-05 rounded-3" style="background: linear-gradient(145deg, #8E8E8E, #6C6C6C);">
-              <button style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: 1 rem;" class="btn btn-success text-black e-radius-hotfix border border-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers" style="font-family:'Lucida Console', Monaco, monospace;">login</button>
-              <button class="btn  border-0 px-2" data-bs-toggle="dropdown">
+              <button class="py-05 px-1 fs-6 btn btn-success text-black e-radius-hotfix border border-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers" style="font-family:'Lucida Console', Monaco, monospace;">login</button>
+              <button class="btn border-0 px-2" data-bs-toggle="dropdown">
               <span class="d-flex align-items-center"> 
                <i class="fa-solid fa-bars"></i>
               </span>
