@@ -1054,18 +1054,18 @@ export default {
         <!-- LOGIN MENU -->
         <ul class="navbar-nav" id="loginMenu" v-show="!user">
           <li class="nav-item">
-            <div class="btn-group p-05 rounded-3" style="background: linear-gradient(145deg, #8E8E8E, #6C6C6C);">
-              <button class="py-05 px-1 fs-6 btn btn-success text-black e-radius-hotfix border border-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers" style="font-family:'Lucida Console', Monaco, monospace;">login</button>
+            <div class="btn-group rounded-3 p-05" style="background: linear-gradient(145deg, #8E8E8E, #6C6C6C); ">
+              <button class="py-05 px-1 fs-6 btn btn-success text-black e-radius-hotfix" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers" style="font-family:'Lucida Console', Monaco, monospace;">login</button>
               <button class="btn border-0 px-2" data-bs-toggle="dropdown">
               <span class="d-flex align-items-center"> 
                <i class="fa-solid fa-bars"></i>
               </span>
               </button>
               <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black" aria-labelledby="infoDropdown" style="position: absolute;"> 
-                  <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
                   <li class=""><a class="dropdown-item" href="/qr/"><i class="fa-solid fa-qrcode fa-fw me-2"></i>Invite</a></li>
                   <li class=""><a class="dropdown-item" href="/new/"><i class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
                   <li class=""><a class="dropdown-item" href="/docs/"><i class="fa-solid fa-book fa-fw me-2"></i>Docs</a></li>
+                  <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
                 </ul>
             </div>
                 
