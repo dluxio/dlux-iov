@@ -1076,7 +1076,7 @@ export default {
         <!-- USER MENU -->
 	      <ul class="navbar-nav" v-if="user" id="userMenu">
           <li class="nav-item d-flex align-items-center d-none"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus fa-fw me-1"></i></a></li>
-          <li class="nav-item d-flex align-items-center"><a class="nav-link" role="button" @click="toggleChat" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSting" aria-controls="offcanvasSting"><i class="fa-solid fa-comment fa-flip-horizontal me-2"></i></a></li>
+          <li class="nav-item d-flex align-items-center"><a class="nav-link" role="button" @click="toggleChat" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSting" aria-controls="offcanvasSting"><i class="fa-solid fa-comment fa-flip-horizontal me-md-2"></i></a></li>
           <a role="button" v-show="user" class="p-0 d-none d-md-flex nav-link d-flex align-items-center text-white-50" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
             <img :src="avatar" id="userImage" alt="" width="40" height="40" class="img-fluid rounded-circle bg-light cover">  
           </a>
