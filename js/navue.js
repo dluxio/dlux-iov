@@ -1084,7 +1084,7 @@ export default {
           <li class="nav-item d-flex align-items-center">
             <a role="button" v-show="user" class="position-relative p-0 m-0 d-none d-md-flex nav-link align-items-center text-white-50" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
               <span class="position-absolute top-100 start-50 bg-dark bg-opacity-75 translate-middle rounded-circle" style="font-size: .7em;"><i class=" fa-solid fa-arrows-rotate p-05"></i><span class="visually-hidden">change user</span></span>
-              <img :src="avatar" id="userImage" alt="" width="40" height="40" class="img-fluid rounded-circle cover">  
+              <img :src="avatar" id="userImage" alt="" width="40" height="40" class="img-fluid rounded-circle cover bg-light">  
             </a>
           </li>
           <div class="btn-group dropdown">
