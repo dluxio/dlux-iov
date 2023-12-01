@@ -1077,9 +1077,9 @@ export default {
 	      <ul class="navbar-nav" v-if="user" id="userMenu">
           <li class="nav-item d-flex align-items-center d-none"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus fa-fw me-1"></i></a></li>
           <li class="nav-item d-flex align-items-center"><a class="nav-link" role="button" @click="toggleChat" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSting" aria-controls="offcanvasSting"><i class="fa-solid fa-comment fa-flip-horizontal me-md-2"></i></a></li>
-          <a role="button" v-show="user" class="border border-dark border-5 rounded-circle position-relative p-0 m-0 d-none d-md-flex nav-link d-flex align-items-center text-white-50" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
-            <span class="small position-absolute top-100 start-50 translate-middle bg-dark rounded-circle" style="font-size: .9em;"><i class="small fa-solid fa-arrows-rotate p-05"></i><span class="visually-hidden">change user</span></span>
-            <img :src="avatar" id="userImage" alt="" width="40" height="40" class="img-fluid rounded-circle bg-light cover">  
+          <a role="button" v-show="user" class="position-relative p-0 m-0 d-none d-md-flex nav-link d-flex align-items-center text-white-50" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
+            <span class=" position-absolute top-100 start-50 bg-dark bg-opacity-75 translate-middle rounded-circle" style="font-size: .7em;"><i class=" fa-solid fa-arrows-rotate p-05"></i><span class="visually-hidden">change user</span></span>
+            <img :src="avatar" id="userImage" alt="" width="40" height="40" class="img-fluid rounded-circle cover">  
           </a>
           <div class="btn-group dropdown">
 		      <a class="nav-link mt-auto mb-auto d-flex align-items-center dropdown-toggle dropdown-bs-toggle text-white-50" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
