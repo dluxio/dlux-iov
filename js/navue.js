@@ -1077,13 +1077,14 @@ export default {
 	      <ul class="navbar-nav" v-if="user" id="userMenu">
           <li class="nav-item d-flex align-items-center d-none"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus fa-fw me-1"></i></a></li>
           <li class="nav-item d-flex align-items-center"><a class="nav-link" role="button" @click="toggleChat" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSting" aria-controls="offcanvasSting"><i class="fa-solid fa-comment fa-flip-horizontal me-md-2"></i></a></li>
-          <a role="button" v-show="user" class="p-0 d-none d-md-flex nav-link d-flex align-items-center text-white-50" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
+          <a role="button" v-show="user" class="border border-dark border-5 rounded-circle position-relative p-0 m-0 d-none d-md-flex nav-link d-flex align-items-center text-white-50" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
+            <span class="small position-absolute top-100 start-50 translate-middle bg-dark rounded-circle" style="font-size: .9em;"><i class="small fa-solid fa-arrows-rotate p-05"></i><span class="visually-hidden">change user</span></span>
             <img :src="avatar" id="userImage" alt="" width="40" height="40" class="img-fluid rounded-circle bg-light cover">  
           </a>
           <div class="btn-group dropdown">
 		      <a class="nav-link mt-auto mb-auto d-flex align-items-center dropdown-toggle dropdown-bs-toggle text-white-50" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
 			    <a role="button" v-show="user" class="p-0 d-md-none me-1 nav-link d-flex align-items-center text-white-50">
-            <img :src="avatar" id="userImage" alt="" width="40" height="40" class="img-fluid rounded-circle bg-light cover">  
+            <img :src="avatar" id="userImage" alt="" width="40" height="40" class="img-fluid rounded-circle bg-light cover"> 
           </a>  
           <span id="userName" class="mx-1 d-none d-md-flex">{{user}}</span>
           </a>
@@ -1097,8 +1098,8 @@ export default {
               <li class=""><a class="dropdown-item" href="/docs/"><i class="fa-solid fa-book me-2 fa-fw"></i>Docs</a></li>
               <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
               <li class=""><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" role="button" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers"><i class="fas fa-user-friends me-2"></i>Users</a></li>
               <li class=""><a class="dropdown-item" href="/qr/"><i class="fa-solid fa-qrcode me-2 fa-fw"></i>Invite</a></li>
+              <li><a class="dropdown-item" role="button" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers"><i class="fas fa-user-friends me-2 position-relative"><span class="small position-absolute top-100 start-100 translate-middle text-white bg-darkg rounded-circle" style="font-size: .9em;"><i class="small fa-solid fa-arrows-rotate"></i><span class="visually-hidden">change user</span></span></i>Users</a></li>
 			        <li><a class="dropdown-item" role="button" @click="logout()"><i class="fas fa-power-off fa-fw me-2"></i>Logout</a></li>
 		      </ul>
           </div>
