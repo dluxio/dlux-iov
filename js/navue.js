@@ -1120,7 +1120,10 @@ export default {
 <!-- sting chat -->
 <div class="offcanvas offcanvas-end bg-blur-darkg bg-img-none text-white-50" tabindex="-1" id="offcanvasSting" aria-labelledby="offcanvasStingLabel">
   <div class="offcanvas-header d-flex align-items-center justify-content-between">
-    <h5 id="offcanvasRightLabel" class="m-0 p-0">Sting Chat</h5>
+    <div class="d-flex">
+      <h5 id="offcanvasRightLabel" class="m-0 p-0">Sting Chat</h5>
+      <div class="d-flex"><span class="small badge border border-warning ms-1 mb-auto" style="font-size: 0.5em;">BETA</span></div>
+    </div>
     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>  
   <div class="offcanvas-body p-0">
