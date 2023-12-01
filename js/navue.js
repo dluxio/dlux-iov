@@ -980,14 +980,15 @@ export default {
         "--appMessageFontFamily": "'Lato'",
         "--appMessageFontSize": "16px",
       };
-      var element = stwidget.createElement( true, true);
+      var element = stwidget.createElement('100%', 'calc(100% - 88px)', true/*overlay*/, true /*resizable*/);
       //optionally add style/positioning
       stwidget.setStyle({
-        direction: "rtl",
-
+        direction: "ltr",
+       
         position: "fixed",
       });
       //Add the element to webpage
+   
       document.getElementById("stingChat").appendChild(element);
     },
   },
@@ -1074,8 +1075,8 @@ export default {
 
         <!-- USER MENU -->
 	      <ul class="navbar-nav" v-if="user" id="userMenu">
-          <li class="nav-item d-flex align-items-center d-none d-md-flex"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus fa-fw me-1"></i></a></li>
-          <li class="nav-item d-flex align-items-center d-none d-md-flex"><a class="nav-link" role="button" @click="toggleChat"><i class="fa-solid fa-comment fa-flip-horizontal me-2"></i></a></li>
+          <li class="nav-item d-flex align-items-center d-none"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus fa-fw me-1"></i></a></li>
+          <li class="nav-item d-flex align-items-center"><a class="nav-link" role="button" @click="toggleChat" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSting" aria-controls="offcanvasSting"><i class="fa-solid fa-comment fa-flip-horizontal me-2"></i></a></li>
           <a role="button" v-show="user" class="p-0 d-none d-md-flex nav-link d-flex align-items-center text-white-50" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
             <img :src="avatar" id="userImage" alt="" width="40" height="40" class="img-fluid rounded-circle bg-light cover">  
           </a>
@@ -1093,8 +1094,8 @@ export default {
               <li class=""><a class="dropdown-item" :href="'/me#files/'" @click="showTab('files')"><i class="fas fa-cloud fa-fw me-2"></i>Files</a></li>
               <li class=""><hr class="dropdown-divider"></li>
               <li class=""><a class="dropdown-item" href="/new/"><i class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
-			        <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
               <li class=""><a class="dropdown-item" href="/docs/"><i class="fa-solid fa-book me-2 fa-fw"></i>Docs</a></li>
+              <li class=""><a class="dropdown-item" href="/about/"><i class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
               <li class=""><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" role="button" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers"><i class="fas fa-user-friends me-2"></i>Users</a></li>
               <li class=""><a class="dropdown-item" href="/qr/"><i class="fa-solid fa-qrcode me-2 fa-fw"></i>Invite</a></li>
@@ -1116,23 +1117,13 @@ export default {
 </div>
 
 <!-- sting chat -->
-<div v-show="chatVisible" id="stingChat"></div>
-
-<!-- off canvas nav (old) -->
-<div class="offcanvas offcanvas-start bg-blur-darkg bg-img-none text-white-50" style="max-width:200px" tabindex="-1" id="offcanvasNav" aria-labelledby="offcanvasLeftLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasLeftLabel"><a class="navbar-brand d-sm-none text-white d-flex align-items-center" href="/"><img src="/img/dlux-hive-logo-alpha.svg" class="me-2" alt="dlux-logo" width="40" height="40">DLUX</a></h5>
+<div class="offcanvas offcanvas-end bg-blur-darkg bg-img-none text-white-50" tabindex="-1" id="offcanvasSting" aria-labelledby="offcanvasStingLabel">
+  <div class="offcanvas-header d-flex align-items-center justify-content-between">
+    <h5 id="offcanvasRightLabel" class="m-0 p-0">Sting Chat</h5>
     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-body p-0 side-nav">
-    <div>
-      <ul class="navbar-nav">      
-        <li class="nav-item"><a class="nav-link text-white-50" href="/hub/"><i class="fa-solid fa-mountain-sun mx-3"></i>HUB</a></li>
-        <li class="nav-item"><a class="nav-link text-white-50" href="/nfts/"><i class="fa-solid fa-store mx-3"></i>NFTS</a></li>
-        <li class="nav-item"><a class="nav-link text-white-50" href="/dex/"><i class="fa-solid fa-building-columns mx-3"></i>DEX</a></li>
-        <li class="nav-item"><a class="nav-link text-white-50" href="/docs/"><i class="fa-solid fa-book mx-3"></i>DOCS</a></li>
-      </ul>
-    </div>
+  </div>  
+  <div class="offcanvas-body p-0">
+    <div id="stingChat" class=""></div>
   </div>
 </div>
 
