@@ -549,7 +549,7 @@ methods: {
             default:
                 return
         }
-        const op = [["comment",
+        const operations = [["comment",
         {
           "parent_author": post.parent_author,
           "parent_permlink": post.parent_permlink,
