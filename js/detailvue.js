@@ -545,6 +545,9 @@ methods: {
         switch (type){
             case '360':
                 post.json_metadata.vrHash = "QmZF2ZEZK8WBVUT7dnQyzA6eApLGnMXgNaJtWHFc3PCpqV"
+                break;
+            default:
+                return
         }
         const op = [["comment",
         {
