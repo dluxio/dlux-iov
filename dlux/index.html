@@ -51,7 +51,7 @@
             if (splits.length && splits[3] == 'ipfs') {
                 hashy = splits('/')[4];
             }
-            if(!hashy)hashy = 'QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16'
+            if(!hashy)location.href = `https://dlux.io/blog/@${author}/${permlink}`
             function match (s,t) {var a=[];for(var i=0;i<s.length;i++){j=s.indexOf(t,i);if(j>=0){a.push(j);i=j}else return a}}
 
             const subauthor = match(author,'.').length ? match(author,'.').join('') + author.replace('.', '-') : author
