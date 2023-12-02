@@ -546,7 +546,7 @@ methods: {
             case '360':
                 post.json_metadata.vrHash = "QmZF2ZEZK8WBVUT7dnQyzA6eApLGnMXgNaJtWHFc3PCpqV"
         }
-        op = [["comment",
+        const op = [["comment",
         {
           "parent_author": post.parent_author,
           "parent_permlink": post.parent_permlink,
