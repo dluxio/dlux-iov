@@ -565,8 +565,7 @@ methods: {
             key: `posting`,
             msg: `Posting...`,
             ops: ["checkAccount"],
-            api: this.apiFor(this.prefix),
-            txid: `Posting @${this.account}/${this.permlink}`,
+            txid: `Updating @${this.account}/${this.permlink}`,
           }
           this.$emit('tosign', toSign)
     },
