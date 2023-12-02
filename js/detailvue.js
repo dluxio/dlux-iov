@@ -549,6 +549,7 @@ methods: {
             default:
                 return
         }
+        post.json_metadata.subApp = type
         const operations = [["comment",
         {
           "parent_author": post.parent_author,
