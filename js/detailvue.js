@@ -25,6 +25,8 @@ export default {
                 <div class="ms-auto">
                     <button :class="{'invisible' : !modal}" type="button" class="btn-close mt-3 me-3"
                         data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button :class="{'d-none' : modal, 'invisible' : post.author != account}" type="button" class="btn btn-dark mt-3 me-3"
+                        >Update dApp</button>
                 </div>
                 <div class="ms-auto me-auto w-100 px-2" style="max-width: 750px">
                     <div class="">
