@@ -734,6 +734,7 @@ export default {
       return new Promise((resolve, reject) => {
         if (window.hive_keychain) {
           if (typeof op[1] == "string") op[1] = JSON.parse(op[1]);
+          else op[1] = JSON.parse(JSON.stringify(op[1]))
           console.log(op);
           try {
             window.hive_keychain.requestBroadcast(
