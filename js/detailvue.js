@@ -560,14 +560,15 @@ methods: {
           "body": post.body,
           "json_metadata": JSON.stringify(post.json_metadata)
         }]]
+        console.log({operations})
         const toSign = {
             type: "raw",
             op: operations,
-            key: `active`,
+            key: `posting`,
             msg: `Updating...`,
             ops: ["checkAccount"],
             api: "https://api.hive.blog",
-            txid: `Updating @${this.account}/${this.permlink}`,
+            txid: `Updating @${post.author}/${post.permlink}`,
           }
           this.$emit('tosign', toSign)
     },
