@@ -114,6 +114,7 @@ var app = new Vue({
         "app": "dlux/0.1.0",
         "xr": true,
         "Hash360": "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16",
+        "vrHash": "QmZF2ZEZK8WBVUT7dnQyzA6eApLGnMXgNaJtWHFc3PCpqV",
         "format": "markdown",
         "assets": [
           // {"hash":"",
@@ -1414,7 +1415,7 @@ var app = new Vue({
         this.upload(cids, this.contract)
       })
     },
-    upload(cids = ['QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3'], contract = { api: 'https://ipfs.dlux.io', id: '1668913215284', sigs: {}, s: 10485760, t: 0 }) {
+    upload(cids = ['QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3'], contract ) { // = { api: 'https://ipfs.dlux.io', id: '1668913215284', sigs: {}, s: 10485760, t: 0 }) {
       var files = []
       for (var name in this.FileInfo) {
         for (var i = 0; i < cids.length; i++) {
