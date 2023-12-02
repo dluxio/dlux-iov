@@ -539,6 +539,32 @@ methods: {
           }
           this.$emit('tosign', toSign)
     },
+    updateAPP(post, type = '360'){
+        switch (type){
+            case '360':
+                post.json_metadata.vrHash = "QmZF2ZEZK8WBVUT7dnQyzA6eApLGnMXgNaJtWHFc3PCpqV"
+        }
+        op = [["comment",
+        {
+          "parent_author": post.parent_author,
+          "parent_permlink": post.parent_permlink,
+          "author": post.author,
+          "permlink": post.permlink,
+          "title": post.title,
+          "body": post.body,
+          "json_metadata": JSON.stringify(post.json_metadata)
+        }]]
+        const toSign = {
+            type: "raw",
+            op: operations,
+            key: `posting`,
+            msg: `Posting...`,
+            ops: ["checkAccount"],
+            api: this.apiFor(this.prefix),
+            txid: `Posting @${this.account}/${this.permlink}`,
+          }
+          this.$emit('tosign', toSign)
+    },
     updateCost(id) {
         this.extendcost[id] = parseInt(this.contracts[id].extend * (this.contracts[id].p + (this.spread ? 1 : 0)) / (30 * 3) * this.contracts[id].r)
         this.$forceUpdate()

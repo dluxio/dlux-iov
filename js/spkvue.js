@@ -112,6 +112,7 @@ var app = new Vue({
       postBens: [],
       postCustom_json: {
         "app": "dlux/0.1.0",
+        "subApp": "360",
         "xr": true,
         "Hash360": "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16",
         "vrHash": "QmZF2ZEZK8WBVUT7dnQyzA6eApLGnMXgNaJtWHFc3PCpqV",
