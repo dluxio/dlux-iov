@@ -563,8 +563,8 @@ methods: {
         const toSign = {
             type: "raw",
             op: operations,
-            key: `posting`,
-            msg: `Posting...`,
+            key: `active`,
+            msg: `Updating...`,
             ops: ["checkAccount"],
             api: "https://api.hive.blog",
             txid: `Updating @${this.account}/${this.permlink}`,
