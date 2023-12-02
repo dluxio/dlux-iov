@@ -566,6 +566,7 @@ methods: {
             key: `posting`,
             msg: `Posting...`,
             ops: ["checkAccount"],
+            api: "https://api.hive.blog",
             txid: `Updating @${this.account}/${this.permlink}`,
           }
           this.$emit('tosign', toSign)
