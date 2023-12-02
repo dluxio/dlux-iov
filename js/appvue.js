@@ -1084,7 +1084,7 @@ createApp({
               if (
                 "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
                 this.posturls[key].json_metadata.vrHash ||
-                "newhashhere" ==
+                "QmZF2ZEZK8WBVUT7dnQyzA6eApLGnMXgNaJtWHFc3PCpqV" ==
                 this.posturls[key].json_metadata.vrHash
               )
                 type = "360";
