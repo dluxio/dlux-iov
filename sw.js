@@ -1,4 +1,4 @@
-this.version = "2023.12.07.2";
+this.version = "2023.12.07.3";
 
 console.log(
   "SW:" + this.version + " - online."
@@ -134,9 +134,7 @@ self.addEventListener("activate", function (event) {
       return Promise.all(
         cacheNames
           .filter(function (cacheName) {
-            // Return true if you want to remove this cache,
-            // but remember that caches are shared across
-            // the whole origin
+            return cacheName != CACHE_NAME
           })
           .map(function (cacheName) {
             console.log("Deleteing cache: " + cacheName);
