@@ -1,4 +1,4 @@
-this.version = "2023.12.07.1";
+this.version = "2023.12.07.2";
 
 console.log(
   "SW:" + this.version + " - online."
@@ -84,27 +84,46 @@ self.addEventListener("install", function (event) {
 
 self.addEventListener("fetch", function (event) {
   event.respondWith(
-    caches.match(event.request).then(function (response) {
-      if (response) {
-        console.log(event.request);
-        return response;
-      }
-      var fetchRequest = event.request.clone();
-      return fetch(fetchRequest).then(function (response) {
-        if (!response || response.status !== 200 || response.type !== "basic") {
-          return response;
-        }
-        var responseToCache = response.clone();
-
-        if(!(event.request.url.startsWith('http'))){
-        caches.open(CACHE_NAME).then(function (cache) {
-          if (!/^https?:$/i.test(new URL(event.request.url).protocol)) return;
-          cache.put(event.request, responseToCache);
-        });
-      }
-        return response;
+    /* Check if the cache has the file */
+    caches.open(currentVersion).then(cache => {
+      return cache.match(event.request).then(resp => {
+          // Request found in current cache, or fetch the file
+          return resp || fetch(event.request).then(response => {
+              // Cache the newly fetched file for next time
+              cache.put(event.request, response.clone());
+              return response;
+          // Fetch failed, user is offline
+          }).catch(() => {
+              // Look in the whole cache to load a fallback version of the file
+              return caches.match(event.request).then(fallback => {
+                  return fallback;
+              });
+          });
       });
     })
+    
+    // caches.match(event.request).then(function (response) {
+    //   if (response) {
+    //     console.log(event.request);
+    //     return response;
+    //   }
+    //   var fetchRequest = event.request.clone();
+    //   return fetch(fetchRequest).then(function (response) {
+    //     if (!response || response.status !== 200 || response.type !== "basic") {
+    //       return response;
+    //     }
+    //     var responseToCache = response.clone();
+
+    //     if(!(event.request.url.startsWith('http'))){
+    //     caches.open(CACHE_NAME).then(function (cache) {
+    //       if (!/^https?:$/i.test(new URL(event.request.url).protocol)) return;
+    //       cache.put(event.request, responseToCache);
+    //     });
+    //   }
+    //     return response;
+    //   });
+    // })
+
   );
 });
 
