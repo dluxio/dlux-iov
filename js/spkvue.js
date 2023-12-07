@@ -1146,7 +1146,7 @@ var app = new Vue({
     changeAppType(type = 'Blog'){
       this.appType = type
       if(type == 'Blog'){
-        delete this.postCustom_json.vrhash
+        delete this.postCustom_json.vrHash
       }
       this.postCustom_json.subApp = type
       this.dluxMock()
