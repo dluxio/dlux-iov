@@ -1592,6 +1592,17 @@
                                                     <!-- <a href="#" class="ml-auto"> Edit Permlink</a> -->
                                                 </small>
                                             </div>
+                                            <div class="dropdown">
+                                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                                  Select dApp Type
+                                                </button>
+                                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                  <li><a class="dropdown-item" href="#" @click="changeAppType('Blog')">Blog (No App)</a></li>
+                                                  <li><a class="dropdown-item" href="#" @click="changeAppType('VR')">VR dApp</a></li>
+                                                  <li><a class="dropdown-item" href="#" @click="changeAppType('360')">360 dApp</a></li>
+                                                  <li><a class="dropdown-item" href="#" @click="changeAppType('2D')">2D dApp</a></li>
+                                                </ul>
+                                            </div>
                                             <div class="form-group mb-3">
                                                 <label for="body">Post Body</label>
                                                 <mde id="body" @data="postBody = $event" />
@@ -1601,6 +1612,10 @@
                                                 <tagify class="rounded bg-darkg border-secondary w-100"
                                                     @data="postTags = $event" id="tags" />
                                             </div>
+                                            
+                                            <button class="btn btn-outline-primary" v-if="!isntDlux" type="button"
+                                                @click="addBen('dlux-io', 1000)">Include in
+                                                DLUX Ecosystem</button>
                                             <ul v-if="postBens.length">
                                                 <h6>Benificiaries: ({{postBens.length}}/8) </h6>
 
@@ -1630,7 +1645,7 @@
                     </div>
                     <div class="col-xl-6 scroll">
                         <h3 class="d-none">Preview</h3>
-                        <div class="accordion" id="previewCol">
+                        <div class="accordion" id="previewCol" v-if="appType != 'Blog'">
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
                                     <button class="accordion-button" type="button" data-bs-toggle="collapse"

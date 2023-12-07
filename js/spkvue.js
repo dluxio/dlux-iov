@@ -110,6 +110,7 @@ var app = new Vue({
       postTags: "",
       postPermlink: "",
       postBens: [],
+      appType: "360",
       postCustom_json: {
         "app": "dlux/0.1.0",
         "subApp": "360",
@@ -129,10 +130,22 @@ var app = new Vue({
         ]
       },
       customJsonDefaults: {
-        "app": "dlux/0.0.10",
-        "vrHash": {
-          "360viewer": "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16"
-        }
+        "app": "dlux/0.1.0",
+        "subApp": "360",
+        "xr": true,
+        "Hash360": "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16",
+        "vrHash": "QmZF2ZEZK8WBVUT7dnQyzA6eApLGnMXgNaJtWHFc3PCpqV",
+        "format": "markdown",
+        "assets": [
+          // {"hash":"",
+          //   "name":"",
+          //   "type":"ts", //ts - threesixty
+          //   "thumbHash":""
+          // }
+        ],
+        "tags": [
+          "dlux"
+        ]
       },
       nftTradeTabTo: "",
       nftTradeTabToken: "",
@@ -1130,6 +1143,14 @@ var app = new Vue({
       }
       this.dluxMock()
     },
+    changeAppType(type = 'Blog'){
+      this.appType = type
+      if(type == 'Blog'){
+        delete this.postCustom_json.vrhash
+      }
+      this.postCustom_json.subApp = type
+      this.dluxMock()
+    },
     delAsset(cid) {
       var found = -1
       if (!cid) return false
@@ -1655,6 +1676,9 @@ var app = new Vue({
     },
     replace(string, char = ':') {
       return string.replaceAll(char, '_')
+    },
+    addToPost(contract){
+
     },
     appendFile(file, id) {
       if (this.files[file]) delete this.files[file]

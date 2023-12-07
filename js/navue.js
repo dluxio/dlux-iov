@@ -945,6 +945,55 @@ export default {
         this.setUser();
       }
     },
+    queueUser() {
+      fetch("https://api.hive.blog", {
+        method: "POST",
+        body: JSON.stringify([
+          "get_accounts",
+          [[this.userField]],
+        ]),
+
+      }).then(r=>{
+        if(r[0].active.key_auths[0][0]){
+          userPinFeedback = "Valid User";
+          this.pinSetup = {
+            account: this.userField,
+            activePub: r[0].active.key_auths[0],
+            postingPub: r[0].posting.key_auths[0],
+            memoPub: r[0].memo_key,
+            ownerPub: r[0].owner.key_auths[0],
+          }
+        } else {
+          userPinFeedback = "Invalid User";
+        }
+        var PublicKey = hiveTx.PublicKey.from(
+          r[0][level].key_auths[0][0]
+        );
+        var PrivateKey = hiveTx.PrivateKey.from(key);
+        var success = PublicKey.verify(
+          "Testing123",
+          PrivateKey.sign("Testing123")
+        );
+        if (success) {
+          if (!this.decrypted.accounts[this.account]) this.decrypted[this.account] = {};
+            this.decrypted[this.account][level] = key;
+          var encrypted = CryptoJS.AES.encrypt(
+            JSON.stringify(this.decrypted),
+            this.PIN
+          );
+          localStorage.setItem("PEN", encrypted);
+        } else {
+          this.PENstatus = "Invalid Key";
+        }
+      })
+      this.decrypted.accounts[this.account] = {
+        posting: "",
+        active: "",
+        memo: "",
+        owner: "",
+        master: "",
+        };
+    },
     cleanOps(txid) {
       const ops = this.ops;
       for (var i = 0; i < ops.length; i++) {
@@ -1183,7 +1232,7 @@ export default {
       </div>
     </div>
 
-    <div v-if="!PEN">
+    <div v-if="!decrypted.pin">
       <label class="form-label">Add user</label>
       <div class="position-relative has-validation">
         <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
@@ -1191,9 +1240,10 @@ export default {
         </span>
         <input v-model="userField" autocapitalize="off" placeholder="username" @keyup.enter="setUser()" class="px-4 form-control bg-dark border-dark text-info">
         <span v-if="userField" class="position-absolute end-0 top-50 translate-middle-y pe-2">
-          <a role="button" @click="setUser()" class="text-info"><i class="fa-solid fa-circle-plus fa-fw"></i></a>
+          <a role="button" @click="queueUser()" class="text-info"><i class="fa-solid fa-circle-plus fa-fw"></i></a>
         </span>
       </div>
+      <p v-if="userPinFeedback"></p>
       <div class="small text-muted text-center mt-1 mb-2">
         Usernames are stored locally. <a class="no-decoration text-info" target="_blank" href="https://signup.hive.io/">Get Account</a>
       </div>
