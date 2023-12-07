@@ -1,4 +1,4 @@
-this.version = "2023.12.07.3";
+this.version = "2023.12.07.4";
 
 console.log(
   "SW:" + this.version + " - online."
@@ -101,28 +101,6 @@ self.addEventListener("fetch", function (event) {
           });
       });
     })
-    
-    // caches.match(event.request).then(function (response) {
-    //   if (response) {
-    //     console.log(event.request);
-    //     return response;
-    //   }
-    //   var fetchRequest = event.request.clone();
-    //   return fetch(fetchRequest).then(function (response) {
-    //     if (!response || response.status !== 200 || response.type !== "basic") {
-    //       return response;
-    //     }
-    //     var responseToCache = response.clone();
-
-    //     if(!(event.request.url.startsWith('http'))){
-    //     caches.open(CACHE_NAME).then(function (cache) {
-    //       if (!/^https?:$/i.test(new URL(event.request.url).protocol)) return;
-    //       cache.put(event.request, responseToCache);
-    //     });
-    //   }
-    //     return response;
-    //   });
-    // })
 
   );
 });

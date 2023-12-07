@@ -93,7 +93,7 @@ export default {
                                             </button>
                                             </span>
                                         </a>
-                                        {{contract.a/1000000}} MB
+                                        {{contract.c > 1 ? contract.u/1000000 : contract.a/1000000}} MB
                                         
                                     </div>
                                 </th>
