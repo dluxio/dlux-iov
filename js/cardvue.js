@@ -77,7 +77,7 @@ export default {
                             <!-- contract collapse -->
                             <div class="collapse" :id="'contract-' +  post.author + '-' + post.permlink">
                                 <form v-for="(cid, name, index) in post.contract" id="contractForm">
-                                    <div v-if="contracts[name]">
+                                    <div v-if="inView == name">
 
                                     <!-- detail banner -->
                                     <div class="d-flex flex-column mb-2">
@@ -150,7 +150,7 @@ export default {
                                         <button type="button" class="btn btn-sm btn-warning ms-1 mt-1" v-if="contracts[name].t == account" @click="cancel_contract(contracts[name])">
                                             <i class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Sever</button>
                                         <button type="button" class="btn btn-sm btn-secondary ms-1 mt-1" data-bs-toggle="collapse"
-                                        :data-bs-target="'#contract-' + post.author + '-' + post.permlink">
+                                        :data-bs-target="'#contract-' + post.author + '-' + post.permlink" @click="inView = false">
                                             <i class="fa-solid fa-xmark fa-fw"></i></button>
                                         <div class="d-flex align-items-center text-wrap ms-1 mt-1 btn btn-sm btn-outline-secondary p-0">
                                             <label :for="'spread-' + name" role="button" class="ps-1">&nbsp;</label>
@@ -220,7 +220,7 @@ export default {
          <i class="fa-solid fa-flag me-1"></i><span
             class="text-white-50">{{post.downVotes ? post.downVotes : ''}}</span>
          </a>
-         <a role="button" v-for="(contract, name, index) in post.contract" class="ms-2 no-decoration text-white-50"
+         <a role="button" v-for="(contract, name, index) in post.contract" @click="inView = name" class="ms-2 no-decoration text-white-50"
             data-bs-toggle="collapse"
             :data-bs-target="'#contract-' + post.author + '-' + post.permlink">
          <i class="fa-solid fa-file-contract me-1" :class="{'text-success': color_code(name) > 28800 * 7,'text-warning': color_code(name) < 28800 * 7 &&  color_code(name) > 28800, 'text-warning': color_code(name) < 28800}"></i>
@@ -300,6 +300,7 @@ export default {
             spread: false,
             showNodes: false,
             bens: [],
+            inView: false,
         };
     },
     emits: ['vote', 'reply', 'modalselect', 'tosign'],
