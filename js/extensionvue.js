@@ -301,7 +301,7 @@ export default {
             const toSign = {
                 type: "cja",
                 cj: {
-                  broca: amount,
+                  broca: this.extendcost,
                   id: contract.i,
                   file_owner: contract.t,
                   power: this.spread ? 1 : 0,
