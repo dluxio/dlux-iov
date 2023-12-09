@@ -365,6 +365,9 @@ export default {
       }
       return `${this.toFixed(bytes, 2)} ${p[counter]}B`
     },
+    toFixed(num, dig){
+      return parseFloat(num).toFixed(dig);
+    },
     valVote(){
       var op 
       if(this.difVote)op = {
