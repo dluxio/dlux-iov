@@ -287,10 +287,11 @@ export default {
                       <label for="broca" class="small mb-1 d-flex">Amount
                       <span class="ms-auto">Balance: <a role="button" class="text-info" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 0, '', ',')}}</a> {{token}}</span></label>
                       <div class="position-relative mb-3">
-                        <input id="broca" class="pe-5 form-control text-white border-dark bg-dark" type="number" step="1" :min="1" :max="balance" placeholder="1.000" v-model="amount"> 
+                        <input id="broca" class="pe-5 form-control text-white border-dark bg-dark" type="number" step="1" :min="1" :max="balance" placeholder="1" v-model="amount"> 
                         <span class="position-absolute end-0 top-50 translate-middle-y px-2">
                           {{token}}
                         </span>
+                        {{fancyBytes(amount * 1000)}}
                       </div>
                       <label for="c_to" class="small mb-1">Account to Upload File</label>
                       <div class="position-relative mb-3" id="c_to">
@@ -355,6 +356,14 @@ export default {
   methods: {
     log(event, item){
       console.log(event, item)
+    },
+    fancyBytes(bytes){
+      var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
+      while (bytes > 1024){
+        bytes = bytes / 1024
+        counter ++
+      }
+      return `${this.toFixed(bytes, 2)} ${p[counter]}B`
     },
     valVote(){
       var op 
