@@ -2,8 +2,6 @@ import Pop from "/js/pop.js";
 import ExtensionVue from "/js/extensionvue.js";
 import FilesVue from "/js/filesvue.js";
 
-/*  */
-
 export default {
     components: {
         "pop-vue": Pop,
@@ -142,7 +140,7 @@ export default {
                                         </div>
                                         <div v-if="contract.c == 3">
                                             <span class="d-md-none">Extend</span>
-                                            <span class="d-none d-md-flex align-items-center">Extend<span class="mx-2">—</span>1 / 3 <i class="fa-solid fa-tower-broadcast ms-1 fa-fw"></i></span>
+                                            <span class="d-none d-md-flex align-items-center">Extend<span class="mx-2">—</span>{{contract.nt}} / {{contract.p}} <i class="fa-solid fa-tower-broadcast ms-1 fa-fw"></i></span>
                                         </div>
                                     </div>
                                 </td>
@@ -190,7 +188,7 @@ export default {
                             </tr>
                             <tr class="collapse" :id="replace(contract.i) + 'extension'">
                                 <td class=" border-0" colspan="4" v-if="contract.c == 3">
-                                <extension-vue :contract="contracts[contract.i]" :sstats="sstats" :account="account" :saccountapi="saccountapi" ></extension-vue>
+                                <extension-vue :node-view="nodeView" :contract="contract" :sstats="sstats" :account="account" :saccountapi="saccountapi" @tosign="toSign=$event"></extension-vue>
                                 </td>
                             </tr>
 
@@ -254,16 +252,24 @@ export default {
         sapi: {
             default: 'https://spktest.dlux.io'
         },
+        nodeView: {
+            default: false
+        },
+        contracts: {
+            default: function () {
+                return []
+            }
+        }
     },
     data() {
         return {
             tick: "1",
+            toSign: {},
             larynxbehind: 999999,
             lbalance: 0,
             lbargov: 0,
             spkval: 0,
             sstats: {},
-            contracts: [],
             contractIDs: {},
             saccountapi: {
                 spk: 0,
@@ -426,22 +432,25 @@ export default {
                   for (var i = 0; i < data.powerDowns.length; i++) {
                     data.powerDowns[i] = data.powerDowns[i].split(":")[0];
                   }
-                  for (var node in data.file_contracts) {
-                    this.contractIDs[data.file_contracts[node].i] = data.file_contracts[node];
-                    this.contracts.push(data.file_contracts[node]);
-                    this.contractIDs[data.file_contracts[node].i].index = this.contracts.length - 1;
-                  }
-                  for (var user in data.channels) {
-                    for (var node in data.channels[user]) {
-                        if(this.contractIDs[data.channels[user][node].i])continue
-                        else {
-                            this.contractIDs[data.channels[user][node].i] = data.channels[user][node];
-                            this.contracts.push(data.channels[user][node]);
-                            this.contractIDs[data.channels[user][node].i].index = this.contracts.length - 1;
+                  // Storage nodes won't get contracts from here, we'll need some props from the contract
+                  if(!this.nodeView){
+                    for (var node in data.file_contracts) {
+                        this.contractIDs[data.file_contracts[node].i] = data.file_contracts[node];
+                        this.contracts.push(data.file_contracts[node]);
+                        this.contractIDs[data.file_contracts[node].i].index = this.contracts.length - 1;
+                    }
+                    for (var user in data.channels) {
+                        for (var node in data.channels[user]) {
+                            if(this.contractIDs[data.channels[user][node].i])continue
+                            else {
+                                this.contractIDs[data.channels[user][node].i] = data.channels[user][node];
+                                this.contracts.push(data.channels[user][node]);
+                                this.contractIDs[data.channels[user][node].i].index = this.contracts.length - 1;
+                            }
                         }
                     }
+                    this.sortContracts()
                   }
-                  this.sortContracts()
                   this.saccountapi = data;
                   this.saccountapi.spk += this.reward_spk();
                   if (!this.saccountapi.granted.t) this.saccountapi.granted.t = 0;
@@ -555,16 +564,6 @@ export default {
                 this.contract.api = res.services.IPFS[Object.keys(res.services.IPFS)[0]].a
               })
           },
-        isStored(contract){
-            var found = false
-            for (var i in this.contracts[contract].n) {
-                if (this.contracts[contract].n[i] == this.account) {
-                    found = true
-                    break
-                }
-            }
-            return found
-        },
         extend(contract, amount){
             if(amount > this.broca_calc(this.broca))return
             const toSign = {
@@ -576,7 +575,7 @@ export default {
                   power: this.spread ? 1 : 0,
                 },
                 id: `spkcc_extend`,
-                msg: `Extending ${contract}...`,
+                msg: `Extending ${contract.i}...`,
                 ops: ["getTokenUser"],
                 api: "https://spktest.dlux.io",
                 txid: "extend",
@@ -776,8 +775,10 @@ export default {
     watch: {
         'account'(newValue) {
             if(this.loaded == true){
-                this.contracts =  []
-                this.contractIDs = {}
+                if(!this.nodeView){
+                    this.contracts =  []
+                    this.contractIDs = {}
+                }
                 this.saccountapi = {
                     spk: 0,
                     balance: 0,
@@ -793,10 +794,22 @@ export default {
                 },
                 this.getSpkStats()
             }
+        },
+        'toSign'(newValue){
+            if(newValue.type){
+                this.$emit('tosign', this.toSign)
+                this.toSign = {}
+            }
         }
       },
     mounted() {
         this.getSpkStats()
+        if(this.nodeView){
+            for (var node in this.contracts) {
+                this.contractIDs[this.contracts[node].i] = this.contracts[node];
+                this.contractIDs[this.contracts[node].i].index = this.contracts.length - 1;
+            }
+        }
     },
 };
 

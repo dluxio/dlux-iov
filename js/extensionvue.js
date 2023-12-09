@@ -1,5 +1,5 @@
 export default {
-    template: `<div :id="'contract-' +  contract.i">
+    template: `<div :id="'contract-' +  contract.id">
     <form id="contractForm">
         <div class="px-3 py-2">
 
@@ -9,11 +9,11 @@ export default {
                     <div class="d-flex justify-content-between align-items-center mx-2">
                         <span class="text-break">{{fancyBytes(contract.u)}} | {{expIn(contract)}}</span>
                         <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="collapse"
-                            :data-bs-target="'#nodes-' + contract.i">
+                            :data-bs-target="'#nodes-' + contract.id">
                             <i
                                 class="fa-solid fa-tower-broadcast fa-fw me-1"></i>{{contract.nt}}/{{contract.p}}</button>
                     </div>
-                    <div class="collapse mx-2" :id="'nodes-' + contract.i">
+                    <div class="collapse mx-2" :id="'nodes-' + contract.id">
                         <div class="text-lead text-uppercase text-white-50 pb-05 mt-1 border-bottom">Nodes Storing This
                             Contract</div>
                         <ol type="1" class="my-1">
@@ -34,15 +34,15 @@ export default {
             </div>
 
             <!-- node banner -->
-            <div v-if="has_ipfs" class="alert alert-secondary d-flex align-items-center py-1 ps-2 pe-1 mx-2 mb-2">
-                <div class="me-1">{{isStored(contract.i) ? 'Your node is storing this contract' : 'Your node is not storing this contract'}}</div>
+            <div v-if="saccountapi.storage && !nodeView" class="alert alert-secondary d-flex align-items-center py-1 ps-2 pe-1 mx-2 mb-2">
+                <div class="me-1">{{isStored ? 'Your node is storing this contract' : 'Your node is not storing this contract'}}</div>
                 <div class="ms-auto d-flex flex-wrap align-items-center justify-content-center mb-1">
 
-                    <button style="max-width:100px;" @click="store(contract.i, isStored(contract.i))"
+                    <button style="max-width:100px;" type="button" @click="store(contract.i, isStored)"
                         class="flex-grow-1 ms-1 mt-1 btn btn-sm text-nowrap"
-                        :class="{'btn-success': !isStored(contract.i), 'btn-danger': isStored(contract.i)}">
-                        <span v-if="!isStored(contract.i)"><i class="fa-solid fa-square-plus fa-fw me-1"></i>Add</span>
-                        <span v-if="isStored(contract.i)"><i class="fa-solid fa-trash-can fa-fw me-1"></i>Remove</span>
+                        :class="{'btn-success': !isStored, 'btn-danger': isStored}">
+                        <span v-if="!isStored"><i class="fa-solid fa-square-plus fa-fw me-1"></i>Add</span>
+                        <span v-if="isStored"><i class="fa-solid fa-trash-can fa-fw me-1"></i>Remove</span>
                     </button>
                     <button style="max-width:100px;" type="button" class="flex-grow-1 btn btn-sm btn-warning ms-1 mt-1"
                         @click="">
@@ -67,19 +67,19 @@ export default {
                         </div>
                     </ol>
                 </div>
-                <div v-if="has_ipfs" class="mx-auto mt-auto d-flex flex-wrap align-items-center justify-content-center mb-1">
+                <div v-if="saccountapi.storage" class="mx-auto mt-auto d-flex flex-wrap align-items-center justify-content-center mb-1">
 
-                    <button style="max-width:100px;" @click="store(contract.i, isStored(contract.i))"
+                    <button style="max-width:100px;" @click="store(contract.i, isStored)" type="button"
                         class="flex-grow-1 ms-1 mt-1 btn btn-sm text-nowrap"
-                        :class="{'btn-success': !isStored(contract.i), 'btn-danger': isStored(contract.i)}">
-                        <span v-if="!isStored(contract.i)"><i class="fa-solid fa-square-plus fa-fw me-1"></i>Store</span>
-                        <span v-if="isStored(contract.i)"><i class="fa-solid fa-trash-can fa-fw me-1"></i>Delete</span>
+                        :class="{'btn-success': !isStored, 'btn-danger': isStored}">
+                        <span v-if="!isStored"><i class="fa-solid fa-square-plus fa-fw me-1"></i>Store</span>
+                        <span v-if="isStored"><i class="fa-solid fa-trash-can fa-fw me-1"></i>Delete</span>
                     </button>
                     <button style="max-width:100px;" type="button" class="flex-grow-1 btn btn-sm btn-warning ms-1 mt-1"
-                        @click="">
+                        @click="" >
                         <i class="fa-solid fa-flag fa-fw me-1"></i>Flag</button>
                 </div>
-                <button type="button" class="mx-auto mt-auto btn btn-sm btn-danger mt-1" v-if="contract.t != account"
+                <button type="button" class="mx-auto mt-auto btn btn-sm btn-danger mt-1" v-if="contract.t == account" type="button"
                     @click="cancel_contract(contract)">
                     <i class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Sever</button>
             </div>
@@ -134,7 +134,7 @@ export default {
                 <div class="ms-auto d-flex align-items-center my-2 text-white fw-bold display-6">{{formatNumber(extendcost, 0, '.',',')}}
                     <span class="ms-2 fs-6 border-bottom border-2 border-white">BROCA<i class="fa-solid fa-atom ms-1"></i></span></div>
 
-                    <button type="button" class="btn btn-sm btn-primary mx-auto mt-1"
+                    <button type="button" class="btn btn-sm btn-primary mx-auto mt-1" type="button"
                     :disabled="extendcost > broca_calc(saccountapi.broca)" @click="extend(contract, extendcost[name])">
                     <i class="fa-solid fa-clock-rotate-left fa-fw me-1"></i>Extend</button>
 
@@ -142,8 +142,8 @@ export default {
 </div>
             <!-- action buttons -->
             <div class="px-2 mb-2 d-none d-flex justify-content-between flex-wrap text-wrap align-items-center text-white-50">
-                <button type="button" class="d-none btn btn-sm btn-secondary mt-1" data-bs-toggle="collapse"
-                    :data-bs-target="'#contract-' + contract.i">
+                <button type="button" class="d-none btn btn-sm btn-secondary mt-1" data-bs-toggle="collapse" type="button"
+                    :data-bs-target="'#contract-' + contract.id">
                     <i class="fa-solid fa-xmark fa-fw me-1"></i>Cancel</button>
                 <button type="button" class="btn btn-sm btn-danger mt-1" v-if="contract.t != account"
                     @click="cancel_contract(contract)">
@@ -163,6 +163,16 @@ export default {
             required: true,
             default: function () {
                 return {
+                    n: {
+                        "dlux-io": 1,
+                    },
+                    p: 3,
+                    nt: "1",
+                    i: "a:1:1",
+                    id: "a-1-1",
+                    u: 1,
+                    t: 10,
+                    extend: 7,
 
                 };
             },
@@ -174,7 +184,7 @@ export default {
             required: true,
             default: function () {
                 return {
-
+                    head_block: 8000000
                 };
             },
         },
@@ -182,12 +192,12 @@ export default {
             required: true,
             default: function () {
                 return {
-
+                    head_block: 8000000
                 };
             },
         },
-        has_ipfs: {
-            default: false,
+        nodeView: {
+            default: false
         },
     },
     data() {
@@ -206,8 +216,23 @@ export default {
             extendcost: 0,
         };
     },
-    emits: [],
+    emits: ['tosign'],
     methods: {
+        store(contract, remove = false){
+            // have a storage node?
+            const toSign = {
+                type: "cja",
+                cj: {
+                  items: [contract]
+                },
+                id: `spkcc_${!remove ? 'store' : 'remove'}`,
+                msg: `Storing ${contract}...`,
+                ops: ["getTokenUser"],
+                api: "https://spktest.dlux.io",
+                txid: `${contract}_${!remove ? 'store' : 'remove'}`,
+              }
+              this.$emit('tosign', toSign)
+        },
         Base64toNumber(chars) {
             const glyphs =
                 "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
@@ -253,7 +278,7 @@ export default {
                 i = i.replace(c, "$1" + e + "$2");
             return (u ? "-" : "") + i + o;
         },
-        updateCost(id){
+        updateCost(){
             this.extendcost = parseInt(this.contract.extend / 30 * this.contract.r)
             this.$forceUpdate()
           },
@@ -269,9 +294,54 @@ export default {
             return parseFloat(num).toFixed(dig);
           },
           expIn(con){
-            if(con.e)return `Expires in ${parseInt((parseInt(con.e.split(':')[0]) - this.sstats.head_block) / 20 / 60) < 24 ? parseInt((parseInt(con.e.split(':')[0]) - this.spkapi.head_block) / 20 / 60) + ' hours' : parseInt((parseInt(con.e.split(':')[0]) - this.spkapi.head_block) / 20 / 60 / 24) + ' days'}`
+            if(con.e)return `Expires in ${parseInt((parseInt(con.e.split(':')[0]) - this.sstats.head_block) / 20 / 60) < 24 ? parseInt((parseInt(con.e.split(':')[0]) - this.saccountapi.head_block) / 20 / 60) + ' hours' : parseInt((parseInt(con.e.split(':')[0]) - this.saccountapi.head_block) / 20 / 60 / 24) + ' days'}`
           },
+          extend(contract, amount){
+            if(amount > this.broca_calc(this.broca))return
+            const toSign = {
+                type: "cja",
+                cj: {
+                  broca: amount,
+                  id: contract.i,
+                  file_owner: contract.t,
+                  power: this.spread ? 1 : 0,
+                },
+                id: `spkcc_extend`,
+                msg: `Extending ${contract.i}...`,
+                ops: ["getTokenUser"],
+                api: "https://spktest.dlux.io",
+                txid: "extend",
+              }
+              this.$emit('tosign', toSign)
+        }
     },
-    mounted() {},
+    computed: {
+        isStored: {
+          get() {
+            var found = false
+            for (var i in this.contract.n) {
+                if (this.contract.n[i] == this.account) {
+                    found = true
+                    break
+                }
+            }
+            return found
+          },
+        },
+    },
+    watch: {
+        'contract'(newValue) {
+            console.log('watch', newValue)
+            this.contract.id = this.contract.i.replace(/:/g, "-");
+            this.contract.extend = 7
+            this.updateCost()
+        }
+      },
+    mounted() {
+        console.log("mount", this.contract)
+        this.contract.id = this.contract.i.replace(/:/g, "-");
+        this.contract.extend = 7
+        this.updateCost()
+    },
 };
 

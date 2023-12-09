@@ -329,7 +329,7 @@ export default {
                   power: this.spread ? 1 : 0,
                 },
                 id: `spkcc_extend`,
-                msg: `Extending ${contract}...`,
+                msg: `Extending ${contract.i}...`,
                 ops: ["getTokenUser"],
                 api: "https://spktest.dlux.io",
                 txid: "extend",
