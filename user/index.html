@@ -1306,10 +1306,15 @@
                                         <!-- search bar -->
                                         <div class="d-flex flex-wrap ms-md-auto order-sm-last">
                                             <!-- new contract modal button -->
-                                            <button type="button" class="btn btn-secondary me-1" data-bs-toggle="modal"
-                                                data-bs-target="#contractModal">
-                                                <span class=""></span><i class="fa-solid fa-plus"></i>
-                                            </button>
+                                            <button v-if="saccountapi.pubKey != 'NA'" type="button"
+                                                        class="btn btn-secondary me-1">
+                                                        <modal-vue type="build" token="BROCA"
+                                                            :balance="broca_calc(saccountapi.broca)" :account="account"
+                                                            @modalsign="sendIt($event)" :ipfsproviders="ipfsProviders">
+                                                            <span slot="trigger" class=""><i
+                                                                    class="fa-solid fa-plus fa-fw"></i></span>
+                                                        </modal-vue>
+                                                    </button>
                                             <!-- lucky petition -->
                                             <button type="button" class="btn btn-secondary me-1">
                                                 <span class=""></span><i class="fa-solid fa-wand-magic-sparkles"></i>

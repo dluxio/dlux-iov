@@ -19,6 +19,7 @@ import NFTCard from "./nftcard.js";
 import FTTransfer from "./fttransfer.js";
 import NFTDetail from "./nftdetail.js";
 
+
 let url = location.href.replace(/\/$/, "");
 let lapi = "",
   sapi = "https://spkinstant.hivehoneycomb.com";
@@ -279,6 +280,7 @@ var app = new Vue({
         showDeleted: false,
         searching: false,
       },
+      ipfsProviders: {},
       accountRNFTs: [],
       accountNFTs: [],
       displayNFTs: [],
@@ -1106,6 +1108,20 @@ var app = new Vue({
           };
         }
       });
+    },
+    broca_calc(last = '0,0') {
+      const last_calc = this.Base64toNumber(last.split(',')[1])
+      const accured = parseInt((parseFloat(this.sstats.broca_refill) * (this.sstats.head_block - last_calc)) / (this.saccountapi.spk_power * 1000))
+      var total = parseInt(last.split(',')[0]) + accured
+      if (total > (this.saccountapi.spk_power * 1000)) total = (this.saccountapi.spk_power * 1000)
+      return total
+    },
+    getIPFSproviders() {
+      fetch(this.sapi + "/services/IPFS")
+        .then((response) => response.json())
+        .then((data) => {
+          this.ipfsProviders = data.providers
+        });
     },
     upload(cid = 'QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3', contract = {api: 'https://127.0.0.1:5050', id: '1668913215284', sigs: {QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3: '20548a0032e0cf51ba75721743d2ec6fac180f7bc773ce3d77b769d9c4c9fa9dbb7d59503f05be8edcaac00d5d66709b0bce977f3207785913f7fbad2773ae4ac2'}}){
    
