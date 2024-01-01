@@ -203,13 +203,13 @@ export default {
                                         <li v-if="contract.c == 2">Size:
                                             {{contract.u}} bytes
                                         </li>
-                                        <li>File Owner:  <a :href="'/@' + contract.t" class="no-decoration text-info">@{{contract.t}}</a>
+                                        <li>File Owner:  <a :href="'/@' + contract.t" class="no-decoration text-primary">@{{contract.t}}</a>
                                         </li>
                                         <li>Service Provider:
-                                        <a :href="'/@' + contract.b" class="no-decoration text-info">@{{contract.b}}</a>
+                                        <a :href="'/@' + contract.b" class="no-decoration text-primary">@{{contract.b}}</a>
                                         </li>
                                         <li>Sponsor:
-                                        <a :href="'/@' + contract.f" class="no-decoration text-info">@{{contract.f}}</a>
+                                        <a :href="'/@' + contract.f" class="no-decoration text-primary">@{{contract.f}}</a>
                                         </li>
                                         <li>Expiration:
                                             {{exp_to_time(contract.e)}}
@@ -231,14 +231,14 @@ export default {
                                         <li v-if="contract.df">Files:
                                             <ol>
                                             <li class="mb-0" v-for="(size, cid, index) in contract.df">
-                                            <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="no-decoration text-info">{{cid}}</a><span class="small ms-1">({{size > 1 ? size/1000000 : size/1000000}} MB)</span>
+                                            <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="no-decoration text-primary">{{cid}}</a><span class="small ms-1">({{size > 1 ? size/1000000 : size/1000000}} MB)</span>
                                             </li>
                                             </ol>
                                         </li>
                                         <li v-if="contract.n">Stored by:
                                         <ol>
                                             <li v-for="acc in contract.n">
-                                               <a :href="'/@' + acc" class="no-decoration text-info">@{{acc}}</a>
+                                               <a :href="'/@' + acc" class="no-decoration text-primary">@{{acc}}</a>
                                             </li>
                                             </ol>
                                         </li>
