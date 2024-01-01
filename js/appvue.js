@@ -1250,7 +1250,7 @@ createApp({
                     looker = looker.split(')')[0]
                 } catch (e) {
                     */
-        return "/img/dluxdefault.svg";
+        return "/img/dlux-logo-icon.png";
       }
     },
     readRep(rep2) {
