@@ -203,12 +203,14 @@ export default {
                                         <li v-if="contract.c == 2">Size:
                                             {{contract.u}} bytes
                                         </li>
-                                        <li>File Owner: @{{contract.t}}
+                                        <li>File Owner:  <a :href="'/@' + contract.t" class="no-decoration text-info">@{{contract.t}}</a>
                                         </li>
                                         <li>Service Provider:
-                                            @{{contract.b}}
+                                        <a :href="'/@' + contract.b" class="no-decoration text-info">@{{contract.b}}</a>
                                         </li>
-                                        <li>Sponsor: @{{contract.f}}</li>
+                                        <li>Sponsor:
+                                        <a :href="'/@' + contract.f" class="no-decoration text-info">@{{contract.f}}</a>
+                                        </li>
                                         <li>Expiration:
                                             {{exp_to_time(contract.e)}}
                                         </li>
@@ -229,14 +231,14 @@ export default {
                                         <li v-if="contract.df">Files:
                                             <ol>
                                             <li class="mb-0" v-for="(size, cid, index) in contract.df">
-                                                {{cid}} — {{size}}
+                                            <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="no-decoration text-info">{{cid}}</a><span class="small ms-1">({{size > 1 ? size/1000000 : size/1000000}} MB)</span>
                                             </li>
                                             </ol>
                                         </li>
                                         <li v-if="contract.n">Stored by:
                                         <ol>
                                             <li v-for="acc in contract.n">
-                                               <a href="/user/@acc" class="no-decoration text-info">@{{acc}}</a>
+                                               <a :href="'/@' + acc" class="no-decoration text-info">@{{acc}}</a>
                                             </li>
                                             </ol>
                                         </li>
