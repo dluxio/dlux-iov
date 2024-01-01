@@ -1,4 +1,4 @@
-this.version = "2024.01.01.1";
+this.version = "2024.01.01.2";
 
 console.log(
   "SW:" + this.version + " - online."
@@ -85,7 +85,7 @@ self.addEventListener("install", function (event) {
 self.addEventListener("fetch", function (event) {
   event.respondWith(
     /* Check if the cache has the file */
-    caches.open(currentVersion).then(cache => {
+    caches.open(CACHE_NAME).then(cache => {
       return cache.match(event.request).then(resp => {
           // Request found in current cache, or fetch the file
           return resp || fetch(event.request).then(response => {
