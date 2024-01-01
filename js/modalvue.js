@@ -286,13 +286,13 @@ export default {
                     <div class="modal-body text-start"> 
                       <label for="broca" class="small mb-1 d-flex">Amount
                       <span class="ms-auto">Balance: <a role="button" class="text-info" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 0, '', ',')}}</a> {{token}}</span></label>
-                      <div class="position-relative mb-3">
+                      <div class="position-relative mb-1">
                         <input id="broca" class="pe-5 form-control text-white border-dark bg-dark" type="number" step="1" :min="1" :max="balance" placeholder="1" v-model="amount"> 
                         <span class="position-absolute end-0 top-50 translate-middle-y px-2">
                           {{token}}
-                        </span>
-                        {{fancyBytes(amount * 1000)}}
+                        </span>  
                       </div>
+                      <div class="text-center mb-3 small text-muted">~{{fancyBytes(amount * 1000)}}</div>
                       <label for="c_to" class="small mb-1">Account to Upload File</label>
                       <div class="position-relative mb-3" id="c_to">
                         <span class="position-absolute top-50 translate-middle-y ps-2">
