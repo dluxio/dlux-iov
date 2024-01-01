@@ -226,14 +226,19 @@ export default {
                                             'Waiting For Upload' :
                                             'Uploaded'}}
                                         </li>
-                                        <li v-if="contract.df">Files:<p v-for="(size, cid, index) in contract.df">
-                                                {{index}} {{cid}}:{{size}}
-                                            </p>
+                                        <li v-if="contract.df">Files:
+                                            <ol>
+                                            <li class="mb-0" v-for="(size, cid, index) in contract.df">
+                                                {{cid}} — {{size}}
+                                            </li>
+                                            </ol>
                                         </li>
                                         <li v-if="contract.n">Stored by:
-                                            <p v-for="acc in contract.n">
-                                                @{{acc}}
-                                            </p>
+                                        <ol>
+                                            <li v-for="acc in contract.n">
+                                               <a href="/user/@acc" class="no-decoration text-info">@{{acc}}</a>
+                                            </li>
+                                            </ol>
                                         </li>
                                     </ul>
                                 </td>
