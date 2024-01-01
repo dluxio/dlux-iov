@@ -152,6 +152,7 @@ export default {
   data() {
     return {
       chatVisible: false,
+      userPinFeedback: "",
       passwordField: "",
       level: "posting",
       decrypted: {
@@ -955,7 +956,7 @@ export default {
 
       }).then(r=>{
         if(r[0].active.key_auths[0][0]){
-          userPinFeedback = "Valid User";
+          this.userPinFeedback = "Valid User";
           this.pinSetup = {
             account: this.userField,
             activePub: r[0].active.key_auths[0],
@@ -964,7 +965,7 @@ export default {
             ownerPub: r[0].owner.key_auths[0],
           }
         } else {
-          userPinFeedback = "Invalid User";
+          this.userPinFeedback = "Invalid User";
         }
         var PublicKey = hiveTx.PublicKey.from(
           r[0][level].key_auths[0][0]
