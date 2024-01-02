@@ -1,5 +1,6 @@
 export default {
     template: `
+    <div>
     <div class="container">
         <div class="mt-3">
             <div class="alert alert-danger text-start" role="alert">
@@ -54,7 +55,7 @@ export default {
                 <div>
                     <div class="d-flex align-items-start">
                         <h4 class="m-0">SPK Token</h4><small
-                            v-if="lapi == 'https://spktest.dlux.io'"><span
+                            v-if="sapi == 'https://spktest.dlux.io'"><span
                                 class="badge ms-1 me-2 bg-warning">TEST</span></small>
                     </div>
                     <p class="text-white-50 m-0">The governance
@@ -76,7 +77,7 @@ export default {
                                 :balance="saccountapi.spk" :account="account"
                                 @modalsign="sendIt($event)">
                                 <span slot="trigger" class="p-2"
-                                    :test="lapi == 'https://spktest.dlux.io' ? true : false"><i
+                                    :test="sapi == 'https://spktest.dlux.io' ? true : false"><i
                                         class="fas fa-paper-plane me-2"></i>Send</span>
                             </modal-vue>
                         </button>
@@ -116,7 +117,7 @@ export default {
                 <div class="text-start">
                     <div class="d-flex align-items-start">
                         <h4 class="m-0">SPK Power</h4><small
-                            v-if="lapi == 'https://spktest.dlux.io'"><span
+                            v-if="sapi == 'https://spktest.dlux.io'"><span
                                 class="badge ms-1 me-2 bg-warning">TEST</span></small>
                     </div>
                     <p class="text-white-50">Powered SPK for
@@ -288,7 +289,7 @@ export default {
                 <div class="text-start">
                     <div class="d-flex align-items-start">
                         <h4 class="m-0">BROCA</h4><small
-                            v-if="lapi == 'https://spktest.dlux.io'"><span
+                            v-if="sapi == 'https://spktest.dlux.io'"><span
                                 class="badge ms-1 me-2 bg-warning">TEST</span></small>
                     </div>
                     <p class="text-white-50">Resource Credits
@@ -297,11 +298,11 @@ export default {
                     <p class="text-white-50">BROCA stats:</p>
                     <ul class="text-white-50">
                         <li>Current cost to store: 1 BROCA per
-                            {{sstats.channel_bytes}}
+                            {{spkStats.channel_bytes}}
                             Bytes
                             for 30 days.</li>
                         <li>Recharge Rate:
-                            {{formatNumber((sstats.broca_refill
+                            {{formatNumber((spkStats.broca_refill
                             / 28800), 2,
                             '.',
                             ',')}} Days to Recharge.</li>
@@ -309,7 +310,7 @@ export default {
                             (broca_calc(saccountapi.broca))/(saccountapi.spk_power
                             * 1000))
                             *
-                            (sstats.broca_refill / 28800), 2,
+                            (spkStats.broca_refill / 28800), 2,
                             '.', ',')}}
                             Days until full.
                         </li>
@@ -358,39 +359,6 @@ export default {
                                 </modal-vue>
                             </ul>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <!--claim larynx airdrop-->
-            <div id="larynxclaimdiv"
-                class="d-flex align-items-center border-bottom border-secondary py-5"
-                v-if="parseInt(saccountapi.drop.last_claim, 16) != frmDate() && saccountapi.drop.availible.amount > 0 && me">
-                <div>
-                    <div class="d-flex align-items-start">
-                        <h4 class="m-0">LARYNX Airdrop Claim
-                        </h4>
-                    </div>
-                    <p class="text-white-50">This months
-                        claimable tokens
-                        based on a January
-                        6th HIVE blockchain snapshot.</p>
-                    <p>Tokens not claimed do not roll over to
-                        next month.
-                    </p>
-                    <input type="text" name="frmDateReg" required id="frmDate"
-                        value="" class="d-none">
-                </div>
-                <div id="claimlarynxbtn" class="ms-auto text-end">
-                    <h5>{{formatNumber((saccountapi.drop.availible.amount)/1000,
-                        3, '.',
-                        ',')}}
-                        LARYNX</h5>
-                    <div class="btn-group" role="group"
-                        aria-label="LARYNX Claim">
-                        <button type="submit" class="btn btn-info "
-                            @click="dropClaim('spkcc', 'claim')"><i
-                                class="fas fa-coin"></i><i
-                                class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
                     </div>
                 </div>
             </div>
@@ -450,7 +418,7 @@ export default {
                 <div>
                     <div class="d-flex align-items-start">
                         <h4 class="m-0">LARYNX Token</h4><small
-                            v-if="lapi == 'https://spktest.dlux.io'"><span
+                            v-if="sapi == 'https://spktest.dlux.io'"><span
                                 class="badge ms-1 me-2 bg-warning">TEST</span></small>
                     </div>
                     <p class="text-white-50">The mining token
@@ -469,7 +437,7 @@ export default {
                             <modal-vue type="send" token="LARYNX"
                                 :balance="saccountapi.balance"
                                 :account="account" @modalsign="sendIt($event)"
-                                :test="lapi == 'https://spktest.dlux.io' ? true : false">
+                                :test="sapi == 'https://spktest.dlux.io' ? true : false">
                                 <span slot="trigger" class="p-2"><i
                                         class="fas fa-paper-plane me-2"></i>Send</span>
                             </modal-vue>
@@ -489,7 +457,7 @@ export default {
                                     :balance="saccountapi.balance"
                                     :account="account"
                                     @modalsign="sendIt($event)"
-                                    :test="lapi == 'https://spktest.dlux.io' ? true : false">
+                                    :test="sapi == 'https://spktest.dlux.io' ? true : false">
                                     <button class="dropdown-item" slot="trigger"
                                         type="button"><i
                                             class="fas fa-angle-double-up fa-fw me-2"></i>Power
@@ -500,7 +468,7 @@ export default {
                                     :balance="saccountapi.balance"
                                     :account="account"
                                     @modalsign="sendIt($event)"
-                                    :test="lapi == 'https://spktest.dlux.io' ? true : false">
+                                    :test="sapi == 'https://spktest.dlux.io' ? true : false">
                                     <button class="dropdown-item"
                                         :disabled="!isNode" slot="trigger"
                                         type="button"><i
@@ -510,7 +478,7 @@ export default {
                                 <modal-vue type="power" token="LARYNX"
                                     func="Register a Service"
                                     :balance="saccountapi.balance"
-                                    :min="sstats.IPFSRate/1000"
+                                    :min="spkStats.IPFSRate/1000"
                                     :account="account"
                                     @modalsign="sendIt($event)">
                                     <button class="dropdown-item" slot="trigger"
@@ -522,7 +490,7 @@ export default {
                                 <modal-vue type="power" token="LARYNX"
                                     func="Register a Service Type"
                                     :balance="saccountapi.balance"
-                                    :min="sstats.IPFSRate/1000"
+                                    :min="spkStats.IPFSRate/1000"
                                     :account="account"
                                     @modalsign="sendIt($event)">
                                     <button class="dropdown-item" slot="trigger"
@@ -534,7 +502,7 @@ export default {
                                 <modal-vue v-if="isNode" type="power"
                                     token="LARYNX" func="Register a Validator"
                                     :balance="saccountapi.balance"
-                                    :min="isValidator ? '0.001' : sstats.IPFSRate/1000"
+                                    :min="isValidator ? '0.001' : spkStats.IPFSRate/1000"
                                     :account="account"
                                     @modalsign="sendIt($event)">
                                     <button class="dropdown-item" slot="trigger"
@@ -616,7 +584,7 @@ export default {
                                 <modal-vue type="power" token="LARYNX"
                                     func="Unlock Liquidity"
                                     :balance="saccountapi.gov"
-                                    :test="lapi == 'https://spktest.dlux.io' ? true : false"
+                                    :test="sapi == 'https://spktest.dlux.io' ? true : false"
                                     :account="account"
                                     @modalsign="sendIt($event)">
                                     <button class="dropdown-item" slot="trigger"
@@ -636,7 +604,7 @@ export default {
                         <div class="d-flex align-items-start">
                             <h4 class="m-0">LARYNX Power</h4>
                             <small
-                                v-if="lapi == 'https://spktest.dlux.io'"><span
+                                v-if="sapi == 'https://spktest.dlux.io'"><span
                                     class="badge ms-1 me-2 bg-warning">TEST</span></small>
                         </div>
                         <p class="text-white-50">Powered tokens
@@ -721,11 +689,11 @@ export default {
                             <button class="btn btn-info p-0" type="button">
                                 <modal-vue type="delegate"
                                     :smarkets="smarkets.node" token="LARYNX"
-                                    func="Lock Liquidity" :stats="sstats"
+                                    func="Lock Liquidity" :stats="spkStats"
                                     :balance="saccountapi.poweredUp"
                                     :account="account"
                                     @modalsign="sendIt($event)"
-                                    :test="lapi == 'https://spktest.dlux.io' ? true : false"><span
+                                    :test="sapi == 'https://spktest.dlux.io' ? true : false"><span
                                         slot="trigger" class="p-2">
                                         <i
                                             class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
@@ -748,7 +716,7 @@ export default {
                                         :balance="saccountapi.poweredUp"
                                         :account="account"
                                         @modalsign="sendIt($event)"
-                                        :test="lapi == 'https://spktest.dlux.io' ? true : false">
+                                        :test="sapi == 'https://spktest.dlux.io' ? true : false">
                                         <button
                                             :disabled="!saccountapi.poweredUp"
                                             class="dropdown-item" slot="trigger"
@@ -761,7 +729,7 @@ export default {
                                         type="confirm" token="LARYNX"
                                         func="powercancel" :account="account"
                                         @modalsign="sendIt($event)"
-                                        :test="lapi == 'https://spktest.dlux.io' ? true : false">
+                                        :test="sapi == 'https://spktest.dlux.io' ? true : false">
                                         <button class="dropdown-item"
                                             slot="trigger" type="button">
                                             <i
@@ -785,7 +753,7 @@ export default {
                         <modal-vue type="confirm" token="LARYNX"
                             func="powercancel" :account="account"
                             @modalsign="sendIt($event)"
-                            :test="lapi == 'https://spktest.dlux.io' ? true : false">
+                            :test="sapi == 'https://spktest.dlux.io' ? true : false">
                             <button class="btn btn-sm btn-outline-danger"
                                 slot="trigger" type="button">
                                 STOP</button>
@@ -811,21 +779,21 @@ export default {
                                 <div class="d-flex ms-auto ">
                                     <modal-vue type="delegate"
                                         :smarkets="smarkets.node" token="LARYNX"
-                                        :to="b" :amount="a" :stats="sstats"
+                                        :to="b" :amount="a" :stats="spkStats"
                                         :balance="saccountapi.poweredUp"
                                         :account="account"
                                         @modalsign="sendIt($event)"
-                                        :test="lapi == 'https://spktest.dlux.io' ? true : false">
+                                        :test="sapi == 'https://spktest.dlux.io' ? true : false">
                                         <button slot="trigger" type="button"
                                             class="ms-1 btn btn-secondary"><i
                                                 class="fas fa-fw fa-user-edit"></i></button>
                                     </modal-vue>
                                     <modal-vue type="delegate"
                                         :smarkets="smarkets.node" token="LARYNX"
-                                        :to="b" amount="0" :stats="sstats"
+                                        :to="b" amount="0" :stats="spkStats"
                                         :balance="saccountapi.poweredUp"
                                         :account="account"
-                                        :test="lapi == 'https://spktest.dlux.io' ? true : false"
+                                        :test="sapi == 'https://spktest.dlux.io' ? true : false"
                                         @modalsign="sendIt($event)">
                                         <button class="ms-1 btn btn-danger ms-1"
                                             slot="trigger" type="button"><i
@@ -878,18 +846,211 @@ export default {
                 class="fa-solid fa-angles-up fa-fw me-2"></i>Hide
             Wallet</button>
     </div>
+    </div>
    `,
 props: {
+    account: {
+        type: String,
+        default: '',
+        required: true
+    },
+    me: {
+        type: Boolean,
+        default: true,
+        required: false
+    },
+    sapi: {
+        type: String,
+        default: 'https://spktest.dlux.io',
+        required: false
+    },
+    hiveprice: {
+        type: Object,
+        default: function () {
+            return {
+              hive: {
+                usd: 0.0,
+                btc: 0.0,
+              }
+            }
+        },
+        required: false
+    }
 },
 data() {
     return {
+        larynxbehind: 999,
+        saccountapi: {
 
+        },
+        spkStats: {
+
+        },
+        smarkets: {
+
+        },
+        validator_totals: {
+
+        },
+        validators: {
+
+        },
+        tokenGov: {
+            title: "SPK VOTE",
+            options: [
+              {id:"spk_cycle_length",
+              range_low: 28800,
+              range_high: 2592000,
+              info: "Time in blocks to complete a power down cycle. 4 cycles to completely divest. 28800 blocks per day.",
+              val: 200000,
+              step: 1,
+              unit: "Blocks",
+              title: "Down Power Period"}, 
+              {id:"dex_fee",
+                range_low: 0,
+                range_high: 0.01,
+                info: "Share of DEX completed DEX trades to allocate over the collateral group.",
+                val: 0.00505,
+                step: 0.000001,
+                unit: "",
+                title: "DEX Fee" }, 
+              {id:"dex_max",
+                range_low: 28800,
+                range_high: 2592000,
+                info: "Largest open trade size in relation to held collateral.",
+                val: 97.38,
+                step: 1,
+                unit: "%",
+                title: "Max Trade Size" }, 
+              {id:"dex_slope",
+                range_low: 0,
+                range_high: 100,
+                info: "0 Allows any size buy orders to be placed. 1 will disallow large buy orders at low prices.",
+                val: 48.02,
+                step: 0.01,
+                unit: "%",
+                title: "Max Lowball Trade Size" }, 
+              {id:"spk_rate_ldel",
+                range_low: 0.00001, //current lpow
+                range_high: 0.0001, //current lgov
+                info: "SPK generation rate for delegated LARYNX Power",
+                val: 0.00015,
+                step: 1,
+                unit: "",
+                title: "SPK Gen Rate: Delegated" }, 
+              {id:"spk_rate_lgov",
+                range_low: 0.00015, //current ldel
+                range_high: 0.01,
+                info: "SPK generation rate for Larynx Locked",
+                val: 0.001,
+                step: 0.000001,
+                unit: "",
+                title: "SPK Gen Rate: Locked" }, 
+              {id:"spk_rate_lpow",
+                range_low: 0.000001,
+                range_high: 0.00015, //current ldel
+                info: "SPK generation rate for undelegated Larynx Power",
+                val: 0.0001,
+                step: 0.000001,
+                unit: "",
+                title: "Min SPK Gen Rate: Min" }, 
+              {id:"max_coll_members",
+                range_low: 25,
+                range_high: 79,
+                info: "The Max number of accounts that can share DEX fees. The richer half of this group controls outflows from the multisig wallet.",
+                val: 25,
+                step: 1,
+                unit: "Accounts",
+                title: "Size of collateral group"}
+            ]
+          },
     };
 },
 emits: [],
 methods: {
+    getTokenUser(user = this.account) {
+        fetch(this.sapi + "/@" + user)
+          .then((response) => response.json())
+          .then((data) => {
+            data.tick = data.tick || 0.01;
+            this.larynxbehind = data.behind;
+            this.saccountapi = data
+          });
+      },
+      getSNodes() {
+        // fetch(this.sapi + "/runners")
+        //   .then((response) => response.json())
+        //   .then((data) => {
+        //     this.runners = data.result.sort((a, b) => {
+        //       return b.g - a.g;
+        //     });
+        //   });
+        fetch(this.sapi + "/markets")
+          .then((response) => response.json())
+          .then((data) => {
+            this.smarkets = data.markets;
+            this.validator_totals = data.validators;
+            this.spkStats = data.stats;
+            this.spkStats.head_block = data.head_block;
+            let validators = {}
+            for (var node in this.spkStats.nodes) {
+              if (this.spkStats.nodes[node].val_code) {
+                validators[node] = this.spkStats.nodes[node]
+                validators[node].votes = this.spkStats.nodes[node].val_code
+              }
+            }
+            this.validators = validators
+          });
+      },
+      precision(num, precision) {
+        return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
+      },
+      toFixed(num, dig) {
+        return parseFloat(num).toFixed(dig);
+      },
+      formatNumber(t, n, r, e) {
+        if (typeof t != "number") t = parseFloat(t);
+        if (isNaN(t)) return "Invalid Number";
+        if (!isFinite(t)) return (t < 0 ? "-" : "") + "infinite";
+        (r = r || "."), (e = e || "");
+        var u = t < 0;
+        t = Math.abs(t);
+        var a = (null != n && 0 <= n ? t.toFixed(n) : t.toString()).split("."),
+          i = a[0],
+          o = 1 < a.length ? r + a[1] : "";
+        if (e)
+          for (var c = /(\d+)(\d{3})/; c.test(i);)
+            i = i.replace(c, "$1" + e + "$2");
+        return (u ? "-" : "") + i + o;
+      },
+      when(arr) {
+        if (!arr.length) return "";
+        var seconds =
+          (parseInt(arr[0]) - parseInt(this.saccountapi.head_block)) * 3;
+        var interval = Math.floor(seconds / 86400);
+        if (interval >= 1) {
+          return interval + ` day${interval > 1 ? "s" : ""}`;
+        }
+        interval = Math.floor(seconds / 3600);
+        if (interval >= 1) {
+          return interval + ` hour${interval > 1 ? "s" : ""}`;
+        }
+        interval = Math.floor(seconds / 60);
+        if (interval >= 1) {
+          return `${interval} minute${interval > 1 ? "s" : ""}`;
+        }
+        return Math.floor(seconds) + " seconds";
+      },
+      parseFloat(value) {
+        return parseFloat(value);
+      }
 },
 computed: {
+    isValidator: {
+        get() {
+          return this.smarkets.node?.[this.account]?.val_code ? true : false;
+        },
+      }
 },
 mounted() {
 },

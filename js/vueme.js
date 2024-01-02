@@ -18,6 +18,7 @@ import DetailVue from "./detailvue.js";
 import NFTCard from "./nftcard.js";
 import FTTransfer from "./fttransfer.js";
 import NFTDetail from "./nftdetail.js";
+import SPKVue from "/js/spk-wallet-comp.js";
 
 
 let url = location.href.replace(/\/$/, "");
@@ -828,6 +829,7 @@ var app = new Vue({
     };
   },
   components: {
+    "spk-vue": SPKVue,
     "nav-vue": Navue,
     "foot-vue": FootVue,
     "cycle-text": Cycler,
@@ -3512,6 +3514,13 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       if(this.activeIndex > 0) this.activeIndex--
       else this.activeIndex = this[this.focusItem.source].length - 1
     },
+    onClassChange(classAttrValue) {
+      console.log(classAttrValue)
+      const classList = classAttrValue.split(' ');
+      if (classList.includes('active')) {
+        console.log('active');
+      }
+    }
   },
   mounted() {
     if (location.pathname.split("/@")[1]) {
@@ -3548,8 +3557,26 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         //this.getNFTs(this.pageAccount);
       }
       deepLink();
+      this.observer = new MutationObserver(mutations => {
+        for (const m of mutations) {
+          const newValue = m.target.getAttribute(m.attributeName);
+          this.$nextTick(() => {
+            console.log('tick')
+            this.onClassChange(newValue, m.oldValue);
+          });
+        }
+      });
+    
+      this.observer.observe(this.$refs.filesTab, {
+        attributes: true,
+        attributeOldValue : true,
+        attributeFilter: ['class'],
+      });
     }
   },
+  beforeDestroy() {
+    this.observer.disconnect();
+  }, 
   watch: {
     postSelect(a, b) {
       if (a.searchTerm != b.searchTerm || a.bitMask != b.bitMask) {
