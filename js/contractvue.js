@@ -227,9 +227,7 @@ export default {
                                             Beneficiary to @{{slotDecode(contract.s, 0)}}
                                         </div>
                                         <div class="m-1">
-                                            Status: {{contract.c == 1 ?
-                                            'Waiting For Upload' :
-                                            'Uploaded'}}
+                                            Status: {{contract.c == 1 ? 'Waiting For Upload' : 'Uploaded'}}
                                         </div>
                                         <div v-if="contract.df" class="m-1 text-center">
                                             <u>Files</u>
@@ -246,8 +244,8 @@ export default {
                                                <a :href="'/@' + acc" class="no-decoration text-primary">@{{acc}}</a>
                                             </li>
                                             </ol>
-                                        </li>
-                                    </ul>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
