@@ -881,13 +881,20 @@ data() {
     return {
         larynxbehind: 999,
         saccountapi: {
-
+            granting:{
+                t: 0
+            },
+            granted:{
+                t: 0
+            },
+            powerDowns: [],
         },
         spkStats: {
 
         },
+        spkval: 0,
         smarkets: {
-
+            node: {}
         },
         validator_totals: {
 
@@ -1048,9 +1055,14 @@ methods: {
 computed: {
     isValidator: {
         get() {
-          return this.smarkets.node?.[this.account]?.val_code ? true : false;
+            return this.smarkets.node?.[this.account]?.val_code ? true : false;
         },
-      }
+    },
+    isNode: {
+        get() {
+            return this.smarkets.node[this.account] ? true : false;
+        },
+    }
 },
 mounted() {
 },
