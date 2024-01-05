@@ -880,7 +880,14 @@ export default {
                 }
             },
             required: false
-        }
+        },
+        ipfsproviders: {
+            default: function () {
+              return {
+                "na": "na",
+              };
+            },
+          },
     },
     data() {
         return {
@@ -1030,6 +1037,13 @@ export default {
                     this.validators = validators
                 });
         },
+        getIPFSproviders() {
+            fetch(this.sapi + "/services/IPFS")
+              .then((response) => response.json())
+              .then((data) => {
+                this.ipfsProviders = data.providers
+              });
+          },
         Base64toNumber(chars) {
             const glyphs =
                 "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
@@ -1105,5 +1119,6 @@ export default {
     mounted() {
         this.getTokenUser();
         this.getSNodes();
+        this.getIPFSproviders();
     },
 };
