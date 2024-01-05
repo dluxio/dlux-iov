@@ -1008,6 +1008,7 @@ export default {
     emits: ["tosign"],
     methods: {
         sendIt(event){
+            console.log(event)
             this.$emit('tosign', event)
         },
         getTokenUser(user = this.account) {
