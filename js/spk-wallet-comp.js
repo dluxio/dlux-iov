@@ -1005,7 +1005,7 @@ export default {
             },
         };
     },
-    emits: [],
+    emits: ["tosign"],
     methods: {
         sendIt(event){
             this.$emit('tosign', event)
