@@ -881,16 +881,19 @@ export default {
             },
             required: false
         },
-        ipfsproviders: {
-            default: function () {
-              return {
-                "na": "na",
-              };
-            },
-          },
+        // ipfsproviders: {
+        //     default: function () {
+        //       return {
+        //         "na": "na",
+        //       };
+        //     },
+        //   },
     },
     data() {
         return {
+            ipfsProviders: {
+                "na": "na",
+            },
             larynxbehind: 999,
             saccountapi: {
                 granting: {
