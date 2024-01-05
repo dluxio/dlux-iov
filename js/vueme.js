@@ -2231,6 +2231,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         this.toSign = {};
       }
     },
+    log(event){
+      console.log(event)
+    },
     getReplies(a, p, c) {
       return new Promise((resolve, reject) => {
         fetch(this.hapi, {
