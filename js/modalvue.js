@@ -5,6 +5,7 @@ export default {
   data() {
     return {
       spkprefix: "spkcc",
+      valid: false,
     };
   },
   template: `
@@ -996,9 +997,6 @@ export default {
     },
     api: {
       default: 'https://ipfs.example.com',
-    },
-    valid: {
-      default: false,
     },
     test:{
       default: false,
