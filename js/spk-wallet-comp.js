@@ -752,7 +752,7 @@ export default {
                     <b>A power down is scheduled
                         to happen in
                         {{when(saccountapi.powerDowns)}}
-                        ({{saccountapi.powerDowns.length}}
+                        ({{when(saccountapi.powerDowns, true)}}
                         installments
                         remaining)</b><small class="ms-2">
                         <modal-vue type="confirm" token="LARYNX"
@@ -902,7 +902,7 @@ export default {
                 granted: {
                     t: 0
                 },
-                powerDowns: [],
+                powerDowns: {},
             },
             spkStats: {
 
@@ -1085,8 +1085,10 @@ export default {
                     i = i.replace(c, "$1" + e + "$2");
             return (u ? "-" : "") + i + o;
         },
-        when(arr = []) {
-            if (!arr.length) return "";
+        when(ip = {}, num = false) {
+            arr = Object.keys(ip)
+            if (num) return arr.length
+            if (!arr.length) return false
             var seconds =
                 (parseInt(arr[0]) - parseInt(this.saccountapi.head_block)) * 3;
             var interval = Math.floor(seconds / 86400);
