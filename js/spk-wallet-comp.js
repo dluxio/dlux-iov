@@ -889,6 +889,7 @@ export default {
         //     },
         //   },
     },
+    emits: ['tosign'],
     data() {
         return {
             ipfsProviders: {
@@ -1006,6 +1007,9 @@ export default {
     },
     emits: [],
     methods: {
+        sendIt(event){
+            this.$emit('tosign', event)
+        },
         getTokenUser(user = this.account) {
             fetch(this.sapi + "/@" + user)
                 .then((response) => response.json())
