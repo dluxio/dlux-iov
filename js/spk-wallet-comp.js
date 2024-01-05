@@ -1085,7 +1085,7 @@ export default {
                     i = i.replace(c, "$1" + e + "$2");
             return (u ? "-" : "") + i + o;
         },
-        when(arr) {
+        when(arr = []) {
             if (!arr.length) return "";
             var seconds =
                 (parseInt(arr[0]) - parseInt(this.saccountapi.head_block)) * 3;
