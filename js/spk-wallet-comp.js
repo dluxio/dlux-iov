@@ -1030,6 +1030,23 @@ export default {
                     this.validators = validators
                 });
         },
+        Base64toNumber(chars) {
+            const glyphs =
+                "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
+            var result = 0;
+            chars = chars.split("");
+            for (var e = 0; e < chars.length; e++) {
+                result = result * 64 + glyphs.indexOf(chars[e]);
+            }
+            return result;
+        },
+        broca_calc(last = '0,0') {
+            const last_calc = this.Base64toNumber(last.split(',')[1])
+            const accured = parseInt((parseFloat(this.spkStats.broca_refill) * (this.spkStats.head_block - last_calc)) / (this.saccountapi.spk_power * 1000))
+            var total = parseInt(last.split(',')[0]) + accured
+            if (total > (this.saccountapi.spk_power * 1000)) total = (this.saccountapi.spk_power * 1000)
+            return total
+        },
         precision(num, precision) {
             return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
         },
