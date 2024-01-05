@@ -2226,6 +2226,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       }
     },
     removeOp(txid) {
+      console.log(txid)
       if (this.toSign.txid == txid) {
         this.toSign = {};
       }
