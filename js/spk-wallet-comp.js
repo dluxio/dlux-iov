@@ -853,222 +853,240 @@ export default {
     </div>
     </div>
    `,
-props: {
-    account: {
-        type: String,
-        default: '',
-        required: true
-    },
-    me: {
-        type: Boolean,
-        default: true,
-        required: false
-    },
-    sapi: {
-        type: String,
-        default: 'https://spktest.dlux.io',
-        required: false
-    },
-    hiveprice: {
-        type: Object,
-        default: function () {
-            return {
-              hive: {
-                usd: 0.0,
-                btc: 0.0,
-              }
-            }
+    props: {
+        account: {
+            type: String,
+            default: '',
+            required: true
         },
-        required: false
-    }
-},
-data() {
-    return {
-        larynxbehind: 999,
-        saccountapi: {
-            granting:{
-                t: 0
+        me: {
+            type: Boolean,
+            default: true,
+            required: false
+        },
+        sapi: {
+            type: String,
+            default: 'https://spktest.dlux.io',
+            required: false
+        },
+        hiveprice: {
+            type: Object,
+            default: function () {
+                return {
+                    hive: {
+                        usd: 0.0,
+                        btc: 0.0,
+                    }
+                }
             },
-            granted:{
-                t: 0
-            },
-            powerDowns: [],
-        },
-        spkStats: {
-
-        },
-        spkval: 0,
-        smarkets: {
-            node: {}
-        },
-        validator_totals: {
-
-        },
-        validators: {
-
-        },
-        tokenGov: {
-            title: "SPK VOTE",
-            options: [
-              {id:"spk_cycle_length",
-              range_low: 28800,
-              range_high: 2592000,
-              info: "Time in blocks to complete a power down cycle. 4 cycles to completely divest. 28800 blocks per day.",
-              val: 200000,
-              step: 1,
-              unit: "Blocks",
-              title: "Down Power Period"}, 
-              {id:"dex_fee",
-                range_low: 0,
-                range_high: 0.01,
-                info: "Share of DEX completed DEX trades to allocate over the collateral group.",
-                val: 0.00505,
-                step: 0.000001,
-                unit: "",
-                title: "DEX Fee" }, 
-              {id:"dex_max",
-                range_low: 28800,
-                range_high: 2592000,
-                info: "Largest open trade size in relation to held collateral.",
-                val: 97.38,
-                step: 1,
-                unit: "%",
-                title: "Max Trade Size" }, 
-              {id:"dex_slope",
-                range_low: 0,
-                range_high: 100,
-                info: "0 Allows any size buy orders to be placed. 1 will disallow large buy orders at low prices.",
-                val: 48.02,
-                step: 0.01,
-                unit: "%",
-                title: "Max Lowball Trade Size" }, 
-              {id:"spk_rate_ldel",
-                range_low: 0.00001, //current lpow
-                range_high: 0.0001, //current lgov
-                info: "SPK generation rate for delegated LARYNX Power",
-                val: 0.00015,
-                step: 1,
-                unit: "",
-                title: "SPK Gen Rate: Delegated" }, 
-              {id:"spk_rate_lgov",
-                range_low: 0.00015, //current ldel
-                range_high: 0.01,
-                info: "SPK generation rate for Larynx Locked",
-                val: 0.001,
-                step: 0.000001,
-                unit: "",
-                title: "SPK Gen Rate: Locked" }, 
-              {id:"spk_rate_lpow",
-                range_low: 0.000001,
-                range_high: 0.00015, //current ldel
-                info: "SPK generation rate for undelegated Larynx Power",
-                val: 0.0001,
-                step: 0.000001,
-                unit: "",
-                title: "Min SPK Gen Rate: Min" }, 
-              {id:"max_coll_members",
-                range_low: 25,
-                range_high: 79,
-                info: "The Max number of accounts that can share DEX fees. The richer half of this group controls outflows from the multisig wallet.",
-                val: 25,
-                step: 1,
-                unit: "Accounts",
-                title: "Size of collateral group"}
-            ]
-          },
-    };
-},
-emits: [],
-methods: {
-    getTokenUser(user = this.account) {
-        fetch(this.sapi + "/@" + user)
-          .then((response) => response.json())
-          .then((data) => {
-            data.tick = data.tick || 0.01;
-            this.larynxbehind = data.behind;
-            this.saccountapi = data
-          });
-      },
-      getSNodes() {
-        // fetch(this.sapi + "/runners")
-        //   .then((response) => response.json())
-        //   .then((data) => {
-        //     this.runners = data.result.sort((a, b) => {
-        //       return b.g - a.g;
-        //     });
-        //   });
-        fetch(this.sapi + "/markets")
-          .then((response) => response.json())
-          .then((data) => {
-            this.smarkets = data.markets;
-            this.validator_totals = data.validators;
-            this.spkStats = data.stats;
-            this.spkStats.head_block = data.head_block;
-            let validators = {}
-            for (var node in this.spkStats.nodes) {
-              if (this.spkStats.nodes[node].val_code) {
-                validators[node] = this.spkStats.nodes[node]
-                validators[node].votes = this.spkStats.nodes[node].val_code
-              }
-            }
-            this.validators = validators
-          });
-      },
-      precision(num, precision) {
-        return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
-      },
-      toFixed(num, dig) {
-        return parseFloat(num).toFixed(dig);
-      },
-      formatNumber(t, n, r, e) {
-        if (typeof t != "number") t = parseFloat(t);
-        if (isNaN(t)) return "Invalid Number";
-        if (!isFinite(t)) return (t < 0 ? "-" : "") + "infinite";
-        (r = r || "."), (e = e || "");
-        var u = t < 0;
-        t = Math.abs(t);
-        var a = (null != n && 0 <= n ? t.toFixed(n) : t.toString()).split("."),
-          i = a[0],
-          o = 1 < a.length ? r + a[1] : "";
-        if (e)
-          for (var c = /(\d+)(\d{3})/; c.test(i);)
-            i = i.replace(c, "$1" + e + "$2");
-        return (u ? "-" : "") + i + o;
-      },
-      when(arr) {
-        if (!arr.length) return "";
-        var seconds =
-          (parseInt(arr[0]) - parseInt(this.saccountapi.head_block)) * 3;
-        var interval = Math.floor(seconds / 86400);
-        if (interval >= 1) {
-          return interval + ` day${interval > 1 ? "s" : ""}`;
+            required: false
         }
-        interval = Math.floor(seconds / 3600);
-        if (interval >= 1) {
-          return interval + ` hour${interval > 1 ? "s" : ""}`;
-        }
-        interval = Math.floor(seconds / 60);
-        if (interval >= 1) {
-          return `${interval} minute${interval > 1 ? "s" : ""}`;
-        }
-        return Math.floor(seconds) + " seconds";
-      },
-      parseFloat(value) {
-        return parseFloat(value);
-      }
-},
-computed: {
-    isValidator: {
-        get() {
-            return this.smarkets.node?.[this.account]?.val_code ? true : false;
-        },
     },
-    isNode: {
-        get() {
-            return this.smarkets.node[this.account] ? true : false;
+    data() {
+        return {
+            larynxbehind: 999,
+            saccountapi: {
+                granting: {
+                    t: 0
+                },
+                granted: {
+                    t: 0
+                },
+                powerDowns: [],
+            },
+            spkStats: {
+
+            },
+            spkval: 0,
+            smarkets: {
+                node: {}
+            },
+            validator_totals: {
+
+            },
+            validators: {
+
+            },
+            tokenGov: {
+                title: "SPK VOTE",
+                options: [
+                    {
+                        id: "spk_cycle_length",
+                        range_low: 28800,
+                        range_high: 2592000,
+                        info: "Time in blocks to complete a power down cycle. 4 cycles to completely divest. 28800 blocks per day.",
+                        val: 200000,
+                        step: 1,
+                        unit: "Blocks",
+                        title: "Down Power Period"
+                    },
+                    {
+                        id: "dex_fee",
+                        range_low: 0,
+                        range_high: 0.01,
+                        info: "Share of DEX completed DEX trades to allocate over the collateral group.",
+                        val: 0.00505,
+                        step: 0.000001,
+                        unit: "",
+                        title: "DEX Fee"
+                    },
+                    {
+                        id: "dex_max",
+                        range_low: 28800,
+                        range_high: 2592000,
+                        info: "Largest open trade size in relation to held collateral.",
+                        val: 97.38,
+                        step: 1,
+                        unit: "%",
+                        title: "Max Trade Size"
+                    },
+                    {
+                        id: "dex_slope",
+                        range_low: 0,
+                        range_high: 100,
+                        info: "0 Allows any size buy orders to be placed. 1 will disallow large buy orders at low prices.",
+                        val: 48.02,
+                        step: 0.01,
+                        unit: "%",
+                        title: "Max Lowball Trade Size"
+                    },
+                    {
+                        id: "spk_rate_ldel",
+                        range_low: 0.00001, //current lpow
+                        range_high: 0.0001, //current lgov
+                        info: "SPK generation rate for delegated LARYNX Power",
+                        val: 0.00015,
+                        step: 1,
+                        unit: "",
+                        title: "SPK Gen Rate: Delegated"
+                    },
+                    {
+                        id: "spk_rate_lgov",
+                        range_low: 0.00015, //current ldel
+                        range_high: 0.01,
+                        info: "SPK generation rate for Larynx Locked",
+                        val: 0.001,
+                        step: 0.000001,
+                        unit: "",
+                        title: "SPK Gen Rate: Locked"
+                    },
+                    {
+                        id: "spk_rate_lpow",
+                        range_low: 0.000001,
+                        range_high: 0.00015, //current ldel
+                        info: "SPK generation rate for undelegated Larynx Power",
+                        val: 0.0001,
+                        step: 0.000001,
+                        unit: "",
+                        title: "Min SPK Gen Rate: Min"
+                    },
+                    {
+                        id: "max_coll_members",
+                        range_low: 25,
+                        range_high: 79,
+                        info: "The Max number of accounts that can share DEX fees. The richer half of this group controls outflows from the multisig wallet.",
+                        val: 25,
+                        step: 1,
+                        unit: "Accounts",
+                        title: "Size of collateral group"
+                    }
+                ]
+            },
+        };
+    },
+    emits: [],
+    methods: {
+        getTokenUser(user = this.account) {
+            fetch(this.sapi + "/@" + user)
+                .then((response) => response.json())
+                .then((data) => {
+                    data.tick = data.tick || 0.01;
+                    this.larynxbehind = data.behind;
+                    this.saccountapi = data
+                });
         },
-    }
-},
-mounted() {
-},
+        getSNodes() {
+            // fetch(this.sapi + "/runners")
+            //   .then((response) => response.json())
+            //   .then((data) => {
+            //     this.runners = data.result.sort((a, b) => {
+            //       return b.g - a.g;
+            //     });
+            //   });
+            fetch(this.sapi + "/markets")
+                .then((response) => response.json())
+                .then((data) => {
+                    this.smarkets = data.markets;
+                    this.validator_totals = data.validators;
+                    this.spkStats = data.stats;
+                    this.spkStats.head_block = data.head_block;
+                    let validators = {}
+                    for (var node in this.spkStats.nodes) {
+                        if (this.spkStats.nodes[node].val_code) {
+                            validators[node] = this.spkStats.nodes[node]
+                            validators[node].votes = this.spkStats.nodes[node].val_code
+                        }
+                    }
+                    this.validators = validators
+                });
+        },
+        precision(num, precision) {
+            return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
+        },
+        toFixed(num, dig) {
+            return parseFloat(num).toFixed(dig);
+        },
+        formatNumber(t, n, r, e) {
+            if (typeof t != "number") t = parseFloat(t);
+            if (isNaN(t)) return "Invalid Number";
+            if (!isFinite(t)) return (t < 0 ? "-" : "") + "infinite";
+            (r = r || "."), (e = e || "");
+            var u = t < 0;
+            t = Math.abs(t);
+            var a = (null != n && 0 <= n ? t.toFixed(n) : t.toString()).split("."),
+                i = a[0],
+                o = 1 < a.length ? r + a[1] : "";
+            if (e)
+                for (var c = /(\d+)(\d{3})/; c.test(i);)
+                    i = i.replace(c, "$1" + e + "$2");
+            return (u ? "-" : "") + i + o;
+        },
+        when(arr) {
+            if (!arr.length) return "";
+            var seconds =
+                (parseInt(arr[0]) - parseInt(this.saccountapi.head_block)) * 3;
+            var interval = Math.floor(seconds / 86400);
+            if (interval >= 1) {
+                return interval + ` day${interval > 1 ? "s" : ""}`;
+            }
+            interval = Math.floor(seconds / 3600);
+            if (interval >= 1) {
+                return interval + ` hour${interval > 1 ? "s" : ""}`;
+            }
+            interval = Math.floor(seconds / 60);
+            if (interval >= 1) {
+                return `${interval} minute${interval > 1 ? "s" : ""}`;
+            }
+            return Math.floor(seconds) + " seconds";
+        },
+        parseFloat(value) {
+            return parseFloat(value);
+        }
+    },
+    computed: {
+        isValidator: {
+            get() {
+                return this.smarkets.node?.[this.account]?.val_code ? true : false;
+            },
+        },
+        isNode: {
+            get() {
+                return this.smarkets.node[this.account] ? true : false;
+            },
+        }
+    },
+    mounted() {
+        this.getTokenUser();
+        this.getSNodes();
+    },
 };
