@@ -1086,7 +1086,7 @@ export default {
             return (u ? "-" : "") + i + o;
         },
         when(ip = {}, num = false) {
-            arr = Object.keys(ip)
+            const arr = Object.keys(ip)
             if (num) return arr.length
             if (!arr.length) return false
             var seconds =
