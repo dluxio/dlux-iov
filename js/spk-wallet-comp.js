@@ -1,4 +1,9 @@
+import ModalVue from './modalvue.js'
+
 export default {
+    components: {
+        "modal-vue": ModalVue
+    },
     template: `
     <div>
     <div class="container">

@@ -3,7 +3,7 @@ import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
 import Popper from "/js/pop.js";
-import Modals from "/js/modalvue.js";
+import ModalVue from "/js/modalvue.js";
 import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
@@ -834,7 +834,7 @@ var app = new Vue({
     "foot-vue": FootVue,
     "cycle-text": Cycler,
     "pop-vue": Popper,
-    "modal-vue": Modals,
+    "modal-vue": ModalVue,
     "vue-markdown": Marker,
     "vue-ratings": Ratings,
     "mde": MDE,

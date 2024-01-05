@@ -1,6 +1,7 @@
 const { Modal } = bootstrap;
 
 export default {
+  name: "ModalVue",
   data() {
     return {
       spkprefix: "spkcc",
