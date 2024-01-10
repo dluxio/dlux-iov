@@ -37,16 +37,6 @@ if (location.search) {
   }
   //window.history.replaceState(null, null, "?api=" + lapi);
 }
-// if (location.hash && !lapi) {
-//     const hash = url.split("#");
-//     if (hash[1].includes("dlux")) {
-//         lapi = "https://token.dlux.io";
-//     } else if (hash[1].includes("larynx")) {
-//         lapi = "https://spkinstant.hivehoneycomb.com";
-//     } else if (hash[1].includes("duat")) {
-//         lapi = "https://duat.hivehoneycomb.com";
-//     }
-// }
 if (!lapi) {
   lapi = "https://spktest.dlux.io";
 }
@@ -1475,7 +1465,7 @@ var app = new Vue({
           this.File[this.FileInfo[f.name].index].actions.cancel = true
           this.File[this.FileInfo[f.name].index].progress = e.loaded / e.total * 100
           // const fileObj = files.get(file);
-          this.FileInfo[f.name].status = 'uploading'
+          this.FileInfo[f.name].status = `uploading(${this.File[this.FileInfo[f.name].index].progress}%)`
           // fileObj.status = FILE_STATUS.UPLOADING;
           // fileObj.percentage = e.percentage;
           // fileObj.uploadedChunkSize = e.loaded;
@@ -1498,7 +1488,7 @@ var app = new Vue({
           this.File[this.FileInfo[f.name].index].actions.pause = false
           this.File[this.FileInfo[f.name].index].actions.resume = false
           this.File[this.FileInfo[f.name].index].actions.cancel = false
-          this.FileInfo[f.name].progress = 1
+          this.FileInfo[f.name].progress = 100
           this.FileInfo[f.name].status = 'done'
 
         }
@@ -1658,21 +1648,6 @@ var app = new Vue({
           options.cid = file.cid
           uploadFile(file, options, file.cid)
         });
-      // return (files, options = defaultOptions) => {
-      //   [...files]
-      //     .forEach(file => {
-      //       console.log(file)
-      //       options.cid = file.cid
-      //       uploadFile(file, options)
-      //     });
-
-      //   return {
-      //     abortFileUpload,
-      //     retryFileUpload,
-      //     clearFileUpload,
-      //     resumeFileUpload
-      //   };
-      // }
     },
     replace(string, char = ':') {
       return string.replaceAll(char, '_')
@@ -1705,50 +1680,8 @@ var app = new Vue({
             onComplete
           });
         }
-        // var formdata = new FormData();
-        // console.log(this.FileInfo[name].path)
-        // console.log(document.getElementById(this.FileInfo[name].path))
-        // formdata.append('file', document.getElementById(this.FileInfo[name].path).files[0]);
-        // formdata.append(
-        //   "path",
-        //   `/${headers.split(":")[0]}/${headers.split(":")[1]}.${this.account}`
-        // );
-        // for (const value of formdata.values()) {
-        //   console.log(value);
-        // }
-        // var myHeaders = new Headers()
-        // myHeaders.append("Content-Type", "multipart/form-data")
-        // var requestOptions = {
-        //   method: "POST",
-        //   body: formdata,
-        //   headers: myHeaders,
-        //   connection: 'keep-alive', 
-        //   mode: 'cors',
-        //   redirect: "follow",
-        //   //credentials: 'include',
-        // };
-        // fetch(
-        //   `https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true&account=${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
-        //   //`https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true&account=${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
-        //   requestOptions
-        // )
-        //   .then((response) => {
-        //     response.text()
-        //     console.log(response)
-        //   })
-        //   .then((result) => console.log(result))
-        //   .catch((error) => console.log("error", error));
       });
     },
-    /*
-function buyFT(setname, uid, price, type,  callback){
-     price = parseInt(price * 1000)
-     if(type == 'HIVE')broadcastTransfer({ to: 'dlux-cc', hive: bid_amount, memo:`NFTbuy ${setname}:${uid}`}, `Buying on ${setname}:${uid}`)
-     else if(type == 'HBD')broadcastTransfer({ to: 'dlux-cc', hbd: bid_amount, memo:`NFTbuy ${setname}:${uid}`}, `Buying ${setname}:${uid}`)
-     else broadcastCJA({set: setname, uid, price}, 'dlux_ft_buy', `Trying to buy ${setname} mint token`)
- }
-
-    */
     buyFT(uid, set) {
       var cja = {
         set: set || this.focusSet.set,
@@ -1781,15 +1714,6 @@ function buyFT(setname, uid, price, type,  callback){
         txid: `${set}:${uid}_ft_buy`,
       };
     },
-    /*
-function giveFT(setname, to, qty, callback){
-    checkAccount(to)
-    .then(r => {
-        broadcastCJA({set: setname, to, qty}, "dlux_ft_transfer", `Trying to give ${setname} mint token to ${to}`) 
-    })
-    .catch(e=>alert(`${to} is not a valid hive account`))
- }
-    */
     giveFT() {
       var cja = {
         set: this.mint_detail.set,
@@ -1808,16 +1732,6 @@ function giveFT(setname, to, qty, callback){
         txid: `${this.prefix} _ft_transfer`,
       };
     },
-    /*
-function tradeFT(setname, to, price, callback){
-    price = parseInt(price * 1000)
-    checkAccount(to)
-    .then(r => {
-        broadcastCJA({ set: setname, to, price}, "dlux_ft_escrow", `Trying to trade ${setname}: Mint Token`)
-    })
-    .catch(e=>alert(`${to} is not a valid hive account`))
- }
-    */
     tradeFT(item) {
       const price = parseInt(this.FTmenu.amount * 1000);
       var cja = { set: item.set, to: this.FTmenu.to, price };
@@ -1831,16 +1745,6 @@ function tradeFT(setname, to, price, callback){
         txid: `${item.token}_ft_escrow`,
       };
     },
-    /*
-function sellFT(setname, price, type, quantity = 1, distro,  callback){
-    price = parseInt(price * 1000)
-    if(type.toUpperCase() == 'HIVE')type = 'hive'
-    else if (type.toUpperCase() == 'HBD') type = 'hbd'
-    else type = 0
-    if(!type)broadcastCJA({set: setname, price}, 'dlux_ft_sell', `Trying to sell ${setname} mint token`)
-    else broadcastCJA({set: setname, [type]:price, quantity, distro}, 'dlux_fts_sell_h', `Trying to sell ${setname} mint token`)
- }
-    */
     sellFT(setname, price, type, quantity = 1, distro) {
       price = parseInt(price * 1000);
       var cja = { set: setname, price },
@@ -1866,44 +1770,6 @@ function sellFT(setname, price, type, quantity = 1, distro,  callback){
         txid: `${this.prefix} _ft sell`,
       };
     },
-    /*
-
- function auctionFT(setname, price, now, time, callback){
-    time = parseInt(time)
-    price = parseInt(price * 1000)
-    broadcastCJA({set:setname, price, now, time}, 'dlux_ft_auction', `Trying to auction ${setname} mint tokens`)
- }
-
-function airdropFT(setname, to_str,  callback){
-    let to_array = to_str.split(' ')
-    to_array = [... new Set(to_array)]
-    var promises = []
-    for (item in to_array){ promises.push(checkAccount(to_array[item]))}
-    Promise.all(promises)
-    .then(r=>{
-        broadcastCJA({set:setname, to: to_array}, 'dlux_ft_airdrop', `Trying to airdrop ${setname} mint tokens`)
-    })
-    .catch(e=>alert(`At least one hive account doesn't exist: ${e}`))
- }
-
-// FT Actions //
-
-function openFT(setname, callback){
-    broadcastCJA({set:setname}, 'dlux_nft_mint', `Minting ${setname} token...`)
- }
-
-function sellFTcancel(setname, uid, token,  callback){
-     broadcastCJA({set: setname, uid}, token == 'DLUX' ? 'dlux_ft_cancel_sell' : 'dlux_fts_sell_hcancel', `Trying to cancel ${setname} mint token sell`)
- }
-function tradeFTaccept(setname, uid, callback){
-     broadcastCJA({ set: setname, uid}, "dlux_ft_escrow_complete", `Trying to complete ${setname} mint tokentrade`)
- }
-
-function tradeFTreject(setname, uid, callback){
-    broadcastCJA({ set: setname, uid }, "dlux_ft_escrow_cancel", `Trying to cancel ${setname} mint token trade`)
- }
-*/
-
     openFT(item) {
       var cja = {
         set: item.set,
@@ -1919,7 +1785,6 @@ function tradeFTreject(setname, uid, callback){
         txid: `${item.set}_nft_mint`,
       };
     },
-
     acceptFT(item) {
       var cja = {
         set: item.set,
