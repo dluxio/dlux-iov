@@ -3320,6 +3320,7 @@ function buyNFT(setname, uid, price, type, callback){
     }
   },
   mounted() {
+    window.addEventListener('scroll', this.handleScroll);
     if (location.pathname.split("/@")[1]) {
       this.pageAccount = location.pathname.split("/@")[1]
       if (this.pageAccount.indexOf('/') > -1) {
@@ -3373,7 +3374,10 @@ function buyNFT(setname, uid, price, type, callback){
   },
   beforeDestroy() {
     this.observer.disconnect();
-  }, 
+  },
+  unmounted () {
+    window.removeEventListener('scroll', this.handleScroll);
+  },
   watch: {
     postSelect(a, b) {
       if (a.searchTerm != b.searchTerm || a.bitMask != b.bitMask) {
