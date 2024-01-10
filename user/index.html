@@ -582,8 +582,8 @@
                                                 <div class="btn-group" v-if="me" role="group" aria-label="SPK Actions">
                                                     <button type="button" class="btn btn-primary p-0">
                                                         <modal-vue type="send" token="SPK" :balance="saccountapi.spk"
-                                                            :account="account" @modalsign="sendIt($event)">
-                                                            <span slot="trigger" class="p-2 trigger" v-slot:trigger><i
+                                                            :account="account" @modalsign="sendIt($event)" v-slot:trigger>
+                                                            <span slot="trigger" class="p-2 trigger"><i
                                                                     class="fas fa-paper-plane me-2"></i>Send</span>
                                                         </modal-vue>
                                                     </button>
