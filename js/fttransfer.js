@@ -379,7 +379,7 @@ export default {
                                     <div role="tabpanel" class="tab-pane fade show " id="auctionFTtab"
                                        aria-labelledby="auctionFT">
                                        <!-- AUCTION FORM -->
-                                       <form class="needs-validation mt-4" novalidate novalidate
+                                       <form class="needs-validation mt-4" novalidate
                                           @submit.prevent="auctionFT()">
                                           <!--:action="javascript:auctionFT('{{item.data.set}}','{{auctionFTprice.value}}','{{Date.now()}}','{{auctionFTdays.value}}'),'{{auctionFTpriceType.value}}'"-->
                                           <div class="">
