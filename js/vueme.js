@@ -1388,16 +1388,6 @@ function giveFT(setname, to, qty, callback){
         txid: `${this.prefix} _ft_transfer`,
       };
     },
-    /*
-function tradeFT(setname, to, price, callback){
-    price = parseInt(price * 1000)
-    checkAccount(to)
-    .then(r => {
-        broadcastCJA({ set: setname, to, price}, "dlux_ft_escrow", `Trying to trade ${setname}: Mint Token`)
-    })
-    .catch(e=>alert(`${to} is not a valid hive account`))
- }
-    */
     tradeFT(item) {
       const price = parseInt(this.FTmenu.amount * 1000);
       var cja = { set: item.setname, to: this.FTmenu.to, price };
@@ -1411,16 +1401,6 @@ function tradeFT(setname, to, price, callback){
         txid: `${item.token}_ft_escrow`,
       };
     },
-    /*
-function sellFT(setname, price, type, quantity = 1, distro,  callback){
-    price = parseInt(price * 1000)
-    if(type.toUpperCase() == 'HIVE')type = 'hive'
-    else if (type.toUpperCase() == 'HBD') type = 'hbd'
-    else type = 0
-    if(!type)broadcastCJA({set: setname, price}, 'dlux_ft_sell', `Trying to sell ${setname} mint token`)
-    else broadcastCJA({set: setname, [type]:price, quantity, distro}, 'dlux_fts_sell_h', `Trying to sell ${setname} mint token`)
- }
-    */
     sellFT(setname, price, type, quantity = 1, distro) {
       price = parseInt(price * 1000);
       var cja = { set: setname, price },
@@ -1446,44 +1426,6 @@ function sellFT(setname, price, type, quantity = 1, distro,  callback){
         txid: `${this.prefix} _ft sell`,
       };
     },
-    /*
-
- function auctionFT(setname, price, now, time, callback){
-    time = parseInt(time)
-    price = parseInt(price * 1000)
-    broadcastCJA({set:setname, price, now, time}, 'dlux_ft_auction', `Trying to auction ${setname} mint tokens`)
- }
-
-function airdropFT(setname, to_str,  callback){
-    let to_array = to_str.split(' ')
-    to_array = [... new Set(to_array)]
-    var promises = []
-    for (item in to_array){ promises.push(checkAccount(to_array[item]))}
-    Promise.all(promises)
-    .then(r=>{
-        broadcastCJA({set:setname, to: to_array}, 'dlux_ft_airdrop', `Trying to airdrop ${setname} mint tokens`)
-    })
-    .catch(e=>alert(`At least one hive account doesn't exist: ${e}`))
- }
-
-// FT Actions //
-
-function openFT(setname, callback){
-    broadcastCJA({set:setname}, 'dlux_nft_mint', `Minting ${setname} token...`)
- }
-
-function sellFTcancel(setname, uid, token,  callback){
-     broadcastCJA({set: setname, uid}, token == 'DLUX' ? 'dlux_ft_cancel_sell' : 'dlux_fts_sell_hcancel', `Trying to cancel ${setname} mint token sell`)
- }
-function tradeFTaccept(setname, uid, callback){
-     broadcastCJA({ set: setname, uid}, "dlux_ft_escrow_complete", `Trying to complete ${setname} mint tokentrade`)
- }
-
-function tradeFTreject(setname, uid, callback){
-    broadcastCJA({ set: setname, uid }, "dlux_ft_escrow_cancel", `Trying to cancel ${setname} mint token trade`)
- }
-*/
-
     openFT(item) {
       var cja = {
           set: item.setname,
@@ -1538,115 +1480,6 @@ function tradeFTreject(setname, uid, callback){
         txid: `${item.setname}:${item.uid}_ft_escrow_cancel`,
       };
     },
-
-    /*
-
-
-function tradeFTcancel(setname, uid, callback){
-    broadcastCJA({ set: setname, uid }, "dlux_ft_escrow_cancel", `Trying to cancel ${setname} mint token trade`)
- }
-
-// NFT Actions //
-
- function defineNFT(setname, type, script, permlink, start, end, total, royalty, handling, max_fee, bond, callback){
-    max_fee = parseInt(max_fee * 1000)
-    royalty = parseInt(royalty * 100)
-    type = parseInt(type)
-    bond = parseInt(bond * 1000)
-    //more validation
-    broadcastCJA({ name: setname, type, script, permlink, start, end, total, royalty, handling, max_fee, bond}, "dlux_nft_define", `Trying to define ${setname}`)
- }
-
-function tradeNFTaccept(setname, uid, price, type, callback){
-    if(type.toUpperCase() == 'HIVE'){
-        broadcastTransfer({ to: 'dlux-cc', hive: price, memo:`NFTtrade ${setname}:${uid}`}, `Completing Trade ${setname}:${uid}`)
-    } else if (type.toUpperCase() == 'HBD'){
-        broadcastTransfer({ to: 'dlux-cc', hbd: price, memo:`NFTtrade ${setname}:${uid}`}, `Completing Trade ${setname}:${uid}`)
-    } else {
-        broadcastCJA({ set: setname, uid, price}, "dlux_nft_reserve_complete", `Trying to complete ${setname}:${uid} trade`)
-    }
- }
-function tradeNFTreject(setname, uid, callback){
-    broadcastCJA({ set: setname, uid }, "dlux_nft_transfer_cancel", `Trying to cancel ${setname}:${uid} trade`)
- }
-function tradeNFTcancel(setname, uid, callback){
-    broadcastCJA({ set: setname, uid }, "dlux_nft_transfer_cancel", `Trying to cancel ${setname}:${uid} trade`)
- }
- */
-    /*
-function setPFP(setname, uid, callback){
-    fetch("https://api.hive.blog", {
-        body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[["${user}"]], "id":1}`,
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        method: "POST"
-        })
-        .then(r=>r.json())
-        .then(json=>{
-            if(JSON.parse(json.result[0].posting_json_metadata).profile.profile_image !== `https://data.dlux.io/pfp/${user}?${setname}-${uid}`){
-                var pjm = JSON.parse(json.result[0].posting_json_metadata)
-                pjm.profile.profile_image = `https://data.dlux.io/pfp/${user}?${setname}-${uid}`
-                const op = 
-                    [
-                        ['custom_json', {
-                            "required_auths": [],
-                            "required_posting_auths": [user],
-                            "id": "dlux_nft_pfp",
-                            "json": JSON.stringify({
-                                set: setname,
-                                uid
-                            })
-                        }],
-                        ["account_update2",{
-                            "account": user,
-                            "json_metadata": "",
-                            "posting_json_metadata": JSON.stringify(pjm)}
-                        ]
-                    ]
-                Dluxsession.hive_sign([user, op, 'posting'])
-                     .then(r => {
-                         statusWaiter (r, `Trying to set ${setname}:${uid} as PFP`)
-                     })
-                     .catch(e => { console.log(e) })
-            } else {
-                Dluxsession.hive_sign([user, [
-                    ['custom_json', {
-                        "required_auths": [],
-                        "required_posting_auths": [user],
-                        "id": "dlux_nft_pfp",
-                        "json": JSON.stringify({
-                            set: setname,
-                            uid
-                            })
-                        }]
-                     ], 'posting'])
-                .then(r => {
-                    statusWaiter (r, `Trying to set ${setname}:${uid} as PFP`)
-                })
-                .catch(e => { console.log(e) })
-            }
-        })
-        .catch(e=>{
-            console.log(e)
-            Dluxsession.hive_sign([user, [
-                ['custom_json', {
-                    "required_auths": [user],
-                    "required_posting_auths": [],
-                    "id": "dlux_nft_pfp",
-                    "json": JSON.stringify({
-                        set: setname,
-                        uid
-                        })
-                    }]
-                ], 'posting'])
-            .then(r => {
-                statusWaiter (r, `Trying to set ${setname}:${uid} as PFP`)
-            })
-            .catch(e => { console.log(e) })
-        })
- }
-*/
     setPFP(item) {
       console.log('trigger', item)
       var pjm = JSON.parse(this.accountinfo.posting_json_metadata);
@@ -1740,16 +1573,6 @@ function giveNFT(setname, uid, to, callback){
         };
       }
     },
-    /*
-function tradeNFT(setname, uid, to, price, type, callback){
-    price = parseInt(price * 1000)
-    checkAccount(to)
-    .then(r => {
-        broadcastCJA({ set: setname, uid, to, price, type}, "dlux_nft_reserve_transfer", `Trying to trade ${setname}:${uid}`)
-    })
-    .catch(e=>alert(`${to} is not a valid hive account`))
- }
-*/
     tradeNFT(item) {
       if (this.nftTradeAllowed) {
         var cja = {
@@ -1771,12 +1594,6 @@ function tradeNFT(setname, uid, to, price, type, callback){
         };
       }
     },
-    /*
-function sellNFT(setname, uid, price, type, callback){
-    price = parseInt(price * 1000)
-    broadcastCJA({ set: setname, uid, price, type}, "dlux_nft_sell", `Trying to list ${setname}:${uid} for sell`)
- }
-*/
     sellNFT(item) {
       var cja = {
           set: item.setname,
@@ -1862,22 +1679,6 @@ function buyNFT(setname, uid, price, type, callback){
         txid: `${item.setname}:${item.uid}_nft_buy`,
       };
     },
-    /*
-function auctionNFT(setname, uid, price, now, time, type, callback){
-     time = parseInt(time)
-    price = parseInt(price * 1000)
-    if(type.toUpperCase() == 'HIVE'){
-        type = 'HIVE'
-    } else if(type.toUpperCase() == 'HBD'){
-        type = 'HBD'
-    } else {
-        type = 0
-    }
-    if(!type)broadcastCJA({ set: setname, uid, price, now, time}, "dlux_nft_auction", `Trying to auction ${setname}:${uid} for DLUX`)
-    else broadcastCJA({ set: setname, uid, price, type, now, time}, "dlux_nft_hauction", `Trying to auction ${setname}:${uid} for ${type}`)
- }
-
-*/
     auctionNFT(item) {
       var cja = {
           set: item.setname,
@@ -2351,9 +2152,6 @@ function auctionNFT(setname, uid, price, now, time, type, callback){
     },
     sendIt(op) {
       this.toSign = op;
-    },
-    parseInt(a, b = 10) {
-      return parseInt(a, b);
     },
     frmDate() {
       return new Date().getMonth() + 1;
