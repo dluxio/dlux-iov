@@ -358,7 +358,7 @@ export default {
                                         type="button"><i
                                             class="fas fa-coins fa-fw me-2"></i>Buy
                                         /
-                                        Sell</a></button>
+                                        Sell</button>
                                 </modal-vue>
                             </ul>
                         </div>
