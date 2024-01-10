@@ -857,7 +857,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
   },
   methods: {
     getSetPhotos(s, c) {
-      return s.setname ? `https://ipfs.io/ipfs/${s.set[c]}` : "";
+      return s.setname ? `https://ipfs.dlux.io/ipfs/${s.set[c]}` : "";
     },
     getSPKUser() {
       if(this.account)fetch("https://spktest.dlux.io/@" + this.account)
@@ -2618,7 +2618,7 @@ function buyNFT(setname, uid, price, type, callback){
       } else if (typeof arr == "string") {
         return arr;
       } else if (typeof json.Hash360 == "string") {
-        return `https://ipfs.io/ipfs/${json.Hash360}`;
+        return `https://ipfs.dlux.io/ipfs/${json.Hash360}`;
       } else {
         /*
                 var looker
@@ -2628,7 +2628,7 @@ function buyNFT(setname, uid, price, type, callback){
                     looker = looker.split(')')[0]
                 } catch (e) {
                     */
-        return "/img/dluxdefault.svg";
+        return "/img/dluxdefault.png";
       }
     },
     getMint(set, item) {
@@ -3096,7 +3096,7 @@ function buyNFT(setname, uid, price, type, callback){
     },
     pullScript(id) {
       return new Promise((resolve, reject) => {
-        fetch(`https://ipfs.io/ipfs/${id}`)
+        fetch(`https://ipfs.dlux.io/ipfs/${id}`)
           .then((response) => response.text())
           .then((data) => {
             this.nftscripts[id] = data;

@@ -413,7 +413,7 @@ export default {
         exp_to_time(exp = '0:0') {
             return this.when([parseInt(exp.split(':')[0])])
         },
-        replace(string = "", char = ':') {
+        replace(string, char = ':') {
         return string.replaceAll(char, '_')
         },
         split(string, del, index) {

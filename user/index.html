@@ -1342,7 +1342,7 @@
                                     </div>
                                 </div>
                                 <div class="card-body p-0">
-                                    <contract-vue :account="pageAccount" @tosign="toSign=$event"></contract-vue>
+                                    <contract-vue :node="false" :account="pageAccount" @tosign="toSign=$event"></contract-vue>
                                 </div>
                             </div>
                         </div>
@@ -1412,7 +1412,7 @@
                                     aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <spk-vue :account="account" @tosign="toSign=$event;log($event)"/>
+                                <spk-vue node="false" :account="account" @tosign="toSign=$event;log($event)"/>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>

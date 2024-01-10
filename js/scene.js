@@ -1206,7 +1206,7 @@ export default {
                         looker = looker.split(')')[0]
                     } catch (e) {
                         */
-            return "/img/dluxdefault.svg";
+            return "/img/dluxdefault.png";
           }
         },
         readRep(rep2) {
