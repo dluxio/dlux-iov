@@ -1447,55 +1447,55 @@
         </div>
     </div>
     <script>
-        // document.addEventListener("DOMContentLoaded", function () {
-        //     //MODAL URL UPDATE
-        //     var detailMod = document.getElementById('detailModal');
-        //     detailMod.addEventListener('hide.bs.modal', event => {
-        //         window.history.back();
-        //     })
-        // });
-        // (function () {
-        //     "use strict";
-        //     window.addEventListener(
-        //         "load",
-        //         function () {
-        //             // Fetch all the forms we want to apply custom Bootstrap validation styles to
-        //             var forms = document.getElementsByClassName("needs-validation");
-        //             // Loop over them and prevent submission
-        //             var validation = Array.prototype.filter.call(
-        //                 forms,
-        //                 function (form) {
-        //                     form.addEventListener(
-        //                         "submit",
-        //                         function (event) {
-        //                             if (form.checkValidity() === false) {
-        //                                 event.preventDefault();
-        //                                 event.stopPropagation();
-        //                             }
-        //                             form.classList.add("was-validated");
-        //                         },
-        //                         false
-        //                     );
-        //                 }
-        //             );
-        //         },
-        //         false
-        //     );
-        // })();
-        // var disabletab = document.getElementsByClassName("disabled-input");
-        // for (var i = 0; i < disabletab.length; i++) {
-        //     disabletab[i].setAttribute("tabindex", "-1");
-        // }
-        // var toastElList = [].slice.call(document.querySelectorAll(".toast"));
-        // var toastList = toastElList.map(function (toastEl) {
-        //     return new bootstrap.Toast(toastEl, option);
-        // });
-        // var tooltipTriggerList = [].slice.call(
-        //     document.querySelectorAll('[data-bs-toggle="tooltip"]')
-        // );
-        // var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        //     return new bootstrap.Tooltip(tooltipTriggerEl);
-        // });
+        document.addEventListener("DOMContentLoaded", function () {
+            //MODAL URL UPDATE
+            var detailMod = document.getElementById('detailModal');
+            detailMod.addEventListener('hide.bs.modal', event => {
+                window.history.back();
+            })
+        });
+        (function () {
+            "use strict";
+            window.addEventListener(
+                "load",
+                function () {
+                    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                    var forms = document.getElementsByClassName("needs-validation");
+                    // Loop over them and prevent submission
+                    var validation = Array.prototype.filter.call(
+                        forms,
+                        function (form) {
+                            form.addEventListener(
+                                "submit",
+                                function (event) {
+                                    if (form.checkValidity() === false) {
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                    }
+                                    form.classList.add("was-validated");
+                                },
+                                false
+                            );
+                        }
+                    );
+                },
+                false
+            );
+        })();
+        var disabletab = document.getElementsByClassName("disabled-input");
+        for (var i = 0; i < disabletab.length; i++) {
+            disabletab[i].setAttribute("tabindex", "-1");
+        }
+        var toastElList = [].slice.call(document.querySelectorAll(".toast"));
+        var toastList = toastElList.map(function (toastEl) {
+            return new bootstrap.Toast(toastEl, option);
+        });
+        var tooltipTriggerList = [].slice.call(
+            document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        );
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
     </script>
     <script>
         const Base64 = {
@@ -1512,39 +1512,39 @@
         };
     </script>
     <script>
-        // function deepLink(link) {
-        //     if (link) location.hash = link
-        //     let url = location.href.replace(/\/$/, '');
-        //     if (location.hash) {
-        //         const hash = url.split('#');
-        //         const currentTab = hash[1] == 'dlux' || hash[1] == 'hive' || hash[1] == 'spk' ? document.querySelector('#wallettab a[href="#' + hash[1] + '"]') : document.querySelector('#usertabs a[href="#' + hash[1] + '"]')
-        //         const curTab = new bootstrap.Tab(currentTab);
-        //         curTab.show();
-        //         url = location.href.replace(/\/#/, '#');
-        //         history.replaceState(null, null, url);
-        //         setTimeout(() => {
-        //             window.scrollTop = 0;
-        //         }, 400);
-        //     }
-        //     // change url based on selected tab
-        //     const selectableTabList = [].slice.call(document.querySelectorAll('a[data-bs-toggle="tab"]'));
-        //     selectableTabList.forEach((selectableTab) => {
-        //         const selTab = new bootstrap.Tab(selectableTab);
-        //         selectableTab.addEventListener('click', function () {
-        //             var newUrl;
-        //             const hash = selectableTab.getAttribute('href');
-        //             if (hash == '#blog') {
-        //                 newUrl = url.split('#')[0];
-        //                 history.replaceState(null, null, newUrl);
-        //             } else if (hash == '#b/') {
+        function deepLink(link) {
+            if (link) location.hash = link
+            let url = location.href.replace(/\/$/, '');
+            if (location.hash) {
+                const hash = url.split('#');
+                const currentTab = hash[1] == 'dlux' || hash[1] == 'hive' || hash[1] == 'spk' ? document.querySelector('#wallettab a[href="#' + hash[1] + '"]') : document.querySelector('#usertabs a[href="#' + hash[1] + '"]')
+                const curTab = new bootstrap.Tab(currentTab);
+                curTab.show();
+                url = location.href.replace(/\/#/, '#');
+                history.replaceState(null, null, url);
+                setTimeout(() => {
+                    window.scrollTop = 0;
+                }, 400);
+            }
+            // change url based on selected tab
+            const selectableTabList = [].slice.call(document.querySelectorAll('a[data-bs-toggle="tab"]'));
+            selectableTabList.forEach((selectableTab) => {
+                const selTab = new bootstrap.Tab(selectableTab);
+                selectableTab.addEventListener('click', function () {
+                    var newUrl;
+                    const hash = selectableTab.getAttribute('href');
+                    if (hash == '#blog') {
+                        newUrl = url.split('#')[0];
+                        history.replaceState(null, null, newUrl);
+                    } else if (hash == '#b/') {
 
-        //             } else {
-        //                 newUrl = url.split('#')[0] + hash;
-        //                 history.replaceState(null, null, newUrl);
-        //             }
-        //         });
-        //     });
-        // }
+                    } else {
+                        newUrl = url.split('#')[0] + hash;
+                        history.replaceState(null, null, newUrl);
+                    }
+                });
+            });
+        }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
         integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
