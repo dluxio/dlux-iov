@@ -6,263 +6,6 @@ export default {
     },
     template: `
     <div>
-      <div>
-        <div class="flex-column m-1">
-            <div class="btn-group">
-                <button type="button" v-if="saccountapi.pubKey != 'NA'"
-                    class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
-                <button v-if="saccountapi.pubKey != 'NA'" type="button"
-                    class="btn btn-info">
-                    <modal-vue type="build" token="BROCA"
-                        :balance="broca_calc(saccountapi.broca)" :account="account"
-                        @modalsign="sendIt($event)" :ipfsproviders="ipfsProviders" v-slot:trigger>
-                        <span class="p-2 trigger"><i
-                                class="fa-solid fa-file-contract fa-fw me-2"></i>Contract</span>
-                    </modal-vue>
-                </button>
-                <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                    disabled></button>
-                <button v-if="saccountapi.pubKey == 'NA'" type="button"
-                    class="btn btn-info" @click="updatePubkey">
-                    <i class="fas fa-plus fa-fw me-2"></i>Register Account
-                </button>
-                <button v-if="saccountapi.pubKey != 'NA'" type="button"
-                    class="btn btn-info" @click="petitionForContract">
-                    <i
-                        class="fa-solid fa-wand-magic-sparkles fa-fw me-2"></i>{{petitionStatus ? petitionStatus : "Ask for Contract"}}
-                </button>
-            </div>
-        </div>
-        <div v-show="!numChannels" class="p-3">
-            <p class="m-0">You have no available SPK Network
-                contracts for file hosting. <span v-if="saccountapi.pubKey == 'NA'">After your account is registered, create a
-                hosting contract to
-                upload files.</span><span v-if="saccountapi.pubKey != 'NA'">Create a hosting contract to upload files.</span></p>
-        </div>
-        
-        <div v-show="numChannels" class="">
-            <table
-                class="table table-dark table-striped table-hover text-center align-middle mb-0">
-                <thead>
-                    <tr>
-
-                        <th scope="col"><i
-                                class="fa-solid fa-database fa-fw me-2"></i>Storage</th>
-                        <th scope="col"><i
-                                class="fa-solid fa-clock fa-fw me-2"></i>Expiration</th>
-                        <th scope="col"><i
-                                class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>Benificiary
-                        </th>
-                        <th scope="col"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    
-                        <tr v-for="(sponsor, key, index) in saccountapi.channels">
-                            <td colspan="4" class="p-0">
-                                <div class="table-responsive">
-                                    <table class="table text-white align-middle mb-0">
-                                        <tbody>
-                                            <tr v-for="channel in sponsor">
-                                                <th class="border-0"
-                                                    
-                                                    v-if="channel.c == 1">
-                                                    {{channel.a/1000000}}
-                                                    MB</th>
-                                                <td class="border-0"
-                                                    
-                                                    v-if="channel.c == 1">
-                                                    {{exp_to_time(channel.e)}}
-                                                </td>
-                                                <td class="border-0" scope="row"
-                                                    
-                                                    v-if="channel.c == 1 && channel.s">
-                                                    @{{slotDecode(channel.s, 0)}}
-                                                    ({{slotDecode(channel.s, 1)}}%)</td>
-                                                <td class="border-0" scope="row"
-                                                    
-                                                    v-if="channel.c == 1 && !channel.s">
-                                                </td>
-                                                <td class="border-0 text-end"
-                                                    
-                                                    v-if="channel.c == 1">
-
-                                                    <button type="button"
-                                                        class="btn btn-outline-success m-1"
-                                                        v-bind:class="{'invisible': contract.id}"
-                                                        @click="selectContract(channel.i, channel.b)"><i
-                                                            class="fa-solid fa-file-import fa-fw"></i></button>
-
-                                                    <button type="button"
-                                                        class="btn btn-success m-1"
-                                                        v-bind:class="{'d-none': !contract.id || contract.id != channel.i}"
-                                                        @click="contract.id = ''; contract.api = ''"><i
-                                                            class="fa-solid fa-file-import fa-fw"></i></button>
-
-
-
-                                                    <a class="collapsed"
-                                                        data-bs-toggle="collapse"
-                                                        :href="'#' + replace(channel.i)">
-                                                        <span
-                                                            class="if-collapsed"><button
-                                                                class="btn btn-outline-primary"><i
-                                                                    class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
-                                                        <span
-                                                            class="if-not-collapsed"><button
-                                                                class="btn btn-primary"><i
-                                                                    class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
-                                                    </a>
-
-
-                                                </td>
-                                            </tr>
-                                            <tr v-for="channel in sponsor">
-                                                <td class="collapse border-0"
-                                                    colspan="4" :id="replace(channel.i)"
-                                                    v-if="channel.c == 1">
-                                                    <ul class="text-start">
-                                                        <li>Contract ID: {{channel.i}}
-                                                        </li>
-                                                        <li v-if="channel.c == 1">Size
-                                                            Allowed:
-                                                            {{channel.a}} bytes</li>
-                                                        <li v-if="channel.c == 2">Size:
-                                                            {{channel.u}} bytes
-                                                        </li>
-                                                        <li>File Owner: @{{channel.t}}
-                                                        </li>
-                                                        <li>Service Provider:
-                                                            @{{channel.b}}
-                                                        </li>
-                                                        <li>Sponsor: @{{channel.f}}</li>
-                                                        <li>Expiration:
-                                                            {{exp_to_time(channel.e)}}
-                                                        </li>
-                                                        <li>Price: {{channel.r}} Broca
-                                                        </li>
-                                                        <li>Redundancy: {{channel.p}}
-                                                        </li>
-                                                        <li v-if="channel.s">Terms:
-                                                            {{slotDecode(channel.s,
-                                                            1)}}%
-                                                            Bennificiary to
-                                                            @{{slotDecode(channel.s,
-                                                            0)}}</li>
-                                                        <li>Status: {{channel.c == 1 ?
-                                                            'Waiting For Upload' :
-                                                            'Uploaded'}}
-                                                        </li>
-                                                        <li v-if="channel.df">Files:<p
-                                                                v-for="file in channel.df">
-                                                                {{file}}
-                                                            </p>
-                                                        </li>
-                                                        <li v-if="channel.n">Stored by:
-                                                            <p v-for="acc in channel.n">
-                                                                @{{acc}}
-                                                            </p>
-                                                        </li>
-                                                    </ul>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </td>
-
-
-
-                        </tr>
-                    
-
-                </tbody>
-            </table>
-
-
-            
-            
-                <div v-if="contract.id" style="background: #16191C;">
-                    <div class="p-2">
-                        <form onsubmit="return false;">
-                            <div
-                                class="d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0 mx-2">Upload Files</h5>
-                                <div class="flex-column ms-auto me-auto">
-                                    <input type="file" @change="uploadFile" multiple class="form-control bg-darkg border-secondary text-white-50" />
-                                </div>
-                                <button type="button"
-                                    class="btn-lg btn-close btn-close-white ms-2"
-                                    @click="contract.id = ''; contract.api = ''"
-                                    aria-label="Close"></button>
-                            </div>
-                            <div class="p-5 my-4 mx-3 text-center" id="img-well"
-                                @drop="dragFile($event)" @dragenter.prevent
-                                @dragover.prevent>
-                                Or drag the file(s) here
-                            </div>
-                        </form>
-                    </div>
-                    <div id="listOfImgs" v-for="(file, index) in File">
-                        <div class="p-3 mb-3 bg-dark" style="border-radius: 10px;">
-                            <div class="d-flex align-items-center flex-row pb-2 mb-2">
-                                <h6 class="m-0">{{file.name}}</h6>
-                                <div class="flex-grow-1 mx-5">
-                                    <div class="progress" role="progressbar"
-                                        aria-label="Upload progress" aria-valuenow="25"
-                                        aria-valuemin="0" aria-valuemax="100">
-                                        <div class="progress-bar"
-                                            :style="'width: ' + file.progress + '%'">
-                                            {{file.progress}}%
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex-shrink" v-if="File.length">
-                                    <button type="button" class="me-2 btn btn-secondary"
-                                        v-if="file.actions.pause"
-                                        @click="fileRequest[index].resumeFileUpload()">Pause</button>
-                                    <button type="button" class="me-2 btn btn-secondary"
-                                        v-if="file.actions.resume"
-                                        @click="fileRequest[index].resumeFileUpload()">Resume</button>
-                                    <button type="button" class="me-2 btn btn-secondary"
-                                        v-if="file.actions.cancel"
-                                        @click="fileRequest[index].resumeFileUpload()">Cancel</button>
-                                </div>
-                                <div class="ms-auto">
-                                    <button class="btn btn-danger"
-                                        @click="deleteImg(index, file.name)"
-                                        data-toggle="tooltip" data-placement="top"
-                                        title="Delete Asset"><i
-                                            class="fas fa-fw fa-trash-alt"></i></button>
-                                </div>
-                            </div>
-                            <div class="d-flex w-100">
-                                <ul class="text-start w-100">
-                                    <li class="">Bytes: {{file.size}}</li>
-                                    <li class="">CID:
-                                        {{FileInfo[file.name].hash}}</li>
-                                    <li class="">Status:
-                                        {{FileInfo[file.name].status}}
-                                    </li>
-                                    <li class=""><a
-                                            :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
-                                            target="_blank">{{FileInfo[file.name].hash}}<i
-                                                class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div v-if="File.length" class="text-center">
-                        <button type="button" class="btn btn-info mb-2"
-                            @click="signNUpload()"><i
-                                class="fa-solid fa-file-signature fa-fw me-2"></i>Sign
-                            and
-                            Upload</button>
-                    </div>
-                </div>
-            
-      </div>
     <div class="container">
         <div class="mt-3">
             <div class="alert alert-danger text-start" role="alert">
@@ -337,8 +80,8 @@ export default {
                         <button type="button" class="btn btn-info p-0">
                             <modal-vue type="send" token="SPK"
                                 :balance="saccountapi.spk" :account="account"
-                                @modalsign="sendIt($event)" v-slot:trigger>
-                                <span class="p-2 trigger"
+                                @modalsign="sendIt($event)">
+                                <span slot="trigger" class="p-2"
                                     :test="sapi == 'https://spktest.dlux.io' ? true : false"><i
                                         class="fas fa-paper-plane me-2"></i>Send</span>
                             </modal-vue>
@@ -356,9 +99,11 @@ export default {
                                 <modal-vue type="power" token="SPK"
                                     func="Power Up" :balance="saccountapi.spk"
                                     :account="account"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
-                                    <button class="dropdown-item trigger"
-                                        type="button"><i class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
+                                    @modalsign="sendIt($event)">
+                                    <button class="dropdown-item" slot="trigger"
+                                        type="button"><i
+                                            class="fas fa-angle-double-up fa-fw me-2"></i>Power
+                                        Up</button>
                                 </modal-vue>
                                 <div class="dropdown-divider">
                                 </div>
@@ -389,12 +134,16 @@ export default {
                         </li>
                         <li>Grants BROCA at 1:1,000,000</li>
                         <li>Your max BROCA:
-                            {{formatNumber((saccountapi.spk_power * 1000 ), 0, '', ',')}}</li>
+                            {{formatNumber((saccountapi.spk_power
+                            * 1000 ),
+                            0, '', ',')}}</li>
                     </ul>
                 </div>
                 <div class="ms-auto text-end">
                     <h5>
-                        {{formatNumber((saccountapi.spk_power)/1000, 3, '.', ',')}}
+                        {{formatNumber((saccountapi.spk_power)/1000,
+                        3, '.',
+                        ',')}}
                         SPK
                     </h5>
                     <div class="btn-group" role="group"
@@ -491,7 +240,10 @@ export default {
                                                 drain VP to 0%
                                             </li>
                                             <li>Full Recharge:
-                                                {{formatNumber((spkStats.spk_cycle_length * 4)/28800, '.', ',', 2)}}
+                                                {{formatNumber((spkStats.spk_cycle_length
+                                                *
+                                                4)/28800, '.',
+                                                ',', 2)}}
                                                 days</li>
                                         </ul>
                                     </div>
@@ -512,8 +264,8 @@ export default {
                                     func="Power Down"
                                     :balance="saccountapi.spk_power"
                                     :account="account"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
-                                    <button class="dropdown-item trigger"
+                                    @modalsign="sendIt($event)">
+                                    <button class="dropdown-item" slot="trigger"
                                         type="button"><i
                                             class="fas fa-angle-double-down fa-fw me-2"></i>Power
                                         Down</button>
@@ -523,8 +275,8 @@ export default {
                                     :balance="saccountapi.spk_power"
                                     :account="account" :smarkets="smarkets.node"
                                     :current="saccountapi.spk_vote"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
-                                    <button class="dropdown-item trigger"
+                                    @modalsign="sendIt($event)">
+                                    <button class="dropdown-item" slot="trigger"
                                         type="button"><i
                                             class="fa-solid fa-plug fa-fw me-2"></i>Elect
                                         Validators</button>
@@ -553,16 +305,25 @@ export default {
                             Bytes
                             for 30 days.</li>
                         <li>Recharge Rate:
-                            {{formatNumber((spkStats.broca_refill / 28800), 2, '.', ',')}} Days to Recharge.</li>
+                            {{formatNumber((spkStats.broca_refill
+                            / 28800), 2,
+                            '.',
+                            ',')}} Days to Recharge.</li>
                         <li>Time Until Full: {{formatNumber((1 -
-                            (broca_calc(saccountapi.broca))/(saccountapi.spk_power * 1000)) * (spkStats.broca_refill / 28800), 2, '.', ',')}}
+                            (broca_calc(saccountapi.broca))/(saccountapi.spk_power
+                            * 1000))
+                            *
+                            (spkStats.broca_refill / 28800), 2,
+                            '.', ',')}}
                             Days until full.
                         </li>
                     </ul>
                 </div>
                 <div class="ms-auto text-end">
                     <h5>
-                        {{formatNumber(broca_calc(saccountapi.broca), 0, '', ',')}} BROCA
+                        {{formatNumber(broca_calc(saccountapi.broca),
+                        0, '',
+                        ',')}} BROCA
                     </h5>
 
                     <div class="btn-group" role="group"
@@ -571,8 +332,11 @@ export default {
                             <modal-vue type="build" token="BROCA"
                                 :balance="broca_calc(saccountapi.broca)"
                                 :account="account" @modalsign="sendIt($event)"
-                                :ipfsproviders="ipfsProviders" v-slot:trigger>
-                                <span class="p-2 trigger"><i class="fa-solid fa-file-contract fa-fw me-2"></i>Create A Contract</span>
+                                :ipfsproviders="ipfsProviders">
+                                <span slot="trigger" class="p-2"><i
+                                        class="fa-solid fa-file-contract fa-fw me-2"></i>Create
+                                    A
+                                    Contract</span>
                             </modal-vue>
                         </button>
                         <button type="button"
@@ -589,10 +353,12 @@ export default {
                                     func="Power Down"
                                     :balance="saccountapi.spk_power"
                                     :account="account"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
-                                    <button class="dropdown-item trigger"
+                                    @modalsign="sendIt($event)">
+                                    <button class="dropdown-item" slot="trigger"
                                         type="button"><i
-                                            class="fas fa-coins fa-fw me-2"></i>Buy / Sell</button>
+                                            class="fas fa-coins fa-fw me-2"></i>Buy
+                                        /
+                                        Sell</button>
                                 </modal-vue>
                             </ul>
                         </div>
@@ -613,7 +379,9 @@ export default {
                         node.</p>
                 </div>
                 <div id="claimlarynxrewardbtn" class="ms-auto text-end">
-                    <h5>{{formatNumber((saccountapi.claim)/1000, 3, '.', ',')}} LARYNX
+                    <h5>{{formatNumber((saccountapi.claim)/1000,
+                        3, '.',
+                        ',')}} LARYNX
                     </h5>
                     <div class="mb-2"> <span class="small" v-show="!spk2gov">50%
                             Liquid |
@@ -662,7 +430,9 @@ export default {
                 </div>
                 <div class="ms-auto text-end">
                     <h5>
-                        {{formatNumber((saccountapi.balance)/1000, 3, '.', ',')}} LARYNX
+                        {{formatNumber((saccountapi.balance)/1000,
+                        3, '.',
+                        ',')}} LARYNX
                     </h5>
                     <div class="btn-group" role="group"
                         aria-label="LARYNX Actions">
@@ -670,8 +440,8 @@ export default {
                             <modal-vue type="send" token="LARYNX"
                                 :balance="saccountapi.balance"
                                 :account="account" @modalsign="sendIt($event)"
-                                :test="sapi == 'https://spktest.dlux.io' ? true : false" v-slot:trigger>
-                                <span class="p-2 trigger"><i
+                                :test="sapi == 'https://spktest.dlux.io' ? true : false">
+                                <span slot="trigger" class="p-2"><i
                                         class="fas fa-paper-plane me-2"></i>Send</span>
                             </modal-vue>
                         </button>
@@ -690,29 +460,31 @@ export default {
                                     :balance="saccountapi.balance"
                                     :account="account"
                                     @modalsign="sendIt($event)"
-                                    :test="sapi == 'https://spktest.dlux.io' ? true : false" v-slot:trigger>
-                                    <button class="dropdown-item trigger"
+                                    :test="sapi == 'https://spktest.dlux.io' ? true : false">
+                                    <button class="dropdown-item" slot="trigger"
                                         type="button"><i
-                                            class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
+                                            class="fas fa-angle-double-up fa-fw me-2"></i>Power
+                                        Up</button>
                                 </modal-vue>
                                 <modal-vue type="power" :dis="!isNode"
                                     token="LARYNX" func="Lock Liquidity"
                                     :balance="saccountapi.balance"
                                     :account="account"
                                     @modalsign="sendIt($event)"
-                                    :test="sapi == 'https://spktest.dlux.io' ? true : false" v-slot:trigger>
-                                    <button class="dropdown-item trigger"
-                                        :disabled="!isNode" 
+                                    :test="sapi == 'https://spktest.dlux.io' ? true : false">
+                                    <button class="dropdown-item"
+                                        :disabled="!isNode" slot="trigger"
                                         type="button"><i
-                                            class="fas fa-lock fa-fw me-2"></i>Lock Liquidity</button>
+                                            class="fas fa-lock fa-fw me-2"></i>Lock
+                                        Liquidity</button>
                                 </modal-vue>
                                 <modal-vue type="power" token="LARYNX"
                                     func="Register a Service"
                                     :balance="saccountapi.balance"
                                     :min="spkStats.IPFSRate/1000"
                                     :account="account"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
-                                    <button class="dropdown-item trigger" 
+                                    @modalsign="sendIt($event)">
+                                    <button class="dropdown-item" slot="trigger"
                                         type="button"><i
                                             class="fa fa-network-wired fa-fw me-2"></i>Register
                                         A Service
@@ -723,8 +495,8 @@ export default {
                                     :balance="saccountapi.balance"
                                     :min="spkStats.IPFSRate/1000"
                                     :account="account"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
-                                    <button class="dropdown-item trigger" 
+                                    @modalsign="sendIt($event)">
+                                    <button class="dropdown-item" slot="trigger"
                                         type="button"><i
                                             class="fa fa-network-wired fa-fw me-2"></i>Register
                                         A Service Type
@@ -735,8 +507,8 @@ export default {
                                     :balance="saccountapi.balance"
                                     :min="isValidator ? '0.001' : spkStats.IPFSRate/1000"
                                     :account="account"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
-                                    <button class="dropdown-item trigger" 
+                                    @modalsign="sendIt($event)">
+                                    <button class="dropdown-item" slot="trigger"
                                         type="button"><i
                                             class="fa fa-network-wired fa-fw me-2"></i>
                                         {{isValidator ? 'Burn LARYNX to your Validator' : 'Register a Validator'}}
@@ -746,7 +518,8 @@ export default {
                                 </div>
                                 <a class="dropdown-item" href="/dex/larynx"
                                     id="buylink"><i
-                                        class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
+                                        class="fas fa-coins fa-fw me-2"></i>Buy
+                                    / Sell</a>
                             </ul>
                         </div>
                     </div>
@@ -764,21 +537,33 @@ export default {
                         to the
                         network, aid in determining consensus,
                         and earn rewards for node runners</p>
-                    <p class="text-white-50">Benefits of LARYNX Locked:</p>
+                    <p class="text-white-50">Benefits of LARYNX
+                        Locked:</p>
                     <ul class="text-white-50">
-                        <li>Provides collateral for DEX transactions and proof-of-stake consensus</li>
+                        <li>Provides collateral for DEX
+                            transactions and
+                            proof-of-stake
+                            consensus</li>
                         <li>Instant Lock | 4 Week Unlock</li>
                         <li>Requires an operating LARYNX node
                         </li>
-                        <li>LARYNX LOCKED (LL) earns SPK tokens at {{toFixed(pFloat(spkStats.spk_rate_lgov) * 100,3)}}%</li>
+                        <li>LARYNX LOCKED (LL) earns SPK tokens
+                            at
+                            {{toFixed(pFloat(spkStats.spk_rate_lgov)
+                            *
+                            100,3)}}%</li>
                     </ul>
                 </div>
                 <div id="larynxgactions" class="ms-auto text-end" v-show="me">
                     <div class="d-flex align-items-center mb-2">
                         <small class="ms-auto"><span
-                                class="badge me-2 bg-success">{{toFixed(pFloat(spkStats.spk_rate_lgov) * 100,3)}}%</span></small>
+                                class="badge me-2 bg-success">{{toFixed(pFloat(spkStats.spk_rate_lgov)
+                                *
+                                100,3)}}%</span></small>
                         <h5 id="govbalance" class="m-0">
-                            {{formatNumber((saccountapi.gov)/1000, 3, '.', ',')}} LL
+                            {{formatNumber((saccountapi.gov)/1000,
+                            3, '.',
+                            ',')}} LL
                         </h5>
                     </div>
                     <div class="btn-group" role="group"
@@ -804,10 +589,11 @@ export default {
                                     :balance="saccountapi.gov"
                                     :test="sapi == 'https://spktest.dlux.io' ? true : false"
                                     :account="account"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
-                                    <button class="dropdown-item trigger" 
+                                    @modalsign="sendIt($event)">
+                                    <button class="dropdown-item" slot="trigger"
                                         type="button"><i
-                                            class="fas fa-lock-open fa-fw me-2"></i>Unlock Liquidity</button>
+                                            class="fas fa-lock-open fa-fw me-2"></i>Unlock
+                                        Liquidity</button>
                                 </modal-vue>
                             </ul>
                         </div>
@@ -824,31 +610,43 @@ export default {
                                 v-if="sapi == 'https://spktest.dlux.io'"><span
                                     class="badge ms-1 me-2 bg-warning">TEST</span></small>
                         </div>
-                        <p class="text-white-50">Powered tokens used to mine SPK</p>
-                        <p class="text-white-50">Benefits of LARYNX Power:
+                        <p class="text-white-50">Powered tokens
+                            used to mine
+                            SPK</p>
+                        <p class="text-white-50">Benefits of
+                            LARYNX Power:
                         </p>
                         <ul class="text-white-50">
-                            <li>Delegate to node service accounts to build consensus (DPoS)
+                            <li>Delegate to node service
+                                accounts to build
+                                consensus (DPoS)
                             </li>
                             <li>Instant Power Up | 4 Week Power
                                 Down</li>
                             <li>LARYNX POWER (LP) earns SPK
                                 tokens at
-                                {{toFixed(pFloat(spkStats.spk_rate_lpow) * 100,3)}}%
+                                {{toFixed(pFloat(spkStats.spk_rate_lpow)
+                                * 100,3)}}%
                             </li>
                             <li>Delegated LP (DLP) earns SPK
                                 tokens for both
                                 delegator and
                                 delegatee at
-                                {{toFixed(pFloat(spkStats.spk_rate_ldel) * 100,3)}}%
+                                {{toFixed(pFloat(spkStats.spk_rate_ldel)
+                                * 100,3)}}%
                             </li>
                         </ul>
                     </div>
                     <div id="larynxgactions" class="ms-auto text-end">
                         <div class="d-flex align-items-center mb-2">
                             <small class="ms-auto"><span
-                                    class="badge me-2 bg-success">{{toFixed(pFloat(spkStats.spk_rate_lpow) * 100,3)}}%</span></small>
-                            <h5 class="m-0"> {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}} LP</h5>
+                                    class="badge me-2 bg-success">{{toFixed(pFloat(spkStats.spk_rate_lpow)
+                                    * 100,3)}}%</span></small>
+                            <h5 class="m-0">
+                                {{formatNumber((saccountapi.poweredUp)/1000,
+                                3, '.', ',')}}
+                                LP
+                            </h5>
                         </div>
                         <div class="mb-2">
                             <a v-if="saccountapi.granting.t || saccountapi.granted.t"
@@ -859,9 +657,13 @@ export default {
                                 class="text-white d-flex align-items-center "
                                 style="text-decoration: none">
                                 <small class="ms-auto"><span
-                                        class="badge me-2 bg-success">{{toFixed(pFloat(spkStats.spk_rate_ldel) * 100,3)}}%</span></small>
+                                        class="badge me-2 bg-success">{{toFixed(pFloat(spkStats.spk_rate_ldel)
+                                        *
+                                        100,3)}}%</span></small>
                                 <h5 class="m-0">
-                                    {{formatNumber((saccountapi.granting.t+saccountapi.granted.t)/1000, 3, '.', ',')}} DLP<i class="fas fa-search ms-2"></i>
+                                    {{formatNumber((saccountapi.granting.t+saccountapi.granted.t)/1000,
+                                    3, '.', ',')}}
+                                    DLP<i class="fas fa-search ms-2"></i>
                                 </h5>
                             </a>
                         </div>
@@ -874,9 +676,12 @@ export default {
                             style="text-decoration: none">
                             <h6 id="delegatebal">
                                 <span
-                                    v-if="saccountapi.granting.t">(-{{formatNumber((saccountapi.granting.t)/1000, 3, '.', ',')}} LP)</span>
+                                    v-if="saccountapi.granting.t">(-{{formatNumber((saccountapi.granting.t)/1000,
+                                    3,
+                                    '.', ',')}} LP)</span>
                                 <span
-                                    v-if="saccountapi.granted.t">(+{{formatNumber((saccountapi.granted.t)/1000, 3,'.', ',')}} LP)</span>
+                                    v-if="saccountapi.granted.t">(+{{formatNumber((saccountapi.granted.t)/1000,
+                                    3,'.', ',')}} LP)</span>
                                 <i class="fas fa-search ms-2"></i>
                             </h6>
 
@@ -891,9 +696,10 @@ export default {
                                     :balance="saccountapi.poweredUp"
                                     :account="account"
                                     @modalsign="sendIt($event)"
-                                    :test="sapi == 'https://spktest.dlux.io' ? true : false" v-slot:trigger><span
-                                        class="p-2 trigger">
-                                        <i class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
+                                    :test="sapi == 'https://spktest.dlux.io' ? true : false"><span
+                                        slot="trigger" class="p-2">
+                                        <i
+                                            class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
                                 </modal-vue>
                             </button>
                             <button type="button"
@@ -913,21 +719,25 @@ export default {
                                         :balance="saccountapi.poweredUp"
                                         :account="account"
                                         @modalsign="sendIt($event)"
-                                        :test="sapi == 'https://spktest.dlux.io' ? true : false" v-slot:trigger>
+                                        :test="sapi == 'https://spktest.dlux.io' ? true : false">
                                         <button
                                             :disabled="!saccountapi.poweredUp"
-                                            class="dropdown-item trigger" 
-                                            type="button"><i class="fas fa-angle-double-down fa-fw me-2"></i>Power Down</button>
+                                            class="dropdown-item" slot="trigger"
+                                            type="button"><i
+                                                class="fas fa-angle-double-down fa-fw me-2"></i>Power
+                                            Down</button>
                                     </modal-vue>
                                     <modal-vue
                                         v-show="when(saccountapi.powerDowns)"
                                         type="confirm" token="LARYNX"
                                         func="powercancel" :account="account"
                                         @modalsign="sendIt($event)"
-                                        :test="sapi == 'https://spktest.dlux.io' ? true : false" v-slot:trigger>
-                                        <button class="dropdown-item trigger"
-                                            type="button">
-                                            <i class="fa-solid fa-xmark fa-fw me-2"></i>Cancel Power Down</button>
+                                        :test="sapi == 'https://spktest.dlux.io' ? true : false">
+                                        <button class="dropdown-item"
+                                            slot="trigger" type="button">
+                                            <i
+                                                class="fa-solid fa-xmark fa-fw me-2"></i>Cancel
+                                            Power Down</button>
                                     </modal-vue>
 
                                 </ul>
@@ -937,25 +747,38 @@ export default {
                 </div>
                 <div
                     :class="{'d-none': !when(saccountapi.powerDowns), 'd-flex': true, 'align-items-center': true}">
-                    <b>A power down is scheduled to happen in {{when(saccountapi.powerDowns)}} ({{when(saccountapi.powerDowns, true)}} installments remaining)</b><small class="ms-2">
+                    <b>A power down is scheduled
+                        to happen in
+                        {{when(saccountapi.powerDowns)}}
+                        ({{when(saccountapi.powerDowns, true)}}
+                        installments
+                        remaining)</b><small class="ms-2">
                         <modal-vue type="confirm" token="LARYNX"
                             func="powercancel" :account="account"
                             @modalsign="sendIt($event)"
-                            :test="sapi == 'https://spktest.dlux.io' ? true : false" v-slot:trigger>
-                            <button class="btn btn-sm btn-outline-danger trigger"
-                                type="button">
+                            :test="sapi == 'https://spktest.dlux.io' ? true : false">
+                            <button class="btn btn-sm btn-outline-danger"
+                                slot="trigger" type="button">
                                 STOP</button>
                         </modal-vue>
                     </small>
                 </div>
                 <div class="collapse" id="delegationsspk">
-                    <div class="d-flex flex-column text-start border border-secondary rounded p-4 my-4">
+                    <div
+                        class="d-flex flex-column text-start border border-secondary rounded p-4 my-4">
                         <h4 class="border-bottom border-secondary py-2">
-                            Delegated: {{formatNumber((saccountapi.granting.t)/1000, 3, '.', ',')}} LP</h4>
+                            Delegated:
+                            {{formatNumber((saccountapi.granting.t)/1000,
+                            3,
+                            '.', ',')}} LP</h4>
                         <div v-for="(a,b,c) in saccountapi.granting">
                             <div class="d-flex align-items-center border-bottom border-secondary pb-2 my-1"
                                 v-if="b != 't'">
-                                <p class="my-0">@{{b}}: {{formatNumber((a)/1000, 3, '.', ',')}} LP</p>
+                                <p class="my-0">@{{b}}:
+                                    {{formatNumber((a)/1000, 3,
+                                    '.', ',')}}
+                                    LP
+                                </p>
                                 <div class="d-flex ms-auto ">
                                     <modal-vue type="delegate"
                                         :smarkets="smarkets.node" token="LARYNX"
@@ -963,9 +786,9 @@ export default {
                                         :balance="saccountapi.poweredUp"
                                         :account="account"
                                         @modalsign="sendIt($event)"
-                                        :test="sapi == 'https://spktest.dlux.io' ? true : false" v-slot:trigger>
-                                        <button type="button"
-                                            class="ms-1 btn btn-secondary trigger"><i
+                                        :test="sapi == 'https://spktest.dlux.io' ? true : false">
+                                        <button slot="trigger" type="button"
+                                            class="ms-1 btn btn-secondary"><i
                                                 class="fas fa-fw fa-user-edit"></i></button>
                                     </modal-vue>
                                     <modal-vue type="delegate"
@@ -974,20 +797,26 @@ export default {
                                         :balance="saccountapi.poweredUp"
                                         :account="account"
                                         :test="sapi == 'https://spktest.dlux.io' ? true : false"
-                                        @modalsign="sendIt($event)" v-slot:trigger>
-                                        <button class="ms-1 btn btn-danger ms-1 trigger"
-                                            type="button"><i
+                                        @modalsign="sendIt($event)">
+                                        <button class="ms-1 btn btn-danger ms-1"
+                                            slot="trigger" type="button"><i
                                                 class="fas fa-fw fa-trash-alt"></i></button>
                                     </modal-vue>
                                 </div>
                             </div>
                         </div>
                         <h4 class="border-bottom border-secondary py-2 mt-5">
-                            Received: {{formatNumber((saccountapi.granted.t)/1000, 3,'.', ',')}} LP</h4>
+                            Received:
+                            {{formatNumber((saccountapi.granted.t)/1000,
+                            3,'.', ',')}} LP</h4>
                         <div v-for="(a,b,c) in saccountapi.granted">
                             <div class="d-flex align-items-center border-bottom border-secondary pb-2 my-1"
                                 v-if="b != 't'">
-                                <p class="my-0">@{{b}}: {{formatNumber((a)/1000, 3, '.', ',')}} LP</p>
+                                <p class="my-0">@{{b}}:
+                                    {{formatNumber((a)/1000, 3,
+                                    '.', ',')}}
+                                    LP
+                                </p>
 
                             </div>
                         </div>
@@ -999,21 +828,26 @@ export default {
                 class="d-flex text-start align-items-center border-bottom border-secondary py-5">
                 <div class="">
                     <h4>Estimated Account Value</h4>
-                    <p class="text-white-50">The approximate US Dollar value for all SPK assets in your account</p>
+                    <p class="text-white-50">The approximate US
+                        Dollar value
+                        for all SPK
+                        assets
+                        in your account</p>
                 </div>
                 <div class="ms-auto text-end">
                     <h5 id="totallarynx">
-                        {{toFixed(spkval * saccountapi.tick * hiveprice.hive.usd,2)}}
+                        {{toFixed(spkval * saccountapi.tick *
+                        hiveprice.hive.usd,2)}}
                     </h5>
                 </div>
             </div>
         </div>
     </div>
-        <div class="text-center">
-            <button class="btn btn-info my-2" type="button"
-                data-bs-toggle="collapse" data-bs-target="#spkwallet"><i
-                    class="fa-solid fa-angles-up fa-fw me-2"></i>Hide Wallet</button>
-        </div>
+    <div class="text-center">
+        <button class="btn btn-info my-2" type="button"
+            data-bs-toggle="collapse" data-bs-target="#spkwallet"><i
+                class="fa-solid fa-angles-up fa-fw me-2"></i>Hide
+            Wallet</button>
     </div>
     </div>
    `,
@@ -1027,12 +861,6 @@ export default {
             type: Boolean,
             default: true,
             required: false
-        },
-        node: {
-            type: String,
-            default: "dlux-io",
-            required: true
-        
         },
         sapi: {
             type: String,
@@ -1065,12 +893,7 @@ export default {
             ipfsProviders: {
                 "na": "na",
             },
-            contract: {
-                id: "",
-                api: "",
-            },
             larynxbehind: 999,
-            petitionStatus: 'Ask for Contract',
             saccountapi: {
                 granting: {
                     t: 0
@@ -1079,19 +902,6 @@ export default {
                     t: 0
                 },
                 powerDowns: {},
-                channels: {
-                    na: [{
-                        a: 0,
-                        b: "na",
-                        c: 0,
-                        e:"0:0",
-                        f: "na",
-                        i: "::",
-                        p: 0,
-                        r: 0,
-                        t: "na"
-                    }]
-                },
             },
             spkStats: {
 
@@ -1200,14 +1010,13 @@ export default {
             this.$emit('tosign', event)
         },
         getTokenUser(user = this.account) {
-            if(user)fetch(this.sapi + "/@" + user)
+            fetch(this.sapi + "/@" + user)
                 .then((response) => response.json())
                 .then((data) => {
                     data.tick = data.tick || 0.01;
                     this.larynxbehind = data.behind;
                     this.saccountapi = data
                 });
-            else setTimeout(this.getTokenUser, 1000)
         },
         getSNodes() {
             // fetch(this.sapi + "/runners")
@@ -1234,24 +1043,6 @@ export default {
                     this.validators = validators
                 });
         },
-        petitionForContract(provider = this.node) {
-            this.petitionStatus = 'Preparing'
-            // fetch(`https://spktest.dlux.io/user_services/${provider}`)
-            // .then(r=>r.json())
-            // .then(json =>{
-            //   console.log(json)
-            // })
-            fetch(`/upload-contract?user=${this.account}`)
-              .then(r => r.json())
-              .then(json => {
-                this.petitionStatus = 'Sending'
-                console.log(json)
-                setTimeout(() => {
-                  this.getSapi()
-                  this.petitionStatus = 'Recieved'
-                }, 7000)
-              })
-          },
         getIPFSproviders() {
             fetch(this.sapi + "/services/IPFS")
               .then((response) => response.json())
@@ -1276,18 +1067,6 @@ export default {
             if (total > (this.saccountapi.spk_power * 1000)) total = (this.saccountapi.spk_power * 1000)
             return total
         },
-        replace(string, char = ':') {
-            return string.replaceAll(char, '_')
-        },
-        selectContract(id, broker) {  //needs PeerID of broker
-            this.contract.id = id
-            fetch(`${this.sapi}/user_services/${broker}`)
-              .then(r => r.json())
-              .then(res => {
-                console.log(res)
-                this.contract.api = res.services.IPFS[Object.keys(res.services.IPFS)[0]].a
-              })
-        },
         precision(num, precision) {
             return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
         },
@@ -1308,9 +1087,6 @@ export default {
                 for (var c = /(\d+)(\d{3})/; c.test(i);)
                     i = i.replace(c, "$1" + e + "$2");
             return (u ? "-" : "") + i + o;
-        },
-        exp_to_time(exp = '0:0') {
-            return this.when([parseInt(exp.split(':')[0])])
         },
         when(ip = {}, num = false) {
             const arr = Object.keys(ip)
@@ -1346,12 +1122,7 @@ export default {
             get() {
                 return this.smarkets.node[this.account] ? true : false;
             },
-        },
-        numChannels: {
-            get() {
-              return Object.keys(this.saccountapi.channels).length
-            }
-          },
+        }
     },
     mounted() {
         this.getTokenUser();
