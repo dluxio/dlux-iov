@@ -265,7 +265,7 @@ export default {
         nodeView: {
             default: false
         },
-        contracts: {
+        prop_contracts: {
             default: function () {
                 return []
             }
@@ -273,6 +273,7 @@ export default {
     },
     data() {
         return {
+            contracts: [],
             tick: "1",
             toSign: {},
             larynxbehind: 999999,
