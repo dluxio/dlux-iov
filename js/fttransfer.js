@@ -45,7 +45,7 @@ export default {
                      <!-- Mint img -->
                      <div class="p-2 flex-grow-1 d-flex">
                         <img v-if="wrapped" class="w-100 border border-dark border-2 rounded mt-auto mb-auto"
-                           :src="'https://ipfs.io/ipfs/' + wrapped">
+                           :src="'https://ipfs.dlux.io/ipfs/' + wrapped">
                      </div>
                      <div class="flex-shrink-1">
                         <div class="text-center">

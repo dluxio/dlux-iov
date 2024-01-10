@@ -88,11 +88,11 @@
         <div class="card bg-dark text-white">
           <div>
             <img class="banner-img w-100 img-fluid"
-              :src="makeLink('https://ipfs.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.banner : '')"></img>
+              :src="makeLink('https://ipfs.dlux.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.banner : '')"></img>
 
             <div class="center-circle rounded-circle bg-darker" style="border: solid black 3px;">
               <img class="rounded-circle max-134"
-                :src="makeLink('https://ipfs.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.logo : '')"></img>
+                :src="makeLink('https://ipfs.dlux.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.logo : '')"></img>
             </div>
           </div>
           <div v-cloak class="card-body p-0 rounded-bottom rounded-bottom-3"
@@ -256,7 +256,7 @@
                         @click="focusItem.set = setname; focusItem.token = jsontoken">
                         <div class="position-relative">
                           <img class="rounded max-160"
-                            :src="makeLink('https://ipfs.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.wrapped : '')">
+                            :src="makeLink('https://ipfs.dlux.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.wrapped : '')">
                           <span
                             class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{formatNumber(chains[jsontoken].sets[setname].forAuctionMint
                             +

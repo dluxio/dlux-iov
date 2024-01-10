@@ -62,7 +62,7 @@ export default {
       <a role="button" title="Mint Details" data-bs-toggle="modal" data-bs-target="#transferModal"
         @click="modal('transfer')">
         <img v-if="wrapped" class="w-100 border border-dark border-2 rounded mt-auto mb-auto"
-          :src="'https://ipfs.io/ipfs/' + wrapped"></a>
+          :src="'https://ipfs.dlux.io/ipfs/' + wrapped"></a>
     </div>
 
     <div class="d-flex d-none flex-column flex-shrink-1">

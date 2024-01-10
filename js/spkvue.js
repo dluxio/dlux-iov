@@ -893,7 +893,7 @@ var app = new Vue({
       };
     },
     getSetPhotos(s, c) {
-      return s.set ? `https://ipfs.io/ipfs/${s.set[c]}` : "";
+      return s.set ? `https://ipfs.dlux.io/ipfs/${s.set[c]}` : "";
     },
     uploadFile(e) {
       console.log(e)
@@ -2325,7 +2325,7 @@ var app = new Vue({
       } else if (typeof arr == "string") {
         return arr;
       } else if (typeof json.Hash360 == "string") {
-        return `https://ipfs.io/ipfs/${json.Hash360}`;
+        return `https://ipfs.dlux.io/ipfs/${json.Hash360}`;
       } else {
         /*
                 var looker
@@ -2832,7 +2832,7 @@ var app = new Vue({
     },
     pullScript(id) {
       return new Promise((resolve, reject) => {
-        fetch(`https://ipfs.io/ipfs/${id}`)
+        fetch(`https://ipfs.dlux.io/ipfs/${id}`)
           .then((response) => response.text())
           .then((data) => {
             this.nftscripts[id] = data;

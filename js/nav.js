@@ -543,7 +543,7 @@ function setPortals(action) {
         authorImage: authorData.profile_image,
         title: post.title,
         body: removeMD(post.body).trim().substr(0, 220),
-        Hash360: "https://ipfs.io/ipfs/" + portalImage,
+        Hash360: "https://ipfs.dlux.io/ipfs/" + portalImage,
         permlink: post.permlink,
         rep: hive.formatter.reputation(post.author_reputation),
         votesNum: post.net_votes,

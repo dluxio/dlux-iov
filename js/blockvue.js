@@ -339,7 +339,7 @@ var app = new Vue({
     },
     getBlock(hash = "QmbtVQ5v3Nrtk8rLkSJpNKr5tFEEY613iAtQPGBBdRqwSy"){
       
-      fetch(`https://ipfs.io/ipfs/${hash}`)
+      fetch(`https://ipfs.dlux.io/ipfs/${hash}`)
       .then((r) => {
         return r.json();
       })

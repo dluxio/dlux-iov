@@ -1,4 +1,4 @@
-this.version = "2024.01.10.11";
+this.version = "2024.01.10.12";
 
 console.log(
   "SW:" + this.version + " - online."
@@ -153,7 +153,7 @@ function pullScript(id) {
       return new Promise((resolve, reject) => {
         // check if cache includes id
         // add to cache if not...
-        fetch(`https://ipfs.io/ipfs/${id}`)
+        fetch(`https://ipfs.dlux.io/ipfs/${id}`)
           .then((response) => response.text())
           .then((data) => {
             this.nftscripts[id] = data;

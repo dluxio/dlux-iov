@@ -2408,7 +2408,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
     pullScript(id) {
       return new Promise((resolve, reject) => {
-        fetch(`https://ipfs.io/ipfs/${id}`)
+        fetch(`https://ipfs.dlux.io/ipfs/${id}`)
           .then((response) => response.text())
           .then((data) => {
             this.nftscripts[id] = data;
@@ -2458,7 +2458,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       )} ${nai.token}`;
     },
     getSetPhotos(s, c) {
-      return s.set ? `https://ipfs.io/ipfs/${s.set[c]}` : "";
+      return s.set ? `https://ipfs.dlux.io/ipfs/${s.set[c]}` : "";
     },
     getSetDetailsColors(s) {
       let r = "chartreuse,lawngreen";

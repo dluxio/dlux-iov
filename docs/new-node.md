@@ -30,7 +30,7 @@ Repeat these steps for each node you wish to install.
 ---
 
 ### Get Server (Privex)
-You may use any server of your choosing. Privex is chosen because it is Hive friendly, [IPFS](https://ipfs.io/) friendly, and can be paid in Hive or HBD.
+You may use any server of your choosing. Privex is chosen because it is Hive friendly, [IPFS](https://ipfs.dlux.io/) friendly, and can be paid in Hive or HBD.
 
 Go to [Privex server](https://www.privex.io) or equivalent of your choosing:
 

@@ -1196,7 +1196,7 @@ export default {
           } else if (typeof arr == "string") {
             return arr;
           } else if (typeof json.Hash360 == "string") {
-            return `https://ipfs.io/ipfs/${json.Hash360}`;
+            return `https://ipfs.dlux.io/ipfs/${json.Hash360}`;
           } else {
             /*
                     var looker
