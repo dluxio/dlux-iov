@@ -1475,7 +1475,7 @@ var app = new Vue({
         onError: (e, f) => {
           console.log('options.onError', e, f)
           // const fileObj = files.get(file);
-          this.FileInfo[f.name].status = '!!ERROR!!'
+          this.FileInfo[e.name].status = '!!ERROR!!'
           // fileObj.status = FILE_STATUS.FAILED;
           // fileObj.percentage = 100;
           this.File[this.FileInfo[f.name].index].actions.pause = false
