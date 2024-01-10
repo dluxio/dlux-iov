@@ -755,14 +755,14 @@
                                                     <li>Collateral for DEX transactions</li>
                                                     <li>Instant Lock | 4 Week Unlock</li>
                                                     <li>Requires an operating LARYNX node</li>
-                                                    <li>Earns {{formatNumber(parseFloat(spkStats.spk_rate_lgov) *
+                                                    <li>Earns {{formatNumber(pFloat(spkStats.spk_rate_lgov) *
                                                         100,3, '.', ',')}}%</li>
                                                 </ul>
                                             </div>
                                             <div id="larynxgactions" class="ms-auto text-end" v-show="me">
                                                 <div class="d-flex align-items-center mb-2">
                                                     <small class="ms-auto"><span
-                                                            class="badge me-2 text-bg-success">{{formatNumber(parseFloat(spkStats.spk_rate_lgov)
+                                                            class="badge me-2 text-bg-success">{{formatNumber(pFloat(spkStats.spk_rate_lgov)
                                                             *
                                                             100,3, '.', ',')}}%</span></small>
                                                     <h5 id="govbalance" class="m-0">
@@ -817,13 +817,13 @@
                                                             (DPoS)
                                                         </li>
                                                         <li>LARYNX POWER (LP) earns SPK tokens at
-                                                            {{formatNumber(parseFloat(spkStats.spk_rate_lpow) *
+                                                            {{formatNumber(pFloat(spkStats.spk_rate_lpow) *
                                                             100,3, '.', ',')}}%
                                                         </li>
                                                         <li>Delegated LP (DLP) earns SPK tokens for both
                                                             delegator and
                                                             delegatee at
-                                                            {{formatNumber(parseFloat(spkStats.spk_rate_ldel) *
+                                                            {{formatNumber(pFloat(spkStats.spk_rate_ldel) *
                                                             100,3, '.', ',')}}%
                                                         </li>
                                                     </ul>
@@ -831,7 +831,7 @@
                                                 <div id="larynxgactions" class="ms-auto text-end">
                                                     <div class="d-flex align-items-center mb-2">
                                                         <small class="ms-auto"><span
-                                                                class="badge me-2 text-bg-success">{{formatNumber(parseFloat(spkStats.spk_rate_lpow)
+                                                                class="badge me-2 text-bg-success">{{formatNumber(pFloat(spkStats.spk_rate_lpow)
                                                                 * 100,3, '.', ',')}}%</span></small>
                                                         <h5 class="m-0">
                                                             {{formatNumber((saccountapi.poweredUp)/1000, 3, '.',
@@ -847,7 +847,7 @@
                                                             class="text-white d-flex align-items-center "
                                                             style="text-decoration: none">
                                                             <small class="ms-auto"><span
-                                                                    class="badge me-2 text-bg-success">{{formatNumber(parseFloat(spkStats.spk_rate_ldel)
+                                                                    class="badge me-2 text-bg-success">{{formatNumber(pFloat(spkStats.spk_rate_ldel)
                                                                     * 100,3, '.', ',')}}%</span></small>
                                                             <h5 class="m-0">
                                                                 {{formatNumber((saccountapi.granting.t+saccountapi.granted.t)/1000,
@@ -1025,7 +1025,7 @@
                                                 <div class="btn-group" v-if="me" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-primary">
                                                         <modal-vue type="send" token="HIVE"
-                                                            :balance="parseFloat(focus.balance) * 1000"
+                                                            :balance="pFloat(focus.balance) * 1000"
                                                             :account="account" @modalsign="sendIt($event)">
                                                             <span slot="trigger"><i
                                                                     class="fas fa-paper-plane me-2"></i>Send</span>
@@ -1065,7 +1065,7 @@
                                             </div>
                                             <div id="hivepactions" class="float-right text-end">
                                                 <h5 id="hpbal">
-                                                    {{formatNumber(((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares)),3,
+                                                    {{formatNumber(((pFloat(hivestats.total_vesting_fund_hive)*pFloat(focus.vesting_shares))/pFloat(hivestats.total_vesting_shares)),3,
                                                     '.', ',')}}
                                                     HP</h5>
                                                 <div class="btn-group" v-if="me" role="group" aria-label="DLUX Actions">
@@ -1108,7 +1108,7 @@
                                                 <div class="btn-group" v-if="me" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-primary">
                                                         <modal-vue type="send" token="HBD"
-                                                            :balance="parseFloat(focus.hbd_balance) * 1000"
+                                                            :balance="pFloat(focus.hbd_balance) * 1000"
                                                             :account="account" @modalsign="sendIt($event)">
                                                             <span slot="trigger"><i
                                                                     class="fas fa-paper-plane me-2"></i>Send</span>
@@ -1160,7 +1160,7 @@
                                             </div>
                                             <div id="hiveval" class="float-right text-end">
                                                 <h5 id="totalhivebalance">
-                                                    ${{formatNumber((((((parseFloat(hivestats.total_vesting_fund_hive)*parseFloat(focus.vesting_shares))/parseFloat(hivestats.total_vesting_shares))+parseFloat(focus.balance))*hiveprice.hive.usd)+((parseFloat(focus.hbd_balance)+parseFloat(focus.savings_hbd_balance))*hbdprice.hive_dollar.usd)),2,
+                                                    ${{formatNumber((((((pFloat(hivestats.total_vesting_fund_hive)*pFloat(focus.vesting_shares))/pFloat(hivestats.total_vesting_shares))+pFloat(focus.balance))*hiveprice.hive.usd)+((pFloat(focus.hbd_balance)+pFloat(focus.savings_hbd_balance))*hbdprice.hive_dollar.usd)),2,
                                                     '.', ',')}}
                                                 </h5>
                                             </div>
@@ -1448,55 +1448,55 @@
         </div>
     </div>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            //MODAL URL UPDATE
-            var detailMod = document.getElementById('detailModal');
-            detailMod.addEventListener('hide.bs.modal', event => {
-                window.history.back();
-            })
-        });
-        (function () {
-            "use strict";
-            window.addEventListener(
-                "load",
-                function () {
-                    // Fetch all the forms we want to apply custom Bootstrap validation styles to
-                    var forms = document.getElementsByClassName("needs-validation");
-                    // Loop over them and prevent submission
-                    var validation = Array.prototype.filter.call(
-                        forms,
-                        function (form) {
-                            form.addEventListener(
-                                "submit",
-                                function (event) {
-                                    if (form.checkValidity() === false) {
-                                        event.preventDefault();
-                                        event.stopPropagation();
-                                    }
-                                    form.classList.add("was-validated");
-                                },
-                                false
-                            );
-                        }
-                    );
-                },
-                false
-            );
-        })();
-        var disabletab = document.getElementsByClassName("disabled-input");
-        for (var i = 0; i < disabletab.length; i++) {
-            disabletab[i].setAttribute("tabindex", "-1");
-        }
-        var toastElList = [].slice.call(document.querySelectorAll(".toast"));
-        var toastList = toastElList.map(function (toastEl) {
-            return new bootstrap.Toast(toastEl, option);
-        });
-        var tooltipTriggerList = [].slice.call(
-            document.querySelectorAll('[data-bs-toggle="tooltip"]')
-        );
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
+        // document.addEventListener("DOMContentLoaded", function () {
+        //     //MODAL URL UPDATE
+        //     var detailMod = document.getElementById('detailModal');
+        //     detailMod.addEventListener('hide.bs.modal', event => {
+        //         window.history.back();
+        //     })
+        // });
+        // (function () {
+        //     "use strict";
+        //     window.addEventListener(
+        //         "load",
+        //         function () {
+        //             // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        //             var forms = document.getElementsByClassName("needs-validation");
+        //             // Loop over them and prevent submission
+        //             var validation = Array.prototype.filter.call(
+        //                 forms,
+        //                 function (form) {
+        //                     form.addEventListener(
+        //                         "submit",
+        //                         function (event) {
+        //                             if (form.checkValidity() === false) {
+        //                                 event.preventDefault();
+        //                                 event.stopPropagation();
+        //                             }
+        //                             form.classList.add("was-validated");
+        //                         },
+        //                         false
+        //                     );
+        //                 }
+        //             );
+        //         },
+        //         false
+        //     );
+        // })();
+        // var disabletab = document.getElementsByClassName("disabled-input");
+        // for (var i = 0; i < disabletab.length; i++) {
+        //     disabletab[i].setAttribute("tabindex", "-1");
+        // }
+        // var toastElList = [].slice.call(document.querySelectorAll(".toast"));
+        // var toastList = toastElList.map(function (toastEl) {
+        //     return new bootstrap.Toast(toastEl, option);
+        // });
+        // var tooltipTriggerList = [].slice.call(
+        //     document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        // );
+        // var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        //     return new bootstrap.Tooltip(tooltipTriggerEl);
+        // });
     </script>
     <script>
         const Base64 = {
@@ -1513,39 +1513,39 @@
         };
     </script>
     <script>
-        function deepLink(link) {
-            if (link) location.hash = link
-            let url = location.href.replace(/\/$/, '');
-            if (location.hash) {
-                const hash = url.split('#');
-                const currentTab = hash[1] == 'dlux' || hash[1] == 'hive' || hash[1] == 'spk' ? document.querySelector('#wallettab a[href="#' + hash[1] + '"]') : document.querySelector('#usertabs a[href="#' + hash[1] + '"]')
-                const curTab = new bootstrap.Tab(currentTab);
-                curTab.show();
-                url = location.href.replace(/\/#/, '#');
-                history.replaceState(null, null, url);
-                setTimeout(() => {
-                    window.scrollTop = 0;
-                }, 400);
-            }
-            // change url based on selected tab
-            const selectableTabList = [].slice.call(document.querySelectorAll('a[data-bs-toggle="tab"]'));
-            selectableTabList.forEach((selectableTab) => {
-                const selTab = new bootstrap.Tab(selectableTab);
-                selectableTab.addEventListener('click', function () {
-                    var newUrl;
-                    const hash = selectableTab.getAttribute('href');
-                    if (hash == '#blog') {
-                        newUrl = url.split('#')[0];
-                        history.replaceState(null, null, newUrl);
-                    } else if (hash == '#b/') {
+        // function deepLink(link) {
+        //     if (link) location.hash = link
+        //     let url = location.href.replace(/\/$/, '');
+        //     if (location.hash) {
+        //         const hash = url.split('#');
+        //         const currentTab = hash[1] == 'dlux' || hash[1] == 'hive' || hash[1] == 'spk' ? document.querySelector('#wallettab a[href="#' + hash[1] + '"]') : document.querySelector('#usertabs a[href="#' + hash[1] + '"]')
+        //         const curTab = new bootstrap.Tab(currentTab);
+        //         curTab.show();
+        //         url = location.href.replace(/\/#/, '#');
+        //         history.replaceState(null, null, url);
+        //         setTimeout(() => {
+        //             window.scrollTop = 0;
+        //         }, 400);
+        //     }
+        //     // change url based on selected tab
+        //     const selectableTabList = [].slice.call(document.querySelectorAll('a[data-bs-toggle="tab"]'));
+        //     selectableTabList.forEach((selectableTab) => {
+        //         const selTab = new bootstrap.Tab(selectableTab);
+        //         selectableTab.addEventListener('click', function () {
+        //             var newUrl;
+        //             const hash = selectableTab.getAttribute('href');
+        //             if (hash == '#blog') {
+        //                 newUrl = url.split('#')[0];
+        //                 history.replaceState(null, null, newUrl);
+        //             } else if (hash == '#b/') {
 
-                    } else {
-                        newUrl = url.split('#')[0] + hash;
-                        history.replaceState(null, null, newUrl);
-                    }
-                });
-            });
-        }
+        //             } else {
+        //                 newUrl = url.split('#')[0] + hash;
+        //                 history.replaceState(null, null, newUrl);
+        //             }
+        //         });
+        //     });
+        // }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
         integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="

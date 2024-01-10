@@ -1,4 +1,5 @@
-import Vue from "https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.esm.browser.js";
+//import Vue from "https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.esm.browser.js";
+import { createApp, toRaw } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
 import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
@@ -70,19 +71,23 @@ if (
 let user = localStorage.getItem("user") || "GUEST";
 let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
 
-Vue.directive("scroll", {
-  inserted: function (el, binding) {
-    const onScrollCallback = binding.value;
-    window.addEventListener("scroll", () => onScrollCallback());
-  },
-});
+// Vue.directive("scroll", {
+//   inserted: function (el, binding) {
+//     const onScrollCallback = binding.value;
+//     window.addEventListener("scroll", () => onScrollCallback());
+//   },
+// });
 
-var app = new Vue({
+// var app = new Vue({
   // vue 2
-  el: "#app", // vue 2
+  // el: "#app", // vue 2
   // directives:{
   //   scroll
   // },
+  createApp({
+    directives:{
+      scroll
+    },
   data() {
     return {
       fileRequests: {},
@@ -1894,16 +1899,6 @@ function auctionNFT(setname, uid, price, now, time, type, callback){
         txid: `${item.setname}:${item.uid}_nft_${cja.type ? "h" : ""}auction`,
       };
     },
-    /*
-function bidNFT(setname, uid, bid_amount, type, callback){
-    console.log({bid_amount, type})
-    bid_amount = parseInt(bid_amount * 1000)
-    if(type == 'HIVE') broadcastTransfer({ to: 'dlux-cc', hive: bid_amount, memo:`NFTbid ${setname}:${uid}`}, `Bidding on ${setname}:${uid}`)
-    else if (type == 'HBD') broadcastTransfer({ to: 'dlux-cc', hbd: bid_amount, memo:`NFTbid ${setname}:${uid}`}, `Bidding on ${setname}:${uid}`)
-    else broadcastCJA({ set: setname, uid, bid_amount}, "dlux_nft_bid", `Bidding on ${setname}:${uid} for ${parseFloat(bid_amount/1000).toFixed(3)} DLUX`)
- }
-
-*/
     bidNFT(item) {
       var cja = {
           set: item.setname,
@@ -2401,7 +2396,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     toFixed(value, decimals) {
       return Number(value).toFixed(decimals);
     },
-    parseFloat(value) {
+    pFloat(value) {
       return parseFloat(value);
     },
     toUpperCase(value) {
@@ -3613,4 +3608,4 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       );
     },
   },
-})//.mount('#app')
+}).mount('#app')

@@ -109,8 +109,7 @@ export default {
                                 </div>
                                 <a class="dropdown-item" href="/dex/#larynx"
                                     id="buylink"><i
-                                        class="fas fa-coins fa-fw me-2"></i>Buy
-                                    / Sell</a>
+                                        class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
                             </ul>
                         </div>
                     </div>
@@ -139,7 +138,6 @@ export default {
                             * 1000 ),
                             0, '', ',')}}</li>
                     </ul>
-                    </p>
                 </div>
                 <div class="ms-auto text-end">
                     <h5>
@@ -551,7 +549,7 @@ export default {
                         </li>
                         <li>LARYNX LOCKED (LL) earns SPK tokens
                             at
-                            {{toFixed(parseFloat(spkStats.spk_rate_lgov)
+                            {{toFixed(pFloat(spkStats.spk_rate_lgov)
                             *
                             100,3)}}%</li>
                     </ul>
@@ -559,7 +557,7 @@ export default {
                 <div id="larynxgactions" class="ms-auto text-end" v-show="me">
                     <div class="d-flex align-items-center mb-2">
                         <small class="ms-auto"><span
-                                class="badge me-2 bg-success">{{toFixed(parseFloat(spkStats.spk_rate_lgov)
+                                class="badge me-2 bg-success">{{toFixed(pFloat(spkStats.spk_rate_lgov)
                                 *
                                 100,3)}}%</span></small>
                         <h5 id="govbalance" class="m-0">
@@ -627,14 +625,14 @@ export default {
                                 Down</li>
                             <li>LARYNX POWER (LP) earns SPK
                                 tokens at
-                                {{toFixed(parseFloat(spkStats.spk_rate_lpow)
+                                {{toFixed(pFloat(spkStats.spk_rate_lpow)
                                 * 100,3)}}%
                             </li>
                             <li>Delegated LP (DLP) earns SPK
                                 tokens for both
                                 delegator and
                                 delegatee at
-                                {{toFixed(parseFloat(spkStats.spk_rate_ldel)
+                                {{toFixed(pFloat(spkStats.spk_rate_ldel)
                                 * 100,3)}}%
                             </li>
                         </ul>
@@ -642,7 +640,7 @@ export default {
                     <div id="larynxgactions" class="ms-auto text-end">
                         <div class="d-flex align-items-center mb-2">
                             <small class="ms-auto"><span
-                                    class="badge me-2 bg-success">{{toFixed(parseFloat(spkStats.spk_rate_lpow)
+                                    class="badge me-2 bg-success">{{toFixed(pFloat(spkStats.spk_rate_lpow)
                                     * 100,3)}}%</span></small>
                             <h5 class="m-0">
                                 {{formatNumber((saccountapi.poweredUp)/1000,
@@ -659,7 +657,7 @@ export default {
                                 class="text-white d-flex align-items-center "
                                 style="text-decoration: none">
                                 <small class="ms-auto"><span
-                                        class="badge me-2 bg-success">{{toFixed(parseFloat(spkStats.spk_rate_ldel)
+                                        class="badge me-2 bg-success">{{toFixed(pFloat(spkStats.spk_rate_ldel)
                                         *
                                         100,3)}}%</span></small>
                                 <h5 class="m-0">
@@ -1110,7 +1108,7 @@ export default {
             }
             return Math.floor(seconds) + " seconds";
         },
-        parseFloat(value) {
+        pFloat(value) {
             return parseFloat(value);
         }
     },

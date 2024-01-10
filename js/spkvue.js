@@ -1478,9 +1478,9 @@ var app = new Vue({
           this.FileInfo[e.name].status = '!!ERROR!!'
           // fileObj.status = FILE_STATUS.FAILED;
           // fileObj.percentage = 100;
-          this.File[this.FileInfo[f.name].index].actions.pause = false
-          this.File[this.FileInfo[f.name].index].actions.resume = true
-          this.File[this.FileInfo[f.name].index].actions.cancel = true
+          this.File[this.FileInfo[e.name].index].actions.pause = false
+          this.File[this.FileInfo[e.name].index].actions.resume = true
+          this.File[this.FileInfo[e.name].index].actions.cancel = true
           // updateFileElement(fileObj);
         },
         onComplete: (e, f) => {
