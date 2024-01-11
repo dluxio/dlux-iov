@@ -1344,7 +1344,9 @@
                                             </button>
                                         </div>
 
-                                        <div class="position-relative d-none flex-grow-1 me-1 order-sm-first">
+                                        <div class="position-relative flex-grow-1 me-1 order-sm-first d-flex align-items-center">
+                                            <h2 class="mb-0 ms-lg-3 fw-light">Your Contracts</h2>
+                                            <span class="d-none">
                                             <span class="position-absolute ps-2 top-50 translate-middle-y">
                                                 <i class="fa-solid fa-magnifying-glass fa-fw"></i>
                                             </span>
@@ -1352,6 +1354,7 @@
                                                 placeholder="Search" v-model="postSelect.searchTerm"
                                                 @keyup.enter="postSelect.entry = 'search';getPosts()"
                                                 @search="postSelect.entry = 'search';getPosts()">
+                                            </span>
                                         </div>
 
                                     </div>
