@@ -2,19 +2,16 @@ export default {
     template: `
     <!--file uploader-->
     <Transition>
-        <div v-if="contract.i" style="background: #16191C;">
-            <div class="p-2">
+        <div v-if="contract.i">
+            <div class="p-2 card">
                 <form onsubmit="return false;">
                     <div
-                        class="d-flex justify-content-between align-items-center">
+                        class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0 mx-2">Upload Files</h5>
                         <div class="flex-column ms-auto me-auto">
-                            <input type="file" @change="uploadFile" multiple class="form-control bg-darkg border-secondary text-white-50" />
+                            <input type="file" @change="uploadFile" multiple class="form-control" />
                         </div>
-                        <button type="button"
-                            class="btn-lg btn-close btn-close-white ms-2"
-                            @click="contract.i = ''; contract.api = ''"
-                            aria-label="Close"></button>
+                        
                     </div>
                     <div class="p-5 my-4 mx-3 text-center" id="img-well"
                         @drop="dragFile($event)" @dragenter.prevent
