@@ -1151,7 +1151,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
       fetch("https://spktest.dlux.io/services/MARKET")
         .then((response) => response.json())
         .then((data) => {
-          for(var provider of data.providers){ //$ACCOUNT
+          for(var provider in data.providers){ //$ACCOUNT
             // find in array
             const thisService = data.services.filter(service => service[provider].b == provider)
             this.services[provider] = {
