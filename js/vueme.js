@@ -272,6 +272,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
       activeIndex: 0,
       giveFTusername: "",
       giveFTqty: 1,
+      services: {},
       NFTselect: {
         start: 0,
         amount: 30,
@@ -935,12 +936,8 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
     },
     petitionForContract(provider = 'dlux-io',) {
       this.petitionStatus = 'Preparing'
-      // fetch(`https://spktest.dlux.io/user_services/${provider}`)
-      // .then(r=>r.json())
-      // .then(json =>{
-      //   console.log(json)
-      // })
-      fetch(`https://ipfs.dlux.io/upload-contract?user=${this.account}`)
+      const address = this.services[provider].address.replace('$ACCOUNT', this.account)
+      fetch(address)
         .then(r => r.json())
         .then(json => {
           this.petitionStatus = 'Sending'
@@ -1148,6 +1145,21 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         .then((response) => response.json())
         .then((data) => {
           this.ipfsProviders = data.providers
+        });
+    },
+    getMARKETS(){
+      fetch("https://spktest.dlux.io/services/MARKET")
+        .then((response) => response.json())
+        .then((data) => {
+          for(var provider of data.providers){ //$ACCOUNT
+            // find in array
+            const thisService = data.services.filter(service => service[provider].b == provider)
+            this.services[provider] = {
+              address: thisService[0].a,
+              memo: thisService[0].m,
+              provider
+            }
+          }
         });
     },
     upload(cid = 'QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3', contract = {api: 'https://127.0.0.1:5050', id: '1668913215284', sigs: {QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3: '20548a0032e0cf51ba75721743d2ec6fac180f7bc773ce3d77b769d9c4c9fa9dbb7d59503f05be8edcaac00d5d66709b0bce977f3207785913f7fbad2773ae4ac2'}}){
@@ -3345,6 +3357,7 @@ function buyNFT(setname, uid, price, type, callback){
   },
   mounted() {
     this.getIPFSproviders()
+    this.getMARKETS()
     window.addEventListener('scroll', this.handleScroll);
     if (location.pathname.split("/@")[1]) {
       this.pageAccount = location.pathname.split("/@")[1]

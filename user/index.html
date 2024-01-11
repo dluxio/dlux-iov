@@ -1448,8 +1448,9 @@
                             </div>
 
                             <div class="modal-body text-start">
-                                <p>https://spktest.dlux.io/services/MARKET</p>
-                                <button @click="petitionForContract" class="btn btn-lg text-white btn-outline-primary w-100 border d-flex justify-content-between align-items-center"><span class="lead">DLUX</span><span class="small text-warning">10% Beneficiary</span><span class="small">{{petitionStatus}}</span></button>
+                                <div v-for="spon in services">
+                                    <button @click="petitionForContract(spon.provider)" class="btn btn-lg text-white btn-outline-primary w-100 border d-flex justify-content-between align-items-center"><span class="lead">@{{spon.provider}}</span><span class="small text-warning">{{spon.memo}}</span><span class="small">{{petitionStatus}}</span></button>
+                                </div>        
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
