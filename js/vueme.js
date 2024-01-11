@@ -864,6 +864,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
       return s.setname ? `https://ipfs.dlux.io/ipfs/${s.set[c]}` : "";
     },
     getSPKUser() {
+      console.log('SPK User Update')
       if(this.account)fetch("https://spktest.dlux.io/@" + this.account)
           .then((response) => response.json())
           .then((data) => {
@@ -3356,7 +3357,6 @@ function buyNFT(setname, uid, price, type, callback){
       this.getPosts();
       this.getProtocol();
       this.getSpkStats();
-      this.getSPKUser()
       this.getSPKUser()
       this.getRewardFund();
       this.getFeedPrice();
