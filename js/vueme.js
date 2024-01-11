@@ -967,7 +967,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         .then(r => r.json())
         .then(json => {
           this.services[provider].memo = "Sending"
-          updateMemo(provider, 0)
+          this.updateMemo(provider, 0)
         })
     },
     deleteImg (index){
