@@ -878,7 +878,10 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
                     if(this.services[user]){
                       this.services[user].channel = 1
                       this.services[user].memo = "Contract Open"
-                    } else setTimeout(()=>{this.services[user].channel = 1}, 3000)
+                    } else setTimeout(()=>{
+                      this.services[user].channel = 1
+                      this.services[user].memo = "Contract Open"
+                      }, 3000)
                     if(this.contractIDs[data.channels[user][node].i])continue
                     else {
                         this.contractIDs[data.channels[user][node].i] = data.channels[user][node];
@@ -3353,6 +3356,7 @@ function buyNFT(setname, uid, price, type, callback){
       this.getPosts();
       this.getProtocol();
       this.getSpkStats();
+      this.getSPKUser()
       this.getSPKUser()
       this.getRewardFund();
       this.getFeedPrice();
