@@ -213,6 +213,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         },
       },
       selectedNFTs: [],
+      contractIDs: {},
       NFTselect: {
         start: 0,
         amount: 30,
@@ -867,6 +868,26 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
           .then((response) => response.json())
           .then((data) => {
             this.spkapi = data
+            for (var node in data.file_contracts) {
+              this.contractIDs[data.file_contracts[node].i] = data.file_contracts[node];
+              this.contracts.push(data.file_contracts[node]);
+              this.contractIDs[data.file_contracts[node].i].index = this.contracts.length - 1;
+            }
+            for (var user in data.channels) {
+                for (var node in data.channels[user]) {
+                  console.log({user,node})
+                    if(this.service[node]){
+                      this.service[node].channel = 1
+                      this.service[node].memo = "Contract Already Open"
+                    } else setTimeout(()=>{this.service[node].channel = 1}, 3000)
+                    if(this.contractIDs[data.channels[user][node].i])continue
+                    else {
+                        this.contractIDs[data.channels[user][node].i] = data.channels[user][node];
+                        this.contracts.push(data.channels[user][node]);
+                        this.contractIDs[data.channels[user][node].i].index = this.contracts.length - 1;
+                    }
+                }
+            }
           });
     },
     uploadFile(e) {
@@ -2584,12 +2605,6 @@ function buyNFT(setname, uid, price, type, callback){
         }
       for(var contract in this.posturls[url].contract){
         contracts.push(contract)
-        if(contract.c == 1){
-          if(this.service[contract.f]){
-            this.service[contract.f].channel = 1
-            this.service[contract.f].memo = "Contract Already Open"
-          } else setTimeout(()=>{this.service[contract.f].channel = 1}, 3000)
-        }
       }
       contracts = [...new Set(contracts)]
       for(var i = 0; i < contracts.length; i++){
