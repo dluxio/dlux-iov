@@ -230,6 +230,7 @@ methods: {
             callbacks: [res, rej],
             txid: "Sign Auth Headers",
           };
+          this.$emit("tosign", this.toSign);
         });
       },
       selectContract(id, broker) {  //needs PeerID of broker
