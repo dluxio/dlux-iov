@@ -2,7 +2,7 @@ export default {
     template: `
     <!--file uploader-->
     <Transition>
-        <div v-if="contract.id" style="background: #16191C;">
+        <div v-if="contract.i" style="background: #16191C;">
             <div class="p-2">
                 <form onsubmit="return false;">
                     <div
@@ -13,7 +13,7 @@ export default {
                         </div>
                         <button type="button"
                             class="btn-lg btn-close btn-close-white ms-2"
-                            @click="contract.id = ''; contract.api = ''"
+                            @click="contract.i = ''; contract.api = ''"
                             aria-label="Close"></button>
                     </div>
                     <div class="p-5 my-4 mx-3 text-center" id="img-well"
@@ -127,8 +127,8 @@ methods: {
         this.File.splice(index, 1)
       },
       signNUpload() {
-        console.log(this.contract.id)
-        var header = `${this.contract.id}`
+        console.log(this.contract.i)
+        var header = `${this.contract.i}`
         var body = ""
         var names = Object.keys(this.FileInfo)
         var cids = []
@@ -233,7 +233,7 @@ methods: {
             'Content-Range', `bytes=${options.startingByte}-${options.startingByte + chunk.size}/${file.size}`
           );
           req.setRequestHeader('X-Cid', options.cid);
-          req.setRequestHeader('X-Contract', options.contract.id);
+          req.setRequestHeader('X-Contract', options.contract.i);
           req.setRequestHeader('X-Sig', options.contract.fosig);
           req.setRequestHeader('X-Account', this.account);
           req.setRequestHeader('X-Files', options.cids);
@@ -275,7 +275,7 @@ methods: {
               'Content-Type': 'application/json',
               'X-Sig': options.contract.fosig,
               'X-Account': this.account,
-              'X-Contract': options.contract.id,
+              'X-Contract': options.contract.i,
               'X-Cid': cid,
               'X-Files': options.contract.files,
               'X-Chain': 'HIVE'
@@ -351,7 +351,7 @@ methods: {
                 'Content-Type': 'application/json',
                 'sig': contract.fosig,
                 'account': this.account,
-                'contract': contract.id,
+                'contract': contract.i,
                 'cid': cid
               }
             })
