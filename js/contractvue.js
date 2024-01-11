@@ -173,7 +173,9 @@ export default {
 
                             <tr class="collapse" :id="replace(contract.i) + 'upload'">
                                 <td class=" border-0" colspan="4">
-                                    <p>put upload here</p>
+                                   <uploadvue>
+                                        ...
+                                   </uploadvue>
                                 </td>
                             </tr>
                             <tr class="collapse" :id="replace(contract.i) + 'files'">
