@@ -1319,13 +1319,13 @@
                                             <!-- new contract modal button -->
                                             <button v-if="saccountapi.pubKey != 'NA'" type="button"
                                                 class="btn btn-secondary me-1">
-                                                <spk-wallet-comp type="contractModal" token="BROCA"
+                                                <modal-vue type="build" token="BROCA"
                                                     :balance="broca_calc(saccountapi.broca)" :account="account"
                                                     @modalsign="sendIt($event)" :ipfsproviders="ipfsProviders"
                                                     v-slot:trigger>
                                                     <span slot="trigger" class="trigger"><i
                                                             class="fa-solid fa-plus fa-fw me-1"></i>NEW</span>
-                                                </spk-wallet-comp>
+                                                </modal-vue>
                                             </button>
                                             <!-- lucky petition -->
                                             <button type="button" class="btn btn-secondary me-1" data-bs-toggle="modal"
@@ -1366,8 +1366,6 @@
                     </div>
                 </div>
                 <!-- MODALS -->
-                
-                Ï
 
                 <!-- Create User Modal -->
                 <div class="modal fade" id="signUpModal" tabindex="-1" aria-labelledby="signUpModalLabel"
@@ -1451,10 +1449,7 @@
 
                             <div class="modal-body text-start">
                                 <p>https://spktest.dlux.io/services/MARKET</p>
-                                <button @click="petitionForContract"
-                                    class="btn btn-lg text-white btn-outline-primary w-100 border d-flex justify-content-between align-items-center"><span
-                                        class="lead">DLUX</span><span class="small text-warning">10%
-                                        Beneficiary</span><span class="small">{{petitionStatus}}</span></button>
+                                <button @click="petitionForContract" class="btn btn-lg text-white btn-outline-primary w-100 border d-flex justify-content-between align-items-center"><span class="lead">DLUX</span><span class="small text-warning">10% Beneficiary</span><span class="small">{{petitionStatus}}</span></button>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
