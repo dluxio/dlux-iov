@@ -942,7 +942,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         }, 333)
       }else{
         this.services[provider].memo = `Validating`
-        this.getSapi()
+        this.getSPKUser()
       }
     },
     updatePubkey() {
@@ -958,10 +958,10 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         api: sapi,
         txid: `spkcc_register_authority`,
       };
-      setTimeout(() => {this.getSapi()}, 7000);
+      setTimeout(() => {this.getSPKUser()}, 7000);
     },
     petitionForContract(provider = 'dlux-io',) {
-      this.petitionStatus = 'Preparing'
+      this.services[provider].memo = 'Preparing'
       this.services[provider].channel = 1
       const address = this.services[provider].address.replace('$ACCOUNT', this.account)
       fetch(address)
