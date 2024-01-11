@@ -941,11 +941,20 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
       fetch(address)
         .then(r => r.json())
         .then(json => {
-          this.petitionStatus = 'Sending'
-          console.log(json)
+          this.services[provider].memo = "Sending"
+          updateMemo = (provider, times) => {
+            if(times < 21){
+              setTimeout(() => {
+                this.services[provider].memo = `Sending${times % 3 == 0 ? '.' : times % 3 == 1 ? '..' : '...'}`
+                updateMemo(provider, times + 1)
+              }, 1000)
+            }else{
+              this.services[provider].memo = "Sent"
+            }
+          }
           setTimeout(() => {
             this.getSapi()
-            this.petitionStatus = 'Recieved'
+            this.services[provider].memo = 'Validating'
           }, 7000)
         })
     },
@@ -2555,8 +2564,10 @@ function buyNFT(setname, uid, price, type, callback){
                 res.result.extend = "7"
                 this.contracts[id] = res.result
                 if(res.result.c == 1){
-                  if(this.service[res.result.f])this.service[res.result.f].channel = 1
-                  else setTimeout(()=>{this.service[res.result.f].channel = 1}, 3000)
+                  if(this.service[res.result.f]){
+                    this.service[res.result.f].channel = 1
+                    this.service[res.result.f].memo = "Contract Already Open"
+                  } else setTimeout(()=>{this.service[res.result.f].channel = 1}, 3000)
                 }
                 this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
               } else {
