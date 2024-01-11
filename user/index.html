@@ -1328,7 +1328,7 @@
                                                 </modal-vue>
                                             </button>
                                             <!-- lucky petition -->
-                                            <button type="button" class="btn btn-secondary me-1" data-bs-toggle="modal"
+                                            <button v-if="spkapi.pubKey != 'NA'" type="button" class="btn btn-secondary me-1" data-bs-toggle="modal"
                                                 data-bs-target="#sponsoredModal">
                                                 <span class=""></span><i
                                                     class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE
@@ -1359,9 +1359,21 @@
 
                                     </div>
                                 </div>
+                                <div v-if="spkapi.pubKey == 'NA'">
+                                <div class="d-flex justify-content-center p-3">
+                                    <div class="text-center">
+                                    <p class="lead">Activate your ability to create file storage contracts.</p>
+                                    <button v-if="spkapi.pubKey == 'NA'" type="button"
+                                    class="btn btn-primary mb-3" @click="updatePubkey">
+                                    Register Account
+                                </button>
+                            </div>
+                                </div>
+                            </div>
                                 <div class="card-body p-0">
+                                    <div v-if="spkapi.pubKey != 'NA'">
                                     <contract-vue :node="true" :account="pageAccount" @tosign="toSign=$event"
-                                        :contracts="contracts"></contract-vue>
+                                        :contracts="contracts"></contract-vue></div>
                                 </div>
                             </div>
                         </div>
