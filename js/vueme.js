@@ -944,6 +944,20 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         this.getSapi()
       }
     },
+    updatePubkey() {
+      var cja = {
+        pubKey: this.accountinfo.posting.key_auths[0][0]
+      };
+      this.toSign = {
+        type: "cja",
+        cj: cja,
+        id: `spkcc_register_authority`,
+        msg: `Registering: ${this.account}:${this.accountinfo.posting.key_auths[0][0]}`,
+        ops: ["getSapi"],
+        api: sapi,
+        txid: `spkcc_register_authority`,
+      };
+    },
     petitionForContract(provider = 'dlux-io',) {
       this.petitionStatus = 'Preparing'
       this.services[provider].channel = 1
@@ -2560,12 +2574,6 @@ function buyNFT(setname, uid, price, type, callback){
               if(typeof res.result != "string"){
                 res.result.extend = "7"
                 this.contracts[id] = res.result
-                if(res.result.c == 1){
-                  if(this.service[res.result.f]){
-                    this.service[res.result.f].channel = 1
-                    this.service[res.result.f].memo = "Contract Already Open"
-                  } else setTimeout(()=>{this.service[res.result.f].channel = 1}, 3000)
-                }
                 this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
               } else {
                 delete this.contracts[id]
@@ -2574,6 +2582,12 @@ function buyNFT(setname, uid, price, type, callback){
         }
       for(var contract in this.posturls[url].contract){
         contracts.push(contract)
+        if(contract.c == 1){
+          if(this.service[contract.f]){
+            this.service[contract.f].channel = 1
+            this.service[contract.f].memo = "Contract Already Open"
+          } else setTimeout(()=>{this.service[contract.f].channel = 1}, 3000)
+        }
       }
       contracts = [...new Set(contracts)]
       for(var i = 0; i < contracts.length; i++){
