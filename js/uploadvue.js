@@ -155,6 +155,15 @@ methods: {
           };
         });
       },
+      selectContract(id, broker) {  //needs PeerID of broker
+        this.contract.id = id
+        fetch(`https://spktest.dlux.io/user_services/${broker}`)
+          .then(r => r.json())
+          .then(res => {
+            console.log(res)
+            this.contract.api = res.services.IPFS[Object.keys(res.services.IPFS)[0]].a
+          })
+      },
       upload(cids = ['QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3'], contract ) { // = { api: 'https://ipfs.dlux.io', id: '1668913215284', sigs: {}, s: 10485760, t: 0 }) {
         var files = []
         for (var name in this.FileInfo) {
@@ -385,6 +394,6 @@ computed: {
 },
 mounted() {
     this.contract = this.propcontract;
-    console.log(this.contract);
+    this.selectContract(this.contract.i, this.contract.b)
 },
 };
