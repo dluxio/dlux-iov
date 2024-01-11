@@ -931,6 +931,24 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
     togglePin(index){
       this.File[index].pin = !this.File[index].pin;
     },
+    petitionForContract(provider = 'dlux-io',) {
+      this.petitionStatus = 'Preparing'
+      // fetch(`https://spktest.dlux.io/user_services/${provider}`)
+      // .then(r=>r.json())
+      // .then(json =>{
+      //   console.log(json)
+      // })
+      fetch(`https://ipfs.dlux.io/upload-contract?user=${this.account}`)
+        .then(r => r.json())
+        .then(json => {
+          this.petitionStatus = 'Sending'
+          console.log(json)
+          setTimeout(() => {
+            this.getSapi()
+            this.petitionStatus = 'Recieved'
+          }, 7000)
+        })
+    },
     deleteImg (index){
       this.File.splice(index, 1)
     },
