@@ -13,7 +13,6 @@ export default {
   },
   template: `
 <div>
-
 <!-- Extend -->
 <div class="modal fade" id="extend" :tabindex="i" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
@@ -278,69 +277,6 @@ export default {
           </div>
       </div>
   </div>
-
-  <!-- Create Contract -->
-  <div class="modal fade" id="build" tabindex="-1" role="dialog" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-          <div class="modal-content bg-darker text-white">
-              <div class="modal-header">
-                  <h5 class="modal-title">Create Contract</h5> 
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <form name="contract">
-                    <div class="modal-body text-start"> 
-                      <label for="broca" class="small mb-1 d-flex">Amount
-                      <span class="ms-auto">Balance: <a role="button" class="text-info" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 0, '', ',')}}</a> {{token}}</span></label>
-                      <div class="position-relative mb-1">
-                        <input id="broca" class="pe-5 form-control text-white border-dark bg-dark" type="number" step="1" :min="1" :max="balance" placeholder="1" v-model="d.amount"> 
-                        <span class="position-absolute end-0 top-50 translate-middle-y px-2">
-                          {{token}}
-                        </span>  
-                      </div>
-                      <div class="text-center mb-3 small text-muted">~{{fancyBytes(amount * 1000)}}</div>
-                      <label for="c_to" class="small mb-1">Account to Upload File</label>
-                      <div class="position-relative mb-3" id="c_to">
-                        <span class="position-absolute top-50 translate-middle-y ps-2">
-                          <i class="fa-solid fa-at fa-fw"></i>
-                        </span>  
-                        <input class="ps-4 form-control text-white border-dark bg-dark" type="text" v-model="d.to"> 
-                      </div>
-                      <label for="broker" class="small mb-1">IPFS Service Provider</label>
-                      <div class="position-relative mb-3" id="broker">
-                        <span class="position-absolute top-50 translate-middle-y ps-2">
-                          <i class="fa-solid fa-at fa-fw"></i>
-                        </span> 
-                        <select class="ps-4 form-select text-white bg-dark border-dark" id="sponsoredContracts" v-model="d.broker">
-                          <option value="" disabled selected>Select provider</option>
-                          <option v-for="(account, key) in ipfsproviders" :value="key">{{key}}</option>
-                        </select>
-                      </div>
-                      <label for="ben_to" class="small mb-1">Benificiary Account</label>
-                      <div class="position-relative mb-3" id="ben_to">
-                        <span class="position-absolute top-50 translate-middle-y ps-2">
-                          <i class="fa-solid fa-at fa-fw"></i>
-                        </span>   
-                        <input class="ps-4 form-control text-white border-dark bg-dark" type="text" v-model="d.ben_to"> 
-                      </div>
-                      <label for="ben" class="small mb-1">Requested Benificary Amount</label>
-                      <div class="position-relative">
-                      <input id="ben" class="pe-5 form-control text-white border-dark bg-dark" type="number" step="0.01" :min="0" :max="100" v-model="d.ben_amount"> 
-                        <span class="position-absolute end-0 top-50 translate-middle-y px-2">
-                          <i class="fa-solid fa-percent fa-fw"></i>
-                        </span>
-                      </div>
-                    </div> 
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                      <button type="button" class="btn btn-primary" @click="build" data-bs-dismiss="modal">Propose</button>
-                    </div>
-              </form>
-          </div>
-      </div>
-  </div>
-
-  
-
   <!-- Cancel / Remove -->
   <div class="modal fade" id="confirm" tabindex="-1" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
