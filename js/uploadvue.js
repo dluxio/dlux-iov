@@ -230,6 +230,7 @@ methods: {
             callbacks: [res, rej],
             txid: "Sign Auth Headers",
           };
+          this.$emit("tosign", this.toSign);
         });
       },
       selectContract(id, broker) {  //needs PeerID of broker
@@ -321,7 +322,7 @@ methods: {
           req.setRequestHeader('X-Cid', options.cid);
           req.setRequestHeader('X-Contract', options.contract.i);
           req.setRequestHeader('X-Sig', options.contract.fosig);
-          req.setRequestHeader('X-Account', this.account);
+          req.setRequestHeader('X-Account', options.contract.t);
           req.setRequestHeader('X-Files', options.cids);
   
   
@@ -360,7 +361,7 @@ methods: {
             headers: {
               'Content-Type': 'application/json',
               'X-Sig': options.contract.fosig,
-              'X-Account': this.account,
+              'X-Account': options.contract.t,
               'X-Contract': options.contract.i,
               'X-Cid': cid,
               'X-Files': options.contract.files,
@@ -436,7 +437,7 @@ methods: {
               headers: {
                 'Content-Type': 'application/json',
                 'sig': contract.fosig,
-                'account': this.account,
+                'account': contract.t,
                 'contract': contract.i,
                 'cid': cid
               }
