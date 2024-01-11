@@ -1138,13 +1138,13 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
     },
     broca_calc(last = '0,0') {
       const last_calc = this.Base64toNumber(last.split(',')[1])
-      const accured = parseInt((parseFloat(this.sstats.broca_refill) * (this.sstats.head_block - last_calc)) / (this.saccountapi.spk_power * 1000))
+      const accured = parseInt((144000 * (this.sstats.head_block - last_calc)) / (this.spkapi.spk_power * 1000)) //broca refill
       var total = parseInt(last.split(',')[0]) + accured
-      if (total > (this.saccountapi.spk_power * 1000)) total = (this.saccountapi.spk_power * 1000)
+      if (total > (this.spkapi.spk_power * 1000)) total = (this.spkapi.spk_power * 1000)
       return total
     },
     getIPFSproviders() {
-      fetch("https://spktest.dlux.io//services/IPFS")
+      fetch("https://spktest.dlux.io/services/IPFS")
         .then((response) => response.json())
         .then((data) => {
           this.ipfsProviders = data.providers
