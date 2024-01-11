@@ -184,7 +184,8 @@
                         </div>
                         <div id="walletcontent" class="tab-content">
                             <!-- dlux wallet tab-->
-                            <div role="tabpanel" ref="walletTab" class="tab-pane fade show active" id="dlux" aria-labelledby="dluxtab">
+                            <div role="tabpanel" ref="walletTab" class="tab-pane fade show active" id="dlux"
+                                aria-labelledby="dluxtab">
                                 <div class="container">
                                     <div>
                                         <div class="d-flex align-items-center mt-4 mb-2">
@@ -282,7 +283,8 @@
                                                             <modal-vue type="power" token="DLUX" func="Power Up" i="-99"
                                                                 :balance="accountapi.balance" :account="account"
                                                                 @modalsign="sendIt($event)" v-slot:trigger>
-                                                                <a class="dropdown-item trigger" slot="trigger" role="button">
+                                                                <a class="dropdown-item trigger" slot="trigger"
+                                                                    role="button">
                                                                     <i
                                                                         class="fas fa-angle-double-up fa-fw me-2"></i>Power
                                                                     Up</a>
@@ -290,7 +292,8 @@
                                                             <modal-vue type="power" token="DLUX" func="Lock"
                                                                 :balance="accountapi.balance" :account="account"
                                                                 @modalsign="sendIt($event)" v-slot:trigger>
-                                                                <a class="dropdown-item trigger" slot="trigger" role="button"><i
+                                                                <a class="dropdown-item trigger" slot="trigger"
+                                                                    role="button"><i
                                                                         class="fas fa-lock fa-fw me-2"></i>Lock
                                                                     GOV</a>
                                                             </modal-vue>
@@ -585,7 +588,8 @@
                                                 <div class="btn-group" v-if="me" role="group" aria-label="SPK Actions">
                                                     <button type="button" class="btn btn-primary p-0">
                                                         <modal-vue type="send" token="SPK" :balance="saccountapi.spk"
-                                                            :account="account" @modalsign="sendIt($event)" v-slot:trigger>
+                                                            :account="account" @modalsign="sendIt($event)"
+                                                            v-slot:trigger>
                                                             <span slot="trigger" class="p-2 trigger"><i
                                                                     class="fas fa-paper-plane me-2"></i>Send</span>
                                                         </modal-vue>
@@ -603,7 +607,8 @@
                                                                 @modalsign="sendIt($event)" v-slot:trigger>
                                                                 <button class="dropdown-item trigger" slot="trigger"
                                                                     type="button"><i
-                                                                        class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
+                                                                        class="fas fa-angle-double-up fa-fw me-2"></i>Power
+                                                                    Up</button>
                                                             </modal-vue>
                                                             <div class="dropdown-divider"></div>
                                                             <a class="dropdown-item" href="/dex/larynx" id="buylink"><i
@@ -726,9 +731,10 @@
                                                             </modal-vue>
                                                             <modal-vue type="power" :dis="!isNode" token="LARYNX"
                                                                 func="Lock Liquidity" :balance="saccountapi.balance"
-                                                                :account="account" @modalsign="sendIt($event)" v-slot:trigger>
-                                                                <button class="dropdown-item trigger" :disabled="!isNode"
-                                                                    slot="trigger" type="button"><i
+                                                                :account="account" @modalsign="sendIt($event)"
+                                                                v-slot:trigger>
+                                                                <button class="dropdown-item trigger"
+                                                                    :disabled="!isNode" slot="trigger" type="button"><i
                                                                         class="fas fa-lock fa-fw me-2"></i>Lock
                                                                     Liquidity</button>
                                                             </modal-vue>
@@ -790,7 +796,8 @@
                                                             aria-labelledby="btnGroupDrop1">
                                                             <modal-vue type="power" token="LARYNX"
                                                                 func="Unlock Liquidity" :balance="saccountapi.gov"
-                                                                :account="account" @modalsign="sendIt($event)" v-slot:trigger>
+                                                                :account="account" @modalsign="sendIt($event)"
+                                                                v-slot:trigger>
                                                                 <button class="dropdown-item trigger" slot="trigger"
                                                                     type="button"><i
                                                                         class="fas fa-lock-open fa-fw me-2"></i>Unlock
@@ -882,8 +889,8 @@
                                                             <modal-vue type="delegate" :smarkets="smarkets.node"
                                                                 token="LARYNX" func="Lock Liquidity" :stats="sstats"
                                                                 :balance="saccountapi.poweredUp" :account="account"
-                                                                @modalsign="sendIt($event)" v-slot:trigger><span slot="trigger"
-                                                                    class="p-2 trigger">
+                                                                @modalsign="sendIt($event)" v-slot:trigger><span
+                                                                    slot="trigger" class="p-2 trigger">
                                                                     <i
                                                                         class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
                                                             </modal-vue>
@@ -909,7 +916,8 @@
                                                                 </modal-vue>
                                                                 <modal-vue v-show="when(saccountapi.powerDowns)"
                                                                     type="confirm" token="LARYNX" func="powercancel"
-                                                                    :account="account" @modalsign="sendIt($event)" v-slot:trigger>
+                                                                    :account="account" @modalsign="sendIt($event)"
+                                                                    v-slot:trigger>
                                                                     <button class="dropdown-item trigger" slot="trigger"
                                                                         type="button">
                                                                         <i
@@ -930,8 +938,8 @@
                                                     remaining)</b><small class="ms-2">
                                                     <modal-vue type="confirm" token="LARYNX" func="powercancel"
                                                         :account="account" @modalsign="sendIt($event)" v-slot:trigger>
-                                                        <button class="btn btn-sm btn-outline-danger trigger" slot="trigger"
-                                                            type="button">
+                                                        <button class="btn btn-sm btn-outline-danger trigger"
+                                                            slot="trigger" type="button">
                                                             STOP</button>
                                                     </modal-vue>
                                                 </small>
@@ -1027,8 +1035,8 @@
                                                 <div class="btn-group" v-if="me" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-primary">
                                                         <modal-vue type="send" token="HIVE"
-                                                            :balance="pFloat(focus.balance) * 1000"
-                                                            :account="account" @modalsign="sendIt($event)" v-slot:trigger>
+                                                            :balance="pFloat(focus.balance) * 1000" :account="account"
+                                                            @modalsign="sendIt($event)" v-slot:trigger>
                                                             <span slot="trigger"><i
                                                                     class="fas fa-paper-plane me-2 trigger"></i>Send</span>
                                                         </modal-vue></button>
@@ -1111,7 +1119,8 @@
                                                     <button type="button" class="btn btn-primary">
                                                         <modal-vue type="send" token="HBD"
                                                             :balance="pFloat(focus.hbd_balance) * 1000"
-                                                            :account="account" @modalsign="sendIt($event)" v-slot:trigger>
+                                                            :account="account" @modalsign="sendIt($event)"
+                                                            v-slot:trigger>
                                                             <span slot="trigger"><i
                                                                     class="fas fa-paper-plane me-2 trigger"></i>Send</span>
                                                         </modal-vue></button>
@@ -1309,17 +1318,20 @@
                                         <div class="d-flex flex-wrap ms-md-auto order-sm-last">
                                             <!-- new contract modal button -->
                                             <button v-if="saccountapi.pubKey != 'NA'" type="button"
-                                                        class="btn btn-secondary me-1">
-                                                        <modal-vue type="build" token="BROCA"
-                                                            :balance="broca_calc(saccountapi.broca)" :account="account"
-                                                            @modalsign="sendIt($event)" :ipfsproviders="ipfsProviders" v-slot:trigger>
-                                                            <span slot="trigger" class="trigger"><i
-                                                                    class="fa-solid fa-plus fa-fw me-1"></i>NEW</span>
-                                                        </modal-vue>
-                                                    </button>
+                                                class="btn btn-secondary me-1">
+                                                <modal-vue type="build" token="BROCA"
+                                                    :balance="broca_calc(saccountapi.broca)" :account="account"
+                                                    @modalsign="sendIt($event)" :ipfsproviders="ipfsProviders"
+                                                    v-slot:trigger>
+                                                    <span slot="trigger" class="trigger"><i
+                                                            class="fa-solid fa-plus fa-fw me-1"></i>NEW</span>
+                                                </modal-vue>
+                                            </button>
                                             <!-- lucky petition -->
-                                            <button type="button" class="btn btn-secondary me-1" @click="petitionForContract">
-                                                <span class=""></span><i class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>{{petitionStatus}}
+                                            <button type="button" class="btn btn-secondary me-1" data-bs-toggle="modal"
+                                                data-bs-target="#sponsoredModal">
+                                                <span class=""></span><i
+                                                    class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE
                                             </button>
                                             <!-- spk wallet modal button -->
                                             <button type="button" class="btn btn-secondary" data-bs-toggle="modal"
@@ -1345,7 +1357,8 @@
                                     </div>
                                 </div>
                                 <div class="card-body p-0">
-                                    <contract-vue :node="true" :account="pageAccount" @tosign="toSign=$event" :contracts="contracts"></contract-vue>
+                                    <contract-vue :node="true" :account="pageAccount" @tosign="toSign=$event"
+                                        :contracts="contracts"></contract-vue>
                                 </div>
                             </div>
                         </div>
@@ -1415,11 +1428,34 @@
                                     aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <spk-vue node="false" :account="account" @tosign="toSign=$event;log($event)"/>
+                                <spk-vue node="false" :account="account" @tosign="toSign=$event;log($event)" />
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sponsored Contract -->
+                <div class="modal fade" id="sponsoredModal" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content bg-darker text-white">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Sponsored Contracts</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-body text-start">
+                                <p>https://spktest.dlux.io/services/MARKET</p>
+                                <button @click="petitionForContract" class="btn btn-lg text-white btn-outline-primary w-100 border d-flex justify-content-between align-items-center"><span class="lead">DLUX</span><span class="small text-warning">10% Beneficiary</span><span class="small">{{petitionStatus}}</span></button>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+
+                            </div>
+
                         </div>
                     </div>
                 </div>
