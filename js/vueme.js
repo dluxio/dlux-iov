@@ -3344,6 +3344,7 @@ function buyNFT(setname, uid, price, type, callback){
     }
   },
   mounted() {
+    this.getIPFSproviders()
     window.addEventListener('scroll', this.handleScroll);
     if (location.pathname.split("/@")[1]) {
       this.pageAccount = location.pathname.split("/@")[1]
