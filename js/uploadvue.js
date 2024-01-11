@@ -386,6 +386,33 @@ methods: {
             uploadFile(file, options, file.cid)
           });
       },
+      appendFile(file, id) {
+        if (this.files[file]) delete this.files[file]
+        else this.files[file] = id
+      },
+      uploadAndTrack(name, contract) {
+        this.signText().then((headers) => {
+          let uploader = null;
+          const setFileElement = (file) => {
+            // create file element here
+          }
+          const onProgress = (e, file) => { };
+          const onError = (e, file) => { };
+          const onAbort = (e, file) => { };
+          const onComplete = (e, file) => { };
+          return (uploadedFiles) => {
+            [...uploadedFiles].forEach(setFileElement);
+  
+            //append progress box
+            uploader = uploadFiles(uploadedFiles, {
+              onProgress,
+              onError,
+              onAbort,
+              onComplete
+            });
+          }
+        });
+      },
 },
 computed: {
     hasFiles() {
