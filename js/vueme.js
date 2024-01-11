@@ -467,6 +467,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         },
       },
       behindTitle: "",
+      petitionStatus: "FREE",
       TOKEN: "DLUX",
       sendTo: "",
       sendAmount: 0,
