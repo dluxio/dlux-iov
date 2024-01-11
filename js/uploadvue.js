@@ -74,11 +74,9 @@ export default {
                 </div>
             </div>
             <div v-if="File.length" class="text-center">
-                <button type="button" class="btn btn-info mb-2"
+                <button type="button" class="btn btn-info mb-2" :disabled="ready"
                     @click="signNUpload()"><i
-                        class="fa-solid fa-file-signature fa-fw me-2"></i>Sign
-                    and
-                    Upload</button>
+                        class="fa-solid fa-file-signature fa-fw me-2"></i>Sign and Upload</button>
             </div>
         </div>
     </Transition>
@@ -110,6 +108,8 @@ data() {
         fileRequests: {},
         FileInfo: {},
         File: [],
+        ready: false,
+        deletable: true,
     };
 },
 emits: ["tosign"],
@@ -144,7 +144,7 @@ methods: {
           var File = e.target.files[i];
           File.progress = 0;
           File.actions = {
-            cancel: true,
+            cancel: false,
             pause: false,
             resume: false,
           }
@@ -173,25 +173,15 @@ methods: {
               var File = event.currentTarget.File
               File.progress = 0;
               File.actions = {
-                cancel: true,
+                cancel: false,
                 pause: false,
                 resume: false,
               }
               this.File.push(File);
             })
-            //   }
-            // }
-  
           };
+          this.ready = true
           reader.readAsArrayBuffer(e.dataTransfer.files[i]);
-          // var File = e.dataTransfer.files[i];
-          // File.progress = 0;
-          // File.actions = {
-          //   cancel: true,
-          //   pause: false,
-          //   resume: false,
-          // }
-          // this.File.push(File);
         }
       },
     deleteImg(index, name) {
@@ -218,6 +208,7 @@ methods: {
           console.log({ res })
           this.contract.fosig = res.split(":")[3]
           this.upload(cids, this.contract)
+          this.ready = false
         })
       },
       signText(challenge) {
@@ -305,7 +296,16 @@ methods: {
             this.File[this.FileInfo[f.name].index].actions.cancel = false
             this.FileInfo[f.name].progress = 100
             this.FileInfo[f.name].status = 'done'
-  
+            var done = true
+            for(var file in this.FileInfo){
+              if(this.FileInfo[file].status != 'done'){
+                done = false
+                break;
+              }
+            }
+            if(done){
+              this.$emit('done', this.contract)
+            }
           }
         };
         const uploadFileChunks = (file, options) => {

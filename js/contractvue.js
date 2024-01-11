@@ -175,7 +175,7 @@ export default {
 
                             <tr class="collapse" :id="replace(contract.i) + 'upload'">
                                 <td class=" border-0" colspan="4">
-                                   <upload-vue :user="saccountapi" :propcontract="contract" @tosign="toSign=$event"/>
+                                   <upload-vue :user="saccountapi" :propcontract="contract" @tosign="toSign=$event" @done="getSpkStats()"/>
                                 </td>
                             </tr>
                             <tr class="collapse" :id="replace(contract.i) + 'files'">
