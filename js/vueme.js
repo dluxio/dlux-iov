@@ -877,7 +877,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
                 for (var node in data.channels[user]) {
                     if(this.services[user]){
                       this.services[user].channel = 1
-                      this.services[user].memo = "Contract Already Open"
+                      this.services[user].memo = "Contract Open"
                     } else setTimeout(()=>{this.services[user].channel = 1}, 3000)
                     if(this.contractIDs[data.channels[user][node].i])continue
                     else {
