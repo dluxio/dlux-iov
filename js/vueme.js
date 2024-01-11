@@ -469,7 +469,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         },
       },
       behindTitle: "",
-      petitionStatus: "FREE",
+      petitionStatus: "Choose One",
       TOKEN: "DLUX",
       sendTo: "",
       sendAmount: 0,
@@ -1154,9 +1154,10 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
           for(var provider in data.providers){ //$ACCOUNT
             // find in array
             const thisService = data.services.filter(service => service[provider].b == provider)
+            console.log(thisService)
             this.services[provider] = {
-              address: thisService[0].a,
-              memo: thisService[0].m,
+              address: thisService[0][provider].a,
+              memo: thisService[0][provider].m,
               provider
             }
           }
