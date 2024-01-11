@@ -1,12 +1,14 @@
 import Pop from "/js/pop.js";
 import ExtensionVue from "/js/extensionvue.js";
 import FilesVue from "/js/filesvue.js";
+import UploadVue from "/js/uploadvue.js";
 
 export default {
     components: {
         "pop-vue": Pop,
         "extension-vue": ExtensionVue,
-        "files-vue": FilesVue
+        "files-vue": FilesVue,
+        "upload-vue": UploadVue
     },
     template: `<table class="table table-hover text-center align-middle mb-0" id="files-table">
     <thead>
@@ -173,9 +175,7 @@ export default {
 
                             <tr class="collapse" :id="replace(contract.i) + 'upload'">
                                 <td class=" border-0" colspan="4">
-                                   <uploadvue>
-                                        ...
-                                   </uploadvue>
+                                   <upload-vue :user="saccountapi"/>
                                 </td>
                             </tr>
                             <tr class="collapse" :id="replace(contract.i) + 'files'">

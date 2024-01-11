@@ -84,14 +84,16 @@ export default {
     </Transition>
    `,
 props: {
-    files: {
+    user: {
         type: Object,
-        default: {},
+        default: function () {
+            return {}
+        }
     },
 },
 data() {
     return {
-
+        files: {}
     };
 },
 emits: [],

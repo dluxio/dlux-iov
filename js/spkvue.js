@@ -980,11 +980,6 @@ var app = new Vue({
     },
     petitionForContract(provider = 'dlux-io',) {
       this.petitionStatus = 'Preparing'
-      // fetch(`https://spktest.dlux.io/user_services/${provider}`)
-      // .then(r=>r.json())
-      // .then(json =>{
-      //   console.log(json)
-      // })
       fetch(`https://ipfs.dlux.io/upload-contract?user=${this.account}`)
         .then(r => r.json())
         .then(json => {
