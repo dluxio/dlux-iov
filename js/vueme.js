@@ -957,6 +957,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         api: sapi,
         txid: `spkcc_register_authority`,
       };
+      setTimeout(() => {this.getSapi()}, 7000);
     },
     petitionForContract(provider = 'dlux-io',) {
       this.petitionStatus = 'Preparing'
