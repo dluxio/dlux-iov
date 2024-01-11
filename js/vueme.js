@@ -91,6 +91,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
   data() {
     return {
       fileRequests: {},
+      debounceScroll: 0,
       relations: {"follows":false,"ignores":false,"blacklists":false,"follows_blacklists":false,"follows_muted":false},
       sets: {},
       chains: {
@@ -1910,12 +1911,16 @@ function buyNFT(setname, uid, price, type, callback){
       return parseFloat(num).toFixed(dig);
     },
     handleScroll() {
-      if (
-        document.documentElement.clientHeight + window.scrollY >
-        document.documentElement.scrollHeight -
-          document.documentElement.clientHeight * 2
-      ) {
-        this.getPosts();
+      const now = Date.now();
+      if (now - this.lastScroll > 1000) {
+        this.lastScroll = now;
+        if (
+          document.documentElement.clientHeight + window.scrollY >
+          document.documentElement.scrollHeight -
+            document.documentElement.clientHeight * 2
+        ) {
+          this.getPosts();
+        }
       }
     },
     modalNext(modal, kind) {
