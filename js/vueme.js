@@ -941,6 +941,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
           this.updateMemo(provider, times + 1)
         }, 333)
       }else{
+        this.services[provider].memo = `Validating`
         this.getSapi()
       }
     },
