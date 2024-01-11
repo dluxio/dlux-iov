@@ -1144,7 +1144,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
       return total
     },
     getIPFSproviders() {
-      fetch(this.sapi + "/services/IPFS")
+      fetch("https://spktest.dlux.io//services/IPFS")
         .then((response) => response.json())
         .then((data) => {
           this.ipfsProviders = data.providers

@@ -1320,7 +1320,7 @@
                                             <button v-if="saccountapi.pubKey != 'NA'" type="button"
                                                 class="btn btn-secondary me-1">
                                                 <modal-vue type="build" token="BROCA"
-                                                    :balance="broca_calc(saccountapi.broca)" :account="account"
+                                                    :balance="broca_calc(spkapi.broca)" :account="account"
                                                     @modalsign="sendIt($event)" :ipfsproviders="ipfsProviders"
                                                     v-slot:trigger>
                                                     <span slot="trigger" class="trigger"><i
