@@ -934,6 +934,16 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
     togglePin(index){
       this.File[index].pin = !this.File[index].pin;
     },
+    updateMemo(provider, times) {
+      if(times < 21){
+        setTimeout(() => {
+          this.services[provider].memo = `Sending${times % 3 == 0 ? '.' : times % 3 == 1 ? '..' : '...'}`
+          this.updateMemo(provider, times + 1)
+        }, 333)
+      }else{
+        this.getSapi()
+      }
+    },
     petitionForContract(provider = 'dlux-io',) {
       this.petitionStatus = 'Preparing'
       this.services[provider].channel = 1
@@ -942,20 +952,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         .then(r => r.json())
         .then(json => {
           this.services[provider].memo = "Sending"
-          updateMemo = (provider, times) => {
-            if(times < 21){
-              setTimeout(() => {
-                this.services[provider].memo = `Sending${times % 3 == 0 ? '.' : times % 3 == 1 ? '..' : '...'}`
-                updateMemo(provider, times + 1)
-              }, 1000)
-            }else{
-              this.services[provider].memo = "Sent"
-            }
-          }
-          setTimeout(() => {
-            this.getSapi()
-            this.services[provider].memo = 'Validating'
-          }, 7000)
+          updateMemo(provider, 0)
         })
     },
     deleteImg (index){
@@ -1167,7 +1164,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
             console.log(thisService)
             this.services[provider] = {
               address: thisService[0][provider].a,
-              memo: thisService[0][provider].m,
+              memo: JSON.parse(thisService[0][provider].m),
               channel: 0,
               provider
             }
