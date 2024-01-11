@@ -936,6 +936,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
     },
     petitionForContract(provider = 'dlux-io',) {
       this.petitionStatus = 'Preparing'
+      this.services[provider].channel = 1
       const address = this.services[provider].address.replace('$ACCOUNT', this.account)
       fetch(address)
         .then(r => r.json())
@@ -1158,6 +1159,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
             this.services[provider] = {
               address: thisService[0][provider].a,
               memo: thisService[0][provider].m,
+              channel: 0,
               provider
             }
           }
@@ -2552,6 +2554,10 @@ function buyNFT(setname, uid, price, type, callback){
               if(typeof res.result != "string"){
                 res.result.extend = "7"
                 this.contracts[id] = res.result
+                if(res.result.c == 1){
+                  if(this.service[res.result.f])this.service[res.result.f].channel = 1
+                  else setTimeout(()=>{this.service[res.result.f].channel = 1}, 3000)
+                }
                 this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
               } else {
                 delete this.contracts[id]
