@@ -875,11 +875,10 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
             }
             for (var user in data.channels) {
                 for (var node in data.channels[user]) {
-                  console.log({user,node})
-                    if(this.service[node]){
-                      this.service[node].channel = 1
-                      this.service[node].memo = "Contract Already Open"
-                    } else setTimeout(()=>{this.service[node].channel = 1}, 3000)
+                    if(this.service[user]){
+                      this.service[user].channel = 1
+                      this.service[user].memo = "Contract Already Open"
+                    } else setTimeout(()=>{this.service[user].channel = 1}, 3000)
                     if(this.contractIDs[data.channels[user][node].i])continue
                     else {
                         this.contractIDs[data.channels[user][node].i] = data.channels[user][node];
