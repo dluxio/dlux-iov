@@ -3462,6 +3462,7 @@ function buyNFT(setname, uid, price, type, callback){
               '/sw.js'
           )
           .then(reg => {
+            console.log('SW Reg', reg)
               this.serviceWorker = true
           });
   }
