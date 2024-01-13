@@ -3457,14 +3457,11 @@ function buyNFT(setname, uid, price, type, callback){
   mounted() {
     //recieve serviceworker messages
     if ('serviceWorker' in navigator) {
-      navigator
-          .serviceWorker
-          .register(
+      navigator.serviceWorker.register(
               // path to the service worker file
               '/sw.js'
           )
-          // the registration is async and it returns a promise
-          .then(function (reg) {
+          .then(reg => {
               this.serviceWorker = true
           });
   }
