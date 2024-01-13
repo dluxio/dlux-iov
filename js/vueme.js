@@ -905,7 +905,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
             }
           };
         } else {
-          reject("no controller");
+          reject(`${id} no controller`);
         }
       })
     },
