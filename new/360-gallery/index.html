@@ -164,294 +164,264 @@
                 <div class="col-xl-6 pt-0 pb-0 px-0 px-md-1 scroll">
                     <h3 class="d-none">Build</h3>
                     <div class="accordion text-start bg-blur-darkg rounded" id="360accordion">
-                        <div class="container">
-
-                            <contract-vue :node="false" :account="pageAccount" @tosign="toSign=$event"
-                                :contracts="contracts"></contract-vue>
+                        <div class="accordion-item bg-img-none">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button show" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#executedContracts" aria-expanded="false"
+                                    aria-controls="executedContracts">
+                                    SPK Hosting
+                                </button>
+                            </h2>
+                            <div id="executedContracts" class="accordion-collapse collapse show">
+                                <div class="accordion-body p-0">
+                                    <contract-vue :node="false" :account="pageAccount" @tosign="toSign=$event"
+                                        :contracts="contracts"></contract-vue>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div class="accordion-item bg-img-none">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#assetManager" aria-expanded="false" aria-controls="assetManager">
-                        360 Asset Manager
-                    </button>
-                </h2>
-                <div id="assetManager" class="accordion-collapse collapse">
-                    <div class="accordion-body">
-                        <!-- Asset Manager -->
-                        <div v-if="!postCustom_json.assets.length">No assets added. Use the File Upload
-                            & Hosting section to view or create hosting contracts, then upload assets
-                            into a hosting contract. Once you have assets in a hosting contract, you can
-                            add them to your 360 post and they will appear here.</div>
-                        <div v-if="postCustom_json.assets.length">
-                            <h6>Assets</h6>
-                            <div v-for="(asset, index) in postCustom_json.assets">
-                                <form onsubmit="return false;">
-                                    <p class="text-break">CID: {{asset.hash}}</p>
-                                    <p>In: {{asset.contract}}</p>
-                                    <div class="d-flex p-2 justify-content-between align-items-center flex-wrap">
-                                        <div class="m-2">
-                                            <div class="input-group m-2">
-                                                <input type="text" class="form-control" v-model="asset.name"
-                                                    placeholder="Picture Name">
-                                            </div>
-                                            <div class="input-group m-2">
-                                                <input type="text" class="form-control" v-model="asset.thumbHash"
-                                                    placeholder="Thumbnail IPFS Hash">
-                                            </div>
-                                        </div>
-                                        <div class="d-flex flex-column p-2 m-2">
-                                            <div class="row g-3 align-items-center">
-                                                <div class="col-auto me-auto">
-                                                    <label for="ry" class="col-form-label"><i
-                                                            class="fa-solid fa-arrows-left-right me-2"></i>Pan
-                                                        Y:{{asset.ry}}</label>
+                        <div class="accordion-item bg-img-none">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#assetManager" aria-expanded="false" aria-controls="assetManager">
+                                    360 Asset Manager
+                                </button>
+                            </h2>
+                            <div id="assetManager" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <!-- Asset Manager -->
+                                    <div v-if="!postCustom_json.assets.length">No assets added. Use the File Upload
+                                        & Hosting section to view or create hosting contracts, then upload assets
+                                        into a hosting contract. Once you have assets in a hosting contract, you can
+                                        add them to your 360 post and they will appear here.</div>
+                                    <div v-if="postCustom_json.assets.length">
+                                        <h6>Assets</h6>
+                                        <div v-for="(asset, index) in postCustom_json.assets">
+                                            <form onsubmit="return false;">
+                                                <p class="text-break">CID: {{asset.hash}}</p>
+                                                <p>In: {{asset.contract}}</p>
+                                                <div
+                                                    class="d-flex p-2 justify-content-between align-items-center flex-wrap">
+                                                    <div class="m-2">
+                                                        <div class="input-group m-2">
+                                                            <input type="text" class="form-control" v-model="asset.name"
+                                                                placeholder="Picture Name">
+                                                        </div>
+                                                        <div class="input-group m-2">
+                                                            <input type="text" class="form-control"
+                                                                v-model="asset.thumbHash"
+                                                                placeholder="Thumbnail IPFS Hash">
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex flex-column p-2 m-2">
+                                                        <div class="row g-3 align-items-center">
+                                                            <div class="col-auto me-auto">
+                                                                <label for="ry" class="col-form-label"><i
+                                                                        class="fa-solid fa-arrows-left-right me-2"></i>Pan
+                                                                    Y:{{asset.ry}}</label>
+                                                            </div>
+                                                            <div class="col-auto">
+                                                                <input type="range" class="form-range" id="ry"
+                                                                    v-model="asset.ry"
+                                                                    @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])"
+                                                                    min="-180" max="180" step="1">
+                                                            </div>
+                                                        </div>
+                                                        <div class="row g-3 align-items-center">
+                                                            <div class="col-auto me-auto">
+                                                                <label for="rx" class="col-form-label"><i
+                                                                        class="fa-solid fa-arrows-rotate me-2"></i>Roll
+                                                                    X:{{asset.rx}}</label>
+                                                            </div>
+                                                            <div class="col-auto">
+                                                                <input type="range" class="form-range" id="rx"
+                                                                    v-model="asset.rx"
+                                                                    @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])"
+                                                                    min="-180" max="180" step="1">
+                                                            </div>
+                                                        </div>
+                                                        <div class="row g-3 align-items-center">
+                                                            <div class="col-auto me-auto">
+                                                                <label for="rz" class="col-form-label"><i
+                                                                        class="fa-solid fa-arrows-rotate me-2"></i>Roll
+                                                                    Z:{{asset.rz}}</label>
+                                                            </div>
+                                                            <div class="col-auto">
+                                                                <input type="range" class="form-range" id="rz"
+                                                                    v-model="asset.rz"
+                                                                    @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])"
+                                                                    min="-180" max="180" step="1">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex flex-column">
+                                                        <div class="d-flex" style="justify-content: center;"><img
+                                                                :src="'https://ipfs.dlux.io/ipfs/' + asset.hash"
+                                                                class="img-fluid" style="max-width: 300px;"
+                                                                :alt="asset.hash"></div>
+                                                        <div class="m-2 btn-group">
+                                                            <button class="btn btn-primary"
+                                                                @click="addAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, asset.r)">Refresh
+                                                                dApp</button>
+                                                            <button type="button"
+                                                                class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                                disabled></button>
+                                                            <button class="btn btn-primary"
+                                                                @click="delAsset(asset.hash, asset.contract, asset.name, asset.thumbHash)">Delete
+                                                                Asset</button>
+                                                            <button type="button"
+                                                                class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                                disabled></button>
+                                                            <button class="btn btn-primary" :disabled="index == 0"
+                                                                @click="moveAsset(asset.hash, 'up')"><i
+                                                                    class="fa-solid fa-up-long"></i></button>
+                                                            <button type="button"
+                                                                class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                                disabled></button>
+                                                            <button class="btn btn-primary"
+                                                                :disabled="index == postCustom_json.assets.length - 1"
+                                                                @click="moveAsset(asset.hash, 'down')"><i
+                                                                    class="fa-solid fa-down-long"></i></button>
+                                                        </div>
+                                                        <div class="form-check ms-auto me-auto">
+                                                            <input class="form-check-input" type="checkbox" value=""
+                                                                id="firstImage" :checked="asset.f"
+                                                                @click="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])">
+                                                            <label class="form-check-label" for="firstImage">
+                                                                Initial Image
+                                                            </label>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div class="col-auto">
-                                                    <input type="range" class="form-range" id="ry" v-model="asset.ry"
-                                                        @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])"
-                                                        min="-180" max="180" step="1">
-                                                </div>
-                                            </div>
-                                            <div class="row g-3 align-items-center">
-                                                <div class="col-auto me-auto">
-                                                    <label for="rx" class="col-form-label"><i
-                                                            class="fa-solid fa-arrows-rotate me-2"></i>Roll
-                                                        X:{{asset.rx}}</label>
-                                                </div>
-                                                <div class="col-auto">
-                                                    <input type="range" class="form-range" id="rx" v-model="asset.rx"
-                                                        @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])"
-                                                        min="-180" max="180" step="1">
-                                                </div>
-                                            </div>
-                                            <div class="row g-3 align-items-center">
-                                                <div class="col-auto me-auto">
-                                                    <label for="rz" class="col-form-label"><i
-                                                            class="fa-solid fa-arrows-rotate me-2"></i>Roll
-                                                        Z:{{asset.rz}}</label>
-                                                </div>
-                                                <div class="col-auto">
-                                                    <input type="range" class="form-range" id="rz" v-model="asset.rz"
-                                                        @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])"
-                                                        min="-180" max="180" step="1">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex flex-column">
-                                            <div class="d-flex" style="justify-content: center;"><img
-                                                    :src="'https://ipfs.dlux.io/ipfs/' + asset.hash" class="img-fluid"
-                                                    style="max-width: 300px;" :alt="asset.hash"></div>
-                                            <div class="m-2 btn-group">
-                                                <button class="btn btn-primary"
-                                                    @click="addAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, asset.r)">Refresh
-                                                    dApp</button>
-                                                <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                                                    disabled></button>
-                                                <button class="btn btn-primary"
-                                                    @click="delAsset(asset.hash, asset.contract, asset.name, asset.thumbHash)">Delete
-                                                    Asset</button>
-                                                <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                                                    disabled></button>
-                                                <button class="btn btn-primary" :disabled="index == 0"
-                                                    @click="moveAsset(asset.hash, 'up')"><i
-                                                        class="fa-solid fa-up-long"></i></button>
-                                                <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                                                    disabled></button>
-                                                <button class="btn btn-primary"
-                                                    :disabled="index == postCustom_json.assets.length - 1"
-                                                    @click="moveAsset(asset.hash, 'down')"><i
-                                                        class="fa-solid fa-down-long"></i></button>
-                                            </div>
-                                            <div class="form-check ms-auto me-auto">
-                                                <input class="form-check-input" type="checkbox" value="" id="firstImage"
-                                                    :checked="asset.f"
-                                                    @click="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])">
-                                                <label class="form-check-label" for="firstImage">
-                                                    Initial Image
-                                                </label>
-                                            </div>
+                                            </form>
                                         </div>
                                     </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="accordion-item bg-img-none">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#postDetails" aria-expanded="false" aria-controls="postDetails">
-                        Post Details
-                    </button>
-                </h2>
-                <div id="postDetails" class="accordion-collapse collapse">
-                    <div class="accordion-body">
-                        <form onsubmit="return false;">
-                            <div class="form-group mb-3">
-                                <label for="username">Author</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">@</span>
-                                    <input type="text" class="form-control text-info" readonly id="username"
-                                        v-model="account">
                                 </div>
                             </div>
-                            <div class="form-group mb-3">
-                                <label for="title">Title</label>
-                                <input type="text" class="form-control" id="title"
-                                    placeholder="Enter an attention grabbing title" v-model="postTitle"
-                                    @blur="permlink()">
-                                <small id="permlinkPreview" class="form-text text-muted d-flex"><span id="permlink"
-                                        class="mr-auto">Permlink:
-                                        https://dlux.io/dlux/@{{account}}/{{postPermlink}}</span>
-                                    <!-- <a href="#" class="ml-auto"> Edit Permlink</a> -->
-                                </small>
-                            </div>
-                            <div class="form-group mb-3">
-                                <label for="body">Post Body</label>
-                                <mde id="body" @data="postBody = $event" />
-                            </div>
-                            <div class="form-group mb-3">
-                                <label for="tags">Tags</label><br>
-                                <tagify class="rounded w-100" @data="postTags = $event" id="tags" />
-                            </div>
-                            <ul v-if="postBens.length">
-                                <h6>Benificiaries: ({{postBens.length}}/8) </h6>
+                        </div>
+                        <div class="accordion-item bg-img-none">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#postDetails" aria-expanded="false" aria-controls="postDetails">
+                                    Post Details
+                                </button>
+                            </h2>
+                            <div id="postDetails" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <form onsubmit="return false;">
+                                        <div class="form-group mb-3">
+                                            <label for="username">Author</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">@</span>
+                                                <input type="text" class="form-control text-info" readonly id="username"
+                                                    v-model="account">
+                                            </div>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label for="title">Title</label>
+                                            <input type="text" class="form-control" id="title"
+                                                placeholder="Enter an attention grabbing title" v-model="postTitle"
+                                                @blur="permlink()">
+                                            <small id="permlinkPreview" class="form-text text-muted d-flex"><span
+                                                    id="permlink" class="mr-auto">Permlink:
+                                                    https://dlux.io/dlux/@{{account}}/{{postPermlink}}</span>
+                                                <!-- <a href="#" class="ml-auto"> Edit Permlink</a> -->
+                                            </small>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label for="body">Post Body</label>
+                                            <mde id="body" @data="postBody = $event" />
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label for="tags">Tags</label><br>
+                                            <tagify class="rounded w-100" @data="postTags = $event" id="tags" />
+                                        </div>
+                                        <ul v-if="postBens.length">
+                                            <h6>Benificiaries: ({{postBens.length}}/8) </h6>
 
-                                <li v-for="ben in postBens">@{{ben.account}}: {{formatNumber(ben.weight
-                                    / 100,
-                                    2, '.')}}% <button type="button" class="btn btn-outline-danger btn-sm"
-                                        @click="delBen(ben.account)">Remove</button></li>
-                            </ul>
-                            <button class="btn btn-outline-primary" v-if="!isntDlux" type="button"
-                                @click="addBen('dlux-io', 1000)">Include in
-                                DLUX Ecosystem</button>
-                            <button v-for="item in isntBenned" type="button"
-                                @click="addBen(item.account, item.weight)">Include Contract
-                                {{item.contract}}</button>
-                            <div class="text-center">
-                                <button ref="publishButton" type="button" @keyUp="buildTags()" class="btn btn-danger"
-                                    data-toggle="tooltip" data-placement="top" title="Publish Gallery to HIVE"
-                                    :disable="!validPost"
-                                    @click="post([['vrHash', 'QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16']])">Publish</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-    </div>
-
-    </div>
-    <div class="col-xl-6 pt-0 px-0 px-md-1 scroll">
-        <h3 class="d-none">Preview</h3>
-        <div class="accordion bg-blur-darkg rounded" id="previewCol">
-            <div class="accordion-item bg-img-none">
-                <h2 class="accordion-header">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#preview360" aria-expanded="true" aria-controls="preview360">
-                        360 Preview
-                    </button>
-                </h2>
-                <div id="preview360" class="accordion-collapse collapse show">
-                    <div class="accordion-body p-0">
-                        <div class="position-relative">
-                            <div
-                                class="d-flex w-100 justify-content-end align-items-center p-2 overlay position-absolute top-0 start-50 translate-middle-x">
-
-                                <div class="form-check form-switch  form-switch-lg me-2">
-                                    <input class="form-check-input bg-blur-darkg" type="checkbox" role="switch"
-                                        id="flexSwitchCheckChecked" v-model="showLine" title="Horizon Line">
+                                            <li v-for="ben in postBens">@{{ben.account}}: {{formatNumber(ben.weight
+                                                / 100,
+                                                2, '.')}}% <button type="button" class="btn btn-outline-danger btn-sm"
+                                                    @click="delBen(ben.account)">Remove</button></li>
+                                        </ul>
+                                        <button class="btn btn-outline-primary" v-if="!isntDlux" type="button"
+                                            @click="addBen('dlux-io', 1000)">Include in
+                                            DLUX Ecosystem</button>
+                                        <button v-for="item in isntBenned" type="button"
+                                            @click="addBen(item.account, item.weight)">Include Contract
+                                            {{item.contract}}</button>
+                                        <div class="text-center">
+                                            <button ref="publishButton" type="button" @keyUp="buildTags()"
+                                                class="btn btn-danger" data-toggle="tooltip" data-placement="top"
+                                                title="Publish Gallery to HIVE" :disable="!validPost"
+                                                @click="post([['vrHash', 'QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16']])">Publish</button>
+                                        </div>
+                                    </form>
                                 </div>
-                                <button class="btn btn-dark bg-blur-darkg border-0" title="Reset Camera"
-                                    @click="resetCamera()"><i class="fa-solid fa-camera-rotate"></i></button>
                             </div>
+                        </div>
+                    </div>
 
-                            <hr style="border: 5px solid red;" :class="{'invisible': !showLine}"
-                                class="overlay m-0 w-100 position-absolute top-50 start-0 translate-middle-y" />
-                            <div class="ratio ratio-1x1 frame-360">
-                                <iframe ref="aframePreview" id="aframePreview"
-                                    src="https://turnkey-360-gallery.glitch.me/post.html" frameborder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowfullscreen></iframe>
+                </div>
+                <div class="col-xl-6 pt-0 px-0 px-md-1 scroll">
+                    <h3 class="d-none">Preview</h3>
+                    <div class="accordion bg-blur-darkg rounded" id="previewCol">
+                        <div class="accordion-item bg-img-none">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#preview360" aria-expanded="true" aria-controls="preview360">
+                                    360 Preview
+                                </button>
+                            </h2>
+                            <div id="preview360" class="accordion-collapse collapse show">
+                                <div class="accordion-body p-0">
+                                    <div class="position-relative">
+                                        <div
+                                            class="d-flex w-100 justify-content-end align-items-center p-2 overlay position-absolute top-0 start-50 translate-middle-x">
+
+                                            <div class="form-check form-switch  form-switch-lg me-2">
+                                                <input class="form-check-input bg-blur-darkg" type="checkbox"
+                                                    role="switch" id="flexSwitchCheckChecked" v-model="showLine"
+                                                    title="Horizon Line">
+                                            </div>
+                                            <button class="btn btn-dark bg-blur-darkg border-0" title="Reset Camera"
+                                                @click="resetCamera()"><i
+                                                    class="fa-solid fa-camera-rotate"></i></button>
+                                        </div>
+
+                                        <hr style="border: 5px solid red;" :class="{'invisible': !showLine}"
+                                            class="overlay m-0 w-100 position-absolute top-50 start-0 translate-middle-y" />
+                                        <div class="ratio ratio-1x1 frame-360">
+                                            <iframe ref="aframePreview" id="aframePreview"
+                                                src="https://turnkey-360-gallery.glitch.me/post.html" frameborder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowfullscreen></iframe>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item bg-img-none">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#previewPost" aria-expanded="true" aria-controls="previewPost">
+                                    Post Preview
+                                </button>
+                            </h2>
+                            <div id="previewPost" class="accordion-collapse collapse show">
+                                <div class="accordion-body text-start">
+                                    <div v-if="!postBody.length">
+                                        <p class="text-center">Use the Post Details area to compose the body of your
+                                            post.</p>
+                                    </div>
+                                    <!-- <vue-markdown :md="compiledMarkdown" /> -->
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="accordion-item bg-img-none">
-                <h2 class="accordion-header">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#previewPost" aria-expanded="true" aria-controls="previewPost">
-                        Post Preview
-                    </button>
-                </h2>
-                <div id="previewPost" class="accordion-collapse collapse show">
-                    <div class="accordion-body text-start">
-                        <div v-if="!postBody.length">
-                            <p class="text-center">Use the Post Details area to compose the body of your
-                                post.</p>
-                        </div>
-                        <!-- <vue-markdown :md="compiledMarkdown" /> -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    </div>
 
-    </main>
-    <!-- SPK Wallet Modal -->
-    <div class="modal modal-xl fade" id="spkWalletModal" tabindex="-1"
-    aria-labelledby="spkWalletModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="spkWalletModalLabel">SPK Testnet Wallet</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <spk-vue node="false" :account="account" @tosign="toSign=$event;log($event)" />
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary"
-                    data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Sponsored Contract -->
-<div class="modal fade" id="sponsoredModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content bg-darker text-white">
-            <div class="modal-header">
-                <h5 class="modal-title">Sponsored Contracts</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
-            </div>
-
-            <div class="modal-body text-start">
-                <div v-for="spon in services">
-                    <button :disabled="spon.channel" @click="petitionForContract(spon.provider)"
-                        class="btn btn-lg text-white btn-outline-primary w-100 border d-flex justify-content-between align-items-center"><span
-                            class="lead">@{{spon.provider}}</span><span
-                            class="small text-warning">{{spon.memo}}</span></button>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary"
-                    data-bs-dismiss="modal">Close</button>
-
-            </div>
-
-        </div>
-    </div>
-</div>
+        </main>
     </div>
     <!-- Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
