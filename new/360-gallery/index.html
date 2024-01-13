@@ -420,7 +420,50 @@
                     </div>
                 </div>
             </div>
+            <!-- SPK Wallet Modal -->
+            <div class="modal modal-xl fade" id="spkWalletModal" tabindex="-1" aria-labelledby="spkWalletModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="spkWalletModalLabel">SPK Testnet Wallet</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <spk-vue node="false" :account="account" @tosign="toSign=$event;log($event)" />
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            <!-- Sponsored Contract -->
+            <div class="modal fade" id="sponsoredModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content bg-darker text-white">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Sponsored Contracts</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body text-start">
+                            <div v-for="spon in services">
+                                <button :disabled="spon.channel" @click="petitionForContract(spon.provider)"
+                                    class="btn btn-lg text-white btn-outline-primary w-100 border d-flex justify-content-between align-items-center"><span
+                                        class="lead">@{{spon.provider}}</span><span
+                                        class="small text-warning">{{spon.memo}}</span></button>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
     <!-- Bootstrap -->
