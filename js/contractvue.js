@@ -24,12 +24,11 @@ export default {
             <span v-show="saccountapi.spk_power">. If
             you have BROCA token, click <a class="btn btn-sm btn-primary no-decoration small"
                 style="font-size: 0.6em;" role="button" data-bs-toggle="modal" data-bs-target="#contractModal">
-                <modal-vue type="build" token="BROCA" :balance="broca_calc(spkapi.broca)" :account="account"
-                @modalsign="sendIt($event)" :ipfsproviders="ipfsProviders" v-slot:trigger>
-                <span slot="trigger" class="trigger"><i
-                        class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
-            </modal-vue>
-                </a>
+                <modal-vue type="build" token="BROCA" :balance="broca_calc(saccountapi.broca)" :account="account"
+                    @modalsign="sendIt($event)" :ipfsproviders="ipfsProviders" v-slot:trigger>
+                    <span slot="trigger" class="trigger"><i
+                            class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
+                </modal-vue></a>
             to create a custom contract
         </span>
         </p>
