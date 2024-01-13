@@ -2173,7 +2173,7 @@ function buyNFT(setname, uid, price, type, callback){
       }
     },
     accountRelations(name) {
-      fetch("https://api.hive.blog", {
+      fetch("https://hive-api.dlux.io", {
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"bridge.get_relationship_between_accounts\", \"params\":[\"${this.account}\",\"${name}\"], \"id\":5}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -2409,7 +2409,7 @@ function buyNFT(setname, uid, price, type, callback){
         !this.postSelect[this.postSelect.entry].p
       ) {
         this.postSelect[this.postSelect.entry].p = true;
-        fetch("https://api.hive.blog", {
+        fetch("https://hive-api.dlux.io", {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_blog_entries", "params":["${
             this.pageAccount
           }",${this.postSelect[this.postSelect.entry].o},${

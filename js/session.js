@@ -690,7 +690,7 @@ let HP
 //  }
 
 // function setPFP(setname, uid, callback){
-//     fetch("https://api.hive.blog", {
+//     fetch("https://hive-api.dlux.io", {
 //         body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[["${user}"]], "id":1}`,
 //         headers: {
 //             "Content-Type": "application/x-www-form-urlencoded"
@@ -1074,7 +1074,7 @@ function downPowerMagic(up, down, block_num) {
 
 function propCheck(user){
     return new Promise((resolve, reject)=>{
-    var url171 = fetch("https://api.hive.blog", {
+    var url171 = fetch("https://hive-api.dlux.io", {
         body: "{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.list_proposal_votes\", \"params\":[[171], 1000, \"by_proposal_voter\", \"ascending\", \"active\"], \"id\":1}",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"

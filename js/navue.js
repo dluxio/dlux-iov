@@ -240,7 +240,7 @@ export default {
     },
     storeKey(level, key){
       //get hive user
-      fetch("https://api.hive.blog", {
+      fetch("https://hive-api.dlux.io", {
         method: "POST",
         body: JSON.stringify([
           "get_accounts",
@@ -947,7 +947,7 @@ export default {
       }
     },
     queueUser() {
-      fetch("https://api.hive.blog", {
+      fetch("https://hive-api.dlux.io", {
         method: "POST",
         body: JSON.stringify([
           "get_accounts",
