@@ -31,7 +31,7 @@
     <!-- <script src="/js/drag-sort.js"></script>
 	<script src="https://unpkg.com/lodash@4.16.0"></script> -->
     <!-- Vue Controller -->
-    <script type="module" src="/js/vueme.js"></script>
+    <script type="module" src="/js/spkvue.js"></script>
     <link href="/css/custom.css" rel="stylesheet" />
     <script>
         if ('serviceWorker' in navigator) {
@@ -1669,7 +1669,7 @@
                                 <div id="previewPost" class="accordion-collapse collapse show">
                                     <div class="accordion-body text-start">
                                         <div v-if="!postBody.length"><p class="text-center">Use the Post Details area to compose the body of your post.</p></div>
-                                        <vue-showdown :markdown="postBody" />
+                                        <!-- <vue-showdown :markdown="postBody" /> -->
                                     </div>
                                 </div>
                             </div>
