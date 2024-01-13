@@ -10,149 +10,176 @@ export default {
         "files-vue": FilesVue,
         "upload-vue": UploadVue
     },
-    template: `<table class="table table-hover text-center align-middle mb-0" id="files-table">
-    <thead>
-        <tr>
+    template: `
+<div class="ms-auto me-auto text-center" v-show="!contracts.length">
+    <div class="ms-auto me-auto card px-3 py-2 mt-3 mb-4 bg-darker" style="max-width: 600px">
+        <h2 class="fw-light mt-1">No contracts found</h2>
+        <p class="lead mb-1">
+            Click <a class="btn btn-sm btn-danger no-decoration small" style="font-size: 0.6em;" role="button"
+            data-bs-toggle="modal" data-bs-target="#sponsoredModal"><i
+            class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE</a>
+            to select a sponsored contract
+            <!-- v-show="spkapi.spk_power" -->
+            <span>. If
+            you have BROCA token, click <a class="btn btn-sm btn-primary no-decoration small"
+                style="font-size: 0.6em;" role="button" data-bs-toggle="modal" data-bs-target="#contractModal">
+                <!-- 
+                <modal-vue type="build" token="BROCA" :balance="broca_calc(spkapi.broca)" :account="account"
+                @modalsign="sendIt($event)" :ipfsproviders="ipfsProviders" v-slot:trigger>
+                <span slot="trigger" class="trigger"><i
+                        class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
+            </modal-vue> -->
+                </a>
+            to create a custom contract
+        </span>
+        </p>
+    </div>
+</div>
+<div v-show="contracts.length">
+    <table class="table table-hover text-center align-middle mb-0" id="files-table">
+        <thead>
+            <tr>
 
-        <!-- storage -->
-        <th scope="col">
-            <div class="d-flex flex-wrap align-items-center justify-content-center">
-                <div class="d-flex flex-wrap align-items-center justify-content-center">
-                    <i class="fa-solid fa-database fa-fw"></i>
-                    <span class="m-1">Storage</span>
-                </div>
-                <div class="d-flex align-items-center">
-                    <button class="btn btn-sm btn-secondary" @click="sortContracts('a','asc')"><i
-                            class="fa-solid fa-caret-up"></i></button>
-                    <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('a','dec')"><i
-                            class="fa-solid fa-caret-down"></i></button>
-                </div>
-            </div>
-        </th>
-
-
-            <!-- status -->
-            <th scope="col">
-                <div class="d-flex flex-wrap align-items-center justify-content-center">
+                <!-- storage -->
+                <th scope="col">
                     <div class="d-flex flex-wrap align-items-center justify-content-center">
-                        <i class="fa-solid fa-signal fa-fw"></i>
-                        <span class="m-1">Status</span>
+                        <div class="d-flex flex-wrap align-items-center justify-content-center">
+                            <i class="fa-solid fa-database fa-fw"></i>
+                            <span class="m-1">Storage</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <button class="btn btn-sm btn-secondary" @click="sortContracts('a','asc')"><i
+                                    class="fa-solid fa-caret-up"></i></button>
+                            <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('a','dec')"><i
+                                    class="fa-solid fa-caret-down"></i></button>
+                        </div>
                     </div>
-                    <div class="d-flex align-items-center">
-                        <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('c','asc')"><i
-                                class="fa-solid fa-caret-up"></i></button>
-                        <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('c','dec')"><i
-                                class="fa-solid fa-caret-down"></i></button>
-                    </div>
-                </div>
-            </th>
+                </th>
 
-            <!-- expires -->
-            <th scope="col">
-                <div class="d-flex flex-wrap align-items-center justify-content-center">
+
+                <!-- status -->
+                <th scope="col">
                     <div class="d-flex flex-wrap align-items-center justify-content-center">
-                        <i class="fa-solid fa-clock fa-fw"></i>
-                        <span class="m-1">Expires</span>
+                        <div class="d-flex flex-wrap align-items-center justify-content-center">
+                            <i class="fa-solid fa-signal fa-fw"></i>
+                            <span class="m-1">Status</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('c','asc')"><i
+                                    class="fa-solid fa-caret-up"></i></button>
+                            <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('c','dec')"><i
+                                    class="fa-solid fa-caret-down"></i></button>
+                        </div>
                     </div>
-                    <div class="d-flex align-items-center">
-                        <button class="btn btn-sm btn-secondary" @click="sortContracts('e','dec')"><i
-                                class="fa-solid fa-caret-up"></i></button>
-                        <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('e','asc')"><i
-                                class="fa-solid fa-caret-down"></i></button>
+                </th>
+
+                <!-- expires -->
+                <th scope="col">
+                    <div class="d-flex flex-wrap align-items-center justify-content-center">
+                        <div class="d-flex flex-wrap align-items-center justify-content-center">
+                            <i class="fa-solid fa-clock fa-fw"></i>
+                            <span class="m-1">Expires</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <button class="btn btn-sm btn-secondary" @click="sortContracts('e','dec')"><i
+                                    class="fa-solid fa-caret-up"></i></button>
+                            <button class="btn btn-sm btn-secondary ms-1" @click="sortContracts('e','asc')"><i
+                                    class="fa-solid fa-caret-down"></i></button>
+                        </div>
                     </div>
-                </div>
-            </th>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="contract in contracts" class="text-start">
+                <td colspan="4" class="p-0">
+                    <div class="table-responsive">
+                        <table class="table text-white align-middle mb-0">
+                            <tbody class="border-0">
+                                <tr class="border-0">
 
-            
+                                    <!-- storage -->
+                                    <th class="border-0">
+                                        <div class="d-flex align-items-center">
+                                            <a class="ms-md-2 collapsed no-decoration" data-bs-toggle="collapse"
+                                                :href="'#' + replace(contract.i) + 'files'">
+                                                <span class="if-collapsed">
+                                                    <button class="my-1 me-2 btn btn-sm btn-outline-light">
+                                                        <i class="fa-solid fa-file fa-fw"></i>
+                                                    </button>
+                                                </span>
+                                                <span class="if-not-collapsed">
+                                                    <button class="my-1 me-2 btn btn-sm btn-light">
+                                                        <i class="fa-solid fa-file fa-fw"></i>
+                                                    </button>
+                                                </span>
+                                            </a>
+                                            {{contract.c > 1 ? contract.u/1000000 : contract.a/1000000}} MB
 
-
-        </tr>
-    </thead>
-    <tbody>
-
-        <tr v-for="contract in contracts" class="text-start">
-            <td colspan="4" class="p-0">
-                <div class="table-responsive">
-                    <table class="table text-white align-middle mb-0">
-                        <tbody class="border-0">
-                            <tr class="border-0">
-
-                                <!-- storage -->
-                                <th class="border-0">
-                                    <div class="d-flex align-items-center">
-                                        <a  class="ms-md-2 collapsed no-decoration"
-                                            data-bs-toggle="collapse" :href="'#' + replace(contract.i) + 'files'">
-                                            <span class="if-collapsed">
-                                            <button class="my-1 me-2 btn btn-sm btn-outline-light">
-                                            <i class="fa-solid fa-file fa-fw"></i>
-                                            </button>
-                                            </span>
-                                            <span class="if-not-collapsed">
-                                            <button class="my-1 me-2 btn btn-sm btn-light">
-                                            <i class="fa-solid fa-file fa-fw"></i>
-                                            </button>
-                                            </span>
-                                        </a>
-                                        {{contract.c > 1 ? contract.u/1000000 : contract.a/1000000}} MB
-                                        
-                                    </div>
-                                </th>
-
-                                <!-- status -->
-                                <td class="border-0">
-                                    <div class="d-flex align-items-center">
-                                        
-                                        <!-- upload btn -->
-                                        <a v-if="contract.c == 1" class="collapsed no-decoration"
-                                            data-bs-toggle="collapse" :href="'#' + replace(contract.i) + 'upload'">
-                                            <span class="if-collapsed"><button
-                                                    class="my-1 me-2 btn btn-sm btn-outline-success"><i
-                                                        class="fa-solid fa-file-upload fa-fw"></i></button></span>
-                                            <span class="if-not-collapsed"><button
-                                                    class="my-1 me-2 btn btn-sm btn-success"><i
-                                                        class="fa-solid fa-file-upload fa-fw"></i></button></span>
-                                        </a>
-                                        <!-- post btn -->
-                                        <a v-if="contract.c == 2" class="collapsed no-decoration"
-                                            data-bs-toggle="collapse" :href="'#' + replace(contract.i) + 'beneficiary'">
-                                            <span class="if-collapsed"><button
-                                                    class="my-1 me-2 btn btn-sm btn-outline-warning"><i
-                                                        class="fa-solid fa-hand-holding-dollar fa-fw"></i></button></span>
-                                            <span class="if-not-collapsed"><button
-                                                    class="my-1 me-2 btn btn-sm btn-warning"><i
-                                                        class="fa-solid fa-hand-holding-dollar fa-fw"></i></button></span>
-                                        </a>
-                                        <!-- extend btn -->
-                                        <a v-if="contract.c == 3" class="collapsed no-decoration"
-                                        data-bs-toggle="collapse" :href="'#' + replace(contract.i) + 'extension'">
-                                        <span class="if-collapsed"><button
-                                                class="my-1 me-2 btn btn-sm btn-outline-info"><i
-                                                    class="fa-solid fa-clock-rotate-left fa-fw"></i></button></span>
-                                        <span class="if-not-collapsed"><button class="my-1 me-2 btn btn-sm btn-info"><i
-                                                    class="fa-solid fa-clock-rotate-left fa-fw"></i></button></span>
-                                        </a>
-                                        <!-- message -->
-                                        <div v-if="contract.c == 1">
-                                            <span class="d-lg-none">Upload</span>
-                                            <span class="d-none d-lg-flex">Ready for upload</span>
                                         </div>
-                                        <div v-if="contract.c == 2">
-                                            <span class="d-lg-none">Post</span>
-                                            <span class="d-none d-lg-flex">Post {{split(contract.s, ',', 1)/100}}% to @{{split(contract.s, ',', 0)}}</span>
-                                        </div>
-                                        <div v-if="contract.c == 3">
-                                            <span class="d-lg-none">Extend</span>
-                                            <span class="d-none d-lg-flex align-items-center">Extend<span class="mx-2">—</span>{{contract.nt}} / {{contract.p}} <i class="fa-solid fa-tower-broadcast ms-1 fa-fw"></i></span>
-                                        </div>
-                                    </div>
-                                </td>
+                                    </th>
 
-                                <!-- expires -->
-                                <td class="border-0">
-                                    <div class="d-flex align-items-center">
-                                        
+                                    <!-- status -->
+                                    <td class="border-0">
+                                        <div class="d-flex align-items-center">
 
-                                        <a  class="no-decoration collapsed" data-bs-toggle="collapse"
+                                            <!-- upload btn -->
+                                            <a v-if="contract.c == 1" class="collapsed no-decoration"
+                                                data-bs-toggle="collapse" :href="'#' + replace(contract.i) + 'upload'">
+                                                <span class="if-collapsed"><button
+                                                        class="my-1 me-2 btn btn-sm btn-outline-success"><i
+                                                            class="fa-solid fa-file-upload fa-fw"></i></button></span>
+                                                <span class="if-not-collapsed"><button
+                                                        class="my-1 me-2 btn btn-sm btn-success"><i
+                                                            class="fa-solid fa-file-upload fa-fw"></i></button></span>
+                                            </a>
+                                            <!-- post btn -->
+                                            <a v-if="contract.c == 2" class="collapsed no-decoration"
+                                                data-bs-toggle="collapse"
+                                                :href="'#' + replace(contract.i) + 'beneficiary'">
+                                                <span class="if-collapsed"><button
+                                                        class="my-1 me-2 btn btn-sm btn-outline-warning"><i
+                                                            class="fa-solid fa-hand-holding-dollar fa-fw"></i></button></span>
+                                                <span class="if-not-collapsed"><button
+                                                        class="my-1 me-2 btn btn-sm btn-warning"><i
+                                                            class="fa-solid fa-hand-holding-dollar fa-fw"></i></button></span>
+                                            </a>
+                                            <!-- extend btn -->
+                                            <a v-if="contract.c == 3" class="collapsed no-decoration"
+                                                data-bs-toggle="collapse"
+                                                :href="'#' + replace(contract.i) + 'extension'">
+                                                <span class="if-collapsed"><button
+                                                        class="my-1 me-2 btn btn-sm btn-outline-info"><i
+                                                            class="fa-solid fa-clock-rotate-left fa-fw"></i></button></span>
+                                                <span class="if-not-collapsed"><button
+                                                        class="my-1 me-2 btn btn-sm btn-info"><i
+                                                            class="fa-solid fa-clock-rotate-left fa-fw"></i></button></span>
+                                            </a>
+                                            <!-- message -->
+                                            <div v-if="contract.c == 1">
+                                                <span class="d-lg-none">Upload</span>
+                                                <span class="d-none d-lg-flex">Ready for upload</span>
+                                            </div>
+                                            <div v-if="contract.c == 2">
+                                                <span class="d-lg-none">Post</span>
+                                                <span class="d-none d-lg-flex">Post {{split(contract.s, ',', 1)/100}}%
+                                                    to @{{split(contract.s, ',', 0)}}</span>
+                                            </div>
+                                            <div v-if="contract.c == 3">
+                                                <span class="d-lg-none">Extend</span>
+                                                <span class="d-none d-lg-flex align-items-center">Extend<span
+                                                        class="mx-2">—</span>{{contract.nt}} / {{contract.p}} <i
+                                                        class="fa-solid fa-tower-broadcast ms-1 fa-fw"></i></span>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- expires -->
+                                    <td class="border-0">
+                                        <div class="d-flex align-items-center">
+
+
+                                            <a class="no-decoration collapsed" data-bs-toggle="collapse"
                                                 :href="'#' + replace(contract.i)">
                                                 <span class="if-collapsed"><button
                                                         class="my-1 me-2 btn btn-sm btn-outline-light"><i
@@ -162,101 +189,113 @@ export default {
                                                             class="fa-solid fa-info fa-fw"></i></button></span>
                                             </a>
 
-                                            
+
 
                                             <span v-if="contract.c">
-                                            {{exp_to_time(contract.e)}}
-                                        </span>
+                                                {{exp_to_time(contract.e)}}
+                                            </span>
 
-                                    </div>
-                                </td>
-                                
-                            </tr>
+                                        </div>
+                                    </td>
 
-                            <tr class="collapse" :id="replace(contract.i) + 'upload'">
-                                <td class=" border-0" colspan="4">
-                                   <upload-vue :user="saccountapi" :propcontract="contract" @tosign="toSign=$event" @done="getSpkStats()"/>
-                                </td>
-                            </tr>
-                            <tr class="collapse" :id="replace(contract.i) + 'files'">
-                                <td class=" border-0" colspan="4">
-                                    <files-vue :files="contract.df" ></files-vue>
-                                </td>
-                            </tr>
-                            <tr class="collapse" :id="replace(contract.i) + 'beneficiary'">
-                                <td class=" border-0" colspan="4">
-                                    <p>put post compose here</p>
-                                </td>
-                            </tr>
-                            <tr class="collapse" :id="replace(contract.i) + 'extension'">
-                                <td class=" border-0" colspan="4" v-if="contract.c == 3">
-                                <extension-vue :node-view="nodeView" :contract="contract" :sstats="sstats" :account="account" :saccountapi="saccountapi" @tosign="toSign=$event"></extension-vue>
-                                </td>
-                            </tr>
+                                </tr>
 
-                            <tr class="collapse" :id="replace(contract.i)">
-                                <td class="border-0" colspan="4">
-                                    <div class="d-flex flex-wrap justify-content-between border border-white rounded text-start">
-                                        <div class="m-1">
-                                            Contract ID: {{contract.i}}
+                                <tr class="collapse" :id="replace(contract.i) + 'upload'">
+                                    <td class=" border-0" colspan="4">
+                                        <upload-vue :user="saccountapi" :propcontract="contract" @tosign="toSign=$event"
+                                            @done="getSpkStats()" />
+                                    </td>
+                                </tr>
+                                <tr class="collapse" :id="replace(contract.i) + 'files'">
+                                    <td class=" border-0" colspan="4">
+                                        <files-vue :files="contract.df"></files-vue>
+                                    </td>
+                                </tr>
+                                <tr class="collapse" :id="replace(contract.i) + 'beneficiary'">
+                                    <td class=" border-0" colspan="4">
+                                        <p>put post compose here</p>
+                                    </td>
+                                </tr>
+                                <tr class="collapse" :id="replace(contract.i) + 'extension'">
+                                    <td class=" border-0" colspan="4" v-if="contract.c == 3">
+                                        <extension-vue :node-view="nodeView" :contract="contract" :sstats="sstats"
+                                            :account="account" :saccountapi="saccountapi"
+                                            @tosign="toSign=$event"></extension-vue>
+                                    </td>
+                                </tr>
+
+                                <tr class="collapse" :id="replace(contract.i)">
+                                    <td class="border-0" colspan="4">
+                                        <div
+                                            class="d-flex flex-wrap justify-content-between border border-white rounded text-start">
+                                            <div class="m-1">
+                                                Contract ID: {{contract.i}}
+                                            </div>
+                                            <div class="m-1">
+                                                Size Allowed: {{contract.a}} bytes
+                                            </div>
+                                            <div v-if="contract.c == 2" class="m-1">
+                                                Size: {{contract.u}} bytes
+                                            </div>
+                                            <div class="m-1">
+                                                File Owner: <a :href="'/@' + contract.t"
+                                                    class="no-decoration text-primary">@{{contract.t}}</a>
+                                            </div>
+                                            <div class="m-1">
+                                                Service Provider: <a :href="'/@' + contract.b"
+                                                    class="no-decoration text-primary">@{{contract.b}}</a>
+                                            </div>
+                                            <div class="m-1">
+                                                Sponsor: <a :href="'/@' + contract.f"
+                                                    class="no-decoration text-primary">@{{contract.f}}</a>
+                                            </div>
+                                            <div class="m-1">
+                                                Expiration: {{exp_to_time(contract.e)}}
+                                            </div>
+                                            <div class="m-1">
+                                                Price: {{formatNumber(contract.r,'3','.',',')}} Broca
+                                            </div>
+                                            <div class="m-1">
+                                                Redundancy: {{contract.p}}
+                                            </div>
+                                            <div v-if="contract.s" class="m-1">
+                                                Terms: {{slotDecode(contract.s, 1)}}%
+                                                Beneficiary to @{{slotDecode(contract.s, 0)}}
+                                            </div>
+                                            <div class="m-1">
+                                                Status: {{contract.c == 1 ? 'Waiting For Upload' : 'Uploaded'}}
+                                            </div>
+                                            <div v-if="contract.df" class="m-1 text-center">
+                                                <u>Files</u>
+                                                <ol class="text-start">
+                                                    <li class="mb-0" v-for="(size, cid, index) in contract.df">
+                                                        <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank"
+                                                            class="no-decoration text-break text-primary">{{cid}}</a><span
+                                                            class="small ms-1">({{size > 1 ? size/1000000 :
+                                                            size/1000000}} MB)</span>
+                                                    </li>
+                                                </ol>
+                                            </div>
+                                            <div v-if="contract.n" class="m-1 ms-auto text-center">
+                                                <u>Stored by</u>
+                                                <ol class="text-start">
+                                                    <li v-for="acc in contract.n">
+                                                        <a :href="'/@' + acc"
+                                                            class="no-decoration text-primary">@{{acc}}</a>
+                                                    </li>
+                                                </ol>
+                                            </div>
                                         </div>
-                                        <div class="m-1">
-                                            Size Allowed: {{contract.a}} bytes
-                                        </div>
-                                        <div v-if="contract.c == 2" class="m-1">
-                                            Size: {{contract.u}} bytes
-                                        </div>
-                                        <div class="m-1">
-                                            File Owner:  <a :href="'/@' + contract.t" class="no-decoration text-primary">@{{contract.t}}</a>
-                                        </div>
-                                        <div class="m-1">
-                                            Service Provider: <a :href="'/@' + contract.b" class="no-decoration text-primary">@{{contract.b}}</a>
-                                        </div>
-                                        <div class="m-1">
-                                            Sponsor: <a :href="'/@' + contract.f" class="no-decoration text-primary">@{{contract.f}}</a>
-                                        </div>
-                                        <div class="m-1">
-                                            Expiration: {{exp_to_time(contract.e)}}
-                                        </div>
-                                        <div class="m-1">
-                                            Price: {{formatNumber(contract.r,'3','.',',')}} Broca
-                                        </div>
-                                        <div class="m-1">
-                                            Redundancy: {{contract.p}}
-                                        </div>
-                                        <div v-if="contract.s" class="m-1">
-                                            Terms: {{slotDecode(contract.s, 1)}}%
-                                            Beneficiary to @{{slotDecode(contract.s, 0)}}
-                                        </div>
-                                        <div class="m-1">
-                                            Status: {{contract.c == 1 ? 'Waiting For Upload' : 'Uploaded'}}
-                                        </div>
-                                        <div v-if="contract.df" class="m-1 text-center">
-                                            <u>Files</u>
-                                            <ol class="text-start">
-                                            <li class="mb-0" v-for="(size, cid, index) in contract.df">
-                                            <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="no-decoration text-break text-primary">{{cid}}</a><span class="small ms-1">({{size > 1 ? size/1000000 : size/1000000}} MB)</span>
-                                            </li>
-                                            </ol>
-                                        </div>
-                                        <div v-if="contract.n" class="m-1 ms-auto text-center">
-                                            <u>Stored by</u>
-                                            <ol class="text-start">
-                                            <li v-for="acc in contract.n">
-                                               <a :href="'/@' + acc" class="no-decoration text-primary">@{{acc}}</a>
-                                            </li>
-                                            </ol>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </td>
-        </tr>
-    </tbody>
-</table>`,
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>`,
     props: {
         account: {
             default: ''
