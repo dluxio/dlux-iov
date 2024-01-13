@@ -2129,9 +2129,9 @@ createApp({
     toFixed(value, decimals) {
       return Number(value).toFixed(decimals);
     },
-    parseFloat(value) {
-      return parseFloat(value);
-    },
+    // parseFloat(value) {
+    //   return parseFloat(value);
+    // },
     toUpperCase(value) {
       return value.toUpperCase();
     },
