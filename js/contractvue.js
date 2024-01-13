@@ -274,7 +274,7 @@ export default {
                                             </tr>
                                             <tr class="collapse" :id="replace(contract.i) + 'files'">
                                                 <td class=" border-0" colspan="4">
-                                                    <files-vue :files="contract.df"></files-vue>
+                                                    <files-vue :files="contract.df" :assets="assets" @addassets="addAsets($event)"></files-vue>
                                                 </td>
                                             </tr>
                                             <tr class="collapse" :id="replace(contract.i) + 'beneficiary'">
@@ -514,6 +514,9 @@ export default {
             this.$emit('modalselect', url);
         },
         addAsset(id, contract) {
+            if(typeof id == 'object'){
+                contract = id.contract
+            }
             const item = {
                 id,
                 contract,

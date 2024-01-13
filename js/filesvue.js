@@ -17,7 +17,7 @@ export default {
                                 </div>
                             </a>
                        
-                        <div class="card-footer text-center border-0">
+                        <div class="card-footer text-center border-0" v-if="assets">
                             <button type="button" class="btn btn-primary" @click="addAsset(file, contract.i)"><i class="fa-solid fa-square-plus me-2"></i>Add</button>
                         </div>
                     </div>
@@ -32,14 +32,21 @@ props: {
         type: Object,
         default: {},
     },
+    assets: {
+        type: Boolean,
+        default: false,
+    },
 },
 data() {
     return {
 
     };
 },
-emits: [],
+emits: [ "addassets" ],
 methods: {
+    addAsset(id, contract) {
+        this.$emit("addassets", { id, contract });
+    },
 },
 computed: {
     hasFiles() {
