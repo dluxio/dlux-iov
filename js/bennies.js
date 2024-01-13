@@ -111,7 +111,7 @@ export default {
             }
         },
         checkHive(account, amount){
-            fetch('https://hive-api.dlux.io', {
+            fetch('https://api.hive.blog', {
                 method: 'POST',
                 body: JSON.stringify({  
                     "jsonrpc": "2.0",

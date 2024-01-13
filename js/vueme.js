@@ -69,7 +69,7 @@ if (
   //window.history.replaceState(null, null, "dex");
 }
 let user = localStorage.getItem("user") || "GUEST";
-let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
+let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
 
 // Vue.directive("scroll", {
 //   inserted: function (el, binding) {
@@ -2173,7 +2173,7 @@ function buyNFT(setname, uid, price, type, callback){
       }
     },
     accountRelations(name) {
-      fetch("https://hive-api.dlux.io", {
+      fetch("https://api.hive.blog", {
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"bridge.get_relationship_between_accounts\", \"params\":[\"${this.account}\",\"${name}\"], \"id\":5}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -2409,7 +2409,7 @@ function buyNFT(setname, uid, price, type, callback){
         !this.postSelect[this.postSelect.entry].p
       ) {
         this.postSelect[this.postSelect.entry].p = true;
-        fetch("https://hive-api.dlux.io", {
+        fetch("https://api.hive.blog", {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_blog_entries", "params":["${
             this.pageAccount
           }",${this.postSelect[this.postSelect.entry].o},${
