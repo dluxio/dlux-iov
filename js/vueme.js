@@ -2117,7 +2117,7 @@ function buyNFT(setname, uid, price, type, callback){
     },
     getReplies(a, p, c) {
       return new Promise((resolve, reject) => {
-        fetch(this.hapi, {
+        fetch('https://api.hive.blog', {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content_replies", "params":["${a}","${p}"], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -2478,7 +2478,7 @@ function buyNFT(setname, uid, price, type, callback){
     },
     getContent(a, p, modal) {
       if (a && p) {
-        fetch(this.hapi, {
+        fetch('https://api.hive.blog', {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content", "params":["${a}", "${p}"], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
