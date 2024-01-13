@@ -891,6 +891,23 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
     getSetPhotos(s, c) {
       return s.setname ? `https://ipfs.dlux.io/ipfs/${s.set[c]}` : "";
     },
+    callSWfunction(id,o,p,cb) {
+      return new Promise((resolve, reject) => {
+        if (navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({
+            id: id,
+            o: o,
+          });
+          navigator.serviceWorker.onmessage = (e) => {
+            if (e.data.id == id) {
+              resolve(e.data);
+            }
+          };
+        } else {
+          reject("no controller");
+        }
+      })
+    },
     getSPKUser() {
       console.log('SPK User Update')
       if(this.account)fetch("https://spktest.dlux.io/@" + this.account)
@@ -3433,6 +3450,8 @@ function buyNFT(setname, uid, price, type, callback){
     }
   },
   mounted() {
+    //recieve serviceworker messages
+    this.callSWfunction('online').then((r) => {console.log(r)})
     this.getIPFSproviders()
     this.getMARKETS()
     window.addEventListener('scroll', this.handleScroll);

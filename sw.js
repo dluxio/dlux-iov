@@ -1,4 +1,4 @@
-this.version = "2024.01.13.14";
+this.version = "2024.01.13.15";
 
 console.log(
   "SW:" + this.version + " - online."
@@ -124,10 +124,42 @@ self.addEventListener("activate", function (event) {
 });
 
 self.addEventListener("message", function (e) {
-  var message = e.data; // We're going to have some fun here...
   
+  var message = e.data; // We're going to have some fun here...
+  console.log("SW msg:", message);
+  switch (message.call) {
+    case "callScript":
+      callScript(message.o).then((r) => {
+        e.ports[0].postMessage(r);
+      });
+      break;
+    case "tryLocal":
+      tryLocal(message).then((r) => {
+        e.ports[0].postMessage(r);
+      });
+      break;
+    case "online":
+      e.ports[0].postMessage(navigator.onLine);
+      break;
+    default:
+      console.log("SW msg:" + message);
+  }
   console.log("SW msg:" + message);
 });
+
+
+
+function tryLocal(m) {
+  return new Promise((resolve, reject) => {
+    localStorage.getItem(m.o).then((data) => {
+      if (data) {
+        resolve(data);
+      } else {
+        reject("no data");
+      }
+    })
+  });
+}
 
 function callScript (o){
   return new Promise((resolve, reject) => {
