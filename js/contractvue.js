@@ -513,7 +513,7 @@ export default {
         modalSelect(url) {
             this.$emit('modalselect', url);
         },
-        addAsset(id, contract) {
+        addAssets(id, contract) {
             if(typeof id == 'object'){
                 contract = id.contract
             }
