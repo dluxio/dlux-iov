@@ -3466,8 +3466,6 @@ function buyNFT(setname, uid, price, type, callback){
               this.serviceWorker = true
           });
   }
-    this.getIPFSproviders()
-    this.getMARKETS()
     window.addEventListener('scroll', this.handleScroll);
     if (location.pathname.split("/@")[1]) {
       this.pageAccount = location.pathname.split("/@")[1]
@@ -3475,6 +3473,8 @@ function buyNFT(setname, uid, price, type, callback){
         this.pagePermlink = this.pageAccount.split('/')[1]
         this.pageAccount = this.pageAccount.split('/')[0]
       }
+    } else if(location.pathname.split("/new/")[1]) {
+      this.builder = true
     } else {
       this.pageAccount = this.account;
       this.me = true;
@@ -3483,6 +3483,8 @@ function buyNFT(setname, uid, price, type, callback){
     if(this.pagePermlink){
       this.getContent(this.pageAccount, this.pagePermlink, true)
     } else {
+      this.getIPFSproviders()
+      this.getMARKETS()
       if(!this.me){
         this.focus.account = this.pageAccount;
         this.sapi = sapi;
@@ -3502,22 +3504,25 @@ function buyNFT(setname, uid, price, type, callback){
         //this.getTokenUser(this.pageAccount, false);
         //this.getNFTs(this.pageAccount);
       }
-      deepLink();
-      this.observer = new MutationObserver(mutations => {
-        for (const m of mutations) {
-          const newValue = m.target.getAttribute(m.attributeName);
-          this.$nextTick(() => {
-            console.log('tick')
-            this.onClassChange(newValue, m.oldValue);
-          });
-        }
-      });
-    
-      this.observer.observe(this.$refs.filesTab, {
-        attributes: true,
-        attributeOldValue : true,
-        attributeFilter: ['class'],
-      });
+      if(!this.builder){
+        deepLink();
+        this.observer = new MutationObserver(mutations => {
+          for (const m of mutations) {
+            const newValue = m.target.getAttribute(m.attributeName);
+            this.$nextTick(() => {
+              console.log('tick')
+              this.onClassChange(newValue, m.oldValue);
+            });
+          }
+        });
+      
+        this.observer.observe(this.$refs.filesTab, {
+          attributes: true,
+          attributeOldValue : true,
+          attributeFilter: ['class'],
+        });
+      }
+
     }
   },
   beforeDestroy() {
