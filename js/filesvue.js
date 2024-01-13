@@ -16,10 +16,10 @@ export default {
                                     <span class="text-break small text-muted">{{file}}</span>
                                 </div>
                             </a>
-                       <div class="card-footer text-center d-none">
-                            <button type="button" class="btn btn-primary" 
-                            @click="addAsset(file, contract.i)"><i class="fa-solid fa-magnifying-glass me-2"></i>Preview</button>
-                            </div>
+                       
+                        <div class="card-footer text-center border-0">
+                            <button type="button" class="btn btn-primary" @click="addAsset(file, contract.i)"><i class="fa-solid fa-square-plus me-2"></i>Add</button>
+                        </div>
                     </div>
                 </div>
             </div>
