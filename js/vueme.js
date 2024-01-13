@@ -1128,9 +1128,38 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
 				});
 			}
 		},
-    addAsset(item){
-      this.postCustom_json.assets.push(item)
-      this.validPost()
+    addAsset(cid, contract, name = '', thumbHash, type = 'ts', rot = [0, 0, 0]) {
+      var found = -1
+      if(typeof cid == 'object'){
+        cid = cid.id
+        contract = cid.contract
+      }
+      if (!cid) return false
+      for (var i = 0; i < this.postCustom_json.assets.length; i++) {
+        this.postCustom_json.assets[i].f = 0
+        if (this.postCustom_json.assets[i].hash == cid) {
+          found = i
+        }
+      }
+      if (found >= 0) {
+        this.postCustom_json.assets[found].name = name || this.postCustom_json.assets[found].name
+        this.postCustom_json.assets[found].thumbHash = thumbHash || cid
+        this.postCustom_json.assets[found].r = rot.join(' ')
+      } else {
+        this.postCustom_json.assets.push({
+          hash: cid,
+          name: name,
+          type: type,
+          contract: contract,
+          thumbHash,
+          r: rot.join(' '),
+          rx: rot[0],
+          ry: rot[1],
+          rz: rot[2],
+          f: 1
+        })
+      }
+      this.dluxMock()
     },
     getSetDetailsColors(script) {
       let r = "chartreuse,lawngreen";
