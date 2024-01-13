@@ -471,6 +471,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         },
       },
       behindTitle: "",
+      builder: false,
       petitionStatus: "Choose One",
       TOKEN: "DLUX",
       sendTo: "",
