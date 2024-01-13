@@ -10,6 +10,7 @@ import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
 import Replies from "/js/replies.js";
 import CardVue from "./cardvue.js";
+import Tagify from "/js/tagifyvue.js";
 import ContractVue from "/js/contractvue.js";
 import FilesVue from "/js/filesvue.js";
 import ExtensionVue from "/js/extensionvue.js";
@@ -831,10 +832,36 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         items: [],
       },
       authors: {},
-      spkapi: {},
+      spkapi: {
+        balance: 0,
+        broca: '0,0',
+        spk: 0,
+        channels: [],
+        file_contracts: [],
+        spk_power: 0,
+        gov: 0,
+        tick: 0.01,
+        claim: 0,
+        granted: {
+          t: 0,
+        },
+        granting: {
+          t: 0,
+        },
+        poweredUp: 0,
+        powerDowns: [],
+        power_downs: {},
+        drop: {
+          last_claim: 0,
+          availible: {
+            amount: 0,
+          },
+        },
+      },
       extendcost: {},
       contracts: {},
       numitems: 0,
+      postBens: [],
     };
   },
   components: {
@@ -858,6 +885,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
     "nftcard": NFTCard,
     "fttransfer": FTTransfer,
     "nftdetail": NFTDetail,
+    "tagify": Tagify,
   },
   methods: {
     getSetPhotos(s, c) {
@@ -3485,6 +3513,34 @@ function buyNFT(setname, uid, price, type, callback){
       get() {
         return this.smarkets.node[this.account] ? true : false;
       },
+    },
+    isntDlux: {
+      get() {
+        for (var i = 0; i < this.postBens.length; i++) {
+          if (this.postBens[i].account == "dlux-io") {
+            return true
+          }
+        }
+        return false
+      }
+    },
+    isntBenned: {
+      get() {
+        var unbenned = [], benned = {}
+        for (var i = 0; i < this.postBens.length; i++) {
+          benned[this.postBens[i].account] = this.postBens[i].weight
+        }
+        for (var i = 0; i < this.spkapi.file_contracts.length; i++) {
+          if (!benned[this.spkapi.file_contracts[i].s.split(',')[0]] || benned[this.spkapi.file_contracts[i].s.split(',')[0]] < this.spkapi.file_contracts[i].s.split(',')[1]) {
+            unbenned.push({
+              contract: this.spkapi.file_contracts[i].i,
+              account: this.spkapi.file_contracts[i].s.split(',')[0],
+              weight: this.spkapi.file_contracts[i].s.split(',')[1]
+            })
+          }
+        }
+        return unbenned
+      }
     },
     compiledMarkdown: function() {
             return marked(this.postBody, { sanitize: true });
