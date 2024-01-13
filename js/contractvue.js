@@ -19,8 +19,8 @@ export default {
             data-bs-toggle="modal" data-bs-target="#sponsoredModal"><i
             class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE</a>
             to select a sponsored contract
-            <!-- v-show="spkapi.spk_power" -->
-            <span>. If
+            <!--  -->
+            <span v-show="saccountapi.spk_power">. If
             you have BROCA token, click <a class="btn btn-sm btn-primary no-decoration small"
                 style="font-size: 0.6em;" role="button" data-bs-toggle="modal" data-bs-target="#contractModal">
                 <!-- 
