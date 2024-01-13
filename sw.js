@@ -1,4 +1,4 @@
-this.version = "2024.01.13.18";
+this.version = "2024.01.13.19";
 
 console.log(
   "SW:" + this.version + " - online."
@@ -72,7 +72,7 @@ var urlsToCache = [
   "/vr/vue.html",
 ];
 
-var nftscripts = {}
+this.nftscripts = {}
 
 self.addEventListener("install", function (event) {
   event.waitUntil(
