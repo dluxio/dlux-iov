@@ -1317,14 +1317,14 @@
                                         <!-- search bar -->
                                         <div class="d-flex flex-wrap ms-md-auto order-sm-last">
                                             <!-- new contract modal button -->
-                                            <button v-if="spkapi.pubKey != 'NA'" type="button"
+                                            <button v-if="spkapi.pubKey != 'NA' && spkapi.spk_power" type="button"
                                                 class="btn btn-secondary me-1">
                                                 <modal-vue type="build" token="BROCA"
                                                     :balance="broca_calc(spkapi.broca)" :account="account"
                                                     @modalsign="sendIt($event)" :ipfsproviders="ipfsProviders"
                                                     v-slot:trigger>
                                                     <span slot="trigger" class="trigger"><i
-                                                            class="fa-solid fa-plus fa-fw me-1"></i>NEW</span>
+                                                            class="fa-solid fa-plus fa-fw me-1"></i>Buy Storage</span>
                                                 </modal-vue>
                                             </button>
                                             <!-- lucky petition -->
