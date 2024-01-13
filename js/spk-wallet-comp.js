@@ -310,12 +310,20 @@ export default {
                     <div class="btn-group" role="group"
                         aria-label="Power Actions">
                         <button type="button" class="btn btn-info p-0">
+                            <!-- register -->
+                            <div v-if="saccountapi.pubKey == 'NA'"
+                            @click="updatePubkey">
+                            <i class="fas fa-plus fa-fw me-2"></i>Register Account
+                            </div>
+                            <!-- new contract -->
+                            <div v-if="saccountapi.pubKey != 'NA'">
                             <modal-vue type="build" token="BROCA"
                                 :balance="broca_calc(saccountapi.broca)"
                                 :account="account" @modalsign="sendIt($event)"
                                 :ipfsproviders="ipfsProviders" v-slot:trigger>
                                 <span class="p-2 trigger"><i class="fa-solid fa-file-contract fa-fw me-2"></i>Create A Contract</span>
                             </modal-vue>
+                            </div>
                         </button>
                         <button type="button"
                             class="btn btn-dark ms-0 me-0 ps-0 pe-0"

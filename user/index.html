@@ -79,14 +79,16 @@
             <div class="container-fluid px-0 ">
                 <!-- Page header area -->
                 <div class="container-fluid mt-2">
-                    <div v-if="!account" class="alert alert-fusch d-flex flex-wrap align-items-center" role="alert">
-                        <span class="my-1">To follow @{{pageAccount}}</span>
-                        <span class="ms-auto">
-                            <button class="btn btn-fusch me-1 my-1" type="button" data-bs-toggle="offcanvas"
-                                data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
-                            <button class="btn btn-turq my-1" type="button" data-bs-toggle="modal"
-                                data-bs-target="#signUpModal">Signup</button>
-                        </span>
+                    <div class="container">
+                        <div v-if="!account" class="alert alert-fusch d-flex flex-wrap align-items-center" role="alert">
+                            <span class="my-1">To follow @{{pageAccount}}</span>
+                            <span class="ms-auto">
+                                <button class="btn btn-fusch me-1 my-1" type="button" data-bs-toggle="offcanvas"
+                                    data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
+                                <button class="btn btn-turq my-1" type="button" data-bs-toggle="modal"
+                                    data-bs-target="#signUpModal">Signup</button>
+                            </span>
+                        </div>
                     </div>
                     <div class="container">
                         <!-- pfp and info -->
@@ -1328,7 +1330,8 @@
                                                 </modal-vue>
                                             </button>
                                             <!-- lucky petition -->
-                                            <button v-if="spkapi.pubKey != 'NA'" type="button" class="btn btn-secondary me-1" data-bs-toggle="modal"
+                                            <button v-if="spkapi.pubKey != 'NA'" type="button"
+                                                class="btn btn-secondary me-1" data-bs-toggle="modal"
                                                 data-bs-target="#sponsoredModal">
                                                 <span class=""></span><i
                                                     class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE
@@ -1344,36 +1347,38 @@
                                             </button>
                                         </div>
 
-                                        <div class="position-relative flex-grow-1 me-1 order-sm-first d-flex align-items-center">
+                                        <div
+                                            class="position-relative flex-grow-1 me-1 order-sm-first d-flex align-items-center">
                                             <h2 class="mb-0 ms-lg-3 fw-light">Your Contracts</h2>
                                             <span class="d-none">
-                                            <span class="position-absolute ps-2 top-50 translate-middle-y">
-                                                <i class="fa-solid fa-magnifying-glass fa-fw"></i>
-                                            </span>
-                                            <input type="search" class="ps-4 form-control text-info border-light"
-                                                placeholder="Search" v-model="postSelect.searchTerm"
-                                                @keyup.enter="postSelect.entry = 'search';getPosts()"
-                                                @search="postSelect.entry = 'search';getPosts()">
+                                                <span class="position-absolute ps-2 top-50 translate-middle-y">
+                                                    <i class="fa-solid fa-magnifying-glass fa-fw"></i>
+                                                </span>
+                                                <input type="search" class="ps-4 form-control text-info border-light"
+                                                    placeholder="Search" v-model="postSelect.searchTerm"
+                                                    @keyup.enter="postSelect.entry = 'search';getPosts()"
+                                                    @search="postSelect.entry = 'search';getPosts()">
                                             </span>
                                         </div>
 
                                     </div>
                                 </div>
                                 <div v-if="spkapi.pubKey == 'NA'">
-                                <div class="d-flex justify-content-center p-3">
-                                    <div class="text-center">
-                                    <p class="lead">Activate your ability to create file storage contracts.</p>
-                                    <button v-if="spkapi.pubKey == 'NA'" type="button"
-                                    class="btn btn-primary mb-3" @click="updatePubkey">
-                                    Register Account
-                                </button>
-                            </div>
+                                    <div class="d-flex justify-content-center p-3">
+                                        <div class="text-center">
+                                            <p class="lead">Activate your ability to create file storage contracts.</p>
+                                            <button v-if="spkapi.pubKey == 'NA'" type="button"
+                                                class="btn btn-primary mb-3" @click="updatePubkey">
+                                                Register Account
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
                                 <div class="card-body p-0">
                                     <div v-if="spkapi.pubKey != 'NA'">
-                                    <contract-vue :node="false" :account="pageAccount" @tosign="toSign=$event"
-                                        :contracts="contracts"></contract-vue></div>
+                                        <contract-vue :node="false" :account="pageAccount" @tosign="toSign=$event"
+                                            :contracts="contracts"></contract-vue>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1464,8 +1469,11 @@
 
                             <div class="modal-body text-start">
                                 <div v-for="spon in services">
-                                    <button :disabled="spon.channel" @click="petitionForContract(spon.provider)" class="btn btn-lg text-white btn-outline-primary w-100 border d-flex justify-content-between align-items-center"><span class="lead">@{{spon.provider}}</span><span class="small text-warning">{{spon.memo}}</span></button>
-                                </div>   
+                                    <button :disabled="spon.channel" @click="petitionForContract(spon.provider)"
+                                        class="btn btn-lg text-white btn-outline-primary w-100 border d-flex justify-content-between align-items-center"><span
+                                            class="lead">@{{spon.provider}}</span><span
+                                            class="small text-warning">{{spon.memo}}</span></button>
+                                </div>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

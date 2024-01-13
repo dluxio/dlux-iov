@@ -10,6 +10,7 @@ import VueShowdownComponent from "/js/showdown.js";
 import Tagify from "/js/tagifyvue.js";
 import MDE from "/js/mde.js";
 import ChatVue from "/js/chatvue.js";
+import SPKVue from "/js/spk-wallet-comp.js";
 
 
 let url = location.href.replace(/\/$/, "");
@@ -840,6 +841,7 @@ createApp({
     };
   },
   components: {
+    "spk-vue": SPKVue,
     "nav-vue": Navue,
     "foot-vue": FootVue,
     "cycle-text": Cycler,
