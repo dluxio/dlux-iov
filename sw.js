@@ -1,4 +1,4 @@
-this.version = "2024.01.13.20";
+this.version = "2024.01.13.21";
 
 console.log(
   "SW:" + this.version + " - online."
@@ -165,13 +165,15 @@ function tryLocal(m) {
 function callScript (o){
   return new Promise((resolve, reject) => {
     if (this.nftscripts[o.script]) {
-      const code = `(//${this.nftscripts[o.script]}\n)("${o.uid ? o.uid : 0}")`;
-      var computed = eval(code);
-      computed.uid = o.uid;
-      computed.owner = o.owner;
-      computed.script = o.script;
-      computed.setname = o.set;
-      resolve(computed);
+      const code = `(//${this.nftscripts[o.script]}\n)("${
+            o.uid ? o.uid : 0
+          }")`;
+          var computed = eval(code);
+          computed.uid = o.uid || "";
+          computed.owner = o.owner || "";
+          computed.script = o.script;
+          (computed.setname = o.set), (computed.token = o.token);
+          resolve(computed);
     } else {
       this.pullScript(o.script).then((empty) => {
         this.callScript(o).then((r) => {
