@@ -847,7 +847,7 @@ createApp({
     "modal-vue": Modals,
     "vue-markdown": Marker,
     "vue-ratings": Ratings,
-    "vue-showdown": VueShowdownComponent,
+    //"vue-showdown": VueShowdownComponent,
     "tagify": Tagify,
     "mde": MDE,
     "chat-vue": ChatVue,
@@ -1200,7 +1200,7 @@ createApp({
       }, "*");
     },
     addBen(acc, weight) {
-      weight = this.parseInt(weight)
+      weight = parseInt(weight)
       var found = -1
       var total = 0
       if (!acc) return false
