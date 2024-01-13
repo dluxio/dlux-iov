@@ -2085,9 +2085,9 @@ createApp({
       console.log(op);
       this.toSign = op;
     },
-    parseInt(a, b = 10) {
-      return parseInt(a, b);
-    },
+    // parseInt(a, b = 10) {
+    //   return parseInt(a, b);
+    // },
     frmDate() {
       return new Date().getMonth() + 1;
     },
