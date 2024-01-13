@@ -1128,6 +1128,10 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
 				});
 			}
 		},
+    addAsset(item){
+      this.postCustom_json.assets.push(item)
+      this.validPost()
+    },
     getSetDetailsColors(script) {
       let r = "chartreuse,lawngreen";
       const s = this.baseScript[script];

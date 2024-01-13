@@ -1,4 +1,4 @@
-this.version = "2024.01.13.29";
+this.version = "2024.01.13.30";
 
 console.log(
   "SW:" + this.version + " - online."
@@ -165,9 +165,8 @@ function tryLocal(m) {
 function callScript (o){
   return new Promise((resolve, reject) => {
     if (this.nftscripts[o.script]) {
-      const code = `(//${this.nftscripts[o.script]}\n)("${
-            o.uid ? o.uid : 0
-          }")`;
+      const code = `(//${this.nftscripts[o.script]}\n)("${ o.uid ? o.uid : 0}")`;
+      console.log(code)
           var computed = eval(code);
           computed.uid = o.uid || "";
           computed.owner = o.owner || "";
@@ -186,7 +185,13 @@ function callScript (o){
 
 function pullScript(id) {
       return new Promise((resolve, reject) => {
-        if (this.nftscripts[id]) {
+        if (this.nftscripts[id] == "Loading...") {
+          setTimeout(() => {
+              pullScript(id).then((r) => {
+              resolve(r);
+            });
+          }, 1000);
+        } else if (this.nftscripts[id]) {
           resolve("OK");
         } else {
           this.nftscripts[id] = "Loading...";
