@@ -17,6 +17,9 @@
     <script src="https://unpkg.com/showdown@1.x/dist/showdown.min.js"></script>
     <link href="/css/smde.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+    <!-- Marked
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked-linkify-it/lib/index.umd.js"></script> -->
     <!-- Tagify -->
     <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
     <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
@@ -31,7 +34,7 @@
     <!-- <script src="/js/drag-sort.js"></script>
 	<script src="https://unpkg.com/lodash@4.16.0"></script> -->
     <!-- Vue Controller -->
-    <script type="module" src="/js/spkvue.js"></script>
+    <script type="module" src="/js/vueme.js"></script>
     <link href="/css/custom.css" rel="stylesheet" />
     <script>
         if ('serviceWorker' in navigator) {
@@ -161,294 +164,75 @@
                 <div class="col-xl-6 pt-0 pb-0 px-0 px-md-1 scroll">
                     <h3 class="d-none">Build</h3>
                     <div class="accordion text-start bg-blur-darkg rounded" id="360accordion">
-                        <div class="accordion-item bg-img-none">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#fileHosting" aria-expanded="true" aria-controls="fileHosting">
-                                    Image Upload via SPK Network
-                                </button>
-                            </h2>
-                            <div id="fileHosting" class="accordion-collapse collapse show">
-                                <div class="accordion-body p-0">
-                                    <div class="d-flex flex-wrap justify-content-between p-2"
-                                        style="background: #16191C;">
-                                        <div class="flex-column m-1">
-                                            <div class="input-group">
-                                                <span class="input-group-text">@</span>
-                                                <input type="text" class="form-control text-info" readonly id="username"
-                                                    v-model="account" placeholder="Please login">
-                                            </div>
+                        <div class="container">
+                            <div class="card my-3">
+                                <div class="card-head p-2">
+                                    <!-- top menu -->
+                                    <div class="mb-2 d-flex flex-wrap justify-content-center">
+                                        <!-- search bar -->
+                                        <div class="d-flex flex-wrap ms-md-auto order-sm-last">
+                                            <!-- new contract modal button -->
+                                            <button v-if="spkapi.pubKey != 'NA' && spkapi.spk_power" type="button"
+                                                class="btn btn-secondary me-1">
+                                                <modal-vue type="build" token="BROCA"
+                                                    :balance="broca_calc(spkapi.broca)" :account="account"
+                                                    @modalsign="sendIt($event)" :ipfsproviders="ipfsProviders"
+                                                    v-slot:trigger>
+                                                    <span slot="trigger" class="trigger"><i
+                                                            class="fa-solid fa-plus fa-fw me-1"></i>Buy Storage</span>
+                                                </modal-vue>
+                                            </button>
+                                            <!-- lucky petition -->
+                                            <button v-if="spkapi.pubKey != 'NA'" type="button" class="btn btn-secondary me-1" data-bs-toggle="modal"
+                                                data-bs-target="#sponsoredModal">
+                                                <span class=""></span><i
+                                                    class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE
+                                            </button>
+                                            <!-- spk wallet modal button -->
+                                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal"
+                                                data-bs-target="#spkWalletModal">
+                                                <span class=""></span><i class="fa-solid fa-wallet fa-fw me-1"></i>SPK
+                                            </button>
+                                            <!-- filter button hidden -->
+                                            <button type="button" class="btn btn-secondary d-none">
+                                                <span class=""></span><i class="fa-solid fa-filter me-1"></i>
+                                            </button>
                                         </div>
-                                        <div class="flex-column m-1">
-                                            <div class="btn-group">
-                                                <button type="button" class="btn btn-info" data-bs-toggle="modal"
-                                                    data-bs-target="#spkWalletModal" aria-expanded="false"
-                                                    aria-controls="SPK Wallet"><i
-                                                        class="fa-solid fa-wallet fa-fw me-2"></i>Wallet</button>
-                                                <button type="button"
-                                                    class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
-                                                <button v-if="saccountapi.pubKey != 'NA'" type="button"
-                                                    class="btn btn-info">
-                                                    <modal-vue type="build" token="BROCA"
-                                                        :balance="broca_calc(saccountapi.broca)" :account="account"
-                                                        @modalsign="sendIt($event)" :ipfsproviders="ipfsProviders">
-                                                            <span slot="trigger" class="p-2">
-                                                                <i class="fa-solid fa-file-contract fa-fw me-2"></i>Contract
-                                                            </span>
-                                                    </modal-vue>
-                                                </button>
-                                                <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                                                    disabled></button>
-                                                <button v-if="saccountapi.pubKey == 'NA'" type="button"
-                                                    class="btn btn-info" @click="updatePubkey">
-                                                    <i class="fas fa-plus fa-fw me-2"></i>Register Account
-                                                </button>
-                                                <button v-if="saccountapi.pubKey != 'NA'" type="button"
-                                                    class="btn btn-info" @click="petitionForContract">
-                                                    <i class="fa-solid fa-wand-magic-sparkles fa-fw me-2"></i>Sponsored
-                                                </button>
-                                            </div>
+
+                                        <div class="position-relative flex-grow-1 me-1 order-sm-first d-flex align-items-center">
+                                            <h2 class="mb-0 ms-lg-3 fw-light">Your Contracts</h2>
+                                            <span class="d-none">
+                                            <span class="position-absolute ps-2 top-50 translate-middle-y">
+                                                <i class="fa-solid fa-magnifying-glass fa-fw"></i>
+                                            </span>
+                                            <input type="search" class="ps-4 form-control text-info border-light"
+                                                placeholder="Search" v-model="postSelect.searchTerm"
+                                                @keyup.enter="postSelect.entry = 'search';getPosts()"
+                                                @search="postSelect.entry = 'search';getPosts()">
+                                            </span>
                                         </div>
-                                    </div>
-                                   
-                                    <!--no contracts message-->
-                                    <div v-show="!numChannels" class="p-3">
-                                        <p class="m-0">You have no available SPK Network
-                                            contracts for file hosting. <span v-if="saccountapi.pubKey == 'NA'">After
-                                                your account is registered, create a
-                                                hosting contract to
-                                                upload files.</span><span v-if="saccountapi.pubKey != 'NA'">Create a
-                                                hosting contract to upload files.</span></p>
-                                    </div>
-                                    <!--table of available contracts-->
-                                    <div v-show="numChannels" class="">
-                                        <table
-                                            class="table table-dark table-striped table-hover text-center align-middle mb-0">
-                                            <thead>
-                                                <tr>
-
-                                                    <th scope="col"><i
-                                                            class="fa-solid fa-database fa-fw me-2"></i>Storage</th>
-                                                    <th scope="col"><i
-                                                            class="fa-solid fa-clock fa-fw me-2"></i>Expiration</th>
-                                                    <th scope="col"><i
-                                                            class="fa-solid fa-hand-holding-dollar fa-fw me-2"></i>Benificiary
-                                                    </th>
-                                                    <th scope="col"></th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <Transition>
-                                                    <tr v-for="(sponsor, key, index) in saccountapi.channels">
-                                                        <td colspan="4" class="p-0">
-                                                            <div class="table-responsive">
-                                                                <table class="table text-white align-middle mb-0">
-                                                                    <tbody>
-                                                                        <tr>
-                                                                            <th class="border-0"
-                                                                                v-for="channel in sponsor"
-                                                                                v-if="channel.c == 1">
-                                                                                {{channel.a/1000000}}
-                                                                                MB</th>
-                                                                            <td class="border-0"
-                                                                                v-for="channel in sponsor"
-                                                                                v-if="channel.c == 1">
-                                                                                {{exp_to_time(channel.e)}}
-                                                                            </td>
-                                                                            <td class="border-0" scope="row"
-                                                                                v-for="channel in sponsor"
-                                                                                v-if="channel.c == 1 && channel.s">
-                                                                                @{{slotDecode(channel.s, 0)}}
-                                                                                ({{slotDecode(channel.s, 1)}}%)</td>
-                                                                            <td class="border-0" scope="row"
-                                                                                v-for="channel in sponsor"
-                                                                                v-if="channel.c == 1 && !channel.s">
-                                                                            </td>
-                                                                            <td class="border-0 text-end"
-                                                                                v-for="channel in sponsor"
-                                                                                v-if="channel.c == 1">
-
-                                                                                <button type="button"
-                                                                                    class="btn btn-outline-success m-1"
-                                                                                    v-bind:class="{'invisible': contract.id}"
-                                                                                    @click="selectContract(channel.i, channel.b)"><i
-                                                                                        class="fa-solid fa-file-import fa-fw"></i></button>
-
-                                                                                <button type="button"
-                                                                                    class="btn btn-success m-1"
-                                                                                    v-bind:class="{'d-none': !contract.id || contract.id != channel.i}"
-                                                                                    @click="contract.id = ''; contract.api = ''"><i
-                                                                                        class="fa-solid fa-file-import fa-fw"></i></button>
-
-
-
-                                                                                <a class="collapsed"
-                                                                                    data-bs-toggle="collapse"
-                                                                                    :href="'#' + replace(channel.i)">
-                                                                                    <span class="if-collapsed"><button
-                                                                                            class="btn btn-outline-primary"><i
-                                                                                                class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
-                                                                                    <span
-                                                                                        class="if-not-collapsed"><button
-                                                                                            class="btn btn-primary"><i
-                                                                                                class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>
-                                                                                </a>
-
-
-                                                                            </td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td class="collapse border-0" colspan="4"
-                                                                                :id="replace(channel.i)"
-                                                                                v-for="channel in sponsor"
-                                                                                v-if="channel.c == 1">
-                                                                                <ul class="text-start">
-                                                                                    <li>Contract ID: {{channel.i}}
-                                                                                    </li>
-                                                                                    <li v-if="channel.c == 1">Size
-                                                                                        Allowed:
-                                                                                        {{channel.a}} bytes</li>
-                                                                                    <li v-if="channel.c == 2">Size:
-                                                                                        {{channel.u}} bytes
-                                                                                    </li>
-                                                                                    <li>File Owner: @{{channel.t}}
-                                                                                    </li>
-                                                                                    <li>Service Provider:
-                                                                                        @{{channel.b}}
-                                                                                    </li>
-                                                                                    <li>Sponsor: @{{channel.f}}</li>
-                                                                                    <li>Expiration:
-                                                                                        {{exp_to_time(channel.e)}}
-                                                                                    </li>
-                                                                                    <li>Price: {{channel.r}} Broca
-                                                                                    </li>
-                                                                                    <li>Redundancy: {{channel.p}}
-                                                                                    </li>
-                                                                                    <li v-if="channel.s">Terms:
-                                                                                        {{slotDecode(channel.s,
-                                                                                        1)}}%
-                                                                                        Bennificiary to
-                                                                                        @{{slotDecode(channel.s,
-                                                                                        0)}}</li>
-                                                                                    <li>Status: {{channel.c == 1 ?
-                                                                                        'Waiting For Upload' :
-                                                                                        'Uploaded'}}
-                                                                                    </li>
-                                                                                    <li v-if="channel.df">Files:<p
-                                                                                            v-for="file in channel.df">
-                                                                                            {{file}}
-                                                                                        </p>
-                                                                                    </li>
-                                                                                    <li v-if="channel.n">Stored by:
-                                                                                        <p v-for="acc in channel.n">
-                                                                                            @{{acc}}
-                                                                                        </p>
-                                                                                    </li>
-                                                                                </ul>
-                                                                            </td>
-                                                                        </tr>
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
-                                                        </td>
-
-
-
-                                                    </tr>
-                                                </Transition>
-
-                                            </tbody>
-                                        </table>
-
-
-                                        <!--file uploader-->
-                                        <Transition>
-                                            <div v-if="contract.id" style="background: #16191C;">
-                                                <div class="p-2">
-                                                    <form onsubmit="return false;">
-                                                        <div class="d-flex justify-content-between align-items-center">
-                                                            <h5 class="mb-0 mx-2">Upload Files</h5>
-                                                            <div class="flex-column ms-auto me-auto">
-                                                                <input type="file" @change="uploadFile" multiple
-                                                                    class="form-control bg-darkg border-secondary text-white-50" />
-                                                            </div>
-                                                            <button type="button"
-                                                                class="btn-lg btn-close btn-close-white ms-2"
-                                                                @click="contract.id = ''; contract.api = ''"
-                                                                aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="p-5 my-4 mx-3 text-center" id="img-well"
-                                                            @drop="dragFile($event)" @dragenter.prevent
-                                                            @dragover.prevent>
-                                                            Or drag the file(s) here
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                                <div id="listOfImgs" v-for="(file, index) in File">
-                                                    <div class="p-3 mb-3 bg-dark" style="border-radius: 10px;">
-                                                        <div class="d-flex align-items-center flex-row pb-2 mb-2">
-                                                            <h6 class="m-0">{{file.name}}</h6>
-                                                            <div class="flex-grow-1 mx-5">
-                                                                <div class="progress" role="progressbar"
-                                                                    aria-label="Upload progress" aria-valuenow="25"
-                                                                    aria-valuemin="0" aria-valuemax="100">
-                                                                    <div class="progress-bar"
-                                                                        :style="'width: ' + file.progress + '%'">
-                                                                        {{file.progress}}%
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="flex-shrink" v-if="File.length">
-                                                                <button type="button" class="me-2 btn btn-secondary"
-                                                                    v-if="file.actions.pause"
-                                                                    @click="fileRequest[index].resumeFileUpload()">Pause</button>
-                                                                <button type="button" class="me-2 btn btn-secondary"
-                                                                    v-if="file.actions.resume"
-                                                                    @click="fileRequest[index].resumeFileUpload()">Resume</button>
-                                                                <button type="button" class="me-2 btn btn-secondary"
-                                                                    v-if="file.actions.cancel"
-                                                                    @click="fileRequest[index].resumeFileUpload()">Cancel</button>
-                                                            </div>
-                                                            <div class="ms-auto">
-                                                                <button class="btn btn-danger"
-                                                                    @click="deleteImg(index, file.name)"
-                                                                    data-toggle="tooltip" data-placement="top"
-                                                                    title="Delete Asset"><i
-                                                                        class="fas fa-fw fa-trash-alt"></i></button>
-                                                            </div>
-                                                        </div>
-                                                        <div class="d-flex w-100">
-                                                            <ul class="text-start w-100">
-                                                                <li class="">Bytes: {{file.size}}</li>
-                                                                <li class="">CID:
-                                                                    {{FileInfo[file.name].hash}}</li>
-                                                                <li class="">Status:
-                                                                    {{FileInfo[file.name].status}}
-                                                                </li>
-                                                                <li class=""><a
-                                                                        :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
-                                                                        target="_blank">{{FileInfo[file.name].hash}}<i
-                                                                            class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div v-if="File.length" class="text-center">
-                                                    <button type="button" class="btn btn-info mb-2"
-                                                        @click="signNUpload()"><i
-                                                            class="fa-solid fa-file-signature fa-fw me-2"></i>Sign
-                                                        and
-                                                        Upload</button>
-                                                </div>
-                                            </div>
-                                        </Transition>
 
                                     </div>
                                 </div>
+                                <div v-if="spkapi.pubKey == 'NA'">
+                                <div class="d-flex justify-content-center p-3">
+                                    <div class="text-center">
+                                    <p class="lead">Activate your ability to create file storage contracts.</p>
+                                    <button v-if="spkapi.pubKey == 'NA'" type="button"
+                                    class="btn btn-primary mb-3" @click="updatePubkey">
+                                    Register Account
+                                </button>
+                            </div>
+                                </div>
+                            </div>
+                                <div class="card-body p-0">
+                                    <div v-if="spkapi.pubKey != 'NA'">
+                                    <contract-vue :node="false" :account="pageAccount" @tosign="toSign=$event"
+                                        :contracts="contracts"></contract-vue></div>
+                                </div>
                             </div>
                         </div>
-                        <div class="accordion-item bg-img-none">
+                        <!-- <div class="accordion-item bg-img-none">
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                     data-bs-target="#executedContracts" aria-expanded="false"
@@ -499,9 +283,7 @@
                                                             <span slot="trigger"
                                                                 :test="lapi == 'https://spktest.dlux.io' ? true : false"><i
                                                                     class="fa-solid fa-clock-rotate-left fa-fw me-2"></i>Extend</span></modal-vue></button>
-                                                    <!-- <button type="button"
-                                                            class="btn btn-secondary" @click=""><i
-                                                                class="fa-solid fa-clock-rotate-left fa-fw me-2"></i>Extend</button> -->
+                                                    
                                                     <button v-if="contract.c == 2" type="button" class="btn btn-warning"
                                                         @click="addBen(slotDecode(contract.s,
                                         0), slotDecode(contract.s, 1) * 100)"><i
@@ -554,7 +336,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                         <div class="accordion-item bg-img-none">
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -789,7 +571,7 @@
                                         <p class="text-center">Use the Post Details area to compose the body of your
                                             post.</p>
                                     </div>
-                                    <!-- <vue-showdown :markdown="postBody" /> -->
+                                    <!-- <vue-markdown :md="compiledMarkdown" /> -->
                                 </div>
                             </div>
                         </div>
@@ -798,28 +580,6 @@
             </div>
 
         </main>
-         <!-- SPK Wallet Modal -->
-         <div class="modal modal-xl fade" id="spkWalletModal" tabindex="-1"
-         aria-labelledby="spkWalletModalLabel" aria-hidden="true">
-         <div class="modal-dialog">
-             <div class="modal-content">
-                 <div class="modal-header">
-                     <h1 class="modal-title fs-5" id="spkWalletModalLabel">SPK Testnet
-                         Wallet</h1>
-                     <button type="button" class="btn-close" data-bs-dismiss="modal"
-                         aria-label="Close"></button>
-                 </div>
-                 <div class="modal-body">
-                     <spk-vue node="false" :account="account"
-                         @tosign="toSign=$event;log($event)" />
-                 </div>
-                 <div class="modal-footer">
-                     <button type="button" class="btn btn-primary"
-                         data-bs-dismiss="modal">Close</button>
-                 </div>
-             </div>
-         </div>
-     </div>
     </div>
     <!-- Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
