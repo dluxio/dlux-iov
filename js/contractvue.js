@@ -2,6 +2,7 @@ import Pop from "/js/pop.js";
 import ExtensionVue from "/js/extensionvue.js";
 import FilesVue from "/js/filesvue.js";
 import UploadVue from "/js/uploadvue.js";
+import ModalVue from "/js/modalvue.js";
 
 export default {
     components: {
@@ -9,6 +10,7 @@ export default {
         "extension-vue": ExtensionVue,
         "files-vue": FilesVue,
         "upload-vue": UploadVue
+        "modal-vue": ModalVue
     },
     template: `
 <div class="ms-auto me-auto text-center" v-show="!contracts.length">
@@ -19,16 +21,14 @@ export default {
             data-bs-toggle="modal" data-bs-target="#sponsoredModal"><i
             class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE</a>
             to select a sponsored contract
-            <!--  -->
             <span v-show="saccountapi.spk_power">. If
             you have BROCA token, click <a class="btn btn-sm btn-primary no-decoration small"
                 style="font-size: 0.6em;" role="button" data-bs-toggle="modal" data-bs-target="#contractModal">
-                <!-- 
                 <modal-vue type="build" token="BROCA" :balance="broca_calc(spkapi.broca)" :account="account"
                 @modalsign="sendIt($event)" :ipfsproviders="ipfsProviders" v-slot:trigger>
                 <span slot="trigger" class="trigger"><i
                         class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
-            </modal-vue> -->
+            </modal-vue>
                 </a>
             to create a custom contract
         </span>
