@@ -3250,7 +3250,7 @@ function buyNFT(setname, uid, price, type, callback){
         if(this.serviceWorker){
           this.callSWfunction('callScript', o).then((r) => {
             resolve(r)
-          }).catch((e) => {reject(e)})
+          }).catch((e) => {this.serviceWorker = false; this.callScript(o).then((r) => {resolve(r)})})
         } else if (this.nftscripts[o.script]) {
           const code = `(//${this.nftscripts[o.script]}\n)("${
             o.uid ? o.uid : 0
