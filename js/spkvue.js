@@ -1,4 +1,4 @@
-import Vue from "https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.esm.browser.js";
+import { createApp, toRaw } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
 import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
@@ -55,17 +55,10 @@ console.log({
   lapi,
 });
 
-Vue.directive("scroll", {
-  inserted: function (el, binding) {
-    const onScrollCallback = binding.value;
-    window.addEventListener("scroll", () => onScrollCallback());
+createApp({
+  directives:{
+    scroll
   },
-});
-
-// createApp({ // vue 3
-var app = new Vue({
-  // vue 2
-  el: "#app", // vue 2
   data() {
     return {
       fileRequests: {},
@@ -376,6 +369,7 @@ var app = new Vue({
       dluxval: 0,
       spkval: 0,
       focusval: 0,
+      lastScroll: 0,
       me: false,
       sendModal: {
         amount: 0,
@@ -1955,12 +1949,16 @@ var app = new Vue({
       return parseFloat(num).toFixed(dig);
     },
     handleScroll() {
-      if (
-        document.documentElement.clientHeight + window.scrollY >
-        document.documentElement.scrollHeight -
-        document.documentElement.clientHeight * 2
-      ) {
-        this.getPosts();
+      const now = Date.now();
+      if (now - this.lastScroll > 1000) {
+        this.lastScroll = now;
+        if (
+          document.documentElement.clientHeight + window.scrollY >
+          document.documentElement.scrollHeight -
+            document.documentElement.clientHeight * 2
+        ) {
+          this.getPosts();
+        }
       }
     },
     getRewardFund() {
@@ -3137,4 +3135,4 @@ var app = new Vue({
       );
     },
   },
-});
+}).mount('#app')
