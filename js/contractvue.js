@@ -9,7 +9,7 @@ export default {
         "pop-vue": Pop,
         "extension-vue": ExtensionVue,
         "files-vue": FilesVue,
-        "upload-vue": UploadVue
+        "upload-vue": UploadVue,
         "modal-vue": ModalVue
     },
     template: `
