@@ -1,4 +1,4 @@
-this.version = "2024.01.13.15";
+this.version = "2024.01.13.16";
 
 console.log(
   "SW:" + this.version + " - online."
@@ -90,7 +90,7 @@ self.addEventListener("fetch", function (event) {
           // Request found in current cache, or fetch the file
           return resp || fetch(event.request).then(response => {
               // Cache the newly fetched file for next time
-              cache.put(event.request, response.clone());
+              if (event.request.method === "GET")cache.put(event.request, response.clone());
               return response;
           // Fetch failed, user is offline
           }).catch(() => {
@@ -127,7 +127,7 @@ self.addEventListener("message", function (e) {
   
   var message = e.data; // We're going to have some fun here...
   console.log("SW msg:", message);
-  switch (message.call) {
+  switch (message.id) {
     case "callScript":
       callScript(message.o).then((r) => {
         e.ports[0].postMessage(r);
@@ -142,9 +142,8 @@ self.addEventListener("message", function (e) {
       e.ports[0].postMessage(navigator.onLine);
       break;
     default:
-      console.log("SW msg:" + message);
+      console.log("SW msg:", message);
   }
-  console.log("SW msg:" + message);
 });
 
 

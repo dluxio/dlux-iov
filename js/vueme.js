@@ -637,6 +637,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         },
       },
       accountinfo: {},
+      serviceWorker: false,
       filterusers: {
         checked: true,
         value: "",
@@ -3246,7 +3247,11 @@ function buyNFT(setname, uid, price, type, callback){
     },
     callScript(o) {
       return new Promise((resolve, reject) => {
-        if (this.nftscripts[o.script]) {
+        if(this.serviceWorker){
+          this.callSWfunction('callScript', o).then((r) => {
+            resolve(r)
+          }).catch((e) => {reject(e)})
+        } else if (this.nftscripts[o.script]) {
           const code = `(//${this.nftscripts[o.script]}\n)("${
             o.uid ? o.uid : 0
           }")`;
@@ -3451,7 +3456,18 @@ function buyNFT(setname, uid, price, type, callback){
   },
   mounted() {
     //recieve serviceworker messages
-    this.callSWfunction('online').then((r) => {console.log(r)})
+    if ('serviceWorker' in navigator) {
+      navigator
+          .serviceWorker
+          .register(
+              // path to the service worker file
+              '/sw.js'
+          )
+          // the registration is async and it returns a promise
+          .then(function (reg) {
+              this.serviceWorker = true
+          });
+  }
     this.getIPFSproviders()
     this.getMARKETS()
     window.addEventListener('scroll', this.handleScroll);

@@ -36,20 +36,6 @@
     <!-- Vue Controller -->
     <script type="module" src="/js/vueme.js"></script>
     <link href="/css/custom.css" rel="stylesheet" />
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator
-                .serviceWorker
-                .register(
-                    // path to the service worker file
-                    '/sw.js'
-                )
-                // the registration is async and it returns a promise
-                .then(function (reg) {
-                    console.log('Registration Successful');
-                });
-        }
-    </script>
     <style>
         .form-switch.form-switch-lg .form-check-input {
             height: 2rem;
