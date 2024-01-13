@@ -335,6 +335,7 @@ export default {
                     t: 0
                 }
             },
+            ipfsProviders: {},
             tokenGov: {
                 title: "SPK VOTE",
                 options: [
@@ -673,6 +674,13 @@ export default {
                 getContract(contracts[i])
             }
         },
+        getIPFSproviders() {
+            fetch("https://spktest.dlux.io/services/IPFS")
+              .then((response) => response.json())
+              .then((data) => {
+                this.ipfsProviders = data.providers
+              });
+          },
         imgUrlAlt(event) {
             event.target.src = "/img/dlux-logo-icon.png";
         },
@@ -855,6 +863,7 @@ export default {
       },
     mounted() {
         this.getSpkStats()
+        this.getIPFSproviders()
         if(this.nodeView){
             for (var node in this.contracts) {
                 this.contractIDs[this.contracts[node].i] = this.contracts[node];
