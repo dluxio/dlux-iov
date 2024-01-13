@@ -18,7 +18,7 @@ export default {
                             </a>
                        
                         <div class="card-footer text-center border-0" v-if="assets">
-                            <button type="button" class="btn btn-primary" @click="addAsset(file, contract.i)"><i class="fa-solid fa-square-plus me-2"></i>Add</button>
+                            <button type="button" class="btn btn-primary" @click="addAsset(file, contract)"><i class="fa-solid fa-square-plus me-2"></i>Add</button>
                         </div>
                     </div>
                 </div>
@@ -35,6 +35,10 @@ props: {
     assets: {
         type: Boolean,
         default: false,
+    },
+    contract: {
+        type: String,
+        default: "",
     },
 },
 data() {
