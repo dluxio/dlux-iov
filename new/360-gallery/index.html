@@ -161,7 +161,7 @@
                             <div id="executedContracts" class="accordion-collapse collapse show">
                                 <div class="accordion-body p-0">
                                     <contract-vue :node="false" :account="account" @tosign="toSign=$event"
-                                        :contracts="contracts"></contract-vue>
+                                        :contracts="contracts" :assets="true" @addasset="addAsset($event)"></contract-vue>
                                 </div>
                             </div>
                         </div>

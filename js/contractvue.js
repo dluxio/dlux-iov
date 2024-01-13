@@ -381,7 +381,11 @@ export default {
             default: function () {
                 return []
             }
-        }
+        },
+        assets: {
+            default: false,
+            required: false
+        },
     },
     data() {
         return {
@@ -504,10 +508,17 @@ export default {
               }
         };
     },
-    emits: ['tosign'],
+    emits: ['tosign', 'addasset'],
     methods: {
         modalSelect(url) {
             this.$emit('modalselect', url);
+        },
+        addAsset(id, contract) {
+            const item = {
+                id,
+                contract,
+            }
+            this.$emit('addasset', asset);
         },
         sortContracts(on = 'c', dir = 'asc') {
             this.contracts.sort((a, b) => {
