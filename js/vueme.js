@@ -859,7 +859,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         },
       },
       extendcost: {},
-      contracts: {},
+      contracts: [],
       numitems: 0,
       postBens: [],
     };
