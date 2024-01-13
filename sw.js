@@ -1,4 +1,4 @@
-this.version = "2024.01.13.17";
+this.version = "2024.01.13.18";
 
 console.log(
   "SW:" + this.version + " - online."
@@ -71,6 +71,8 @@ var urlsToCache = [
   "/vr/index.html",
   "/vr/vue.html",
 ];
+
+var nftscripts = {}
 
 self.addEventListener("install", function (event) {
   event.waitUntil(
@@ -182,13 +184,16 @@ function callScript (o){
 
 function pullScript(id) {
       return new Promise((resolve, reject) => {
-        // check if cache includes id
-        // add to cache if not...
-        fetch(`https://ipfs.dlux.io/ipfs/${id}`)
+        if (this.nftscripts[id]) {
+          resolve("OK");
+        } else {
+          this.nftscripts[id] = "Loading...";
+          fetch(`https://ipfs.dlux.io/ipfs/${id}`)
           .then((response) => response.text())
           .then((data) => {
             this.nftscripts[id] = data;
             resolve("OK");
           });
+        }
       });
     }
