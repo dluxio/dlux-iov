@@ -51,7 +51,7 @@ if (
     //window.history.replaceState(null, null, "dex");
 }
 let user = localStorage.getItem("user") || "GUEST";
-let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
+let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
 
 createApp({
   directives:{
