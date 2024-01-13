@@ -12,7 +12,7 @@ export default {
         "upload-vue": UploadVue,
         "modal-vue": ModalVue
     },
-    template: `<div class="card">
+    template: `
     <div class="card-head p-2">
         <!-- top menu -->
         <div class="mb-2 d-flex flex-wrap justify-content-center align-items-center">
@@ -366,7 +366,7 @@ export default {
             </div>
         </div>
     </div>
-</div>`,
+`,
     props: {
         account: {
             default: ''
