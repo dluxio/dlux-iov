@@ -514,16 +514,8 @@ export default {
             this.$emit('modalselect', url);
         },
         addAssets(id, contract) {
-            if(typeof id == 'object'){
-                id = id.id
-                contract = id.contract
-            }
-            const item = {
-                id,
-                contract,
-            }
-            console.log({item})
-            this.$emit('addasset', item);
+            if(typeof id == 'object')this.$emit('addasset', id);
+            else this.$emit('addasset', {id, contract});
         },
         sortContracts(on = 'c', dir = 'asc') {
             this.contracts.sort((a, b) => {
