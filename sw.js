@@ -1,4 +1,4 @@
-this.version = "2024.01.14.8";
+this.version = "2024.01.14.9";
 
 console.log(
   "SW:" + this.version + " - online."
@@ -128,12 +128,9 @@ self.addEventListener("activate", function (event) {
 self.addEventListener("message", function (e) {
   console.log(e)
   var message = e.data; // We're going to have some fun here...
-  console.log("SW msg:", message);
   switch (message.id) {
     case "callScript":
-      callScript(o, e.ports[0]).then((r) => {
-        e.ports[0].postMessage(r);
-      });
+      callScript(o, e.ports[0])
       break;
     default:
       console.log("SW msg:", message);
