@@ -3633,6 +3633,7 @@ function buyNFT(setname, uid, price, type, callback){
             this.serviceWorkerPromises[`${event.data.o.script}:${event.data.o.uid}`].resolve(event.data.computed);
           } catch (e) { console.log(e) }
         });
+        navigator.serviceWorker.startMessages();
       } else {
         this.serviceWorker = false;
       }
