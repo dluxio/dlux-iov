@@ -2809,7 +2809,6 @@ function buyNFT(setname, uid, price, type, callback){
           fetch('https://spktest.dlux.io/api/fileContract/' + id)
             .then((r) => r.json())
             .then((res) => {
-              console.log(id, res)
               if(typeof res.result != "string"){
                 res.result.extend = "7"
                 this.contracts[id] = res.result
@@ -3628,7 +3627,6 @@ function buyNFT(setname, uid, price, type, callback){
         this.serviceWorker = true;
         // recieve messages
         navigator.serviceWorker.addEventListener('message', event => {
-          console.log(event.data)
           try {
             this.serviceWorkerPromises[`${event.data.script}:${event.data.uid}`].resolve(event.data);
             delete this.serviceWorkerPromises[`${event.data.script}:${event.data.uid}`]
