@@ -92,6 +92,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
   data() {
     return {
       fileRequests: {},
+      showLine: true,
       debounceScroll: 0,
       relations: {"follows":false,"ignores":false,"blacklists":false,"follows_blacklists":false,"follows_muted":false},
       sets: {},
@@ -1252,6 +1253,13 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         this.postCustom_json.assets.splice(dir == 'up' ? found - 1 : found + 1, 0, asset)
       }
       this.dluxMock()
+    },
+    resetCamera(){
+      var target = this.$refs.aframePreview.contentWindow
+      target.postMessage({
+        'func': 'resetCamera',
+        'message': null,
+      }, "*");
     },
     dluxMock() {
       // if (this.postCustom_json.assets) {
