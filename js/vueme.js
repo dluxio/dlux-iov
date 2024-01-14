@@ -897,9 +897,9 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
     callSWfunction(id,o,cb) {
       return new Promise((resolve, reject) => {
         console.log(navigator.serviceWorker)
-        if (navigator.serviceWorker.controller) {
+        if (activeWorker) {
           this.serviceWorkerPromises[`${o.script}:${o.uid}`] = {resolve, reject}
-          navigator.serviceWorker.controller.postMessage({
+          activeWorker.postMessage({
             id: id,
             o: o
           });
