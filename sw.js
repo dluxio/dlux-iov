@@ -1,4 +1,4 @@
-this.version = "2024.01.14.7";
+this.version = "2024.01.14.8";
 
 console.log(
   "SW:" + this.version + " - online."
@@ -126,7 +126,7 @@ self.addEventListener("activate", function (event) {
 });
 
 self.addEventListener("message", function (e) {
-  
+  console.log(e)
   var message = e.data; // We're going to have some fun here...
   console.log("SW msg:", message);
   switch (message.id) {
