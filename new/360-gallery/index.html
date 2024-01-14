@@ -33,23 +33,13 @@
     <script src="/js/drag-drop.js"></script>
     <!-- <script src="/js/drag-sort.js"></script> -->
 	<script>
-        if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register(
-                    // path to the service worker file
-                    '/sw.js'
-                )
-                    .then(reg => {
-                        console.log('SW Reg', reg)
-                        this.serviceWorker = true
-                    });
-                navigator.serviceWorker.onmessage = (e) => {
-                    if (e.data.cb) {
-                        const cb = e.data.cb
-                        delete e.data.cb
-                        cb(e.data.computed);
-                    }
-                };
-            }
+        var activeWorker = 0
+        if ('serviceWorker' in navigator) {navigator.serviceWorker.register('/sw.js')
+            .then(reg => {
+                console.log('Registration succeeded. Scope is ' + reg.scope);
+                activeWorker = reg.active;
+            })
+        }
     </script>
     <!-- Vue Controller -->
     <script type="module" src="/js/vueme.js"></script>
