@@ -1,4 +1,4 @@
-this.version = "2024.01.13.42";
+this.version = "2024.01.14.1";
 
 console.log(
   "SW:" + this.version + " - online."
@@ -131,17 +131,9 @@ self.addEventListener("message", function (e) {
   console.log("SW msg:", message);
   switch (message.id) {
     case "callScript":
-      callScript(message.o).then((r) => {
+      callScript(e).then((r) => {
         e.ports[0].postMessage(r);
       });
-      break;
-    case "tryLocal":
-      tryLocal(message).then((r) => {
-        e.ports[0].postMessage(r);
-      });
-      break;
-    case "online":
-      e.ports[0].postMessage(navigator.onLine);
       break;
     default:
       console.log("SW msg:", message);
@@ -162,17 +154,20 @@ function tryLocal(m) {
   });
 }
 
-function callScript (o){
-  return new Promise((resolve, reject) => {
+function callScript (e){
+  const o = e.data.o;
     if (this.nftscripts[o.script]) {
       const code = `(//${this.nftscripts[o.script]}\n)("${ o.uid ? o.uid : 0}")`;
-      console.log(code)
-          var computed = eval(code);
-          computed.uid = o.uid || "";
-          computed.owner = o.owner || "";
-          computed.script = o.script;
-          (computed.setname = o.set), (computed.token = o.token);
-          resolve(computed);
+      var computed = eval(code);
+      computed.uid = o.uid || "";
+      computed.owner = o.owner || "";
+      computed.script = o.script;
+      (computed.setname = o.set), (computed.token = o.token);
+      const ret = {
+        computed: computed,
+        cb: e.data.cb
+      }
+      e.ports[0].postMessage(computed);
     } else {
       this.pullScript(o.script).then((empty) => {
         this.callScript(o).then((r) => {
@@ -180,7 +175,6 @@ function callScript (o){
         });
       });
     }
-  });
 }
 
 function pullScript(id) {
@@ -190,7 +184,7 @@ function pullScript(id) {
               pullScript(id).then((r) => {
               resolve(r);
             });
-          }, 1000);
+          }, 2000);
         } else if (this.nftscripts[id]) {
           resolve("OK");
         } else {

@@ -31,8 +31,26 @@
     <script type="text/javascript" src="/js/onlyhash.js"></script>
     <script src="/js/buffer.js"></script>
     <script src="/js/drag-drop.js"></script>
-    <!-- <script src="/js/drag-sort.js"></script>
-	<script src="https://unpkg.com/lodash@4.16.0"></script> -->
+    <!-- <script src="/js/drag-sort.js"></script> -->
+	<script>
+        if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register(
+                    // path to the service worker file
+                    '/sw.js'
+                )
+                    .then(reg => {
+                        console.log('SW Reg', reg)
+                        this.serviceWorker = true
+                    });
+                navigator.serviceWorker.onmessage = (e) => {
+                    if (e.data.cb) {
+                        const cb = e.data.cb
+                        delete e.data.cb
+                        cb(e.data.computed);
+                    }
+                };
+            }
+    </script>
     <!-- Vue Controller -->
     <script type="module" src="/js/vueme.js"></script>
     <link href="/css/custom.css" rel="stylesheet" />

@@ -893,18 +893,14 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
     getSetPhotos(s, c) {
       return s.setname ? `https://ipfs.dlux.io/ipfs/${s.set[c]}` : "";
     },
-    callSWfunction(id,o,p,cb) {
+    callSWfunction(id,o,cb) {
       return new Promise((resolve, reject) => {
         if (navigator.serviceWorker.controller) {
           navigator.serviceWorker.controller.postMessage({
             id: id,
             o: o,
+            cb: resolve
           });
-          navigator.serviceWorker.onmessage = (e) => {
-            if (e.data.id == id) {
-              resolve(e.data);
-            }
-          };
         } else {
           reject(`${id} no controller`);
         }
@@ -3419,7 +3415,7 @@ function buyNFT(setname, uid, price, type, callback){
         if(this.serviceWorker){
           this.callSWfunction('callScript', o).then((r) => {
             resolve(r)
-          }).catch((e) => {console.log('Service Worker not found');this.serviceWorker = false; this.callScript(o).then((r) => {resolve(r)})})
+          }).catch((e) => {console.log('Service Worker not found', e);this.serviceWorker = false; this.callScript(o).then((r) => {resolve(r)})})
         } else if (this.nftscripts[o.script]) {
           const code = `(//${this.nftscripts[o.script]}\n)("${
             o.uid ? o.uid : 0
@@ -3624,17 +3620,14 @@ function buyNFT(setname, uid, price, type, callback){
     }
   },
   mounted() {
-    //recieve serviceworker messages
+    // Check for active service worker
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register(
-              // path to the service worker file
-              '/sw.js'
-          )
-          .then(reg => {
-            console.log('SW Reg', reg)
-              this.serviceWorker = true
-          });
-  }
+      if (navigator.onLine) {
+        this.serviceWorker = true;
+      } else {
+        this.serviceWorker = false;
+      }
+    }
     window.addEventListener('scroll', this.handleScroll);
     if (location.pathname.split("/@")[1]) {
       this.pageAccount = location.pathname.split("/@")[1]
