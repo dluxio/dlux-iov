@@ -1,4 +1,4 @@
-this.version = "2024.01.14.18";
+this.version = "2024.01.14.19";
 
 console.log( "SW:" + this.version + " - online.");
 
@@ -160,9 +160,7 @@ function callScript (o,p){
       p.postMessage(computed);
     } else {
       this.pullScript(o.script).then((empty) => {
-        this.callScript(o,p).then((r) => {
-          resolve(r);
-        });
+        this.callScript(o,p)
       });
     }
 }
