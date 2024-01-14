@@ -1,4 +1,4 @@
-this.version = "2024.01.14.6";
+this.version = "2024.01.14.7";
 
 console.log(
   "SW:" + this.version + " - online."
@@ -131,7 +131,7 @@ self.addEventListener("message", function (e) {
   console.log("SW msg:", message);
   switch (message.id) {
     case "callScript":
-      callScript(e).then((r) => {
+      callScript(o, e.ports[0]).then((r) => {
         e.ports[0].postMessage(r);
       });
       break;
@@ -154,8 +154,7 @@ function tryLocal(m) {
   });
 }
 
-function callScript (e){
-  const o = e.data.o;
+function callScript (o,p){
     if (this.nftscripts[o.script]) {
       const code = `(//${this.nftscripts[o.script]}\n)("${ o.uid ? o.uid : 0}")`;
       var computed = eval(code);
@@ -163,11 +162,7 @@ function callScript (e){
       computed.owner = o.owner || "";
       computed.script = o.script;
       (computed.setname = o.set), (computed.token = o.token);
-      const ret = {
-        computed: computed,
-        cb: e.data.cb
-      }
-      e.ports[0].postMessage(computed);
+      p.postMessage(computed);
     } else {
       this.pullScript(o.script).then((empty) => {
         this.callScript(o).then((r) => {
