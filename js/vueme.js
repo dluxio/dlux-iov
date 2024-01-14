@@ -896,6 +896,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
     },
     callSWfunction(id,o,cb) {
       return new Promise((resolve, reject) => {
+        console.log(navigator.serviceWorker)
         if (navigator.serviceWorker.controller) {
           this.serviceWorkerPromises[`${o.script}:${o.uid}`] = {resolve, reject}
           navigator.serviceWorker.controller.postMessage({
@@ -3628,7 +3629,9 @@ function buyNFT(setname, uid, price, type, callback){
         // recieve messages
         navigator.serviceWorker.addEventListener('message', event => {
           console.log(event.data)
-          this.serviceWorkerPromises[`${event.data.o.script}:${event.data.o.uid}`].resolve(event.data.computed);
+          try {
+            this.serviceWorkerPromises[`${event.data.o.script}:${event.data.o.uid}`].resolve(event.data.computed);
+          } catch (e) { console.log(e) }
         });
       } else {
         this.serviceWorker = false;
