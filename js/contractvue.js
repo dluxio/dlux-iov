@@ -522,6 +522,7 @@ export default {
                 id,
                 contract,
             }
+            console.log({item})
             this.$emit('addasset', item);
         },
         sortContracts(on = 'c', dir = 'asc') {
