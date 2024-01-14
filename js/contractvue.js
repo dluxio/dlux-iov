@@ -521,7 +521,7 @@ export default {
                 id,
                 contract,
             }
-            this.$emit('addasset', asset);
+            this.$emit('addasset', item);
         },
         sortContracts(on = 'c', dir = 'asc') {
             this.contracts.sort((a, b) => {
