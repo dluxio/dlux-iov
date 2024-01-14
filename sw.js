@@ -1,8 +1,6 @@
-this.version = "2024.01.14.9";
+this.version = "2024.01.14.10";
 
-console.log(
-  "SW:" + this.version + " - online."
-);
+console.log( "SW:" + this.version + " - online.");
 
 var CACHE_NAME = "sw-cache-v" + this.version;
 
