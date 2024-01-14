@@ -1,4 +1,4 @@
-this.version = "2024.01.14.15";
+this.version = "2024.01.14.16";
 
 console.log( "SW:" + this.version + " - online.");
 
@@ -150,10 +150,8 @@ function tryLocal(m) {
 }
 
 function callScript (o,p){
-  console.log({o,p})
     if (this.nftscripts[o.script] && this.nftscripts[o.script] != "Loading...") {
       const code = `(//${this.nftscripts[o.script]}\n)("${ o.uid ? o.uid : 0}")`;
-      console.log(code);
       var computed = eval(code);
       computed.uid = o.uid || "";
       computed.owner = o.owner || "";
@@ -162,7 +160,7 @@ function callScript (o,p){
       p.postMessage(computed);
     } else {
       this.pullScript(o.script).then((empty) => {
-        this.callScript(o).then((r) => {
+        this.callScript(o,p).then((r) => {
           resolve(r);
         });
       });
