@@ -1128,12 +1128,35 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
 				});
 			}
 		},
+    appFile(data){
+      console.log(data)
+      this.frameData = data
+      this.postCustom_json.vrHash = ''
+      this.frameURL = ''
+      this.dluxMock()
+    },
+    addApp(cid, contract) {
+      var found = -1
+      if (!cid) return false
+      for (var i = 0; i < this.postCustom_json.assets.length; i++) {
+        if (this.postCustom_json.assets[i].hash == cid) {
+          found = i
+        }
+      }
+      if (found == -1) {
+        this.postCustom_json.assets.push({
+          hash: cid,
+          type: 'dApp',
+          contract: contract,
+        })
+      }
+      this.postCustom_json.vrHash = cid
+      this.frameURL = cid
+      this.frameData = ''
+      this.dluxMock()
+    },
     addAsset(cid, contract, name = '', thumbHash, type = 'ts', rot = [0, 0, 0]) {
       var found = -1
-      if(typeof cid == 'object'){
-        cid = cid.id
-        contract = cid.contract
-      }
       if (!cid) return false
       for (var i = 0; i < this.postCustom_json.assets.length; i++) {
         this.postCustom_json.assets[i].f = 0
@@ -1160,6 +1183,114 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         })
       }
       this.dluxMock()
+    },
+    splitValues(value, i, delimter = ' ') {
+      var values = value.split(delimter)
+      return values[i]
+    },
+    focusAsset(cid, contract, name = '', thumbHash, type = 'ts') {
+      var found = -1
+      if (!cid) return false
+      for (var i = 0; i < this.postCustom_json.assets.length; i++) {
+        this.postCustom_json.assets[i].f = 0
+        if (this.postCustom_json.assets[i].hash == cid) {
+          found = i
+        }
+      }
+      if (found >= 0) {
+        this.postCustom_json.assets[found].name = name || this.postCustom_json.assets[found].name
+        this.postCustom_json.assets[found].thumbHash = thumbHash || cid
+        this.postCustom_json.assets[found].r = `${this.postCustom_json.assets[found].rx || 0} ${this.postCustom_json.assets[found].ry || 0} ${this.postCustom_json.assets[found].rz || 0}`
+        this.postCustom_json.assets[found].f = 1
+      } else {
+        this.postCustom_json.assets.push({
+          hash: cid,
+          name: name,
+          type: type,
+          contract: contract,
+          thumbHash,
+          r: `${this.postCustom_json.assets[found].rx || 0} ${this.postCustom_json.assets[found].ry || 0} ${this.postCustom_json.assets[found].rz || 0}`,
+          f: 1
+        })
+      }
+      this.dluxMock()
+    },
+    changeAppType(type = 'Blog'){
+      this.appType = type
+      if(type == 'Blog'){
+        delete this.postCustom_json.vrHash
+      }
+      this.postCustom_json.subApp = type
+      this.dluxMock()
+    },
+    delAsset(cid) {
+      var found = -1
+      if (!cid) return false
+      for (var i = 0; i < this.postCustom_json.assets.length; i++) {
+        if (this.postCustom_json.assets[i].hash == cid) {
+          found = i
+        }
+      }
+      if (found >= 0) {
+        this.postCustom_json.assets.splice(found, 1)
+      }
+      this.dluxMock()
+    },
+    moveAsset(cid, dir = 'up') {
+      var found = -1
+      if (!cid) return false
+      for (var i = 0; i < this.postCustom_json.assets.length; i++) {
+        if (this.postCustom_json.assets[i].hash == cid) {
+          found = i
+        }
+      }
+      if ((found >= 1 && dir == 'up') || (found < this.postCustom_json.assets.length - 1 && dir == 'down')) {
+        const asset = this.postCustom_json.assets[found]
+        this.postCustom_json.assets.splice(found, 1)
+        this.postCustom_json.assets.splice(dir == 'up' ? found - 1 : found + 1, 0, asset)
+      }
+      this.dluxMock()
+    },
+    dluxMock() {
+      // if (this.postCustom_json.assets) {
+      // 	for (var i = 0; i < this.postCustom_json.assets.length; i++) {
+      // 		this.postCustom_json.assets.push({
+      // 			hash: assets[i].hash,
+      // 			name: assets[i].path,
+      // 			size: assets[i].size,
+      // 			pin: true,
+      // 			type: "ts",
+      // 			thumbHash: assets[i].hash
+      // 		})
+      // 		if (!custom_json.Hash360) {
+      // 			custom_json.Hash360 = assets[i].hash
+      // 		}
+      // 	}
+      // }
+      var result = {
+        author: this.account,
+        permlink: this.postPermlink,
+        title: this.postTitle,
+        body: this.postBody,
+        json_metadata: JSON.stringify(this.postCustom_json),
+        parent_author: '',
+        parent_permlink: 'dlux',
+      }
+      var target = this.$refs.aframePreview.contentWindow
+      var un = 'Guest'
+      if (this.account) { un = this.account }
+      target.postMessage({
+        'func': 'iAm',
+        'message': un,
+      }, "*");
+      target.postMessage({
+        'func': 'key',
+        'message': `markegiles/dlux-vr-tutorial-sm-test`,
+      }, "*");
+      target.postMessage({
+        'func': 'hiveState',
+        'message': result,
+      }, "*");
     },
     getSetDetailsColors(script) {
       let r = "chartreuse,lawngreen";
