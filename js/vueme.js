@@ -897,7 +897,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
     callSWfunction(id,o,cb) {
       return new Promise((resolve, reject) => {
         if (activeWorker) {
-          if(!o.uid)o.uid = 0
+          if(!o.uid)o.uid = ""
           this.serviceWorkerPromises[`${o.script}:${o.uid}`] = {resolve, reject}
           activeWorker.postMessage({
             id: id,
@@ -3631,6 +3631,7 @@ function buyNFT(setname, uid, price, type, callback){
           console.log(event.data)
           try {
             this.serviceWorkerPromises[`${event.data.script}:${event.data.uid}`].resolve(event.data.computed);
+            delete this.serviceWorkerPromises[`${event.data.script}:${event.data.uid}`]
           } catch (e) { console.log(e) }
         });
         navigator.serviceWorker.startMessages();
