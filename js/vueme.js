@@ -3629,7 +3629,7 @@ function buyNFT(setname, uid, price, type, callback){
         navigator.serviceWorker.addEventListener('message', event => {
           console.log(event.data)
           try {
-            this.serviceWorkerPromises[`${event.data.o.script}:${event.data.o.uid}`].resolve(event.data.computed);
+            this.serviceWorkerPromises[`${event.data.script}:${event.data.uid}`].resolve(event.data.computed);
           } catch (e) { console.log(e) }
         });
         navigator.serviceWorker.startMessages();
