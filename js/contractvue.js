@@ -515,6 +515,7 @@ export default {
         },
         addAssets(id, contract) {
             if(typeof id == 'object'){
+                id = id.id
                 contract = id.contract
             }
             const item = {

@@ -49,7 +49,6 @@ data() {
 emits: [ "addassets" ],
 methods: {
     addAsset(id, contract) {
-        console.log(id, contract);
         this.$emit("addassets", { id, contract });
     },
 },
