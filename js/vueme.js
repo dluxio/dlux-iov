@@ -1155,9 +1155,13 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
       this.frameData = ''
       this.dluxMock()
     },
-    addAsset(cid, contract, name = '', thumbHash, type = 'ts', rot = [0, 0, 0]) {
+    addAsset(cid, contract, name = '', thumbHash = '', type = 'ts', rot = [0, 0, 0]) {
       var found = -1
       if (!cid) return false
+      if(typeof cid == 'object'){
+        cid = cid.id
+        contract = cid.contract
+      }
       for (var i = 0; i < this.postCustom_json.assets.length; i++) {
         this.postCustom_json.assets[i].f = 0
         if (this.postCustom_json.assets[i].hash == cid) {
