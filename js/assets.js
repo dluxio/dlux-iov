@@ -9,6 +9,15 @@ add them to your 360 post and they will appear here.</div>
 <h6>Assets</h6>
 <div v-for="(asset, index) in Assets">
     <form onsubmit="return false;">
+        <div class="dropdown ms-auto">
+            <button class="btn btn-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="true">
+             Type
+            </button>
+            <ul class="dropdown-menu dropdown-menu-dark bg-black">
+                <li><a class="dropdown-item" role="button">360</a></li>
+                <li><a class="dropdown-item" role="button">GLTF</a></li>
+            </ul>
+        </div>
         <p class="text-break">CID: {{asset.hash}}</p>
         <p>In: {{asset.contract}}</p>
         <div
