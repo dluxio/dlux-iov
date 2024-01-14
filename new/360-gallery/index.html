@@ -177,118 +177,13 @@
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                     data-bs-target="#assetManager" aria-expanded="false" aria-controls="assetManager">
-                                    360 Asset Manager
+                                    Asset Manager
                                 </button>
                             </h2>
                             <div id="assetManager" class="accordion-collapse collapse">
                                 <div class="accordion-body">
                                     <!-- Asset Manager -->
-                                    <div v-if="!postCustom_json.assets.length">No assets added. Use the File Upload
-                                        & Hosting section to view or create hosting contracts, then upload assets
-                                        into a hosting contract. Once you have assets in a hosting contract, you can
-                                        add them to your 360 post and they will appear here.</div>
-                                    <div v-if="postCustom_json.assets.length">
-                                        <h6>Assets</h6>
-                                        <div v-for="(asset, index) in postCustom_json.assets">
-                                            <form onsubmit="return false;">
-                                                <p class="text-break">CID: {{asset.hash}}</p>
-                                                <p>In: {{asset.contract}}</p>
-                                                <div
-                                                    class="d-flex p-2 justify-content-between align-items-center flex-wrap">
-                                                    <div class="m-2">
-                                                        <div class="input-group m-2">
-                                                            <input type="text" class="form-control" v-model="asset.name"
-                                                                placeholder="Picture Name">
-                                                        </div>
-                                                        <div class="input-group m-2">
-                                                            <input type="text" class="form-control"
-                                                                v-model="asset.thumbHash"
-                                                                placeholder="Thumbnail IPFS Hash">
-                                                        </div>
-                                                    </div>
-                                                    <div class="d-flex flex-column p-2 m-2">
-                                                        <div class="row g-3 align-items-center">
-                                                            <div class="col-auto me-auto">
-                                                                <label for="ry" class="col-form-label"><i
-                                                                        class="fa-solid fa-arrows-left-right me-2"></i>Pan
-                                                                    Y:{{asset.ry}}</label>
-                                                            </div>
-                                                            <div class="col-auto">
-                                                                <input type="range" class="form-range" id="ry"
-                                                                    v-model="asset.ry"
-                                                                    @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])"
-                                                                    min="-180" max="180" step="1">
-                                                            </div>
-                                                        </div>
-                                                        <div class="row g-3 align-items-center">
-                                                            <div class="col-auto me-auto">
-                                                                <label for="rx" class="col-form-label"><i
-                                                                        class="fa-solid fa-arrows-rotate me-2"></i>Roll
-                                                                    X:{{asset.rx}}</label>
-                                                            </div>
-                                                            <div class="col-auto">
-                                                                <input type="range" class="form-range" id="rx"
-                                                                    v-model="asset.rx"
-                                                                    @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])"
-                                                                    min="-180" max="180" step="1">
-                                                            </div>
-                                                        </div>
-                                                        <div class="row g-3 align-items-center">
-                                                            <div class="col-auto me-auto">
-                                                                <label for="rz" class="col-form-label"><i
-                                                                        class="fa-solid fa-arrows-rotate me-2"></i>Roll
-                                                                    Z:{{asset.rz}}</label>
-                                                            </div>
-                                                            <div class="col-auto">
-                                                                <input type="range" class="form-range" id="rz"
-                                                                    v-model="asset.rz"
-                                                                    @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])"
-                                                                    min="-180" max="180" step="1">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="d-flex flex-column">
-                                                        <div class="d-flex" style="justify-content: center;"><img
-                                                                :src="'https://ipfs.dlux.io/ipfs/' + asset.hash"
-                                                                class="img-fluid" style="max-width: 300px;"
-                                                                :alt="asset.hash"></div>
-                                                        <div class="m-2 btn-group">
-                                                            <button class="btn btn-primary"
-                                                                @click="addAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, asset.r)">Refresh
-                                                                dApp</button>
-                                                            <button type="button"
-                                                                class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                                                                disabled></button>
-                                                            <button class="btn btn-primary"
-                                                                @click="delAsset(asset.hash, asset.contract, asset.name, asset.thumbHash)">Delete
-                                                                Asset</button>
-                                                            <button type="button"
-                                                                class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                                                                disabled></button>
-                                                            <button class="btn btn-primary" :disabled="index == 0"
-                                                                @click="moveAsset(asset.hash, 'up')"><i
-                                                                    class="fa-solid fa-up-long"></i></button>
-                                                            <button type="button"
-                                                                class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                                                                disabled></button>
-                                                            <button class="btn btn-primary"
-                                                                :disabled="index == postCustom_json.assets.length - 1"
-                                                                @click="moveAsset(asset.hash, 'down')"><i
-                                                                    class="fa-solid fa-down-long"></i></button>
-                                                        </div>
-                                                        <div class="form-check ms-auto me-auto">
-                                                            <input class="form-check-input" type="checkbox" value=""
-                                                                id="firstImage" :checked="asset.f"
-                                                                @click="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, [asset.rx, asset.ry, asset.rz])">
-                                                            <label class="form-check-label" for="firstImage">
-                                                                Initial Image
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
+                                    <assets-vue :assets="postCustom_json.assets" @updateassets="postCustom_json.assets = $event;dluckMock()" types="ts"/>
                                 </div>
                             </div>
                         </div>

@@ -21,6 +21,7 @@ import NFTCard from "./nftcard.js";
 import FTTransfer from "./fttransfer.js";
 import NFTDetail from "./nftdetail.js";
 import SPKVue from "/js/spk-wallet-comp.js";
+import Assets from "/js/assets.js"
 
 
 let url = location.href.replace(/\/$/, "");
@@ -870,6 +871,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
   },
   components: {
     "spk-vue": SPKVue,
+    "assets-vue": Assets,
     "nav-vue": Navue,
     "foot-vue": FootVue,
     "cycle-text": Cycler,
