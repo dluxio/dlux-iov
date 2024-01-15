@@ -81,8 +81,8 @@ export default {
         <!-- registered -->
         <div v-if="saccountapi.pubKey != 'NA'">
             <!-- no contracts -->
-            <div class="ms-auto me-auto text-center" v-show="!contracts.length">
-                <div class="ms-auto me-auto card px-3 py-2 mt-3 mb-4 bg-darker" style="max-width: 600px">
+            <div class="d-flex justify-content-center" v-show="!contracts.length">
+                <div class="card px-3 py-2 mt-3 mb-4 mx-1 bg-darker text-center" style="max-width: 600px">
                     <h2 class="fw-light mt-1">No contracts found</h2>
                     <p class="lead mb-1">
                         Click <a class="btn btn-sm btn-danger no-decoration small" style="font-size: 0.6em;"
@@ -170,7 +170,7 @@ export default {
                                     <table class="table text-white align-middle mb-0">
                                         <tbody class="border-0">
                                             <tr class="border-0">
-                                                <!-- storage -->
+                                                <!-- storage col -->
                                                 <th class="border-0">
                                                     <div class="d-flex align-items-center">
                                                         <a class="ms-md-2 collapsed no-decoration"
@@ -190,7 +190,7 @@ export default {
                                                         {{contract.c > 1 ? contract.u/1000000 : contract.a/1000000}} MB
                                                     </div>
                                                 </th>
-                                                <!-- status -->
+                                                <!-- status col -->
                                                 <td class="border-0">
                                                     <div class="d-flex align-items-center">
                                                         <!-- upload btn -->
@@ -247,7 +247,7 @@ export default {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <!-- expires -->
+                                                <!-- expires col -->
                                                 <td class="border-0">
                                                     <div class="d-flex align-items-center">
                                                         <a class="no-decoration collapsed" data-bs-toggle="collapse"
