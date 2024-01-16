@@ -25,7 +25,7 @@ export default {
                         <button v-if="saccountapi.pubKey != 'NA' && saccountapi.spk_power" type="button"
                             class="btn btn-primary mt-1 me-1">
                             <modal-vue type="build" token="BROCA" :balance="broca_calc(saccountapi.broca)"
-                                :account="account" @modalsign="sendIt($event)" :ipfsproviders="ipfsProviders"
+                                :account="account" @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
                                 v-slot:trigger>
                                 <span slot="trigger" class="trigger"><i
                                         class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
@@ -94,7 +94,7 @@ export default {
                                 style="font-size: 0.6em;" role="button" data-bs-toggle="modal"
                                 data-bs-target="#contractModal">
                                 <modal-vue type="build" token="BROCA" :balance="broca_calc(saccountapi.broca)"
-                                    :account="account" @modalsign="sendIt($event)" :ipfsproviders="ipfsProviders"
+                                    :account="account" @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
                                     v-slot:trigger>
                                     <span slot="trigger" class="trigger"><i
                                             class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
