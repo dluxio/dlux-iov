@@ -241,18 +241,18 @@ export default {
                     <!-- Elect Validator -->
                     <div v-if="func == 'Election'">
                       <div class="modal-body">
-                        <h3 class="mb-2">Chosen Validators ({{valWorkable.length}}/30)</h3>
+                        <h3 class="mb-2">Chosen Validators ({{d.valWorkable.length}}/30)</h3>
                         <div class="d-flex mx-5 justify-content-between align-items-center border-bottom border-secondary py-2 mb-3">
                           <button class="btn btn-success invisible" type="button">Save</button>
                           <h5 class="m-0"> Node (Weight)</h5>
                           <button :class="{'invisible': !difVote}" class="btn btn-success" type="button" @click="valVote()">Save</button>
                         </div>
                         <div class="mb-5">
-                          <div v-if="!valWorkable.length">
+                          <div v-if="!d.valWorkable.length">
                             <p>No Validators Added</p>
                           </div>
                           <ul class="mx-5 p-0">
-                            <div v-for="(node, index) in valWorkable">
+                            <div v-for="(node, index) in d.valWorkable">
                               <li @dragstart="pick($event, node, index)" @dragover.prevent @dragenter.prevent @drop="move($event, node, index)" class="border border-secondary rounded d-flex align-items-center justify-content-between p-2 my-2 drop-zone" draggable="true" style="cursor: move;">
                                 <i class="fa-solid fa-grip-lines ms-3"></i>  
                                 <h5 class="m-0">@{{node.self}} ({{formatNumber(((30 - index )/ 30)* 100, 1,  '.', ',')}}%)</h5>
@@ -267,7 +267,7 @@ export default {
                             <li v-if="isVal(node)" class="border border-secondary rounded d-flex align-items-center justify-content-between p-2 my-2">
                               <button class="btn btn-primary invisible" type="button"><i class="fa-solid fa-plus"></i></button>
                               <h5 class="m-0">@{{node.self}}</h5>
-                              <button :disable="valWorkable.length == 30" class="btn btn-primary" @click="add(node)" type="button"><i class="fa-solid fa-plus"></i></button>
+                              <button :disable="d.valWorkable.length == 30" class="btn btn-primary" @click="add(node)" type="button"><i class="fa-solid fa-plus"></i></button>
                             </li>
                           </div>
                         </ul>
