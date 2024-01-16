@@ -377,12 +377,12 @@ export default {
     },
     valVote(){
       var op 
-      if(this.d.difVote)op = {
+      if(this.difVote)op = {
         type: "cja",
         cj: {
-          votes: this.d.voteString,
+          votes: this.voteString,
         },
-        id: `${this.d.spkprefix}_val_vote`,
+        id: `${this.dspkprefix}_val_vote`,
         msg: `Voting for Validators...`,
         ops: ["getSapi"],
         api: "https://spkinstant.hivehoneycomb.com",
@@ -954,7 +954,7 @@ export default {
   computed:{
     difVote: {
       get() {
-        return typeof this.d.current == 'string' ? this.d.current.split(',')[0] : '' == this.d.voteString ? false : true
+        return typeof this.current == 'string' ? this.current.split(',')[0] : '' == this.voteString ? false : true
       }
     },
     voteString: {
