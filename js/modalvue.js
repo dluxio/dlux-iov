@@ -382,7 +382,7 @@ export default {
         cj: {
           votes: this.voteString,
         },
-        id: `${this.dspkprefix}_val_vote`,
+        id: `${this.spkprefix}_val_vote`,
         msg: `Voting for Validators...`,
         ops: ["getSapi"],
         api: "https://spkinstant.hivehoneycomb.com",
