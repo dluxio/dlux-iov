@@ -374,7 +374,7 @@ export default {
         sapi: {
             default: 'https://spktest.dlux.io'
         },
-        nodeView: {
+        nodeview: {
             default: false
         },
         prop_contracts: {

@@ -168,8 +168,8 @@
                             </h2>
                             <div id="executedContracts" class="accordion-collapse collapse show">
                                 <div class="accordion-body p-0">
-                                    <contract-vue :node="false" :account="account" @tosign="toSign=$event"
-                                        :contracts="contracts" :assets="true" @addasset="addAsset($event)"></contract-vue>
+                                    <contract-vue :nodeview="false" :account="account" @tosign="toSign=$event"
+                                        :prop_contracts="contracts" :assets="true" @addasset="addAsset($event)"></contract-vue>
                                 </div>
                             </div>
                         </div>
