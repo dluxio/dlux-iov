@@ -565,7 +565,7 @@ export default {
                     data.powerDowns[i] = data.powerDowns[i].split(":")[0];
                   }
                   // Storage nodes won't get contracts from here, we'll need some props from the contract
-                  if(!this.nodeView){
+                  if(!this.nodeview){
                     for (var node in data.file_contracts) {
                         this.contractIDs[data.file_contracts[node].i] = data.file_contracts[node];
                         this.contracts.push(data.file_contracts[node]);
@@ -914,7 +914,7 @@ export default {
     watch: {
         'account'(newValue) {
             if(this.loaded == true){
-                if(!this.nodeView){
+                if(!this.nodeview){
                     this.contracts =  []
                     this.contractIDs = {}
                 }
@@ -944,7 +944,7 @@ export default {
     mounted() {
         this.getSpkStats()
         this.getIPFSproviders()
-        if(this.nodeView){
+        if(this.nodeview){
             for (var node in this.contracts) {
                 this.contractIDs[this.contracts[node].i] = this.contracts[node];
                 this.contractIDs[this.contracts[node].i].index = this.contracts.length - 1;
