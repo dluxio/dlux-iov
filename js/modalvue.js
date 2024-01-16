@@ -78,7 +78,7 @@ export default {
                       </div>
                       <label class="small mb-1 d-flex" for="sendAmount">Amount 
                         <span class="ms-auto">
-                          Balance: <a role="button" class="text-info" @click="d.amount = d.balance / 1000">{{formatNumber((d.balance)/1000, 3, '.', ',')}}</a> {{token}}
+                          Balance: <a role="button" class="text-info" @click="d.amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}
                         </span>
                       </label>
                       <div class="position-relative mb-3">
@@ -156,7 +156,7 @@ export default {
                     <label for="delegatemirror">Mirror Network Only</label>
                   </div>
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> 
-                  <button :disabled="!to" type="submit" class="btn btn-primary" @click="delegate" data-bs-dismiss="modal">Confirm</button> 
+                  <button :disabled="!d.to" type="submit" class="btn btn-primary" @click="delegate" data-bs-dismiss="modal">Confirm</button> 
                 </div>
               </form>
           </div>
