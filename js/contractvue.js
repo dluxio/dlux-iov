@@ -16,7 +16,7 @@ export default {
     <div class="card-head p-2">
         <!-- top menu -->
         <div class="mb-2 d-flex flex-wrap justify-content-center align-items-center">
-            <h2 class="my-1 ms-lg-3 fw-light text-start">Storage Contracts</h2>
+            <h2 class="my-1 ms-lg-3 fw-light text-start">{{title}}</h2>
             <div class="d-flex flex-wrap flex-grow-1 ms-lg-3">
                 <!-- tools 1 -->
                 <div v-if="saccountapi.pubKey != 'NA'" class="d-flex mb-1 flex-wrap ms-auto order-lg-last">
@@ -37,7 +37,7 @@ export default {
                             <span class=""></span><i class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE
                         </button>
                         <!-- spk wallet button -->
-                        <button type="button" class="mt-1 me-1 btn btn-secondary" data-bs-toggle="modal"
+                        <button v-if="!nodeview" type="button" class="mt-1 me-1 btn btn-secondary" data-bs-toggle="modal"
                             data-bs-target="#spkWalletModal">
                             <span class=""></span><i class="fa-solid fa-wallet fa-fw me-1"></i>SPK
                         </button>
@@ -84,7 +84,7 @@ export default {
             <div class="ms-auto me-auto text-center" v-show="!contracts.length">
                 <div class="ms-auto me-auto card px-3 py-2 mt-3 mb-4 bg-darker" style="max-width: 600px">
                     <h2 class="fw-light mt-1">No contracts found</h2>
-                    <p class="lead mb-1">
+                    <p class="lead mb-1" v-if="!nodeview">
                         Click <a class="btn btn-sm btn-danger no-decoration small" style="font-size: 0.6em;"
                             role="button" data-bs-toggle="modal" data-bs-target="#sponsoredModal"><i
                                 class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE</a>
@@ -279,12 +279,15 @@ export default {
                                             </tr>
                                             <tr class="collapse" :id="replace(contract.i) + 'beneficiary'">
                                                 <td class=" border-0" colspan="4">
-                                                    <p>put post compose here</p>
+                                                    <p v-if="account == contract.t">put post compose here</p>
+                                                    <extension-vue :node-view="nodeview" :contract="contract"
+                                                        :sstats="sstats" :account="account" :saccountapi="saccountapi"
+                                                        @tosign="toSign=$event"></extension-vue>
                                                 </td>
                                             </tr>
                                             <tr class="collapse" :id="replace(contract.i) + 'extension'">
                                                 <td class=" border-0" colspan="4" v-if="contract.c == 3">
-                                                    <extension-vue :node-view="nodeView" :contract="contract"
+                                                    <extension-vue :node-view="nodeview" :contract="contract"
                                                         :sstats="sstats" :account="account" :saccountapi="saccountapi"
                                                         @tosign="toSign=$event"></extension-vue>
                                                 </td>
@@ -386,6 +389,10 @@ export default {
             default: false,
             required: false
         },
+        title: {
+            default: 'Storage Contracts',
+            required: false
+        }
     },
     data() {
         return {
@@ -601,7 +608,7 @@ export default {
             fetch(this.sapi + "/stats")
               .then((response) => response.json())
               .then((data) => {
-                console.log(data);
+                //console.log(data);
                 this.loaded = true;
                 this.spkStats = data.result;
                 for (var i = 0; i < this.tokenGov.options.length; i++) {
@@ -638,12 +645,12 @@ export default {
               c = 0,
               t = 0,
               diff = (this.saccountapi.head_block ? this.saccountapi.head_block : this.sstats.lastIBlock) - this.saccountapi.spk_block;
-              console.log(diff, this.saccountapi.head_block , this.sstats)
+              //console.log(diff, this.saccountapi.head_block , this.sstats)
               if (!this.saccountapi.spk_block) {
-              console.log("No SPK seconds");
+              //console.log("No SPK seconds");
               return 0;
             } else if (diff < 28800) {
-              console.log("Wait for SPK");
+              //console.log("Wait for SPK");
               return 0;
             } else {
               t = parseInt(diff / 28800);
@@ -663,25 +670,10 @@ export default {
                 t,
                 this.sstats.spk_rate_ldel
               );
-              console.log({
-                t,
-                a,
-                b,
-                c,
-                d: this.saccountapi.granted?.t > 0 ? this.saccountapi.granted.t : 0,
-                g: this.saccountapi.granting?.t > 0 ? this.saccountapi.granting.t : 0,
-              });
               const i = a + b + c;
-              if (i) {
-                console.log(i, "Phantom SPK");
-                return i;
-              } else {
-                console.log("0 SPK");
-                return 0;
-              }
+              if(i){return i}else{return 0}
             }
             function simpleInterest(p, t, r) {
-              console.log({ p, t, r });
               const amount = p * (1 + parseFloat(r) / 365);
               const interest = amount - p;
               return parseInt(interest * t);
@@ -692,7 +684,6 @@ export default {
             fetch(`${this.sapi}/user_services/${broker}`)
               .then(r => r.json())
               .then(res => {
-                console.log(res)
                 this.contract.api = res.services.IPFS[Object.keys(res.services.IPFS)[0]].a
               })
           },
@@ -729,10 +720,6 @@ export default {
               }
               this.$emit('tosign', toSign)
         },
-        updateCost(id) {
-            this.extendcost[id] = parseInt(this.contracts[id].extend * (this.contracts[id].p + (this.spread ? 1 : 0)) / (30 * 3) * this.contracts[id].r)
-            this.$forceUpdate()
-        },
         getContracts() {
             var contracts = [],
                 getContract = (id) => {
@@ -742,7 +729,7 @@ export default {
                             res.result.extend = "7"
                             if (res.result) {
                                 this.contracts[id] = res.result
-                                this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
+                                //this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
                             }
                         });
                 }
@@ -792,7 +779,6 @@ export default {
         },
         vote(url) {
             this.$emit('vote', { url: `/@${this.post.author}/${this.post.permlink}`, slider: this.slider, flag: this.flag })
-            console.log(this.post)
         },
         color_code(name) {
             return parseInt(this.contracts[name] ? this.contracts[name].e.split(':')[0] : 0) - this.head_block
@@ -939,15 +925,41 @@ export default {
                 this.$emit('tosign', this.toSign)
                 this.toSign = {}
             }
+        },
+        'prop_contracts'(newValue){
+            if(this.nodeview){
+                this.contracts = []
+                this.contractIDs = {}
+                const getContract = (id) => {
+                    fetch('https://spktest.dlux.io/api/fileContract/' + id)
+                        .then((r) => r.json())
+                        .then((res) => {
+                            res.result.extend = "7"
+                            if (res.result) {
+                                this.contracts.splice(this.contractIDs[id].index, 1, res.result)
+                                //this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
+                            }
+                        });
+                }
+                var i = 0
+                for (var node in this.prop_contracts) {
+                    this.contracts.push(this.prop_contracts[node]);
+                    this.contractIDs[this.prop_contracts[node].i] = this.prop_contracts[node];
+                    this.contractIDs[this.prop_contracts[node].i].index = i
+                    i++
+                    getContract(this.prop_contracts[node].i)
+                }
+            }
         }
       },
     mounted() {
         this.getSpkStats()
         this.getIPFSproviders()
         if(this.nodeview){
-            for (var node in this.contracts) {
-                this.contractIDs[this.contracts[node].i] = this.contracts[node];
-                this.contractIDs[this.contracts[node].i].index = this.contracts.length - 1;
+            for (var node in this.prop_contracts) {
+                this.contracts.push(this.prop_contracts[node]);
+                this.contractIDs[this.prop_contracts[node].i] = this.prop_contracts[node];
+                this.contractIDs[this.prop_contracts[node].i].index = this.prop_contracts.length - 1;
             }
         }
     },

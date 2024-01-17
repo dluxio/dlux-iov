@@ -331,14 +331,12 @@ export default {
     },
     watch: {
         'contract'(newValue) {
-            console.log('watch', newValue)
             this.contract.id = this.contract.i.replace(/:/g, "-");
             this.contract.extend = 7
             this.updateCost()
         }
       },
     mounted() {
-        console.log("mount", this.contract)
         this.contract.id = this.contract.i.replace(/:/g, "-");
         this.contract.extend = 7
         this.updateCost()
