@@ -3,10 +3,9 @@
 
 <head>
   <title>DLUX</title>
-
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
   <!-- Bootstrap -->
   <link href="/css/custom.css" rel="stylesheet" />
@@ -35,13 +34,14 @@
   </script>
 </head>
 
-<body class="d-flex flex-column h-100">
-  <div id="app">
+<body class="d-flex h-100 align-items-stretch text-white">
+  <div id="app" class="d-flex w-100 flex-column w-100">
+    <!-- navbar -->
     <div>
       <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
         @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" />
     </div>
-    <main class="d-flex flex-column text-center flex-shrink-0" style="margin-top: 94px;">
+    <main class="mb-auto" style="margin-top: 94px;">
       <div id="dapps" class="d-flex flex-row px-2">
         <div class="d-flex flex-column dlux-turq jumbo-dlux container p-5 m-auto">
           <div class="dlux-header">
