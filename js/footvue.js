@@ -1,6 +1,6 @@
 export default {
   template: `
-  <footer class="footer mt-auto bg-dark pt-5">
+  <footer class="footer bg-dark pt-5">
 
   <!-- Footer Elements -->
   <div class="container text-center">
@@ -21,7 +21,7 @@ export default {
           </a>
           <!--Twitter -->
           <a href="https://twitter.com/dluxxr" target="_blank">
-            <i class="fab fa-twitter fa-lg mx-md-3 mx-2 fa-2x"></i>
+            <i class="fa-brands fa-x-twitter fa-lg mx-md-3 mx-2 fa-2x"></i>
           </a>
         </div>
 
