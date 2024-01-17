@@ -16,22 +16,26 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/img/dlux-icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#ffffff">
   <meta name="apple-mobile-web-app-title" content="DLUX">
- 
+  <style>
+    body {
+      background-color: #00623A;
+    }
+  </style>
   <script>
     if ('serviceWorker' in navigator) {
-        navigator
-            .serviceWorker
-            .register(
-                // path to the service worker file
-                '/sw.js'
-            )
-            // the registration is async and it returns a promise
-            .then(function (reg) {
-                console.log('Registration Successful');
-            });
+      navigator
+        .serviceWorker
+        .register(
+          // path to the service worker file
+          '/sw.js'
+        )
+        // the registration is async and it returns a promise
+        .then(function (reg) {
+          console.log('Registration Successful');
+        });
     }
   </script>
 </head>
@@ -42,9 +46,9 @@
       <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
         @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" />
     </div>
-    <main class="d-flex flex-column text-center flex-shrink-0" >
-      <div id="dapps" class="d-flex flex-row px-2"  style="margin-top: 94px;">
-        <div class="d-flex flex-column dlux-turq jumbo-dlux container p-5 m-auto" >
+    <main class="d-flex flex-column text-center flex-shrink-0">
+      <div id="dapps" class="d-flex flex-row px-2" style="margin-top: 94px;">
+        <div class="d-flex flex-column dlux-turq jumbo-dlux container p-5 m-auto">
           <div class="dlux-header">
             <h1>
               <span class="text-white">dlux is:</span>
@@ -57,7 +61,8 @@
           <div>
             <a class="btn btn-dlux btn-lg btn-turq mt-2" href="/vr/">Launch Overworld<i
                 class="fas fa-vr-cardboard ms-2"></i></a>
-            <a class="btn btn-dlux btn-lg btn-outline-turq mt-2" href="/hub/">Browse dApps<i class="fa-solid fa-mountain-sun ms-2"></i></a>
+            <a class="btn btn-dlux btn-lg btn-outline-turq mt-2" href="/hub/">Browse dApps<i
+                class="fa-solid fa-mountain-sun ms-2"></i></a>
           </div>
         </div>
       </div>
@@ -75,7 +80,8 @@
           <div>
             <a class="btn btn-dlux btn-lg btn-tang mt-2" href="/nfts/sets">Collect NFTs<i
                 class="fas fa-store fa-fw ms-2"></i></a>
-            <a class="btn btn-dlux btn-lg btn-outline-tang mt-2" href="/dex">Trade Tokens<i class="fa-solid fa-building-columns ms-2"></i></a>
+            <a class="btn btn-dlux btn-lg btn-outline-tang mt-2" href="/dex">Trade Tokens<i
+                class="fa-solid fa-building-columns ms-2"></i></a>
           </div>
         </div>
       </div>
@@ -93,7 +99,9 @@
           <div>
             <a class="btn btn-dlux btn-lg btn-hive mt-2" href="https://signup.hive.io/" target="_blank">Get Account<i
                 class="fab fa-fw fa-hive ms-2"></i></a>
-            <a class="btn btn-dlux btn-lg btn-outline-hive mt-2" href="#/" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login<i class="fas fa-fw fa-key ms-2"></i></a>
+            <a class="btn btn-dlux btn-lg btn-outline-hive mt-2" href="#/" data-bs-toggle="offcanvas"
+              data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login<i
+                class="fas fa-fw fa-key ms-2"></i></a>
           </div>
         </div>
       </div>
@@ -161,7 +169,9 @@
       return new bootstrap.Tooltip(tooltipTriggerEl);
     });
   </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
+    integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
 </body>
 
