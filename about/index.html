@@ -19,7 +19,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 	<script type="module" src="/js/indexvue.js"></script>
 	<script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
-	<script>
+	<!-- <script>
 		if ('serviceWorker' in navigator) {
 		    navigator
 		        .serviceWorker
@@ -32,51 +32,22 @@
 		            console.log('Registration Successful');
 		        });
 		}
-	  </script>
-	<!--page specific-->
-	<style>
-		.listing-btn {
-			background-color: #f8f9fa;
-			border-color: #000;
-			border-width: 2px;
-			border-style: solid;
-		}
-
-		.middle-newsroom {
-			border-right: solid;
-			border-right-width: 2px;
-			border-right-color: rgba(255, 255, 255, 0.2);
-			border-left: solid;
-			border-left-width: 2px;
-			border-left-color: rgba(255, 255, 255, 0.2);
-		}
-
-		@media screen and (max-width: 991px) {
-			.middle-newsroom {
-				border-right: none;
-				border-left: none;
-				border-top: solid;
-				border-top-width: 2px;
-				border-top-color: rgba(255, 255, 255, 0.2);
-				border-bottom: solid;
-				border-bottom-width: 2px;
-				border-bottom-color: rgba(255, 255, 255, 0.2);
-			}
-		}
-	</style>
+	  </script> -->
 </head>
 
-<body class="d-flex flex-column" style="padding-top: 180px;">
-	<div id="app">
+<body class="d-flex h-100 align-items-stretch">
+	<div id="app" class="d-flex flex-column w-100">
+
+
 		<div>
 			<nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event)"
 				@logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
 				:lapi="lapi" />
 		</div>
-		<main role="main" class="flex-shrink-0 text-white bg-color h-100">
+		<main role="main" class="mb-auto text-white bg-color" style="padding-top: 150px;">
 
 			<div class="container-fluid fixed-top px-0" style="margin-top: 94px; z-index: 900;">
-				<nav class="navbar navbar-dark navbar-expand-lg nav-blur ">
+				<nav class="navbar navbar-dark navbar-expand-lg nav-blur mx-1">
 					<div class="m-auto">
 						<ul class="nav nav-tabs navbar py-0 border-bottom-0 rounded justify-content-center" role="tablist">
 							<li class="nav-item">
@@ -258,7 +229,7 @@
 													<title>DappRadar</title>
 												</path>
 											</svg></a></div>
-									<div class="d-flex m-4 p-2 listing-btn rounded"><a
+									<div class="d-none m-4 p-2 listing-btn rounded"><a
 											href="https://www.dapp.com/app/dlux" target="_blank"><img
 												src="https://www.dapp.com/_nuxt/img/dapp_logo.f9fb95f.png" height="50px"
 												title="dapp.com" /></a></div>
