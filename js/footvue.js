@@ -1,9 +1,9 @@
 export default {
   template: `
-  <footer class="footer bg-dark pt-4">
+  <footer class="footer bg-dark pt-5">
   <!-- Footer Elements -->
   <div class="container text-center">
-        <div class="mb-4">
+        <div class="mb-5">
           <!-- Github -->
           <a href="https://github.com/dluxio" target="_blank">
             <i class="fab fa-github fa-lg mx-md-3 mx-2 fa-2x"></i>
