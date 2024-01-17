@@ -37,7 +37,7 @@
 
 <body class="d-flex flex-column h-100">
   <div id="app">
-    <div style="position: fixed; z-index: 100; left: 0; top: -80px; width: 100vw; height: 80px; background: #4411aa;"></div>
+    <div style="position: fixed; z-index: 100; left: 0; width: 100vw; height: 80px; background: #4411aa;"></div>
     <div>
       <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
         @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" />
