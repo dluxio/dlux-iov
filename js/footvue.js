@@ -1,12 +1,9 @@
 export default {
   template: `
-  <footer class="footer bg-dark pt-5">
-
+  <footer class="footer bg-dark pt-4">
   <!-- Footer Elements -->
   <div class="container text-center">
-
-        <div class="mb-5 ">
-		
+        <div class="mb-4">
           <!-- Github -->
           <a href="https://github.com/dluxio" target="_blank">
             <i class="fab fa-github fa-lg mx-md-3 mx-2 fa-2x"></i>
@@ -24,17 +21,10 @@ export default {
             <i class="fa-brands fa-x-twitter fa-lg mx-md-3 mx-2 fa-2x"></i>
           </a>
         </div>
-
-
   </div>
   <!-- Footer Elements -->
-
   <!-- Copyright -->
-  <div class="footer-copyright bg-darker text-center text-white py-3">© 2024 Copyright: 
-    <a href="https://www.dlux.io/about/" class="">dlux.io</a>
-  </div>
-  <!-- Copyright -->
-
-</footer>
+  <div class="footer-copyright text-center text-white-50 pb-1">Copyright © 2024 dlux.io</div>
+  </footer>
   `,
 };

@@ -46,14 +46,14 @@
                 }
             }
         }, {}));
-        // var activeWorker = 0
-        // if ('serviceWorker' in navigator) {
-        //     navigator.serviceWorker.register('/sw.js')
-        //     .then(reg => {
-        //         console.log('Registration succeeded. Scope is ' + reg.scope);
-        //         activeWorker = reg.active;
-        //     })
-        // }
+        var activeWorker = 0
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+            .then(reg => {
+                console.log('Registration succeeded. Scope is ' + reg.scope);
+                activeWorker = reg.active;
+            })
+        }
     </script>
     <script src="/js/purify.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
