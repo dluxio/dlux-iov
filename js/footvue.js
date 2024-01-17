@@ -18,7 +18,7 @@ export default {
           </a>
           <!--Twitter -->
           <a href="https://twitter.com/dluxxr" target="_blank">
-            <i class="fa-brands fa-x-twitter fa-lg mx-md-3 mx-2 fa-2x"></i>
+            <i class="fab fa-x-twitter fa-2x mx-md-3 mx-2"></i>
           </a>
         </div>
   </div>
