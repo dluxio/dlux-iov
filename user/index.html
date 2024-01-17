@@ -65,7 +65,7 @@
 </head>
 
 <body class="d-flex h-100 align-items-stretch text-white" id="explore">
-    <div id="app" v-cloak class="d-flex w-100 flex-column w-100">
+    <div id="app" v-cloak class="d-flex flex-column w-100">
         <!-- navbar -->
         <div v-scroll="handleScroll">
             <nav-vue @login="account = $event;newme($event)" @logout="account = '';removeUser()" @ack="removeOp($event)"
