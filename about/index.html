@@ -8,7 +8,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<link rel="manifest" href="/manifest.webmanifest">
 	<link rel="apple-touch-icon" href="/img/dlux-icon-192.png">
-	<meta name="apple-mobile-web-app-status-bar-style" content="default">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 	<meta name="apple-mobile-web-app-title" content="DLUX">
 	<meta name="theme-color" content="#111222" />
 	<link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
@@ -37,19 +38,18 @@
 
 <body class="d-flex h-100 align-items-stretch">
 	<div id="app" class="d-flex flex-column w-100">
-
-
+		<!-- navbar -->
 		<div>
 			<nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event)"
 				@logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
 				:lapi="lapi" />
 		</div>
 		<main role="main" class="mb-auto text-white bg-color" style="padding-top: 150px;">
-
 			<div class="container-fluid fixed-top px-0" style="margin-top: 94px; z-index: 900;">
-				<nav class="navbar navbar-dark navbar-expand-lg nav-blur mx-1">
+				<nav class="navbar navbar-dark navbar-expand-lg nav-blur mx-1 mt-2">
 					<div class="m-auto">
-						<ul class="nav nav-tabs navbar py-0 border-bottom-0 rounded justify-content-center" role="tablist">
+						<ul class="nav nav-tabs navbar py-0 border-bottom-0 rounded justify-content-center"
+							role="tablist">
 							<li class="nav-item">
 								<a class="nav-link active" id="aboutTab" role="tab" data-bs-toggle="tab"
 									aria-controls="about" aria-expanded="true" href="#about">About</a>
@@ -59,12 +59,12 @@
 									aria-controls="newsroom" aria-expanded="true" href="#newsroom">Newsroom</a>
 							</li>
 							<li class="nav-item">
-								<a class="nav-link" id="brandTab" role="tab" data-bs-toggle="tab"
-									aria-controls="brand" aria-expanded="true" href="#brand">Brand Kit</a>
+								<a class="nav-link" id="brandTab" role="tab" data-bs-toggle="tab" aria-controls="brand"
+									aria-expanded="true" href="#brand">Brand Kit</a>
 							</li>
 							<li class="nav-item">
-								<a class="nav-link " id="techTab" role="tab" data-bs-toggle="tab"
-									aria-controls="tech" aria-expanded="true" href="#tech">Technologies</a>
+								<a class="nav-link " id="techTab" role="tab" data-bs-toggle="tab" aria-controls="tech"
+									aria-expanded="true" href="#tech">Technologies</a>
 							</li>
 							<li class="nav-item">
 								<a class="nav-link " id="faqTab" role="tab" data-bs-toggle="tab" aria-controls="faq"
@@ -82,11 +82,8 @@
 					</div>
 				</nav>
 			</div>
-
 			<div class="container-fluid px-0">
-				
 				<div id="pagecontent" class="tab-content padme-t70 pb-5 text-white">
-
 					<div role="tabpanel" class="tab-pane fade show active" id="about" aria-labelledby="aboutTab">
 						<div class="jumbotron container">
 							<h1 class="display-4 text-center">About</h1>
@@ -148,13 +145,11 @@
 							</div>
 						</div>
 					</div>
-
 					<div role="tabpanel" class="tab-pane fade show " id="newsroom" aria-labelledby="newsroomTab">
 						<div class="jumbotron container  text-center">
 							<h1 class="display-4 text-center">Newsroom</h1>
 							<p class="lead text-center">Project collaborations and interviews</p>
 							<hr class="my-4">
-
 							<div class="row align-items-center py-5 border-bottom border-2">
 								<div class="col-lg-6 order-lg-2">
 									<div class="embed-responsive embed-responsive-16by9">
@@ -179,7 +174,6 @@
 									</div>
 								</div>
 							</div>
-
 							<div class="row align-items-center py-5 border-bottom border-2">
 								<div class="col-lg-6 order-lg-1">
 									<div class="embed-responsive embed-responsive-16by9">
@@ -205,7 +199,6 @@
 									</div>
 								</div>
 							</div>
-
 							<div class="row align-items-center py-5 border-bottom border-2">
 								<div class="m-auto">
 									<h3 style="color:#FB00FF">Project Listings</h3>
@@ -271,9 +264,10 @@
 											href="https://dapp.review/dapp/dlux-01" target="_blank"><img
 												src="https://assets.dapp.review/assets/logo.svg" height="50px"
 												title="Dapp Review" /></a></div>
-									<div class="d-flex m-4 p-2 listing-btn rounded"><a
-											href="https://hivedapps.com/apps/dlux" target="_blank"><svg height="50px"
-												viewBox="0 0 142 40" version="1.1" xmlns="http://www.w3.org/2000/svg"
+									<div class="d-flex m-4 p-2 listing-btn rounded">
+										<a href="https://hivedapps.com/apps/dlux" target="_blank">
+											<svg height="50px" viewBox="0 0 142 40" version="1.1"
+												xmlns="http://www.w3.org/2000/svg"
 												xmlns:xlink="http://www.w3.org/1999/xlink" data-v-f55f2e06="">
 												<g id="Page-1" stroke="none" stroke-width="1" fill="none"
 													fill-rule="evenodd">
@@ -297,14 +291,12 @@
 														</path>
 													</g>
 												</g>
-											</svg></a></div>
-
-
-
+											</svg>
+										</a>
+									</div>
 								</div>
 							</div>
 							<div class="row align-items-center py-5 border-bottom border-2">
-
 								<div class="col-lg-4 order-lg-1 p-5">
 									<h3 style="color:#FB00FF">The Cryptomaniacs</h3>
 									<p class="lead">DLUX Token</p>
@@ -315,7 +307,6 @@
 											target="_blank">Listen Now</a>
 									</div>
 								</div>
-
 								<div class="col-lg-4 order-lg-1 p-5 middle-newsroom">
 									<h3 style="color:#FB00FF">CyberBuzz</h3>
 									<p class="lead">VR, AR &amp; DeFi</p>
@@ -326,7 +317,6 @@
 											Now</a>
 									</div>
 								</div>
-
 								<div class="col-lg-4 order-lg-1 p-5">
 									<h3 style="color:#FB00FF">Simulation Nation</h3>
 									<p class="lead">Virtual Money</p>
@@ -337,11 +327,8 @@
 											target="_blank">Listen Now</a>
 									</div>
 								</div>
-
 							</div>
-
 							<div class="row align-items-center py-5">
-
 								<div class="col-lg-4 order-lg-1 p-5">
 									<h3 style="color:#FB00FF">ARK.io</h3>
 									<p class="lead">Market Square Hub</p>
@@ -352,7 +339,6 @@
 											target="_blank">Read Now</a>
 									</div>
 								</div>
-
 								<div class="col-lg-4 order-lg-1 p-5 middle-newsroom">
 									<h3 style="color:#FB00FF">HiveCoffee</h3>
 									<p class="lead">Side Chains</p>
@@ -362,7 +348,6 @@
 											target="_blank">Watch Now</a>
 									</div>
 								</div>
-
 								<div class="col-lg-4 order-lg-1 p-5">
 									<h3 style="color:#FB00FF">Altcoin Buzz</h3>
 									<p class="lead">Time is Crypto</p>
@@ -373,9 +358,7 @@
 											Now</a>
 									</div>
 								</div>
-
 							</div>
-
 							<!--<div class="row align-items-center py-5">
 								<div class="col-lg-4 order-lg-1 p-5">
 									<h3 style="color:#FB00FF">Voyage LA</h3>
@@ -388,11 +371,8 @@
 									</div>
 								</div>
 							</div>-->
-
-
 						</div>
 					</div>
-
 					<div role="tabpanel" class="tab-pane fade show " id="brand" aria-labelledby="brandTab">
 						<div class="jumbotron container">
 							<h1 class="display-4 text-center">Brand Kit</h1>
@@ -446,7 +426,6 @@
 							</div>
 						</div>
 					</div>
-
 					<div role="tabpanel" class="tab-pane fade show" id="privacy" aria-labelledby="privacyTab">
 						<div class="jumbotron container">
 							<h1 class="display-4 text-center">Privacy Policy</h1>
@@ -468,7 +447,6 @@
 							</div>
 						</div>
 					</div>
-
 					<div role="tabpanel" class="tab-pane fade show" id="tos" aria-labelledby="tosTab">
 						<div class="jumbotron container">
 							<h1 class="display-4 text-center">Terms of Service</h1>
@@ -487,7 +465,6 @@
 							</div>
 						</div>
 					</div>
-
 					<div role="tabpanel" class="tab-pane fade show" id="tech" aria-labelledby="techTab">
 						<div class="jumbotron container">
 							<h1 class="display-4 text-center">Technologies</h1>
@@ -507,19 +484,19 @@
 								<div class="col-lg-2 text-center"><a class="btn btn-outline-primary"
 										href="https://aframe.io/" target="_blank">Learn More</a></div>
 							</div>
-
 							<div class="row align-items-center py-5 border-bottom border-2">
 								<div class="col-4 col-lg-2 text-center mx-auto my-5"><img src="/img/ipfs-logo.svg"
 										width="100%"></div>
 								<div class="col-lg-8 px-5">
 									<h3 style="color:#139192">SPK Network</h3>
-									<p>Decentralized content storage peer-to-peer via the InterPlanetary File System (IPFS). Access your file from anywhere via
-										it's finger print, or "hash" identity. SPK Network incentivizes everybody to pin uploaded content to mitigate censorship and ensure resilency.</p>
+									<p>Decentralized content storage peer-to-peer via the InterPlanetary File System
+										(IPFS). Access your file from anywhere via
+										it's finger print, or "hash" identity. SPK Network incentivizes everybody to pin
+										uploaded content to mitigate censorship and ensure resilency.</p>
 								</div>
 								<div class="col-lg-2 text-center"><a class="btn btn-outline-primary"
 										href="https://ipfs.dlux.io/" target="_blank">Learn More</a></div>
 							</div>
-
 							<div class="row align-items-center py-5">
 								<div class="col-4 col-lg-2 text-center mx-auto my-5"><img src="/img/hextacular.svg"
 										width="100%"></div>
@@ -533,10 +510,8 @@
 								<div class="col-lg-2 text-center"><a class="btn btn-outline-primary"
 										href="https://hive.io/" target="_blank">Learn More</a></div>
 							</div>
-
 						</div>
 					</div>
-
 					<div role="tabpanel" class="tab-pane fade show" id="faq" aria-labelledby="faqTab">
 						<div class="jumbotron container">
 							<h1 class="display-4 text-center">FAQ</h1>
@@ -557,18 +532,16 @@
 								of trades.</p>
 						</div>
 					</div>
-
 				</div>
 			</div>
 		</main>
+		<!-- Footer -->
 		<div>
 			<foot-vue />
 		</div>
 	</div>
 	<!-- Bootstrap -->
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-		integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
-		crossorigin="anonymous"></script>
+	<script src="/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
