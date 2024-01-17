@@ -1093,7 +1093,7 @@ export default {
   },
   template: `
 <div>
-<header class="navbar navbar-expand navbar-dark dnav fixed-top">
+<div class="navbar navbar-expand navbar-dark dnav fixed-top">
   <div class="container-fluid">
     <!--pwa nav toggle-->
     <a class="d-none text-white d-sm-none" style="font-size: 1.5em;" data-bs-toggle="offcanvas" href="#offcanvasNav" role="button" aria-controls="offcanvasExample">
@@ -1175,7 +1175,7 @@ export default {
     
       <div>
   </div>
-</header>
+</div>
 <div class="position-fixed bottom-0 end-0 p-3 toast-container" style="z-index: 11">
   <div v-for="op in ops">  
     <toast-vue :alert="op"/>
