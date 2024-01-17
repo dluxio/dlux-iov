@@ -1094,7 +1094,7 @@ export default {
   template: `
 <div>
 <div class="navbar navbar-expand navbar-dark dnav fixed-top">
-  <div class="container-fluid" style="padding-top: 80px">
+  <div class="container-fluid" style="padding-top: 20px">
     <!--pwa nav toggle-->
     <a class="d-none text-white d-sm-none" style="font-size: 1.5em;" data-bs-toggle="offcanvas" href="#offcanvasNav" role="button" aria-controls="offcanvasExample">
       <i class="fa-solid fa-bars"></i>
