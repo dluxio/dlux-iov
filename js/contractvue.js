@@ -3,6 +3,7 @@ import ExtensionVue from "/js/extensionvue.js";
 import FilesVue from "/js/filesvue.js";
 import UploadVue from "/js/uploadvue.js";
 import ModalVue from "/js/modalvue.js";
+import PostVue from "/js/postvue.js";
 
 export default {
     components: {
@@ -10,7 +11,8 @@ export default {
         "extension-vue": ExtensionVue,
         "files-vue": FilesVue,
         "upload-vue": UploadVue,
-        "modal-vue": ModalVue
+        "modal-vue": ModalVue,
+        "post-vue": PostVue
     },
     template: `
     <div class="card-head p-2">
@@ -279,7 +281,7 @@ export default {
                                             </tr>
                                             <tr class="collapse" :id="replace(contract.i) + 'beneficiary'">
                                                 <td class=" border-0" colspan="4">
-                                                    <p v-if="account == contract.t">put post compose here</p>
+                                                    <post-vue v-if="account == contract.t" :account="account" :prop_contract="contract" @tosign="toSign = $event"/>
                                                     <extension-vue :node-view="nodeview" :contract="contract"
                                                         :sstats="sstats" :account="account" :saccountapi="saccountapi"
                                                         @tosign="toSign=$event"></extension-vue>
