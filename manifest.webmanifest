@@ -4,8 +4,6 @@
   "short_name": "DLUX",
   "start_url": "/",
   "scope": ".",
-  "display": "standalone",
-  "background_color": "#111222",
   "theme_color": "#fff",
   "description": "Build your future: decentralized XR/NFT platform",
   "icons": [{
