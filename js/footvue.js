@@ -24,7 +24,7 @@ export default {
   </div>
   <!-- Footer Elements -->
   <!-- Copyright -->
-  <div class="footer-copyright text-center text-white-50 pb-1">Copyright © 2024 dlux.io</div>
+  <div class="footer-copyright text-center text-white-50 pb-2">Copyright © 2024 dlux.io</div>
   </footer>
   `,
 };
