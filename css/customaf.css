@@ -12914,8 +12914,8 @@ a-scene {
 
 #dapps {
   /* background-image: url("/img/metaverse-vr-comp.jpg"); */
-  background-size: cover;
-  background-position: center;
+  /* background-size: cover; */
+  /* background-position: center; */
   min-height: 600px;
   margin-top: -70px;
 }
