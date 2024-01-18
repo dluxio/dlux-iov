@@ -12926,23 +12926,37 @@ a-scene {
 
 #dapps {
   min-height: 600px;
+  width: 100%;
+  position: relative;
+  z-index: 999;
+  background-size: cover;
+  touch-action: pan-y;
 }
 
 #defi {
+  width: 100%;
+  position: relative;
+  z-index: 999;
   background-size: cover;
-  background-position: center;
+  touch-action: pan-y;
   min-height: 600px;
 }
 
 #hive-chain {
+  width: 100%;
+  position: relative;
+  z-index: 999;
   background-size: cover;
-  background-position: center;
+  touch-action: pan-y;
   min-height: 600px;
 }
 
 #info {
+  width: 100%;
+  position: relative;
+  z-index: 999;
   background-size: cover;
-  background-position: center;
+  touch-action: pan-y;
   min-height: 600px;
 }
 
