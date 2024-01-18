@@ -1313,7 +1313,7 @@
                     <div role="tabpanel" ref="filesTab" class="tab-pane fade" id="files" aria-labelledby="filestab">
                         <div class="container">
                             <div class="card my-3">
-                                <contract-vue :nodeview="true" :account="pageAccount" @tosign="toSign=$event"
+                                <contract-vue :nodeview="false" :account="pageAccount" @tosign="toSign=$event"
                                     :prop_contracts="contracts"></contract-vue>
                             </div>
                         </div>
