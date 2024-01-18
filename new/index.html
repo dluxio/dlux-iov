@@ -8,6 +8,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<link rel="manifest" href="/manifest.webmanifest">
 	<link rel="apple-touch-icon" href="/img/dlux-icon-192.png">
+	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="default">
 	<meta name="apple-mobile-web-app-title" content="DLUX">
 	<meta name="theme-color" content="#111222" />
@@ -35,14 +36,15 @@
 	  </script>
 </head>
 
-<body class="d-flex flex-column h-100" style="margin-top: 94px;">
-	<div id="app">
+<body class="d-flex h-100 align-items-stretch" style="margin-top: 94px;">
+	<div id="app" class="d-flex w-100 flex-column w-100">
+		<!-- navbar -->
 		<div>
 			<nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event)"
 				@logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
 				:lapi="lapi" />
 		</div>
-		<main role="main" class="flex-shrink-0">
+		<main role="main" class="mb-auto" style="margin-top: 94px;">
 			<div class="container" >
 				<h1 class="mt-3 mb-3 text-center display-4"><i class="fa-solid fa-shapes me-2"></i>Build</h1>
 				<div class="row mt-4 mb-lg-5">
