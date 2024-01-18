@@ -2,7 +2,7 @@
 <html lang="en" class="h-100">
 
 <head>
-  <title>DLUX</title>
+  <title>DLUX - Invite</title>
 
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -15,7 +15,7 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/img/dlux-icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="DLUX">
   <meta name="theme-color" content="#111222" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
@@ -40,13 +40,14 @@
   <script type="module" src="/js/vueqr.js"></script>
 </head>
 
-<body class="d-flex flex-column h-100" style="margin-top: 94px;">
-  <div id="app" v-cloak>
+<body class="d-flex h-100 align-items-stretch text-white">
+  <div id="app" v-cloak class="d-flex w-100 flex-column w-100">
+    <!-- navbar -->
     <div>
       <nav-vue @login="account = $event" @logout="account = '';removeUser()" @ack="removeOp($event)"
         @refresh="run($event)" :op="toSign" :lapi="lapi" />
     </div>
-    <main class="d-flex flex-column text-center flex-shrink-0 px-1 mt-2">
+    <main role="main" class="mb-auto" style="margin-top: 94px;">
       <div v-if="!account" class="d-none">
         <div class="alert alert-fusch d-flex flex-wrap align-items-center" role="alert">
           <span class="my-1">Share your HIVE account</span>
