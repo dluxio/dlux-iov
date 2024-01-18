@@ -69,15 +69,15 @@
 
 </head>
 
-<body class="d-flex flex-column h-100 text-white pt-5" id="explore">
-    <div id="app">
+<body class="d-flex h-100 align-items-stretch text-white pt-5" id="explore">
+    <div id="app" class="d-flex w-100 flex-column w-100">
+         <!-- navbar -->
         <div v-scroll="handleScroll">
             <nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event)"
                 @logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
                 :lapi="lapi" />
         </div>
-        <main role="main" class="flex-shrink-0" v-cloak>
-
+        <main role="main" class="mb-auto" style="margin-top: 94px;" v-cloak>
             <!--detail view-->
             <detail-vue 
                 :post="displayPost.item"
@@ -98,7 +98,6 @@
                 @reply="reply($event)"
                 @vote="vote($event)"
                 class="my-3"></detail-vue>
-
         </main>
         <!-- Footer -->
         <div>
