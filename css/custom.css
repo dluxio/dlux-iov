@@ -12910,13 +12910,14 @@ a-scene {
 .a-modal {display: none;}
 .a-enter-vr {display: none;}
 .front {
-  z-index: 999;
+  z-index: 1;
 }
 
 #logo {
   height: 100vh;
   width: 100%;
   background: transparent;
+  z-index: 2;
 }
 
 #dapps {
