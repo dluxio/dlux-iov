@@ -12903,6 +12903,7 @@ td {
   height: 100vh;
   z-index: 0;
   touch-action: none;
+  cursor: grab;
 }
 a-scene {
   width: 100%;
@@ -12917,8 +12918,10 @@ a-scene {
 #logo {
   height: 100vh;
   width: 100%;
+  position: relative;
   z-index: 999;
   background-size: cover;
+  touch-action: pan-y;
 }
 
 #dapps {
