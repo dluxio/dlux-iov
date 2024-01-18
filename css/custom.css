@@ -12912,9 +12912,14 @@ a-scene {
 .front {
   z-index: 999;
 }
+
+#logo {
+  min-height: 600px;
+  margin-top: 50vh;
+}
+
 #dapps {
   min-height: 600px;
-  margin-top: 75vh;
 }
 
 #defi {
