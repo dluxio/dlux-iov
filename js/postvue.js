@@ -307,6 +307,7 @@ mounted() {
     }
     for(var i = 0; i < this.prop_contracts.length; i++){
         this.addBen(this.prop_contracts[i].s.split(',')[0], this.prop_contracts[i].s.split(',')[1])
+        this.postCustom_json = this.prop_json[node]
     }
 },
 };

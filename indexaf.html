@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
   <!-- Bootstrap -->
-  <link href="/css/custom.css" rel="stylesheet" />
+  <link href="/css/customaf.css" rel="stylesheet" />
   <!-- Icons -->
   <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
   <script type="module" src="/js/indexvue.js"></script>
@@ -18,17 +18,75 @@
   <meta name="theme-color" content="#111222">
   <meta name="apple-mobile-web-app-title" content="DLUX">
   <script>
-    if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js')
+    // if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js')
   </script>
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 </head>
 <body class="d-flex h-100 align-items-stretch text-white">
+  <div class="bg">
+    <a-scene embedded>
+      <a-entity light="type: directional; color: #033EFD; intensity: 0.6" position="-10 0 -5"></a-entity>
+      <a-entity light="type: directional; color: #FB00FF; intensity: 0.6" position="10 10 -5"></a-entity>
+      <a-entity light="type: directional; color: #21FFB5; intensity: 0.6" position="10 -10 -5"></a-entity>
+      <a-entity id="hypercube" position="0 0 -5" scale="0.4 0.4 0.4" rotation="-5 -55 54">
+        <a-entity class="opp_sides" position="" rotation="">
+          <a-entity class="logo_side" position="-4.5 -4.5 -4.5" rotation="">
+            <a-box width="5" position="4.5 0 0"></a-box>
+            <a-box depth="8" position="7 0 3.5"></a-box>
+            <a-entity height="8" width="1.6"  position="8 1 4.5" rotation="45 90 90" cloak></a-entity>
+            <a-box width="7" position="3 0 7"></a-box>
+            <a-entity height="8" width="1.6"  position="5 8 1" rotation="-135 0 90" cloak></a-entity>
+            <a-box depth="4" position="0 0 4"></a-box>
+          </a-entity>
+          <a-entity class="logo_side" position="4.5 4.5 4.5" rotation="0 180 0">
+            <a-box width="5" position="4.5 0 0"></a-box>
+            <a-box depth="8" position="7 0 3.5"></a-box>
+            <a-box width="7" position="3 0 7"></a-box>
+            <a-box depth="4" position="0 0 4"></a-box>
+          </a-entity>
+        </a-entity>
+        <a-entity class="opp_sides" position="" rotation="270 0 180">
+          <a-entity class="logo_side" position="-4.5 -4.5 -4.5" rotation="">
+            <a-box width="5" position="4.5 0 0"></a-box>
+            <a-box depth="8" position="7 0 3.5"></a-box>
+            <a-entity height="8" width="1.6"  position="8 1 4.5" rotation="45 90 90" cloak></a-entity>
+            <a-box width="7" position="3 0 7"></a-box>
+            <a-entity height="8" width="1.6"  position="5 8 1" rotation="-135 0 90" cloak></a-entity>
+            <a-box depth="4" position="0 0 4"></a-box>
+          </a-entity>
+          <a-entity class="logo_side" position="4.5 4.5 4.5" rotation="0 180 0">
+            <a-box width="5" position="4.5 0 0"></a-box>
+            <a-box depth="8" position="7 0 3.5"></a-box>
+            <a-box width="7" position="3 0 7"></a-box>
+            <a-box depth="4" position="0 0 4"></a-box>
+          </a-entity>
+        </a-entity>
+        <a-entity class="opp_sides" position="" rotation="180 0 270">
+          <a-entity class="logo_side" position="-4.5 -4.5 -4.5" rotation="">
+            <a-box width="5" position="4.5 0 0"></a-box>
+            <a-box depth="8" position="7 0 3.5"></a-box>
+            <a-entity height="8" width="1.6" position="8 1 4.5" rotation="45 90 90" cloak></a-entity>
+            <a-box width="7" position="3 0 7"></a-box>
+            <a-entity height="8" width="1.6"  position="5 8 1" rotation="-135 0 90" cloak></a-entity>
+            <a-box depth="4" position="0 0 4"></a-box>
+          </a-entity>
+          <a-entity class="logo_side" position="4.5 4.5 4.5" rotation="0 180 0">
+            <a-box width="5" position="4.5 0 0"></a-box>
+            <a-box depth="8" position="7 0 3.5"></a-box>
+            <a-box width="7" position="3 0 7"></a-box>
+            <a-box depth="4" position="0 0 4"></a-box>
+          </a-entity>
+        </a-entity>
+      </a-entity>
+    </a-scene>
+  </div>
   <div id="app" class="d-flex w-100 flex-column w-100">
     <!-- navbar -->
     <div>
       <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
         @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" />
     </div>
-    <main class="mb-auto" style="margin-top: 94px;">
+    <!-- <main class="mb-auto" style="margin-top: 94px;">
       <div id="dapps" class="d-flex flex-row px-2">
         <div class="d-flex flex-column dlux-turq jumbo-dlux container p-5 m-auto">
           <div class="dlux-header">
@@ -106,7 +164,7 @@
           </div>
         </div>
       </div>
-    </main>
+    </main> -->
     <div>
       <foot-vue />
     </div>
@@ -150,6 +208,27 @@
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
       return new bootstrap.Tooltip(tooltipTriggerEl);
     });
+    AFRAME.registerComponent('cloak', {
+    init: function() {
+      let geometry = new THREE.PlaneGeometry(1.6, 8)
+      //geometry.faces.splice(4, 2) // cut out the top faces 
+      let material = new THREE.MeshBasicMaterial({
+         colorWrite: false
+      })
+      let mesh = new THREE.Mesh(geometry, material)
+      this.el.object3D.add(mesh)
+    }
+})
+document.addEventListener('DOMContentLoaded', ()=>{
+  window.addEventListener('scroll', function(e) {
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    var docHeight = document.documentElement.scrollHeight;
+    var winHeight = window.innerHeight;
+    var scrollPercent = (scrollTop) / (docHeight - winHeight);
+    var scroll360 = Math.round(((scrollPercent * 10) + Number.EPSILON) * 100) / 1000 * 360;
+    document.getElementById('hypercube').setAttribute('rotation', `-5 -${55 + scroll360/2} ${54 + scroll360}`);
+  });
+})
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
     integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
