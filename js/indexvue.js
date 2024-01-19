@@ -162,6 +162,10 @@ var app = new Vue({
         },
       },
       accountinfo: {},
+      hivestats: {
+        pending_rewarded_vesting_hive: "0.000 HIVE",
+      },
+      dappstats: 159,
     };
   },
   beforeDestroy() {
@@ -234,6 +238,19 @@ var app = new Vue({
       } else {
         this[key] = value;
       }
+    },
+    getHiveStats() {
+      fetch("https://api.hive.blog", {
+        body: `{"jsonrpc":"2.0", "method":"condenser_api.get_dynamic_global_properties", "params":[], "id":1}`,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        method: "POST",
+      })
+        .then((r) => r.json())
+        .then((r) => {
+          this.hivestats = r.result;
+        });
     },
     setApi(url) {
       if (url.substr(-1) == "/") {
@@ -348,6 +365,13 @@ var app = new Vue({
           this.stats = data.stats;
         });
     },
+    getDluxStats() {
+      fetch("https://data.dlux.io/stats")
+        .then((response) => response.json())
+        .then((data) => {
+          this.dappstats = data.number_of_dApps;
+        });
+    },
     getProtocol() {
       fetch(this.lapi + "/api/protocol")
         .then((response) => response.json())
@@ -375,6 +399,14 @@ var app = new Vue({
     this.getNodes();
     this.getProtocol();
     this.getTickers();
+    this.getHiveStats();
+    this.getDluxStats();
   },
-  computed: {},
+  computed: {
+    reward:{
+      get(){
+        return this.formatNumber(parseFloat(this.hivestats.pending_rewarded_vesting_hive) * this.hiveprice.hive.usd * 2,0, ".", ",")
+      }
+    }
+  },
 });
