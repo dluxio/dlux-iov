@@ -12900,63 +12900,47 @@ td {
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   z-index: 0;
-  touch-action: none;
-  cursor: grab;
 }
+
 a-scene {
   width: 100%;
   height: 100vh;
 }
-.a-modal {display: none;}
-.a-enter-vr {display: none;}
-.front {
-  z-index: 1;
+
+.a-modal {
+  display: none;
 }
 
-#logo {
-  height: 100vh;
-  width: 100%;
-  position: relative;
+.a-enter-vr {
+  display: none;
+}
+
+.front {
   z-index: 999;
-  background-size: cover;
-  touch-action: pan-y;
 }
 
 #dapps {
   min-height: 600px;
-  width: 100%;
-  position: relative;
-  z-index: 999;
-  background-size: cover;
-  touch-action: pan-y;
+  margin-top: -70px;
 }
 
 #defi {
-  width: 100%;
-  position: relative;
-  z-index: 999;
   background-size: cover;
-  touch-action: pan-y;
+  background-position: center;
   min-height: 600px;
 }
 
 #hive-chain {
-  width: 100%;
-  position: relative;
-  z-index: 999;
   background-size: cover;
-  touch-action: pan-y;
+  background-position: center;
   min-height: 600px;
 }
 
 #info {
-  width: 100%;
-  position: relative;
-  z-index: 999;
   background-size: cover;
-  touch-action: pan-y;
+  background-position: center;
   min-height: 600px;
 }
 
@@ -13270,9 +13254,9 @@ a-scene {
 }
 
 .jumbo-dlux {
-  background-color: rgba(0, 0, 0, 0.3);
-  -webkit-backdrop-filter: blur(2px);
-  backdrop-filter: blur(2px);
+  background-color: rgba(0, 0, 0, 0.8);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   max-width: 600px;
 }
 

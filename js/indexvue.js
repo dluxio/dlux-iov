@@ -190,7 +190,7 @@ var app = new Vue({
     startscroll(id = "dapps") {
       const el = this.$refs[id];
       if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     },
     localStoreSet(k, v) {
