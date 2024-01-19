@@ -26,60 +26,62 @@
   <div class="bg-ascene">
     <a-scene embedded renderer="antialias: true">
       <a-entity camera fov="50" touchEnabled="false" wasd-controls-enabled="false" look-controls-enabled="false" touchEnabled="false"></a-entity>
-      <a-entity animation="property: rotation; to: 0 0 360; dur: 6000; easing: linear; loop: true">
+      <a-entity animation="property: rotation; to: 0 0 359; dur: 6000; easing: linear; loop: true">
         <a-entity light="type: directional; color: #033EFD; intensity: 0.6" position="-14.14 0 0"></a-entity>
         <a-entity light="type: directional; color: #FB00FF; intensity: 0.6" position="10 10 0"></a-entity>
         <a-entity light="type: directional; color: #21FFB5; intensity: 0.6" position="10 -10 0"></a-entity>
       </a-entity>
-      <a-entity id="hypercube" position="0 0 -15" scale="0.4 0.4 0.4" rotation="-3.18 -53.6 50.9">
-        <a-entity class="opp_sides" position="" rotation="">
-          <a-entity class="logo_side" position="-4.5 -4.5 -4.5" rotation="">
-            <a-box width="5" position="4.5 0 0"></a-box>
-            <a-box depth="8" position="7 0 3.5"></a-box>
-            <a-entity height="8" width="1.6"  position="7.5 1.5 3.5" rotation="45 90 90" cloak></a-entity>
-            <a-entity position="6.5 2.5 6.5" rotation="90 90 90" cloak-tri></a-entity>
-            <a-box width="7" position="3 0 7"></a-box>
-            <a-entity height="8" width="1.6"  position="5.5 7.5 1.5" rotation="-135 0 90" cloak></a-entity>
-            <a-box depth="4" position="0 0 4"></a-box>
+      <a-entity animation="property: rotation; to: 0 359 0; dur: 6000; easing: linear; loop: true">
+        <a-entity id="hypercube" position="0 0 -15" scale="0.4 0.4 0.4" rotation="-3.18 -53.6 50.9">
+          <a-entity class="opp_sides" position="" rotation="">
+            <a-entity class="logo_side" position="-4.5 -4.5 -4.5" rotation="">
+              <a-box width="5" position="4.5 0 0"></a-box>
+              <a-box depth="8" position="7 0 3.5"></a-box>
+              <a-entity height="8" width="1.6"  position="7.5 1.5 3.5" rotation="45 90 90" cloak></a-entity>
+              <a-entity position="6.5 2.5 6.5" rotation="90 90 90" cloak-tri></a-entity>
+              <a-box width="7" position="3 0 7"></a-box>
+              <a-entity height="8" width="1.6"  position="5.5 7.5 1.5" rotation="-135 0 90" cloak></a-entity>
+              <a-box depth="4" position="0 0 4"></a-box>
+            </a-entity>
+            <a-entity class="logo_side" position="4.5 4.5 4.5" rotation="0 180 0">
+              <a-box width="5" position="4.5 0 0"></a-box>
+              <a-box depth="8" position="7 0 3.5"></a-box>
+              <a-box width="7" position="3 0 7"></a-box>
+              <a-box depth="4" position="0 0 4"></a-box>
+            </a-entity>
           </a-entity>
-          <a-entity class="logo_side" position="4.5 4.5 4.5" rotation="0 180 0">
-            <a-box width="5" position="4.5 0 0"></a-box>
-            <a-box depth="8" position="7 0 3.5"></a-box>
-            <a-box width="7" position="3 0 7"></a-box>
-            <a-box depth="4" position="0 0 4"></a-box>
+          <a-entity class="opp_sides" position="" rotation="270 0 180">
+            <a-entity class="logo_side" position="-4.5 -4.5 -4.5" rotation="">
+              <a-box width="5" position="4.5 0 0"></a-box>
+              <a-box depth="8" position="7 0 3.5"></a-box>
+              <a-entity height="8" width="1.6"  position="7.5 1.5 3.5" rotation="45 90 90" cloak></a-entity>
+              <a-entity position="6.5 2.5 6.5" rotation="90 90 90" cloak-tri></a-entity>
+              <a-box width="7" position="3 0 7"></a-box>
+              <a-entity height="8" width="1.6"  position="5.5 7.5 1.5" rotation="-135 0 90" cloak></a-entity>
+              <a-box depth="4" position="0 0 4"></a-box>
+            </a-entity>
+            <a-entity class="logo_side" position="4.5 4.5 4.5" rotation="0 180 0">
+              <a-box width="5" position="4.5 0 0"></a-box>
+              <a-box depth="8" position="7 0 3.5"></a-box>
+              <a-box width="7" position="3 0 7"></a-box>
+              <a-box depth="4" position="0 0 4"></a-box>
+            </a-entity>
           </a-entity>
-        </a-entity>
-        <a-entity class="opp_sides" position="" rotation="270 0 180">
-          <a-entity class="logo_side" position="-4.5 -4.5 -4.5" rotation="">
-            <a-box width="5" position="4.5 0 0"></a-box>
-            <a-box depth="8" position="7 0 3.5"></a-box>
-            <a-entity height="8" width="1.6"  position="7.5 1.5 3.5" rotation="45 90 90" cloak></a-entity>
-            <a-entity position="6.5 2.5 6.5" rotation="90 90 90" cloak-tri></a-entity>
-            <a-box width="7" position="3 0 7"></a-box>
-            <a-entity height="8" width="1.6"  position="5.5 7.5 1.5" rotation="-135 0 90" cloak></a-entity>
-            <a-box depth="4" position="0 0 4"></a-box>
-          </a-entity>
-          <a-entity class="logo_side" position="4.5 4.5 4.5" rotation="0 180 0">
-            <a-box width="5" position="4.5 0 0"></a-box>
-            <a-box depth="8" position="7 0 3.5"></a-box>
-            <a-box width="7" position="3 0 7"></a-box>
-            <a-box depth="4" position="0 0 4"></a-box>
-          </a-entity>
-        </a-entity>
-        <a-entity class="opp_sides" position="" rotation="180 0 270">
-          <a-entity class="logo_side" position="-4.5 -4.5 -4.5" rotation="">
-            <a-box width="5" position="4.5 0 0"></a-box>
-            <a-box depth="8" position="7 0 3.5"></a-box>
-            <a-entity height="8" width="1.6" position="7.5 1.5 3.5" rotation="45 90 90" cloak></a-entity>
-            <a-box width="7" position="3 0 7"></a-box>
-            <a-entity height="8" width="1.6"  position="5.5 7.5 1.5" rotation="-135 0 90" cloak></a-entity>
-            <a-box depth="4" position="0 0 4"></a-box>
-          </a-entity>
-          <a-entity class="logo_side" position="4.5 4.5 4.5" rotation="0 180 0">
-            <a-box width="5" position="4.5 0 0"></a-box>
-            <a-box depth="8" position="7 0 3.5"></a-box>
-            <a-box width="7" position="3 0 7"></a-box>
-            <a-box depth="4" position="0 0 4"></a-box>
+          <a-entity class="opp_sides" position="" rotation="180 0 270">
+            <a-entity class="logo_side" position="-4.5 -4.5 -4.5" rotation="">
+              <a-box width="5" position="4.5 0 0"></a-box>
+              <a-box depth="8" position="7 0 3.5"></a-box>
+              <a-entity height="8" width="1.6" position="7.5 1.5 3.5" rotation="45 90 90" cloak></a-entity>
+              <a-box width="7" position="3 0 7"></a-box>
+              <a-entity height="8" width="1.6"  position="5.5 7.5 1.5" rotation="-135 0 90" cloak></a-entity>
+              <a-box depth="4" position="0 0 4"></a-box>
+            </a-entity>
+            <a-entity class="logo_side" position="4.5 4.5 4.5" rotation="0 180 0">
+              <a-box width="5" position="4.5 0 0"></a-box>
+              <a-box depth="8" position="7 0 3.5"></a-box>
+              <a-box width="7" position="3 0 7"></a-box>
+              <a-box depth="4" position="0 0 4"></a-box>
+            </a-entity>
           </a-entity>
         </a-entity>
       </a-entity>
