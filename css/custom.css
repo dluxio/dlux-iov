@@ -13389,4 +13389,8 @@ ul.scroll li.scroll {
 
 #files-table tbody > tr:last-child > td {
   border-bottom: 0;
+}
+
+.click-me:hover {
+  cursor: pointer;
 }/*# sourceMappingURL=custom.css.map */
