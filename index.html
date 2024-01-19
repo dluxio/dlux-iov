@@ -30,9 +30,9 @@
       <a-entity camera fov="50" touchEnabled="false" wasd-controls-enabled="false" look-controls-enabled="false"
         touchEnabled="false"></a-entity>
       <a-entity animation="property: rotation; to: 0 0 359; dur: 6000; easing: linear; loop: true">
-        <a-entity light="type: directional; color: #033EFD; intensity: 0.6" position="-14.14 0 0"></a-entity>
-        <a-entity light="type: directional; color: #FB00FF; intensity: 0.6" position="10 10 0"></a-entity>
-        <a-entity light="type: directional; color: #21FFB5; intensity: 0.6" position="10 -10 0"></a-entity>
+        <a-entity light="type: directional; color: #033EFD; intensity: 0.6; castShadow:true; shadowCameraVisible: true;" position="-14.14 0 0"></a-entity>
+        <a-entity light="type: directional; color: #FB00FF; intensity: 0.6; castShadow:true; shadowCameraVisible: true;" position="10 10 0"></a-entity>
+        <a-entity light="type: directional; color: #21FFB5; intensity: 0.6; castShadow:true; shadowCameraVisible: true;" position="10 -10 0"></a-entity>
       </a-entity>
 
       <a-entity id="hypercube" position="0 0 -15" scale="0.4 0.4 0.4" rotation="-3.18 -53.6 50.9">
