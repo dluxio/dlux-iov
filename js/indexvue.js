@@ -13,7 +13,6 @@ if (location.search) {
       lapi = param[1];
     }
   }
-  //window.history.replaceState(null, null, "dex?api=" + lapi);
 }
 if (location.hash && !lapi) {
   const hash = url.split("#");
@@ -188,6 +187,12 @@ var app = new Vue({
           else this[key] = false;
         });
     },
+    startscroll(id = "dapps") {
+      const el = this.$refs[id];
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    },
     localStoreSet(k, v) {
       localStorage.setItem(k, v);
     },
@@ -231,7 +236,6 @@ var app = new Vue({
       }
     },
     setApi(url) {
-      // remove trailing slash
       if (url.substr(-1) == "/") {
         url = url.substr(0, url.length - 1);
       }
@@ -357,151 +361,20 @@ var app = new Vue({
           this.features = data.features ? data.features : this.features;
           this.behind = data.behind;
           this.behindTitle = data.behind + " Blocks Behind Hive";
-        //   fetch(this.lapi + "/api/recent/HIVE_" + this.TOKEN + "?limit=1000")
-        //     .then((response) => response.json())
-        //     .then((data) => {
-        //       this.volume.hive =
-        //         data.recent_trades.reduce((a, b) => {
-        //           if (b.trade_timestamp > this.agoTime)
-        //             return a + parseInt(parseFloat(b.target_volume) * 1000);
-        //           else return a;
-        //         }, 0) / 1000;
-        //       this.volume.token_hive =
-        //         data.recent_trades.reduce((a, b) => {
-        //           if (b.trade_timestamp > this.agoTime)
-        //             return a + parseInt(parseFloat(b.base_volume) * 1000);
-        //           else return a;
-        //         }, 0) / 1000;
-        //       this.recenthive = data.recent_trades.sort((a, b) => {
-        //         return (
-        //           parseInt(b.trade_timestamp) - parseInt(a.trade_timestamp)
-        //         );
-        //       });
-        //     });
-        //   fetch(this.lapi + "/api/recent/HBD_" + this.TOKEN + "?limit=1000")
-        //     .then((response) => response.json())
-        //     .then((data) => {
-        //       this.volume.hbd =
-        //         data.recent_trades.reduce((a, b) => {
-        //           if (b.trade_timestamp > this.agoTime)
-        //             return a + parseInt(parseFloat(b.target_volume) * 1000);
-        //           else return a;
-        //         }, 0) / 1000;
-        //       this.volume.token_hbd =
-        //         data.recent_trades.reduce((a, b) => {
-        //           if (b.trade_timestamp > this.agoTime)
-        //             return a + parseInt(parseFloat(b.base_volume) * 1000);
-        //           else return a;
-        //         }, 0) / 1000;
-        //       this.recenthbd = data.recent_trades.sort((a, b) => {
-        //         return (
-        //           parseInt(b.trade_timestamp) - parseInt(a.trade_timestamp)
-        //         );
-        //       });
-        //     });
         });
     },
     removeUser() {
-    //   this.balance = 0;
-    //   this.bartoken = "";
-    //   this.barpow = "";
-    //   this.bargov = "";
       this.accountapi = "";
-    //   this.hasDrop = false;
-    //   this.openorders = [];
       this.accountinfo = {};
-    //   this.barhive = "";
-    //   this.barhbd = "";
     },
-    getTokenUser(user) {
-    //   if (user)
-    //     fetch(this.lapi + "/@" + user)
-    //       .then((response) => response.json())
-    //       .then((data) => {
-    //         this.balance = (data.balance / 1000).toFixed(3);
-    //         this.bartoken = this.balance;
-    //         this.barpow = (
-    //           (data.poweredUp + data.granted - data.granting) /
-    //           1000
-    //         ).toFixed(3);
-    //         this.bargov = (data.gov / 1000).toFixed(3);
-    //         this.accountapi = data;
-    //         if (
-    //           new Date().getMonth() + 1 !=
-    //             parseInt(data.drop?.last_claim, 16) &&
-    //           data.drop?.availible.amount > 0
-    //         ) {
-    //           this.hasDrop = true;
-    //           this.dropnai = `${parseFloat(
-    //             data.drop.availible.amount /
-    //               Math.pow(10, data.drop.availible.precision)
-    //           ).toFixed(data.drop.availible.precision)} ${
-    //             data.drop.availible.token
-    //           }`;
-    //         }
-    //         this.openorders = data.contracts.reduce((acc, cur) => {
-    //           cur.nai = `${
-    //             cur.type.split(":")[0] == "hive"
-    //               ? parseFloat(cur.hive / 1000).toFixed(3)
-    //               : parseFloat(cur.hbd / 1000).toFixed(3)
-    //           } ${cur.type.split(":")[0] == "hive" ? "HIVE" : "HBD"}`;
-    //           if (
-    //             cur.partials &&
-    //             cur.partials.length &&
-    //             cur.type.split(":")[1] == "sell"
-    //           ) {
-    //             const filled = cur.partials.reduce(function (a, c) {
-    //               return a + c.coin;
-    //             }, 0);
-    //             cur.percentFilled = parseFloat(
-    //               (100 * filled) / (cur.hive ? cur.hive : cur.hbd + filled)
-    //             ).toFixed(2);
-    //             acc.push(cur);
-    //           } else if (cur.partials && cur.partials.length) {
-    //             const filled = cur.partials.reduce(function (a, c) {
-    //               return a + c.token;
-    //             }, 0);
-    //             cur.percentFilled = parseFloat(
-    //               (100 * filled) / (cur.amount + filled)
-    //             ).toFixed(2);
-    //             acc.push(cur);
-    //           } else {
-    //             cur.percentFilled = "0.00";
-    //             acc.push(cur);
-    //           }
-    //           console.log({
-    //             acc,
-    //           });
-    //           return acc;
-    //         }, []);
-    //       });
-    },
-    getHiveUser(user) {
-    //   if (user)
-    //     fetch(hapi, {
-    //       body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[["${user}"]], "id":1}`,
-    //       headers: {
-    //         "Content-Type": "application/x-www-form-urlencoded",
-    //       },
-    //       method: "POST",
-    //     })
-    //       .then((response) => response.json())
-    //       .then((data) => {
-    //         this.accountinfo = data.result[0];
-    //         this.barhive = this.accountinfo.balance;
-    //         this.barhbd = this.accountinfo.hbd_balance;
-    //       });
-    },
+    getTokenUser(user) { },
+    getHiveUser(user) { },
   },
   mounted() {
     this.getQuotes();
     this.getNodes();
     this.getProtocol();
     this.getTickers();
-    // if (user != "GUEST") this.getTokenUser(user);
-    // if (user != "GUEST") this.getHiveUser(user);
   },
-  computed: {
-    
-  },
+  computed: {},
 });
