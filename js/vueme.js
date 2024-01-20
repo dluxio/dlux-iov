@@ -3097,6 +3097,10 @@ function buyNFT(setname, uid, price, type, callback){
         );
       }
     },
+    addBens(obj){
+      console.log(obj)
+      this.postBens.push(obj)
+    },
     getNFTs(account) {
       this.accountNFTs = [];
       this.accountRNFTs = [];

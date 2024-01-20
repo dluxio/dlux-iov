@@ -3,6 +3,7 @@ import ExtensionVue from "/js/extensionvue.js";
 import FilesVue from "/js/filesvue.js";
 import UploadVue from "/js/uploadvue.js";
 import ModalVue from "/js/modalvue.js";
+import PostVue from "/js/postvue.js";
 
 export default {
     components: {
@@ -10,7 +11,8 @@ export default {
         "extension-vue": ExtensionVue,
         "files-vue": FilesVue,
         "upload-vue": UploadVue,
-        "modal-vue": ModalVue
+        "modal-vue": ModalVue,
+        "post-vue": PostVue
     },
     template: `
     <div class="card-head p-2">
@@ -279,7 +281,12 @@ export default {
                                             </tr>
                                             <tr class="collapse" :id="replace(contract.i) + 'beneficiary'">
                                                 <td class=" border-0" colspan="4">
-                                                    <p v-if="account == contract.t">put post compose here</p>
+                                                    <div v-if="account == contract.t && !postpage">
+                                                    <post-vue :account="account" :prop_bens="contract.s" @tosign="toSign=$event"/>
+                                                    </div>
+                                                    <div v-if="account == contract.t && postpage">
+                                                    <button @click="addBen(contract.s)"><i class="fa-solid fa-hand-holding-dollar fa-fw"></i>Add Benificary to Post</button>
+                                                    </div>
                                                     <extension-vue :node-view="nodeview" :contract="contract"
                                                         :sstats="sstats" :account="account" :saccountapi="saccountapi"
                                                         @tosign="toSign=$event"></extension-vue>
@@ -392,11 +399,16 @@ export default {
         title: {
             default: 'Storage Contracts',
             required: false
+        },
+        postpage: {
+            default: false,
+            required: false
         }
     },
     data() {
         return {
             contracts: [],
+            state2contracts: [],
             tick: "1",
             toSign: {},
             larynxbehind: 999999,
@@ -515,7 +527,7 @@ export default {
               }
         };
     },
-    emits: ['tosign', 'addasset'],
+    emits: ['tosign', 'addasset','bens'],
     methods: {
         modalSelect(url) {
             this.$emit('modalselect', url);
@@ -729,6 +741,9 @@ export default {
                             res.result.extend = "7"
                             if (res.result) {
                                 this.contracts[id] = res.result
+                                if(res.result.c == 2){
+                                    this.state2contracts.push(res.result.s)
+                                }
                                 //this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
                             }
                         });
@@ -740,6 +755,10 @@ export default {
             for (var i = 0; i < contracts.length; i++) {
                 getContract(contracts[i])
             }
+        },
+        addBen(s){
+            console.log(s)
+            this.$emit('bens', {account: s.split(',')[0], weight: s.split(',')[1]})
         },
         getIPFSproviders() {
             fetch("https://spktest.dlux.io/services/IPFS")

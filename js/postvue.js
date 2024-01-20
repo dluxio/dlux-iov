@@ -40,12 +40,10 @@ export default {
         <ul v-if="postBens.length">
             <h6>Benificiaries: ({{postBens.length}}/8) </h6>
 
-            <li v-for="ben in postBens">@{{ben.account}}: {{formatNumber(ben.weight
-                / 100,
-                2, '.')}}% <button type="button" class="btn btn-outline-danger btn-sm"
-                    @click="delBen(ben.account)">Remove</button></li>
+            <li v-for="ben in postBens">@{{ben.account}}: {{formatNumber(ben.weight/ 100,2, '.')}}% <button type="button" class="btn btn-outline-danger btn-sm"
+                @click="delBen(ben.account)">Remove</button></li>
         </ul>
-        <button class="btn btn-outline-primary" v-if="!isntDlux" type="button"
+        <button class="btn btn-outline-primary" v-if="!isDlux" type="button"
             @click="addBen('dlux-io', 1000)">Include in
             DLUX Ecosystem</button>
         <button v-for="item in isntBenned" type="button"
@@ -54,8 +52,8 @@ export default {
         <div class="text-center">
             <button ref="publishButton" type="button" @keyUp="buildTags()"
                 class="btn btn-danger" data-toggle="tooltip" data-placement="top"
-                title="Publish Gallery to HIVE" :disable="!validPost"
-                @click="post([['vrHash', 'QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16']])">Publish</button>
+                title="Publish to HIVE" :disable="!validPost"
+                @click="post()">Publish</button>
         </div>
     </form>
 </div>
@@ -120,9 +118,7 @@ methods: {
       },
       post() {
         for (var i = 0; i < this.postCustom_json.assets.length; i++) {
-          delete this.postCustom_json.assets[i].rx
-          delete this.postCustom_json.assets[i].ry
-          delete this.postCustom_json.assets[i].rz
+          delete this.postCustom_json.assets[i].config
           if (!this.postCustom_json.assets[i].f) delete this.postCustom_json.assets[i].f
         }
         if(this.postCustom_json.vrHash){
@@ -149,7 +145,7 @@ methods: {
               "author": this.account,
               "permlink": this.postPermlink,
               "title": this.postTitle,
-              "body": this.postBody + this.postCustom_json.vrHash ? `\n***\n#### [View in VR @ dlux.io](https://dlux.io/dlux/@${this.account}/${this.postPermlink})\n` : "",
+              "body": this.postBody + (this.postCustom_json.vrHash ? `\n***\n#### [View in VR @ dlux.io](https://dlux.io/dlux/@${this.account}/${this.postPermlink})\n` : ""),
               "json_metadata": JSON.stringify(this.postCustom_json)
             }]]
           if (this.postBens.length > 0) {
@@ -179,6 +175,34 @@ methods: {
           }
           this.$emit('tosign', toSign)
         }
+      },
+      formatNumber(t, n, r, e) { // number, decimals, decimal separator, thousands separator
+        if (typeof t != "number") {
+          const parts = t ? t.split(" ") : []
+          var maybe = 0
+          for (i = 0; i < parts.length; i++) {
+            if (parseFloat(parts[i])>0){
+              maybe += parseFloat(parts[i])
+            }
+          }
+          if (maybe>parseFloat(t)){
+            t = maybe
+          } else {
+            t = parseFloat(t)
+          }
+        }
+        if (isNaN(t)) return "Invalid Number";
+        if (!isFinite(t)) return (t < 0 ? "-" : "") + "infinite";
+        (r = r || "."), (e = e || "");
+        var u = t < 0;
+        t = Math.abs(t);
+        var a = (null != n && 0 <= n ? t.toFixed(n) : t.toString()).split("."),
+          i = a[0],
+          o = 1 < a.length ? r + a[1] : "";
+        if (e)
+          for (var c = /(\d+)(\d{3})/; c.test(i); )
+            i = i.replace(c, "$1" + e + "$2");
+        return (u ? "-" : "") + i + o;
       },
     addBen(acc, weight) {
         if(this.postBens.length >= 8){
@@ -245,14 +269,21 @@ methods: {
       },
 },
 computed: {
-    hasFiles() {
-        return Object.keys(this.files).length > 0;
-    },
     validPost() {
         if(!this.postPerlink)return false
         if(!this.postTitle)return false
         if(!this.postBody)return false
         else return true
+    },
+    isDlux() {
+        var found = false
+        for (var i = 0; i < this.postBens.length; i++) {
+            if (this.postBens[i].account == 'dlux-io') {
+                found = true
+                break
+            }
+        }
+        return found
     },
     isntBenned() {
         var isnt = []
@@ -276,12 +307,15 @@ components: {
     "mde": MDE,
 },
 watch: {
-    'prop_bens'(newValue){
-        if(newValue.length){
-            for(var i = 0; i < this.prop_bens.length; i++){
-                this.addBen(this.prop_bens[i].account, this.prop_bens[i].weight)
-            }
-        }
+    'prop_bens': {
+            handler: function () {
+                console.log('caught!');
+                for(var i = 0; i < this.prop_bens.length; i++){
+                    if(typeof this.prop_bens[i] == "string")this.addBen(this.prop_bens[i].split(',')[0], this.prop_bens[i].split(',')[1])
+                    else this.addBen(this.prop_bens[i].account, this.prop_bens[i].weight)
+                }
+            },
+            deep: true
     },
     'prop_contracts'(newValue){
         if(newValue.length){
@@ -300,7 +334,8 @@ watch: {
 },
 mounted() {
     for(var i = 0; i < this.prop_bens.length; i++){
-        this.addBen(this.prop_bens[i].account, this.prop_bens[i].weight)
+        if(typeof this.prop_bens[i] == "string")this.addBen(this.prop_bens[i].split(',')[0], this.prop_bens[i].split(',')[1])
+        else this.addBen(this.prop_bens[i].account, this.prop_bens[i].weight)
     }
     for(var node in this.prop_json){
         this.postCustom_json[node] = this.prop_json[node]
