@@ -1156,7 +1156,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
       this.frameData = ''
       this.dluxMock()
     },
-    addAsset(cid, contract, name = '', thumbHash = '', type = 'ts', rot = [0, 0, 0]) {
+    addAsset(cid, contract, name = '', thumbHash = '', type = 'ts') {
       var found = -1
       if (!cid) return false
       if(typeof cid == 'object'){
@@ -1172,7 +1172,6 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
       if (found >= 0) {
         this.postCustom_json.assets[found].name = name || this.postCustom_json.assets[found].name
         this.postCustom_json.assets[found].thumbHash = thumbHash || cid
-        this.postCustom_json.assets[found].r = rot.join(' ')
       } else {
         this.postCustom_json.assets.push({
           hash: cid,
@@ -1180,11 +1179,6 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
           type: type,
           contract: contract,
           thumbHash,
-          r: rot.join(' '),
-          rx: rot[0],
-          ry: rot[1],
-          rz: rot[2],
-          f: 1
         })
       }
       this.dluxMock()
@@ -1264,21 +1258,6 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
       }, "*");
     },
     dluxMock() {
-      // if (this.postCustom_json.assets) {
-      // 	for (var i = 0; i < this.postCustom_json.assets.length; i++) {
-      // 		this.postCustom_json.assets.push({
-      // 			hash: assets[i].hash,
-      // 			name: assets[i].path,
-      // 			size: assets[i].size,
-      // 			pin: true,
-      // 			type: "ts",
-      // 			thumbHash: assets[i].hash
-      // 		})
-      // 		if (!custom_json.Hash360) {
-      // 			custom_json.Hash360 = assets[i].hash
-      // 		}
-      // 	}
-      // }
       var result = {
         author: this.account,
         permlink: this.postPermlink,
@@ -3721,6 +3700,7 @@ function buyNFT(setname, uid, price, type, callback){
         this.postSelect[this.postSelect.entry].e = false;
       }
     },
+    
   },
   computed: {
     location: {
