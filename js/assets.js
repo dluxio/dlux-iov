@@ -65,6 +65,10 @@ add them to your 360 post and they will appear here.</div>
                     <button class="btn btn-primary"
                         @click="delAsset(asset.hash, asset.contract, asset.name, asset.thumbHash)">Delete
                         Asset</button>
+                    <button v-if="asset.type == 'img' || asset.type == 'ts'" class="btn btn-primary"
+                        @click="copyToClipboard('![' + asset.name + '](http://ipfs.dlux.io/ipfs/' + asset.hash + ')')"><i class="fa-solid fa-image"></i><i class="fa-solid fa-caret-right"></i><i class="fa-solid fa-clipboard"></i></button>
+                        <button class="btn btn-primary"
+                        @click="copyToClipboard('[' + asset.name + '](http://ipfs.dlux.io/ipfs/' + asset.hash + ')')"><i class="fa-solid fa-clipboard"></i></button>
                     <button type="button"
                         class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                         disabled></button>
@@ -554,6 +558,14 @@ methods: {
     },
     hasProp(obj, prop) {
         return Object.prototype.hasOwnProperty.call(obj, prop);
+    },
+    copyToClipboard(text) {
+        const el = document.createElement('textarea');
+        el.value = text;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
     },
     switchType(index,t){
         if(index = -1)index = this.Assets.length - 1

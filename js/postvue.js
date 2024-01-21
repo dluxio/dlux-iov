@@ -270,7 +270,7 @@ methods: {
 },
 computed: {
     validPost() {
-        if(!this.postPerlink)return false
+        if(!this.postPermlink)return false
         if(!this.postTitle)return false
         if(!this.postBody)return false
         else return true

@@ -3746,7 +3746,7 @@ function buyNFT(setname, uid, price, type, callback){
       }
     },
     compiledMarkdown: function() {
-            return marked(this.postBody, { sanitize: true });
+      return DOMPurify.sanitize( marked.parse(this.postBody, { sanitize: true }))
           },
     voteVal() {
       return (
