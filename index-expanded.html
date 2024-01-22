@@ -226,10 +226,10 @@
     }
     var toastElList = [].slice.call(document.querySelectorAll(".toast"));
     var toastList = toastElList.map(function (toastEl) {
-      return new bootstrap.Toast(toastEl, option);
+      return new bootstrap.Toast(toastEl, option)
     });
     var tooltipTriggerList = [].slice.call(
-      document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      document.querySelectorAll('[data-bs-toggle="tooltip"]')
     );
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
       return new bootstrap.Tooltip(tooltipTriggerEl);
@@ -237,12 +237,10 @@
     const sqrt8 = Math.sqrt(8);
     AFRAME.registerComponent('cloak', {
       init: function () {
-        let geometry = new THREE.PlaneGeometry(sqrt8, 6)
-        let material = new THREE.MeshBasicMaterial({
-          colorWrite: false
-        })
-        let mesh = new THREE.Mesh(geometry, material)
-        this.el.object3D.add(mesh)
+        var geometry = new THREE.PlaneGeometry(sqrt8, 6);
+        var material = new THREE.MeshBasicMaterial({colorWrite: false});
+        var mesh = new THREE.Mesh(geometry, material);
+        this.el.object3D.add(mesh);
       }
     });
     AFRAME.registerComponent('cloak-tri', {

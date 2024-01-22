@@ -33,7 +33,7 @@
     <script src="/js/buffer.js"></script>
     <script src="/js/drag-drop.js"></script>
 	<script>
-        var activeWorker = 0
+        var activeWorker = 0;
         if ('serviceWorker' in navigator) {navigator.serviceWorker.register('/sw.js')
             .then(reg => {
                 console.log('Registration succeeded. Scope is ' + reg.scope);

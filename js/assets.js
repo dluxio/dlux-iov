@@ -130,6 +130,12 @@ data() {
                     default: "",
                     icon: "",
                 },
+                perm: {
+                    name: "Permissions",
+                    type: "text",
+                    default: "",
+                    icon: "",
+                },
             },
             doc: {
                 atr: {
