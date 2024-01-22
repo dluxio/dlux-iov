@@ -281,8 +281,8 @@ export default {
                                             </tr>
                                             <tr class="collapse" :id="replace(contract.i) + 'beneficiary'">
                                                 <td class=" border-0" colspan="4">
-                                                    <div v-if="account == contract.t && !postpage">
-                                                    <post-vue :account="account" :prop_bens="contract.s" @tosign="toSign=$event"/>
+                                                    <div v-if="account == contract.t && !postpage && contract.c == 2">
+                                                    <post-vue :account="account" :prop_bens="[contract.s]" @tosign="toSign=$event"/>
                                                     </div>
                                                     <div v-if="account == contract.t && postpage">
                                                     <button @click="addBen(contract.s)"><i class="fa-solid fa-hand-holding-dollar fa-fw"></i>Add Benificary to Post</button>
