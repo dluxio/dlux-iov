@@ -1,7 +1,7 @@
 export default {
     template: `
     <div>
-        <p>Current Beneficiaries: ({{bennies?.length}}/8) {{total/100}}%</p>
+        <p>Current Beneficiaries: ({{bennies?.length}}/8) {{total/100}}%</p><button v-if="!dlux" class="btn btn-sm btn-warning" @click="addBenny('dlux-io', 1000)">Include in DLUX Ecosystem</button>
         <div class="table-responsive">
         <table class="table align-middle">
             <thead>
@@ -79,6 +79,11 @@ export default {
         eq100: {
             default: false
         },
+    },
+    computed: {
+        dlux(){
+            return this.bennies.find(benny => benny.account == 'dlux-io')?.weight || 0 >= 1000 ? true : false;
+        }
     },
     emits: ['updatebennies'],
     methods:{
@@ -184,6 +189,16 @@ export default {
         removeFavorite(account){
             this.favorites = this.favorites.filter(favorite => favorite != account);
             this.setFavorites()
+        }
+    },
+    watch: {
+        'list': {
+            handler: function (val, oldVal) {
+                this.list.forEach(benny => {
+                    this.checkHive(benny.account, benny.weight)
+                });
+            },
+            deep: true
         }
     },
     mounted() {

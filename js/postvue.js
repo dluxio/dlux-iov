@@ -1,5 +1,6 @@
 import Tagify from "/js/tagifyvue.js";
 import MDE from "/js/mde.js";
+import Bennies from "/js/bennies.js";
 
 export default {
     template: `
@@ -37,7 +38,8 @@ export default {
             <tagify class="rounded w-100"
                 @data="postTags = $event" id="tags" />
         </div>
-        <ul v-if="postBens.length">
+        <bennies :list="postBens" @updatebennies="postBens = $event" />
+        <!--<ul v-if="postBens.length">
             <h6>Benificiaries: ({{postBens.length}}/8) </h6>
 
             <li v-for="ben in postBens">@{{ben.account}}: {{formatNumber(ben.weight/ 100,2, '.')}}% <button type="button" class="btn btn-outline-danger btn-sm"
@@ -48,7 +50,7 @@ export default {
             DLUX Ecosystem</button>
         <button v-for="item in isntBenned" type="button"
             @click="addBen(item.account, item.weight)">Include Contract
-            {{item.contract}}</button>
+            {{item.contract}}</button>-->
         <div class="text-center">
             <button ref="publishButton" type="button" @keyUp="buildTags()"
                 class="btn btn-danger" data-toggle="tooltip" data-placement="top"
@@ -305,6 +307,7 @@ computed: {
 components: {
     "tagify": Tagify,
     "mde": MDE,
+    "bennies": Bennies
 },
 watch: {
     'prop_bens': {
