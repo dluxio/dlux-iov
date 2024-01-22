@@ -1,6 +1,5 @@
 export default {
-    template: `
-<div>
+    template: `<div>
 <div v-if="!assets.length">No assets added. Use the File Upload
 & Hosting section to view or create hosting contracts, then upload assets
 into a hosting contract. Once you have assets in a hosting contract, you can
@@ -8,96 +7,63 @@ add them to your 360 post and they will appear here.</div>
 <div v-if="Assets.length">
 <h6>Assets</h6>
 <div v-for="(asset, index) in Assets">
-    <form onsubmit="return false;">
-        <div class="dropdown ms-auto">
-            <button class="btn btn-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="true">
-             Type: {{typeDict[asset.type].name}}
-            </button>
-            <ul class="dropdown-menu dropdown-menu-dark bg-black" >
-                <li v-for="type in Types"><a class="dropdown-item" role="button" @click="switchType(index,type)">{{typeDict[type].name}}</a></li>
-            </ul>
-        </div>
-        <p class="text-break">CID: {{asset.hash}}</p>
-        <p>In: {{asset.contract}}</p>
-        <div
-            class="d-flex p-2 justify-content-between align-items-center flex-wrap">
-            <div class="m-2">
-                <div class="input-group m-2">
-                    <input type="text" class="form-control" v-model="asset.name"
-                        placeholder="Picture Name">
-                </div>
-                <div class="input-group m-2">
-                    <input type="text" class="form-control"
-                        v-model="asset.thumbHash"
-                        placeholder="Thumbnail IPFS Hash">
-                </div>
-            </div>
-            <div class="d-flex flex-column p-2 m-2">
-                <div class="row g-3 align-items-center" v-for="(val, param, index) in asset.config">
-                    <div class="col-auto me-auto" v-if="paramDict[asset.type][param]">
-                        <label :for="param" class="col-form-label"><i
-                                :class="paramDict[asset.type][param].icon"></i>{{paramDict[asset.type][param].name}}:{{asset.config[param]}}</label>
-                    </div>
-                    <div class="col-auto">
-                        <input :type="paramDict[asset.type][param].type" :class="{['form-' + paramDict[asset.type][param].type]: true}" :id="param"
-                            v-model="asset.config[param]"
-                            @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash)"
-                            :min="paramDict[asset.type][param].min" :max="paramDict[asset.type][param].max" :step="paramDict[asset.type][param].default">
-                    </div>
-                    <div v-if="param == 'atr'">
-                        <p v-if="asset.config[param]">{{asset.config[param]}}</p><button class="btn btn-primary" @click="addAtr(asset.hash)">Add Attribute</button>
-                        <p v-for="(atr, j) in asset.atr">{{atr}}</p><button class="btn btn-danger" @click="subAtr(asset.hash, j)">Remove Attribute</button>
-                    </div>
-                </div>
-            </div>
-            <div class="d-flex flex-column">
-                <div class="d-flex" style="justify-content: center;"><img
-                        :src="'https://ipfs.dlux.io/ipfs/' + asset.hash"
-                        class="img-fluid" style="max-width: 300px;"
-                        :alt="asset.hash"></div>
-                <div class="m-2 btn-group">
-                    <button class="btn btn-primary"
-                        @click="addAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, asset.r)">Refresh
-                        dApp</button>
-                    <button type="button"
-                        class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                        disabled></button>
-                    <button class="btn btn-primary"
-                        @click="delAsset(asset.hash, asset.contract, asset.name, asset.thumbHash)">Delete
-                        Asset</button>
-                    <button v-if="asset.type == 'img' || asset.type == 'ts'" class="btn btn-primary"
-                        @click="copyToClipboard('![' + asset.name + '](http://ipfs.dlux.io/ipfs/' + asset.hash + ')')"><i class="fa-solid fa-image"></i><i class="fa-solid fa-caret-right"></i><i class="fa-solid fa-clipboard"></i></button>
-                        <button class="btn btn-primary"
-                        @click="copyToClipboard('[' + asset.name + '](http://ipfs.dlux.io/ipfs/' + asset.hash + ')')"><i class="fa-solid fa-clipboard"></i></button>
-                    <button type="button"
-                        class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                        disabled></button>
-                    <button class="btn btn-primary" :disabled="index == 0"
-                        @click="moveAsset(asset.hash, 'up')"><i
-                            class="fa-solid fa-up-long"></i></button>
-                    <button type="button"
-                        class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                        disabled></button>
-                    <button class="btn btn-primary"
-                        :disabled="index == Assets.length - 1"
-                        @click="moveAsset(asset.hash, 'down')"><i
-                            class="fa-solid fa-down-long"></i></button>
-                </div>
-                <div class="form-check ms-auto me-auto" v-if="hasProp(asset, 'f')">
-                    <input class="form-check-input" type="checkbox" value=""
-                        :id="asset.hash + 'firstImage'" :checked="asset.f"
-                        @click="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash)">
-                    <label class="form-check-label" :for="asset.hash + 'firstImage'">
-                        Initial Image
-                    </label>
-                </div>
-            </div>
-        </div>
-    </form>
+<form onsubmit="return false;">
+<div class="dropdown ms-auto">
+<button class="btn btn-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="true">Type: {{typeDict[asset.type].name}}
+</button>
+<ul class="dropdown-menu dropdown-menu-dark bg-black" >
+<li v-for="type in Types"><a class="dropdown-item" role="button" @click="switchType(index,type)">{{typeDict[type].name}}</a></li>
+</ul>
+</div>
+<p class="text-break">CID: {{asset.hash}}</p>
+<p>In: {{asset.contract}}</p>
+<div class="d-flex p-2 justify-content-between align-items-center flex-wrap">
+<div class="m-2">
+<div class="input-group m-2">
+<input type="text" class="form-control" v-model="asset.name" placeholder="Picture Name">
+</div>
+<div class="input-group m-2">
+<input type="text" class="form-control"  v-model="asset.thumbHash" placeholder="Thumbnail IPFS Hash">
+</div>
+</div>
+<div class="d-flex flex-column p-2 m-2">
+<div class="row g-3 align-items-center" v-for="(val, param, index) in asset.config">
+<div class="col-auto me-auto" v-if="paramDict[asset.type][param]">
+<label :for="param" class="col-form-label"><i :class="paramDict[asset.type][param].icon"></i>{{paramDict[asset.type][param].name}}:{{asset.config[param]}}</label>
+</div>
+<div class="col-auto">
+<input :type="paramDict[asset.type][param].type" :class="{['form-' + paramDict[asset.type][param].type]: true}" :id="param" v-model="asset.config[param]" @input="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash)" :min="paramDict[asset.type][param].min" :max="paramDict[asset.type][param].max" :step="paramDict[asset.type][param].default">
+</div>
+<div v-if="param == 'atr'">
+<p v-if="asset.config[param]">{{asset.config[param]}}</p><button class="btn btn-primary" @click="addAtr(asset.hash)">Add Attribute</button>
+<p v-for="(atr, j) in asset.atr">{{atr}}</p><button class="btn btn-danger" @click="subAtr(asset.hash, j)">Remove Attribute</button>
 </div>
 </div>
 </div>
-   `,
+<div class="d-flex flex-column">
+<div class="d-flex" style="justify-content: center;"><img :src="'https://ipfs.dlux.io/ipfs/' + asset.hash" class="img-fluid" style="max-width: 300px;" :alt="asset.hash"></div>
+<div class="m-2 btn-group">
+<button class="btn btn-primary" @click="addAsset(asset.hash, asset.contract, asset.name, asset.thumbHash, asset.r)">Refresh dApp</button>
+<button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
+<button class="btn btn-primary" @click="delAsset(asset.hash, asset.contract, asset.name, asset.thumbHash)">Delete Asset</button>
+<button v-if="asset.type == 'img' || asset.type == 'ts'" class="btn btn-primary" @click="copyToClipboard('![' + asset.name + '](http://ipfs.dlux.io/ipfs/' + asset.hash + ')')"><i class="fa-solid fa-image"></i><i class="fa-solid fa-caret-right"></i><i class="fa-solid fa-clipboard"></i></button>
+<button class="btn btn-primary" @click="copyToClipboard('[' + asset.name + '](http://ipfs.dlux.io/ipfs/' + asset.hash + ')')"><i class="fa-solid fa-clipboard"></i></button>
+<button class="btn btn-primary" v-if="asset.type == 'app' @click="setDapp(asset.hash)"><i class="fa-solid fa-tablet-screen-button"></i></button>
+<button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
+<button class="btn btn-primary" :disabled="index == 0"  @click="moveAsset(asset.hash, 'up')"><i class="fa-solid fa-up-long"></i></button>
+<button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
+<button class="btn btn-primary" :disabled="index == Assets.length - 1"  @click="moveAsset(asset.hash, 'down')"><i class="fa-solid fa-down-long"></i></button>
+</div>
+<div class="form-check ms-auto me-auto" v-if="hasProp(asset, 'f')">
+<input class="form-check-input" type="checkbox" value="" :id="asset.hash + 'firstImage'" :checked="asset.f" @click="focusAsset(asset.hash, asset.contract, asset.name, asset.thumbHash)">
+<label class="form-check-label" :for="asset.hash + 'firstImage'">Initial Image</label>
+</div>
+</div>
+</div>
+</form>
+</div>
+</div>
+</div>`,
 props: {
     assets: {
         default: function () {
@@ -531,8 +497,11 @@ data() {
         }
     };
 },
-emits: [ "updateassets",  "dluxmock"],
+emits: [ "updateassets",  "dluxmock", "setdapp"],
 methods: {
+    setDapp(cid){
+        this.$emit("setdapp", cid);
+    },
     update() {
         let assets = []
         for (var i = 0; i < this.Assets.length; i++) {

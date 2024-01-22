@@ -21,7 +21,7 @@ import NFTCard from "./nftcard.js";
 import FTTransfer from "./fttransfer.js";
 import NFTDetail from "./nftdetail.js";
 import SPKVue from "/js/spk-wallet-comp.js";
-import Assets from "/js/assets.js"
+import Assets from "/js/assets-min.js"
 
 
 let url = location.href.replace(/\/$/, "");

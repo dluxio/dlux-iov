@@ -1,4 +1,4 @@
-this.version = "2024.01.22.3";
+this.version = "2024.01.22.4";
 
 console.log( "SW:" + this.version + " - online.");
 
@@ -53,7 +53,7 @@ var urlsToCache = [
   "/img/spknetwork.png",
   "/js/aframe.min.js",
   "/js/appvue.js",
-  "/js/assets.js",
+  "/js/assets-min.js",
   "/js/bennies-min.js",
   "/js/bootstrap.bundle.min.js",
   "/js/buffer.js",

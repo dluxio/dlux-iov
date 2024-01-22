@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>DLUX 360&deg; Image Gallery</title>
+    <meta name="description" content="360&deg; Image Gallery - A-Frame">
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-event-set-component@5/dist/aframe-event-set-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-layout-component@5.3.0/dist/aframe-layout-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-template-component@3.2.1/dist/aframe-template-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-proxy-event-component@2.1.0/dist/aframe-proxy-event-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-troika-text/dist/aframe-troika-text.min.js"></script>
+    <script>
+    var postKey,permlink,author,data,username,iam="Init",hasMemoKey=0
+    function onSceneLoad(msg){username = msg || iam}
+    if (window.addEventListener){window.addEventListener("message", onMessage, false)}
+    else if (window.attachEvent){window.attachEvent("onmessage", onMessage, false)}
+    function onMessage(event) {data = event.data;if(typeof(window[data.func])=="function"){window[data.func].call(null, data.message)}}
+    function comment(message){window.parent.postMessage({'func':'comment','message': {'message': message.message,'customJSON':message.customJSON}}, "*");}
+    function sendLink(payload){window.parent.postMessage({'func':'sendLink','message': payload},"*")}
+    function aVote(data){window.parent.postMessage({'func':'aVote','message':{'permlink':data.split('/')[0],'author':data.split('/')[1],'weight':10000||data.split('/')[2],}},"*")}
+    function memoKey(message){hasMemoKey=message;}
+    function key(message){postKey=message;permlink=message.split('/');onSceneLoad(iam)}
+    function accountUpdate(message) {}
+    function hiveState(message) {const json=JSON.parse(message.json_metadata)
+    var assets=document.getElementById('aassets')
+    assets.innerHTML = '<img id="graph" src="https://ipfs.dlux.io/ipfs/QmeDDfa2QUUhuTvVJrEQNRNB1qBCJCjUKmx2enmVjLqP8H?.graph.png" crossorigin="anonymous" >'
+    document.getElementById('links').innerHTML = ''
+    var first = false
+    for(var i=0;i<json.assets.length;i++){
+        if(json.assets[i].type=='ts'){
+        var img = document.createElement("img");
+        img.id = `ts${i}`
+        img.setAttribute('crossorigin', 'anonymous')
+        img.src = `https://ipfs.dlux.io/ipfs/${json.assets[i].hash}`
+        assets.appendChild(img)
+          var imgThumb = document.createElement("img");
+        imgThumb.id = `th${i}`
+        imgThumb.setAttribute('crossorigin', 'anonymous')
+        imgThumb.src = `https://ipfs.dlux.io/ipfs/${json.assets[i].thumbHash || json.assets[i].hash}`
+        assets.appendChild(imgThumb)
+        var linkItem = document.createElement("a-entity");
+        linkItem.setAttribute('template', {
+          src: "#link"
+        })
+        linkItem.setAttribute('look-at', "[camera]")
+        linkItem.setAttribute('data-src', `#ts${i}`)
+          linkItem.setAttribute('data-thumb',`#th${i}`)
+        linkItem.setAttribute('data-text',`${json.assets[i].name}`)
+          linkItem.setAttribute('data-rot',`${json.assets[i].r || "0 0 0"}`)
+        if(json.assets.length > 1)document.getElementById('links').appendChild(linkItem)
+          if(json.assets[i].f || (!first && i == json.assets.length - 1)){
+          document.getElementById('image-360').setAttribute('src', `#ts${i}`)
+          document.getElementById('image-360').setAttribute('rotation',`${json.assets[i].r || "0 0 0"}`)
+          first = true
+        }
+      }
+      }
+      for (var i = json.assets.length; i < 11; i++ ){
+        var linkItem = document.createElement("a-entity");
+        document.getElementById('links').appendChild(linkItem)
+      }
+    }
+    function iAm(message){iam=message}
+    function resetCamera(message) {
+      let controls = document.getElementById('cam').components['look-controls']
+      controls.pitchObject.rotation.x = 0
+      controls.yawObject.rotation.y = 0
+    }
+    function onpageloaded(){window.parent.postMessage({'func':'iloaded','message':''},"*");}
+    </script>
+    <script id="link" type="text/html">
+      <a-entity class="link"
+        geometry="primitive: sphere; height: 1; width: 1"
+        material="shader: flat;transparency:true; src: ${thumb};opacity: .6"
+        event-set__mouseenter="scale: 1.2 1.2 1; material.opacity: 1"
+        event-set__mouseleave="scale: 1 1 1; material.opacity: .6"
+        event-set__click="_target: #image-360; _delay: 300; material.src: ${src};rotation:${rot}"
+        proxy-event="event: click; to: #image-360; as: fade"
+        sound="on: click; src: #click-sound">
+        <a-entity troika-text="value: ${text};
+        color: white;
+        align: center; 
+        baseline: top; 
+        maxWidth: 1;
+        overflowWrap: break-word; 
+        font: https://cdn.glitch.com/b3e5aba8-53bf-44c1-a9b9-f3bfa5344c93%2Froboto-v20-vietnamese_latin-ext_latin_greek-ext_greek_cyrillic-ext_cyrillic-regular.woff?v=1612129504894" 
+        position="0 -1.1 0" 
+        </a-entity></a-entity>
+    </script>
+  </head>
+  <body>
+    <a-scene>
+      <a-assets id="aassets">
+        <audio id="click-sound" crossorigin="anonymous" src="https://cdn.aframe.io/360-image-gallery-boilerplate/audio/click.ogg"></audio>
+        <img id="graph" src="https://ipfs.dlux.io/ipfs/QmeDDfa2QUUhuTvVJrEQNRNB1qBCJCjUKmx2enmVjLqP8H?.graph.png" crossorigin="anonymous" >
+        <img id="hive" src="https://cdn.glitch.com/01653acd-2032-42f4-b8a0-e375b4533968%2Fcircle_hive_black.png?v=1608032530206" crossorigin="">
+      </a-assets>
+      <a-sky id="image-360" radius="10" src="#graph"
+             animation__fade="property: components.material.material.color; type: color; from: #FFF; to: #000; dur: 300; startEvents: fade"
+             animation__fadeback="property: components.material.material.color; type: color; from: #000; to: #FFF; dur: 300; startEvents: animationcomplete__fade"></a-sky>
+
+      <a-entity id="links" layout="type: circle; radius: 5" rotation="90 180 0" position="0 -3 0">        
+      </a-entity>
+      <a-entity id="cam" camera look-controls="pointerLockEnabled: true">
+        <a-cursor
+          id="cursor"
+          animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
+          animation__fusing="property: fusing; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500"
+          event-set__mouseenter="_event: mouseenter; color: springgreen"
+          event-set__mouseleave="_event: mouseleave; color: white"
+          material="color: white; shader: flat; opacity: 0.5"
+          raycaster="objects: .link"></a-cursor>
+      </a-entity>
+    </a-scene>
+    <script>
+    onpageloaded()
+    </script>
+  </body>
+</html>
