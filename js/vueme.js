@@ -9,17 +9,17 @@ import Marker from "/js/marker-min.js";
 import Ratings from "/js/ratings-min.js";
 import MDE from "/js/mde-min.js";
 import Replies from "/js/replies-min.js";
-import CardVue from "./cardvue.js";
+import CardVue from "/js/cardvue.js";
 import Tagify from "/js/tagifyvue.js";
 import ContractVue from "/js/contractvue.js";
 import FilesVue from "/js/filesvue.js";
 import ExtensionVue from "/js/extensionvue.js";
 import UploadVue from "/js/uploadvue.js";
 import PostVue from "/js/postvue.js";
-import DetailVue from "./detailvue-min.js";
-import NFTCard from "./nftcard.js";
-import FTTransfer from "./fttransfer.js";
-import NFTDetail from "./nftdetail.js";
+import DetailVue from "/js/detailvue-min.js";
+import NFTCard from "/js/nftcard.js";
+import FTTransfer from "/js/fttransfer.js";
+import NFTDetail from "/js/nftdetail.js";
 import SPKVue from "/js/spk-wallet-comp.js";
 import Assets from "/js/assets-min.js"
 
