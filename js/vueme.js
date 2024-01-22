@@ -129,7 +129,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         "tags": [
           "dlux"
         ],
-        "vrHash": "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16"
+        "vrHash": "Qma4dk3mWP325HrHYBDz3UdL9h1A6q8CSvZdc8JhqfgiMp"
       },
       nftTradeTabTo: "",
       nftTradeTabToken: "",
@@ -2748,7 +2748,8 @@ function buyNFT(setname, uid, price, type, callback){
                   "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
                   this.posturls[key].json_metadata.vrHash ||
                   "QmZF2ZEZK8WBVUT7dnQyzA6eApLGnMXgNaJtWHFc3PCpqV" ==
-                  this.posturls[key].json_metadata.vrHash
+                  this.posturls[key].json_metadata.vrHash || 
+                  "Qma4dk3mWP325HrHYBDz3UdL9h1A6q8CSvZdc8JhqfgiMp" == this.posturls[key].json_metadata.vrHash
                 )
                   type = "360";
                 else if (this.posturls[key].json_metadata.vrHash)
