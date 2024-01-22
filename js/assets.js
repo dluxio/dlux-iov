@@ -48,7 +48,7 @@ add them to your 360 post and they will appear here.</div>
 <button class="btn btn-primary" @click="delAsset(asset.hash, asset.contract, asset.name, asset.thumbHash)">Delete Asset</button>
 <button v-if="asset.type == 'img' || asset.type == 'ts'" class="btn btn-primary" @click="copyToClipboard('![' + asset.name + '](http://ipfs.dlux.io/ipfs/' + asset.hash + ')')"><i class="fa-solid fa-image"></i><i class="fa-solid fa-caret-right"></i><i class="fa-solid fa-clipboard"></i></button>
 <button class="btn btn-primary" @click="copyToClipboard('[' + asset.name + '](http://ipfs.dlux.io/ipfs/' + asset.hash + ')')"><i class="fa-solid fa-clipboard"></i></button>
-<button class="btn btn-primary" v-if="asset.type == 'app' @click="setDapp(asset.hash)"><i class="fa-solid fa-tablet-screen-button"></i></button>
+<button class="btn btn-primary" v-if="asset.type == 'app'" @click="setDapp(asset.hash)"><i class="fa-solid fa-tablet-screen-button"></i></button>
 <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
 <button class="btn btn-primary" :disabled="index == 0"  @click="moveAsset(asset.hash, 'up')"><i class="fa-solid fa-up-long"></i></button>
 <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
