@@ -2,7 +2,7 @@ import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
 import Pop from "/js/pop.js";
-import Bennies from "/js/bennies.js";
+import Bennies from "/js/bennies.min.js";
 
 export default {
     components: {

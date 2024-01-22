@@ -116,6 +116,13 @@ export default {
             }
         },
         checkHive(account, amount){
+            let found = -1
+            for (let index = 0; index < this.bennies.length; index++) {
+                if(this.bennies[index].account == account){
+                    this.bennies[index].weight += amount;
+                    found = index;
+                }
+            }
             fetch('https://api.hive.blog', {
                 method: 'POST',
                 body: JSON.stringify({  

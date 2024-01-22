@@ -1,4 +1,4 @@
-import Bennies from "/js/bennies.js";
+import Bennies from "/js/bennies.min.js";
 
 export default {
     components: {
