@@ -204,9 +204,7 @@
       (function () {
         "use strict";
         window.addEventListener("load", function () {
-          // Fetch all the forms we want to apply custom Bootstrap validation styles to
           var forms = document.getElementsByClassName("needs-validation");
-          // Loop over them and prevent submission
           var validation = Array.prototype.filter.call(forms, function (form) {
             form.addEventListener(
               "submit",
@@ -231,37 +229,35 @@
       return new bootstrap.Toast(toastEl, option);
     });
     var tooltipTriggerList = [].slice.call(
-      document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      document.querySelectorAll('[data-bs-toggle="tooltip"]');
     );
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
       return new bootstrap.Tooltip(tooltipTriggerEl);
     });
-    const sqrt8 = Math.sqrt(8)
+    const sqrt8 = Math.sqrt(8);
     AFRAME.registerComponent('cloak', {
       init: function () {
         let geometry = new THREE.PlaneGeometry(sqrt8, 6)
-        //geometry.faces.splice(4, 2) // cut out the top faces 
         let material = new THREE.MeshBasicMaterial({
           colorWrite: false
         })
         let mesh = new THREE.Mesh(geometry, material)
         this.el.object3D.add(mesh)
       }
-    })
+    });
     AFRAME.registerComponent('cloak-tri', {
       init: function () {
         let v1 = new THREE.Vector3(0, 2, 0);
         let v2 = new THREE.Vector3(0, 0, 2);
         let v3 = new THREE.Vector3(2, 0, 0);
-        let geometry = new THREE.BufferGeometry().setFromPoints([v1, v2, v3])
-        //geometry.faces.splice(4, 2) // cut out the top faces 
+        let geometry = new THREE.BufferGeometry().setFromPoints([v1, v2, v3]);
         let material = new THREE.MeshBasicMaterial({
           colorWrite: false
-        })
-        let mesh = new THREE.Mesh(geometry, material)
-        this.el.object3D.add(mesh)
+        });
+        let mesh = new THREE.Mesh(geometry, material);
+        this.el.object3D.add(mesh);
       }
-    })
+    });
     document.addEventListener('DOMContentLoaded', () => {
       window.addEventListener('scroll', function (e) {
         var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -269,7 +265,7 @@
         var winHeight = window.innerHeight;
         var scrollPercent = (scrollTop) / (docHeight - winHeight);
         var scroll360 = Math.round(((scrollPercent * 10) + Number.EPSILON) * 100) / 1000 * 360;
-        document.getElementById('hypercube').setAttribute('rotation', `-3.18 -${53.6 + scroll360 / 2} ${50.9 + scroll360}`);//-3.18 -53.6 50.9
+        document.getElementById('hypercube').setAttribute('rotation', `-3.18 -${53.6 + scroll360 / 2} ${50.9 + scroll360}`);
         document.getElementById('hypercube').setAttribute('position', `0 0 -${15 - (scrollPercent * 10)}`);
       });
     })
