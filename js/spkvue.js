@@ -2,13 +2,13 @@ import { createApp, toRaw } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.j
 import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
-import Popper from "/js/pop.js";
+import Popper from "/js/pop-min.js";
 import Modals from "/js/modalvue.js";
-import Marker from "/js/marker.js";
-import Ratings from "/js/ratings.js";
+import Marker from "/js/marker-min.js";
+import Ratings from "/js/ratings-min.js";
 import VueShowdownComponent from "/js/showdown.js";
 import Tagify from "/js/tagifyvue.js";
-import MDE from "/js/mde.js";
+import MDE from "/js/mde-min.js";
 import ChatVue from "/js/chatvue.js";
 import SPKVue from "/js/spk-wallet-comp.js";
 

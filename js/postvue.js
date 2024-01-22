@@ -1,5 +1,5 @@
 import Tagify from "/js/tagifyvue.js";
-import MDE from "/js/mde.js";
+import MDE from "/js/mde-min.js";
 import Bennies from "/js/bennies-min.js";
 
 export default {

@@ -4,14 +4,13 @@ export default {
       text: "",
     };
   },
-  template: `
-  <div>
-    <div v-show="!md">
-      <textarea ref="editor" v-model="text" class="form-control" rows="3"></textarea>
-      <button @click="insertAtCursor('[Alt Text](https://goto.link)')">Insert Link</button>
-      <button @click="edit()">Comment</button>
-    </div>
-    <div class="behavemark" v-html="compiledMarkdown"></div>
+  template: `<div>
+<div v-show="!md">
+<textarea ref="editor" v-model="text" class="form-control" rows="3"></textarea>
+<button @click="insertAtCursor('[Alt Text](https://goto.link)')">Insert Link</button>
+<button @click="edit()">Comment</button>
+</div>
+<div class="behavemark" v-html="compiledMarkdown"></div>
   </div>`,
   props: ["md", "author", "permlink", "toedit"],
   emits: ["settext"],

@@ -1,12 +1,7 @@
 const { Popover } = bootstrap;
 
 export default {
-  template: `
-    <div :id="id">
-        <slot>
-        </slot>
-    </div>
-        `,
+  template: `<div :id="id"><slot></slot></div>`,
   props: {
     content: {
       required: false,

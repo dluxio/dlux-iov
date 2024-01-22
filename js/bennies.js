@@ -51,7 +51,7 @@ export default {
 </tbody>
 </table>
 </div>
-</div> `,
+</div>`,
     data() {
         return {
             total: 0,

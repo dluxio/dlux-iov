@@ -3,18 +3,18 @@ import { createApp, toRaw } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.j
 import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
-import Popper from "/js/pop.js";
-import Marker from "/js/marker.js";
-import Ratings from "/js/ratings.js";
-import MDE from "/js/mde.js";
-import Replies from "/js/replies.js";
+import Popper from "/js/pop-min.js";
+import Marker from "/js/marker-min.js";
+import Ratings from "/js/ratings-min.js";
+import MDE from "/js/mde-min.js";
+import Replies from "/js/replies-min.js";
 import CardVue from "/js/cardvue.js";
 import ContractsVue from "/js/contractvue.js";
 import FilesVue from "/js/filesvue.js";
 import ExtensionVue from "/js/extensionvue.js";
 import UploadVue from "/js/uploadvue.js";
 import PostVue from "/js/postvue.js";
-import DetailVue from "/js/detailvue.js";
+import DetailVue from "/js/detailvue-min.js";
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "";

@@ -1,4 +1,4 @@
-this.version = "2024.01.22.2";
+this.version = "2024.01.22.3";
 
 console.log( "SW:" + this.version + " - online.");
 
@@ -61,7 +61,7 @@ var urlsToCache = [
   "/js/contractvue.js",
   "/js/cycler.js",
   "/js/dd.js",
-  "/js/detailvue.js",
+  "/js/detailvue-min.js",
   "/js/dexvue.js",
   "/js/drag-drop.js",
   "/js/drag-sort.js",
@@ -71,8 +71,8 @@ var urlsToCache = [
   "/js/fttransfer.js",
   "/js/img-ipfs.js",
   "/js/indexvue.js",
-  "/js/marker.js",
-  "/js/mde.js",
+  "/js/marker-min.js",
+  "/js/mde-min.js",
   "/js/modalvue.js",
   "/js/nav.js",
   "/js/navue.js",
@@ -80,11 +80,11 @@ var urlsToCache = [
   "/js/nftdetail.js",
   "/js/nftsvue.js",
   "/js/onlyhash.js",
-  "/js/pop.js",
+  "/js/pop-min.js",
   "/js/postvue.js",
   "/js/purify.min.js",
-  "/js/ratings.js",
-  "/js/replies.js",
+  "/js/ratings-min.js",
+  "/js/replies-min.js",
   "/js/scene.js",
   "/js/session.js",
   "/js/showdown.js",
@@ -95,9 +95,9 @@ var urlsToCache = [
   "/js/trading-vue.min.js",
   "/js/uploadvue.js",
   "/js/uuidv.js",
-  "/js/vote.js",
+  "/js/vote-min.js",
   "/js/vrvue.js",
-  "/js/vueme.js",
+  "/js/vueme-min.js",
   "/js/vueqr.js",
   "/new/360-gallery/index.html",
   "/new/advanced/index.html",

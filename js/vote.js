@@ -1,7 +1,7 @@
-import Marker from "/js/marker.js";
-import Ratings from "/js/ratings.js";
-import MDE from "/js/mde.js";
-import Pop from "/js/pop.js";
+import Marker from "/js/marker-min.js";
+import Ratings from "/js/ratings-min.js";
+import MDE from "/js/mde-min.js";
+import Pop from "/js/pop-min.js";
 import Bennies from "/js/bennies-min.js";
 
 export default {
@@ -12,74 +12,53 @@ export default {
         "pop-vue": Pop,
         "bennies": Bennies
       },
-  template: `
-<div>
-  <!-- vote  -->
-  <div v-show="makeVote">
-    <form id="voteForm">
-      <div class="d-flex mt-1 align-items-center text-white-50">
-        <button type="button" class="btn btn-sm me-1"
-                  :class="{'btn-success': !flag, ' btn-danger': flag}"
-                  @click="vote(post.url)" style="min-width: 85px;"><span v-if="!flag"><i class="fas fa-heart fa-fw me-1"></i></span><span v-if="flag"><i class="fa-solid fa-flag me-1"></i></span>{{flag ? '-' :
-                  ''}}{{formatNumber(slider / 100, 0,'.',',')}}%</button>
-
-        <button type="button" class="btn btn-sm btn-secondary px-1 me-1" @click="makeVote = !makeVote">
-        <i class="fa-solid fa-xmark fa-fw"></i></button>
-        <input type="range" class="form-range mx-2" step="1"
-                    max="10000" v-model="slider">
-        <span style="min-width: 100px" class="text-end text-nowrap" id="commentVal"
-                    :class="{'text-success': !flag, 'text-danger': flag}">
-                    {{toFixed(voteval *
-                    slider/10000,3)}}
-          <i class="fab fa-fw fa-hive"></i>
-        </span>
-      </div>
-    </form>
-  </div>
-  <div class="mb-3">
-  <!-- reply  -->
-    <div v-show="makeReply">
-      <mde @data="mde = $event" />
-      <div class="collapse" :id="'benes-' + post.author + '-' + post.permlink">
-          <bennies :list="bens" @update-bennies="bens=$event"></bennies>
-      </div>
-      <div class="d-flex">
-      <button class="btn btn-sm px-2 btn-secondary" data-bs-toggle="collapse" :data-bs-target="'#benes-' + post.author + '-' + post.permlink">
-        <i class="fa-solid fa-user-group fa-fw me-1"></i>Beneficiaries {{bens.length ? '(' + bens.length + ')' : ''}}<span v-if="!bens.length">+</span>
-      </button>
-        <button class="btn btn-sm px-2 btn-secondary ms-auto" @click="makeReply = !makeReply"><i class="fa-solid fa-xmark fa-fw me-1"></i>Cancel</button>
-        <button class="btn btn-sm px-2 btn-primary ms-1" @click="reply()"><i class="fa-solid fa-comment fa-fw me-1"></i>Reply</button>
-      </div>
-    </div>
-  <!-- footer buttons -->
-    <div v-if="!makeReply && !makeVote" class="d-flex mt-1">
-      <div class="d-flex align-items-center">
-        <a @click="makeVote = !makeVote; flag = false" role="button" class="no-decoration"
-              :class="{'text-primary': post.hasVoted, 'text-white-50': !post.hasVoted, 'text-danger': slider < 0 }">
-          <i class="fas fa-heart fa-fw me-1"></i><span
-              class="text-white-50">{{post.active_votes.length}}</span>
-        </a>
-        <a @click="makeVote = !makeVote; flag = true" role="button" class="ms-2 no-decoration text-white-50"
-          :class="{'text-primary': flag > 0}" >
-          <i class="fa-solid fa-flag me-1"></i><span
-            class="text-white-50">{{post.downVotes ? post.downVotes : ''}}</span>
-        </a>
-        <button class="btn px-2 btn-sm btn-light ms-2" @click="makeReply = !makeReply">Reply</button>
-        <pop-vue class="ms-1" :id="'pop-' + post.author + '-' + post.permlink"
-                          title="Post Earnings"
-                          :content="(gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') + ' HBD' : post.pending_payout_value ? post.pending_payout_value : '')"
-                          trigger="hover">
-          <button class="btn px-2 btn-sm btn-secondary">
-              {{gt(post.total_payout_value, post.pending_payout_value) ?
-              formatNumber(post.total_payout_value + ' ' +
-              post.curator_payout_value, 3, '.',',') :
-              formatNumber(post.pending_payout_value, 3, '.',',')}}<i
-              class="ms-1 fab fa-fw fa-hive"></i>
-          </button>
-        </pop-vue>
-      </div>
-    </div>
-  </div>
+  template: `<div>
+<div v-show="makeVote">
+<form id="voteForm">
+<div class="d-flex mt-1 align-items-center text-white-50">
+<button type="button" class="btn btn-sm me-1" :class="{'btn-success': !flag, ' btn-danger': flag}"
+@click="vote(post.url)" style="min-width: 85px;"><span v-if="!flag"><i class="fas fa-heart fa-fw me-1"></i></span><span v-if="flag"><i class="fa-solid fa-flag me-1"></i></span>{{flag?'-':''}}{{formatNumber(slider / 100, 0,'.',',')}}%</button>
+<button type="button" class="btn btn-sm btn-secondary px-1 me-1" @click="makeVote = !makeVote">
+<i class="fa-solid fa-xmark fa-fw"></i></button>
+<input type="range" class="form-range mx-2" step="1" max="10000" v-model="slider">
+<span style="min-width: 100px" class="text-end text-nowrap" id="commentVal" :class="{'text-success': !flag, 'text-danger': flag}">{{toFixed(voteval*slider/10000,3)}}
+<i class="fab fa-fw fa-hive"></i>
+</span>
+</div>
+</form>
+</div>
+<div class="mb-3">
+<div v-show="makeReply">
+<mde @data="mde = $event" />
+<div class="collapse" :id="'benes-' + post.author + '-' + post.permlink">
+<bennies :list="bens" @update-bennies="bens=$event"></bennies>
+</div>
+<div class="d-flex">
+<button class="btn btn-sm px-2 btn-secondary" data-bs-toggle="collapse" :data-bs-target="'#benes-' + post.author + '-' + post.permlink">
+<i class="fa-solid fa-user-group fa-fw me-1"></i>Beneficiaries {{bens.length ? '(' + bens.length + ')' : ''}}<span v-if="!bens.length">+</span>
+</button>
+<button class="btn btn-sm px-2 btn-secondary ms-auto" @click="makeReply = !makeReply"><i class="fa-solid fa-xmark fa-fw me-1"></i>Cancel</button>
+<button class="btn btn-sm px-2 btn-primary ms-1" @click="reply()"><i class="fa-solid fa-comment fa-fw me-1"></i>Reply</button>
+</div>
+</div>
+<div v-if="!makeReply && !makeVote" class="d-flex mt-1">
+<div class="d-flex align-items-center">
+<a @click="makeVote = !makeVote; flag = false" role="button" class="no-decoration" :class="{'text-primary': post.hasVoted, 'text-white-50': !post.hasVoted, 'text-danger': slider < 0 }">
+<i class="fas fa-heart fa-fw me-1"></i><span class="text-white-50">{{post.active_votes.length}}</span>
+</a>
+<a @click="makeVote = !makeVote; flag = true" role="button" class="ms-2 no-decoration text-white-50" :class="{'text-primary': flag > 0}" >
+<i class="fa-solid fa-flag me-1"></i><span class="text-white-50">{{post.downVotes ? post.downVotes : ''}}</span>
+</a>
+<button class="btn px-2 btn-sm btn-light ms-2" @click="makeReply = !makeReply">Reply</button>
+<pop-vue class="ms-1" :id="'pop-' + post.author + '-' + post.permlink" title="Post Earnings" :content="(gt(post.total_payout_value, post.pending_payout_value) ? formatNumber(post.total_payout_value + ' ' + post.curator_payout_value, 3, '.',',') + ' HBD' : post.pending_payout_value ? post.pending_payout_value : '')" trigger="hover">
+<button class="btn px-2 btn-sm btn-secondary">
+{{gt(post.total_payout_value, post.pending_payout_value)?formatNumber(post.total_payout_value + ' ' +
+post.curator_payout_value, 3, '.',','):formatNumber(post.pending_payout_value, 3, '.',',')}}<i class="ms-1 fab fa-fw fa-hive"></i>
+</button>
+</pop-vue>
+</div>
+</div>
+</div>
 </div>`,
     props: {
         post: {
