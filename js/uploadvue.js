@@ -21,7 +21,7 @@ export default {
                 </form>
             
             <div id="listOfImgs" v-for="(file, index) in File">
-                <div class="p-3 mb-3 bg-dark" style="border-radius: 10px;">
+                <div class="p-3 mb-1 card bg-darkest" style="border-radius: 10px;">
                     <div class="d-flex align-items-center flex-row pb-2 mb-2">
                         <h6 class="m-0">{{file.name}}</h6>
                         <div class="flex-grow-1 mx-5">
