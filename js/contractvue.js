@@ -180,14 +180,12 @@ export default {
                                                             :href="'#' + replace(contract.i) + 'files'">
                                                             <span class="if-collapsed">
                                                                 <button class="my-1 me-2 btn btn-sm btn-outline-light">
-                                                                    <i v-if="contract.c == 1" class="fa-solid fa-file-circle-xmark fa-fw"></i>
-                                                                    <i v-if="contract.c != 1" class="fa-solid fa-file fa-fw"></i>
+                                                                    <i class="fa-solid fa-file fa-fw"></i>
                                                                 </button>
                                                             </span>
                                                             <span class="if-not-collapsed">
                                                                 <button class="my-1 me-2 btn btn-sm btn-light">
-                                                                    <i v-if="contract.c == 1" class="fa-solid fa-file-circle-xmark fa-fw"></i>
-                                                                    <i v-if="contract.c != 1" class="fa-solid fa-file fa-fw"></i>
+                                                                    <i class="fa-solid fa-file fa-fw"></i>
                                                                 </button>
                                                             </span>
                                                         </a>
@@ -270,15 +268,15 @@ export default {
                                                     </div>
                                                 </td>
                                             </tr>
+                                            <tr class="collapse" :id="replace(contract.i) + 'files'">
+                                                <td class=" border-0" colspan="4">
+                                                    <files-vue :files="contract.df" :assets="assets" @addassets="addAssets($event)" :contract="contract.i"></files-vue>
+                                                </td>
+                                            </tr>
                                             <tr class="collapse" :id="replace(contract.i) + 'upload'">
                                                 <td class=" border-0" colspan="4">
                                                     <upload-vue :user="saccountapi" :propcontract="contract"
                                                         @tosign="toSign=$event" @done="getSpkStats()" />
-                                                </td>
-                                            </tr>
-                                            <tr class="collapse" :id="replace(contract.i) + 'files'">
-                                                <td class=" border-0" colspan="4">
-                                                    <files-vue :files="contract.df" :assets="assets" @addassets="addAssets($event)" :contract="contract.i"></files-vue>
                                                 </td>
                                             </tr>
                                             <tr class="collapse" :id="replace(contract.i) + 'beneficiary'">
@@ -364,6 +362,9 @@ export default {
                                                                         class="no-decoration text-primary">@{{acc}}</a>
                                                                 </li>
                                                             </ol>
+                                                            <button type="button" class="btn btn-sm btn-danger mt-1"
+                                                            @click="cancel_contract(contract)">
+                                                            <i class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Sever</button>
                                                         </div>
                                                     </div>
                                                 </td>

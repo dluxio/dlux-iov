@@ -2,10 +2,7 @@ export default {
     template: `
 <div>
     <div v-if="!hasFiles" class="p-3 text-center">
-        <p class="m-0 text-center">Cancel this contract?</p>
-        <button type="button" class="btn btn-sm btn-danger mt-1"
-                    @click="cancel_contract(contract)">
-                    <i class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Sever</button>
+        <p class="m-0 text-center">No files have been uploaded</p>
     </div>
     <div v-if="hasFiles">
        

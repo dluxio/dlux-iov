@@ -3,80 +3,76 @@ export default {
     <!--file uploader-->
     <Transition>
         <div v-if="contract.i">
-            <div class="p-2 card">
+            <div class="p-2 card bg-img-none">
                 <form onsubmit="return false;">
-                    <div
-                        class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 mx-2">Upload Files</h5>
-                        <div class="flex-column ms-auto me-auto">
-                            <input type="file" @change="uploadFile" multiple class="form-control" />
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 mx-2 d-none">Upload Files</h5>
+                        <div class="ms-auto me-auto">
+                            <label for="formFile" class="btn btn-lg btn-light"><i
+                                    class="fa-solid fa-file-circle-plus fa-fw me-2"></i>Select Files</label>
+                            <input class="d-none" id="formFile" type="file" multiple @change="uploadFile">
                         </div>
-                        
                     </div>
-                    <div class="p-5 my-4 mx-3 text-center" id="img-well"
-                        @drop="dragFile($event)" @dragenter.prevent
-                        @dragover.prevent>
-                        Or drag the file(s) here
+                    <div class="card-body pb-2">
+                        <div class="ms-auto me-auto py-5 text-center lead rounded"
+                            style="border-width: 2px; border-style: dashed; background-color:rgba(0,0,0,0.3);"
+                            id="img-well" @drop="dragFile($event)" @dragenter.prevent @dragover.prevent>
+                            Or drag file(s) here
+                        </div>
                     </div>
                 </form>
-            
-            <div id="listOfImgs" v-for="(file, index) in File">
-                <div class="p-3 mb-1 card bg-darkest" style="border-radius: 10px;">
-                    <div class="d-flex align-items-center flex-row pb-2 mb-2">
-                        <h6 class="m-0">{{file.name}}</h6>
-                        <div class="flex-grow-1 mx-5">
-                            <div class="progress" role="progressbar"
-                                aria-label="Upload progress" aria-valuenow="25"
-                                aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar"
-                                    :style="'width: ' + file.progress + '%'">
-                                    {{file.progress}}%
+                <div v-if="File.length">
+                    <div class="card-body pt-0">
+                        <div id="listOfImgs" v-for="(file, index) in File">
+                            <div class="p-3 mb-2 card bg-darkest" style="border-radius: 10px;">
+                                <div class="d-flex align-items-center flex-row pb-2 mb-2">
+                                    <h6 class="m-0">{{file.name}}</h6>
+                                    <div class="flex-grow-1 mx-5">
+                                        <div class="progress" role="progressbar" aria-label="Upload progress"
+                                            aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                                            <div class="progress-bar" :style="'width: ' + file.progress + '%'">
+                                                {{file.progress}}%
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex-shrink" v-if="File.length">
+                                        <button type="button" class="me-2 btn btn-secondary" v-if="file.actions.pause"
+                                            @click="fileRequest[index].resumeFileUpload()">Pause</button>
+                                        <button type="button" class="me-2 btn btn-secondary" v-if="file.actions.resume"
+                                            @click="fileRequest[index].resumeFileUpload()">Resume</button>
+                                        <button type="button" class="me-2 btn btn-secondary" v-if="file.actions.cancel"
+                                            @click="fileRequest[index].resumeFileUpload()">Cancel</button>
+                                    </div>
+                                    <div class="ms-auto">
+                                        <button class="btn btn-danger" @click="deleteImg(index, file.name)"
+                                            data-toggle="tooltip" data-placement="top" title="Delete Asset"><i
+                                                class="fas fa-fw fa-trash-alt"></i></button>
+                                    </div>
+                                </div>
+                                <div class="d-flex w-100">
+                                    <ul class="text-start w-100">
+                                        <li class="">Bytes: {{file.size}}</li>
+                                        <li class="">CID:
+                                            {{FileInfo[file.name].hash}}</li>
+                                        <li class="">Status:
+                                            {{FileInfo[file.name].status}}
+                                        </li>
+                                        <li class=""><a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
+                                                target="_blank">{{FileInfo[file.name].hash}}<i
+                                                    class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex-shrink" v-if="File.length">
-                            <button type="button" class="me-2 btn btn-secondary"
-                                v-if="file.actions.pause"
-                                @click="fileRequest[index].resumeFileUpload()">Pause</button>
-                            <button type="button" class="me-2 btn btn-secondary"
-                                v-if="file.actions.resume"
-                                @click="fileRequest[index].resumeFileUpload()">Resume</button>
-                            <button type="button" class="me-2 btn btn-secondary"
-                                v-if="file.actions.cancel"
-                                @click="fileRequest[index].resumeFileUpload()">Cancel</button>
-                        </div>
-                        <div class="ms-auto">
-                            <button class="btn btn-danger"
-                                @click="deleteImg(index, file.name)"
-                                data-toggle="tooltip" data-placement="top"
-                                title="Delete Asset"><i
-                                    class="fas fa-fw fa-trash-alt"></i></button>
-                        </div>
                     </div>
-                    <div class="d-flex w-100">
-                        <ul class="text-start w-100">
-                            <li class="">Bytes: {{file.size}}</li>
-                            <li class="">CID:
-                                {{FileInfo[file.name].hash}}</li>
-                            <li class="">Status:
-                                {{FileInfo[file.name].status}}
-                            </li>
-                            <li class=""><a
-                                    :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
-                                    target="_blank">{{FileInfo[file.name].hash}}<i
-                                        class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a>
-                            </li>
-                        </ul>
+                    <div class="card-footer d-flex">
+                        <button type="button" class="ms-auto me-auto mt-2 btn btn-lg btn-info" :disabled="ready" @click="signNUpload()"><i
+                                class="fa-solid fa-file-signature fa-fw me-2"></i>Sign and Upload</button>
                     </div>
                 </div>
             </div>
-            <div v-if="File.length" class="text-center">
-                <button type="button" class="btn btn-info mb-2" :disabled="ready"
-                    @click="signNUpload()"><i
-                        class="fa-solid fa-file-signature fa-fw me-2"></i>Sign and Upload</button>
-            </div>
         </div>
-      </div>
     </Transition>
    `,
 props: {
