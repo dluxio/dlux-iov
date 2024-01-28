@@ -19,7 +19,7 @@ export default {
                         Or drag the file(s) here
                     </div>
                 </form>
-            </div>
+            
             <div id="listOfImgs" v-for="(file, index) in File">
                 <div class="p-3 mb-3 bg-dark" style="border-radius: 10px;">
                     <div class="d-flex align-items-center flex-row pb-2 mb-2">
@@ -76,6 +76,7 @@ export default {
                         class="fa-solid fa-file-signature fa-fw me-2"></i>Sign and Upload</button>
             </div>
         </div>
+      </div>
     </Transition>
    `,
 props: {

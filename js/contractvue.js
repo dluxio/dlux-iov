@@ -180,12 +180,14 @@ export default {
                                                             :href="'#' + replace(contract.i) + 'files'">
                                                             <span class="if-collapsed">
                                                                 <button class="my-1 me-2 btn btn-sm btn-outline-light">
-                                                                    <i class="fa-solid fa-file fa-fw"></i>
+                                                                    <i v-if="contract.c == 1" class="fa-solid fa-file-circle-xmark fa-fw"></i>
+                                                                    <i v-if="contract.c != 1" class="fa-solid fa-file fa-fw"></i>
                                                                 </button>
                                                             </span>
                                                             <span class="if-not-collapsed">
                                                                 <button class="my-1 me-2 btn btn-sm btn-light">
-                                                                    <i class="fa-solid fa-file fa-fw"></i>
+                                                                    <i v-if="contract.c == 1" class="fa-solid fa-file-circle-xmark fa-fw"></i>
+                                                                    <i v-if="contract.c != 1" class="fa-solid fa-file fa-fw"></i>
                                                                 </button>
                                                             </span>
                                                         </a>
