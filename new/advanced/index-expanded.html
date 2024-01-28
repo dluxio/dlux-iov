@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en" class="h-100">
+
+<head>
+    <title>DLUX dApp Uploader</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/img/dlux-icon-192.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="DLUX">
+    <meta name="theme-color" content="#111222" />
+    <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
+    <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
+    <!-- Markdown -->
+    <script src="https://unpkg.com/showdown@1.x/dist/showdown.min.js"></script>
+    <link href="/css/smde.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+    <!-- Marked -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/js/purify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked-linkify-it/lib/index.umd.js"></script>
+    <!-- Tagify -->
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
+    <!-- Bootstrap -->
+    <!--<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">-->
+    <!-- Upload Scripts -->
+    <script type="text/javascript" src="/js/onlyhash.js"></script>
+    <script src="/js/buffer.js"></script>
+    <script src="/js/drag-drop.js"></script>
+	<script>
+        var activeWorker = 0;
+        if ('serviceWorker' in navigator) {navigator.serviceWorker.register('/sw.js')
+            .then(reg => {
+                console.log('Registration succeeded. Scope is ' + reg.scope);
+                activeWorker = reg.active;
+            })
+        }
+        marked.use(markedLinkifyIt({
+            '@': {
+                validate: function (text, pos, self) {
+                    var tail = text.slice(pos);
+
+                    if (!self.re.hive) {
+                        self.re.hive = new RegExp(
+                            '^([a-z0-9\.\-]){1,16}(?!_)(?=$|' + self.re.src_ZPCc + ')'
+                        );
+                    }
+                    if (self.re.hive.test(tail)) {
+                        if (pos >= 2 && tail[pos - 2] === '@') {
+                            return false;
+                        }
+                        return tail.match(self.re.hive)[0].length;
+                    }
+                    return 0;
+                },
+                normalize: function (match) {
+                    if (match.url.endsWith('.')) {
+                        match.url = match.url.substring(0, match.url.length - 1);
+                    }
+                    match.url = '/@' + match.url.replace(/^@/, '');
+                }
+            }
+        }, {}));
+    </script>
+    <!-- Vue Controller -->
+    <script type="module" src="/js/vueme-min.js"></script>
+    <link href="/css/custom.css" rel="stylesheet" />
+    <style>
+        .form-switch.form-switch-lg .form-check-input {
+            height: 2rem;
+            width: calc(3rem + 0.75rem);
+            border-radius: 4rem;
+        }
+
+        .accordion {
+            --bs-accordion-color: rgb(173, 181, 189);
+            --bs-accordion-bg: #212529;
+            --bs-accordion-border-color: #495057;
+            --bs-accordion-btn-color: #5C94FE;
+            --bs-accordion-btn-bg: #2f3133;
+            --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%235C94FE'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+            --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%235C94FE'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+            --bs-accordion-active-color: #5C94FE;
+            --bs-accordion-active-bg: #001D4C;
+
+        }
+
+        .selected-div {
+            background: #434851;
+            border: 0;
+        }
+
+        .hover-div:hover {
+            background: #434851;
+        }
+
+        .v-enter-active,
+        .v-leave-active {
+            transition: opacity .0s ease;
+        }
+
+        .scroll {
+            padding-top: 70px;
+            padding-bottom: 20px;
+        }
+
+        @media (min-width: 1200px) {
+            .scroll {
+                overflow-y: scroll;
+                height: 100%;
+
+            }
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        iframe img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .v-enter-from,
+        .v-leave-to {
+            opacity: 0;
+        }
+
+        [data-bs-toggle="collapse"].collapsed .if-not-collapsed {
+            display: none;
+        }
+
+        [data-bs-toggle="collapse"]:not(.collapsed) .if-collapsed {
+            display: none;
+        }
+
+        #img-well {
+            color: #0041C3;
+            background: #d9f7fc;
+            border-style: solid;
+            border-radius: 10px;
+            border-width: 5px;
+            border-color: #0041C3;
+        }
+
+        #img-well.drag {
+            background: #8ED2C9;
+        }
+
+        .overlay {
+            z-index: 1;
+            background-color: transparent;
+        }
+
+        .frame-360 {
+            position: relative;
+            z-index: 0;
+        }
+    </style>
+
+</head>
+
+<body class="d-flex flex-column text-center text-white">
+    <div id="app">
+        <div>
+            <nav-vue @login="account = $event;newme($event)" @logout="account = '';removeUser()" @ack="removeOp($event)"
+                @refresh="run($event)" :op="toSign" :lapi="lapi" />
+        </div>
+        <main role="main" class="">
+
+
+            <div class="row ms-auto me-auto w-100" style="height: 100vh;">
+                <div class="text-center" style="margin-top: 94px;">
+                    <h1 class="mt-3 mb-3 text-center display-4"><i class="fa-solid fa-globe me-2"></i>dApp Uploader</h1>
+                </div>
+                <div class="dropdown">
+                    <a class="btn btn-outline-secondary dropdown-toggle" role="button" id="postdApp"
+                      data-bs-toggle="dropdown" aria-expanded="false">
+                      Post dApp ({{postCustom_json.vrHash}})
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark bg-black" aria-labelledby="postdApp">
+                      <li><a class="dropdown-item" role="button" @click="postCustom_json.vrHash = 'Qma4dk3mWP325HrHYBDz3UdL9h1A6q8CSvZdc8JhqfgiMp'">360 Image Viewer(1.5.0)</a></li>
+                      <li><a class="dropdown-item" role="button" @click="postCustom_json.vrHash = '';//setUploader('video')">Video</a></li>
+                      <li><a class="dropdown-item" role="button" @click="postCustom_json.vrHash = '';//setUploader('byo')">BYOdApp</a></li>
+                      <li><a class="dropdown-item" role="button" @click="postCustom_json.vrHash = '';//setUploader('upcycle')">ReMix dApp</a></li>
+                    </ul>
+                  </div>
+                <div class="col-xl-6 pt-0 pb-0 px-0 px-md-1 scroll">
+                    <h3 class="d-none">Build</h3>
+                    <div class="accordion text-start bg-blur-darkg rounded" id="360accordion">
+                        <div class="accordion-item bg-img-none">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button show" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#executedContracts" aria-expanded="false"
+                                    aria-controls="executedContracts">
+                                    SPK Hosting
+                                </button>
+                            </h2>
+                            <div id="executedContracts" class="accordion-collapse collapse show">
+                                <div class="accordion-body p-0">
+                                    <contract-vue :nodeview="false" :account="account" @tosign="toSign=$event" @bens="addBens($event)" :postpage="true"
+                                        :prop_contracts="contracts" :assets="true" @addasset="addAsset($event)"></contract-vue>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item bg-img-none">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#assetManager" aria-expanded="false" aria-controls="assetManager">
+                                    Asset Manager
+                                </button>
+                            </h2>
+                            <div id="assetManager" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <!-- Asset Manager -->
+                                    <assets-vue :assets="postCustom_json.assets" @updateassets="postCustom_json.assets = $event;dluxMock()" @setdapp="postCustom_json.vrHash = $event" types="ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item bg-img-none">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#postDetails" aria-expanded="false" aria-controls="postDetails">
+                                    Post Details
+                                </button>
+                            </h2>
+                            <div id="postDetails" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <post-vue :account="account" :prop_json="postCustom_json" :prop_bens="postBens" @tosign="toSign=$event"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-xl-6 pt-0 px-0 px-md-1 scroll">
+                    <h3 class="d-none">Preview</h3>
+                    <div class="accordion bg-blur-darkg rounded" id="previewCol">
+                        <div class="accordion-item bg-img-none">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" :disabled="!postCustom_json.vrHash"
+                                    data-bs-target="#preview360" aria-expanded="true" aria-controls="preview360">
+                                    DLUX dApp Preview {{postCustom_json.vrHash ? '' : '(Select a dApp)'}}
+                                </button>
+                            </h2>
+                            <div id="preview360" v-if="postCustom_json.vrHash" class="accordion-collapse collapse show">
+                                <div class="accordion-body p-0">
+                                    <div class="position-relative">
+                                        <div
+                                            class="d-flex w-100 justify-content-end align-items-center p-2 overlay position-absolute top-0 start-50 translate-middle-x">
+
+                                            <div class="form-check form-switch  form-switch-lg me-2">
+                                                <input class="form-check-input bg-blur-darkg" type="checkbox"
+                                                    role="switch" id="flexSwitchCheckChecked" v-model="showLine"
+                                                    title="Horizon Line">
+                                            </div>
+                                            <button class="btn btn-dark bg-blur-darkg border-0" title="Reset Camera"
+                                                @click="resetCamera()"><i
+                                                    class="fa-solid fa-camera-rotate"></i></button>
+                                        </div>
+
+                                        <hr style="border: 5px solid red;" :class="{'invisible': !showLine}"
+                                            class="overlay m-0 w-100 position-absolute top-50 start-0 translate-middle-y" />
+                                        <div class="ratio ratio-1x1 frame-360">
+                                            <iframe ref="aframePreview" id="aframePreview"
+                                                :src="'https://ipfs.dlux.io/ipfs/' + postCustom_json.vrHash" frameborder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowfullscreen></iframe>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- SPK Wallet Modal -->
+            <div class="modal modal-xl fade" id="spkWalletModal" tabindex="-1" aria-labelledby="spkWalletModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="spkWalletModalLabel">SPK Testnet Wallet</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <spk-vue node="false" :account="account" @tosign="toSign=$event;log($event)" />
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sponsored Contract -->
+            <div class="modal fade" id="sponsoredModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content bg-darker text-white">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Sponsored Contracts</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body text-start">
+                            <div v-for="spon in services">
+                                <button :disabled="spon.channel" @click="petitionForContract(spon.provider)"
+                                    class="btn btn-lg text-white btn-outline-primary w-100 border d-flex justify-content-between align-items-center"><span
+                                        class="lead">@{{spon.provider}}</span><span
+                                        class="small text-warning">{{spon.memo}}</span></button>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <!-- Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+        integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"
+        integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V"
+        crossorigin="anonymous"></script>
+    <script>function deepLink(link) {}</script>
+
+</body>
+
+</html>
