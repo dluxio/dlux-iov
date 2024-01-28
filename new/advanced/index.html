@@ -187,7 +187,7 @@
                       Post Type <span v-cloak>({{postCustom_json.vrHash}})</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-dark bg-black" aria-labelledby="postdApp">
-                      <li><a class="dropdown-item" role="button" @click="postCustom_json.vrHash = 'Qma4dk3mWP325HrHYBDz3UdL9h1A6q8CSvZdc8JhqfgiMp';types='ts'">360 Image Viewer</a></li>
+                      <li><a class="dropdown-item" role="button" @click="postCustom_json.vrHash = 'Qma4dk3mWP325HrHYBDz3UdL9h1A6q8CSvZdc8JhqfgiMp';types='ts,img'">360 Image Viewer</a></li>
                       <li><a class="dropdown-item" role="button" @click="postCustom_json.vrHash = '';types='img,vid'">Video</a></li>
                       <li><a class="dropdown-item" role="button" @click="postCustom_json.vrHash = '';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'">BYOdApp</a></li>
                       <li><a class="dropdown-item" role="button" @click="postCustom_json.vrHash = '';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'">ReMix dApp</a></li>
@@ -221,7 +221,7 @@
                             <div id="assetManager" class="accordion-collapse collapse">
                                 <div class="accordion-body">
                                     <!-- Asset Manager -->
-                                    <assets-vue :assets="postCustom_json.assets" @updateassets="postCustom_json.assets = $event;dluxMock()" @setdapp="postCustom_json.vrHash = $event" types="ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt"/>
+                                    <assets-vue :assets="postCustom_json.assets" @updateassets="postCustom_json.assets = $event;dluxMock()" @setdapp="postCustom_json.vrHash = $event" :types="types"/>
                                 </div>
                             </div>
                         </div>
