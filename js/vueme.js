@@ -163,7 +163,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
       ],
       scripts: {},
       nftscripts: {},
-      types: 'ts',
+      types: 'ts,img',
       baseScript: {},
       NFTs: [],
       rNFTs: [],
