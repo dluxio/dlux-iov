@@ -362,10 +362,10 @@ export default {
                                                                         class="no-decoration text-primary">@{{acc}}</a>
                                                                 </li>
                                                             </ol>
-                                                            <button type="button" class="btn btn-sm btn-danger mt-1"
+                                                        </div>
+                                                        <button type="button" class="btn btn-sm btn-danger mt-1"
                                                             @click="cancel_contract(contract)">
                                                             <i class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Sever</button>
-                                                        </div>
                                                     </div>
                                                 </td>
                                             </tr>
