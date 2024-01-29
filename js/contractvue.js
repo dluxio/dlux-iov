@@ -30,20 +30,21 @@ export default {
     <!-- tabs nav -->
 <div v-if="saccountapi.pubKey != 'NA'" class="d-flex flex-column w-100">
     <ul class="nav nav-pills ms-auto me-auto mb-2">
+        
         <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#filesTab" role="tab"
-            data-bs-toggle="tab" aria-controls="filestab" aria-expanded="true"><i
-                    class="fa-solid fa-cloud fa-fw"></i></a>
+            <a class="nav-link active" href="#contractsTab" role="tab"
+            data-bs-toggle="tab" aria-controls="contractstab" aria-expanded="true"><i class="fa-solid fa-list fa-fw"></i></a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#contractsTab" role="tab"
-            data-bs-toggle="tab" aria-controls="contractstab" aria-expanded="false"><i class="fa-solid fa-cloud-arrow-up fa-fw"></i></a>
+            <a class="nav-link " aria-current="page" href="#filesTab" role="tab"
+            data-bs-toggle="tab" aria-controls="filestab" aria-expanded="false"><i
+                    class="fa-solid fa-cloud fa-fw"></i></a>
         </li>
     </ul>
 <!-- tabs -->
 <div class="tab-content bg-color">
     <!-- files -->
-    <div role="tabpanel" class="tab-pane show active" id="filesTab" aria-labelledby="filestab">
+    <div role="tabpanel" class="tab-pane" id="filesTab" aria-labelledby="filestab">
     <!-- no files -->
     <div v-if="hasFiles" class="ms-auto me-auto text-center">
         <div class="ms-auto me-auto card px-3 py-2 mt-3 mb-4 bg-darker" style="max-width: 600px">
@@ -65,7 +66,7 @@ export default {
         </div>
     </div>
     <!-- contracts -->
-    <div role="tabpanel" class="tab-pane" id="contractsTab" aria-labelledby="contractstab">
+    <div role="tabpanel" class="tab-pane show active" id="contractsTab" aria-labelledby="contractstab">
         <!-- top menu -->
         <div class="card-header mb-2 d-flex flex-wrap justify-content-center align-items-center">
             <h2 class="my-1 ms-lg-3 fw-light text-start">{{title}}</h2>
