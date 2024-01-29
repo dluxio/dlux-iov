@@ -987,8 +987,8 @@ export default {
 
         <!-- USER MENU -->
 	      <ul class="navbar-nav" v-if="user" id="userMenu">
-          <li class="nav-item d-flex align-items-center d-none"><a class="nav-link" href="/new/"><i class="fa-solid fa-plus fa-fw me-1"></i></a></li>
-          <li class="nav-item d-flex align-items-center">
+          <li class="nav-item d-flex align-items-center"><a class="nav-link" href="/new/advanced"><i class="fa-solid fa-plus fa-fw me-1"></i></a></li>
+          <li class="nav-item d-flex align-items-center d-none">
             <a class="nav-link" role="button" @click="toggleChat" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSting" aria-controls="offcanvasSting">
               <img src="/img/sting_white.svg" alt="" width="30" height="30" class="img-fluid me-md-2">
             </a>
@@ -1007,6 +1007,11 @@ export default {
           <span id="userName" class="mx-1 d-none d-md-flex">{{user}}</span>
           </a>
           <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black mt-2" aria-labelledby="userDropdown" >
+          <li class="">
+            <a class="dropdown-item" role="button" @click="toggleChat" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSting" aria-controls="offcanvasSting">
+              <img src="/img/sting_white.svg" alt="" width="20" height="20" class="img-fluid me-md-2">Chat
+            </a>
+          </li>
 			        <li class=""><a class="dropdown-item" :href="'/me#blog/'" @click="showTab('blog')"><i class="fas fa-user fa-fw me-2"></i>Profile</a></li>
 			        <li class=""><a class="dropdown-item" :href="'/me#wallet/'" @click="showTab('wallet')"><i class="fas fa-wallet fa-fw me-2"></i>Wallet</a></li>
 			        <li class=""><a class="dropdown-item" :href="'/me#inventory/'" @click="showTab('inventory')"><i class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>

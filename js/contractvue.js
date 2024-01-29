@@ -17,7 +17,7 @@ export default {
     template: `
 <div class="d-flex justify-content-center p-2">
 <!-- register account -->
-            <div v-if="saccountapi.pubKey == 'NA'">
+            <div v-if="saccountapi.pubKey == 'NA'" class="d-flex">
                 <div class="d-flex justify-content-center p-3">
                     <div class="text-center" style="max-width: 600px;">
                         <p class="lead">Join the SPK Network to store your files on IPFS</p>
@@ -28,38 +28,46 @@ export default {
                 </div>
             </div>
     <!-- tabs nav -->
-<div v-if="saccountapi.pubKey != 'NA'">
-    <ul class="nav nav-pills ms-auto me-auto">
+<div v-if="saccountapi.pubKey != 'NA'" class="d-flex flex-column w-100">
+    <ul class="nav nav-pills ms-auto me-auto mb-2">
         <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="#filesTab" role="tab"
             data-bs-toggle="tab" aria-controls="filestab" aria-expanded="true"><i
-                    class="fa-solid fa-file-image fa-fw"></i></a>
+                    class="fa-solid fa-cloud fa-fw"></i></a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="#contractsTab" role="tab"
-            data-bs-toggle="tab" aria-controls="contractstab" aria-expanded="false"><i class="fa-solid fa-list fa-fw"></i></a>
+            data-bs-toggle="tab" aria-controls="contractstab" aria-expanded="false"><i class="fa-solid fa-cloud-arrow-up fa-fw"></i></a>
         </li>
     </ul>
-</div>
-
 <!-- tabs -->
 <div class="tab-content bg-color">
     <!-- files -->
     <div role="tabpanel" class="tab-pane show active" id="filesTab" aria-labelledby="filestab">
-
-        <div class="d-flex flex-wrap justify-content-center">
+    <!-- no files -->
+    <div v-if="hasFiles" class="ms-auto me-auto text-center">
+        <div class="ms-auto me-auto card px-3 py-2 mt-3 mb-4 bg-darker" style="max-width: 600px">
+            <h2 class="fw-light mt-1">No files found</h2>
+            <p class="lead mb-1" v-if="!nodeview">
+                Click <a class="btn btn-sm btn-primary no-decoration small"
+                        style="font-size: 0.6em;" role="button" data-bs-toggle="tab"
+                        href="#contractsTab"><i class="fa-solid fa-list fa-fw me-1"></i>Contracts Tab
+                        </a> to upload files
+            </p>
+        </div>
+    </div>
+    <!-- has files -->
+        <div v-if="!hasFiles" class="d-flex flex-wrap justify-content-center">
             <div class="d-flex flex-wrap justify-content-center" v-for="contract in contracts">
                 <files-vue :files="contract.df" :assets="assets" @addassets="addAssets($event)"
                     :contract="contract.i"></files-vue>
             </div>
         </div>
     </div>
-
     <!-- contracts -->
     <div role="tabpanel" class="tab-pane" id="contractsTab" aria-labelledby="contractstab">
-
         <!-- top menu -->
-        <div class="mb-2 d-flex flex-wrap justify-content-center align-items-center">
+        <div class="card-header mb-2 d-flex flex-wrap justify-content-center align-items-center">
             <h2 class="my-1 ms-lg-3 fw-light text-start">{{title}}</h2>
             <div class="d-flex flex-wrap flex-grow-1 ms-lg-3">
                 <!-- tools 1 -->
@@ -108,7 +116,6 @@ export default {
             </div>
         </div>
         <div class="card-body p-0">
-            
             <!-- registered -->
             <div v-if="saccountapi.pubKey != 'NA'">
                 <!-- no contracts -->
