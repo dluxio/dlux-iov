@@ -15,8 +15,20 @@ export default {
         "post-vue": PostVue
     },
     template: `
-<div class="card-head d-flex p-2">
+<div class="d-flex justify-content-center p-2">
+<!-- register account -->
+            <div v-if="saccountapi.pubKey == 'NA'">
+                <div class="d-flex justify-content-center p-3">
+                    <div class="text-center" style="max-width: 600px;">
+                        <p class="lead">Join the SPK Network to store your files on IPFS</p>
+                        <button type="button" class="btn btn-primary" @click="updatePubkey">
+                            Register Account
+                        </button>
+                    </div>
+                </div>
+            </div>
     <!-- tabs nav -->
+<div v-if="saccountapi.pubKey != 'NA'">
     <ul class="nav nav-pills ms-auto me-auto">
         <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="#filesTab" role="tab"
@@ -51,7 +63,7 @@ export default {
             <h2 class="my-1 ms-lg-3 fw-light text-start">{{title}}</h2>
             <div class="d-flex flex-wrap flex-grow-1 ms-lg-3">
                 <!-- tools 1 -->
-                <div v-if="saccountapi.pubKey != 'NA'" class="d-flex mb-1 flex-wrap ms-auto order-lg-last">
+                <div class="d-flex mb-1 flex-wrap ms-auto order-lg-last">
                     <div class="d-flex flex-wrap justify-content-center ms-auto me-auto">
                         <!-- new contract button -->
                         <button v-if="saccountapi.pubKey != 'NA' && saccountapi.spk_power" type="button"
@@ -96,19 +108,7 @@ export default {
             </div>
         </div>
         <div class="card-body p-0">
-            <!-- register account -->
-            <div v-if="saccountapi.pubKey == 'NA'">
-                <div class="d-flex justify-content-center p-3">
-                    <div class="text-center" style="max-width: 600px;">
-                        <p class="lead">Activate the ability for your account to create and
-                            manage
-                            file storage contracts.</p>
-                        <button type="button" class="btn btn-primary mb-3" @click="updatePubkey">
-                            Register Account
-                        </button>
-                    </div>
-                </div>
-            </div>
+            
             <!-- registered -->
             <div v-if="saccountapi.pubKey != 'NA'">
                 <!-- no contracts -->
@@ -426,6 +426,7 @@ export default {
             </div>
         </div>
     </div>
+</div>
 </div>
 `,
     props: {
