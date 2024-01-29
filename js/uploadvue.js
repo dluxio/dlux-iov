@@ -25,8 +25,10 @@ export default {
                     <div class="card-body pt-0">
                         <div id="listOfImgs" v-for="(file, index) in File">
                             <div class="p-3 mb-2 card bg-darkest" style="border-radius: 10px;">
-                                <div class="d-flex align-items-center flex-row pb-2 mb-2">
-                                    <h6 class="m-0">{{file.name}}</h6>
+                                <div class="d-flex flex-wrap align-items-center pb-2 mb-2">
+                                  <div>
+                                    <h6 class="m-0 text-break">{{file.name}}</h6>
+                                  </div>
                                     <div class="flex-grow-1 mx-5">
                                         <div class="progress" role="progressbar" aria-label="Upload progress"
                                             aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
