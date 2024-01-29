@@ -15,7 +15,7 @@ export default {
         "post-vue": PostVue
     },
     template: `
-<div class="d-flex justify-content-center p-2">
+<div class="d-flex justify-content-center mt-2">
 <!-- register account -->
             <div v-if="saccountapi.pubKey == 'NA'" class="d-flex">
                 <div class="d-flex justify-content-center p-3">
