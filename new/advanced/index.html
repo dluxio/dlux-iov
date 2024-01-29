@@ -201,7 +201,18 @@
                         <li></li>
                     </ul>
                 </div>
-
+                <!-- video -->
+                <div v-if="postCustom_json.vrHash == 'video'" class="text-center">
+                    <div> download ffmpeg (30 MB) <button class="btn btn-success">Download</button></div>
+                    <div>drag and drop your video</div>
+                    <div>transcode your video <button class="btn btn-primary">Transcode</button></div>
+                    <div>Get a SPK contract</div>
+                    <div>Sign and upload to SPK</div>
+                    <div>Compose post</div>
+                    <div>Publish</div>
+                </div>
+                <!-- 360 -->
+                <div v-if="postCustom_json.vrHash == 'Qma4dk3mWP325HrHYBDz3UdL9h1A6q8CSvZdc8JhqfgiMp'">
                 <!-- toggle buttons -->
                 <div class="d-flex justify-content-center">
                     <!-- url button -->
