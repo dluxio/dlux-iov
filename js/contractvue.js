@@ -35,8 +35,8 @@ export default {
     <!-- files -->
     <div role="tabpanel" class="tab-pane show active" id="filesTab" aria-labelledby="filestab">
 
-        <div class="d-flex flex-wrap justify-content-between">
-            <div class="d-flex flex-wrap justify-content-between" v-for="contract in contracts">
+        <div class="d-flex flex-wrap justify-content-center">
+            <div class="d-flex flex-wrap justify-content-center" v-for="contract in contracts">
                 <files-vue :files="contract.df" :assets="assets" @addassets="addAssets($event)"
                     :contract="contract.i"></files-vue>
             </div>

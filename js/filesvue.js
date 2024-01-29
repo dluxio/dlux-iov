@@ -8,7 +8,7 @@ export default {
                 <span class="text-break small text-muted">{{file}}</span>
             </div>
         </a>
-        <div class="card-footer text-center border-0" v-if="assets">
+        <div class="card-footer mt-auto text-center border-0" v-if="assets">
             <button type="button" class="btn btn-primary" @click="addAsset(file, contract)"><i
                 class="fa-solid fa-square-plus me-2"></i>Add</button>
         </div>
