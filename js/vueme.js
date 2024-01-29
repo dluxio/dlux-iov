@@ -966,6 +966,8 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
                   if(current_contract == "Not found"){
                     const dict = {hash, index:i, size: event.currentTarget.File.size, name: event.currentTarget.File.name}
                     this.FileInfo[dict.name] = dict
+                  } else {
+                    alert("File already uploaded")
                   }
                 break
               }
