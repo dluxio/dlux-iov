@@ -304,7 +304,7 @@ export default {
                                                     </td>
                                                 </tr>
                                                 <tr class="collapse" :id="replace(contract.i) + 'files'">
-                                                    <td class=" border-0" colspan="4">
+                                                    <td class="d-flex border-0" colspan="4">
                                                         <files-vue :files="contract.df" :assets="assets"
                                                             @addassets="addAssets($event)"
                                                             :contract="contract.i"></files-vue>
