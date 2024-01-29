@@ -953,14 +953,20 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
                 this.File[i].name == event.currentTarget.File.name
                 && this.File[i].size == event.currentTarget.File.size
               ) {
-                Hash.of(fileContent).then((hash) => {
-                  const dict = {hash, index:i, size: event.currentTarget.File.size, name: event.currentTarget.File.name, path:e.target.id, progress: '..........'}
-                  this.FileInfo[dict.name] = dict
-                  // this.File[i].md5 = hash;
-                  // this.File[i].blob = new Blob([fileContent], event.currentTarget.File.name)
-                  const file = this.File[i];
-                  this.File.splice(i, 1, file);
-                });
+                // Hash.of(fileContent).then((hash) => {
+
+                //   const dict = {hash, index:i, size: event.currentTarget.File.size, name: event.currentTarget.File.name, path:e.target.id, progress: '..........'}
+                //   this.FileInfo[dict.name] = dict
+                //   const file = this.File[i];
+                //   this.File.splice(i, 1, file);
+                // });
+                Hash.of(fileContent).then(async (hash)=>{
+                  var current_contract = "Not found"
+                  current_contract = {result} = await fetch(`https://spktest.dlux.io/api/file/${hash}`)
+                  if(current_contract == "Not found"){
+                    const dict = {hash, index:i, size: event.currentTarget.File.size, name: event.currentTarget.File.name}
+                    this.FileInfo[dict.name] = dict
+                  }
                 break
               }
             }
@@ -984,13 +990,13 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
               this.File[i].name == event.currentTarget.File.name
               && this.File[i].size == event.currentTarget.File.size
             ) {
-              Hash.of(fileContent).then(hash=>{
-                const dict = {hash, index:i, size: event.currentTarget.File.size, name: event.currentTarget.File.name}
-                this.FileInfo[dict.name] = dict
-                // this.File[i].md5 = hash 
-                // this.File[i].blob = fileContent; 
-                // const file = this.File[i];
-                //  this.File.splice(i, 1, file);
+              Hash.of(fileContent).then(async (hash)=>{
+                var current_contract = "Not found"
+                current_contract = {result} = await fetch(`https://spktest.dlux.io/api/file/${hash}`)
+                if(current_contract == "Not found"){
+                  const dict = {hash, index:i, size: event.currentTarget.File.size, name: event.currentTarget.File.name}
+                  this.FileInfo[dict.name] = dict
+                }
               })
               break
             }
