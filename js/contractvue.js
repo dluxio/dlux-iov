@@ -451,10 +451,6 @@ export default {
             default: false,
             required: false
         },
-        contract: {
-            type: String,
-            default: "",
-        },
         title: {
             default: 'Storage Contracts',
             required: false
