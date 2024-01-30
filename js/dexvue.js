@@ -484,8 +484,9 @@ var app = new Vue({
         };
       else alert("Account Not Found");
     },
-    bcalc(k) {
-      switch (k) {
+    bcalc(k, w = false) {
+      if(!w)setTimeout(() => this.bcalc(k, true), 1000);
+      else switch (k) {
         case "t":
           //this.buyQuantity = parseFloat(this.buyQuantity);
           if (this.bform.cl) {
@@ -546,8 +547,9 @@ var app = new Vue({
     localStoreSet(k, v) {
       localStorage.setItem(k, v);
     },
-    scalc(k) {
-      switch (k) {
+    scalc(k, w = false) {
+      if(!w)setTimeout(() => this.scalc(k, true), 1000);
+      else switch (k) {
         case "t":
           this.sellQuantity = parseFloat(this.sellQuantity);
           if (this.sform.cl) {
