@@ -67,14 +67,15 @@
 
 </head>
 
-<body class="d-flex flex-column h-100" style="padding-top: 150px;" id="explore">
-    <div id="app">
+<body class="d-flex h-100 align-items-stretch text-white" id="explore">
+    <div id="app"class="d-flex w-100 flex-column w-100">
+        <!-- navbar -->
         <div>
             <nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event);getSPKUser($event)"
                 @logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
                 :lapi="lapi" />
         </div>
-        <main role="main" class="flex-shrink-0" v-cloak>
+        <main role="main" class="mb-auto" style="margin-top: 150px;" v-cloak>
 
             <!-- app options -->
             <div class="container-fluid fixed-top px-0" style="margin-top: 94px; z-index: 900;">
@@ -174,6 +175,18 @@
 
             <!--main view-->
             <div class="row w-100 m-auto">
+                <div v-if="displayPosts.length == 0" class="d-flex my-3">
+                    <div class="card mx-auto" style="max-width: 600px;">
+                        <div class="card-body text-center">
+                            <div style="font-size: 10em;" class="text-white-50 ">
+                                <i class="fa-solid fa-panorama position-relative">
+                                <span style="font-size: .3em;" class="px-1 py-1 text-white bg-warning rounded position-absolute top-0 start-100 translate-middle">
+                                    <i class="fa-solid fa-triangle-exclamation fa-fw"></i></span></i>
+                            </div>
+                            <h1 style="font-size: 1.5em;" class="fw-light">It looks like we're having trouble loading this content right now. Please try again later.</p>
+                        </div>
+                    </div>
+                </div>
                 <div class="col-sm-6 col-lg-4 mb-3" v-for="post in displayPosts" :key="post.url">
                     <card-vue :post="post" :account="account" :has_ipfs="spkapi.storage?.length ? true : false"
                         :post_select="postSelect" :voteval="voteVal" :head_block="spkapi.head_block"
@@ -190,7 +203,6 @@
                 :contracts="contracts" :extendcost="extendcost" @tosign="toSign=$event" @reply="reply($event)"
                 @modalselect="modalSelect($event)" @vote="vote($event)"></detail-vue>
         </main>
-
         <!-- Footer -->
         <div>
             <foot-vue />
