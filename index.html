@@ -23,69 +23,82 @@
   </script>
   <script src="/js/aframe.min.js"></script>
   <style>
-  /* Scroll arrows */
+    /* Scroll arrows */
     #section07 a {
-  padding-top: 80px;
-}
-#section07 a span {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 24px;
-  height: 24px;
-  margin-left: -12px;
-  border-left: 1px solid #fff;
-  border-bottom: 1px solid #fff;
-  -webkit-transform: rotate(-45deg);
-  transform: rotate(-45deg);
-  -webkit-animation: sdb07 2s infinite;
-  animation: sdb07 2s infinite;
-  opacity: 0;
-  box-sizing: border-box;
-}
-#section07 a span:nth-of-type(1) {
-  -webkit-animation-delay: 0s;
-  animation-delay: 0s;
-}
-#section07 a span:nth-of-type(2) {
-  top: 16px;
-  -webkit-animation-delay: .15s;
-  animation-delay: .15s;
-}
-#section07 a span:nth-of-type(3) {
-  top: 32px;
-  -webkit-animation-delay: .3s;
-  animation-delay: .3s;
-}
-@-webkit-keyframes sdb07 {
-  0% {
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-@keyframes sdb07 {
-  0% {
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
+      padding-top: 80px;
+    }
+
+    #section07 a span {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 24px;
+      height: 24px;
+      margin-left: -12px;
+      border-left: 1px solid #fff;
+      border-bottom: 1px solid #fff;
+      -webkit-transform: rotate(-45deg);
+      transform: rotate(-45deg);
+      -webkit-animation: sdb07 2s infinite;
+      animation: sdb07 2s infinite;
+      opacity: 0;
+      box-sizing: border-box;
+    }
+
+    #section07 a span:nth-of-type(1) {
+      -webkit-animation-delay: 0s;
+      animation-delay: 0s;
+    }
+
+    #section07 a span:nth-of-type(2) {
+      top: 16px;
+      -webkit-animation-delay: .15s;
+      animation-delay: .15s;
+    }
+
+    #section07 a span:nth-of-type(3) {
+      top: 32px;
+      -webkit-animation-delay: .3s;
+      animation-delay: .3s;
+    }
+
+    @-webkit-keyframes sdb07 {
+      0% {
+        opacity: 0;
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+      }
+    }
+
+    @keyframes sdb07 {
+      0% {
+        opacity: 0;
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 
 <body class="d-flex h-100 align-items-stretch text-white">
   <div id="section07" class="position-fixed bottom-0 start-50 translate-middle-x mb-3" :class="{
     'd-none': scrollTop > 0 }">
-    <a class="btn btn-lg"><div><span></span><span></span><span></span></div><div>Scroll</div></a>
+    <a class="btn btn-lg">
+      <div><span></span><span></span><span></span></div>
+      <div>Scroll</div>
+    </a>
   </div>
   <div class="bg-ascene">
     <a-scene embedded renderer="antialias: true">
@@ -162,11 +175,39 @@
       <div id="logo" ref="logo" class="d-flex flex-row px-2 click-me" @click="startscroll()"></div>
       <div id="dapps" ref="dapps" class="d-flex flex-row px-2">
         <div class="d-flex flex-column dlux-turq jumbo-dlux container p-5 m-auto">
-
-          <div class="dlux-header">
-            <h1>
+          <div class="dlux-header d-flex display-4">
+            <h1 class="d-flex mb-0">
               <span class="text-white">dlux is:</span>
-              <span class="dlux-is">Spatial</span>
+              <div class="d-flex ms-1">
+                <div class="box text-center">
+                  <ul class="scroll mb-1">
+                    <li class="scroll">Your</li>
+                    <li class="scroll">Game</li>
+                    <li class="scroll">Soc</li>
+                    <li class="scroll">Web</li>
+                    <li class="scroll">Your</li>
+                  </ul>
+                </div>
+                <span class="text-turq">Fi</span>
+              </div>
+            </h1>
+
+            <h1 class="d-none" style="margin-block: 0px;">
+              <span style="display: inline-block; vertical-align: top;" class="text-white border-0 my-0 px-0 mx-0">dlux
+                is:</span>
+              <div style="display: inline-block; vertical-align: top;" class="my-0 px-0 mx-0">
+                <div style="display: inline-block; vertical-align: top;" class="box">
+                  <ul class="scroll mx-0 px-0">
+                    <li class="scroll mx-0 px-0">Your</li>
+                    <li class="scroll mx-0 px-0">Game</li>
+                    <li class="scroll mx-0 px-0">Soc</li>
+                    <li class="scroll mx-0 px-0">Web</li>
+                    <li class="scroll mx-0 px-0">Your</li>
+                  </ul>
+                </div>
+                <div style="display: inline-block; vertical-align: top; text-align: left" class="my-0 px-0 mx-0">Fi
+                </div>
+              </div>
             </h1>
           </div>
           <div class="mt-2">
@@ -250,25 +291,25 @@
     </div>
   </div>
   <script>
-    (function () {
-      "use strict";
-      window.addEventListener("load", function () {
-        var forms = document.getElementsByClassName("needs-validation");
-        var validation = Array.prototype.filter.call(forms, function (form) {
-          form.addEventListener(
-            "submit",
-            function (event) {
-              if (form.checkValidity() === false) {
-                event.preventDefault();
-                event.stopPropagation();
-              }
-              form.classList.add("was-validated");
-            },
-            false
-          );
+      (function () {
+        "use strict";
+        window.addEventListener("load", function () {
+          var forms = document.getElementsByClassName("needs-validation");
+          var validation = Array.prototype.filter.call(forms, function (form) {
+            form.addEventListener(
+              "submit",
+              function (event) {
+                if (form.checkValidity() === false) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }
+                form.classList.add("was-validated");
+              },
+              false
+            );
+          });
         });
-      });
-    })();
+      })();
     var disabletab = document.getElementsByClassName("disabled-input");
     for (var i = 0; i < disabletab.length; i++) {
       disabletab[i].setAttribute("tabindex", "-1");
@@ -318,7 +359,7 @@
     })
   </script>
   <!-- Bootstrap -->
-	<script src="/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
     integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
