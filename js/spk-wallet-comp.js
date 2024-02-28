@@ -371,7 +371,7 @@ export default {
                             Power</span> <span class="small"
                             v-show="spk2gov">50%
                             Liquid | 50% Gov</span></div>
-                    <div v-show="accountapi.gov > 0" class="bg-dark text-white">
+                    <div v-show="saccountapi.gov > 0" class="bg-dark text-white">
                         <div class="input-group my-3">
                             <span
                                 class="input-group-text bg-darkg border-info text-info">
