@@ -805,6 +805,7 @@ export default {
     emits: ['tosign'],
     data() {
         return {
+            spk2gov: false,
             ipfsProviders: {
                 "na": "na",
             },
