@@ -21,7 +21,7 @@ export default {
         <div class="d-flex justify-content-center p-3">
             <div class="text-center" style="max-width: 600px;">
                 <p class="lead">Join the SPK Network to store your files on IPFS</p>
-                <button type="button" class="btn btn-primary" @click="updatePubkey">
+                <button type="button" class="btn btn-primary" @click="updatePubkey()">
                     Register Account
                 </button>
             </div>
@@ -478,6 +478,12 @@ export default {
         postpage: {
             default: false,
             required: false
+        },
+        accountinfo: {
+            default: function () {
+                return {}
+            },
+            required: false
         }
     },
     data() {
@@ -606,6 +612,20 @@ export default {
     methods: {
         modalSelect(url) {
             this.$emit('modalselect', url);
+        },
+        updatePubkey() {
+            var cja = {
+              pubKey: this.accountinfo.posting.key_auths[0][0]
+            };
+            this.toSign = {
+              type: "cja",
+              cj: cja,
+              id: `spkcc_register_authority`,
+              msg: `Registering: ${this.account}:${this.accountinfo.posting.key_auths[0][0]}`,
+              ops: ["getSapi"],
+              api: sapi,
+              txid: `spkcc_register_authority`,
+            };
         },
         addAssets(id, contract) {
             if(typeof id == 'object')this.$emit('addasset', id);
