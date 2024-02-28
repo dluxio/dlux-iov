@@ -623,7 +623,7 @@ export default {
               id: `spkcc_register_authority`,
               msg: `Registering: ${this.account}:${this.accountinfo.posting.key_auths[0][0]}`,
               ops: ["getSapi"],
-              api: sapi,
+              api: this.sapi,
               txid: `spkcc_register_authority`,
             };
         },
