@@ -969,9 +969,8 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
                   } else {
                     alert("File already uploaded")
                   }
-                break
+                })
               }
-            }
           };
           reader.readAsBinaryString(e.target.files[i]);
           var File = e.target.files[i];
@@ -980,7 +979,8 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
           // File.md5 = ""
           this.File.push(File);
         }
-      },
+      }
+    },
     dragFile(e) {
       for (var i = 0; i < e.dataTransfer.files.length; i++) {
         var reader = new FileReader();
@@ -1409,18 +1409,19 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
       fetch("https://spktest.dlux.io/services/MARKET")
         .then((response) => response.json())
         .then((data) => {
-          for(var provider in data.providers){ //$ACCOUNT
-            // find in array
-            const thisService = data.services.filter(service => service[provider].b == provider)
-            console.log(thisService)
-            this.services[provider] = {
-              address: thisService[0][provider].a,
-              memo: JSON.parse(thisService[0][provider].m),
+
+          for(var listing = 0; listing < data.providers.length; listing++){
+            var ids = Object.keys(data.providers[listing])
+            for(var id in ids){
+            this.services[`${id}:${data.providers[listing][id].b}`] = {
+              address: data.providers[listing][id].a,
+              memo: JSON.parse(data.providers[listing][id].m),
               channel: 0,
-              provider
+              provider: data.providers[listing][id].b
             }
           }
-        });
+        }
+      });
     },
     upload(cid = 'QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3', contract = {api: 'https://127.0.0.1:5050', id: '1668913215284', sigs: {QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3: '20548a0032e0cf51ba75721743d2ec6fac180f7bc773ce3d77b769d9c4c9fa9dbb7d59503f05be8edcaac00d5d66709b0bce977f3207785913f7fbad2773ae4ac2'}}){
    

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@hiveio/hive-js/dist/hive.min.js"></script>
+    <style>
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+        }
+        
+        iframe {
+            border: 0;
+            display: inline-block;
+        }
+    </style>
+    <script>
+        function match (s,t) {var a=[];for(var i=0;i<s.length;i++){j=s.indexOf(t,i);if(j>=0){a.push(j);i=j}else return a}}
+        const dns01 = window.location.hostname.split('.')[0]
+        function varval(name, arr) {
+            for (var i = 0; i < arr.length; i++) {
+                var pair = arr[i].split('=');
+                if (pair[0] == name) {
+                    return pair[1];
+                }
+            }
+            return false;
+        }
+        var stateObj,
+            vars = location.href.split('?')[1],
+            goAhead = true,
+            vararr = vars.split('&'),
+            author = varval('author', vararr),
+            permlink = varval('permlink', vararr),
+            hiveKey = `${author}/${permlink}`,
+            dots = match(author,'.'),
+            authorizedDNS01 = dots.length ? dots.join('') + author.replaceAll('.', '-') : author
+            if(dns01 != authorizedDNS01){
+                goAhead = false
+                alert(`This dApp failed it's signature check.\nYou are likely following a malicious link:\nAuthor: ${dns01} != subdomain: ${authorizedDNS01}\n Please report`)
+            }
+        if(goAhead)hive.api.getContent(author, permlink, (err, result) => {
+            if (err) console.log(err)
+            console.log(result)
+            document.title = `DLUX | ${result.title}`
+            stateObj = result
+            var metadata = result.json_metadata
+            var hashy = JSON.parse(metadata).vrHash
+            var scrolling = JSON.parse(metadata).scrolling
+            var vars = location.href.split('?')[1]
+            var iframe = document.createElement('iframe');
+            iframe.id = 'theIframe'
+            iframe.scrolling = scrolling || 'yes'
+            iframe.width = '100%'
+            iframe.height = '100%'
+            iframe.setAttribute('allowfullscreen', true)
+            iframe.setAttribute('allow', 'gyroscope; accelerometer; microphone; camera')
+            iframe.src = `/ipfs/${hashy}?${vars}`
+            document.body.appendChild(iframe);
+        });
+        if (isIOS()) {
+            window.addEventListener('devicemotion', function(e) {
+                document.getElementById('theIframe').contentWindow.postMessage({
+                    type: 'devicemotion',
+                    deviceMotionEvent: cloneDeviceMotionEvent(e),
+                }, '*');
+            });
+        }
+
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        }
+
+        function cloneDeviceMotionEvent(e) {
+            return {
+                acceleration: {
+                    x: e.acceleration.x,
+                    y: e.acceleration.y,
+                    z: e.acceleration.z,
+                },
+                accelerationIncludingGravity: {
+                    x: e.accelerationIncludingGravity.x,
+                    y: e.accelerationIncludingGravity.y,
+                    z: e.accelerationIncludingGravity.z,
+                },
+                rotationRate: {
+                    alpha: e.rotationRate.alpha,
+                    beta: e.rotationRate.beta,
+                    gamma: e.rotationRate.gamma,
+                },
+                interval: e.interval,
+                timeStamp: e.timeStamp
+            };
+        }
+        if (window.addEventListener) {
+            window.addEventListener("message", onMessage, false);
+        } else if (window.attachEvent) {
+            window.attachEvent("onmessage", onMessage, false);
+        }
+
+        function onMessage(event) {
+            if (event.origin !== window.origin) return;
+            let data = event.data
+            if (typeof(window[data.func]) == "function") {
+                if (data.func == 'advPost' || data.func == 'vote' || data.func == 'signDecode' || data.func == 'signEncode' || data.func == 'follow' || data.func == 'aVote' || data.func == 'sendLink' || data.func == 'iloaded' || data.func == 'passGenerateHotLink' || data.func == 'comment' || data.func == 'reqsign') {
+                    window[data.func].call(null, data.message);
+                }
+            }
+        }
+
+        function sendLink(link) {
+            if (link == 'back()') {
+                window.history.back();
+            } else if (link.split(';').length > 1){
+                window.open(link.split(';')[0], link.split(';')[1]).opener = null;;
+            } else {
+                location.href = link;
+            }
+        }
+        var memoRights = 0
+
+        function signEncode(message) {
+            if (!memoRights) {
+                memoRights = confirm('Allow this app to encrypt and decrypt messages')
+            }
+            if (memoRights == true) {
+                hive.api.getAccounts([message.to], (err, result) => {
+                    if (err) {
+                        console.log(err)
+                    }
+                    if (result.length === 0) {
+                        console.log('No Such User')
+                    }
+                    var encoded = hive.memo.encode(localStorage.memoKey, result[0].memo_key, `#` + message.memo);
+                    target.postMessage({
+                        'func': 'encoded',
+                        'message': {
+                            'memo': encoded,
+                            'msgid': message.msgid,
+                        }
+                    }, "*");
+                });
+            } else {}
+        }
+
+        function signDecode(message) {
+            if (!memoRights) {
+                memoRights = confirm('Allow this app to encrypt and decrypt messages')
+            }
+            if (memoRights == true) {
+                var decoded = hive.memo.decode(localStorage.memoKey, message.encoded);
+                target.postMessage({
+                    'func': 'decoded',
+                    'message': {
+                        'memo': decoded,
+                        'msgid': message.msgid,
+                    }
+                }, "*");
+            } else {}
+        }
+        var userLoggedIn = 'Guest'
+        if (userLoggedIn == 'Guest' && varval('user', vararr)) {
+            userLoggedIn = varval('user', vararr)
+        } else if (window.hive_keychain) {
+            //iAm = prompt('Hive Username for Hive Keychain', 'no @')
+        }
+
+        function reqsign(op) {
+            if (window.hive_keychain) {
+                hive_keychain.requestBroadcast(op[1][1], [op[0]], op[1][0], function(response) {
+                    console.log(response);
+                    target.postMessage({
+                        'func': 'keychainResponse',
+                        'message': response
+                    }, "*");
+                });
+            }
+        }
+
+        function iloaded() {
+            hive.api.getContent(author, permlink, function(err, result) {
+                var target = document.getElementById('theIframe').contentWindow
+                var un = 'Guest'
+                if (varval('user', vararr)) {
+                    un = varval('user', vararr)
+                }
+                target.postMessage({
+                    'func': 'iAm',
+                    'message': un,
+                }, "*");
+                target.postMessage({
+                    'func': 'key',
+                    'message': hiveKey,
+                }, "*");
+                target.postMessage({
+                    'func': 'hiveState',
+                    'message': result,
+                }, "*");
+            })
+            if (window.hive_keychain) {
+                postable = true
+            }
+        }
+
+        function to58lower(hash) {
+            var arr = hash.split('')
+            for (var i = 0; i < arr.length; i++) {
+                if (i == 0) {
+                    arr[i] = 'q'
+                } else if (arr[i].toLowerCase() != arr[i]) {
+                    arr[i] = `0${arr[i].toLowerCase()}`
+                }
+            }
+            return arr.join('')
+        }
+
+        function to58(hash) {
+            var arr = hash.split('')
+            var uparr = []
+            for (var i = 0; i < arr.length; i++) {
+                if (i == 0) {
+                    uparr.push('Q')
+                } else if (arr[i] == '0') {
+                    uparr.push(arr[i + 1].toUpperCase())
+                    arr.splice(i, 0)
+                } else {
+                    uparr.push(arr[i])
+                }
+            }
+            return uparr.join('')
+        }
+    </script>
+</head>
+
+<body></body>
+
+</html>
