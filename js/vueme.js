@@ -1414,15 +1414,14 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
           for(var listing = 0; listing < data.services.length; listing++){
             console.log(data.services[listing])
             var ids = Object.keys(data.services[listing])
-            for(var id in ids){
-            this.services[`${data.services[listing][id].b}`] = {
-              address: data.services[listing][id].a,
-              memo: JSON.parse(data.services[listing][id].m),
+           
+            this.services[`${data.services[listing][ids[0]].b}`] = {
+              address: data.services[listing][ids[0]].a,
+              memo: JSON.parse(data.services[listing][ids[0]].m),
               channel: 0,
-              provider: data.services[listing][id].b
+              provider: data.services[listing][ids[0]].b
             }
-            break
-          }
+          
         }
       });
     },
