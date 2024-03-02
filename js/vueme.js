@@ -1413,12 +1413,13 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
           for(var listing = 0; listing < data.providers.length; listing++){
             var ids = Object.keys(data.providers[listing])
             for(var id in ids){
-            this.services[`${id}:${data.providers[listing][id].b}`] = {
+            this.services[`${data.providers[listing][id].b}`] = {
               address: data.providers[listing][id].a,
               memo: JSON.parse(data.providers[listing][id].m),
               channel: 0,
               provider: data.providers[listing][id].b
             }
+            break
           }
         }
       });
