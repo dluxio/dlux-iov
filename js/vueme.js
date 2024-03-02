@@ -1411,15 +1411,15 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         .then((response) => response.json())
         .then((data) => {
           console.log(data)
-          for(var listing = 0; listing < data.providers.length; listing++){
-            console.log(data.providers[listing])
-            var ids = Object.keys(data.providers[listing])
+          for(var listing = 0; listing < data.services.length; listing++){
+            console.log(data.services[listing])
+            var ids = Object.keys(data.services[listing])
             for(var id in ids){
-            this.services[`${data.providers[listing][id].b}`] = {
-              address: data.providers[listing][id].a,
-              memo: JSON.parse(data.providers[listing][id].m),
+            this.services[`${data.services[listing][id].b}`] = {
+              address: data.services[listing][id].a,
+              memo: JSON.parse(data.services[listing][id].m),
               channel: 0,
-              provider: data.providers[listing][id].b
+              provider: data.services[listing][id].b
             }
             break
           }
