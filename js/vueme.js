@@ -1406,11 +1406,13 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
         });
     },
     getMARKETS(){
+      console.log('Getting Markets')
       fetch("https://spktest.dlux.io/services/MARKET")
         .then((response) => response.json())
         .then((data) => {
-
+          console.log(data)
           for(var listing = 0; listing < data.providers.length; listing++){
+            console.log(data.providers[listing])
             var ids = Object.keys(data.providers[listing])
             for(var id in ids){
             this.services[`${data.providers[listing][id].b}`] = {
