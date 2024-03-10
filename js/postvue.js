@@ -107,7 +107,7 @@ data() {
         postTags: "",
         postCustom_json: {
             "app": "dlux/0.1",
-            "vrHash": "QmSZf78BMVsttwcbegNSQLyAoE4TxC9CPApwZqAniG6nXM",
+            "vrHash": "QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k",
             "assets": [],
             tags: []
         }
