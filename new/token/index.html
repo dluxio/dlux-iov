@@ -119,11 +119,11 @@
 								</label>
 								<div>
 									<div class="btn-group bg-dark">
-										<input type="radio" name="tokenDecentralized" id="setYesDecentralized" autocomplete="off"
-											checked="checked" class="btn-check">
+										<input type="radio" name="tokenDecentralized" id="setYesDecentralized"
+											autocomplete="off" checked="checked" class="btn-check">
 										<label for="setYesDecentralized" class="btn btn-outline-primary">YES</label>
-										<input type="radio" name="tokenDecentralized" id="setNoDecentralized" autocomplete="off"
-											class="btn-check">
+										<input type="radio" name="tokenDecentralized" id="setNoDecentralized"
+											autocomplete="off" class="btn-check">
 										<label for="setNoDecentralized" class="btn btn-outline-primary">NO</label>
 									</div>
 								</div>
@@ -145,163 +145,204 @@
 								</div>
 							</div>
 							<!--Which features do you want?-->
-							<div class="d-flex justify-content-center border-bottom border-3 mb-3">
-								<div class="display-6 mb-2">Advanced Options</div>
-							</div>
-							<div class="mb-3">
-								<label for="tokenFeaturesPoB" class="lead form-label">Proof-of-Brain
-								</label>
-								<div>
-									<div class="btn-group bg-dark">
-										<input type="radio" name="tokenFeaturesPoB" id="setYesPob" autocomplete="off"
-											class="btn-check">
-										<label for="setYesPob" class="btn btn-outline-primary">YES</label>
-										<input type="radio" name="tokenFeaturesPoB" id="setNoPob" autocomplete="off"
-											checked class="btn-check">
-										<label for="setNoPob" class="btn btn-outline-primary">NO</label>
+							<div class="accordion" id="optionsAccordion">
+								<div class="accordion-item bg-img-none bg-dark">
+									<h2 class="accordion-header text-white">
+										<button class="accordion-button collapsed bg-dark text-white" type="button"
+											data-bs-toggle="collapse" data-bs-target="#optionsCollapse"
+											aria-expanded="false" aria-controls="optionsCollapse">
+											<i class="fa-solid fa-gears fa-fw me-2"></i>Advanced Options
+										</button>
+									</h2>
+									<div id="optionsCollapse" class="accordion-collapse collapse"
+										data-bs-parent="#optionsAccordion">
+										<div class="accordion-body">
+											<div class="mb-3">
+												<label for="tokenFeaturesPoB" class="lead form-label">Proof-of-Brain
+												</label>
+												<div>
+													<div class="btn-group bg-dark">
+														<input type="radio" name="tokenFeaturesPoB" id="setYesPob"
+															autocomplete="off" class="btn-check">
+														<label for="setYesPob"
+															class="btn btn-outline-primary">YES</label>
+														<input type="radio" name="tokenFeaturesPoB" id="setNoPob"
+															autocomplete="off" checked class="btn-check">
+														<label for="setNoPob" class="btn btn-outline-primary">NO</label>
+													</div>
+												</div>
+												<div id="tokenFeaturesPoBHelp" class="form-text">Do you want
+													proof-of-brain</div>
+											</div>
+											<div class="mb-3">
+												<label for="tokenFeaturesDelegate" class="lead form-label">Delegate
+												</label>
+												<div>
+													<div class="btn-group bg-dark">
+														<input type="radio" name="tokenFeaturesDelegate"
+															id="setYesDelegate" autocomplete="off" class="btn-check">
+														<label for="setYesDelegate"
+															class="btn btn-outline-primary">YES</label>
+														<input type="radio" name="tokenFeaturesDelegate"
+															id="setNoDelegate" autocomplete="off" checked
+															class="btn-check">
+														<label for="setNoDelegate"
+															class="btn btn-outline-primary">NO</label>
+													</div>
+												</div>
+												<div id="tokenFeaturesDelegateHelp" class="form-text">Do you want
+													delegate</div>
+											</div>
+											<div class="mb-3">
+												<label for="tokenFeaturesDaily" class="lead form-label">Daily
+												</label>
+												<div>
+													<div class="btn-group bg-dark">
+														<input type="radio" name="tokenFeaturesDaily" id="setYesDaily"
+															autocomplete="off" class="btn-check">
+														<label for="setYesDaily"
+															class="btn btn-outline-primary">YES</label>
+														<input type="radio" name="tokenFeaturesDaily" id="setNoDaily"
+															autocomplete="off" checked class="btn-check">
+														<label for="setNoDaily"
+															class="btn btn-outline-primary">NO</label>
+													</div>
+												</div>
+												<div id="tokenFeaturesDailyHelp" class="form-text">Do you want daily
+												</div>
+											</div>
+											<div class="mb-3">
+												<label for="tokenFeaturesLiquidity" class="lead form-label">Liquidity
+												</label>
+												<div>
+													<div class="btn-group bg-dark">
+														<input type="radio" name="tokenFeaturesLiquidity"
+															id="setYesLiquidity" autocomplete="off" class="btn-check">
+														<label for="setYesLiquidity"
+															class="btn btn-outline-primary">YES</label>
+														<input type="radio" name="tokenFeaturesLiquidity"
+															id="setNoLiquidity" autocomplete="off" checked
+															class="btn-check">
+														<label for="setNoLiquidity"
+															class="btn btn-outline-primary">NO</label>
+													</div>
+												</div>
+												<div id="tokenFeaturesLiquidityHelp" class="form-text">Do you want
+													liquidity</div>
+											</div>
+											<div class="mb-3">
+												<label for="tokenFeaturesIco" class="lead form-label">ICO
+												</label>
+												<div>
+													<div class="btn-group bg-dark">
+														<input type="radio" name="tokenFeaturesIco" id="setYesIco"
+															autocomplete="off" class="btn-check">
+														<label for="setYesIco"
+															class="btn btn-outline-primary">YES</label>
+														<input type="radio" name="tokenFeaturesIco" id="setNoIco"
+															autocomplete="off" checked class="btn-check">
+														<label for="setNoIco" class="btn btn-outline-primary">NO</label>
+													</div>
+												</div>
+												<div id="tokenFeaturesIcoHelp" class="form-text">Do you want ICO</div>
+											</div>
+											<div class="mb-3">
+												<label for="tokenFeaturesInflation" class="lead form-label">Inflation
+												</label>
+												<div>
+													<div class="btn-group bg-dark">
+														<input type="radio" name="tokenFeaturesInflation"
+															id="setYesInflation" autocomplete="off" class="btn-check">
+														<label for="setYesInflation"
+															class="btn btn-outline-primary">YES</label>
+														<input type="radio" name="tokenFeaturesInflation"
+															id="setNoInflation" autocomplete="off" checked
+															class="btn-check">
+														<label for="setNoInflation"
+															class="btn btn-outline-primary">NO</label>
+													</div>
+												</div>
+												<div id="tokenFeaturesInflationHelp" class="form-text">Do you want
+													inflation</div>
+											</div>
+											<div class="mb-3">
+												<label for="tokenFeaturesDex" class="lead form-label">DEX
+												</label>
+												<div>
+													<div class="btn-group bg-dark">
+														<input type="radio" name="tokenFeaturesDex" id="setYesDex"
+															autocomplete="off" checked class="btn-check">
+														<label for="setYesDex"
+															class="btn btn-outline-primary">YES</label>
+														<input type="radio" name="tokenFeaturesDex" id="setNoDex"
+															autocomplete="off" class="btn-check">
+														<label for="setNoDex" class="btn btn-outline-primary">NO</label>
+													</div>
+												</div>
+												<div id="tokenFeaturesDexHelp" class="form-text">Do you want a
+													Decentralized Exchange
+												</div>
+											</div>
+											<div class="mb-3">
+												<label for="tokenFeaturesNft" class="lead form-label">NFT
+												</label>
+												<div>
+													<div class="btn-group bg-dark">
+														<input type="radio" name="tokenFeaturesNft" id="setYesNft"
+															autocomplete="off" checked="checked" class="btn-check">
+														<label for="setYesNft"
+															class="btn btn-outline-primary">YES</label>
+														<input type="radio" name="tokenFeaturesNft" id="setNoNft"
+															autocomplete="off" class="btn-check">
+														<label for="setNoNft" class="btn btn-outline-primary">NO</label>
+													</div>
+												</div>
+												<div id="tokenFeaturesNftHelp" class="form-text">Do you want to support
+													Non Fungible
+													Tokens</div>
+											</div>
+											<div class="mb-3">
+												<label for="tokenFeaturesState" class="lead form-label">State
+												</label>
+												<div>
+													<div class="btn-group bg-dark">
+														<input type="radio" name="tokenFeaturesState" id="setYesState"
+															autocomplete="off" checked="checked" class="btn-check">
+														<label for="setYesState"
+															class="btn btn-outline-primary">YES</label>
+														<input type="radio" name="tokenFeaturesState" id="setNoState"
+															autocomplete="off" class="btn-check">
+														<label for="setNoState"
+															class="btn btn-outline-primary">NO</label>
+													</div>
+												</div>
+												<div id="tokenFeaturesStateHelp" class="form-text">Do you want state
+												</div>
+											</div>
+											<div class="mb-3">
+												<label for="tokenFeaturesClaimdrop" class="lead form-label">Claim Drop
+												</label>
+												<div>
+													<div class="btn-group bg-dark">
+														<input type="radio" name="tokenFeaturesClaimdrop"
+															id="setYesClaimdrop" autocomplete="off" checked="checked"
+															class="btn-check">
+														<label for="setYesClaimdrop"
+															class="btn btn-outline-primary">YES</label>
+														<input type="radio" name="tokenFeaturesClaimdrop"
+															id="setNoClaimdrop" autocomplete="off" class="btn-check">
+														<label for="setNoClaimdrop"
+															class="btn btn-outline-primary">NO</label>
+													</div>
+												</div>
+												<div id="tokenFeaturesClaimdropHelp" class="form-text">Do you want Claim
+													Drop</div>
+											</div>
+										</div>
 									</div>
 								</div>
-								<div id="tokenFeaturesPoBHelp" class="form-text">Do you want proof-of-brain</div>
-							</div>
-							<div class="mb-3">
-								<label for="tokenFeaturesDelegate" class="lead form-label">Delegate
-								</label>
-								<div>
-									<div class="btn-group bg-dark">
-										<input type="radio" name="tokenFeaturesDelegate" id="setYesDelegate" autocomplete="off"
-											class="btn-check">
-										<label for="setYesDelegate" class="btn btn-outline-primary">YES</label>
-										<input type="radio" name="tokenFeaturesDelegate" id="setNoDelegate" autocomplete="off"
-											checked class="btn-check">
-										<label for="setNoDelegate" class="btn btn-outline-primary">NO</label>
-									</div>
-								</div>
-								<div id="tokenFeaturesDelegateHelp" class="form-text">Do you want delegate</div>
-							</div>
-							<div class="mb-3">
-								<label for="tokenFeaturesDaily" class="lead form-label">Daily
-								</label>
-								<div>
-									<div class="btn-group bg-dark">
-										<input type="radio" name="tokenFeaturesDaily" id="setYesDaily" autocomplete="off"
-											class="btn-check">
-										<label for="setYesDaily" class="btn btn-outline-primary">YES</label>
-										<input type="radio" name="tokenFeaturesDaily" id="setNoDaily" autocomplete="off"
-											checked class="btn-check">
-										<label for="setNoDaily" class="btn btn-outline-primary">NO</label>
-									</div>
-								</div>
-								<div id="tokenFeaturesDailyHelp" class="form-text">Do you want daily</div>
-							</div>
-							<div class="mb-3">
-								<label for="tokenFeaturesLiquidity" class="lead form-label">Liquidity
-								</label>
-								<div>
-									<div class="btn-group bg-dark">
-										<input type="radio" name="tokenFeaturesLiquidity" id="setYesLiquidity" autocomplete="off"
-											class="btn-check">
-										<label for="setYesLiquidity" class="btn btn-outline-primary">YES</label>
-										<input type="radio" name="tokenFeaturesLiquidity" id="setNoLiquidity" autocomplete="off"
-											checked class="btn-check">
-										<label for="setNoLiquidity" class="btn btn-outline-primary">NO</label>
-									</div>
-								</div>
-								<div id="tokenFeaturesLiquidityHelp" class="form-text">Do you want liquidity</div>
-							</div>
-							<div class="mb-3">
-								<label for="tokenFeaturesIco" class="lead form-label">ICO
-								</label>
-								<div>
-									<div class="btn-group bg-dark">
-										<input type="radio" name="tokenFeaturesIco" id="setYesIco" autocomplete="off"
-											class="btn-check">
-										<label for="setYesIco" class="btn btn-outline-primary">YES</label>
-										<input type="radio" name="tokenFeaturesIco" id="setNoIco" autocomplete="off"
-											checked class="btn-check">
-										<label for="setNoIco" class="btn btn-outline-primary">NO</label>
-									</div>
-								</div>
-								<div id="tokenFeaturesIcoHelp" class="form-text">Do you want ICO</div>
-							</div>
-							<div class="mb-3">
-								<label for="tokenFeaturesInflation" class="lead form-label">Inflation
-								</label>
-								<div>
-									<div class="btn-group bg-dark">
-										<input type="radio" name="tokenFeaturesInflation" id="setYesInflation" autocomplete="off"
-											class="btn-check">
-										<label for="setYesInflation" class="btn btn-outline-primary">YES</label>
-										<input type="radio" name="tokenFeaturesInflation" id="setNoInflation" autocomplete="off"
-											checked class="btn-check">
-										<label for="setNoInflation" class="btn btn-outline-primary">NO</label>
-									</div>
-								</div>
-								<div id="tokenFeaturesInflationHelp" class="form-text">Do you want inflation</div>
-							</div>
-							<div class="mb-3">
-								<label for="tokenFeaturesDex" class="lead form-label">DEX
-								</label>
-								<div>
-									<div class="btn-group bg-dark">
-										<input type="radio" name="tokenFeaturesDex" id="setYesDex" autocomplete="off"
-											checked class="btn-check">
-										<label for="setYesDex" class="btn btn-outline-primary">YES</label>
-										<input type="radio" name="tokenFeaturesDex" id="setNoDex" autocomplete="off"
-											class="btn-check">
-										<label for="setNoDex" class="btn btn-outline-primary">NO</label>
-									</div>
-								</div>
-								<div id="tokenFeaturesDexHelp" class="form-text">Do you want a Decentralized Exchange
-								</div>
-							</div>
-							<div class="mb-3">
-								<label for="tokenFeaturesNft" class="lead form-label">NFT
-								</label>
-								<div>
-									<div class="btn-group bg-dark">
-										<input type="radio" name="tokenFeaturesNft" id="setYesNft" autocomplete="off"
-											checked="checked" class="btn-check">
-										<label for="setYesNft" class="btn btn-outline-primary">YES</label>
-										<input type="radio" name="tokenFeaturesNft" id="setNoNft" autocomplete="off"
-											class="btn-check">
-										<label for="setNoNft" class="btn btn-outline-primary">NO</label>
-									</div>
-								</div>
-								<div id="tokenFeaturesNftHelp" class="form-text">Do you want to support Non Fungible
-									Tokens</div>
-							</div>
-							<div class="mb-3">
-								<label for="tokenFeaturesState" class="lead form-label">State
-								</label>
-								<div>
-									<div class="btn-group bg-dark">
-										<input type="radio" name="tokenFeaturesState" id="setYesState" autocomplete="off"
-											checked="checked" class="btn-check">
-										<label for="setYesState" class="btn btn-outline-primary">YES</label>
-										<input type="radio" name="tokenFeaturesState" id="setNoState" autocomplete="off"
-											class="btn-check">
-										<label for="setNoState" class="btn btn-outline-primary">NO</label>
-									</div>
-								</div>
-								<div id="tokenFeaturesStateHelp" class="form-text">Do you want state</div>
-							</div>
-							<div class="mb-3">
-								<label for="tokenFeaturesClaimdrop" class="lead form-label">Claim Drop
-								</label>
-								<div>
-									<div class="btn-group bg-dark">
-										<input type="radio" name="tokenFeaturesClaimdrop" id="setYesClaimdrop" autocomplete="off"
-											checked="checked" class="btn-check">
-										<label for="setYesClaimdrop" class="btn btn-outline-primary">YES</label>
-										<input type="radio" name="tokenFeaturesClaimdrop" id="setNoClaimdrop" autocomplete="off"
-											class="btn-check">
-										<label for="setNoClaimdrop" class="btn btn-outline-primary">NO</label>
-									</div>
-								</div>
-								<div id="tokenFeaturesClaimdropHelp" class="form-text">Do you want Claim Drop</div>
 							</div>
 						</div>
-
 						<div class="card-footer text-center">
 							<button type="submit" class="btn btn-primary">Create<i
 									class="fa-solid fa-rocket fa-fw ms-1"></i></button>
