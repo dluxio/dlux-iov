@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en" class="h-100">
+
+<head>
+	<title>DLUX - New Token</title>
+	<meta charset="UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="manifest" href="/manifest.webmanifest">
+	<link rel="apple-touch-icon" href="/img/dlux-icon-192.png">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="default">
+	<meta name="apple-mobile-web-app-title" content="DLUX">
+	<meta name="theme-color" content="#111222" />
+	<link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
+	<link href="/css/custom.css" rel="stylesheet" />
+	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+	<script type="module" src="/js/indexvue.js"></script>
+	<script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
+	<script>
+		if ('serviceWorker' in navigator) {
+			navigator
+				.serviceWorker
+				.register(
+					// path to the service worker file
+					'/sw.js'
+				)
+				// the registration is async and it returns a promise
+				.then(function (reg) {
+					console.log('Registration Successful');
+				});
+		}
+	</script>
+</head>
+
+<body class="d-flex h-100 align-items-stretch">
+	<div id="app" class="d-flex w-100 flex-column w-100">
+		<!-- navbar -->
+		<div>
+			<nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event)"
+				@logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
+				:lapi="lapi" />
+		</div>
+		<main role="main" class="mb-auto" style="padding-top: 94px;">
+			<div class="container my-4">
+				<div class="d-flex justify-content-center">
+					<div class="d-flex text-white-50 flex-wrap align-items-center mb-3 border-1 rounded p-2 pe-3">
+						<div class="display-1 me-2">DLUX</div>
+						<i class="fa-solid fa-atom display-1 me-2"></i>
+						<div>
+							<div class="display-6">HONEYCOMB</div>
+							<h4 class="mb-0 fw-light">LAYER 2 FOR HIVE</h4>
+						</div>
+					</div>
+				</div>
+				<div class="card bg-blur-darkg-50">
+					<form>
+						<div class="card-header py-2">
+							<h1 class="text-center display-4 mb-0">New Token</h1>
+						</div>
+						<div class="card-body px-md-5">
+
+							<!--1 Token Name: DLUX-->
+							<div class="mb-3">
+								<label for="tokenTagName" class="lead form-label">Token Tag Name</label>
+								<input required type="text" placeholder="ex: ragnarok"
+									class="form-control bg-dark border-0 text-info" id="tokenTagName"
+									aria-describedby="tokenTagNameHelp">
+								<div id="tokenTagNameHelp" class="form-text">Enter the display name for your token</div>
+							</div>
+							<div class="mb-3">
+								<label for="tokenJson" class="lead form-label">Token JSON</label>
+								<input required type="text" placeholder="ex: duat"
+									class="form-control bg-dark border-0 text-info" id="tokenJson"
+									aria-describedby="tokenJsonHelp">
+								<div id="tokenJsonHelp" class="form-text">Enter the JSON <i
+										class="fa-solid fa-chain mx-1"></i> name for your token</div>
+							</div>
+							<div class="mb-3">
+								<label for="tokenPrefix" class="lead form-label">Token Prefix
+								</label>
+								<input required type="text" placeholder="ex: duat_"
+									class="form-control bg-dark border-0 text-info" id="tokenPrefix"
+									aria-describedby="tokenPrefixHelp">
+								<div id="tokenPrefixHelp" class="form-text">Enter the prefix for your token</div>
+							</div>
+							<!--2 Precision (default 3)-->
+							<div class="mb-3">
+								<label for="tokenPrecision" class="lead form-label">Token Precision</label>
+								<input required type="range" class="form-range" min="0" max="7" step="1" value="3"
+									id="tokenPrecision">
+								<div id="tokenPrecisionHelp" class="form-text">Enter the precision for your token</div>
+							</div>
+							<!--3 Which Account will participate first: @dlux-io-->
+							<!--3b What will be this accounts public API? token.dlux.io -->
+							<div class="mb-3">
+								<label for="tokenCreator" class="lead form-label">Initial Account</label>
+								<div class="position-relative">
+									<span class="position-absolute top-50 translate-middle-y ps-2">
+										<i class="fa-solid fa-at fa-fw"></i>
+									</span>
+									<input required type="text" aria-describedby="tokenCreatorHelp"
+										class="ps-4 form-control text-info bg-dark border-0" placeholder="dlux-io"
+										id="tokenCreator">
+								</div>
+								<div id="tokenCreatorHelp" class="form-text">Enter the account creator for your token
+								</div>
+							</div>
+							<div class="mb-3">
+								<label for="tokenApi" class="lead form-label">Public API
+								</label>
+								<input required type="text" class="form-control bg-dark border-0 text-info"
+									placeholder="token.dlux.io" id="tokenApi" aria-describedby="tokenApiHelp">
+								<div id="tokenApiHelp" class="form-text">Enter the API for your token</div>
+							</div>
+							<!--4 Is this token decentralized?-->
+							<div class="mb-3">
+								<label for="tokenDecentralized" class="lead form-label">Decentralized
+								</label>
+								<div>
+									<div class="btn-group bg-dark">
+										<input type="radio" name="tokenDecentralized" id="setYes" autocomplete="off"
+											checked="checked" class="btn-check">
+										<label for="setYes" class="btn btn-outline-primary">YES</label>
+										<input type="radio" name="tokenDecentralized" id="setNo" autocomplete="off"
+											class="btn-check">
+										<label for="setNo" class="btn btn-outline-primary">NO</label>
+									</div>
+								</div>
+								<div id="tokenDecentralizedHelp" class="form-text">Choose whether your token is
+									decentralized</div>
+							</div>
+							<!--5 Which account is the Multi-sig account / Make a multi-sig account-->
+							<div class="mb-3">
+								<label for="tokenMultiSig" class="lead form-label">Multi-Sig Account
+								</label>
+								<div class="position-relative">
+									<span class="position-absolute top-50 translate-middle-y ps-2">
+										<i class="fa-solid fa-at fa-fw"></i>
+									</span>
+									<input required="true" type="text" aria-describedby="tokenMultiSigHelp"
+										class="ps-4 form-control text-info bg-dark border-0" id="tokenMultiSig">
+								</div>
+								<div id="tokenMultiSigHelp" class="form-text">Enter the multi-sig account for your token
+								</div>
+							</div>
+							<!--Which features do you want?-->
+							<div class="d-flex justify-content-center border-bottom border-3 mb-3">
+								<div class="display-6 mb-2">Advanced Options</div>
+							</div>
+							<div class="mb-3">
+								<label for="tokenFeaturesPoB" class="lead form-label">Proof-of-Brain
+								</label>
+								<div>
+									<div class="btn-group bg-dark">
+										<input type="radio" name="tokenFeaturesPoB" id="setYes" autocomplete="off"
+											class="btn-check">
+										<label for="setYes" class="btn btn-outline-primary">YES</label>
+										<input type="radio" name="tokenFeaturesPoB" id="setNo" autocomplete="off"
+											checked class="btn-check">
+										<label for="setNo" class="btn btn-outline-primary">NO</label>
+									</div>
+								</div>
+								<div id="tokenFeaturesPoBHelp" class="form-text">Do you want proof-of-brain</div>
+							</div>
+							<div class="mb-3">
+								<label for="tokenFeaturesDelegate" class="lead form-label">Delegate
+								</label>
+								<div>
+									<div class="btn-group bg-dark">
+										<input type="radio" name="tokenFeaturesDelegate" id="setYes" autocomplete="off"
+											class="btn-check">
+										<label for="setYes" class="btn btn-outline-primary">YES</label>
+										<input type="radio" name="tokenFeaturesDelegate" id="setNo" autocomplete="off"
+											checked class="btn-check">
+										<label for="setNo" class="btn btn-outline-primary">NO</label>
+									</div>
+								</div>
+								<div id="tokenFeaturesDelegateHelp" class="form-text">Do you want delegate</div>
+							</div>
+							<div class="mb-3">
+								<label for="tokenFeaturesDaily" class="lead form-label">Daily
+								</label>
+								<div>
+									<div class="btn-group bg-dark">
+										<input type="radio" name="tokenFeaturesDaily" id="setYes" autocomplete="off"
+											class="btn-check">
+										<label for="setYes" class="btn btn-outline-primary">YES</label>
+										<input type="radio" name="tokenFeaturesDaily" id="setNo" autocomplete="off"
+											checked class="btn-check">
+										<label for="setNo" class="btn btn-outline-primary">NO</label>
+									</div>
+								</div>
+								<div id="tokenFeaturesDailyHelp" class="form-text">Do you want daily</div>
+							</div>
+							<div class="mb-3">
+								<label for="tokenFeaturesLiquidity" class="lead form-label">Liquidity
+								</label>
+								<div>
+									<div class="btn-group bg-dark">
+										<input type="radio" name="tokenFeaturesLiquidity" id="setYes" autocomplete="off"
+											class="btn-check">
+										<label for="setYes" class="btn btn-outline-primary">YES</label>
+										<input type="radio" name="tokenFeaturesLiquidity" id="setNo" autocomplete="off"
+											checked class="btn-check">
+										<label for="setNo" class="btn btn-outline-primary">NO</label>
+									</div>
+								</div>
+								<div id="tokenFeaturesLiquidityHelp" class="form-text">Do you want liquidity</div>
+							</div>
+							<div class="mb-3">
+								<label for="tokenFeaturesIco" class="lead form-label">ICO
+								</label>
+								<div>
+									<div class="btn-group bg-dark">
+										<input type="radio" name="tokenFeaturesIco" id="setYes" autocomplete="off"
+											class="btn-check">
+										<label for="setYes" class="btn btn-outline-primary">YES</label>
+										<input type="radio" name="tokenFeaturesIco" id="setNo" autocomplete="off"
+											checked class="btn-check">
+										<label for="setNo" class="btn btn-outline-primary">NO</label>
+									</div>
+								</div>
+								<div id="tokenFeaturesIcoHelp" class="form-text">Do you want ICO</div>
+							</div>
+							<div class="mb-3">
+								<label for="tokenFeaturesInflation" class="lead form-label">Inflation
+								</label>
+								<div>
+									<div class="btn-group bg-dark">
+										<input type="radio" name="tokenFeaturesInflation" id="setYes" autocomplete="off"
+											class="btn-check">
+										<label for="setYes" class="btn btn-outline-primary">YES</label>
+										<input type="radio" name="tokenFeaturesInflation" id="setNo" autocomplete="off"
+											checked class="btn-check">
+										<label for="setNo" class="btn btn-outline-primary">NO</label>
+									</div>
+								</div>
+								<div id="tokenFeaturesInflationHelp" class="form-text">Do you want inflation</div>
+							</div>
+							<div class="mb-3">
+								<label for="tokenFeaturesDex" class="lead form-label">DEX
+								</label>
+								<div>
+									<div class="btn-group bg-dark">
+										<input type="radio" name="tokenFeaturesDex" id="setYes" autocomplete="off"
+											checked class="btn-check">
+										<label for="setYes" class="btn btn-outline-primary">YES</label>
+										<input type="radio" name="tokenFeaturesDex" id="setNo" autocomplete="off"
+											class="btn-check">
+										<label for="setNo" class="btn btn-outline-primary">NO</label>
+									</div>
+								</div>
+								<div id="tokenFeaturesDexHelp" class="form-text">Do you want a Decentralized Exchange
+								</div>
+							</div>
+							<div class="mb-3">
+								<label for="tokenFeaturesNft" class="lead form-label">NFT
+								</label>
+								<div>
+									<div class="btn-group bg-dark">
+										<input type="radio" name="tokenFeaturesNft" id="setYes" autocomplete="off"
+											checked="checked" class="btn-check">
+										<label for="setYes" class="btn btn-outline-primary">YES</label>
+										<input type="radio" name="tokenFeaturesNft" id="setNo" autocomplete="off"
+											class="btn-check">
+										<label for="setNo" class="btn btn-outline-primary">NO</label>
+									</div>
+								</div>
+								<div id="tokenFeaturesNftHelp" class="form-text">Do you want to support Non Fungible
+									Tokens</div>
+							</div>
+							<div class="mb-3">
+								<label for="tokenFeaturesState" class="lead form-label">State
+								</label>
+								<div>
+									<div class="btn-group bg-dark">
+										<input type="radio" name="tokenFeaturesState" id="setYes" autocomplete="off"
+											checked="checked" class="btn-check">
+										<label for="setYes" class="btn btn-outline-primary">YES</label>
+										<input type="radio" name="tokenFeaturesState" id="setNo" autocomplete="off"
+											class="btn-check">
+										<label for="setNo" class="btn btn-outline-primary">NO</label>
+									</div>
+								</div>
+								<div id="tokenFeaturesStateHelp" class="form-text">Do you want state</div>
+							</div>
+							<div class="mb-3">
+								<label for="tokenFeaturesClaimdrop" class="lead form-label">Claim Drop
+								</label>
+								<div>
+									<div class="btn-group bg-dark">
+										<input type="radio" name="tokenFeaturesClaimdrop" id="setYes" autocomplete="off"
+											checked="checked" class="btn-check">
+										<label for="setYes" class="btn btn-outline-primary">YES</label>
+										<input type="radio" name="tokenFeaturesClaimdrop" id="setNo" autocomplete="off"
+											class="btn-check">
+										<label for="setNo" class="btn btn-outline-primary">NO</label>
+									</div>
+								</div>
+								<div id="tokenFeaturesClaimdropHelp" class="form-text">Do you want Claim Drop</div>
+							</div>
+						</div>
+
+						<div class="card-footer text-center">
+							<button type="submit" class="btn btn-primary">Create<i
+									class="fa-solid fa-rocket fa-fw ms-1"></i></button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</main>
+		<div>
+			<foot-vue />
+		</div>
+	</div>
+	<!-- Bootstrap -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+		crossorigin="anonymous"></script>
+</body>
+
+</html>
