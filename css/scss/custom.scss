@@ -628,7 +628,9 @@ a-scene {
   border-style: solid;
   border-width: 2px;
 }
-
+.text-turq {
+  color: #0ed18c;
+}
 .border-turq {
   border-color: #0ed18c !important;
 }
@@ -661,6 +663,9 @@ a-scene {
   border-width: 2px;
 }
 
+.text-blue {
+  color: #033efd;
+}
 .border-blue {
   border-color: #033efd !important;
 }
@@ -701,7 +706,9 @@ a-scene {
   border-style: solid;
   border-width: 2px;
 }
-
+.text-fusch {
+  color: #fb00ff;
+}
 .border-fusch {
   border-color: #fb00ff !important;
 }
@@ -731,7 +738,9 @@ a-scene {
   border-style: solid;
   border-width: 1.5px;
 }
-
+.text-tang {
+  color: #ffa300;
+}
 .border-tang {
   border-color: #ffa300;
 }
@@ -752,7 +761,9 @@ a-scene {
   border-style: solid;
   border-width: 2px;
 }
-
+.text-purp {
+  color: #9300ff;
+}
 .border-purp {
   border-color: #9300ff;
 }
@@ -776,6 +787,9 @@ a-scene {
 // HONEY ELEMENTS
 .text-honey {
   color: #EBA937 !important;
+}
+.text-honey-50 {
+  color: #eba937da !important;
 }
 .border-honey {
   border-color: #EBA937 !important;
