@@ -25,7 +25,7 @@
     function accountUpdate(message) {}
     function hiveState(message) {const json=JSON.parse(message.json_metadata)
     var assets=document.getElementById('aassets')
-    assets.innerHTML = '<img id="graph" src="https://ipfs.dlux.io/ipfs/QmeDDfa2QUUhuTvVJrEQNRNB1qBCJCjUKmx2enmVjLqP8H?.graph.png" crossorigin="anonymous" >'
+    assets.innerHTML = '<img id="graph" src="https://ipfs.dlux.io/ipfs/QmWvwLf3noy9jb8FRXXhcEUfBkKDHtSEy9xUna8nZ99GVd" crossorigin="anonymous" >'
     document.getElementById('links').innerHTML = ''
     var first = false
     for(var i=0;i<json.assets.length;i++){
@@ -85,7 +85,7 @@
           baseline: top; 
           maxWidth: 1;
           overflowWrap: break-word; 
-          font: /ipfs/QmPEgaopzfbAZf9ecb5yQpzCTcxT4jEGcWwRAqFGboBJ4d" 
+          font: https://ipfs.dlux.io/ipfs/QmPEgaopzfbAZf9ecb5yQpzCTcxT4jEGcWwRAqFGboBJ4d" 
           position="0 -1.1 0" 
         </a-entity>
       </a-entity>
@@ -96,7 +96,7 @@
       <a-assets id="aassets">
         <audio id="click-sound" crossorigin="anonymous" src="https://cdn.aframe.io/360-image-gallery-boilerplate/audio/click.ogg"></audio>
         <img id="graph" src="https://ipfs.dlux.io/ipfs/QmeDDfa2QUUhuTvVJrEQNRNB1qBCJCjUKmx2enmVjLqP8H?.graph.png" crossorigin="anonymous" >
-        <img id="hive" src="/ipfs/QmPEgaopzfbAZf9ecb5yQpzCTcxT4jEGcWwRAqFGboBJ4d" crossorigin="">
+        <img id="hive" src="https://ipfs.dlux.io/ipfs/QmWvwLf3noy9jb8FRXXhcEUfBkKDHtSEy9xUna8nZ99GVd" crossorigin="">
       </a-assets>
       <a-sky id="image-360" radius="10" src="#graph"
              animation__fade="property: components.material.material.color; type: color; from: #FFF; to: #000; dur: 300; startEvents: fade"
