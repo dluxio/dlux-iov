@@ -1082,6 +1082,8 @@ createApp({
               }
               try {
               if (
+                "Qmez37Vc9EZY44hLvdyLXkMgPjpMZkcQzfUYwmpaRZNQHb" ==
+                this.posturls[key].json_metadata.vrHash ||
                 "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
                 this.posturls[key].json_metadata.vrHash ||
                 "QmZF2ZEZK8WBVUT7dnQyzA6eApLGnMXgNaJtWHFc3PCpqV" ==

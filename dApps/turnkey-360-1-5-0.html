@@ -80,14 +80,15 @@
         proxy-event="event: click; to: #image-360; as: fade"
         sound="on: click; src: #click-sound">
         <a-entity troika-text="value: ${text};
-        color: white;
-        align: center; 
-        baseline: top; 
-        maxWidth: 1;
-        overflowWrap: break-word; 
-        font: https://cdn.glitch.com/b3e5aba8-53bf-44c1-a9b9-f3bfa5344c93%2Froboto-v20-vietnamese_latin-ext_latin_greek-ext_greek_cyrillic-ext_cyrillic-regular.woff?v=1612129504894" 
-        position="0 -1.1 0" 
-        </a-entity></a-entity>
+          color: white;
+          align: center; 
+          baseline: top; 
+          maxWidth: 1;
+          overflowWrap: break-word; 
+          font: /ipfs/QmPEgaopzfbAZf9ecb5yQpzCTcxT4jEGcWwRAqFGboBJ4d" 
+          position="0 -1.1 0" 
+        </a-entity>
+      </a-entity>
     </script>
   </head>
   <body>
@@ -95,7 +96,7 @@
       <a-assets id="aassets">
         <audio id="click-sound" crossorigin="anonymous" src="https://cdn.aframe.io/360-image-gallery-boilerplate/audio/click.ogg"></audio>
         <img id="graph" src="https://ipfs.dlux.io/ipfs/QmeDDfa2QUUhuTvVJrEQNRNB1qBCJCjUKmx2enmVjLqP8H?.graph.png" crossorigin="anonymous" >
-        <img id="hive" src="https://cdn.glitch.com/01653acd-2032-42f4-b8a0-e375b4533968%2Fcircle_hive_black.png?v=1608032530206" crossorigin="">
+        <img id="hive" src="/ipfs/QmPEgaopzfbAZf9ecb5yQpzCTcxT4jEGcWwRAqFGboBJ4d" crossorigin="">
       </a-assets>
       <a-sky id="image-360" radius="10" src="#graph"
              animation__fade="property: components.material.material.color; type: color; from: #FFF; to: #000; dur: 300; startEvents: fade"

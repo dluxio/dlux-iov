@@ -99,7 +99,7 @@ createApp({
         "app": "dlux/0.1.0",
         "subApp": "360",
         "xr": true,
-        "vrHash": "Qma4dk3mWP325HrHYBDz3UdL9h1A6q8CSvZdc8JhqfgiMp",
+        "vrHash": "Qmez37Vc9EZY44hLvdyLXkMgPjpMZkcQzfUYwmpaRZNQHb",
         "format": "markdown",
         "assets": [
           // {"hash":"",
@@ -116,7 +116,7 @@ createApp({
         "app": "dlux/0.1.0",
         "subApp": "360",
         "xr": true,
-        "vrHash": "Qma4dk3mWP325HrHYBDz3UdL9h1A6q8CSvZdc8JhqfgiMp",
+        "vrHash": "Qmez37Vc9EZY44hLvdyLXkMgPjpMZkcQzfUYwmpaRZNQHb",
         "format": "markdown",
         "assets": [
           // {"hash":"",
