@@ -63,14 +63,14 @@
 							<!--1 Token Name: DLUX-->
 							<div class="mb-3">
 								<label for="tokenTagName" class="lead form-label">Token Tag Name</label>
-								<input required type="text" placeholder="ex: ragnarok"
+								<input required="required" type="text" placeholder="ex: ragnarok"
 									class="form-control bg-dark border-0 text-info" id="tokenTagName"
 									aria-describedby="tokenTagNameHelp">
 								<div id="tokenTagNameHelp" class="form-text">Enter the display name for your token</div>
 							</div>
 							<div class="mb-3">
 								<label for="tokenJson" class="lead form-label">Token JSON</label>
-								<input required type="text" placeholder="ex: duat"
+								<input required="required" type="text" placeholder="ex: duat"
 									class="form-control bg-dark border-0 text-info" id="tokenJson"
 									aria-describedby="tokenJsonHelp">
 								<div id="tokenJsonHelp" class="form-text">Enter the JSON <i
@@ -79,7 +79,7 @@
 							<div class="mb-3">
 								<label for="tokenPrefix" class="lead form-label">Token Prefix
 								</label>
-								<input required type="text" placeholder="ex: duat_"
+								<input required="required" type="text" placeholder="ex: duat_"
 									class="form-control bg-dark border-0 text-info" id="tokenPrefix"
 									aria-describedby="tokenPrefixHelp">
 								<div id="tokenPrefixHelp" class="form-text">Enter the prefix for your token</div>
@@ -87,7 +87,7 @@
 							<!--2 Precision (default 3)-->
 							<div class="mb-3">
 								<label for="tokenPrecision" class="lead form-label">Token Precision</label>
-								<input required type="range" class="form-range" min="0" max="7" step="1" value="3"
+								<input required="required" type="range" class="form-range" min="0" max="7" step="1" value="3"
 									id="tokenPrecision">
 								<div id="tokenPrecisionHelp" class="form-text">Enter the precision for your token</div>
 							</div>
@@ -99,7 +99,7 @@
 									<span class="position-absolute top-50 translate-middle-y ps-2">
 										<i class="fa-solid fa-at fa-fw"></i>
 									</span>
-									<input required type="text" aria-describedby="tokenCreatorHelp"
+									<input required="required" type="text" aria-describedby="tokenCreatorHelp"
 										class="ps-4 form-control text-info bg-dark border-0" placeholder="dlux-io"
 										id="tokenCreator">
 								</div>
@@ -109,7 +109,7 @@
 							<div class="mb-3">
 								<label for="tokenApi" class="lead form-label">Public API
 								</label>
-								<input required type="text" class="form-control bg-dark border-0 text-info"
+								<input required="required" type="text" class="form-control bg-dark border-0 text-info"
 									placeholder="token.dlux.io" id="tokenApi" aria-describedby="tokenApiHelp">
 								<div id="tokenApiHelp" class="form-text">Enter the API for your token</div>
 							</div>
@@ -138,7 +138,7 @@
 									<span class="position-absolute top-50 translate-middle-y ps-2">
 										<i class="fa-solid fa-at fa-fw"></i>
 									</span>
-									<input required="true" type="text" aria-describedby="tokenMultiSigHelp"
+									<input required="required" type="text" aria-describedby="tokenMultiSigHelp"
 										class="ps-4 form-control text-info bg-dark border-0" id="tokenMultiSig">
 								</div>
 								<div id="tokenMultiSigHelp" class="form-text">Enter the multi-sig account for your token
