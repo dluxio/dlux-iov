@@ -92,9 +92,9 @@
                         <div class="col mb-4" v-for="set in nftsetsf" :key="set.script">
                             <a :href="makeLink('/nfts/set/', set.set, ['#', toLowerCase(set.token)])"
                                 style="text-decoration: none">
-                                <div class="card bg-dark text-white">
+                                <div class="card text-white rounded-5">
                                     <div>
-                                        <img class="img-fluid featured-img"
+                                        <img class="img-fluid featured-img rounded-top-5 border-3 border-bottom border-black"
                                             :src="makeLink('https://ipfs.dlux.io/ipfs/', set.computed.set.featured)"></img>
                                         <div class="center-circle rounded-circle bg-darker"
                                             style="border: solid black 3px">
@@ -104,9 +104,9 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="card-footer p-0" style="border: none"
+                                    <div class="card-footer p-0 border-3 border-top border-black rounded-bottom-5" style="border: none"
                                         :style="{'background': getSetDetailsColors(set.computed, 'body')}">
-                                        <div class="m-3 p-3 rounded " style="background-color: rgba(0, 0, 0, 0.7)">
+                                        <div class="m-3 p-3 rounded-5" style="background-color: rgba(0, 0, 0, 0.7)">
                                             <h2 class="card-title mt-4 pt-2 mb-2 mx-3 text-center">{{set.name_long ?
                                                 set.name_long : set.set}}</h2>
                                             <div class="my-2 mx-3 d-flex align-items-center">
