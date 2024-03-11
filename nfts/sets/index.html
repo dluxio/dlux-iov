@@ -56,14 +56,14 @@
       </script>
 </head>
 
-<body class="d-flex flex-column h-100 padme-t70 text-white" id="explore">
-    <div id="app" v-cloak>
+<body class="d-flex h-100 align-items-stretch" id="explore">
+    <div id="app" v-cloak class="d-flex w-100 flex-column w-100">
         <div>
             <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event);getUserNFTs()"
                 @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" @refresh="run($event)"
                 :op="toSign" :lapi="lapi" />
         </div>
-        <main role="main" class="flex-shrink-0">
+        <main role="main" class="mb-auto" style="padding-top: 94px;">
             <div class="container-fluid">
                 <div class="container" style="max-width: 1600px">
                     <div class="my-4 d-flex align-items-center flex-wrap">
