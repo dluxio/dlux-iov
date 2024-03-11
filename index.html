@@ -171,10 +171,10 @@
       <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
         @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" />
     </div>
-    <main class="mb-auto" style="margin-top: 94px;">
+    <main class="mb-auto px-2" style="margin-top: 94px;">
       <div id="logo" ref="logo" class="d-flex flex-row px-2 click-me" @click="startscroll()"></div>
-      <div id="dapps" ref="dapps" class="d-flex flex-row mx-2 my-1">
-        <div class="d-flex flex-column dlux-turq jumbo-dlux container p-1 p-md-5 m-auto">
+  
+        <div class="d-flex flex-column dlux-turq jumbo-dlux container px-3 py-4 p-md-5 my-4 my-lg-5">
           <div class="dlux-header d-flex display-4">
             <h1 class="d-flex mb-0">
               <span class="text-white">dlux is:</span>
@@ -216,15 +216,15 @@
             <p class="text-white">{{dappstats}} dApps in the Hub.</p>
           </div>
           <div>
-            <a class="btn btn-dlux btn-lg btn-turq mt-2" href="/vr/">Launch Overworld<i
+            <a class="btn btn-dlux btn-lg btn-turq mt-2" href="/vr/">VR Overworld<i
                 class="fas fa-vr-cardboard ms-2"></i></a>
             <a class="btn btn-dlux btn-lg btn-outline-turq mt-2" href="/hub/">Browse dApps<i
                 class="fa-solid fa-mountain-sun ms-2"></i></a>
           </div>
         </div>
-      </div>
-      <div id="defi" class="d-flex flex-row mx-2 my-1">
-        <div class="d-flex flex-column dlux-tang jumbo-dlux container p-1 p-md-5 m-auto">
+     
+
+        <div class="d-flex flex-column dlux-tang jumbo-dlux container px-3 py-4 p-md-5 my-4 my-lg-5">
           <div class="dlux-header">
             <h1>
               <span class="text-white">dlux is:</span>
@@ -242,9 +242,9 @@
                 class="fa-solid fa-building-columns ms-2"></i></a>
           </div>
         </div>
-      </div>
-      <div id="hive-chain" class="d-flex flex-row mx-2 my-1">
-        <div class="d-flex flex-column hive jumbo-dlux container p-1 p-md-5 m-auto">
+      
+ 
+        <div class="d-flex flex-column hive jumbo-dlux container px-3 py-4 p-md-5 my-4 my-lg-5">
           <div class="dlux-header">
             <h1>
               <span class="text-white">dlux is:</span>
@@ -264,9 +264,9 @@
                 class="fas fa-fw fa-key ms-2"></i></a>
           </div>
         </div>
-      </div>
-      <div id="info" class="d-flex flex-row mx-2 my-1">
-        <div class="d-flex flex-column dlux-purp jumbo-dlux container p-1 p-md-5 m-auto">
+      
+
+        <div class="d-flex flex-column dlux-purp jumbo-dlux container px-3 py-4 p-md-5 my-4 my-lg-5">
           <div class="dlux-header">
             <h1>
               <span class="text-white">dlux is:</span>
@@ -284,7 +284,7 @@
                 class="fas fa-fw fa-book ms-2"></i></a>
           </div>
         </div>
-      </div>
+   
     </main>
     <div class="front">
       <foot-vue />
