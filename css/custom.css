@@ -13302,7 +13302,7 @@ a-scene {
 }
 
 .jumbo-dlux {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.4);
   -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
   max-width: 600px;
