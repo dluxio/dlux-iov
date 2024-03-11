@@ -130,8 +130,8 @@ export default {
                     <!-- registered -->
                     <div v-if="saccountapi.pubKey != 'NA'">
                         <!-- no contracts -->
-                        <div class="ms-auto me-auto text-center" v-show="!contracts.length">
-                            <div class="ms-auto me-auto card px-3 py-2 mt-3 mb-4 bg-darker" style="max-width: 600px">
+                        <div class="ms-auto me-auto d-flex justify-content-center" v-show="!contracts.length">
+                            <div class="card mx-1 px-3 py-2 mt-3 mb-4 bg-darker" style="max-width: 600px">
                                 <h2 class="fw-light mt-1">No contracts found</h2>
                                 <p class="lead mb-1" v-if="!nodeview">
                                     Click <a class="btn btn-sm btn-danger no-decoration small" style="font-size: 0.6em;"
