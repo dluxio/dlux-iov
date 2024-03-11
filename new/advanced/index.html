@@ -173,89 +173,95 @@
             <nav-vue @login="account = $event;newme($event)" @logout="account = '';removeUser()" @ack="removeOp($event)"
                 @refresh="run($event)" :op="toSign" :lapi="lapi" />
         </div>
-        <main role="main" class="mb-auto" style="margin-top: 94px;">
-            <div class="d-flex flex-column justify-content-between align-items-center nav-blur px-2"
-                style="background-color: rgba(0,0,0,0.6)">
-                <div class="py-1 px-1 w-100" style="max-width: 1800px;">
-                    <!-- toolbar -->
-                    <div class="d-flex justify-content-between align-items-center">
-                        <!-- page title -->
-                        <div class="lead d-none">New DLUX Post</div>
-                        <!-- post type dropdown -->
-                        <div class="dropdown d-flex me-1">
-                            <a class="ms-auto me-auto btn btn-outline-light dropdown-toggle" role="button" id="postdApp"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                DLUX Post Type:
-                                <span class="mx-1"
-                                    v-if="postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'"><i class="fa-solid fa-globe fa-fw me-1"></i>360
-                                    Image Gallery</span>
-                                <span class="mx-1" v-if="postCustom_json.vrHash == 'video'"><i class="fa-solid fa-film fa-fw me-1"></i>Video</span>
-                                <span class="mx-1" v-if="postCustom_json.vrHash == 'dapp'"><i class="fa-solid fa-mobile-screen-button fa-fw me-1"></i>New dApp</span>
-                                <span class="mx-1" v-if="postCustom_json.vrHash == 'remix'"><i class="fa-solid fa-shuffle fa-fw me-1"></i>Remix dApp</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end"
-                                aria-labelledby="postdApp">
-                                <li><a class="dropdown-item"
-                                        :class="{active: postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'}"
-                                        role="button"
-                                        @click="postCustom_json.vrHash = 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k';types='ts,img'"><i
-                                            class="fa-solid fa-globe fa-fw me-2"></i>360 Image Gallery</a></li>
-                                <li><a class="dropdown-item" :class="{active: postCustom_json.vrHash == 'video'}"
-                                        role="button" @click="postCustom_json.vrHash = 'video';types='img,vid'"><i
-                                            class="fa-solid fa-film fa-fw me-2"></i>Video</a></li>
-                                <li><a class="dropdown-item" :class="{active: postCustom_json.vrHash == 'dapp'}"
-                                        role="button"
-                                        @click="postCustom_json.vrHash = 'dapp';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'"><i
-                                            class="fa-solid fa-mobile-screen-button fa-fw me-2"></i>New dApp</a></li>
-                                <li><a class="dropdown-item" :class="{active: postCustom_json.vrHash == 'remix'}"
-                                        role="button"
-                                        @click="postCustom_json.vrHash = 'remix';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'"><i
-                                            class="fa-solid fa-shuffle fa-fw me-2"></i>ReMix dApp</a></li>
-                                <li></li>
-                            </ul>
-                        </div>
+        <main role="main" class="mb-auto" style="margin-top: 170px;">
+            <div class="container-fluid fixed-top px-0" style="margin-top: 94px; z-index: 900;">
+                <div class="d-flex flex-column justify-content-between align-items-center nav-blur px-2"
+                    style="background-color: rgba(0,0,0,0.6)">
+                    <div class="py-1 px-1 w-100" style="max-width: 1800px;">
+                        <!-- toolbar -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <!-- post type dropdown -->
+                            <div class="dropdown d-flex me-1">
+                                <a class="ms-auto me-auto btn btn-outline-light dropdown-toggle" role="button"
+                                    id="postdApp" data-bs-toggle="dropdown" aria-expanded="false">
+                                    DLUX Post Type:
+                                    <span class="mx-1"
+                                        v-if="postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'"><i
+                                            class="fa-solid fa-globe fa-fw me-1"></i>360
+                                        Image Gallery</span>
+                                    <span class="mx-1" v-if="postCustom_json.vrHash == 'video'"><i
+                                            class="fa-solid fa-film fa-fw me-1"></i>Video</span>
+                                    <span class="mx-1" v-if="postCustom_json.vrHash == 'dapp'"><i
+                                            class="fa-solid fa-mobile-screen-button fa-fw me-1"></i>New dApp</span>
+                                    <span class="mx-1" v-if="postCustom_json.vrHash == 'remix'"><i
+                                            class="fa-solid fa-shuffle fa-fw me-1"></i>Remix dApp</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end"
+                                    aria-labelledby="postdApp">
+                                    <li><a class="dropdown-item"
+                                            :class="{active: postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'}"
+                                            role="button"
+                                            @click="postCustom_json.vrHash = 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k';types='ts,img'"><i
+                                                class="fa-solid fa-globe fa-fw me-2"></i>360 Image Gallery</a></li>
+                                    <li><a class="dropdown-item" :class="{active: postCustom_json.vrHash == 'video'}"
+                                            role="button" @click="postCustom_json.vrHash = 'video';types='img,vid'"><i
+                                                class="fa-solid fa-film fa-fw me-2"></i>Video</a></li>
+                                    <li><a class="dropdown-item" :class="{active: postCustom_json.vrHash == 'dapp'}"
+                                            role="button"
+                                            @click="postCustom_json.vrHash = 'dapp';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'"><i
+                                                class="fa-solid fa-mobile-screen-button fa-fw me-2"></i>New dApp</a>
+                                    </li>
+                                    <li><a class="dropdown-item" :class="{active: postCustom_json.vrHash == 'remix'}"
+                                            role="button"
+                                            @click="postCustom_json.vrHash = 'remix';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'"><i
+                                                class="fa-solid fa-shuffle fa-fw me-2"></i>ReMix dApp</a></li>
+                                    <li></li>
+                                </ul>
+                            </div>
 
-                        <!-- toggle buttons -->
-                        <div class="d-flex justify-content-center">
-                            <!-- assets button -->
-                            <a class="ms-md-2 no-decoration" data-bs-toggle="collapse" href="#assetMgr">
-                                <span class="if-collapsed">
-                                    <button class="me-1 btn btn-outline-light">
-                                        <i class="fa-solid fa-shapes fa-fw me-1"></i> Asset Manager
-                                    </button>
-                                </span>
-                                <span class="if-not-collapsed">
-                                    <button class="me-1 btn btn-light">
-                                        <i class="fa-solid fa-shapes fa-fw me-1"></i> Asset Manager
-                                    </button>
-                                </span>
-                            </a>
-                            <!-- dapp button -->
-                            <a class="ms-md-2 collapsed no-decoration" data-bs-toggle="collapse" href="#dappPreview">
-                                <span class="if-collapsed">
-                                    <button class="me-1 btn btn-outline-light">
-                                        <i class="fa-solid fa-magnifying-glass fa-fw me-1"></i> Preview
-                                    </button>
-                                </span>
-                                <span class="if-not-collapsed">
-                                    <button class="me-1 btn btn-light">
-                                        <i class="fa-solid fa-magnifying-glass fa-fw me-1"></i> Preview
-                                    </button>
-                                </span>
-                            </a>
-                             <!-- post button -->
-                             <a class="ms-md-2 collapsed no-decoration" data-bs-toggle="collapse" href="#editPost">
-                                <span class="if-collapsed">
-                                    <button class="me-1 btn btn-outline-light">
-                                        <i class="fa-solid fa-pen-to-square fa-fw me-1"></i> Post Details
-                                    </button>
-                                </span>
-                                <span class="if-not-collapsed">
-                                    <button class="me-1 btn btn-light">
-                                        <i class="fa-solid fa-pen-to-square fa-fw me-1"></i> Post Details
-                                    </button>
-                                </span>
-                            </a>
+                            <!-- toggle buttons -->
+                            <div class="d-flex justify-content-center">
+                                <!-- assets button -->
+                                <a class="ms-md-2 no-decoration" data-bs-toggle="collapse" href="#assetMgr">
+                                    <span class="if-collapsed">
+                                        <button class="me-1 btn btn-outline-light">
+                                            <i class="fa-solid fa-shapes fa-fw me-1"></i> Asset Manager
+                                        </button>
+                                    </span>
+                                    <span class="if-not-collapsed">
+                                        <button class="me-1 btn btn-light">
+                                            <i class="fa-solid fa-shapes fa-fw me-1"></i> Asset Manager
+                                        </button>
+                                    </span>
+                                </a>
+                                <!-- dapp button -->
+                                <a class="ms-md-2 collapsed no-decoration" data-bs-toggle="collapse"
+                                    href="#dappPreview">
+                                    <span class="if-collapsed">
+                                        <button class="me-1 btn btn-outline-light">
+                                            <i class="fa-solid fa-magnifying-glass fa-fw me-1"></i> Preview
+                                        </button>
+                                    </span>
+                                    <span class="if-not-collapsed">
+                                        <button class="me-1 btn btn-light">
+                                            <i class="fa-solid fa-magnifying-glass fa-fw me-1"></i> Preview
+                                        </button>
+                                    </span>
+                                </a>
+                                <!-- post button -->
+                                <a class="ms-md-2 collapsed no-decoration" data-bs-toggle="collapse" href="#editPost">
+                                    <span class="if-collapsed">
+                                        <button class="me-1 btn btn-outline-light">
+                                            <i class="fa-solid fa-pen-to-square fa-fw me-1"></i> Post Details
+                                        </button>
+                                    </span>
+                                    <span class="if-not-collapsed">
+                                        <button class="me-1 btn btn-light">
+                                            <i class="fa-solid fa-pen-to-square fa-fw me-1"></i> Post Details
+                                        </button>
+                                    </span>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -270,95 +276,93 @@
                 <div>Compose post</div>
                 <div>Publish</div>
             </div>
+
             <!-- 360 -->
             <div v-if="postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'">
-
-
                 <!-- widgets -->
                 <div class="d-flex flex-wrap justify-content-around mb-3">
                     <!-- File URL Widget -->
                     <div class="collapse col-lg-6 p-1" id="fileUrl">
-                        <div class="modal position-static d-block">
+                        <div class="modal  position-static d-block">
                             <div class="modal-content">
-                                <div class="modal-header px-3 py-2 item">
-                                    <h5 class="modal-title">File URL</h5>
-                                    <a role="button" class="btn-close" data-bs-toggle="collapse" aria-label="Close"
-                                        href="#fileUrl"></a>
-                                </div>
-                                <div class="modal-body">
-                                    Paste the URL of a file you want to add
-                                    <input class="form-control" type="text">
-                                    <button class="btn btn-primary">Add</button>
-                                </div>
+                            <div class="modal-header px-3 py-2 item">
+                                <h5 class="modal-title">File URL</h5>
+                                <a role="button" class="btn-close" data-bs-toggle="collapse" aria-label="Close"
+                                    href="#fileUrl"></a>
                             </div>
+                            <div class="modal-body">
+                                Paste the URL of a file you want to add
+                                <input class="form-control" type="text">
+                                <button class="btn btn-primary">Add</button>
+                            </div>
+</div>
                         </div>
                     </div>
                     <!-- SPK Hosting Widget -->
                     <div class="collapse col-lg-6 p-1" id="spkNetwork">
                         <div class="modal position-static d-block">
                             <div class="modal-content">
-                                <div class="modal-header px-3 py-2 item">
-                                    <h5 class="modal-title">SPK Network</h5>
-                                    <a role="button" class="btn-close" data-bs-toggle="collapse" aria-label="Close"
-                                        href="#spkNetwork"></a>
-                                </div>
-                                <div class="modal-body p-0">
-                                    <contract-vue :nodeview="false" :account="account" @tosign="toSign=$event"
-                                        @bens="addBens($event)" :postpage="true" :prop_contracts="contracts"
-                                        :assets="true" @addasset="addAsset($event)"
-                                        :accountinfo="accountinfo"></contract-vue>
-                                </div>
+                            <div class="modal-header px-3 py-2 item">
+                                <h5 class="moadl-title">SPK Network</h5>
+                                <a role="button" class="btn-close" data-bs-toggle="collapse" aria-label="Close"
+                                    href="#spkNetwork"></a>
                             </div>
+                            <div class="modal-body p-0">
+                                <contract-vue :nodeview="false" :account="account" @tosign="toSign=$event"
+                                    @bens="addBens($event)" :postpage="true" :prop_contracts="contracts" :assets="true"
+                                    @addasset="addAsset($event)" :accountinfo="accountinfo"></contract-vue>
+                            </div>
+</div>
                         </div>
                     </div>
                     <!-- Asset Manager Widget -->
                     <div class="collapse show col-lg-6 p-1" id="assetMgr">
                         <div class="modal position-static d-block">
                             <div class="modal-content">
-                                <div class="modal-header px-3 py-2 item">
-                                    <h5 class="modal-title">Asset Manager</h5>
-                                    <a role="button" class="btn-close" data-bs-toggle="collapse" aria-label="Close"
-                                        href="#assetMgr"></a>
-                                </div>
-                                <div class="modal-body pt-2">
-                                    <div class="d-flex justify-content-center align-items-center">
-                                        <!-- url button -->
-                                        <a class="collapsed no-decoration" data-bs-toggle="collapse" href="#fileUrl">
-                                            <span class="if-collapsed">
-                                                <button class="my-1 btn btn-outline-light d-flex flex-column">
-                                                    <i class="fa-solid fa-link fa-fw fa-2x ms-auto me-auto"></i>
-                                                    <span class="lead">File URL</span>
-                                                </button>
-                                            </span>
-                                            <span class="if-not-collapsed">
-                                                <button class="my-1 btn btn-light d-flex flex-column">
-                                                    <i class="fa-solid fa-link fa-fw fa-2x ms-auto me-auto"></i>
-                                                    <span class="lead">File URL</span>
-                                                </button>
-                                            </span>
-                                        </a>
-                                        <!-- spk button -->
-                                        <a class="ms-md-2 collapsed no-decoration" data-bs-toggle="collapse"
-                                            href="#spkNetwork">
-                                            <span class="if-collapsed">
-                                                <button class="my-1 btn btn-outline-light d-flex flex-column">
-                                                    <i class="fa-solid fa-cloud fa-fw fa-2x ms-auto me-auto"></i>
-                                                    <span class="lead">SPK Network</span>
-                                                </button>
-                                            </span>
-                                            <span class="if-not-collapsed">
-                                                <button class="my-1 btn btn-light d-flex flex-column">
-                                                    <i class="fa-solid fa-cloud fa-fw fa-2x ms-auto me-auto"></i>
-                                                    <span class="lead">SPK Network</span>
-                                                </button>
-                                            </span>
-                                        </a>
-                                    </div>
-                                    <assets-vue :assets="postCustom_json.assets"
-                                        @updateassets="postCustom_json.assets = $event;dluxMock()"
-                                        @setdapp="postCustom_json.vrHash = $event" :types="types" />
-                                </div>
+                            <div class="modal-header px-3 py-2 item">
+                                <h5 class="modal-title">Asset Manager</h5>
+                                <a role="button" class="btn-close" data-bs-toggle="collapse" aria-label="Close"
+                                    href="#assetMgr"></a>
                             </div>
+                            <div class="modal-body pt-2">
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <!-- url button -->
+                                    <a class="collapsed no-decoration" data-bs-toggle="collapse" href="#fileUrl">
+                                        <span class="if-collapsed">
+                                            <button class="my-1 btn btn-outline-light d-flex flex-column">
+                                                <i class="fa-solid fa-link fa-fw fa-2x ms-auto me-auto"></i>
+                                                <span class="lead">File URL</span>
+                                            </button>
+                                        </span>
+                                        <span class="if-not-collapsed">
+                                            <button class="my-1 btn btn-light d-flex flex-column">
+                                                <i class="fa-solid fa-link fa-fw fa-2x ms-auto me-auto"></i>
+                                                <span class="lead">File URL</span>
+                                            </button>
+                                        </span>
+                                    </a>
+                                    <!-- spk button -->
+                                    <a class="ms-md-2 collapsed no-decoration" data-bs-toggle="collapse"
+                                        href="#spkNetwork">
+                                        <span class="if-collapsed">
+                                            <button class="my-1 btn btn-outline-light d-flex flex-column">
+                                                <i class="fa-solid fa-cloud fa-fw fa-2x ms-auto me-auto"></i>
+                                                <span class="lead">SPK Network</span>
+                                            </button>
+                                        </span>
+                                        <span class="if-not-collapsed">
+                                            <button class="my-1 btn btn-light d-flex flex-column">
+                                                <i class="fa-solid fa-cloud fa-fw fa-2x ms-auto me-auto"></i>
+                                                <span class="lead">SPK Network</span>
+                                            </button>
+                                        </span>
+                                    </a>
+                                </div>
+                                <assets-vue :assets="postCustom_json.assets"
+                                    @updateassets="postCustom_json.assets = $event;dluxMock()"
+                                    @setdapp="postCustom_json.vrHash = $event" :types="types" />
+                            </div>
+</div>
                         </div>
                     </div>
 
@@ -366,38 +370,35 @@
                     <div class="collapse col-lg-6 p-1" id="dappPreview">
                         <div class="modal position-static d-block">
                             <div class="modal-content">
-                                <div class="modal-header px-3 py-2 item">
-                                    <h5 class="modal-title">dApp Preview</h5>
-                                    <a role="button" class="btn-close" data-bs-toggle="collapse" aria-label="Close"
-                                        href="#dappPreview"></a>
-                                </div>
-                                <div class="modal-body p-0">
-                                    <div class="position-relative">
-                                        <div
-                                            class="d-flex w-100 justify-content-end align-items-center p-2 overlay position-absolute top-0 start-50 translate-middle-x">
+                            <div class="modal-header px-3 py-2 item">
+                                <h5 class="modal-title">dApp Preview</h5>
+                                <a role="button" class="btn-close" data-bs-toggle="collapse" aria-label="Close"
+                                    href="#dappPreview"></a>
+                            </div>
+                            <div class="modal-body p-0">
+                                <div class="position-relative">
+                                    <div
+                                        class="d-flex w-100 justify-content-end align-items-center p-2 overlay position-absolute top-0 start-50 translate-middle-x">
 
-                                            <div class="form-check form-switch  form-switch-lg me-2">
-                                                <input class="form-check-input bg-blur-darkg" type="checkbox"
-                                                    role="switch" id="flexSwitchCheckChecked" v-model="showLine"
-                                                    title="Horizon Line">
-                                            </div>
-                                            <button class="btn btn-dark bg-blur-darkg border-0" title="Reset Camera"
-                                                @click="resetCamera()"><i
-                                                    class="fa-solid fa-camera-rotate"></i></button>
+                                        <div class="form-check form-switch  form-switch-lg me-2">
+                                            <input class="form-check-input bg-blur-darkg" type="checkbox" role="switch"
+                                                id="flexSwitchCheckChecked" v-model="showLine" title="Horizon Line">
                                         </div>
+                                        <button class="btn btn-dark bg-blur-darkg border-0" title="Reset Camera"
+                                            @click="resetCamera()"><i class="fa-solid fa-camera-rotate"></i></button>
+                                    </div>
 
-                                        <hr style="border: 5px solid red;" :class="{'invisible': !showLine}"
-                                            class="overlay m-0 w-100 position-absolute top-50 start-0 translate-middle-y" />
-                                        <div class="ratio ratio-1x1 frame-360">
-                                            <iframe ref="aframePreview" id="aframePreview"
-                                                :src="'https://ipfs.dlux.io/ipfs/' + postCustom_json.vrHash"
-                                                frameborder="0"
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                allowfullscreen></iframe>
-                                        </div>
+                                    <hr style="border: 5px solid red;" :class="{'invisible': !showLine}"
+                                        class="overlay m-0 w-100 position-absolute top-50 start-0 translate-middle-y" />
+                                    <div class="ratio ratio-1x1 frame-360">
+                                        <iframe ref="aframePreview" id="aframePreview"
+                                            :src="'https://ipfs.dlux.io/ipfs/' + postCustom_json.vrHash" frameborder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowfullscreen></iframe>
                                     </div>
                                 </div>
                             </div>
+</div>
                         </div>
                     </div>
 
@@ -405,18 +406,18 @@
                     <div class="collapse col-lg-6 p-1" id="editPost">
                         <div class="modal position-static d-block">
                             <div class="modal-content">
-                                <div class="modal-header px-3 py-2 item">
-                                    <h5 class="modal-title">Post Details</h5>
-                                    <a role="button" class="btn-close" data-bs-toggle="collapse" aria-label="Close"
-                                        href="#editPost"></a>
-                                </div>
-                                <div class="modal-body">
-                                    <post-vue :account="account" :prop_json="postCustom_json" :prop_bens="postBens"
-                                        @tosign="toSign=$event" />
-                                </div>
+                            <div class="modal-header px-3 py-2 item">
+                                <h5 class="modal-title">Post Details</h5>
+                                <a role="button" class="btn-close" data-bs-toggle="collapse" aria-label="Close"
+                                    href="#editPost"></a>
+                            </div>
+                            <div class="modal-body">
+                                <post-vue :account="account" :prop_json="postCustom_json" :prop_bens="postBens"
+                                    @tosign="toSign=$event" />
                             </div>
                         </div>
                     </div>
+</div>
                 </div>
 
 
