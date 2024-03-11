@@ -71,7 +71,7 @@
 								<div>
 									<div class="btn-group bg-dark">
 										<input type="radio" name="tokenDecentralized" id="setYesDecentralized"
-											autocomplete="off" :checked="newToken.decent" class="btn-check">
+											autocomplete="off" v-model="newToken.decent" class="btn-check">
 										<label for="setYesDecentralized" class="btn btn-outline-primary">YES</label>
 										<input type="radio" name="tokenDecentralized" id="setNoDecentralized"
 											autocomplete="off" :checked="!newToken.decent" class="btn-check">
@@ -101,10 +101,10 @@
 							</div>
 							<div class="mb-3">
 								<label for="tokenTagName" class="lead form-label">Token Tag Name</label>
-								<input required="required" type="text" placeholder="ex: ragnarok"
+								<input required="required" type="text" :placeholder="ex: ' + lc(newToken.token)"
 									class="form-control bg-dark border-0 text-info" id="tokenTagName"
 									aria-describedby="tokenTagNameHelp"  v-model="newToken.tag">
-								<div id="tokenTagNameHelp" class="form-text">Enter the preferred tag for your community: /dlux/@author/permlink</div>
+								<div id="tokenTagNameHelp" class="form-text">Enter the preferred tag for your community: /{{lc(newToken.token)}}/@author/permlink</div>
 							</div>
 							<div class="mb-3">
 								<label for="tokenJson" class="lead form-label">Token JSON</label>
@@ -127,7 +127,7 @@
 								<label for="tokenPrecision" class="lead form-label">Token Precision</label>
 								<input required="required" type="range" class="form-range" min="0" max="7" step="1"
 									value="3" id="tokenPrecision" v-model="newToken.precision">
-								<div id="tokenPrecisionHelp" class="form-text">Enter the precision for your token: {{formatNumber(1,newToken.precision, ',','.')}} {{newToken.token}}</div>
+								<div id="tokenPrecisionHelp" class="form-text">Enter the precision for your token: {{formatNumber(1,newToken.precision, '.',',')}} {{newToken.token}}</div>
 							</div>
 							<!--3 Which Account will participate first: @dlux-io-->
 							<!--3b What will be this accounts public API? token.dlux.io -->
@@ -141,7 +141,7 @@
 										class="ps-4 form-control text-info bg-dark border-0" :placeholder="account"
 										id="tokenCreator" v-model="newToken.leader">
 								</div>
-								<div id="tokenCreatorHelp" class="form-text">Enter the account creator for your token
+								<div id="tokenCreatorHelp" class="form-text">Enter the creator account for your token
 								</div>
 							</div>
 							<div class="mb-3">
