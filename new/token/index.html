@@ -62,38 +62,72 @@
 						</div>
 						<div class="card-body px-md-5">
 							<div class="border-bottom border-white border-4 mb-3">
-								<div class="display-5 mb-1 text-white fw-bold">New Token</div>
+								<div class="display-5 mb-1 text-white fw-bold">New {{newToken.token}} Token</div>
+							</div>
+							<!--4 Is this token decentralized?-->
+							<div class="mb-3">
+								<label for="tokenDecentralized" class="lead form-label">Decentralized
+								</label>
+								<div>
+									<div class="btn-group bg-dark">
+										<input type="radio" name="tokenDecentralized" id="setYesDecentralized"
+											autocomplete="off" :checked="newToken.decent" class="btn-check">
+										<label for="setYesDecentralized" class="btn btn-outline-primary">YES</label>
+										<input type="radio" name="tokenDecentralized" id="setNoDecentralized"
+											autocomplete="off" :checked="!newToken.decent" class="btn-check">
+										<label for="setNoDecentralized" class="btn btn-outline-primary">NO</label>
+									</div>
+								</div>
+								<div id="tokenDecentralizedHelp" class="form-text">Choose whether your token is
+									decentralized</div>
+							</div>
+							<div class="mb-3" v-show="!newToken.decent">
+								<h4 class="accordion-header text-white">Using HoneyComb as a database for on chain actions is cool... but this form will only get you so far.</h4>
 							</div>
 							<!--1 Token Name: DLUX-->
+							<div class="mb-3">
+								<label for="tokenLongName" class="lead form-label">Community Name</label>
+								<input required="required" type="text" placeholder="ex: Decentralized Limitless User eXperiences"
+									class="form-control bg-dark border-0 text-info" id="tokenLongName"
+									aria-describedby="tokenLongNameHelp" v-model="newToken.longname">
+								<div id="tokenLongNameHelp" class="form-text">Enter the long name of your token</div>
+							</div>
+							<div class="mb-3">
+								<label for="tokenCap" class="lead form-label">Token Name</label>
+								<input required="required" type="text" placeholder="ex: DLUX"
+									class="form-control bg-dark border-0 text-info" id="tokenCap"
+									aria-describedby="tokenCapHelp" v-model="newToken.token">
+								<div id="tokenCapHelp" class="form-text">Normally All Caps</div>
+							</div>
 							<div class="mb-3">
 								<label for="tokenTagName" class="lead form-label">Token Tag Name</label>
 								<input required="required" type="text" placeholder="ex: ragnarok"
 									class="form-control bg-dark border-0 text-info" id="tokenTagName"
-									aria-describedby="tokenTagNameHelp">
-								<div id="tokenTagNameHelp" class="form-text">Enter the display name for your token</div>
+									aria-describedby="tokenTagNameHelp"  v-model="newToken.tag">
+								<div id="tokenTagNameHelp" class="form-text">Enter the preferred tag for your community: /dlux/@author/permlink</div>
 							</div>
 							<div class="mb-3">
 								<label for="tokenJson" class="lead form-label">Token JSON</label>
-								<input required="required" type="text" placeholder="ex: duat"
+								<input required="required" type="text" :placeholder="'ex: ' + lc(newToken.token)"
 									class="form-control bg-dark border-0 text-info" id="tokenJson"
-									aria-describedby="tokenJsonHelp">
+									aria-describedby="tokenJsonHelp" v-model="newToken.jsontoken">
 								<div id="tokenJsonHelp" class="form-text">Enter the JSON <i
 										class="fa-solid fa-chain mx-1"></i> name for your token</div>
 							</div>
 							<div class="mb-3">
 								<label for="tokenPrefix" class="lead form-label">Token Prefix
 								</label>
-								<input required="required" type="text" placeholder="ex: duat_"
+								<input required="required" type="text" :placeholder="'ex: ' + lc(newToken.token) + '_'"
 									class="form-control bg-dark border-0 text-info" id="tokenPrefix"
-									aria-describedby="tokenPrefixHelp">
+									aria-describedby="tokenPrefixHelp" v-model="newToken.prefix">
 								<div id="tokenPrefixHelp" class="form-text">Enter the prefix for your token</div>
 							</div>
 							<!--2 Precision (default 3)-->
 							<div class="mb-3">
 								<label for="tokenPrecision" class="lead form-label">Token Precision</label>
 								<input required="required" type="range" class="form-range" min="0" max="7" step="1"
-									value="3" id="tokenPrecision">
-								<div id="tokenPrecisionHelp" class="form-text">Enter the precision for your token</div>
+									value="3" id="tokenPrecision" v-model="newToken.precision">
+								<div id="tokenPrecisionHelp" class="form-text">Enter the precision for your token: {{formatNumber(1,newToken.precision, ',','.')}} {{newToken.token}}</div>
 							</div>
 							<!--3 Which Account will participate first: @dlux-io-->
 							<!--3b What will be this accounts public API? token.dlux.io -->
@@ -104,8 +138,8 @@
 										<i class="fa-solid fa-at fa-fw"></i>
 									</span>
 									<input required="required" type="text" aria-describedby="tokenCreatorHelp"
-										class="ps-4 form-control text-info bg-dark border-0" placeholder="dlux-io"
-										id="tokenCreator">
+										class="ps-4 form-control text-info bg-dark border-0" :placeholder="account"
+										id="tokenCreator" v-model="newToken.leader">
 								</div>
 								<div id="tokenCreatorHelp" class="form-text">Enter the account creator for your token
 								</div>
@@ -114,28 +148,11 @@
 								<label for="tokenApi" class="lead form-label">Public API
 								</label>
 								<input required="required" type="text" class="form-control bg-dark border-0 text-info"
-									placeholder="token.dlux.io" id="tokenApi" aria-describedby="tokenApiHelp">
+									placeholder="token.dlux.io" id="tokenApi" aria-describedby="tokenApiHelp"  v-model="newToken.mainapi">
 								<div id="tokenApiHelp" class="form-text">Enter the API for your token</div>
 							</div>
-							<!--4 Is this token decentralized?-->
-							<div class="mb-3">
-								<label for="tokenDecentralized" class="lead form-label">Decentralized
-								</label>
-								<div>
-									<div class="btn-group bg-dark">
-										<input type="radio" name="tokenDecentralized" id="setYesDecentralized"
-											autocomplete="off" checked="checked" class="btn-check">
-										<label for="setYesDecentralized" class="btn btn-outline-primary">YES</label>
-										<input type="radio" name="tokenDecentralized" id="setNoDecentralized"
-											autocomplete="off" class="btn-check">
-										<label for="setNoDecentralized" class="btn btn-outline-primary">NO</label>
-									</div>
-								</div>
-								<div id="tokenDecentralizedHelp" class="form-text">Choose whether your token is
-									decentralized</div>
-							</div>
 							<!--5 Which account is the Multi-sig account / Make a multi-sig account-->
-							<div class="mb-3">
+							<div class="mb-3" v-show="newToken.decent">
 								<label for="tokenMultiSig" class="lead form-label">Multi-Sig Account
 								</label>
 								<div class="position-relative">
@@ -149,7 +166,7 @@
 								</div>
 							</div>
 							<!--Which features do you want?-->
-							<div class="accordion" id="optionsAccordion">
+							<div class="accordion" id="optionsAccordion" v-show="newToken.decent">
 								<div class="accordion-item bg-img-none bg-dark">
 									<h2 class="accordion-header text-white">
 										<button class="accordion-button collapsed bg-dark text-white" type="button"
