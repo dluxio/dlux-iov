@@ -130,7 +130,8 @@ export default {
                     <!-- registered -->
                     <div v-if="saccountapi.pubKey != 'NA'">
                         <!-- no contracts -->
-                        <div v-show="!contracts.length" class="ms-auto me-auto d-flex justify-content-center">
+                        <div v-show="!contracts.length"> 
+                        <div class="ms-auto me-auto d-flex justify-content-center">
                             <div class="card mx-1 px-3 py-2 mt-3 mb-4 bg-darker" style="max-width: 600px">
                                 <h2 class="fw-light mt-1">No contracts found</h2>
                                 <p class="lead mb-1" v-if="!nodeview">
@@ -153,6 +154,7 @@ export default {
                                     </span>
                                 </p>
                             </div>
+                        </div>
                         </div>
                         <!-- contracts -->
                         <div v-show="contracts.length">
