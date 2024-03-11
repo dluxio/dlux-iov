@@ -76,7 +76,7 @@ export default {
                 <!-- top menu -->
                 <div class="card-header mb-2 d-flex flex-wrap justify-content-center align-items-center">
                     <h2 class="my-1 ms-lg-3 fw-light text-start">{{title}}</h2>
-                    <div class="d-flex flex-wrap flex-grow-1 ms-lg-3">
+                    <div class="d-flex flex-wrap flex-grow-1 mx-lg-3">
                         <!-- tools 1 -->
                         <div class="d-flex mb-1 flex-wrap ms-auto order-lg-last">
                             <div class="d-flex flex-wrap justify-content-center ms-auto me-auto">
@@ -96,7 +96,8 @@ export default {
                                     <span class=""></span><i class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE
                                 </button>
                                 <!-- spk wallet button -->
-                                <button v-if="!nodeview" type="button" class="ms-2 btn btn-secondary d-flex" data-bs-toggle="modal" data-bs-target="#spkWalletModal">
+                                
+                                <button v-if="!nodeview" type="button" class="mt-1 btn btn-secondary d-flex" data-bs-toggle="modal" data-bs-target="#spkWalletModal">
                                     <i class="fa-solid fa-wallet fa-fw me-1 my-auto"></i>
                                     <span class="my-auto">SPK</span>
                                     <span class="badge small text-bg-warning ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
