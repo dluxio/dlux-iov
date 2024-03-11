@@ -21,13 +21,16 @@ export default {
         <div class="d-flex justify-content-center p-3">
             <div class="text-center" style="max-width: 600px;">
                 <p class="lead">Join the SPK Network to store your files on IPFS</p>
+                <div class="d-flex justify-content-center">
                 <button type="button" class="btn btn-primary" @click="updatePubkey()">
-                    Register Account
+                <i class="fa-solid fa-user-plus fa-fw me-1"></i> Register Account
                 </button>
-                <button type="button" class="ms-2 btn btn-secondary"
-                                    data-bs-toggle="modal" data-bs-target="#spkWalletModal">
-                                    <span class=""></span><i class="fa-solid fa-wallet fa-fw me-1"></i>SPK
-                                </button>
+                <button type="button" class="ms-2 btn btn-secondary d-flex" data-bs-toggle="modal" data-bs-target="#spkWalletModal">
+                    <i class="fa-solid fa-wallet fa-fw me-1 my-auto"></i>
+                    <span class="my-auto">SPK</span>
+                    <span class="badge small text-bg-warning ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
+                </button>
+                </div>
             </div>
         </div>
     </div>
