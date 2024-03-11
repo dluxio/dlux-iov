@@ -96,10 +96,12 @@ export default {
                                     <span class=""></span><i class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE
                                 </button>
                                 <!-- spk wallet button -->
-                                <button v-if="!nodeview" type="button" class="mt-1 me-1 btn btn-secondary"
-                                    data-bs-toggle="modal" data-bs-target="#spkWalletModal">
-                                    <span class=""></span><i class="fa-solid fa-wallet fa-fw me-1"></i>SPK
+                                <button v-if="!nodeview" type="button" class="ms-2 btn btn-secondary d-flex" data-bs-toggle="modal" data-bs-target="#spkWalletModal">
+                                    <i class="fa-solid fa-wallet fa-fw me-1 my-auto"></i>
+                                    <span class="my-auto">SPK</span>
+                                    <span class="badge small text-bg-warning ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
                                 </button>
+                                
                             </div>
                         </div>
                         <!-- tools 2 -->
@@ -134,8 +136,8 @@ export default {
                                     Click <a class="btn btn-sm btn-danger no-decoration small" style="font-size: 0.6em;"
                                         role="button" data-bs-toggle="modal" data-bs-target="#sponsoredModal"><i
                                             class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE</a>
-                                    to select a sponsored contract
-                                    <span v-show="saccountapi.spk_power">. If
+                                    to select a sponsored contract. 
+                                    <span v-show="saccountapi.spk_power"> If
                                         you have BROCA token, click <a
                                             class="btn btn-sm btn-primary no-decoration small" style="font-size: 0.6em;"
                                             role="button" data-bs-toggle="modal" data-bs-target="#contractModal">
