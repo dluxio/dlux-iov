@@ -101,7 +101,7 @@
 							</div>
 							<div class="mb-3">
 								<label for="tokenTagName" class="lead form-label">Token Tag Name</label>
-								<input required="required" type="text" :placeholder="ex: ' + lc(newToken.token)"
+								<input required="required" type="text" :placeholder="'ex: ' + lc(newToken.token)"
 									class="form-control bg-dark border-0 text-info" id="tokenTagName"
 									aria-describedby="tokenTagNameHelp"  v-model="newToken.tag">
 								<div id="tokenTagNameHelp" class="form-text">Enter the preferred tag for your community: /{{lc(newToken.token)}}/@author/permlink</div>
