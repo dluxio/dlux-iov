@@ -75,7 +75,7 @@
                 @logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
                 :lapi="lapi" />
         </div>
-        <main role="main" class="mb-auto" style="margin-top: 150px;" v-cloak>
+        <main role="main" class="mb-auto" style="margin-top: 170px;" v-cloak>
 
             <!-- app options -->
             <div class="container-fluid fixed-top px-0" style="margin-top: 94px; z-index: 900;">
@@ -83,66 +83,61 @@
                     style="background-color: rgba(0,0,0,0.6)">
                     <div class="d-flex py-1 px-1 align-itmes-center justify-content-between w-100"
                         style="max-width: 1800px;">
-
-
-                        <div class="row">
-                            <div class="d-flex align-items-center">
-                                <!-- sort dropdown (hidden) -->
-                                <div class="mx-1 d-none">
-                                    <a class="btn btn-outline-light dropdown-toggle " data-bs-toggle="dropdown"
-                                        aria-haspopup="true" aria-expanded="false">{{postSelect.entry
-                                        == 'new' ? 'NEW' : postSelect.entry == 'trending' ? 'TRENDING' : 'PROMOTED'}}
-                                        <span class="sr-only">Toggle Dropdown</span>
-                                    </a>
-                                    <div class="dropdown-menu dropdown-menu-dark">
-                                        <a class="dropdown-item"
-                                            @click="postSelect.searchTerm = '';postSelect.entry = 'new';getPosts()">NEW</a>
-                                        <a class="dropdown-item"
-                                            @click="postSelect.searchTerm = '';postSelect.entry = 'trending';getPosts()">TRENDING</a>
-                                        <a class="dropdown-item"
-                                            @click="postSelect.searchTerm = '';postSelect.entry = 'promoted';getPosts()">PROMOTED</a>
-                                    </div>
-                                </div>
-                                <!-- type dropdown -->
-                                <div class="me-2">
-                                    <a class="btn btn-outline-light dropdown-toggle " data-bs-toggle="dropdown"
-                                        aria-haspopup="true" aria-expanded="false">TYPE
-                                        <span class="sr-only">Toggle Dropdown</span>
-                                    </a>
-                                    <div class="dropdown-menu dropdown-menu-dark bg-black">
-                                        <a class="dropdown-item" v-for="(value, key, index) in postSelect.types"
-                                            :class="{'d-none' : key == 'XR' || key == '3D' || key == 'Audio' || key == 'Video' || key == 'Blog'}">
-                                            <div class="input-group bg-dark rounded d-flex">
-                                                <div class="input-group-text d-flex flex-fill"><i
-                                                        :class="value.icon"></i>{{key}}</div>
-                                                <div class="input-group-text">
-                                                    <input class="form-check-input mt-0" type="checkbox" value=""
-                                                        :checked="value.checked"
-                                                        @click="value.checked = !value.checked;displayPosts=[];getPosts()"
-                                                        aria-label="Checkbox for following text input">
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </div>
-                                </div>
-
-                                <!-- search bar -->
-                                <div class="row">
-                                    <div class="position-relative">
-                                        <span class="position-absolute ps-2 top-50 translate-middle-y">
-                                            <i class="fa-solid fa-magnifying-glass fa-fw"></i>
-                                        </span>
-                                        <input type="search" class="ps-4 form-control text-info border-light"
-                                            placeholder="Search" v-model="postSelect.searchTerm"
-                                            @keyup.enter="postSelect.entry = 'search';getPosts()"
-                                            @search="postSelect.entry = 'search';getPosts()">
-                                    </div>
-                                </div>
-                                <a href="/vr" class="ms-auto btn btn-lg btn-outline-danger" target="_blank"><i
-                                        class="fas fa-vr-cardboard me-2"></i>Launch overworld
+                        <div class="d-flex align-items-center">
+                            <!-- sort dropdown (hidden) -->
+                            <div class="mx-1 d-none">
+                                <a class="btn btn-outline-light dropdown-toggle " data-bs-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false">{{postSelect.entry
+                                    == 'new' ? 'NEW' : postSelect.entry == 'trending' ? 'TRENDING' : 'PROMOTED'}}
+                                    <span class="sr-only">Toggle Dropdown</span>
                                 </a>
+                                <div class="dropdown-menu dropdown-menu-dark">
+                                    <a class="dropdown-item"
+                                        @click="postSelect.searchTerm = '';postSelect.entry = 'new';getPosts()">NEW</a>
+                                    <a class="dropdown-item"
+                                        @click="postSelect.searchTerm = '';postSelect.entry = 'trending';getPosts()">TRENDING</a>
+                                    <a class="dropdown-item"
+                                        @click="postSelect.searchTerm = '';postSelect.entry = 'promoted';getPosts()">PROMOTED</a>
+                                </div>
+                            </div>
+                            <!-- type dropdown -->
+                            <div class="me-2">
+                                <a class="btn btn-outline-light dropdown-toggle " data-bs-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false">TYPE
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-dark bg-black">
+                                    <a class="dropdown-item" v-for="(value, key, index) in postSelect.types"
+                                        :class="{'d-none' : key == 'XR' || key == '3D' || key == 'Audio' || key == 'Video' || key == 'Blog'}">
+                                        <div class="input-group bg-dark rounded d-flex">
+                                            <div class="input-group-text d-flex flex-fill"><i
+                                                    :class="value.icon"></i>{{key}}</div>
+                                            <div class="input-group-text">
+                                                <input class="form-check-input mt-0" type="checkbox" value=""
+                                                    :checked="value.checked"
+                                                    @click="value.checked = !value.checked;displayPosts=[];getPosts()"
+                                                    aria-label="Checkbox for following text input">
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
                             </div>
 
+                            <!-- search bar -->
+                            <div class="row">
+                                <div class="position-relative">
+                                    <span class="position-absolute ps-2 top-50 translate-middle-y">
+                                        <i class="fa-solid fa-magnifying-glass fa-fw"></i>
+                                    </span>
+                                    <input type="search" class="ps-4 form-control text-info border-light"
+                                        placeholder="Search" v-model="postSelect.searchTerm"
+                                        @keyup.enter="postSelect.entry = 'search';getPosts()"
+                                        @search="postSelect.entry = 'search';getPosts()">
+                                </div>
+                            </div>
+                            <a href="/vr" class="ms-auto btn btn-lg btn-outline-danger" target="_blank"><i
+                                    class="fas fa-vr-cardboard me-2"></i>Launch overworld
+                            </a>
                         </div>
                     </div>
                 </div>
