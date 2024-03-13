@@ -1009,7 +1009,7 @@ export default {
           <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black mt-2" aria-labelledby="userDropdown" >
           <li class="">
             <a class="dropdown-item" role="button" @click="toggleChat" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSting" aria-controls="offcanvasSting">
-              <img src="/img/sting_white.svg" alt="" width="20" height="20" class="img-fluid me-md-2">Chat
+              <img src="/img/sting_white.svg" alt="" width="20" height="20" class="img-fluid me-2">Chat
             </a>
           </li>
 			        <li class=""><a class="dropdown-item" :href="'/me#blog/'" @click="showTab('blog')"><i class="fas fa-user fa-fw me-2"></i>Profile</a></li>
