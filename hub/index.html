@@ -68,7 +68,7 @@
 </head>
 
 <body class="d-flex h-100 align-items-stretch text-white" id="explore">
-    <div id="app"class="d-flex w-100 flex-column w-100">
+    <div id="app" class="d-flex w-100 flex-column w-100">
         <!-- navbar -->
         <div>
             <nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event);getSPKUser($event)"
@@ -86,7 +86,7 @@
 
 
                         <div class="row">
-                            <div class="container-fluid d-flex  justify-content-center">
+                            <div class="d-flex align-items-center">
                                 <!-- sort dropdown (hidden) -->
                                 <div class="mx-1 d-none">
                                     <a class="btn btn-outline-light dropdown-toggle " data-bs-toggle="dropdown"
@@ -125,9 +125,7 @@
                                         </a>
                                     </div>
                                 </div>
-                                <a href="/vr" class="ms-auto btn btn-lg btn-outline-danger" target="_blank"><i
-                                    class="fas fa-vr-cardboard me-2"></i>Launch overworld
-                            </a>
+
                                 <!-- search bar -->
                                 <div class="row">
                                     <div class="position-relative">
@@ -140,7 +138,9 @@
                                             @search="postSelect.entry = 'search';getPosts()">
                                     </div>
                                 </div>
-
+                                <a href="/vr" class="ms-auto btn btn-lg btn-outline-danger" target="_blank"><i
+                                        class="fas fa-vr-cardboard me-2"></i>Launch overworld
+                                </a>
                             </div>
 
                         </div>
@@ -183,8 +183,9 @@
                         <div class="card-body text-center">
                             <div style="font-size: 10em;" class="text-white-50 ">
                                 <i class="fa-solid fa-panorama position-relative">
-                                <span style="font-size: .3em;" class="d-none px-1 py-1 text-white bg-warning rounded position-absolute top-0 start-100 translate-middle">
-                                    <i class="fa-solid fa-triangle-exclamation fa-fw"></i></span></i>
+                                    <span style="font-size: .3em;"
+                                        class="d-none px-1 py-1 text-white bg-warning rounded position-absolute top-0 start-100 translate-middle">
+                                        <i class="fa-solid fa-triangle-exclamation fa-fw"></i></span></i>
                             </div>
                             <h1 style="font-size: 1.5em;" class="fw-light">There seems to be nothing here...</p>
                         </div>
