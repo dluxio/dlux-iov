@@ -990,7 +990,7 @@ export default {
           <li class="nav-item d-flex align-items-center"><a class="nav-link" href="/new/advanced"><i class="fa-solid fa-plus fa-fw me-1"></i></a></li>
           <li class="nav-item d-flex align-items-center d-none">
             <a class="nav-link" role="button" @click="toggleChat" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSting" aria-controls="offcanvasSting">
-              <img src="/img/sting_white.svg" alt="" width="30" height="30" class="img-fluid me-md-2">
+              <img src="/img/sting_white.svg" alt="" width="30" height="30" class="img-fluid me-2">
             </a>
           </li>
           <li class="nav-item d-flex align-items-center">
