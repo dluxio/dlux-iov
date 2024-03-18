@@ -1,4 +1,4 @@
-this.version = "2024.03.18.2";
+this.version = "2024.03.18.3";
 
 console.log( "SW:" + this.version + " - online.");
 
@@ -131,12 +131,13 @@ self.addEventListener("fetch", function (event) {
           // Request found in current cache, or fetch the file
           return resp || fetch(event.request).then(response => {
               /* Check if the cache has the file */
+              if(response.status == 429)throw new Error('Rate Limit@', event.request.url);
               if (!response || response.status !== 200 || response.type !== "basic") {
                 return response;
               }
               // Cache the newly fetched file for next time
               if (
-                !response.headers.get("content-type").includes("json") &&
+                (!response.headers.get("content-type").includes("json") && !response.headers.get("retry-after")) &&
                 event.request.method === "GET" && 
                 event.request.url.startsWith('http'))cache.put(event.request, response.clone());
               return response;
