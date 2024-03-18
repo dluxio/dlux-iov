@@ -1,4 +1,4 @@
-this.version = "2024.03.18.1";
+this.version = "2024.03.18.2";
 
 console.log( "SW:" + this.version + " - online.");
 
@@ -130,8 +130,15 @@ self.addEventListener("fetch", function (event) {
       return cache.match(event.request).then(resp => {
           // Request found in current cache, or fetch the file
           return resp || fetch(event.request).then(response => {
+              /* Check if the cache has the file */
+              if (!response || response.status !== 200 || response.type !== "basic") {
+                return response;
+              }
               // Cache the newly fetched file for next time
-              if (!response.headers.get("content-type").includes('json') && event.request.method === "GET" && event.request.url.startsWith('http'))cache.put(event.request, response.clone());
+              if (
+                !response.headers.get("content-type").includes("json") &&
+                event.request.method === "GET" && 
+                event.request.url.startsWith('http'))cache.put(event.request, response.clone());
               return response;
           // Fetch failed, user is offline
           }).catch(() => {
