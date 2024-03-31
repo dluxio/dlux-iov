@@ -71,7 +71,7 @@ if (
   //window.history.replaceState(null, null, "dex");
 }
 let user = localStorage.getItem("user") || "GUEST";
-let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
+let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
 
 // Vue.directive("scroll", {
 //   inserted: function (el, binding) {
@@ -2331,7 +2331,7 @@ function buyNFT(setname, uid, price, type, callback){
     },
     getReplies(a, p, c) {
       return new Promise((resolve, reject) => {
-        fetch('https://api.hive.blog', {
+        fetch('https://hive-api.dlux.io', {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content_replies", "params":["${a}","${p}"], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -2387,7 +2387,7 @@ function buyNFT(setname, uid, price, type, callback){
       }
     },
     accountRelations(name) {
-      fetch("https://api.hive.blog", {
+      fetch("https://hive-api.dlux.io", {
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"bridge.get_relationship_between_accounts\", \"params\":[\"${this.account}\",\"${name}\"], \"id\":5}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -2623,7 +2623,7 @@ function buyNFT(setname, uid, price, type, callback){
         !this.postSelect[this.postSelect.entry].p
       ) {
         this.postSelect[this.postSelect.entry].p = true;
-        fetch("https://api.hive.blog", {
+        fetch("https://hive-api.dlux.io", {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_blog_entries", "params":["${
             this.pageAccount
           }",${this.postSelect[this.postSelect.entry].o},${
@@ -2692,7 +2692,7 @@ function buyNFT(setname, uid, price, type, callback){
     },
     getContent(a, p, modal) {
       if (a && p) {
-        fetch('https://api.hive.blog', {
+        fetch('https://hive-api.dlux.io', {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content", "params":["${a}", "${p}"], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",

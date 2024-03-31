@@ -94,7 +94,7 @@ class StWidget {
     getDhiveClient() {
         if (StWidget.dhiveClient === null) {
             var dhiveClient = this.dhive.Client;
-            StWidget.dhiveClient = new dhiveClient(["https://api.hive.blog", "https://anyx.io", "https://api.openhive.network", "https://rpc.ecency.com"]);
+            StWidget.dhiveClient = new dhiveClient(["https://hive-api.dlux.io", "https://anyx.io", "https://api.openhive.network", "https://rpc.ecency.com"]);
         }
         return StWidget.dhiveClient;
     }

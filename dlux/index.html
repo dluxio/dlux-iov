@@ -22,8 +22,8 @@
         const permlink = window.location.pathname.split('/')[3]
         const hiveKey = `${author}/${permlink}`
         var user = localStorage.getItem('user') || 'Guest'
-        const hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
-        fetch('https://api.hive.blog', {
+        const hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
+        fetch('https://hive-api.dlux.io', {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content", "params":["${author}", "${permlink}"], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
