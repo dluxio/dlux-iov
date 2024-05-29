@@ -298,7 +298,7 @@ export default {
                           {{token}}
                         </span>  
                       </div>
-                      <div class="text-center mb-3 small text-muted">~{{fancyBytes(amount * 1000)}}</div>
+                      <div class="text-center mb-3 small text-muted">~{{fancyBytes(d.amount * 1000)}}</div>
                       <label for="c_to" class="small mb-1">Account to Upload File</label>
                       <div class="position-relative mb-3" id="c_to">
                         <span class="position-absolute top-50 translate-middle-y ps-2">
