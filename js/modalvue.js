@@ -630,7 +630,7 @@ export default {
           },
           id: `${this.d.token.toLowerCase()}_val_vote`,
           msg: `Trying to unlock ${this.d.token}...`,
-          ops: ["getTokenUser"],
+          ops: ["getTokenUser", "getSapi"],
           api: "https://token.dlux.io",
           txid: "send",
         };
@@ -648,7 +648,7 @@ export default {
           },
           id: `${this.d.token.toLowerCase()}_val_vote`,
           msg: `Trying to unlock ${this.d.token}...`,
-          ops: ["getTokenUser"],
+          ops: ["getTokenUser", "getSapi"],
           api: "https://token.dlux.io",
           txid: "send",
         };
