@@ -108,7 +108,7 @@ data() {
         deletable: true,
     };
 },
-emits: ["tosign"],
+emits: ["tosign", "done"],
 methods: {
     uploadFile(e) {
         console.log(e)
@@ -291,6 +291,7 @@ methods: {
             this.File[this.FileInfo[f.name].index].actions.resume = false
             this.File[this.FileInfo[f.name].index].actions.cancel = false
             this.FileInfo[f.name].progress = 100
+            this.File[this.FileInfo[f.name].index].progress = 100
             this.FileInfo[f.name].status = 'done'
             var done = true
             for(var file in this.FileInfo){
