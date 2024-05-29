@@ -2382,6 +2382,7 @@ function buyNFT(setname, uid, price, type, callback){
       });
     },
     run(op) {
+      console.log('Refreshing:', op)
       if (typeof this[op] == "function" && this.account != "GUEST") {
         this[op](this.account);
       }
