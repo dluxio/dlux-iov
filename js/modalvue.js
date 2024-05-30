@@ -37,7 +37,7 @@ export default {
                   <input class="form-check-input" type="checkbox" role="switch" v-model="d.up"> 
                 </div> 
                 <label class="small mb-1 d-flex" for="sendAmount">Amount
-                  <span class="ms-auto">Balance: <a class="text-info" role="button" @click="amount = balance">{{formatNumber(balance, 0, '', ',')}}</a> {{token}}</span></label>
+                  <span class="ms-auto">Balance: <a class="text-info" role="button" @click="d.amount = balance">{{formatNumber(balance, 0, '', ',')}}</a> {{token}}</span></label>
                 <div class="position-relative">
                   <input class="pe-5 form-control text-white bg-dark border-dark" id="sendAmount" type="number" step="1" :min="contract.r" placeholder="Enter amount" v-model="d.amount"> 
                   <span class="position-absolute end-0 top-50 translate-middle-y px-2">
@@ -141,7 +141,7 @@ export default {
                   </div>
                   <label for="delAmount" class="small mb-1 d-flex">Amount
                     <span class="ms-auto">
-                      Balance: <a role="button" class="text-info" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}
+                      Balance: <a role="button" class="text-info" @click="d.amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}
                     </span>
                   </label>
                   <div class="position-relative">
@@ -177,7 +177,7 @@ export default {
                       <!-- Power / Gov Up / Down -->
                       <div v-if="func == 'Power Up' || func == 'Power Down' || func == 'Lock' || func == 'Unlock'">
                         <div class="modal-body">
-                        <label for="poweramount" class="small mb-1 d-flex">Amount<span class="ms-auto">Balance: <a role="button" class="text-info" @click="amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}</span></label>
+                        <label for="poweramount" class="small mb-1 d-flex">Amount<span class="ms-auto">Balance: <a role="button" class="text-info" @click="d.amount = balance / 1000">{{formatNumber((balance)/1000, 3, '.', ',')}}</a> {{token}}</span></label>
                         <div class="position-relative">
                           <input class="pe-5 form-control text-white border-dark bg-dark" type="number" step="0.001" :min="min" :max="formatNumber((balance)/1000, 3, '.', ',')" placeholder="1.000" v-model="d.amount"> 
                           <span class="position-absolute end-0 top-50 translate-middle-y px-2">
@@ -291,7 +291,7 @@ export default {
               <form name="contract">
                     <div class="modal-body text-start"> 
                       <label for="broca" class="small mb-1 d-flex">Amount
-                      <span class="ms-auto">Balance: <a role="button" class="text-info" @click="amount = balance / 1000">{{formatNumber((balance), 0, '', ',')}}</a> {{token}}</span></label>
+                      <span class="ms-auto">Balance: <a role="button" class="text-info" @click="d.amount = balance">{{formatNumber((balance), 0, '', ',')}}</a> {{token}}</span></label>
                       <div class="position-relative mb-1">
                         <input id="broca" class="pe-5 form-control text-white border-dark bg-dark" type="number" step="1" :min="1" :max="balance" placeholder="1" v-model="d.amount"> 
                         <span class="position-absolute end-0 top-50 translate-middle-y px-2">
