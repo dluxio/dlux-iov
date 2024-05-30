@@ -3290,6 +3290,8 @@ function buyNFT(setname, uid, price, type, callback){
       fetch(this.sapi + "/@" + user)
         .then((response) => response.json())
         .then((data) => {
+          this.account = ""
+          this.account = user
           data.tick = data.tick || 0.01;
           this.larynxbehind = data.behind;
           if (!fu) {
