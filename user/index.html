@@ -1520,9 +1520,9 @@
                 curTab.show();
                 url = location.href.replace(/\/#/, '#');
                 history.replaceState(null, null, url);
-                setTimeout(() => {
-                    window.scrollTop = 0;
-                }, 400);
+                // setTimeout(() => {
+                //     window.scrollTop = 0;
+                // }, 400);
             }
             // change url based on selected tab
             const selectableTabList = [].slice.call(document.querySelectorAll('a[data-bs-toggle="tab"]'));
