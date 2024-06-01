@@ -482,7 +482,7 @@ export default {
                     t = parseFloat(t)
                 }
             }
-            if (isNaN(t)) return "Invalid Number";
+            if (isNaN(t)) return "0";
             if (!isFinite(t)) return (t < 0 ? "-" : "") + "infinite";
             (r = r || "."), (e = e || "");
             var u = t < 0;
