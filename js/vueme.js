@@ -132,6 +132,7 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
         "vrHash": "QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k"
       },
       nftTradeTabTo: "",
+      reloaded: true,
       nftTradeTabToken: "",
       nftTradeTabPrice: 0,
       nftSellTabToken: "",
@@ -3286,12 +3287,12 @@ function buyNFT(setname, uid, price, type, callback){
           this.spkStats = data.result;
         });
     },
-    getSapi(user = this.account, fu) {
+    async getSapi(user = this.account, fu) {
+      this.reloaded = false
       fetch(this.sapi + "/@" + user)
         .then((response) => response.json())
         .then((data) => {
-          this.account = ""
-          this.account = user
+          this.reloaded = true
           data.tick = data.tick || 0.01;
           this.larynxbehind = data.behind;
           if (!fu) {
