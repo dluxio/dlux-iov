@@ -288,6 +288,7 @@ export default {
             return (u ? "-" : "") + i + o;
         },
         updateCost(){
+            if(typeof this.contract.extend != 'number' || this.contract.extend < 1)this.contract.extend = 1
             this.extendcost = parseInt((parseInt(this.contract.extend) / 30) * parseInt(this.contract.r) * ((this.contract.p + (this.spread ? 1 : 0))/this.contract.p))
             this.$forceUpdate()
           },
