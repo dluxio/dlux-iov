@@ -126,7 +126,7 @@ export default {
                     <label :for="'spread-' + contract.i" role="button" class="ps-1">&nbsp;</label>
                     <input class="form control" :id="'spread-' + contract.i" type="checkbox" role="button"
                         v-model="spread" @change="updateCost(contract.i)">
-                     <label :for="'spread-' + contract.i" role="button" class="px-1 py-05">Add<i
+                     <label :for="'spread-' + contract.i" role="button" class="px-1 py-05">Add Node<i
                         class="fa-solid fa-tower-broadcast fa-fw ms-1"></i></label>
                 </div>
 
