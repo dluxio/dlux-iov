@@ -288,8 +288,9 @@ export default {
             return (u ? "-" : "") + i + o;
         },
         updateCost(){
-            if(typeof this.contract.extend != 'number' || this.contract.extend < 1)this.contract.extend = 1
             this.extendcost = parseInt((parseInt(this.contract.extend) / 30) * parseInt(this.contract.r) * ((this.contract.p + (this.spread ? 1 : 0))/this.contract.p))
+            if(this.extendcost > this.broca_calc(this.broca)) this.extendcost = this.broca_calc(this.broca)
+            if(this.extendcost < 1 || typeof this.extendcost != "number") this.extendcost = 1
             this.$forceUpdate()
           },
         fancyBytes(bytes){
