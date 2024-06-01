@@ -1516,7 +1516,7 @@
             if (location.hash) {
                 const hash = url.split('#');
                 console.log(hash[1])
-                const currentTab = hash[1] == 'dlux' || hash[1] == 'hive' || hash[1] == 'spk' ? document.querySelector('#wallet a[href="#' + hash[1] + '"]') : document.querySelector('#' + hash[1] )
+                var currentTab = hash[1] == 'dlux' || hash[1] == 'hive' || hash[1] == 'spk' ? document.querySelector('#wallet a[href="#' + hash[1] + '"]') : document.querySelector('#blog')
                 const curTab = new bootstrap.Tab(currentTab);
                 curTab.show();
                 url = location.href.replace(/\/#/, '#');
