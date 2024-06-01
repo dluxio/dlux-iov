@@ -333,7 +333,7 @@ export default {
                     </div> 
                     <div class="modal-footer">
                       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                      <button type="button" class="btn btn-primary" @click="build" data-bs-dismiss="modal">Propose</button>
+                      <button type="button" class="btn btn-primary" :class="{'disabled': d.amount < 100}" :disabled="d.amount < 100" @click="build" data-bs-dismiss="modal">Propose</button>
                     </div>
               </form>
           </div>
