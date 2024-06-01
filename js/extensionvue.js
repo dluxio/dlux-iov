@@ -279,7 +279,7 @@ export default {
             return (u ? "-" : "") + i + o;
         },
         updateCost(){
-            this.extendcost = parseInt(parseInt(this.contract.extend) / (30 * parseInt(this.contract.r)))
+            this.extendcost = parseInt((parseInt(this.contract.extend) / 30) * parseInt(this.contract.r))
             this.$forceUpdate()
           },
         fancyBytes(bytes){
