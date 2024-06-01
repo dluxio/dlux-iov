@@ -131,15 +131,15 @@
                         <div class="mt-5 mb-2">
                             <ul id="usertabs" class="nav nav-tabs" role="tablist">
                                 <li class="nav-item"> <a class="nav-link active" id="blogtab" role="tab"
-                                        data-bs-toggle="tab" aria-controls="blog" aria-expanded="true"
+                                        data-bs-toggle="tab" aria-controls="blog" aria-expanded="true" @click="activeTab = 'blog'"
                                         href="#blog">Blog</a>
                                 </li>
                                 <li class="nav-item"> <a class="nav-link" id="wallettab" role="tab" data-bs-toggle="tab"
-                                        aria-controls="wallet" aria-expanded="true" href="#wallet">Wallet</a></li>
+                                        aria-controls="wallet" aria-expanded="true" href="#wallet" @click="activeTab = 'wallet'">Wallet</a></li>
                                 <li class="nav-item"> <a class="nav-link" id="inventorytab" role="tab"
-                                        data-bs-toggle="tab" aria-controls="inventory" aria-expanded="true"
+                                        data-bs-toggle="tab" aria-controls="inventory" aria-expanded="true" @click="activeTab = 'inventory'"
                                         href="#inventory">Inventory</a></li>
-                                <li class="nav-item"> <a class="nav-link" id="filestab" role="tab" data-bs-toggle="tab"
+                                <li class="nav-item"> <a class="nav-link" id="filestab" role="tab" data-bs-toggle="tab" @click="activeTab = 'files'"
                                         aria-controls="files" aria-expanded="true" href="#files">Files</a></li>
                                 <!--<li class="nav-item d-none" v-show="me"> <a class="nav-link" id="settingstab" role="tab"
                                     data-bs-toggle="tab" aria-controls="settings" aria-expanded="true"
@@ -1515,7 +1515,7 @@
             let url = location.href.replace(/\/$/, '');
             if (location.hash) {
                 const hash = url.split('#');
-                const currentTab = hash[1] == 'dlux' || hash[1] == 'hive' || hash[1] == 'spk' ? document.querySelector('#wallettab a[href="#' + hash[1] + '"]') : document.querySelector('#usertabs a[href="#' + hash[1] + '"]')
+                const currentTab = hash[1] == 'dlux' || hash[1] == 'hive' || hash[1] == 'spk' ? document.querySelector('#wallet a[href="#' + hash[1] + '"]') : document.querySelector('#blog a[href="#' + hash[1] + '"]')
                 const curTab = new bootstrap.Tab(currentTab);
                 curTab.show();
                 url = location.href.replace(/\/#/, '#');
