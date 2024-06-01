@@ -70,12 +70,12 @@ export default {
                 <div v-if="hasStorage" class="mx-auto mt-auto d-flex flex-wrap align-items-center justify-content-center mb-1">
 
                     <button style="max-width:100px;" @click="store(contract.i, isStored)" type="button"
-                        class="flex-grow-1 ms-1 mt-1 btn btn-sm text-nowrap"
+                        class="d-none flex-grow-1 ms-1 mt-1 btn btn-sm text-nowrap"
                         :class="{'btn-success': !isStored, 'btn-danger': isStored}">
                         <span v-if="!isStored"><i class="fa-solid fa-square-plus fa-fw me-1"></i>Store</span>
                         <span v-if="isStored"><i class="fa-solid fa-trash-can fa-fw me-1"></i>Delete</span>
                     </button>
-                    <button style="max-width:100px;" type="button" class="flex-grow-1 btn btn-sm btn-warning ms-1 mt-1"
+                    <button style="max-width:100px;" type="button" class="d-none flex-grow-1 btn btn-sm btn-warning ms-1 mt-1"
                         @click="" >
                         <i class="fa-solid fa-flag fa-fw me-1"></i>Flag</button>
                 </div>
