@@ -1021,6 +1021,21 @@ export default {
         },
         expIn(con){
             return `Expires in ${parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60) < 24 ? parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60) + ' hours' : parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60 / 24) + ' days'}`
+        },
+        cancel_contract(contract){
+            //if(this.account != contract.t)return
+            const toSign = {
+                type: "cja",
+                cj: {
+                  id: contract.i,
+                },
+                id: `spkcc_contract_close`,
+                msg: `Canceling ${contract.i}...`,
+                ops: ["getTokenUser", "getSapi"],
+                api: "https://spktest.dlux.io",
+                txid: "cancel_contract",
+              }
+              this.$emit('tosign', toSign)
         }
     },
     watch: {

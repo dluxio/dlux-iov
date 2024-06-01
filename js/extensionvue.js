@@ -325,7 +325,7 @@ export default {
                 msg: `Canceling ${contract.i}...`,
                 ops: ["getTokenUser", "getSapi"],
                 api: "https://spktest.dlux.io",
-                txid: "extend",
+                txid: "cancel_contract",
               }
               this.$emit('tosign', toSign)
         }
