@@ -279,10 +279,8 @@ export default {
             return (u ? "-" : "") + i + o;
         },
         updateCost(){
-            setTimeout(() => {
-                this.extendcost = parseInt((parseInt(this.contract.extend) / 30) * parseInt(this.contract.r))
-                this.$forceUpdate()
-            }, 10)
+            this.extendcost = parseInt((parseInt(this.contract.extend) / 30) * parseInt(this.contract.r))
+            this.$forceUpdate()
           },
         fancyBytes(bytes){
             var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
@@ -336,7 +334,11 @@ export default {
             this.contract.id = this.contract.i.replace(/:/g, "-");
             this.contract.extend = 7
             this.updateCost()
-        }
+        },
+        // when contract.extend changes, run updateCost
+        'contract.extend'(newValue) {
+            this.updateCost()
+        },
       },
     mounted() {
         this.contract.id = this.contract.i.replace(/:/g, "-");
