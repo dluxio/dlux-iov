@@ -301,7 +301,9 @@ methods: {
               }
             }
             if(done){
-              this.$emit('done', this.contract)
+              setTimeout(() => {
+                this.$emit('done', this.contract)
+              }, 5000)
             }
           }
         };
