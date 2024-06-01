@@ -149,7 +149,10 @@ export default {
                     @click="cancel_contract(contract)">
                     <i class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Sever</button>
                 <button type="button" class="btn btn-sm btn-primary mt-1"
-                    :disabled="extendcost > broca_calc(saccountapi.broca) || extendcost < 1" @click="extend(contract)">
+                    v-if="extendcost > broca_calc(saccountapi.broca) || extendcost < 1" @click="extend(contract)">
+                    <i class="fa-solid fa-clock-rotate-left fa-fw me-1"></i>Extend</button>
+                    <button type="button" class="disabled btn btn-sm btn-primary mt-1"
+                    v-if="extendcost < 1" @click="extend(contract)">
                     <i class="fa-solid fa-clock-rotate-left fa-fw me-1"></i>Extend</button>
 
 
