@@ -313,6 +313,21 @@ export default {
                 txid: "extend",
               }
               this.$emit('tosign', toSign)
+        },
+        cancel_contract(contract){
+            //if(this.account != contract.t)return
+            const toSign = {
+                type: "cja",
+                cj: {
+                  id: contract.i,
+                },
+                id: `spkcc_contract_close`,
+                msg: `Canceling ${contract.i}...`,
+                ops: ["getTokenUser", "getSapi"],
+                api: "https://spktest.dlux.io",
+                txid: "extend",
+              }
+              this.$emit('tosign', toSign)
         }
     },
     computed: {
