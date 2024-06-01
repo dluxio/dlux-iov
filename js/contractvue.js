@@ -357,7 +357,7 @@ export default {
                                                                 </div>
                                                                 <extension-vue :node-view="nodeview"
                                                                     :contract="contract" :sstats="sstats"
-                                                                    :account="account" :saccountapi="saccountapi"
+                                                                    :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
                                                                     @tosign="toSign=$event"></extension-vue>
                                                             </td>
                                                         </tr>
@@ -365,7 +365,7 @@ export default {
                                                             <td class=" border-0" colspan="4" v-if="contract.c == 3">
                                                                 <extension-vue :node-view="nodeview"
                                                                     :contract="contract" :sstats="sstats"
-                                                                    :account="account" :saccountapi="saccountapi"
+                                                                    :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
                                                                     @tosign="toSign=$event"></extension-vue>
                                                             </td>
                                                         </tr>
@@ -492,6 +492,12 @@ export default {
             required: false
         },
         accountinfo: {
+            default: function () {
+                return {}
+            },
+            required: false
+        },
+        spkapi: {
             default: function () {
                 return {}
             },

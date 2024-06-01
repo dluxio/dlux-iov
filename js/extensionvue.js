@@ -188,6 +188,15 @@ export default {
                 };
             },
         },
+        spkapi: {
+            required: false,
+            default: function () {
+                return {
+                    name: "Guest",
+                    storage: {}
+                };
+            },
+        },
         sstats: {
             required: true,
             default: function () {
@@ -335,7 +344,7 @@ export default {
           get() {
             var found = false
             for (var i in this.contract.n) {
-                if (this.contract.n[i] == this.saccountapi.name) {
+                if (this.contract.n[i] == this.spkapi.name) {
                     found = true
                     break
                 }
@@ -345,7 +354,7 @@ export default {
         },
         hasStorage: {
             get() {
-                if (typeof this.saccountapi.storage == "string"){
+                if (typeof this.spkapi.storage == "string"){
                     return true
                 } else return false
             },
