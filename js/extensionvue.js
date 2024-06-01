@@ -135,7 +135,7 @@ export default {
                     <span class="ms-2 fs-6 border-bottom border-2 border-white">BROCA<i class="fa-solid fa-atom ms-1"></i></span></div>
 
                     <button type="button" class="btn btn-sm btn-primary mx-auto mt-1"
-                    :disabled="extendcost > broca_calc(saccountapi.broca)" @click="extend(contract)">
+                    :disabled="extendcost > broca_calc(saccountapi.broca) || extendcost < 1" @click="extend(contract)" @click="extend(contract)">
                     <i class="fa-solid fa-clock-rotate-left fa-fw me-1"></i>Extend</button>
 
             </div>
@@ -150,9 +150,6 @@ export default {
                     <i class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Sever</button>
                 <button type="button" class="btn btn-sm btn-primary mt-1"
                     v-if="extendcost > broca_calc(saccountapi.broca) || extendcost < 1" @click="extend(contract)">
-                    <i class="fa-solid fa-clock-rotate-left fa-fw me-1"></i>Extend</button>
-                    <button type="button" class="disabled btn btn-sm btn-primary mt-1"
-                    v-if="extendcost < 1" @click="extend(contract)">
                     <i class="fa-solid fa-clock-rotate-left fa-fw me-1"></i>Extend</button>
 
 
