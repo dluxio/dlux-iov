@@ -279,8 +279,10 @@ export default {
             return (u ? "-" : "") + i + o;
         },
         updateCost(){
-            this.extendcost = parseInt((parseInt(this.contract.extend) / 30) * parseInt(this.contract.r))
-            this.$forceUpdate()
+            setTimeout(() => {
+                this.extendcost = parseInt((parseInt(this.contract.extend) / 30) * parseInt(this.contract.r))
+                this.$forceUpdate()
+            }, 10)
           },
         fancyBytes(bytes){
             var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
