@@ -293,7 +293,7 @@ export default {
                       <label for="broca" class="small mb-1 d-flex">Amount
                       <span class="ms-auto">Balance: <a role="button" class="text-info" @click="d.amount = balance">{{formatNumber((balance), 0, '', ',')}}</a> {{token}}</span></label>
                       <div class="position-relative mb-1">
-                        <input id="broca" class="pe-5 form-control text-white border-dark bg-dark" type="number" step="1" :min="1" :max="balance" placeholder="1" v-model="d.amount"> 
+                        <input id="broca" class="pe-5 form-control text-white border-dark bg-dark" type="number" step="1" :min="100" :max="balance" placeholder="1" v-model="d.amount"> 
                         <span class="position-absolute end-0 top-50 translate-middle-y px-2">
                           {{token}}
                         </span>  
