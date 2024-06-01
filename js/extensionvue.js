@@ -79,7 +79,7 @@ export default {
                         @click="" >
                         <i class="fa-solid fa-flag fa-fw me-1"></i>Flag</button>
                 </div>
-                <button type="button" class="mx-auto mt-auto btn btn-sm btn-danger mt-1" v-if="contract.t == account"
+                <button type="button" class="mx-auto mt-auto btn btn-sm btn-danger mt-1" v-if="contract.t == spkapi.name"
                     @click="cancel_contract(contract)">
                     <i class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Sever</button>
             </div>
