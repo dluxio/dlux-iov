@@ -1315,7 +1315,7 @@
                         <div class="container">
                             <div class="card my-3">
                                 <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount" @tosign="toSign=$event"
-                                    :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"></contract-vue>
+                                    :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi" @done="getSapi"></contract-vue>
                             </div>
                         </div>
                     </div>

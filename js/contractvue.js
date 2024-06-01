@@ -339,7 +339,7 @@ export default {
                                                         <tr class="collapse" :id="replace(contract.i) + 'upload'">
                                                             <td class=" border-0" colspan="4">
                                                                 <upload-vue :user="saccountapi" :propcontract="contract"
-                                                                    @tosign="toSign=$event" @done="getSpkStats()" />
+                                                                    @tosign="toSign=$event" @done="done()" />
                                                             </td>
                                                         </tr>
                                                         <tr class="collapse" :id="replace(contract.i) + 'beneficiary'">
@@ -626,8 +626,11 @@ export default {
               }
         };
     },
-    emits: ['tosign', 'addasset','bens'],
+    emits: ['tosign', 'addasset','bens', 'done'],
     methods: {
+        done(){
+            this.$emit('done')
+        },
         modalSelect(url) {
             this.$emit('modalselect', url);
         },
