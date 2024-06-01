@@ -928,7 +928,7 @@ export default {
       default: 0,
     },
     amount: {
-      default: 0.001,
+      default: 100,
     },
     ben_amount: {
       default: "10.00",
