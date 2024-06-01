@@ -34,7 +34,7 @@ export default {
             </div>
 
             <!-- node banner -->
-            <div v-if="saccountapi.storage && !nodeview" class="alert alert-secondary d-flex align-items-center py-1 ps-2 pe-1 mx-2 mb-2">
+            <div v-if="hasStorage && !nodeview" class="alert alert-secondary d-flex align-items-center py-1 ps-2 pe-1 mx-2 mb-2">
                 <div class="me-1">{{isStored ? 'Your node is storing this contract' : 'Your node is not storing this contract'}}</div>
                 <div class="ms-auto d-flex flex-wrap align-items-center justify-content-center mb-1">
 
@@ -67,7 +67,7 @@ export default {
                         </div>
                     </ol>
                 </div>
-                <div v-if="saccountapi.storage" class="mx-auto mt-auto d-flex flex-wrap align-items-center justify-content-center mb-1">
+                <div v-if="hasStorage" class="mx-auto mt-auto d-flex flex-wrap align-items-center justify-content-center mb-1">
 
                     <button style="max-width:100px;" @click="store(contract.i, isStored)" type="button"
                         class="flex-grow-1 ms-1 mt-1 btn btn-sm text-nowrap"
@@ -342,6 +342,13 @@ export default {
             }
             return found
           },
+        },
+        hasStorage: {
+            get() {
+                if (typeof this.saccountapi.storage == "string"){
+                    return true
+                } else return false
+            },
         },
     },
     watch: {
