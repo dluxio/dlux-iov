@@ -90,21 +90,21 @@ export default {
                 
                 <!-- selector -->
                 <div class="btn-group me-auto mt-1">
-                    <input name="time" @change="customTime = false;updateCost(contract.i)" title="1 Day"
-                        class="btn-check" :id="'option1-' + contract.i" type="radio" value="1" v-model="contract.extend"
+                    <input name="time" v-model="contract.extend" @change="customTime = false;updateCost(contract.i)" title="1 Day"
+                        class="btn-check" :id="'option1-' + contract.i" type="radio" value="1"
                         checked>
                     <label class="btn btn-sm btn-outline-info" :for="'option1-' + contract.i">1D</label>
-                    <input name="time" @change="customTime = false;updateCost(contract.i)" title="1 Week"
+                    <input name="time" v-model="contract.extend" @change="customTime = false;updateCost(contract.i)" title="1 Week"
                         class="btn-check" :id="'option2-' + contract.i" type="radio" value="7"
-                        v-model="contract.extend">
+                    >
                     <label class="btn btn-sm btn-outline-info" :for="'option2-' + contract.i">1W</label>
-                    <input name="time" @change="customTime = false;updateCost(contract.i)" title="1 Month"
+                    <input name="time" v-model="contract.extend" @change="customTime = false;updateCost(contract.i)" title="1 Month"
                         class="btn-check" :id="'option3-' + contract.i" type="radio" value="30"
-                        v-model="contract.extend">
+                    >
                     <label class="btn btn-sm btn-outline-info" :for="'option3-' + contract.i">1M</label>
-                    <input name="time" @change="customTime = false;updateCost(contract.i)" title="1 Year"
+                    <input name="time" v-model="contract.extend" @change="customTime = false;updateCost(contract.i)" title="1 Year"
                         class="btn-check" :id="'option4-' + contract.i" type="radio" value="365"
-                        v-model="contract.extend">
+                    >
                     <label class="btn btn-sm btn-outline-info" :for="'option4-' + contract.i">1Y</label>
                 </div>
                 
