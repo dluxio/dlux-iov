@@ -446,7 +446,7 @@ export default {
                                                                                         </div>
                                                                                     </div>
                                                                                     <div class="mb-3 me-3">
-                                                                                        <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="no-decoration text-break text-primary" :alt="{{cid}}"><i class="fa-solid fa-fw fa-up-right-from-square"></i></a>
+                                                                                        <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="no-decoration text-break text-primary" :alt="cid"><i class="fa-solid fa-fw fa-up-right-from-square"></i></a>
                                                                                     </div>
                                                                                 </div>
                                                                             </li>
