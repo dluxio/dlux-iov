@@ -1424,6 +1424,7 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
             }
           
         }
+        this.getSPKUser()
       });
     },
     upload(cid = 'QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3', contract = {api: 'https://127.0.0.1:5050', id: '1668913215284', sigs: {QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3: '20548a0032e0cf51ba75721743d2ec6fac180f7bc773ce3d77b769d9c4c9fa9dbb7d59503f05be8edcaac00d5d66709b0bce977f3207785913f7fbad2773ae4ac2'}}){
