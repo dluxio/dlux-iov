@@ -786,8 +786,9 @@ export default {
                     for (var node in data.file_contracts) {
                         if(!data.file_contracts[node].m){
                             data.file_contracts[node] = ""
+                            const filesNum = Object.keys(data.file_contracts[node].df) ? Object.keys(data.file_contracts[node].df).length : 0
                             this.newMeta[data.file_contracts[node].i] = {
-                                meta: [].fill("", 0, Object.keys(data.file_contracts[node].df).length * 3 + 1),
+                                meta: [].fill("", 0, filesNum * 3 + 1),
                             }
                         } else {
                             this.newMeta[data.file_contracts[node].i] = {
