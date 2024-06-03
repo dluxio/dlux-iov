@@ -1024,7 +1024,7 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
         }, 333)
       }else{
         this.services[provider].memo = `Validating`
-        this.getSPKUser()
+        this.getSapi()
       }
     },
     updatePubkey() {
