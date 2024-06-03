@@ -918,7 +918,6 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
       if(this.account)fetch("https://spktest.dlux.io/@" + this.account)
           .then((response) => response.json())
           .then((data) => {
-            this.services = {}
             this.spkapi = data
             for (var node in data.file_contracts) {
               this.contractIDs[data.file_contracts[node].i] = data.file_contracts[node];
@@ -3294,7 +3293,7 @@ function buyNFT(setname, uid, price, type, callback){
         .then((response) => response.json())
         .then((data) => {
           this.reloaded = true
-          this.getSPKUser()
+          this.getMARKETS()
           data.tick = data.tick || 0.01;
           this.larynxbehind = data.behind;
           if (!fu) {
