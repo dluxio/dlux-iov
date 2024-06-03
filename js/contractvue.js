@@ -464,17 +464,17 @@ export default {
                                                                                 <div class="d-flex mb-1">
                                                                                     <div class="me-1">
                                                                                         <div class="position-relative has-validation">
-                                                                                            <input autocapitalize="off" placeholder="filename" class="form-control form-control-sm bg-dark border-dark text-info">
+                                                                                            <input autocapitalize="off" :value="newMeta[contract.i][index * 3 + 1]" :placeholder="File Name" pattern="[a-zA-Z0-9_\-]{3,25}"class="form-control form-control-sm bg-dark border-dark text-info">
                                                                                         </div>
                                                                                     </div>
                                                                                     <div class="mx-1">
                                                                                         <div class="position-relative has-validation">
-                                                                                            <input autocapitalize="off" placeholder="extension" class="form-control form-control-sm bg-dark border-dark text-info">
+                                                                                            <input autocapitalize="off" :value="newMeta[contract.i][index * 3 + 2]" :placeholder="File Type" pattern="[a-zA-Z0-9]{1,4}class="form-control form-control-sm bg-dark border-dark text-info">
                                                                                         </div>
                                                                                     </div>
                                                                                     <div class="ms-1">
                                                                                         <div class="position-relative has-validation">
-                                                                                            <input autocapitalize="off" placeholder="thumbnail" class="form-control form-control-sm bg-dark border-dark text-info">
+                                                                                            <input autocapitalize="off" :value="newMeta[contract.i][index * 3 + 3S]" :placeholder="Thumbnail" pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+" class="form-control form-control-sm bg-dark border-dark text-info">
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
@@ -492,9 +492,9 @@ export default {
                                                                     <div class="d-flex">
                                                                     <button type="button"
                                                                     class="btn btn-sm btn-info my-2 mx-auto"
-                                                                    @click="update_contract(contract)">
+                                                                    @click="update_meta(contract.i)">
                                                                     <i
-                                                                        class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Update</button>
+                                                                        class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Update Metadata</button>
                                                                 </div>
 
                                                                     <div class="d-flex">
@@ -569,6 +569,7 @@ export default {
     data() {
         return {
             contracts: [],
+            newMeta: {},
             state2contracts: [],
             tick: "1",
             toSign: {},
@@ -690,6 +691,25 @@ export default {
     },
     emits: ['tosign', 'addasset','bens', 'done'],
     methods: {
+        getdelimed(string, del = ',', index = 0) {
+            return string.split(del)[index] ? string.split(del)[index] : ''
+        },
+        update_meta(contract) {
+            var meta = this.newMeta[contract]
+            var cja = {
+                id: contract,
+                m: meta.join(',')
+            };
+            this.toSign = {
+              type: "cja",
+              cj: cja,
+              id: `spkcc_update_metadata`,
+              msg: `Updating Metadata for Contract: ${contract}`,
+              ops: ["getSapi"],
+              api: this.sapi,
+              txid: `spkcc_update_meta`,
+            };
+        },
         done(){
             this.$emit('done')
         },
@@ -764,6 +784,16 @@ export default {
                   // Storage nodes won't get contracts from here, we'll need some props from the contract
                   if(!this.nodeview){
                     for (var node in data.file_contracts) {
+                        if(!data.file_contracts[node].m){
+                            data.file_contracts[node] = ""
+                            this.newMeta[data.file_contracts[node].i] = {
+                                meta: [].fill("", 0, Object.keys(data.file_contracts[node].df).length * 3 + 1),
+                            }
+                        } else {
+                            this.newMeta[data.file_contracts[node].i] = {
+                                meta: data.file_contracts[node].m.split(","),
+                            }
+                        }
                         this.contractIDs[data.file_contracts[node].i] = data.file_contracts[node];
                         this.contracts.push(data.file_contracts[node]);
                         this.contractIDs[data.file_contracts[node].i].index = this.contracts.length - 1;
