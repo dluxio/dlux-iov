@@ -464,17 +464,17 @@ export default {
                                                                                 <div class="d-flex mb-1">
                                                                                     <div class="me-1">
                                                                                         <div class="position-relative has-validation">
-                                                                                            <input autocapitalize="off" :value="newMeta[contract.i].meta[index * 3 + 1]" placeholder="File Name" pattern="[a-zA-Z0-9_\-]{3,25}"class="form-control form-control-sm bg-dark border-dark text-info">
+                                                                                            <input autocapitalize="off" :value="newMeta[contract.i][index * 3 + 1]" placeholder="File Name" pattern="[a-zA-Z0-9_\-]{3,25}"class="form-control form-control-sm bg-dark border-dark text-info">
                                                                                         </div>
                                                                                     </div>
                                                                                     <div class="mx-1">
                                                                                         <div class="position-relative has-validation">
-                                                                                            <input autocapitalize="off" :value="newMeta[contract.i].meta[index * 3 + 2]" placeholder="File Type" pattern="[a-zA-Z0-9]{1,4}" class="form-control form-control-sm bg-dark border-dark text-info">
+                                                                                            <input autocapitalize="off" :value="newMeta[contract.i][index * 3 + 2]" placeholder="File Type" pattern="[a-zA-Z0-9]{1,4}" class="form-control form-control-sm bg-dark border-dark text-info">
                                                                                         </div>
                                                                                     </div>
                                                                                     <div class="ms-1">
                                                                                         <div class="position-relative has-validation">
-                                                                                            <input autocapitalize="off" :value="newMeta[contract.i].meta[index * 3 + 3]" placeholder="Thumbnail" pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+" class="form-control form-control-sm bg-dark border-dark text-info">
+                                                                                            <input autocapitalize="off" :value="newMeta[contract.i][index * 3 + 3]" placeholder="Thumbnail" pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+" class="form-control form-control-sm bg-dark border-dark text-info">
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
@@ -696,7 +696,7 @@ export default {
         },
         update_meta(contract) {
             console.log(this.newMeta[contract], contract)
-            var meta = this.newMeta[contract]
+            var meta = this.newMeta[contract].meta
             var cja = {
                 id: contract,
                 m: meta.join(',')
@@ -788,16 +788,9 @@ export default {
                             if (!data.file_contracts[node].m) {
                                 data.file_contracts[node].m = ""
                                 const filesNum = data.file_contracts[node]?.df ? Object.keys(data.file_contracts[node].df).length : 0
-                                console.log(filesNum)
-                                // make empty array 3 times the length of filesNum
-
-                                this.newMeta[data.file_contracts[node].i] = {
-                                    meta:  new Array(filesNum * 3 + 1).fill('')
-                                }
+                                this.newMeta[data.file_contracts[node].i] = new Array(filesNum * 3 + 1).fill('')
                             } else {
-                                this.newMeta[data.file_contracts[node].i] = {
-                                    meta: data.file_contracts[node].m.split(","),
-                                }
+                                this.newMeta[data.file_contracts[node].i] = data.file_contracts[node].m.split(",")
                             }
                             this.contractIDs[data.file_contracts[node].i] = data.file_contracts[node];
                             this.contracts.push(data.file_contracts[node]);
