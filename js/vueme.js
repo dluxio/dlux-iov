@@ -918,7 +918,7 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
       if(this.account)fetch("https://spktest.dlux.io/@" + this.account)
           .then((response) => response.json())
           .then((data) => {
-            this.services[user] = {}
+            this.services[this.account] = {}
             this.spkapi = data
             for (var node in data.file_contracts) {
               this.contractIDs[data.file_contracts[node].i] = data.file_contracts[node];
