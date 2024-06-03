@@ -596,89 +596,89 @@ export default {
             tokenGov: {
                 title: "SPK VOTE",
                 options: [
-                  {
-                    id: "spk_cycle_length",
-                    range_low: 28800,
-                    range_high: 2592000,
-                    info: "Time in blocks to complete a power down cycle. 4 cycles to completely divest. 28800 blocks per day.",
-                    val: 200000,
-                    step: 1,
-                    unit: "Blocks",
-                    title: "Down Power Period"
-                  },
-                  {
-                    id: "dex_fee",
-                    range_low: 0,
-                    range_high: 0.01,
-                    info: "Share of DEX completed DEX trades to allocate over the collateral group.",
-                    val: 0.00505,
-                    step: 0.000001,
-                    unit: "",
-                    title: "DEX Fee"
-                  },
-                  {
-                    id: "dex_max",
-                    range_low: 28800,
-                    range_high: 2592000,
-                    info: "Largest open trade size in relation to held collateral.",
-                    val: 97.38,
-                    step: 1,
-                    unit: "%",
-                    title: "Max Trade Size"
-                  },
-                  {
-                    id: "dex_slope",
-                    range_low: 0,
-                    range_high: 100,
-                    info: "0 Allows any size buy orders to be placed. 1 will disallow large buy orders at low prices.",
-                    val: 48.02,
-                    step: 0.01,
-                    unit: "%",
-                    title: "Max Lowball Trade Size"
-                  },
-                  {
-                    id: "spk_rate_ldel",
-                    range_low: 0.00001, //current lpow
-                    range_high: 0.0001, //current lgov
-                    info: "SPK generation rate for delegated LARYNX Power",
-                    val: 0.00015,
-                    step: 1,
-                    unit: "",
-                    title: "SPK Gen Rate: Delegated"
-                  },
-                  {
-                    id: "spk_rate_lgov",
-                    range_low: 0.00015, //current ldel
-                    range_high: 0.01,
-                    info: "SPK generation rate for Larynx Locked",
-                    val: 0.001,
-                    step: 0.000001,
-                    unit: "",
-                    title: "SPK Gen Rate: Locked"
-                  },
-                  {
-                    id: "spk_rate_lpow",
-                    range_low: 0.000001,
-                    range_high: 0.00015, //current ldel
-                    info: "SPK generation rate for undelegated Larynx Power",
-                    val: 0.0001,
-                    step: 0.000001,
-                    unit: "",
-                    title: "Min SPK Gen Rate: Min"
-                  },
-                  {
-                    id: "max_coll_members",
-                    range_low: 25,
-                    range_high: 79,
-                    info: "The Max number of accounts that can share DEX fees. The richer half of this group controls outflows from the multisig wallet.",
-                    val: 25,
-                    step: 1,
-                    unit: "Accounts",
-                    title: "Size of collateral group"
-                  }
+                    {
+                        id: "spk_cycle_length",
+                        range_low: 28800,
+                        range_high: 2592000,
+                        info: "Time in blocks to complete a power down cycle. 4 cycles to completely divest. 28800 blocks per day.",
+                        val: 200000,
+                        step: 1,
+                        unit: "Blocks",
+                        title: "Down Power Period"
+                    },
+                    {
+                        id: "dex_fee",
+                        range_low: 0,
+                        range_high: 0.01,
+                        info: "Share of DEX completed DEX trades to allocate over the collateral group.",
+                        val: 0.00505,
+                        step: 0.000001,
+                        unit: "",
+                        title: "DEX Fee"
+                    },
+                    {
+                        id: "dex_max",
+                        range_low: 28800,
+                        range_high: 2592000,
+                        info: "Largest open trade size in relation to held collateral.",
+                        val: 97.38,
+                        step: 1,
+                        unit: "%",
+                        title: "Max Trade Size"
+                    },
+                    {
+                        id: "dex_slope",
+                        range_low: 0,
+                        range_high: 100,
+                        info: "0 Allows any size buy orders to be placed. 1 will disallow large buy orders at low prices.",
+                        val: 48.02,
+                        step: 0.01,
+                        unit: "%",
+                        title: "Max Lowball Trade Size"
+                    },
+                    {
+                        id: "spk_rate_ldel",
+                        range_low: 0.00001, //current lpow
+                        range_high: 0.0001, //current lgov
+                        info: "SPK generation rate for delegated LARYNX Power",
+                        val: 0.00015,
+                        step: 1,
+                        unit: "",
+                        title: "SPK Gen Rate: Delegated"
+                    },
+                    {
+                        id: "spk_rate_lgov",
+                        range_low: 0.00015, //current ldel
+                        range_high: 0.01,
+                        info: "SPK generation rate for Larynx Locked",
+                        val: 0.001,
+                        step: 0.000001,
+                        unit: "",
+                        title: "SPK Gen Rate: Locked"
+                    },
+                    {
+                        id: "spk_rate_lpow",
+                        range_low: 0.000001,
+                        range_high: 0.00015, //current ldel
+                        info: "SPK generation rate for undelegated Larynx Power",
+                        val: 0.0001,
+                        step: 0.000001,
+                        unit: "",
+                        title: "Min SPK Gen Rate: Min"
+                    },
+                    {
+                        id: "max_coll_members",
+                        range_low: 25,
+                        range_high: 79,
+                        info: "The Max number of accounts that can share DEX fees. The richer half of this group controls outflows from the multisig wallet.",
+                        val: 25,
+                        step: 1,
+                        unit: "Accounts",
+                        title: "Size of collateral group"
+                    }
                 ]
-              },
-              contract: {
+            },
+            contract: {
                 api: '',
                 id: '',
                 files: '',
@@ -686,10 +686,10 @@ export default {
                 spsig: '', //service-provider 
                 s: 10485760,
                 t: 0
-              }
+            }
         };
     },
-    emits: ['tosign', 'addasset','bens', 'done'],
+    emits: ['tosign', 'addasset', 'bens', 'done'],
     methods: {
         getdelimed(string, del = ',', index = 0) {
             return string.split(del)[index] ? string.split(del)[index] : ''
@@ -702,16 +702,16 @@ export default {
                 m: meta.join(',')
             };
             this.toSign = {
-              type: "cja",
-              cj: cja,
-              id: `spkcc_update_metadata`,
-              msg: `Updating Metadata for Contract: ${contract}`,
-              ops: ["getSapi"],
-              api: this.sapi,
-              txid: `spkcc_update_meta`,
+                type: "cja",
+                cj: cja,
+                id: `spkcc_update_metadata`,
+                msg: `Updating Metadata for Contract: ${contract}`,
+                ops: ["getSapi"],
+                api: this.sapi,
+                txid: `spkcc_update_meta`,
             };
         },
-        done(){
+        done() {
             this.$emit('done')
         },
         modalSelect(url) {
@@ -719,21 +719,21 @@ export default {
         },
         updatePubkey() {
             var cja = {
-              pubKey: this.accountinfo.posting.key_auths[0][0]
+                pubKey: this.accountinfo.posting.key_auths[0][0]
             };
             this.toSign = {
-              type: "cja",
-              cj: cja,
-              id: `spkcc_register_authority`,
-              msg: `Registering: ${this.account}:${this.accountinfo.posting.key_auths[0][0]}`,
-              ops: ["getSapi"],
-              api: this.sapi,
-              txid: `spkcc_register_authority`,
+                type: "cja",
+                cj: cja,
+                id: `spkcc_register_authority`,
+                msg: `Registering: ${this.account}:${this.accountinfo.posting.key_auths[0][0]}`,
+                ops: ["getSapi"],
+                api: this.sapi,
+                txid: `spkcc_register_authority`,
             };
         },
         addAssets(id, contract) {
-            if(typeof id == 'object')this.$emit('addasset', id);
-            else this.$emit('addasset', {id, contract});
+            if (typeof id == 'object') this.$emit('addasset', id);
+            else this.$emit('addasset', { id, contract });
         },
         sortContracts(on = 'c', dir = 'asc') {
             this.contracts.sort((a, b) => {
@@ -745,7 +745,7 @@ export default {
                     return 0
                 }
             })
-            for(var i=0; i<this.contracts.length; i++){
+            for (var i = 0; i < this.contracts.length; i++) {
                 this.contracts[i].index = i
                 this.contractIDs[this.contracts[i].i].index = i
             }
@@ -754,7 +754,7 @@ export default {
             return this.when([parseInt(exp.split(':')[0])])
         },
         replace(string = "", char = ':') {
-        return string.replaceAll(char, '_')
+            return string.replaceAll(char, '_')
         },
         split(string, del, index) {
             return string.split(del)[index]
@@ -762,186 +762,189 @@ export default {
         slotDecode(slot, index) {
             var item = slot.split(',')
             switch (index) {
-              case 1:
-                return parseFloat(item[1] / 100).toFixed(2)
-                break;
-              default:
-                return item[0]
-                break;
+                case 1:
+                    return parseFloat(item[1] / 100).toFixed(2)
+                    break;
+                default:
+                    return item[0]
+                    break;
             } index
         },
         getSapi(user = this.account) {
             fetch(this.sapi + "/@" + user)
-              .then((response) => response.json())
-              .then((data) => {
-                data.tick = data.tick || 0.01;
-                this.larynxbehind = data.behind;
-                  this.lbalance = (data.balance / 1000).toFixed(3);
-                  this.lbargov = (data.gov / 1000).toFixed(3);
-                  data.powerDowns = Object.keys(data.power_downs);
-                  for (var i = 0; i < data.powerDowns.length; i++) {
-                    data.powerDowns[i] = data.powerDowns[i].split(":")[0];
-                  }
-                  // Storage nodes won't get contracts from here, we'll need some props from the contract
-                  if(!this.nodeview){
-                    for (var node in data.file_contracts) {
-                        if(!data.file_contracts[node].m){
-                            data.file_contracts[node].m = ""
-                            const filesNum = data.file_contracts[node]?.df ? Object.keys(data.file_contracts[node].df).length : 0
-                            console.log(filesNum)
-                            this.newMeta[data.file_contracts[node].i] = {
-                                meta: [].fill("", 0, filesNum * 3 + 1),
+                .then((response) => response.json())
+                .then((data) => {
+                    data.tick = data.tick || 0.01;
+                    this.larynxbehind = data.behind;
+                    this.lbalance = (data.balance / 1000).toFixed(3);
+                    this.lbargov = (data.gov / 1000).toFixed(3);
+                    data.powerDowns = Object.keys(data.power_downs);
+                    for (var i = 0; i < data.powerDowns.length; i++) {
+                        data.powerDowns[i] = data.powerDowns[i].split(":")[0];
+                    }
+                    // Storage nodes won't get contracts from here, we'll need some props from the contract
+                    if (!this.nodeview) {
+                        for (var node in data.file_contracts) {
+                            if (!data.file_contracts[node].m) {
+                                data.file_contracts[node].m = ""
+                                const filesNum = data.file_contracts[node]?.df ? Object.keys(data.file_contracts[node].df).length : 0
+                                console.log(filesNum)
+                                // make empty array 3 times the length of filesNum
+
+                                this.newMeta[data.file_contracts[node].i] = {
+                                    meta:  new Array(this.filesNum * 3 + 1).fill('')
+                                }
+                            } else {
+                                this.newMeta[data.file_contracts[node].i] = {
+                                    meta: data.file_contracts[node].m.split(","),
+                                }
                             }
-                        } else {
-                            this.newMeta[data.file_contracts[node].i] = {
-                                meta: data.file_contracts[node].m.split(","),
+                            this.contractIDs[data.file_contracts[node].i] = data.file_contracts[node];
+                            this.contracts.push(data.file_contracts[node]);
+                            this.contractIDs[data.file_contracts[node].i].index = this.contracts.length - 1;
+                            
+                        }
+                        for (var user in data.channels) {
+                            for (var node in data.channels[user]) {
+                                if (this.contractIDs[data.channels[user][node].i]) continue
+                                else {
+                                    this.contractIDs[data.channels[user][node].i] = data.channels[user][node];
+                                    this.contracts.push(data.channels[user][node]);
+                                    this.contractIDs[data.channels[user][node].i].index = this.contracts.length - 1;
+                                }
                             }
                         }
-                        this.contractIDs[data.file_contracts[node].i] = data.file_contracts[node];
-                        this.contracts.push(data.file_contracts[node]);
-                        this.contractIDs[data.file_contracts[node].i].index = this.contracts.length - 1;
+                        this.sortContracts()
                     }
-                    for (var user in data.channels) {
-                        for (var node in data.channels[user]) {
-                            if(this.contractIDs[data.channels[user][node].i])continue
-                            else {
-                                this.contractIDs[data.channels[user][node].i] = data.channels[user][node];
-                                this.contracts.push(data.channels[user][node]);
-                                this.contractIDs[data.channels[user][node].i].index = this.contracts.length - 1;
-                            }
-                        }
-                    }
-                    this.sortContracts()
-                  }
-                  this.saccountapi = data;
-                  this.saccountapi.spk += this.reward_spk();
-                  if (!this.saccountapi.granted.t) this.saccountapi.granted.t = 0;
-                  if (!this.saccountapi.granting.t) this.saccountapi.granting.t = 0;
-                  this.spkval =
-                    (data.balance +
-                      data.gov +
-                      data.poweredUp +
-                      this.saccountapi.granting.t +
-                      data.claim +
-                      data.spk) /
-                    1000;
-              });
-          },
+                    this.saccountapi = data;
+                    this.saccountapi.spk += this.reward_spk();
+                    if (!this.saccountapi.granted.t) this.saccountapi.granted.t = 0;
+                    if (!this.saccountapi.granting.t) this.saccountapi.granting.t = 0;
+                    this.spkval =
+                        (data.balance +
+                            data.gov +
+                            data.poweredUp +
+                            this.saccountapi.granting.t +
+                            data.claim +
+                            data.spk) /
+                        1000;
+                });
+        },
         getSpkStats() {
             fetch(this.sapi + "/stats")
-              .then((response) => response.json())
-              .then((data) => {
-                //console.log(data);
-                this.loaded = true;
-                this.spkStats = data.result;
-                for (var i = 0; i < this.tokenGov.options.length; i++) {
-                  this.tokenGov.options[i].val = data.result[this.tokenGov.options[i].id]
-                  this.tokenGov.options[i].range_high = parseFloat(this.tokenGov.options[i].val * 1.01).toFixed(6)
-                  this.tokenGov.options[i].range_low = parseFloat(this.tokenGov.options[i].val * 0.99).toFixed(6)
-                  this.tokenGov.options[i].step = "0.000001"
-                }
-                this.getSapi()
-              });
+                .then((response) => response.json())
+                .then((data) => {
+                    //console.log(data);
+                    this.loaded = true;
+                    this.spkStats = data.result;
+                    for (var i = 0; i < this.tokenGov.options.length; i++) {
+                        this.tokenGov.options[i].val = data.result[this.tokenGov.options[i].id]
+                        this.tokenGov.options[i].range_high = parseFloat(this.tokenGov.options[i].val * 1.01).toFixed(6)
+                        this.tokenGov.options[i].range_low = parseFloat(this.tokenGov.options[i].val * 0.99).toFixed(6)
+                        this.tokenGov.options[i].step = "0.000001"
+                    }
+                    this.getSapi()
+                });
         },
         when(arr) {
             if (!arr.length) return "";
             var seconds =
-              (parseInt(arr[0]) - parseInt(this.saccountapi.head_block)) * 3;
+                (parseInt(arr[0]) - parseInt(this.saccountapi.head_block)) * 3;
             var interval = Math.floor(seconds / 86400);
             if (interval >= 1) {
-              return interval + ` day${interval > 1 ? "s" : ""}`;
+                return interval + ` day${interval > 1 ? "s" : ""}`;
             }
             interval = Math.floor(seconds / 3600);
             if (interval >= 1) {
-              return interval + ` hour${interval > 1 ? "s" : ""}`;
+                return interval + ` hour${interval > 1 ? "s" : ""}`;
             }
             interval = Math.floor(seconds / 60);
             if (interval >= 1) {
-              return `${interval} minute${interval > 1 ? "s" : ""}`;
+                return `${interval} minute${interval > 1 ? "s" : ""}`;
             }
             return Math.floor(seconds) + " seconds";
-          },
+        },
         reward_spk() {
             var r = 0,
-              a = 0,
-              b = 0,
-              c = 0,
-              t = 0,
-              diff = (this.saccountapi.head_block ? this.saccountapi.head_block : this.sstats.lastIBlock) - this.saccountapi.spk_block;
-              //console.log(diff, this.saccountapi.head_block , this.sstats)
-              if (!this.saccountapi.spk_block) {
-              //console.log("No SPK seconds");
-              return 0;
+                a = 0,
+                b = 0,
+                c = 0,
+                t = 0,
+                diff = (this.saccountapi.head_block ? this.saccountapi.head_block : this.sstats.lastIBlock) - this.saccountapi.spk_block;
+            //console.log(diff, this.saccountapi.head_block , this.sstats)
+            if (!this.saccountapi.spk_block) {
+                //console.log("No SPK seconds");
+                return 0;
             } else if (diff < 28800) {
-              //console.log("Wait for SPK");
-              return 0;
+                //console.log("Wait for SPK");
+                return 0;
             } else {
-              t = parseInt(diff / 28800);
-              a = this.saccountapi.gov
-                ? simpleInterest(this.saccountapi.gov, t, this.sstats.spk_rate_lgov)
-                : 0;
-              b = this.saccountapi.pow
-                ? simpleInterest(this.saccountapi.pow, t, this.sstats.spk_rate_lpow)
-                : 0;
-              c = simpleInterest(
-                parseInt(
-                  this.saccountapi.granted?.t > 0 ? this.saccountapi.granted.t : 0
-                ) +
-                parseInt(
-                  this.saccountapi.granting?.t > 0 ? this.saccountapi.granting.t : 0
-                ),
-                t,
-                this.sstats.spk_rate_ldel
-              );
-              const i = a + b + c;
-              if(i){return i}else{return 0}
+                t = parseInt(diff / 28800);
+                a = this.saccountapi.gov
+                    ? simpleInterest(this.saccountapi.gov, t, this.sstats.spk_rate_lgov)
+                    : 0;
+                b = this.saccountapi.pow
+                    ? simpleInterest(this.saccountapi.pow, t, this.sstats.spk_rate_lpow)
+                    : 0;
+                c = simpleInterest(
+                    parseInt(
+                        this.saccountapi.granted?.t > 0 ? this.saccountapi.granted.t : 0
+                    ) +
+                    parseInt(
+                        this.saccountapi.granting?.t > 0 ? this.saccountapi.granting.t : 0
+                    ),
+                    t,
+                    this.sstats.spk_rate_ldel
+                );
+                const i = a + b + c;
+                if (i) { return i } else { return 0 }
             }
             function simpleInterest(p, t, r) {
-              const amount = p * (1 + parseFloat(r) / 365);
-              const interest = amount - p;
-              return parseInt(interest * t);
+                const amount = p * (1 + parseFloat(r) / 365);
+                const interest = amount - p;
+                return parseInt(interest * t);
             }
-          },
+        },
         selectContract(id, broker) {  //needs PeerID of broker
             this.contract.id = id
             fetch(`${this.sapi}/user_services/${broker}`)
-              .then(r => r.json())
-              .then(res => {
-                this.contract.api = res.services.IPFS[Object.keys(res.services.IPFS)[0]].a
-              })
-          },
-        extend(contract, amount){
-            if(amount > this.broca_calc(this.broca))return
+                .then(r => r.json())
+                .then(res => {
+                    this.contract.api = res.services.IPFS[Object.keys(res.services.IPFS)[0]].a
+                })
+        },
+        extend(contract, amount) {
+            if (amount > this.broca_calc(this.broca)) return
             const toSign = {
                 type: "cja",
                 cj: {
-                  broca: amount,
-                  id: contract.i,
-                  file_owner: contract.t,
-                  power: this.spread ? 1 : 0,
+                    broca: amount,
+                    id: contract.i,
+                    file_owner: contract.t,
+                    power: this.spread ? 1 : 0,
                 },
                 id: `spkcc_extend`,
                 msg: `Extending ${contract.i}...`,
                 ops: ["getTokenUser"],
                 api: "https://spktest.dlux.io",
                 txid: "extend",
-              }
-              this.$emit('tosign', toSign)
+            }
+            this.$emit('tosign', toSign)
         },
-        store(contract, remove = false){
+        store(contract, remove = false) {
             // have a storage node?
             const toSign = {
                 type: "cja",
                 cj: {
-                  items: [contract]
+                    items: [contract]
                 },
                 id: `spkcc_${!remove ? 'store' : 'remove'}`,
                 msg: `Storing ${contract}...`,
                 ops: ["getTokenUser"],
                 api: "https://spktest.dlux.io",
                 txid: `${contract}_${!remove ? 'store' : 'remove'}`,
-              }
-              this.$emit('tosign', toSign)
+            }
+            this.$emit('tosign', toSign)
         },
         getContracts() {
             var contracts = [],
@@ -952,7 +955,7 @@ export default {
                             res.result.extend = "7"
                             if (res.result) {
                                 this.contracts[id] = res.result
-                                if(res.result.c == 2){
+                                if (res.result.c == 2) {
                                     this.state2contracts.push(res.result.s)
                                 }
                                 //this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
@@ -967,17 +970,17 @@ export default {
                 getContract(contracts[i])
             }
         },
-        addBen(s){
+        addBen(s) {
             console.log(s)
-            this.$emit('bens', {account: s.split(',')[0], weight: s.split(',')[1]})
+            this.$emit('bens', { account: s.split(',')[0], weight: s.split(',')[1] })
         },
         getIPFSproviders() {
             fetch("https://spktest.dlux.io/services/IPFS")
-              .then((response) => response.json())
-              .then((data) => {
-                this.ipfsProviders = data.providers
-              });
-          },
+                .then((response) => response.json())
+                .then((data) => {
+                    this.ipfsProviders = data.providers
+                });
+        },
         imgUrlAlt(event) {
             event.target.src = "/img/dlux-logo-icon.png";
         },
@@ -1048,7 +1051,7 @@ export default {
             this.$emit('reply', deets)
         },
         broca_calc(last = '0,0') {
-            if(!last)last='0,0'
+            if (!last) last = '0,0'
             const last_calc = this.Base64toNumber(last.split(',')[1])
             const accured = parseInt((parseFloat(this.saccountapi.broca_refill || 144000) * (this.saccountapi.head_block - last_calc)) / (this.saccountapi.spk_power * 1000))
             var total = parseInt(last.split(',')[0]) + accured
@@ -1057,11 +1060,11 @@ export default {
         },
         Base64toNumber(chars) {
             const glyphs =
-              "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
+                "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
             var result = 0;
             chars = chars.split("");
             for (var e = 0; e < chars.length; e++) {
-              result = result * 64 + glyphs.indexOf(chars[e]);
+                result = result * 64 + glyphs.indexOf(chars[e]);
             }
             return result;
         },
@@ -1115,38 +1118,38 @@ export default {
         setRating(rating) {
             this.post.rating = rating;
         },
-        fancyBytes(bytes){
+        fancyBytes(bytes) {
             var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
-            while (bytes > 1024){
-              bytes = bytes / 1024
-              counter ++
+            while (bytes > 1024) {
+                bytes = bytes / 1024
+                counter++
             }
             return `${this.toFixed(bytes, 2)} ${p[counter]}B`
         },
-        expIn(con){
+        expIn(con) {
             return `Expires in ${parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60) < 24 ? parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60) + ' hours' : parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60 / 24) + ' days'}`
         },
-        cancel_contract(contract){
+        cancel_contract(contract) {
             //if(this.account != contract.t)return
             const toSign = {
                 type: "cja",
                 cj: {
-                  id: contract.i,
+                    id: contract.i,
                 },
                 id: `spkcc_contract_close`,
                 msg: `Canceling ${contract.i}...`,
                 ops: ["getTokenUser", "getSapi"],
                 api: "https://spktest.dlux.io",
                 txid: "cancel_contract",
-              }
-              this.$emit('tosign', toSign)
+            }
+            this.$emit('tosign', toSign)
         }
     },
     watch: {
         'account'(newValue) {
-            if(this.loaded == true){
-                if(!this.nodeview){
-                    this.contracts =  []
+            if (this.loaded == true) {
+                if (!this.nodeview) {
+                    this.contracts = []
                     this.contractIDs = {}
                 }
                 this.saccountapi = {
@@ -1162,17 +1165,17 @@ export default {
                         t: 0
                     }
                 },
-                this.getSpkStats()
+                    this.getSpkStats()
             }
         },
-        'toSign'(newValue){
-            if(newValue.type){
+        'toSign'(newValue) {
+            if (newValue.type) {
                 this.$emit('tosign', this.toSign)
                 this.toSign = {}
             }
         },
-        'prop_contracts'(newValue){
-            if(this.nodeview){
+        'prop_contracts'(newValue) {
+            if (this.nodeview) {
                 this.contracts = []
                 this.contractIDs = {}
                 const getContract = (id) => {
@@ -1196,8 +1199,8 @@ export default {
                 }
             }
         }
-      },
-      computed: {
+    },
+    computed: {
         hasFiles() {
             return Object.keys(this.files).length > 0;
         }
@@ -1205,7 +1208,7 @@ export default {
     mounted() {
         this.getSpkStats()
         this.getIPFSproviders()
-        if(this.nodeview){
+        if (this.nodeview) {
             for (var node in this.prop_contracts) {
                 this.contracts.push(this.prop_contracts[node]);
                 this.contractIDs[this.prop_contracts[node].i] = this.prop_contracts[node];
