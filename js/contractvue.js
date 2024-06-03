@@ -792,7 +792,7 @@ export default {
                                 // make empty array 3 times the length of filesNum
 
                                 this.newMeta[data.file_contracts[node].i] = {
-                                    meta:  new Array(this.filesNum * 3 + 1).fill('')
+                                    meta:  new Array(filesNum * 3 + 1).fill('')
                                 }
                             } else {
                                 this.newMeta[data.file_contracts[node].i] = {
