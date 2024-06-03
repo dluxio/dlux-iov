@@ -372,51 +372,86 @@ export default {
                                                         <tr class="collapse" :id="replace(contract.i)">
                                                             <td class="border-0" colspan="4">
                                                                 <div class="d-flex flex-column border border-white rounded text-start" style="background-color:rgba(0,0,0,0.3);">
-                                                                <div class="d-flex flex-wrap justify-content-between mb-3">
-                                                                    <div class="m-1">
-                                                                        Contract ID: {{contract.i}}
+                                                                <div class="d-flex flex-wrap justify-content-center mb-3 ">
+
+                                                                    <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
+                                                                        <div> Contract ID </div>
+                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <div>{{contract.i}}</div>
                                                                     </div>
-                                                                    <div class="m-1">
-                                                                        Size Allowed: {{contract.a}} bytes
+
+                                                                    <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
+                                                                        <div> Size Allowed </div>
+                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <div>{{contract.a}} bytes</div>
                                                                     </div>
-                                                                    <div v-if="contract.c == 2" class="m-1">
-                                                                        Size: {{contract.u}} bytes
+
+                                                                    <div v-if="contract.c == 2" class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
+                                                                        <div> File Owner </div>
+                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <div> <a :href="'/@' + contract.t"
+                                                                        class="no-decoration text-primary">@{{contract.t}}</a> bytes</div>
                                                                     </div>
-                                                                    <div class="m-1">
-                                                                        File Owner: <a :href="'/@' + contract.t"
-                                                                            class="no-decoration text-primary">@{{contract.t}}</a>
+
+                                                                    <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
+                                                                        <div> File Owner </div>
+                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <div><a :href="'/@' + contract.t"
+                                                                        class="no-decoration text-primary">@{{contract.t}}</a></div>
                                                                     </div>
-                                                                    <div class="m-1">
-                                                                        Service Provider: <a :href="'/@' + contract.b"
-                                                                            class="no-decoration text-primary">@{{contract.b}}</a>
+
+                                                                    <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
+                                                                        <div> Service Provider </div>
+                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <div><a :href="'/@' + contract.b"
+                                                                        class="no-decoration text-primary">@{{contract.b}}</a></div>
                                                                     </div>
-                                                                    <div class="m-1">
-                                                                        Sponsor: <a :href="'/@' + contract.f"
-                                                                            class="no-decoration text-primary">@{{contract.f}}</a>
+
+                                                                    <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
+                                                                        <div> Sponsor </div>
+                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <div><a :href="'/@' + contract.f"
+                                                                        class="no-decoration text-primary">@{{contract.f}}</a></div>
                                                                     </div>
-                                                                    <div class="m-1">
-                                                                        Expiration: {{exp_to_time(contract.e)}}
+
+                                                                    <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
+                                                                        <div> Expiration </div>
+                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <div>{{exp_to_time(contract.e)}}</div>
                                                                     </div>
-                                                                    <div class="m-1">
-                                                                        Price: {{formatNumber(contract.r,'3','.',',')}}
-                                                                        Broca
+
+                                                                    <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
+                                                                        <div> Price </div>
+                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <div>{{formatNumber(contract.r,'3','.',',')}}
+                                                                        Broca</div>
                                                                     </div>
-                                                                    <div class="m-1">
-                                                                        Redundancy: {{contract.p}}
+
+                                                                    <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
+                                                                        <div> Redundancy </div>
+                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <div>{{contract.p}}</div>
                                                                     </div>
-                                                                    <div v-if="contract.s" class="m-1">
-                                                                        Terms: {{slotDecode(contract.s, 1)}}%
-                                                                        Beneficiary to @{{slotDecode(contract.s, 0)}}
+
+                                                                    
+
+                                                                    <div v-if="contract.s" class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
+                                                                        <div> Terms </div>
+                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <div>{{slotDecode(contract.s, 1)}}%
+                                                                        Beneficiary to @{{slotDecode(contract.s, 0)}}</div>
                                                                     </div>
-                                                                    <div class="m-1">
-                                                                        Status: {{contract.c == 1 ? 'Waiting For Upload'
-                                                                        :
-                                                                        'Uploaded'}}
+
+                                                                    <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
+                                                                        <div> Status </div>
+                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <div> {{contract.c == 1 ? 'Waiting For Upload' : 'Uploaded'}}</div>
                                                                     </div>
+
                                                                 </div>
                                                                     <div v-if="contract.df" class="d-flex flex-column">
                                                                         <h4 class="ms-auto me-auto">Files</h4>
-                                                                        <ol class="text-start">
+                                                                        <ol class="text-start mx-auto">
                                                                             <li class="mb-2" v-for="(size, cid, index) in contract.df">
                                                                             <div class="d-flex align-content-center">    
                                                                             <div class="d-flex mx-2">
@@ -453,8 +488,17 @@ export default {
                                                                             </li>
                                                                         </ol>
                                                                     </div>
+
                                                                     <div class="d-flex">
                                                                     <button type="button"
+                                                                    class="btn btn-sm btn-info my-2 mx-auto"
+                                                                    @click="update_contract(contract)">
+                                                                    <i
+                                                                        class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Update</button>
+                                                                </div>
+
+                                                                    <div class="d-flex">
+                                                                        <button type="button"
                                                                         class="btn btn-sm btn-danger my-2 mx-auto"
                                                                         @click="cancel_contract(contract)">
                                                                         <i
