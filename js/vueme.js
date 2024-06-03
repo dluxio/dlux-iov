@@ -3294,6 +3294,7 @@ function buyNFT(setname, uid, price, type, callback){
         .then((response) => response.json())
         .then((data) => {
           this.reloaded = true
+          this.getSPKUser()
           data.tick = data.tick || 0.01;
           this.larynxbehind = data.behind;
           if (!fu) {
