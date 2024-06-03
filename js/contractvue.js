@@ -371,8 +371,8 @@ export default {
                                                         </tr>
                                                         <tr class="collapse" :id="replace(contract.i)">
                                                             <td class="border-0" colspan="4">
-                                                                <div
-                                                                    class="d-flex flex-wrap justify-content-between border border-white rounded text-start">
+                                                                <div class="d-flex flex-column border border-white rounded text-start" style="background-color:rgba(0,0,0,0.3);">
+                                                                <div class="d-flex flex-wrap justify-content-between mb-3">
                                                                     <div class="m-1">
                                                                         Contract ID: {{contract.i}}
                                                                     </div>
@@ -413,61 +413,54 @@ export default {
                                                                         :
                                                                         'Uploaded'}}
                                                                     </div>
-                                                                    <div v-if="contract.df" class="m-1 text-center">
-                                                                        <u>Files</u>
+                                                                </div>
+                                                                    <div v-if="contract.df" class="d-flex flex-column">
+                                                                        <h4 class="ms-auto me-auto">Files</h4>
                                                                         <ol class="text-start">
-                                                                            <li class="mb-0" v-for="(size, cid, index) in contract.df">
-                                                                                <div class="d-flex">
-                                                                                    <a :href="'https://ipfs.dlux.io/ipfs/' + cid"
-                                                                                    target="_blank"
-                                                                                    class="no-decoration text-break text-primary">{{cid}}</a>
-                                                                                    <span
-                                                                                    class="small ms-1">({{size > 1 ?
-                                                                                    size/1000000 :
-                                                                                    size/1000000}} MB)</span>
+                                                                            <li class="mb-2" v-for="(size, cid, index) in contract.df">
+                                                                            <div class="d-flex align-content-center">    
+                                                                            <div class="d-flex mx-2">
+                                                                                    
+                                                                                        <img class="img-thumbnail" src="/img/dluxdefault.png" width="100px">
+                                                                                    
                                                                                 </div>
-                                                                                <div class="d-flex">
-                                                                                    <div class="mb-3 me-3">
-                                                                                        <label class="form-label">Filename</label>
+                                                                                <div class="d-flex flex-column my-auto">
+                                                                                
+                                                                                <div class="d-flex mb-1">
+                                                                                    <div class="me-1">
                                                                                         <div class="position-relative has-validation">
-                                                                                            <input autocapitalize="off" placeholder="filename" class="px-4 form-control bg-dark border-dark text-info">
+                                                                                            <input autocapitalize="off" placeholder="filename" class="form-control form-control-sm bg-dark border-dark text-info">
                                                                                         </div>
                                                                                     </div>
-                                                                                    <div class="mb-3 me-3">
-                                                                                        <label class="form-label">Extension</label>
+                                                                                    <div class="mx-1">
                                                                                         <div class="position-relative has-validation">
-                                                                                            <input autocapitalize="off" placeholder="extension" class="px-4 form-control bg-dark border-dark text-info">
+                                                                                            <input autocapitalize="off" placeholder="extension" class="form-control form-control-sm bg-dark border-dark text-info">
                                                                                         </div>
                                                                                     </div>
-                                                                                    <div class="mb-3 me-3">
-                                                                                        <label class="form-label">Thumbnail</label>
+                                                                                    <div class="ms-1">
                                                                                         <div class="position-relative has-validation">
-                                                                                            <input autocapitalize="off" placeholder="thumbnail" class="px-4 form-control bg-dark border-dark text-info">
+                                                                                            <input autocapitalize="off" placeholder="thumbnail" class="form-control form-control-sm bg-dark border-dark text-info">
                                                                                         </div>
                                                                                     </div>
-                                                                                    <div class="mb-3 me-3">
-                                                                                        <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="no-decoration text-break text-primary"><i class="fa-solid fa-fw fa-up-right-from-square"></i></a>
-                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="d-flex mb-1">
+                                                                                    <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="no-decoration text-break text-primary">{{cid}}
+                                                                                        <i class="ms-2 fa-solid fa-fw fa-up-right-from-square"></i></a>
+                                                                                    <span class="small ms-1">({{size > 1 ? size/1000000 : size/1000000}} MB)</span>
+                                                                                </div>
+                                                                                </div>
                                                                                 </div>
                                                                             </li>
                                                                         </ol>
                                                                     </div>
-                                                                    <div v-if="contract.n"
-                                                                        class="m-1 ms-auto text-center">
-                                                                        <u>Stored by</u>
-                                                                        <ol class="text-start">
-                                                                            <li v-for="acc in contract.n">
-                                                                                <a :href="'/@' + acc"
-                                                                                    class="no-decoration text-primary">@{{acc}}</a>
-                                                                            </li>
-                                                                        </ol>
-                                                                    </div>
+                                                                    <div class="d-flex">
                                                                     <button type="button"
-                                                                        class="btn btn-sm btn-danger mt-1"
+                                                                        class="btn btn-sm btn-danger my-2 mx-auto"
                                                                         @click="cancel_contract(contract)">
                                                                         <i
                                                                             class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Sever</button>
-                                                                </div>
+                                                                    </div>
+                                                                
                                                             </td>
                                                         </tr>
                                                     </tbody>
