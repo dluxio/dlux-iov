@@ -469,7 +469,7 @@ export default {
                                                                                     </div>
                                                                                     <div class="mx-1">
                                                                                         <div class="position-relative has-validation">
-                                                                                            <input autocapitalize="off" :value="newMeta[contract.i][index * 3 + 2]" :placeholder="File Type" pattern="[a-zA-Z0-9]{1,4}class="form-control form-control-sm bg-dark border-dark text-info">
+                                                                                            <input autocapitalize="off" :value="newMeta[contract.i][index * 3 + 2]" :placeholder="File Type" pattern="[a-zA-Z0-9]{1,4}" class="form-control form-control-sm bg-dark border-dark text-info">
                                                                                         </div>
                                                                                     </div>
                                                                                     <div class="ms-1">
