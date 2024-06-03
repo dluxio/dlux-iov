@@ -135,7 +135,7 @@ export default {
                     <span class="ms-2 fs-6 border-bottom border-2 border-white">BROCA<i class="fa-solid fa-atom ms-1"></i></span></div>
 
                     <button type="button" class="btn btn-sm btn-primary mx-auto mt-1"
-                    :disabled="extendcost > broca_calc(saccountapi.broca) || formatNumber(extendcost) < 1" @click="extend(contract)" @click="extend(contract)">
+                    :disabled="extendcost > broca_calc(saccountapi.broca) || formatNumber(extendcost) < 1" @click="extend(contract)">
                     <i class="fa-solid fa-clock-rotate-left fa-fw me-1"></i>Extend</button>
 
             </div>
