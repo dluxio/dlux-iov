@@ -695,6 +695,7 @@ export default {
             return string.split(del)[index] ? string.split(del)[index] : ''
         },
         update_meta(contract) {
+            console.log(this.newMeta[contract], contract)
             var meta = this.newMeta[contract]
             var cja = {
                 id: contract,
