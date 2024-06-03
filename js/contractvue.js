@@ -416,14 +416,39 @@ export default {
                                                                     <div v-if="contract.df" class="m-1 text-center">
                                                                         <u>Files</u>
                                                                         <ol class="text-start">
-                                                                            <li class="mb-0"
-                                                                                v-for="(size, cid, index) in contract.df">
-                                                                                <a :href="'https://ipfs.dlux.io/ipfs/' + cid"
+                                                                            <li class="mb-0" v-for="(size, cid, index) in contract.df">
+                                                                                <div class="d-flex">
+                                                                                    <a :href="'https://ipfs.dlux.io/ipfs/' + cid"
                                                                                     target="_blank"
-                                                                                    class="no-decoration text-break text-primary">{{cid}}</a><span
+                                                                                    class="no-decoration text-break text-primary">{{cid}}</a>
+                                                                                    <span
                                                                                     class="small ms-1">({{size > 1 ?
                                                                                     size/1000000 :
                                                                                     size/1000000}} MB)</span>
+                                                                                </div>
+                                                                                <div class="d-flex">
+                                                                                    <div class="mb-3 me-3">
+                                                                                        <label class="form-label">Filename</label>
+                                                                                        <div class="position-relative has-validation">
+                                                                                            <input autocapitalize="off" placeholder="filename" class="px-4 form-control bg-dark border-dark text-info">
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="mb-3 me-3">
+                                                                                        <label class="form-label">Extension</label>
+                                                                                        <div class="position-relative has-validation">
+                                                                                            <input autocapitalize="off" placeholder="extension" class="px-4 form-control bg-dark border-dark text-info">
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="mb-3 me-3">
+                                                                                        <label class="form-label">Thumbnail</label>
+                                                                                        <div class="position-relative has-validation">
+                                                                                            <input autocapitalize="off" placeholder="thumbnail" class="px-4 form-control bg-dark border-dark text-info">
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="mb-3 me-3">
+                                                                                        <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="no-decoration text-break text-primary" :alt="{{cid}}"><i class="fa-solid fa-fw fa-up-right-from-square"></i></a>
+                                                                                    </div>
+                                                                                </div>
                                                                             </li>
                                                                         </ol>
                                                                     </div>
