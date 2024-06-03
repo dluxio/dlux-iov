@@ -438,7 +438,7 @@ export default {
                                                                         </ol>
                                                                     </div>
                                                                     <button type="button"
-                                                                        class="d-none btn btn-sm btn-danger mt-1"
+                                                                        class="btn btn-sm btn-danger mt-1"
                                                                         @click="cancel_contract(contract)">
                                                                         <i
                                                                             class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Sever</button>
