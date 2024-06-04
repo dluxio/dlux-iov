@@ -231,16 +231,22 @@ methods: {
       },
       upload(cids = ['QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3'], contract ) { // = { api: 'https://ipfs.dlux.io', id: '1668913215284', sigs: {}, s: 10485760, t: 0 }) {
         var files = []
+        var meta = ','
         for (var name in this.FileInfo) {
           for (var i = 0; i < cids.length; i++) {
             if (this.FileInfo[name].hash == cids[i]) {
               this.File[this.FileInfo[name].index].cid = cids[i]
               files.push(this.File[this.FileInfo[name].index])
+              //get everything before the last .
+              var ext = name.split('.').slice(0, -1).join('')
+              //get everything after the last
+              var Filename = name.split('.').slice(-1).join('')
+              meta += `${Filename},${ext},,`
               break;
             }
           }
         }
-        console.log({ cids }, files)
+        console.log({ cids }, files, meta)
         const ENDPOINTS = {
           UPLOAD: `${this.contract.api}/upload`,
           UPLOAD_STATUS: `${this.contract.api}/upload-check`,
@@ -252,6 +258,7 @@ methods: {
           contract: contract,
           cid: null,
           cids: `${cids.join(',')}`,
+          meta: ',',
           onAbort: (e, f) => {
             console.log('options.onAbort')
             // const fileObj = files.get(file);
@@ -323,6 +330,7 @@ methods: {
           req.setRequestHeader('X-Sig', options.contract.fosig);
           req.setRequestHeader('X-Account', options.contract.t);
           req.setRequestHeader('X-Files', options.cids);
+          req.setRequestHeader('X-Meta', options.meta);
   
   
           req.onload = (e) => {
@@ -364,6 +372,7 @@ methods: {
               'X-Contract': options.contract.i,
               'X-Cid': cid,
               'X-Files': options.contract.files,
+              'X-Meta': options.meta,
               'X-Chain': 'HIVE'
             }
           })
