@@ -125,11 +125,17 @@ methods: {
               ) {
                 Hash.of(buffer.Buffer(fileContent), { unixfs: 'UnixFS' }).then((hash) => {
                   const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash, index: i, size: target.File.size, name: target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
-                  this.FileInfo[dict.name] = dict
-                  // this.File[i].md5 = hash;
-                  // this.File[i].blob = new Blob([fileContent], event.currentTarget.File.name)
-                  const file = this.File[i];
-                  this.File.splice(i, 1, file);
+                  fetch(`https://spktest.dlux.io/api/file/${hash}`).then(r => r.json()).then(res => {
+                    if(res == "Not found"){
+                      this.FileInfo[dict.name] = dict
+                      const file = this.File[i];
+                      this.File.splice(i, 1, file);
+                    } else {
+                      alert(`${target.File.name} already uploaded`)
+                      delete this.FileInfo[dict.name]
+                      this.File.splice(i, 1)
+                    }
+                  })
                 });
                 break
               }
@@ -163,10 +169,24 @@ methods: {
             //     && this.File[i].size == target.File.size
             //   ) {
             Hash.of(buffer.Buffer(fileContent)).then(hash => {
-              const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash, index: this.File.length, size: target.File.size, name: target.File.name, status: 'Pending Signature' }
-              this.FileInfo[dict.name] = dict
+              const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash, index: i, size: target.File.size, name: target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
+                  fetch(`https://spktest.dlux.io/api/file/${hash}`).then(r => r.json()).then(res => {
+                    if(res == "Not found"){
+                      this.FileInfo[dict.name] = dict
+                      const file = this.File[i];
+                      this.File.splice(i, 1, file);
+                    } else {
+                      alert(`${target.File.name} already uploaded`)
+                      delete this.FileInfo[dict.name]
+                      this.File.splice(i, 1)
+                    }
+                  })
               // var File = e.dataTransfer.files[i];
-              var File = target.File
+            })
+          };
+          
+          reader.readAsArrayBuffer(e.dataTransfer.files[i]);
+          var File = target.File
               File.progress = 0;
               File.actions = {
                 cancel: false,
@@ -174,10 +194,6 @@ methods: {
                 resume: false,
               }
               this.File.push(File);
-            })
-          };
-          
-          reader.readAsArrayBuffer(e.dataTransfer.files[i]);
         }
         this.ready = true
       },
