@@ -69,7 +69,7 @@ export default {
                         </div>
                     </div>
                     <div class="card-footer d-flex">
-                        <button type="button" class="ms-auto me-auto mt-2 btn btn-lg btn-info" :disabled="ready" @click="signNUpload()"><i
+                        <button type="button" class="ms-auto me-auto mt-2 btn btn-lg btn-info" :class="{'disabled': !ready}" :disabled="!ready" @click="signNUpload()"><i
                                 class="fa-solid fa-file-signature fa-fw me-2"></i>Sign and Upload</button>
                     </div>
                 </div>
@@ -124,7 +124,6 @@ methods: {
                 && this.File[i].size == target.File.size
               ) {
                 Hash.of(buffer.Buffer(fileContent), { unixfs: 'UnixFS' }).then((hash) => {
-                  console.log(fileContent)
                   const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash, index: i, size: target.File.size, name: target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
                   this.FileInfo[dict.name] = dict
                   // this.File[i].md5 = hash;
@@ -145,9 +144,9 @@ methods: {
             pause: false,
             resume: false,
           }
-          this.ready = true
           this.File.push(File);
         }
+        this.ready = true
       },
     dragFile(e) {
         e.preventDefault();
@@ -177,9 +176,10 @@ methods: {
               this.File.push(File);
             })
           };
-          this.ready = true
+          
           reader.readAsArrayBuffer(e.dataTransfer.files[i]);
         }
+        this.ready = true
       },
     deleteImg(index, name) {
         delete this.FileInfo[name]
