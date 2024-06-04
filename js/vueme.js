@@ -73,19 +73,9 @@ if (
 let user = localStorage.getItem("user") || "GUEST";
 let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
 
-Vue.directive("scroll", {
-  inserted: function (el, binding) {
-    const onScrollCallback = binding.value;
-    window.addEventListener("scroll", () => onScrollCallback());
-  },
-});
-
 // var app = new Vue({
   // vue 2
   // el: "#app", // vue 2
-  // directives:{
-  //   scroll
-  // },
   createApp({
     directives:{
       scroll
