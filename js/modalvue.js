@@ -970,6 +970,7 @@ export default {
     for (var i = 0; i < props.length; i++) {
       this.d[props[i]] = options[props[i]];
     }
+    this.d.self = this.account
     if(!this.$slots["trigger"]){
       //console.log(options)
     } else {
