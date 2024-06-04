@@ -489,7 +489,7 @@ export default {
                                                                         <i
                                                                             class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Sever</button>
                                                                     </div>
-                                                                
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                     </tbody>
