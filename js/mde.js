@@ -13,15 +13,13 @@ export default {
         this.mde.value(value);
       }
     },
-    watch: {
-      'prop_value': {
-        handler: function () {
-            current = this.mde.value()
-            this.mde.value(this.prop_value + current)
-        },
-        deep: true
-},
-    },
+    // watch: {
+    //   'prop_value': {
+    //     handler: function () {
+    //     },
+    //     deep: true
+    //   },
+    // },
     mounted() {
 
       this.mde = new SimpleMDE({ 
