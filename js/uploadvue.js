@@ -238,9 +238,9 @@ methods: {
               this.File[this.FileInfo[name].index].cid = cids[i]
               files.push(this.File[this.FileInfo[name].index])
               //get everything before the last .
-              var ext = name.split('.').slice(0, -1).join('')
+              var Filename = name.split('.').slice(0, -1).join('')
               //get everything after the last
-              var Filename = name.split('.').slice(-1).join('')
+              var ext = name.split('.').slice(-1).join('')
               meta += `${Filename},${ext},,`
               break;
             }
@@ -258,7 +258,7 @@ methods: {
           contract: contract,
           cid: null,
           cids: `${cids.join(',')}`,
-          meta: ',',
+          meta,
           onAbort: (e, f) => {
             console.log('options.onAbort')
             // const fileObj = files.get(file);

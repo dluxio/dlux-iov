@@ -682,7 +682,7 @@ export default {
             return string.split(del)[index] ? string.split(del)[index] : ''
         },
         smartThumb(contract, index,cid) {
-            var thumb = this.newMeta[contract][index * 4 + 3]
+            var thumb = this.newMeta[contract][index * 4 + 3] || ''
             if (thumb.includes('Qm')) return `https://ipfs.dlux.io/ipfs/${thumb}`
             if (thumb.includes('https')) return thumb
             switch (this.newMeta[contract][index * 4 + 2]) {
