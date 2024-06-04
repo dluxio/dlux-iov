@@ -111,22 +111,21 @@ data() {
 emits: ["tosign", "done"],
 methods: {
     uploadFile(e) {
-        console.log(e)
         for (var i = 0; i < e.target.files.length; i++) {
           var reader = new FileReader();
           reader.File = e.target.files[i]
           reader.onload = (Event) => {
             const event = Event
-            console.log(event)
-            const fileContent = event.target.result;
+            const target = event.currentTarget ? event.currentTarget : event.target
+            const fileContent = target.result;
             for (var i = 0; i < this.File.length; i++) {
               if (
-                this.File[i].name == event.currentTarget.File.name
-                && this.File[i].size == event.currentTarget.File.size
+                this.File[i].name == target.File.name
+                && this.File[i].size == target.File.size
               ) {
                 Hash.of(buffer.Buffer(fileContent), { unixfs: 'UnixFS' }).then((hash) => {
                   console.log(fileContent)
-                  const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash, index: i, size: event.currentTarget.File.size, name: event.currentTarget.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
+                  const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash, index: i, size: target.File.size, name: target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
                   this.FileInfo[dict.name] = dict
                   // this.File[i].md5 = hash;
                   // this.File[i].blob = new Blob([fileContent], event.currentTarget.File.name)
@@ -139,7 +138,7 @@ methods: {
           };
   
           reader.readAsArrayBuffer(e.target.files[i])
-          var File = e.target.files[i];
+          var File = arget.files[i];
           File.progress = 0;
           File.actions = {
             cancel: false,
@@ -151,26 +150,24 @@ methods: {
         }
       },
     dragFile(e) {
-        console.log(e)
         e.preventDefault();
         for (var i = 0; i < e.dataTransfer.files.length; i++) {
           var reader = new FileReader();
           reader.File = e.dataTransfer.files[i]
           reader.onload = (Event) => {
             const event = Event
-            console.log(event)
+            const target = event.currentTarget ? event.currentTarget : event.target
             const fileContent = event.target.result;
             // for (var i = 0; i < this.File.length; i++) {
             //   if (
-            //     this.File[i].name == event.currentTarget.File.name
-            //     && this.File[i].size == event.currentTarget.File.size
+            //     this.File[i].name == target.File.name
+            //     && this.File[i].size == target.File.size
             //   ) {
             Hash.of(buffer.Buffer(fileContent)).then(hash => {
-              console.log('hereasdasd')
-              const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash, index: this.File.length, size: event.currentTarget.File.size, name: event.currentTarget.File.name, status: 'Pending Signature' }
+              const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash, index: this.File.length, size: target.File.size, name: target.File.name, status: 'Pending Signature' }
               this.FileInfo[dict.name] = dict
               // var File = e.dataTransfer.files[i];
-              var File = event.currentTarget.File
+              var File = target.File
               File.progress = 0;
               File.actions = {
                 cancel: false,
