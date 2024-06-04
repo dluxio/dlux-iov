@@ -5,8 +5,9 @@ export default {
             <img :src="smartThumb(contract.i, index, file)" onerror="this.style.display='none'"
             class="card-img-top rounded-top" :alt="file">
             <div class="card-body">
-                <span class="text-break small text-muted">{{newMeta[contract.i][index * 4 + 1] || file}}</span>
-                <span class="text-break small text-muted">{{newMeta[contract.i][index * 4 + 2]}}</span>
+                <span class="text-break small text-muted">{{newMeta[contract.i][index * 4 + 1] || file}}</span><br>
+                <span class="text-break small text-muted">{{newMeta[contract.i][index * 4 + 2]}}</span><br>
+                <span class="text-break small text-muted">{{fancyBytes(size)}}</span>
             </div>
         </a>
         <div class="card-footer mt-auto text-center border-0" v-if="assets">
@@ -91,7 +92,15 @@ methods: {
             default:
                 return '/img/dluxdefault.png'
         }
-    }
+    },
+    fancyBytes(bytes) {
+        var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
+        while (bytes > 1024) {
+            bytes = bytes / 1024
+            counter++
+        }
+        return `${this.toFixed(bytes, 2)} ${p[counter]}B`
+    },
 },
 computed: {
     hasFiles() {
