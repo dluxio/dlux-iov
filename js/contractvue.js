@@ -304,7 +304,7 @@ export default {
                                                             <td class="border-0">
                                                                 <div class="d-flex align-items-center">
                                                                     <div class="border border-1 border-light text-light rounded>
-                                                                        <i class="fa-solid fa-circle-info fa-fw"></i>
+                                                                       
                                                                     </div>
                                                                     
                                                                     <span v-if="contract.c">
