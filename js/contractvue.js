@@ -430,9 +430,9 @@ export default {
 
                                                                 
                                                                 <!-- files list -->
-                                                                <div class="card mx-auto p-4 mb-3">
+                                                                <div v-if="contract.df" class="card mx-auto p-4 mb-3">
 
-                                                                    <div v-if="contract.df" class="d-flex flex-column">
+                                                                    <div class="d-flex flex-column">
                                                                         <h4 class="ms-auto me-auto">Files</h4>
                                                                         <ol class="text-start mx-auto">
                                                                             <li class="mb-2" v-for="(size, cid, index) in contract.df">
