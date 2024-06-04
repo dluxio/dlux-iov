@@ -417,7 +417,8 @@ export default {
                                                                         <div> Terms </div>
                                                                         <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
                                                                         <div>{{slotDecode(contract.s, 1)}}%
-                                                                        Beneficiary to @{{slotDecode(contract.s, 0)}}</div>
+                                                                        Beneficiary to <a :href="'/@' + slotDecode(contract.s, 0)"
+                                                                        class="no-decoration text-primary">@{{slotDecode(contract.s, 0)}}</a>@{{slotDecode(contract.s, 0)}}</div>
                                                                     </div>
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> Contract ID </div>
