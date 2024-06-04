@@ -258,27 +258,18 @@ export default {
                                                             <td class="border-0">
                                                                 <div class="d-flex align-items-center">
                                                                     <!-- upload btn -->
-                                                                    <div v-if="contract.c == 1 class="border border-1 border-success text-success rounded>
+                                                                    <div v-if="contract.c == 1" class="border border-1 border-success text-success rounded>
                                                                     <i class="fa-solid fa-file-upload fa-fw"></i>
                                                                 </div>
-                                                                    <a v-if="contract.c == 1"
-                                                                        class="collapsed no-decoration"
-                                                                        data-bs-toggle="collapse"
-                                                                        :href="'#' + replace(contract.i) + 'upload'">
-                                                                        <span class="if-collapsed"><button
-                                                                                class="my-1 me-2 btn btn-sm btn-outline-success"></button></span>
-                                                                        <span class="if-not-collapsed"><button
-                                                                                class="my-1 me-2 btn btn-sm btn-success"><i
-                                                                                    class="fa-solid fa-file-upload fa-fw"></i></button></span>
-                                                                    </a>
+                                                                    
                                                                     <!-- post btn -->
-                                                                    <div v-if="contract.c == 2 class="border border-1 border-warning text-warning rounded>
+                                                                    <div v-if="contract.c == 2" class="border border-1 border-warning text-warning rounded>
                                                                     <i
                                                                                     class="fa-solid fa-hand-holding-dollar fa-fw"></i>
                                                                 </div>
                                                                    
                                                                     <!-- extend btn -->
-                                                                    <div v-if="contract.c == 3 class="border border-1 border-primary text-primary rounded>
+                                                                    <div v-if="contract.c == 3" class="border border-1 border-primary text-primary rounded>
                                                                     <i class="fa-solid fa-clock-rotate-left fa-fw"></i>
                                                                 </div>
                                                                     
