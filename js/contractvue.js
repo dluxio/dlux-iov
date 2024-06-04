@@ -409,7 +409,7 @@ export default {
                                                                 </div>
 
                                                                 <!-- post -->
-                                                                <div v-if="account == contract.t && !postpage && contract.c == 2">
+                                                                <div v-if="account == contract.t && !postpage && contract.c == 2" class="mb-3">
                                                                     <post-vue :account="account"
                                                                         :prop_bens="[contract.s]"
                                                                         @tosign="toSign=$event" />
