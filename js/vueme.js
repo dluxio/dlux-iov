@@ -73,12 +73,12 @@ if (
 let user = localStorage.getItem("user") || "GUEST";
 let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
 
-// Vue.directive("scroll", {
-//   inserted: function (el, binding) {
-//     const onScrollCallback = binding.value;
-//     window.addEventListener("scroll", () => onScrollCallback());
-//   },
-// });
+Vue.directive("scroll", {
+  inserted: function (el, binding) {
+    const onScrollCallback = binding.value;
+    window.addEventListener("scroll", () => onScrollCallback());
+  },
+});
 
 // var app = new Vue({
   // vue 2
@@ -95,6 +95,7 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
       fileRequests: {},
       showLine: true,
       debounceScroll: 0,
+      activeTab: "blog",
       relations: {"follows":false,"ignores":false,"blacklists":false,"follows_blacklists":false,"follows_muted":false},
       sets: {},
       chains: {
@@ -2196,7 +2197,8 @@ function buyNFT(setname, uid, price, type, callback){
           document.documentElement.scrollHeight -
             document.documentElement.clientHeight * 2
         ) {
-          this.getPosts();
+          if(this.activeTab == 'blog')this.getPosts();
+          else if(this.activeTab == 'nfts')this.getNFTs()
         }
       }
     },
@@ -3635,6 +3637,7 @@ function buyNFT(setname, uid, price, type, callback){
   },
   mounted() {
     // Check for active service worker
+    this.activeTab = hash || 'blog'
     if ('serviceWorker' in navigator) {
       if (navigator.onLine) {
         this.serviceWorker = true;
