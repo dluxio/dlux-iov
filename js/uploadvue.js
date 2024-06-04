@@ -69,7 +69,7 @@ export default {
                         </div>
                     </div>
                     <div class="card-footer d-flex">
-                        <button type="button" class="ms-auto me-auto mt-2 btn btn-lg btn-info" :disabled="ready" @click="signNUpload()"><i
+                        <button type="button" class="ms-auto me-auto mt-2 btn btn-lg btn-info" :class="{'disabled': disabled}" :disabled="ready" @click="signNUpload()"><i
                                 class="fa-solid fa-file-signature fa-fw me-2"></i>Sign and Upload</button>
                     </div>
                 </div>
@@ -145,9 +145,9 @@ methods: {
             pause: false,
             resume: false,
           }
-          this.ready = true
           this.File.push(File);
         }
+        this.ready = true
       },
     dragFile(e) {
         e.preventDefault();
@@ -177,9 +177,10 @@ methods: {
               this.File.push(File);
             })
           };
-          this.ready = true
+          
           reader.readAsArrayBuffer(e.dataTransfer.files[i]);
         }
+        this.ready = true
       },
     deleteImg(index, name) {
         delete this.FileInfo[name]
