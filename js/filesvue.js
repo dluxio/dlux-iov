@@ -101,7 +101,7 @@ methods: {
         }
         return `${this.toFixed(bytes, 2)} ${p[counter]}B`
     },
-    toFixed(num, fixed) {
+    toFixed(n, digits) {
         return parseFloat(n).toFixed(digits)
     }
 },
