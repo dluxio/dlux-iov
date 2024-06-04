@@ -25,7 +25,7 @@ export default {
                 @blur="permlink()">
             <small id="permlinkPreview" class="form-text text-muted d-flex"><span
                     id="permlink" class="mr-auto">Permlink:
-                    https://dlux.io/dlux/@{{account}}/{{postPermlink}}</span>
+                    https://dlux.io/{{postCustom_json.vrHash || postCustom_json.tags[0] || 'blog'}}/@{{account}}/{{postPermlink}}</span>
                 <!-- <a href="#" class="ml-auto"> Edit Permlink</a> -->
             </small>
         </div>
@@ -73,6 +73,11 @@ props: {
             return []
         },
     },
+    prop_links: {
+      type: String,
+      required: false,
+      default: ""
+    },
     prop_contracts:{
         type: Array,
         required: false,
@@ -107,7 +112,7 @@ data() {
         postTags: "",
         postCustom_json: {
             "app": "dlux/0.1",
-            "vrHash": "QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k",
+            "vrHash": "",
             "assets": [],
             tags: []
         }
@@ -137,7 +142,7 @@ methods: {
             }
         }
         if(this.postCustom_json.tags.length == 0){
-            this.postCustom_json.tags = ['dlux']
+            this.postCustom_json.tags = ['blog']
         }
         if (this.account && this.postPermlink && this.postTitle && this.postBody) {
           const operations = [["comment",
@@ -347,5 +352,6 @@ mounted() {
         this.addBen(this.prop_contracts[i].s.split(',')[0], this.prop_contracts[i].s.split(',')[1])
         this.postCustom_json = this.prop_json[node]
     }
+    this.postBody = this.prop_links
 },
 };

@@ -364,6 +364,7 @@ export default {
                                                                     v-if="account == contract.t && !postpage && contract.c == 2">
                                                                     <post-vue :account="account"
                                                                         :prop_bens="[contract.s]"
+                                                                        :prop_links="links[contract.i]"
                                                                         @tosign="toSign=$event" />
                                                                 </div>
                                                                 <div v-if="account == contract.t && postpage">
@@ -412,6 +413,7 @@ export default {
                                                                 <div v-if="account == contract.t && !postpage && contract.c == 2" class="mb-3">
                                                                     <post-vue :account="account"
                                                                         :prop_bens="[contract.s]"
+                                                                        :prop_links="links[contract.i]"
                                                                         @tosign="toSign=$event" />
                                                                 </div>
 
@@ -619,6 +621,7 @@ export default {
             lbargov: 0,
             spkval: 0,
             sstats: {},
+            links: {},
             contractIDs: {},
             saccountapi: {
                 spk: 0,
@@ -874,6 +877,13 @@ export default {
                             } else {
                                 this.newMeta[data.file_contracts[node].i] = data.file_contracts[node].m.split(",")
                             }
+                            this.links[data.file_contracts[node].i] = ""
+                            var links = "", j = 0
+                            for(var i = 1; i < this.newMeta[data.file_contracts[node].i].length; i+=4){
+                                links += `![${this.newMeta[data.file_contracts[node].i][i]}](https://ipfs.dlux.io/ipfs/${data.file_contracts[node]?.df[j]})\n`
+                                j++
+                            }
+                            this.links[data.file_contracts[node].i] = links
                             this.contractIDs[data.file_contracts[node].i] = data.file_contracts[node];
                             this.contracts.push(data.file_contracts[node]);
                             this.contractIDs[data.file_contracts[node].i].index = this.contracts.length - 1;
