@@ -101,6 +101,9 @@ methods: {
         }
         return `${this.toFixed(bytes, 2)} ${p[counter]}B`
     },
+    toFixed(num, fixed) {
+        return parseFloat(n).toFixed(digits)
+    }
 },
 computed: {
     hasFiles() {
