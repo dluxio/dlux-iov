@@ -228,7 +228,7 @@ export default {
                                             <div class="table-responsive">
                                                 <table class="table text-white align-middle mb-0">
                                                     <tbody class="border-0">
-                                                        <tr class="border-0" data-bs-toggle="collapse" :href="'#' + replace(contract.i)" aria-expanded="false" aria-controls="collapseExample">
+                                                        <tr class="border-0 click-me" data-bs-toggle="collapse" :href="'#' + replace(contract.i)" aria-expanded="false" aria-controls="collapseExample">
 
                                                             <!-- storage -->
                                                             <th class="border-0">

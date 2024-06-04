@@ -577,6 +577,24 @@
         integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V"
         crossorigin="anonymous"></script>
     <script>function deepLink(link) { }</script>
+    <script>
+        // Add JavaScript to toggle collapse on <tr> click
+        document.addEventListener('DOMContentLoaded', function () {
+          var trElements = document.querySelectorAll('.table tbody tr[data-bs-toggle="collapse"]');
+          trElements.forEach(function (tr) {
+            tr.addEventListener('click', function () {
+              var target = document.querySelector(this.getAttribute('href'));
+              if (target.classList.contains('show')) {
+                target.classList.remove('show');
+                target.setAttribute('aria-expanded', 'false');
+              } else {
+                target.classList.add('show');
+                target.setAttribute('aria-expanded', 'true');
+              }
+            });
+          });
+        });
+      </script>
 </body>
 
 </html>
