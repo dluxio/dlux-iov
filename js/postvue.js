@@ -31,7 +31,7 @@ export default {
         </div>
         <div class="form-group mb-3">
             <label for="body">Post Body</label>
-            <mde id="body" @data="postBody = $event" :value="postBody"/>
+            <mde id="body" @data="postBody = $event" :prop_value="postBody"/>
         </div>
         <div class="form-group mb-3">
             <label for="tags">Tags</label><br>
