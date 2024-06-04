@@ -340,14 +340,14 @@ export default {
 
                                                         <!-- collapse regions -->
 
-                                                        <!-- files -->
+                                                        <!-- files 
                                                         <tr class="collapse" :id="replace(contract.i) + 'files'">
                                                             <td class="d-flex border-0" colspan="4">
                                                                 <files-vue :assets="assets"
                                                                     @addassets="addAssets($event)"
                                                                     :contract="contract"></files-vue>
                                                             </td>
-                                                        </tr>
+                                                        </tr>-->
 
                                                         <!-- upload 
                                                         <tr class="collapse" :id="replace(contract.i) + 'upload'">
@@ -406,6 +406,13 @@ export default {
                                                                 <div v-if="contract.c == 1">\
                                                                     <upload-vue :user="saccountapi" :propcontract="contract"
                                                                     @tosign="toSign=$event" @done="done()" />
+                                                                </div>
+
+                                                                <!-- post -->
+                                                                <div v-if="account == contract.t && !postpage && contract.c == 2">
+                                                                    <post-vue :account="account"
+                                                                        :prop_bens="[contract.s]"
+                                                                        @tosign="toSign=$event" />
                                                                 </div>
 
 
