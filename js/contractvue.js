@@ -430,7 +430,7 @@ export default {
 
                                                                 
                                                                 <!-- files list -->
-                                                                <div class="card mx-auto p-4">
+                                                                <div class="card mx-auto p-4 mb-3">
 
                                                                     <div v-if="contract.df" class="d-flex flex-column">
                                                                         <h4 class="ms-auto me-auto">Files</h4>
@@ -484,7 +484,7 @@ export default {
                                                                     <div class="d-flex flex-wrap justify-content-center mb-3 ">
 
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
-                                                                        <div> File Owner </div>
+                                                                        <div> Owner </div>
                                                                         <i class="fa-solid fa-user fa-fw mx-1" aria-hidden="true"></i>
                                                                         <div><a :href="'/@' + contract.t"
                                                                         class="no-decoration text-primary">@{{contract.t}}</a></div>
