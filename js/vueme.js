@@ -3628,7 +3628,6 @@ function buyNFT(setname, uid, price, type, callback){
   },
   mounted() {
     // Check for active service worker
-    this.activeTab = hash || 'blog'
     if ('serviceWorker' in navigator) {
       if (navigator.onLine) {
         this.serviceWorker = true;
@@ -3684,6 +3683,7 @@ function buyNFT(setname, uid, price, type, callback){
       }
       if(!this.builder){
         deepLink();
+        this.activeTab = hash || 'blog'
         this.observer = new MutationObserver(mutations => {
           for (const m of mutations) {
             const newValue = m.target.getAttribute(m.attributeName);
