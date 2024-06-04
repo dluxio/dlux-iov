@@ -372,12 +372,15 @@ export default {
                                                         <tr class="collapse" :id="replace(contract.i)">
                                                             <td class="border-0" colspan="4">
                                                                 <div class="d-flex flex-column border border-white rounded text-start p-2" style="background-color:rgba(0,0,0,0.3);">
-                                                                <div class="d-flex flex-wrap justify-content-center mb-3 ">
-                                                                <div class="d-flex align-items-center px-3 py-1 m-1 small muted">
-                                                                        <div> Contract ID </div>
-                                                                        <i class="fa-solid fa-file-contract fa-fw mx-1" aria-hidden="true"></i>
-                                                                        <div>{{contract.i}}</div>
+                                                                    <div class="d-flex flex-wrap justify-content-center mb-3 ">
+                                                                        <div class="d-flex align-items-center px-3 py-1 m-1 small muted">
+                                                                            <div> Contract ID </div>
+                                                                            <i class="fa-solid fa-file-contract fa-fw mx-1" aria-hidden="true"></i>
+                                                                            <div>{{contract.i}}</div>
+                                                                        </div>
                                                                     </div>
+                                                                    
+                                                                    <div class="d-flex flex-wrap justify-content-center mb-3 ">
 
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> File Owner </div>
@@ -430,10 +433,9 @@ export default {
                                                                         <i class="fa-solid fa-signal fa-fw mx-1" aria-hidden="true"></i>
                                                                         <div> {{contract.c == 1 ? 'Waiting For Upload' : 'Uploaded'}}</div>
                                                                     </div>
-                                                                    
-                                                                    
-
+                        
                                                                 </div>
+
                                                                     <div v-if="contract.df" class="d-flex flex-column">
                                                                         <h4 class="ms-auto me-auto">Files</h4>
                                                                         <ol class="text-start mx-auto">
@@ -489,7 +491,7 @@ export default {
                                                                         <i
                                                                             class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Sever</button>
                                                                     </div>
-                                                                </div>
+                                                                
                                                             </td>
                                                         </tr>
                                                     </tbody>
