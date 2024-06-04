@@ -443,7 +443,7 @@ export default {
                                                                             <div class="d-flex align-content-center">    
                                                                             <div class="d-flex mx-2">
                                                                                     
-                                                                                        <img class="img-thumbnail" src="/img/dluxdefault.png" width="100px">
+                                                                                        <img class="img-thumbnail" :src="smartThumb(contract.i,index,cid)" width="100px">
                                                                                     
                                                                                 </div>
                                                                                 <div class="d-flex flex-column my-auto">
@@ -680,6 +680,47 @@ export default {
     methods: {
         getdelimed(string, del = ',', index = 0) {
             return string.split(del)[index] ? string.split(del)[index] : ''
+        },
+        smartThumb(contract, index,cid) {
+            var thumb = this.newMeta[contract][index * 4 + 3]
+            if (thumb.includes('Qm')) return `https://ipfs.dlux.io/ipfs/${thumb}`
+            if (thumb.includes('https')) return thumb
+            switch (this.newMeta[contract][index * 4 + 2]) {
+                case 'jpg':
+                case 'jpeg':
+                case 'png':
+                case 'gif':
+                case 'bmp':
+                case 'webp':
+                case 'tiff':
+                case 'tif':
+                    return `https://ipfs.dlux.io/ipfs/${cid}`
+                case 'svg':
+                    return `svg`
+                case 'mp4':
+                case 'gltf':
+                case 'glb':
+                case 'html':
+                case 'htm':
+                case 'pdf':
+                case 'txt':
+                case 'md':
+                case 'json':
+                case 'csv':
+                case 'xml':
+                case 'yaml':
+                case 'yml':
+                case 'js':
+                case 'css':
+                case 'scss':
+                case 'sass':
+                case 'mp3':
+                case 'wav':
+                case 'ico':
+                case 'enc': //encrypted
+                default:
+                    return '/img/dluxdefault.png'
+            }
         },
         update_meta(contract) {
             console.log(this.newMeta[contract], contract)
