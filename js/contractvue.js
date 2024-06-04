@@ -375,73 +375,55 @@ export default {
                                                                 <div class="d-flex flex-wrap justify-content-center mb-3 ">
 
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
-                                                                        <div> Contract ID </div>
-                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
-                                                                        <div>{{contract.i}}</div>
-                                                                    </div>
-
-                                                                    <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
-                                                                        <div> Size Allowed </div>
-                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
-                                                                        <div>{{contract.a}} bytes</div>
-                                                                    </div>
-
-                                                                    <div v-if="contract.c == 2" class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
-                                                                        <div> File Owner </div>
-                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
-                                                                        <div> <a :href="'/@' + contract.t"
-                                                                        class="no-decoration text-primary">@{{contract.t}}</a> bytes</div>
-                                                                    </div>
-
-                                                                    <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> File Owner </div>
                                                                         <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
                                                                         <div><a :href="'/@' + contract.t"
                                                                         class="no-decoration text-primary">@{{contract.t}}</a></div>
                                                                     </div>
-
-                                                                    <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
-                                                                        <div> Service Provider </div>
-                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
-                                                                        <div><a :href="'/@' + contract.b"
-                                                                        class="no-decoration text-primary">@{{contract.b}}</a></div>
-                                                                    </div>
-
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> Sponsor </div>
                                                                         <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
                                                                         <div><a :href="'/@' + contract.f"
                                                                         class="no-decoration text-primary">@{{contract.f}}</a></div>
                                                                     </div>
-
+                                                                    <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
+                                                                        <div> Service Provider </div>
+                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <div><a :href="'/@' + contract.b"
+                                                                        class="no-decoration text-primary">@{{contract.b}}</a></div>
+                                                                    </div>
+                                                                    <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
+                                                                        <div> Size Allowed </div>
+                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <div>{{contract.a}} bytes</div>
+                                                                    </div>
+                                                                    <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
+                                                                        <div> Redundancy </div>
+                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <div>{{contract.p}}</div>
+                                                                    </div>
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> Expiration </div>
                                                                         <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
                                                                         <div>{{exp_to_time(contract.e)}}</div>
                                                                     </div>
-
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> Price </div>
                                                                         <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
                                                                         <div>{{formatNumber(contract.r,'3','.',',')}}
                                                                         Broca</div>
                                                                     </div>
-
-                                                                    <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
-                                                                        <div> Redundancy </div>
-                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
-                                                                        <div>{{contract.p}}</div>
-                                                                    </div>
-
-                                                                    
-
                                                                     <div v-if="contract.s" class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> Terms </div>
                                                                         <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
                                                                         <div>{{slotDecode(contract.s, 1)}}%
                                                                         Beneficiary to @{{slotDecode(contract.s, 0)}}</div>
                                                                     </div>
-
+                                                                    <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
+                                                                        <div> Contract ID </div>
+                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <div>{{contract.i}}</div>
+                                                                    </div>
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> Status </div>
                                                                         <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
