@@ -272,10 +272,6 @@ export default {
                                                                     <div v-if="contract.c == 3" class="border border-1 border-primary text-primary rounded">
                                                                         <i class="fa-solid fa-clock-rotate-left fa-fw"></i>
                                                                     </div>
-                                                                    
-                                                                    <span v-if="contract.c">
-                                                                        {{exp_to_time(contract.e)}}
-                                                                    </span>
 
                                                                 </div>
                                                                    
