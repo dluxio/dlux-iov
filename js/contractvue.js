@@ -421,12 +421,12 @@ export default {
                                                                     </div>
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> Contract ID </div>
-                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <i class="fa-solid fa-file-contract fa-fw mx-1" aria-hidden="true"></i>
                                                                         <div>{{contract.i}}</div>
                                                                     </div>
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> Status </div>
-                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <i class="fa-solid fa-signal fa-fw mx-1" aria-hidden="true"></i>
                                                                         <div> {{contract.c == 1 ? 'Waiting For Upload' : 'Uploaded'}}</div>
                                                                     </div>
 
