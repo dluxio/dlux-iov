@@ -138,7 +138,7 @@ methods: {
           };
   
           reader.readAsArrayBuffer(e.target.files[i])
-          var File = arget.files[i];
+          var File = target.files[i];
           File.progress = 0;
           File.actions = {
             cancel: false,
