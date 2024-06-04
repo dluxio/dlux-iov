@@ -378,7 +378,7 @@ export default {
                                                             </td>
                                                         </tr>
 
-                                                        <!-- extension -->
+                                                        <!-- extension 
                                                         <tr class="collapse" :id="replace(contract.i) + 'extension'">
                                                             <td class=" border-0" colspan="4" v-if="contract.c == 3">
                                                                 <extension-vue :node-view="nodeview"
@@ -386,7 +386,7 @@ export default {
                                                                     :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
                                                                     @tosign="toSign=$event"></extension-vue>
                                                             </td>
-                                                        </tr>
+                                                        </tr>-->
 
                                                         <!-- detail view -->
                                                         <tr class="collapse" :id="replace(contract.i)">
