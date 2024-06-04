@@ -6,6 +6,7 @@ export default {
             class="card-img-top rounded-top" :alt="file">
             <div class="card-body">
                 <span class="text-break small text-muted">{{newMeta[contract.i][index * 4 + 1] || file}}</span>
+                <span class="text-break small text-muted">{{newMeta[contract.i][index * 4 + 2]}}</span>
             </div>
         </a>
         <div class="card-footer mt-auto text-center border-0" v-if="assets">
