@@ -85,6 +85,7 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
       fileRequests: {},
       showLine: true,
       debounceScroll: 0,
+      lastScroll: 0,
       activeTab: "blog",
       relations: {"follows":false,"ignores":false,"blacklists":false,"follows_blacklists":false,"follows_muted":false},
       sets: {},
@@ -2179,6 +2180,7 @@ function buyNFT(setname, uid, price, type, callback){
       return parseFloat(num).toFixed(dig);
     },
     handleScroll() {
+      console.log("scrolling")
       const now = Date.now();
       if (now - this.lastScroll > 1000) {
         this.lastScroll = now;
