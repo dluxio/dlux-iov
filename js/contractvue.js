@@ -288,9 +288,7 @@ export default {
                                                                 <div v-if="contract.c == 2">
                                                                         <span class="d-lg-none">Post</span>
                                                                         <span class="d-none d-lg-flex">Post
-                                                                            {{split(contract.s, ',',
-                                                                            1)/100}}%
-                                                                            to @{{split(contract.s, ',', 0)}}</span>
+                                                                            {{split(contract.s, ',', 1)/100}}% to @{{split(contract.s, ',', 0)}}</span>
                                                                 </div>
                                                                 <div v-if="contract.c == 3">
                                                                         <span class="d-lg-none">Extend</span>
@@ -303,7 +301,7 @@ export default {
                                                             <!-- expires -->
                                                             <td class="border-0">
                                                                 <div class="d-flex align-items-center">
-                                                                    <div class="border border-1 border-light text-light rounded>
+                                                                    <div class="border border-1 border-light text-light rounded">
                                                                         <i class="fa-solid fa-circle-info fa-fw"></i>
                                                                     </div>
                                                                     
