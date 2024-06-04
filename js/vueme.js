@@ -2608,6 +2608,7 @@ function buyNFT(setname, uid, price, type, callback){
         this.posturls = {};
       }
       if (this.postSelect.bitMask != bitMask || reset) {
+        console.log("resetting")
         this.postSelect.bitMask = bitMask;
         this.displayPosts = [];
         this[this.postSelect.entry] = [];
@@ -2664,6 +2665,7 @@ function buyNFT(setname, uid, price, type, callback){
                   this.posturls[post].permlink
                 );
                 called = true;
+                console.log("called")
               }
               authors.push(this.posturls[post].author);
             }
@@ -3683,7 +3685,7 @@ function buyNFT(setname, uid, price, type, callback){
       }
       if(!this.builder){
         deepLink();
-        this.activeTab = hash[1] || 'blog'
+        this.activeTab = hash?.[1] || 'blog'
         this.observer = new MutationObserver(mutations => {
           for (const m of mutations) {
             const newValue = m.target.getAttribute(m.attributeName);
