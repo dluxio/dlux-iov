@@ -376,7 +376,7 @@ export default {
 
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> File Owner </div>
-                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <i class="fa-solid fa-user fa-fw mx-1" aria-hidden="true"></i>
                                                                         <div><a :href="'/@' + contract.t"
                                                                         class="no-decoration text-primary">@{{contract.t}}</a></div>
                                                                     </div>
@@ -388,7 +388,7 @@ export default {
                                                                     </div>
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> Service Provider </div>
-                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <i class="fa-solid fa-user-gear fa-fw mx-1" aria-hidden="true"></i>
                                                                         <div><a :href="'/@' + contract.b"
                                                                         class="no-decoration text-primary">@{{contract.b}}</a></div>
                                                                     </div>
