@@ -29,7 +29,7 @@ export default {
                                   <div>
                                     <h6 class="m-0 text-break">{{file.name}}</h6>
                                   </div>
-                                    <div class="flex-grow-1 mx-5">
+                                    <div class="flex-grow-1 mx-5" v-if="file.actions.cancel">
                                         <div class="progress" role="progressbar" aria-label="Upload progress"
                                             aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
                                             <div class="progress-bar" :style="'width: ' + file.progress + '%'">
