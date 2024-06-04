@@ -417,7 +417,7 @@ export default {
 
 
                                                                     <!-- extension -->
-                                                                    <div v-if="contract.c == 3" class="card p-3 mx-lg-3">
+                                                                    <div v-if="contract.c == 3">
                                                                     <extension-vue :node-view="nodeview"
                                                                     :contract="contract" :sstats="sstats"
                                                                     :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
@@ -430,6 +430,7 @@ export default {
 
                                                                 
                                                                 <!-- files list -->
+                                                                <div class="card">
 
                                                                     <div v-if="contract.df" class="d-flex flex-column">
                                                                         <h4 class="ms-auto me-auto">Files</h4>
@@ -476,6 +477,7 @@ export default {
                                                                     <i
                                                                         class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Update Metadata</button>
                                                                 </div>
+                                                                    </div>
                                                                     </div>
 
                                                                     <!-- contract details -->
