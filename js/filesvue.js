@@ -8,6 +8,7 @@ export default {
                 <span class="text-break small text-muted">{{newMeta[contract.i][index * 4 + 1] || file}}</span><br>
                 <span class="text-break small text-muted">{{newMeta[contract.i][index * 4 + 2]}}</span><br>
                 <span class="text-break small text-muted">{{fancyBytes(size)}}</span>
+                <span class="text-break small text-muted" @click="copyText(contract.i)">Copy Contract ID to Clipboard</span>
             </div>
         </a>
         <div class="card-footer mt-auto text-center border-0" v-if="assets">
@@ -103,7 +104,10 @@ methods: {
     },
     toFixed(n, digits) {
         return parseFloat(n).toFixed(digits)
-    }
+    },
+    copyText(text){
+        navigator.clipboard.writeText(text)
+    },
 },
 computed: {
     hasFiles() {
