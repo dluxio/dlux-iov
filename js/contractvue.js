@@ -395,12 +395,12 @@ export default {
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> Size Allowed </div>
                                                                         <i class="fa-solid fa-warehouse fa-fw mx-1" aria-hidden="true"></i>
-                                                                        <div>{{contract.a}} bytes</div>
+                                                                        <div>{{contract.a/1000000}} MB</div>
                                                                     </div>
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> Redundancy </div>
                                                                         <i class="fa-solid fa-tower-broadcast fa-fw mx-1" aria-hidden="true"></i>
-                                                                        <div>{{contract.p}}</div>
+                                                                        <div>{{contract.p}} nodes</div>
                                                                     </div>
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> Expiration </div>
