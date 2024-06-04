@@ -3,7 +3,7 @@ export default {
     template: `<div><textarea ref="mde"/></div>`,
     emits: ["data"],
     props: {
-      value: {
+      prop_value: {
         type: String,
         default: ""
       }
@@ -14,9 +14,13 @@ export default {
       }
     },
     watch: {
-      value(value) {
-        this.setValue(value);
-      }
+      'prop_value': {
+        handler: function () {
+            current = this.mde.value()
+            this.mde.value(this.prop_value + current)
+        },
+        deep: true
+},
     },
     mounted() {
 
@@ -26,6 +30,6 @@ export default {
       this.mde.codemirror.on("change", () => {
         this.$emit("data", this.mde.value())
       });
-      this.mde.value(this.value)
+      this.mde.value(this.prop_value)
     }
   };
