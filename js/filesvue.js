@@ -7,8 +7,8 @@ export default {
             <div class="card-body">
                 <span class="text-break small text-muted">{{newMeta[contract.i][index * 4 + 1] || file}}</span><br>
                 <span class="text-break small text-muted">{{newMeta[contract.i][index * 4 + 2]}}</span><br>
-                <span class="text-break small text-muted">{{fancyBytes(size)}}</span>
-                <span class="text-break small text-muted" @click="copyText(contract.i)">Copy Contract ID to Clipboard</span>
+                <span class="text-break small text-muted">{{fancyBytes(size)}}</span><br>
+                <button type="button" class="text-break small text-muted" @click="copyText(contract.i)">Copy Contract ID to Clipboard</button>
             </div>
         </a>
         <div class="card-footer mt-auto text-center border-0" v-if="assets">
