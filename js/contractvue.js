@@ -66,8 +66,8 @@ export default {
                 <!-- has files -->
                 <div v-if="!hasFiles" class="d-flex flex-wrap justify-content-center">
                     <div class="d-flex flex-wrap justify-content-center" v-for="contract in contracts">
-                        <files-vue :files="contract.df" :assets="assets" @addassets="addAssets($event)"
-                            :contract="contract.i"></files-vue>
+                        <files-vue :assets="assets" @addassets="addAssets($event)"
+                            :contract="contract"></files-vue>
                     </div>
                 </div>
             </div>
@@ -331,9 +331,9 @@ export default {
                                                         </tr>
                                                         <tr class="collapse" :id="replace(contract.i) + 'files'">
                                                             <td class="d-flex border-0" colspan="4">
-                                                                <files-vue :files="contract.df" :assets="assets"
+                                                                <files-vue :assets="assets"
                                                                     @addassets="addAssets($event)"
-                                                                    :contract="contract.i"></files-vue>
+                                                                    :contract="contract"></files-vue>
                                                             </td>
                                                         </tr>
                                                         <tr class="collapse" :id="replace(contract.i) + 'upload'">

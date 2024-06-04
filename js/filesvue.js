@@ -16,28 +16,39 @@ export default {
 
    `,
 props: {
-    files: {
-        type: Object,
-        default: {},
-    },
     assets: {
         type: Boolean,
         default: false,
     },
     contract: {
-        type: String,
-        default: "",
+        type: Object,
+        default: function () {
+            return {
+                n: {},
+                p: 3,
+                df: {},
+                nt: "0",
+                i: "a:1:1",
+                id: "a-1-1",
+                m: "",
+                u: 1,
+                t: 10,
+                extend: 7,
+
+            };
+        }
     },
 },
 data() {
     return {
-
+        files: {},
+        newMeta: {},
     };
 },
 emits: [ "addassets" ],
 methods: {
     addAsset(id, contract) {
-        this.$emit("addassets", { id, contract });
+        this.$emit("addassets", { id, contract: contract.i });
     },
 },
 computed: {
@@ -46,6 +57,13 @@ computed: {
     }
 },
 mounted() {
-
+    this.files = this.contract.df;
+    if (!this.contract.m) {
+        this.contract.m = ""
+        const filesNum = this.contract?.df ? Object.keys(this.contract.df).length : 0
+        this.newMeta[this.contract.i] = new Array(filesNum * 4 + 1).fill('')
+    } else {
+        this.newMeta[this.contract.i] = this.contract.m.split(",")
+    }
 },
 };
