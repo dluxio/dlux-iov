@@ -80,6 +80,7 @@ export default {
                         <!-- tools 1 -->
                         <div class="d-flex mb-1 flex-wrap ms-auto order-lg-last">
                             <div class="d-flex flex-wrap justify-content-center ms-auto me-auto">
+
                                 <!-- new contract button -->
                                 <button v-if="saccountapi.pubKey != 'NA' && saccountapi.spk_power" type="button"
                                     class="btn btn-primary mt-1 me-1">
@@ -90,13 +91,14 @@ export default {
                                                 class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
                                     </modal-vue>
                                 </button>
+
                                 <!-- free button -->
                                 <button v-if="saccountapi.pubKey != 'NA'" type="button" class="btn btn-danger mt-1 me-1"
                                     data-bs-toggle="modal" data-bs-target="#sponsoredModal">
                                     <span class=""></span><i class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE
                                 </button>
+
                                 <!-- spk wallet button -->
-                                
                                 <button v-if="!nodeview" type="button" class="mt-1 btn btn-secondary d-flex" data-bs-toggle="modal" data-bs-target="#spkWalletModal">
                                     <i class="fa-solid fa-wallet fa-fw me-1 my-auto"></i>
                                     <span class="my-auto">SPK</span>
@@ -105,7 +107,7 @@ export default {
                                 
                             </div>
                         </div>
-                        <!-- tools 2 -->
+                        <!-- tools 2 (hidden) -->
                         <div>
                             <div
                                 class="d-none position-relative flex-grow-1 me-1 order-lg-first d-flex align-items-center">
@@ -129,6 +131,7 @@ export default {
                 <div class="card-body p-0">
                     <!-- registered -->
                     <div v-if="saccountapi.pubKey != 'NA'">
+                        
                         <!-- no contracts -->
                         <div v-show="!contracts.length"> 
                         <div class="ms-auto me-auto d-flex justify-content-center">
@@ -156,6 +159,7 @@ export default {
                             </div>
                         </div>
                         </div>
+
                         <!-- contracts -->
                         <div v-show="contracts.length">
                             <table class="table table-hover text-center align-middle mb-0" id="files-table">
@@ -217,6 +221,7 @@ export default {
                                         </th>
                                     </tr>
                                 </thead>
+
                                 <tbody>
                                     <tr v-for="contract in contracts" class="text-start">
                                         <td colspan="4" class="p-0">
@@ -224,6 +229,7 @@ export default {
                                                 <table class="table text-white align-middle mb-0">
                                                     <tbody class="border-0">
                                                         <tr class="border-0">
+
                                                             <!-- storage -->
                                                             <th class="border-0">
                                                                 <div class="d-flex align-items-center">
@@ -247,6 +253,7 @@ export default {
                                                                     contract.a/1000000}} MB
                                                                 </div>
                                                             </th>
+
                                                             <!-- status -->
                                                             <td class="border-0">
                                                                 <div class="d-flex align-items-center">
@@ -309,6 +316,7 @@ export default {
                                                                     </div>
                                                                 </div>
                                                             </td>
+
                                                             <!-- expires -->
                                                             <td class="border-0">
                                                                 <div class="d-flex align-items-center">
@@ -329,6 +337,10 @@ export default {
                                                                 </div>
                                                             </td>
                                                         </tr>
+
+                                                        <!-- collapse regions -->
+
+                                                        <!-- files -->
                                                         <tr class="collapse" :id="replace(contract.i) + 'files'">
                                                             <td class="d-flex border-0" colspan="4">
                                                                 <files-vue :assets="assets"
@@ -336,12 +348,16 @@ export default {
                                                                     :contract="contract"></files-vue>
                                                             </td>
                                                         </tr>
+
+                                                        <!-- upload -->
                                                         <tr class="collapse" :id="replace(contract.i) + 'upload'">
                                                             <td class=" border-0" colspan="4">
                                                                 <upload-vue :user="saccountapi" :propcontract="contract"
                                                                     @tosign="toSign=$event" @done="done()" />
                                                             </td>
                                                         </tr>
+
+                                                        <!-- post + extension -->
                                                         <tr class="collapse" :id="replace(contract.i) + 'beneficiary'">
                                                             <td class=" border-0" colspan="4">
                                                                 <div
@@ -361,6 +377,8 @@ export default {
                                                                     @tosign="toSign=$event"></extension-vue>
                                                             </td>
                                                         </tr>
+
+                                                        <!-- extension -->
                                                         <tr class="collapse" :id="replace(contract.i) + 'extension'">
                                                             <td class=" border-0" colspan="4" v-if="contract.c == 3">
                                                                 <extension-vue :node-view="nodeview"
@@ -369,17 +387,37 @@ export default {
                                                                     @tosign="toSign=$event"></extension-vue>
                                                             </td>
                                                         </tr>
+
+                                                        <!-- detail view -->
                                                         <tr class="collapse" :id="replace(contract.i)">
                                                             <td class="border-0" colspan="4">
                                                                 <div class="d-flex flex-column border border-white rounded text-start p-2" style="background-color:rgba(0,0,0,0.3);">
-                                                                    <div class="d-flex flex-wrap justify-content-center mb-3 ">
+
+                                                                    <!-- contract ID -->
+                                                                    <div class="d-flex flex-wrap justify-content-center mb-2 ">
                                                                         <div class="d-flex align-items-center px-3 py-1 m-1 small muted">
                                                                             <div> Contract ID </div>
                                                                             <i class="fa-solid fa-file-contract fa-fw mx-1" aria-hidden="true"></i>
                                                                             <div>{{contract.i}}</div>
                                                                         </div>
                                                                     </div>
-                                                                    
+
+                                                                    <!-- upload -->
+                                                                <div v-if="contract.c == 1">\
+                                                                    <upload-vue :user="saccountapi" :propcontract="contract"
+                                                                    @tosign="toSign=$event" @done="done()" />
+                                                                </div>
+
+
+                                                                    <!-- extension -->
+                                                                    <div v-if="contract.c == 3" class="card p-3 mx-lg-3">
+                                                                    <extension-vue :node-view="nodeview"
+                                                                    :contract="contract" :sstats="sstats"
+                                                                    :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
+                                                                    @tosign="toSign=$event"></extension-vue>
+                                                                    </div>
+
+                                                                    <!-- contract details -->
                                                                     <div class="d-flex flex-wrap justify-content-center mb-3 ">
 
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
@@ -401,9 +439,10 @@ export default {
                                                                         class="no-decoration text-primary">@{{contract.b}}</a></div>
                                                                     </div>
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
-                                                                        <div> Size Allowed </div>
+                                                                        <div> Size </div>
                                                                         <i class="fa-solid fa-warehouse fa-fw mx-1" aria-hidden="true"></i>
-                                                                        <div>{{contract.a/1000000}} MB</div>
+                                                                        <div>{{contract.c > 1 ? contract.u/1000000 :
+                                                                        contract.a/1000000}} MB</div>
                                                                     </div>
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> Redundancy </div>
@@ -435,6 +474,11 @@ export default {
                                                                     </div>
                         
                                                                 </div>
+
+
+
+                                                                
+                                                                <!-- files list -->
 
                                                                     <div v-if="contract.df" class="d-flex flex-column">
                                                                         <h4 class="ms-auto me-auto">Files</h4>
@@ -474,22 +518,23 @@ export default {
                                                                                 </div>
                                                                             </li>
                                                                         </ol>
-                                                                    </div>
-
-                                                                    <div class="d-flex">
+                                                                        <div class="d-flex">
                                                                     <button type="button"
                                                                     class="btn btn-sm btn-info my-2 mx-auto"
                                                                     @click="update_meta(contract.i)">
                                                                     <i
                                                                         class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Update Metadata</button>
                                                                 </div>
+                                                                    </div>
+
+                                                                    
 
                                                                     <div class="d-flex">
                                                                         <button type="button"
                                                                         class="btn btn-sm btn-danger my-2 mx-auto"
                                                                         @click="cancel_contract(contract)">
                                                                         <i
-                                                                            class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Sever</button>
+                                                                            class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>End Contract</button>
                                                                     </div>
                                                                 
                                                             </td>
