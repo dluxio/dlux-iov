@@ -2608,6 +2608,7 @@ function buyNFT(setname, uid, price, type, callback){
         this.posturls = {};
       }
       if (this.postSelect.bitMask != bitMask || reset) {
+        console.log("resetting")
         this.postSelect.bitMask = bitMask;
         this.displayPosts = [];
         this[this.postSelect.entry] = [];
@@ -2664,6 +2665,7 @@ function buyNFT(setname, uid, price, type, callback){
                   this.posturls[post].permlink
                 );
                 called = true;
+                console.log("called")
               }
               authors.push(this.posturls[post].author);
             }
