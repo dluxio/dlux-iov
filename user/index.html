@@ -1550,6 +1550,24 @@
         integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add JavaScript to toggle collapse on <tr> click
+        document.addEventListener('DOMContentLoaded', function () {
+          var trElements = document.querySelectorAll('.table tbody tr[data-bs-toggle="collapse"]');
+          trElements.forEach(function (tr) {
+            tr.addEventListener('click', function () {
+              var target = document.querySelector(this.getAttribute('href'));
+              if (target.classList.contains('show')) {
+                target.classList.remove('show');
+                target.setAttribute('aria-expanded', 'false');
+              } else {
+                target.classList.add('show');
+                target.setAttribute('aria-expanded', 'true');
+              }
+            });
+          });
+        });
+      </script>
 </body>
 
 </html>
