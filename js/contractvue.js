@@ -424,6 +424,60 @@ export default {
                                                                     @tosign="toSign=$event"></extension-vue>
                                                                     </div>
 
+                                                                    
+
+
+
+                                                                
+                                                                <!-- files list -->
+
+                                                                    <div v-if="contract.df" class="d-flex flex-column">
+                                                                        <h4 class="ms-auto me-auto">Files</h4>
+                                                                        <ol class="text-start mx-auto">
+                                                                            <li class="mb-2" v-for="(size, cid, index) in contract.df">
+                                                                            <div class="d-flex align-content-center">    
+                                                                            <div class="d-flex mx-2">
+                                                                                    
+                                                                                        <img class="img-thumbnail" :src="smartThumb(contract.i,index,cid)" width="100px">
+                                                                                    
+                                                                                </div>
+                                                                                <div class="d-flex flex-column my-auto">
+                                                                                
+                                                                                <div class="d-flex mb-1">
+                                                                                    <div class="me-1">
+                                                                                        <div class="position-relative has-validation">
+                                                                                            <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 1]" placeholder="File Name" pattern="[a-zA-Z0-9_\-]{3,25}" class="form-control form-control-sm bg-dark border-dark text-info">
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="mx-1">
+                                                                                        <div class="position-relative has-validation">
+                                                                                            <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 2]" placeholder="File Type" pattern="[a-zA-Z0-9]{1,4}" class="form-control form-control-sm bg-dark border-dark text-info">
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="ms-1">
+                                                                                        <div class="position-relative has-validation">
+                                                                                            <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 3]" placeholder="Thumbnail" pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+" class="form-control form-control-sm bg-dark border-dark text-info">
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="d-flex mb-1">
+                                                                                    <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="no-decoration text-break text-primary">{{cid}}
+                                                                                        <i class="ms-2 fa-solid fa-fw fa-up-right-from-square"></i></a>
+                                                                                    <span class="small ms-1">({{size > 1 ? size/1000000 : size/1000000}} MB)</span>
+                                                                                </div>
+                                                                                </div>
+                                                                                </div>
+                                                                            </li>
+                                                                        </ol>
+                                                                        <div class="d-flex">
+                                                                    <button type="button"
+                                                                    class="btn btn-sm btn-info my-2 mx-auto"
+                                                                    @click="update_meta(contract.i)">
+                                                                    <i
+                                                                        class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Update Metadata</button>
+                                                                </div>
+                                                                    </div>
+
                                                                     <!-- contract details -->
                                                                     <div class="d-flex flex-wrap justify-content-center mb-3 ">
 
@@ -481,60 +535,6 @@ export default {
                                                                     </div>
                         
                                                                 </div>
-
-
-
-                                                                
-                                                                <!-- files list -->
-
-                                                                    <div v-if="contract.df" class="d-flex flex-column">
-                                                                        <h4 class="ms-auto me-auto">Files</h4>
-                                                                        <ol class="text-start mx-auto">
-                                                                            <li class="mb-2" v-for="(size, cid, index) in contract.df">
-                                                                            <div class="d-flex align-content-center">    
-                                                                            <div class="d-flex mx-2">
-                                                                                    
-                                                                                        <img class="img-thumbnail" :src="smartThumb(contract.i,index,cid)" width="100px">
-                                                                                    
-                                                                                </div>
-                                                                                <div class="d-flex flex-column my-auto">
-                                                                                
-                                                                                <div class="d-flex mb-1">
-                                                                                    <div class="me-1">
-                                                                                        <div class="position-relative has-validation">
-                                                                                            <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 1]" placeholder="File Name" pattern="[a-zA-Z0-9_\-]{3,25}" class="form-control form-control-sm bg-dark border-dark text-info">
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div class="mx-1">
-                                                                                        <div class="position-relative has-validation">
-                                                                                            <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 2]" placeholder="File Type" pattern="[a-zA-Z0-9]{1,4}" class="form-control form-control-sm bg-dark border-dark text-info">
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div class="ms-1">
-                                                                                        <div class="position-relative has-validation">
-                                                                                            <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 3]" placeholder="Thumbnail" pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+" class="form-control form-control-sm bg-dark border-dark text-info">
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="d-flex mb-1">
-                                                                                    <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="no-decoration text-break text-primary">{{cid}}
-                                                                                        <i class="ms-2 fa-solid fa-fw fa-up-right-from-square"></i></a>
-                                                                                    <span class="small ms-1">({{size > 1 ? size/1000000 : size/1000000}} MB)</span>
-                                                                                </div>
-                                                                                </div>
-                                                                                </div>
-                                                                            </li>
-                                                                        </ol>
-                                                                        <div class="d-flex">
-                                                                    <button type="button"
-                                                                    class="btn btn-sm btn-info my-2 mx-auto"
-                                                                    @click="update_meta(contract.i)">
-                                                                    <i
-                                                                        class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Update Metadata</button>
-                                                                </div>
-                                                                    </div>
-
-                                                                    
 
                                                                     <div class="d-flex">
                                                                         <button type="button"
