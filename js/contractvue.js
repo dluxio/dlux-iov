@@ -273,23 +273,24 @@ export default {
                                                                         <i class="fa-solid fa-clock-rotate-left fa-fw"></i>
                                                                     </div>
 
-                                                                </div>
+                                                               
                                                                    
-                                                                <!-- message -->
-                                                                <div v-if="contract.c == 1">
-                                                                        <span class="d-lg-none">Upload</span>
-                                                                        <span class="d-none d-lg-flex">Ready for
-                                                                            upload</span>
-                                                                </div>
-                                                                <div v-if="contract.c == 2">
-                                                                        <span class="d-lg-none">Post</span>
-                                                                        <span class="d-none d-lg-flex">Post
-                                                                            {{split(contract.s, ',', 1)/100}}% to @{{split(contract.s, ',', 0)}}</span>
-                                                                </div>
-                                                                <div v-if="contract.c == 3">
-                                                                        <span class="d-lg-none">Extend</span>
-                                                                        <span class="d-none d-lg-flex align-items-center">Nodes <i class="fa-solid fa-tower-broadcast mx-1 fa-fw"></i> {{contract.nt}} /
-                                                                            {{contract.p}} </span>
+                                                                    <!-- message -->
+                                                                    <div v-if="contract.c == 1">
+                                                                            <span class="d-lg-none">Upload</span>
+                                                                            <span class="d-none d-lg-flex">Ready for
+                                                                                upload</span>
+                                                                    </div>
+                                                                    <div v-if="contract.c == 2">
+                                                                            <span class="d-lg-none">Post</span>
+                                                                            <span class="d-none d-lg-flex">Post
+                                                                                {{split(contract.s, ',', 1)/100}}% to @{{split(contract.s, ',', 0)}}</span>
+                                                                    </div>
+                                                                    <div v-if="contract.c == 3">
+                                                                            <span class="d-lg-none">Extend</span>
+                                                                            <span class="d-none d-lg-flex align-items-center"> {{contract.nt}} /
+                                                                                {{contract.p}}  <i class="fa-solid fa-tower-broadcast mx-1 fa-fw"></i> nodes </span>
+                                                                    </div>
                                                                 </div>
                                                             </td>
 
