@@ -154,7 +154,8 @@ methods: {
         for (var i = 0; i < e.dataTransfer.files.length; i++) {
           var reader = new FileReader();
           reader.File = e.dataTransfer.files[i]
-          reader.onload = (event) => {
+          reader.onload = (Event) => {
+            const event = Event
             const fileContent = event.target.result;
             // for (var i = 0; i < this.File.length; i++) {
             //   if (
