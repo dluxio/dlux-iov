@@ -349,15 +349,15 @@ export default {
                                                             </td>
                                                         </tr>
 
-                                                        <!-- upload -->
+                                                        <!-- upload 
                                                         <tr class="collapse" :id="replace(contract.i) + 'upload'">
                                                             <td class=" border-0" colspan="4">
                                                                 <upload-vue :user="saccountapi" :propcontract="contract"
                                                                     @tosign="toSign=$event" @done="done()" />
                                                             </td>
-                                                        </tr>
+                                                        </tr>-->
 
-                                                        <!-- post + extension -->
+                                                        <!-- post + extension
                                                         <tr class="collapse" :id="replace(contract.i) + 'beneficiary'">
                                                             <td class=" border-0" colspan="4">
                                                                 <div
@@ -376,7 +376,7 @@ export default {
                                                                     :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
                                                                     @tosign="toSign=$event"></extension-vue>
                                                             </td>
-                                                        </tr>
+                                                        </tr> -->
 
                                                         <!-- extension 
                                                         <tr class="collapse" :id="replace(contract.i) + 'extension'">
