@@ -430,7 +430,7 @@ export default {
 
                                                                 
                                                                 <!-- files list -->
-                                                                <div class="card">
+                                                                <div class="card mx-auto p-4">
 
                                                                     <div v-if="contract.df" class="d-flex flex-column">
                                                                         <h4 class="ms-auto me-auto">Files</h4>
