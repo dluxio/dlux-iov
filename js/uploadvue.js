@@ -138,14 +138,14 @@ methods: {
           };
   
           reader.readAsArrayBuffer(e.target.files[i])
-          var File = target.files[i];
+          var File = e.target.files[i];
           File.progress = 0;
           File.actions = {
             cancel: false,
             pause: false,
             resume: false,
           }
-          // File.md5 = ""
+          this.ready = true
           this.File.push(File);
         }
       },
