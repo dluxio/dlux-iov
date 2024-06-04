@@ -2180,9 +2180,8 @@ function buyNFT(setname, uid, price, type, callback){
       return parseFloat(num).toFixed(dig);
     },
     handleScroll() {
-      console.log("scrolling")
       const now = Date.now();
-      if (now - this.lastScroll > 1000) {
+      if (now - this.lastScroll > 2000) {
         this.lastScroll = now;
         if (
           document.documentElement.clientHeight + window.scrollY >
