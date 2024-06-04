@@ -1,11 +1,11 @@
 export default {
     template: `
-<div v-for="(size, file) in files" class="card rounded p-0 my-2 mx-1" style="max-width:200px">
+<div v-for="(size, file, index) in files" class="card rounded p-0 my-2 mx-1" style="max-width:200px">
         <a :href="'https://ipfs.dlux.io/ipfs/' + file" target="_blank" class="no-decoration">
-            <img :src="'https://ipfs.dlux.io/ipfs/' + file" onerror="this.style.display='none'"
+            <img :src="smartThumb(contract.i, index, file)" onerror="this.style.display='none'"
             class="card-img-top rounded-top" :alt="file">
             <div class="card-body">
-                <span class="text-break small text-muted">{{file}}</span>
+                <span class="text-break small text-muted">{{newMeta[contract.i][index * 4 + 1] || file}}</span>
             </div>
         </a>
         <div class="card-footer mt-auto text-center border-0" v-if="assets">
@@ -50,6 +50,47 @@ methods: {
     addAsset(id, contract) {
         this.$emit("addassets", { id, contract: contract.i });
     },
+    smartThumb(contract, index,cid) {
+        var thumb = this.newMeta[contract][index * 4 + 3]
+        if (thumb.includes('Qm')) return `https://ipfs.dlux.io/ipfs/${thumb}`
+        if (thumb.includes('https')) return thumb
+        switch (this.newMeta[contract][index * 4 + 2]) {
+            case 'jpg':
+            case 'jpeg':
+            case 'png':
+            case 'gif':
+            case 'bmp':
+            case 'webp':
+            case 'tiff':
+            case 'tif':
+                return `https://ipfs.dlux.io/ipfs/${cid}`
+            case 'svg':
+                return `svg`
+            case 'mp4':
+            case 'gltf':
+            case 'glb':
+            case 'html':
+            case 'htm':
+            case 'pdf':
+            case 'txt':
+            case 'md':
+            case 'json':
+            case 'csv':
+            case 'xml':
+            case 'yaml':
+            case 'yml':
+            case 'js':
+            case 'css':
+            case 'scss':
+            case 'sass':
+            case 'mp3':
+            case 'wav':
+            case 'ico':
+            case 'enc': //encrypted
+            default:
+                return '/img/dluxdefault.png'
+        }
+    }
 },
 computed: {
     hasFiles() {
