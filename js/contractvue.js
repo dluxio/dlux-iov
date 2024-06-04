@@ -288,9 +288,8 @@ export default {
                                                                 </div>
                                                                 <div v-if="contract.c == 3">
                                                                         <span class="d-lg-none">Extend</span>
-                                                                        <span class="d-none d-lg-flex align-items-center">Extend
-                                                                            <span class="mx-2">—</span>{{contract.nt}} /
-                                                                            {{contract.p}} <i class="fa-solid fa-tower-broadcast ms-1 fa-fw"></i></span>
+                                                                        <span class="d-none d-lg-flex align-items-center">Nodes <i class="fa-solid fa-tower-broadcast mx-1 fa-fw"></i> {{contract.nt}} /
+                                                                            {{contract.p}} </span>
                                                                 </div>
                                                             </td>
 
