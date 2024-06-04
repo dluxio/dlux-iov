@@ -403,7 +403,7 @@ export default {
                                                                     </div>
 
                                                                     <!-- upload -->
-                                                                <div v-if="contract.c == 1" class="mb-3">\
+                                                                <div v-if="contract.c == 1" class="mb-3">
                                                                     <upload-vue :user="saccountapi" :propcontract="contract"
                                                                     @tosign="toSign=$event" @done="done()" />
                                                                 </div>
