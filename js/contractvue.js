@@ -382,7 +382,7 @@ export default {
                                                                     </div>
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> Sponsor </div>
-                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <i class="fa-solid fa-user-shield fa-fw mx-1" aria-hidden="true"></i>
                                                                         <div><a :href="'/@' + contract.f"
                                                                         class="no-decoration text-primary">@{{contract.f}}</a></div>
                                                                     </div>
@@ -415,10 +415,10 @@ export default {
                                                                     </div>
                                                                     <div v-if="contract.s" class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> Terms </div>
-                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <i class="fa-solid fa-hand-holding-dollar fa-fw mx-1" aria-hidden="true"></i>
                                                                         <div>{{slotDecode(contract.s, 1)}}%
                                                                         Beneficiary to <a :href="'/@' + slotDecode(contract.s, 0)"
-                                                                        class="no-decoration text-primary">@{{slotDecode(contract.s, 0)}}</a>@{{slotDecode(contract.s, 0)}}</div>
+                                                                        class="no-decoration text-primary">@{{slotDecode(contract.s, 0)}}</a></div>
                                                                     </div>
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> Status </div>
