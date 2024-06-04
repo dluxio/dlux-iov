@@ -257,21 +257,21 @@ export default {
                                                             <!-- status -->
                                                             <td class="border-0">
                                                                 <div class="d-flex align-items-center">
+
                                                                     <!-- upload btn -->
                                                                     <div v-if="contract.c == 1" class="border border-1 border-success text-success rounded">
-                                                                    <i class="fa-solid fa-file-upload fa-fw"></i>
-                                                                </div>
+                                                                        <i class="fa-solid fa-file-upload fa-fw"></i>
+                                                                    </div>
                                                                     
                                                                     <!-- post btn -->
                                                                     <div v-if="contract.c == 2" class="border border-1 border-warning text-warning rounded">
-                                                                    <i
-                                                                                    class="fa-solid fa-hand-holding-dollar fa-fw"></i>
-                                                                </div>
+                                                                        <i class="fa-solid fa-hand-holding-dollar fa-fw"></i>
+                                                                    </div>
                                                                    
                                                                     <!-- extend btn -->
                                                                     <div v-if="contract.c == 3" class="border border-1 border-primary text-primary rounded">
-                                                                    <i class="fa-solid fa-clock-rotate-left fa-fw"></i>
-                                                                </div>
+                                                                        <i class="fa-solid fa-clock-rotate-left fa-fw"></i>
+                                                                    </div>
                                                                     
                                                                     <span v-if="contract.c">
                                                                         {{exp_to_time(contract.e)}}
@@ -279,36 +279,35 @@ export default {
 
                                                                 </div>
                                                                    
-                                                                    <!-- message -->
-                                                                    <div v-if="contract.c == 1">
+                                                                <!-- message -->
+                                                                <div v-if="contract.c == 1">
                                                                         <span class="d-lg-none">Upload</span>
                                                                         <span class="d-none d-lg-flex">Ready for
                                                                             upload</span>
-                                                                    </div>
-                                                                    <div v-if="contract.c == 2">
+                                                                </div>
+                                                                <div v-if="contract.c == 2">
                                                                         <span class="d-lg-none">Post</span>
                                                                         <span class="d-none d-lg-flex">Post
                                                                             {{split(contract.s, ',',
                                                                             1)/100}}%
                                                                             to @{{split(contract.s, ',', 0)}}</span>
-                                                                    </div>
-                                                                    <div v-if="contract.c == 3">
+                                                                </div>
+                                                                <div v-if="contract.c == 3">
                                                                         <span class="d-lg-none">Extend</span>
                                                                         <span
                                                                             class="d-none d-lg-flex align-items-center">Extend<span
                                                                                 class="mx-2">—</span>{{contract.nt}} /
                                                                             {{contract.p}} <i
                                                                                 class="fa-solid fa-tower-broadcast ms-1 fa-fw"></i></span>
-                                                                    </div>
                                                                 </div>
                                                             </td>
 
                                                             <!-- expires -->
                                                             <td class="border-0">
                                                                 <div class="d-flex align-items-center">
-                                                                <div class="border border-1 border-light text-light rounded>
-                                                                <i class="fa-solid fa-circle-info fa-fw"></i>
-                                                                </div>
+                                                                    <div class="border border-1 border-light text-light rounded>
+                                                                        <i class="fa-solid fa-circle-info fa-fw"></i>
+                                                                    </div>
                                                                     
                                                                     <span v-if="contract.c">
                                                                         {{exp_to_time(contract.e)}}
