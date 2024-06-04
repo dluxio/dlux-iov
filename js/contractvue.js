@@ -258,18 +258,18 @@ export default {
                                                             <td class="border-0">
                                                                 <div class="d-flex align-items-center">
                                                                     <!-- upload btn -->
-                                                                    <div v-if="contract.c == 1" class="border border-1 border-success text-success rounded>
+                                                                    <div v-if="contract.c == 1" class="border border-1 border-success text-success rounded">
                                                                     <i class="fa-solid fa-file-upload fa-fw"></i>
                                                                 </div>
                                                                     
                                                                     <!-- post btn -->
-                                                                    <div v-if="contract.c == 2" class="border border-1 border-warning text-warning rounded>
+                                                                    <div v-if="contract.c == 2" class="border border-1 border-warning text-warning rounded">
                                                                     <i
                                                                                     class="fa-solid fa-hand-holding-dollar fa-fw"></i>
                                                                 </div>
                                                                    
                                                                     <!-- extend btn -->
-                                                                    <div v-if="contract.c == 3" class="border border-1 border-primary text-primary rounded>
+                                                                    <div v-if="contract.c == 3" class="border border-1 border-primary text-primary rounded">
                                                                     <i class="fa-solid fa-clock-rotate-left fa-fw"></i>
                                                                 </div>
                                                                     
