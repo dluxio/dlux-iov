@@ -258,41 +258,36 @@ export default {
                                                             <td class="border-0">
                                                                 <div class="d-flex align-items-center">
                                                                     <!-- upload btn -->
+                                                                    <div v-if="contract.c == 1 class="border border-1 border-success text-success rounded>
+                                                                    <i class="fa-solid fa-file-upload fa-fw"></i>
+                                                                </div>
                                                                     <a v-if="contract.c == 1"
                                                                         class="collapsed no-decoration"
                                                                         data-bs-toggle="collapse"
                                                                         :href="'#' + replace(contract.i) + 'upload'">
                                                                         <span class="if-collapsed"><button
-                                                                                class="my-1 me-2 btn btn-sm btn-outline-success"><i
-                                                                                    class="fa-solid fa-file-upload fa-fw"></i></button></span>
+                                                                                class="my-1 me-2 btn btn-sm btn-outline-success"></button></span>
                                                                         <span class="if-not-collapsed"><button
                                                                                 class="my-1 me-2 btn btn-sm btn-success"><i
                                                                                     class="fa-solid fa-file-upload fa-fw"></i></button></span>
                                                                     </a>
                                                                     <!-- post btn -->
-                                                                    <a v-if="contract.c == 2"
-                                                                        class="collapsed no-decoration"
-                                                                        data-bs-toggle="collapse"
-                                                                        :href="'#' + replace(contract.i) + 'beneficiary'">
-                                                                        <span class="if-collapsed"><button
-                                                                                class="my-1 me-2 btn btn-sm btn-outline-warning"><i
-                                                                                    class="fa-solid fa-hand-holding-dollar fa-fw"></i></button></span>
-                                                                        <span class="if-not-collapsed"><button
-                                                                                class="my-1 me-2 btn btn-sm btn-warning"><i
-                                                                                    class="fa-solid fa-hand-holding-dollar fa-fw"></i></button></span>
-                                                                    </a>
+                                                                    <div v-if="contract.c == 2 class="border border-1 border-warning text-warning rounded>
+                                                                    <i
+                                                                                    class="fa-solid fa-hand-holding-dollar fa-fw"></i>
+                                                                </div>
+                                                                   
                                                                     <!-- extend btn -->
-                                                                    <a v-if="contract.c == 3"
-                                                                        class="collapsed no-decoration"
-                                                                        data-bs-toggle="collapse"
-                                                                        :href="'#' + replace(contract.i) + 'extension'">
-                                                                        <span class="if-collapsed"><button
-                                                                                class="my-1 me-2 btn btn-sm btn-outline-info"><i
-                                                                                    class="fa-solid fa-clock-rotate-left fa-fw"></i></button></span>
-                                                                        <span class="if-not-collapsed"><button
-                                                                                class="my-1 me-2 btn btn-sm btn-info"><i
-                                                                                    class="fa-solid fa-clock-rotate-left fa-fw"></i></button></span>
-                                                                    </a>
+                                                                    <div v-if="contract.c == 3 class="border border-1 border-primary text-primary rounded>
+                                                                    <i class="fa-solid fa-clock-rotate-left fa-fw"></i>
+                                                                </div>
+                                                                    
+                                                                    <span v-if="contract.c">
+                                                                        {{exp_to_time(contract.e)}}
+                                                                    </span>
+
+                                                                </div>
+                                                                   
                                                                     <!-- message -->
                                                                     <div v-if="contract.c == 1">
                                                                         <span class="d-lg-none">Upload</span>
@@ -320,16 +315,10 @@ export default {
                                                             <!-- expires -->
                                                             <td class="border-0">
                                                                 <div class="d-flex align-items-center">
-                                                                    <a class="no-decoration collapsed"
-                                                                        data-bs-toggle="collapse"
-                                                                        :href="'#' + replace(contract.i)">
-                                                                        <span class="if-collapsed"><button
-                                                                                class="my-1 me-2 btn btn-sm btn-outline-light"><i
-                                                                                    class="fa-solid fa-circle-info fa-fw"></i></button></span>
-                                                                        <span class="if-not-collapsed"><button
-                                                                                class="my-1 me-2 btn btn-sm btn-light"><i
-                                                                                    class="fa-solid fa-info fa-fw"></i></button></span>
-                                                                    </a>
+                                                                <div class="border border-1 border-light text-light rounded>
+                                                                <i class="fa-solid fa-circle-info fa-fw"></i>
+                                                                </div>
+                                                                    
                                                                     <span v-if="contract.c">
                                                                         {{exp_to_time(contract.e)}}
                                                                     </span>
@@ -338,56 +327,7 @@ export default {
                                                             </td>
                                                         </tr>
 
-                                                        <!-- collapse regions -->
-
-                                                        <!-- files 
-                                                        <tr class="collapse" :id="replace(contract.i) + 'files'">
-                                                            <td class="d-flex border-0" colspan="4">
-                                                                <files-vue :assets="assets"
-                                                                    @addassets="addAssets($event)"
-                                                                    :contract="contract"></files-vue>
-                                                            </td>
-                                                        </tr>-->
-
-                                                        <!-- upload 
-                                                        <tr class="collapse" :id="replace(contract.i) + 'upload'">
-                                                            <td class=" border-0" colspan="4">
-                                                                <upload-vue :user="saccountapi" :propcontract="contract"
-                                                                    @tosign="toSign=$event" @done="done()" />
-                                                            </td>
-                                                        </tr>-->
-
-                                                        <!-- post + extension
-                                                        <tr class="collapse" :id="replace(contract.i) + 'beneficiary'">
-                                                            <td class=" border-0" colspan="4">
-                                                                <div
-                                                                    v-if="account == contract.t && !postpage && contract.c == 2">
-                                                                    <post-vue :account="account"
-                                                                        :prop_bens="[contract.s]"
-                                                                        :prop_links="links[contract.i]"
-                                                                        @tosign="toSign=$event" />
-                                                                </div>
-                                                                <div v-if="account == contract.t && postpage">
-                                                                    <button @click="addBen(contract.s)"><i
-                                                                            class="fa-solid fa-hand-holding-dollar fa-fw"></i>Add
-                                                                        Benificary to Post</button>
-                                                                </div>
-                                                                <extension-vue :node-view="nodeview"
-                                                                    :contract="contract" :sstats="sstats"
-                                                                    :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
-                                                                    @tosign="toSign=$event"></extension-vue>
-                                                            </td>
-                                                        </tr> -->
-
-                                                        <!-- extension 
-                                                        <tr class="collapse" :id="replace(contract.i) + 'extension'">
-                                                            <td class=" border-0" colspan="4" v-if="contract.c == 3">
-                                                                <extension-vue :node-view="nodeview"
-                                                                    :contract="contract" :sstats="sstats"
-                                                                    :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
-                                                                    @tosign="toSign=$event"></extension-vue>
-                                                            </td>
-                                                        </tr>-->
+                                                        <!-- collapse region -->
 
                                                         <!-- detail view -->
                                                         <tr class="collapse" :id="replace(contract.i)">
