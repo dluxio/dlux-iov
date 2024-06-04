@@ -341,7 +341,7 @@ watch: {
     },
     'prop_links'(newValue){
         if(newValue){
-            this.postBody = this.prop_links
+            this.postBody += this.prop_links
         }
     }
 },
