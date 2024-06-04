@@ -25,7 +25,7 @@ export default {
                 @blur="permlink()">
             <small id="permlinkPreview" class="form-text text-muted d-flex"><span
                     id="permlink" class="mr-auto">Permlink:
-                    https://dlux.io/{{postCustom_json.vrHash || postCustom_json.tags[0] || 'blog'}}/@{{account}}/{{postPermlink}}</span>
+                    https://dlux.io/{{postCustom_json.vrHash ? 'dlux' : postCustom_json.tags.length ? postCustom_json.tags[0] : 'blog'}}/@{{account}}/{{postPermlink}}</span>
                 <!-- <a href="#" class="ml-auto"> Edit Permlink</a> -->
             </small>
         </div>
@@ -337,6 +337,11 @@ watch: {
             for(var node in this.prop_json){
                 this.postCustom_json[node] = this.prop_json[node]
             }
+        }
+    },
+    'prop_links'(newValue){
+        if(newValue){
+            this.postBody = this.prop_links
         }
     }
 },
