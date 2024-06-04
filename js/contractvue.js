@@ -394,22 +394,22 @@ export default {
                                                                     </div>
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> Size Allowed </div>
-                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <i class="fa-solid fa-warehouse fa-fw mx-1" aria-hidden="true"></i>
                                                                         <div>{{contract.a}} bytes</div>
                                                                     </div>
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> Redundancy </div>
-                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <i class="fa-solid fa-tower-broadcast fa-fw mx-1" aria-hidden="true"></i>
                                                                         <div>{{contract.p}}</div>
                                                                     </div>
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> Expiration </div>
-                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <i class="fa-solid fa-clock fa-fw mx-1" aria-hidden="true"></i>
                                                                         <div>{{exp_to_time(contract.e)}}</div>
                                                                     </div>
                                                                     <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                         <div> Price </div>
-                                                                        <i class="fa-solid fa-cubes-stacked fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <i class="fa-solid fa-atom fa-fw mx-1" aria-hidden="true"></i>
                                                                         <div>{{formatNumber(contract.r,'3','.',',')}}
                                                                         Broca</div>
                                                                     </div>
