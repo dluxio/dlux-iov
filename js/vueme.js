@@ -2686,7 +2686,7 @@ function buyNFT(setname, uid, price, type, callback){
               break;
             }
           }
-          if(!found)this.displayPosts.push(this.displayPosts[j])
+          if(!found)this.displayPosts.push(this.posturls[this[this.postSelect.entry][i]])
           //arr.push(this.posturls[this[this.postSelect.entry][i]]);
       }
       //this.displayPosts = arr;
