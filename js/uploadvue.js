@@ -3,9 +3,9 @@ export default {
     <!--file uploader-->
     <Transition>
         <div v-if="contract.i">
-            <div class="p-2 card bg-img-none">
+            <div class="p-2">
                 <form onsubmit="return false;">
-                    <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0 mx-2 d-none">Upload Files</h5>
                         <div class="ms-auto me-auto">
                             <label for="formFile" class="btn btn-lg btn-light"><i
@@ -13,7 +13,7 @@ export default {
                             <input class="d-none" id="formFile" type="file" multiple @change="uploadFile">
                         </div>
                     </div>
-                    <div class="card-body pb-2">
+                    <div class=" pb-2">
                         <div class="ms-auto me-auto py-5 text-center lead rounded"
                             style="border-width: 2px; border-style: dashed; background-color:rgba(0,0,0,0.3);"
                             id="img-well" @drop="dragFile($event)" @dragenter.prevent @dragover.prevent>
@@ -22,9 +22,9 @@ export default {
                     </div>
                 </form>
                 <div v-if="File.length">
-                    <div class="card-body pt-0">
+                    <div class=" pt-0">
                         <div id="listOfImgs" v-for="(file, index) in File">
-                            <div class="p-3 mb-2 card bg-darkest" style="border-radius: 10px;">
+                            <div class="p-3 mb-2 bg-darkest" style="border-radius: 10px;">
                                 <div class="d-flex flex-wrap align-items-center pb-2 mb-2">
                                   <div>
                                     <h6 class="m-0 text-break">{{file.name}}</h6>
@@ -68,7 +68,7 @@ export default {
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer d-flex">
+                    <div class="d-flex">
                         <button type="button" class="ms-auto me-auto mt-2 btn btn-lg btn-info" :class="{'disabled': !ready}" :disabled="!ready" @click="signNUpload()"><i
                                 class="fa-solid fa-file-signature fa-fw me-2"></i>Sign and Upload</button>
                     </div>
