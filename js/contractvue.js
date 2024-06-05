@@ -304,7 +304,14 @@ export default {
                                                             <td class="border-0" colspan="4">
                                                                 <div class="d-flex flex-column border border-white rounded text-start p-2" style="background-color:rgba(0,0,0,0.3);">
 
-                                                                    
+                                                                <!-- contract ID -->
+                                                                <div class="d-flex flex-wrap justify-content-center mb-2 ">
+                                                                    <div class="d-flex align-items-center px-3 py-1 m-1 small muted">
+                                                                        <div> Contract ID </div>
+                                                                        <i class="fa-solid fa-file-contract fa-fw mx-1" aria-hidden="true"></i>
+                                                                        <div>{{contract.i}}</div>
+                                                                    </div>
+                                                                </div>
 
                                                                     <!-- upload -->
                                                                     <div v-if="contract.c == 1" class="mb-3">
@@ -322,7 +329,7 @@ export default {
                                                                     
 
                                                                     <!-- files list -->
-                                                                    <div v-if="contract.df" class="card mx-auto p-4 mt-3 bg-img-none bg-blur-darkg">
+                                                                    <div v-if="contract.df" class="card mx-auto p-4 mb-3 bg-img-none bg-blur-darkg">
 
                                                                         <div class="d-flex flex-column">
                                                                             <h4 class="ms-auto me-auto">Files <i class="fa-solid fa-fw ms-1 fa-paperclip"></i></h4>
@@ -366,14 +373,7 @@ export default {
                                                                         </div>
                                                                     </div>
 
-                                                                    <!-- contract ID -->
-                                                                    <div class="d-flex flex-wrap justify-content-center mb-2 ">
-                                                                        <div class="d-flex align-items-center px-3 py-1 m-1 small muted">
-                                                                            <div> Contract ID </div>
-                                                                            <i class="fa-solid fa-file-contract fa-fw mx-1" aria-hidden="true"></i>
-                                                                            <div>{{contract.i}}</div>
-                                                                        </div>
-                                                                    </div>
+                                                                   
 
                                                                     <!-- extension -->
                                                                     <div v-if="contract.c == 3">
