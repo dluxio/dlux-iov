@@ -6,15 +6,14 @@ export default {
             <div class="p-2">
                 <form onsubmit="return false;">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 mx-2 d-none">Upload Files</h5>
-                        <div class="ms-auto me-auto mb-2">
+                        <div class="ms-auto me-auto mb-3">
                             <label for="formFile" class="btn btn-lg btn-light"><i
                                     class="fa-solid fa-file-circle-plus fa-fw me-2"></i>Select Files</label>
                             <input class="d-none" id="formFile" type="file" multiple @change="uploadFile">
                         </div>
                     </div>
-                    <div class=" pb-2">
-                        <div class="ms-auto me-auto py-5 text-center lead rounded"
+                    <div class="pb-2">
+                        <div class="mx-lg-5 py-5 text-center lead rounded"
                             style="border-width: 2px; border-style: dashed; background-color:rgba(0,0,0,0.3);"
                             id="img-well" @drop="dragFile($event)" @dragenter.prevent @dragover.prevent>
                             Or drag file(s) here
