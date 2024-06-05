@@ -329,7 +329,7 @@ export default {
                                                                     
 
                                                                     <!-- files list -->
-                                                                    <div v-if="contract.df" class="card mx-auto p-4 mb-3 bg-img-none bg-blur-darkg">
+                                                                    <div v-if="contract.df" class="card mx-auto px-4 py-2 mb-3 bg-img-none bg-blur-darkg">
 
                                                                         <div class="d-flex flex-column">
                                                                             <h4 class="ms-auto me-auto">Files <i class="fa-solid fa-fw ms-1 fa-paperclip"></i></h4>
