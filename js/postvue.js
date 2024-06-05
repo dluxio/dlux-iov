@@ -55,7 +55,7 @@ export default {
             <button ref="publishButton" type="button" @keyUp="buildTags()"
                 class="btn btn-primary" data-toggle="tooltip" data-placement="top"
                 title="Publish to HIVE" :disable="!validPost"
-                @click="post()">Publish</button>
+                @click="post()"><i class="fa-solid fa-fw fa-flag-checkered me-2"></i>Publish</button>
         </div>
     </form>
 </div>
