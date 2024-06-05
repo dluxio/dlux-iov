@@ -233,24 +233,12 @@ export default {
                                                             <!-- storage -->
                                                             <th class="border-0">
                                                                 <div class="d-flex align-items-center">
-                                                                    <a class="ms-md-2 collapsed no-decoration"
-                                                                        data-bs-toggle="collapse"
-                                                                        :href="'#' + replace(contract.i) + 'files'">
-                                                                        <span class="if-collapsed">
-                                                                            <button
-                                                                                class="my-1 me-2 btn btn-sm btn-outline-light">
-                                                                                <i class="fa-solid fa-file fa-fw"></i>
-                                                                            </button>
-                                                                        </span>
-                                                                        <span class="if-not-collapsed">
-                                                                            <button
-                                                                                class="my-1 me-2 btn btn-sm btn-light">
-                                                                                <i class="fa-solid fa-file fa-fw"></i>
-                                                                            </button>
-                                                                        </span>
-                                                                    </a>
-                                                                    {{contract.c > 1 ? contract.u/1000000 :
-                                                                    contract.a/1000000}} MB
+                                                                    <div class="border border-1 border-light text-light rounded p-05 me-2">
+                                                                        <i class="fa-solid fa-file fa-fw"></i>
+                                                                    </div>
+                                                                    <div>
+                                                                        {{contract.c > 1 ? contract.u/1000000 : contract.a/1000000}} MB
+                                                                    </div>
                                                                 </div>
                                                             </th>
 
@@ -259,17 +247,17 @@ export default {
                                                                 <div class="d-flex align-items-center">
 
                                                                     <!-- upload btn -->
-                                                                    <div v-if="contract.c == 1" class="border border-1 border-success text-success rounded">
+                                                                    <div v-if="contract.c == 1" class="border border-1 border-success text-success rounded p-05 me-2">
                                                                         <i class="fa-solid fa-file-upload fa-fw"></i>
                                                                     </div>
                                                                     
                                                                     <!-- post btn -->
-                                                                    <div v-if="contract.c == 2" class="border border-1 border-warning text-warning rounded">
+                                                                    <div v-if="contract.c == 2" class="border border-1 border-warning text-warning rounded p-05 me-2">
                                                                         <i class="fa-solid fa-hand-holding-dollar fa-fw"></i>
                                                                     </div>
                                                                    
                                                                     <!-- extend btn -->
-                                                                    <div v-if="contract.c == 3" class="border border-1 border-primary text-primary rounded">
+                                                                    <div v-if="contract.c == 3" class="border border-1 border-primary text-primary rounded p-05 me-2">
                                                                         <i class="fa-solid fa-clock-rotate-left fa-fw"></i>
                                                                     </div>
 
@@ -297,7 +285,7 @@ export default {
                                                             <!-- expires -->
                                                             <td class="border-0">
                                                                 <div class="d-flex align-items-center">
-                                                                    <div class="border border-1 border-light text-light rounded">
+                                                                    <div class="border border-1 border-light text-light rounded p-05 me-2">
                                                                         <i class="fa-solid fa-circle-info fa-fw"></i>
                                                                     </div>
                                                                     
