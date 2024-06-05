@@ -2680,13 +2680,8 @@ function buyNFT(setname, uid, price, type, callback){
         if (this.posturls[this[this.postSelect.entry][i]])
           arr.push(this.posturls[this[this.postSelect.entry][i]]);
       }
-      //this.displayPosts = arr;
-      for(var i = 0; i < arr.length; i++){
-        // if displayPost doesn't contain the post, add it
-        if(!this.displayPosts.includes(arr[i])){
-          this.displayPosts.push(arr[i])
-        }
-      }
+      this.displayPosts = arr;
+      console.log('displayPosts')
       if (modal) {
         this[modal[0]].items = this.displayPosts;
         this[modal[0]].item = this[modal[0]].items[modal[1]];
