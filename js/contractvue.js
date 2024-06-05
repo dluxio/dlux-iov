@@ -326,13 +326,7 @@ export default {
                                                                         @tosign="toSign=$event" />
                                                                     </div>
 
-                                                                    <!-- extension -->
-                                                                    <div v-if="contract.c == 3">
-                                                                        <extension-vue :node-view="nodeview"
-                                                                        :contract="contract" :sstats="sstats"
-                                                                        :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
-                                                                        @tosign="toSign=$event"></extension-vue>
-                                                                    </div>
+                                                                    
 
                                                                     <!-- files list -->
                                                                     <div v-if="contract.df" class="card mx-auto p-4 mb-3">
@@ -377,6 +371,14 @@ export default {
                                                                                     <i class="fa-solid fa-floppy-disk fa-fw me-1"></i>Update Metadata</button>
                                                                             </div>
                                                                         </div>
+                                                                    </div>
+
+                                                                    <!-- extension -->
+                                                                    <div v-if="contract.c == 3">
+                                                                        <extension-vue :node-view="nodeview"
+                                                                        :contract="contract" :sstats="sstats"
+                                                                        :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
+                                                                        @tosign="toSign=$event"></extension-vue>
                                                                     </div>
 
                                                                     <!-- contract details -->
