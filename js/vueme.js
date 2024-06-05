@@ -2675,24 +2675,12 @@ function buyNFT(setname, uid, price, type, callback){
       }
     },
     selectPosts(modal, reset) {
-      //var arr = [];
-      var found = false
+      var arr = [];
       for (var i = 0; i < this[this.postSelect.entry].length; i++) {
         if (this.posturls[this[this.postSelect.entry][i]])
-          //search displayPosts for this[this.postSelect.entry][i].url
-          for(var j = 0; j < this.displayPosts.length; j++){
-            if(this.displayPosts[j]?.url == this[this.postSelect.entry][i]?.url){
-              found = true
-              break;
-            }
-          }
-          if(!found){
-            this.displayPosts.push(this.posturls[this[this.postSelect.entry][i]])
-            console.count('pushed')
-          }
-          //arr.push(this.posturls[this[this.postSelect.entry][i]]);
+          arr.push(this.posturls[this[this.postSelect.entry][i]]);
       }
-      //this.displayPosts = arr;
+      if(arr.length == this[this.postSelect.entry].length)this.displayPosts = arr;
       if (modal) {
         this[modal[0]].items = this.displayPosts;
         this[modal[0]].item = this[modal[0]].items[modal[1]];
