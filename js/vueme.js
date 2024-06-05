@@ -2678,15 +2678,18 @@ function buyNFT(setname, uid, price, type, callback){
       //var arr = [];
       var found = false
       for (var i = 0; i < this[this.postSelect.entry].length; i++) {
-        if (this.posturls[this[this.postSelect.entry][i]]?.url)
+        if (this.posturls[this[this.postSelect.entry][i]])
           //search displayPosts for this[this.postSelect.entry][i].url
           for(var j = 0; j < this.displayPosts.length; j++){
-            if(this[this.postSelect.entry][i]?.url && this.displayPosts[j]?.url == this[this.postSelect.entry][i]?.url){
+            if(this.displayPosts[j]?.url == this[this.postSelect.entry][i]?.url){
               found = true
               break;
             }
           }
-          if(!found)this.displayPosts.push(this.posturls[this[this.postSelect.entry][i]])
+          if(!found){
+            this.displayPosts.push(this.posturls[this[this.postSelect.entry][i]])
+            console.count('pushed')
+          }
           //arr.push(this.posturls[this[this.postSelect.entry][i]]);
       }
       //this.displayPosts = arr;
