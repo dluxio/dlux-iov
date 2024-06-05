@@ -53,7 +53,7 @@ export default {
             {{item.contract}}</button>-->
         <div class="text-center">
             <button ref="publishButton" type="button" @keyUp="buildTags()"
-                class="btn btn-danger" data-toggle="tooltip" data-placement="top"
+                class="btn btn-primary" data-toggle="tooltip" data-placement="top"
                 title="Publish to HIVE" :disable="!validPost"
                 @click="post()">Publish</button>
         </div>
