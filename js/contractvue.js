@@ -338,7 +338,7 @@ export default {
                                                                     <div v-if="contract.df" class="card mx-auto p-4 mb-3">
 
                                                                         <div class="d-flex flex-column">
-                                                                            <h4 class="ms-auto me-auto">Files</h4>
+                                                                            <h4 class="ms-auto me-auto">Files <i class="fa-solid fa-fw ms-1 fa-paperclip"></i></h4>
                                                                             <ol class="text-start mx-auto">
                                                                                 <li class="mb-2" v-for="(size, cid, index) in contract.df">
                                                                                     <div class="d-flex align-content-center">    
@@ -374,7 +374,7 @@ export default {
                                                                             </ol>
                                                                             <div class="d-flex">
                                                                                 <button type="button" class="btn btn-sm btn-info my-2 mx-auto" @click="update_meta(contract.i)">
-                                                                                    <i class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>Update Metadata</button>
+                                                                                    <i class="fa-solid fa-floppy-disk fa-fw me-1"></i>Update Metadata</button>
                                                                             </div>
                                                                         </div>
                                                                     </div>
