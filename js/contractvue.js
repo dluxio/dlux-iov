@@ -306,7 +306,7 @@ export default {
 
                                                                 <!-- contract ID -->
                                                                 <div class="d-flex flex-wrap justify-content-center mb-2 ">
-                                                                    <div class="d-flex align-items-center px-3 py-1 m-1 small muted">
+                                                                    <div class="d-flex align-items-center small muted">
                                                                         <div> Contract ID </div>
                                                                         <i class="fa-solid fa-file-contract fa-fw mx-1" aria-hidden="true"></i>
                                                                         <div>{{contract.i}}</div>
