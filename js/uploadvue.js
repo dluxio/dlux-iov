@@ -7,7 +7,7 @@ export default {
                 <form onsubmit="return false;">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0 mx-2 d-none">Upload Files</h5>
-                        <div class="ms-auto me-auto">
+                        <div class="ms-auto me-auto mb-2">
                             <label for="formFile" class="btn btn-lg btn-light"><i
                                     class="fa-solid fa-file-circle-plus fa-fw me-2"></i>Select Files</label>
                             <input class="d-none" id="formFile" type="file" multiple @change="uploadFile">
