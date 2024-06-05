@@ -312,8 +312,8 @@ export default {
                           <i class="fa-solid fa-at fa-fw"></i>
                         </span> 
                         <select class="ps-4 form-select text-white bg-dark border-dark" id="sponsoredContracts" v-model="d.broker">
-                          <option value="" disabled selected>Select provider</option>
-                          <option v-for="(account, key) in ipfsproviders" :value="key">{{key}}</option>
+                          <option class="text-white" value="" disabled selected>Select provider</option>
+                          <option class="text-white" v-for="(account, key) in ipfsproviders" :value="key">{{key}}</option>
                         </select>
                       </div>
                       <label for="ben_to" class="small mb-1">Benificiary Account</label>
