@@ -2675,13 +2675,11 @@ function buyNFT(setname, uid, price, type, callback){
       }
     },
     selectPosts(modal, reset) {
-      var arr = [];
-      for (var i = 0; i < this[this.postSelect.entry].length; i++) {
+      if(reset)this.displayPosts = []
+      for (var i = this.displayPosts.length; i < this[this.postSelect.entry].length; i++) {
         if (this.posturls[this[this.postSelect.entry][i]])
-          arr.push(this.posturls[this[this.postSelect.entry][i]]);
+          this.displayPosts.push(this.posturls[this[this.postSelect.entry][i]]);
       }
-      //this.displayPosts = arr;
-      console.log('displayPosts')
       if (modal) {
         this[modal[0]].items = this.displayPosts;
         this[modal[0]].item = this[modal[0]].items[modal[1]];
