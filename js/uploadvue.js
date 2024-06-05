@@ -3,7 +3,7 @@ export default {
     <!--file uploader-->
     <Transition>
         <div v-if="contract.i">
-            <div class="p-2">
+            <div>
                 <form onsubmit="return false;">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="ms-auto me-auto mb-3">
