@@ -305,13 +305,11 @@ export default {
                                                                 <div class="d-flex flex-column border border-white rounded text-start p-2" style="background-color:rgba(0,0,0,0.3);">
 
                                                                 <!-- contract ID -->
-                                                                <div class="d-flex flex-wrap justify-content-center mb-2 ">
-                                                                    <div class="d-flex align-items-center small text-white-50">
-                                                                        <div> Contract ID </div>
-                                                                        <i class="fa-solid fa-file-contract fa-fw mx-1" aria-hidden="true"></i>
-                                                                        <div>{{contract.i}}</div>
+                                                                <div class="d-flex justify-content-center small text-white-50 mb-2">
+                                                                    <div class="text-center"> Contract ID <i class="fa-solid fa-file-contract fa-fw mx-1" aria-hidden="true"></i><span class="text-break">{{contract.i}}</span>
                                                                     </div>
                                                                 </div>
+                                                               
 
                                                                     <!-- upload -->
                                                                     <div v-if="contract.c == 1" class="mb-3">
