@@ -354,7 +354,7 @@ export default {
                                                                                 <li class="mb-2" v-for="(size, cid, index) in contract.df">
                                                                                     <div class="d-flex align-content-center">    
                                                                                         <div class="d-flex mx-2">
-                                                                                            <img class="img-thumbnail" :src="smartThumb(contract.i,index,cid)" width="100px">
+                                                                                            <img class="img-thumbnail" :src="smartThumb(contract.i,index,cid)" width="100px" onerror="if (this.src != '/img/other-file-type-svgrepo-com.svg') this.src = '/img/other-file-type-svgrepo-com.svg'">
                                                                                         </div>
                                                                                         <div class="d-flex flex-column my-auto"> 
                                                                                             <div class="d-flex mb-1">
@@ -668,30 +668,46 @@ export default {
                 case 'tif':
                     return `https://ipfs.dlux.io/ipfs/${cid}`
                 case 'svg':
-                    return `svg`
+                    return `https://ipfs.dlux.io/ipfs/${cid}`
                 case 'mp4':
+                case 'mov':
+                    return `/img/mov-file-type-svgrepo-com.svg`
+                case 'avi':
+                    return `/img/avi-file-type-svgrepo-com.svg`
                 case 'gltf':
                 case 'glb':
+                    return `/img/dluxdefault.png`
                 case 'html':
                 case 'htm':
+                    return `/img/html-file-type-svgrepo-com.svg`
                 case 'pdf':
+                    return `/img/pdf-file-type-svgrepo-com.svg`
                 case 'txt':
-                case 'md':
                 case 'json':
-                case 'csv':
+                case 'md':
                 case 'xml':
                 case 'yaml':
                 case 'yml':
                 case 'js':
+                    return `/img/txt-file-type-svgrepo-com.svg`
+                case 'csv':
+                    return `/img/csv-file-type-svgrepo-com.svg`
                 case 'css':
                 case 'scss':
-                case 'sass':
+                    return `/img/css-file-type-svgrepo-com.svg`
                 case 'mp3':
+                    return `/img/mp3-file-type-svgrepo-com.svg`
                 case 'wav':
-                case 'ico':
+                    return `/img/wav-file-type-svgrepo-com.svg`
+                case 'rar':
+                    return `/img/rar-file-type-svgrepo-com.svg`
+                case 'zip':
+                    return `/img/zip-file-type-svgrepo-com.svg`
+                case '':
+                    return '/img/other-file-type-svgrepo-com.svg'
                 case 'enc': //encrypted
                 default:
-                    return '/img/dluxdefault.png'
+                    return '/img/other-file-type-svgrepo-com.svg'
             }
         },
         update_meta(contract) {
