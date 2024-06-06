@@ -354,7 +354,7 @@ export default {
                                                                                 <li class="mb-2" v-for="(size, cid, index) in contract.df">
                                                                                     <div class="d-flex align-content-center">    
                                                                                         <div class="d-flex mx-2">
-                                                                                            <img class="img-thumbnail" :src="smartThumb(contract.i,index,cid)" width="100px" onerror="if (this.src != '/img/other-file-type-svgrepo-com.svg') this.src = '/img/other-file-type-svgrepo-com.svg'">
+                                                                                            <img class="img-thumbnail bg-light" :src="smartThumb(contract.i,index,cid)" width="100px" onerror="if (this.src != '/img/other-file-type-svgrepo-com.svg') this.src = '/img/other-file-type-svgrepo-com.svg'">
                                                                                         </div>
                                                                                         <div class="d-flex flex-column my-auto"> 
                                                                                             <div class="d-flex mb-1">
