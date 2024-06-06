@@ -306,7 +306,7 @@ export default {
 
                                                                 <!-- contract ID -->
                                                                 <div class="d-flex flex-wrap justify-content-center mb-2 ">
-                                                                    <div class="d-flex align-items-center small muted">
+                                                                    <div class="d-flex align-items-center small text-white-50">
                                                                         <div> Contract ID </div>
                                                                         <i class="fa-solid fa-file-contract fa-fw mx-1" aria-hidden="true"></i>
                                                                         <div>{{contract.i}}</div>
@@ -315,6 +315,25 @@ export default {
 
                                                                     <!-- upload -->
                                                                     <div v-if="contract.c == 1" class="mb-3">
+                                                                        <!-- upload banner -->
+                                                                        <div class="alert alert-warning d-flex align-items-center mx-lg-5">
+                                                                            <div class="d-flex flex-grow-1 flex-wrap me-1 align-items-center">
+                                                                                <div class="mx-1">
+                                                                                    <div class="fs-3 fw-lighter">You have {{exp_to_time(contract.e)}} to start the contract</div>
+                                                                                </div>
+                                                                                <div class="mx-1 ms-auto me-auto d-none">
+                                                                                <ol class="mb-0">
+                                                                                        <li>Add all files</li>
+                                                                                        <li>Click Sign and Upload</li>
+                                                                                        <li>Authorize via keychain</li>
+                                                                                    </ol>
+                                                                                
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="ms-auto d-flex flex-wrap align-items-center fs-1 text-warning justify-content-center me-2 mx-1">
+                                                                                <i class="fa-solid fa-bell fa-fw ms-2"></i>
+                                                                            </div>
+                                                                        </div>
                                                                         <upload-vue :user="saccountapi" :propcontract="contract" @tosign="toSign=$event" @done="done()" />
                                                                     </div>
 
@@ -384,7 +403,7 @@ export default {
                                                                     </div>
 
                                                                     <!-- contract details -->
-                                                                    <div class="d-flex flex-wrap justify-content-center mb-3 ">
+                                                                    <div class="d-flex flex-wrap justify-content-center mb-3 small">
 
                                                                         <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                             <div> Owner </div>
