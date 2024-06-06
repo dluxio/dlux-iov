@@ -319,7 +319,7 @@ export default {
                                                                         <div class="alert alert-warning d-flex align-items-center mx-lg-5">
                                                                             <div class="d-flex flex-grow-1 flex-wrap me-1 align-items-center">
                                                                                 <div class="mx-1">
-                                                                                    <div class="fs-3 fw-lighter">You have {{exp_to_time(contract.e)}} to start the contract</div>
+                                                                                    <div class="fs-3 fw-lighter">You have {{exp_to_time(contract.e)}} to start this contract</div>
                                                                                 </div>
                                                                                 <div class="mx-1 ms-auto me-auto d-none">
                                                                                 <ol class="mb-0">
