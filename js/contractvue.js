@@ -304,11 +304,11 @@ export default {
                                                             <td class="border-0" colspan="4">
                                                                 <div class="d-flex flex-column border border-white rounded text-start p-2" style="background-color:rgba(0,0,0,0.3);">
 
-                                                                <!-- contract ID -->
-                                                                <div class="d-flex justify-content-center small text-white-50 mb-2">
-                                                                    <div class="text-center"> Contract ID <i class="fa-solid fa-file-contract fa-fw mx-1" aria-hidden="true"></i><span class="text-break">{{contract.i}}</span>
+                                                                    <!-- contract ID -->
+                                                                    <div class="d-flex justify-content-center small text-white-50 mb-2">
+                                                                        <div class="text-center"> Contract ID <i class="fa-solid fa-file-contract fa-fw mx-1" aria-hidden="true"></i><span class="text-break">{{contract.i}}</span>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
                                                                
 
                                                                     <!-- upload -->
@@ -332,6 +332,60 @@ export default {
                                                                                 <i class="fa-solid fa-bell fa-fw ms-2"></i>
                                                                             </div>
                                                                         </div>
+
+                                                                        <!-- encryption banner -->
+                                                                        <div class="alert alert-danger d-flex align-items-center mx-lg-5">
+                                                                            
+                                                                            <div class="d-flex flex-column flex-grow-1 mx-1">
+                                                                                <div class="d-flex justify-content-around flex-wrap fs-3 fw-lighter border-bottom border-light border-1 mb-2">
+                                                                                    <span class="me-auto">PRIVACY:</span>
+                                                                                    <span class="me-auto fw-bold">PUBLIC<i class="ms-2 fa-solid fa-fw fa-lock-open"></i></span>
+                                                                                </div>
+                                                                                <div class="mb-2">Files uploaded to this contract will not be encrypted, <b>they will be publicly available on SPK Network</b></div>
+                                                                                <div class="form-check form-switch d-flex align-content-center ps-0 mb-2">
+                                                                                    <label class="form-check-label me-auto mb-0" for="encryptCheck">ENCRYPT FILES</label>
+                                                                                    <input class="form-check-input fs-2 ms-auto mt-0" type="checkbox" role="switch" id="encryptCheck"> 
+                                                                                </div>
+                                                                               
+                                                                                <!-- encrypted sharing -->
+                                                                                <div> <!--v-if="encryptCheck.value == true"-->
+                                                                                    <div class="fs-3 fw-lighter">Sharing:</div>
+                                                                                    <p>You can share the decryption key with up to 20 other accounts to view the files</p>
+                                                                                    
+                                                                                    <div class="d-flex mb-2">
+                                                                                        <div class="me-1 flex-grow-1">
+                                                                                            <div class="position-relative has-validation">
+                                                                                                <input autocapitalize="off" placeholder="username" class="form-control border-light bg-darkg text-info">
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="ms-1">
+                                                                                            <div class="btn btn-lg btn-success"><i class="fa-solid fa-fw fa-plus"></i></div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    
+                                                                                    <!-- shared accounts -->
+                                                                                    <div class="d-flex flex-row flex-wrap">
+                                                                                        <div class="rounded bg-light text-black filter-bubble me-1 mb-1 d-flex align-items-center">
+                                                                                            <span>username1</span> 
+                                                                                            <button type="button" class="ms-1 btn-close btn-close-white"></button>
+                                                                                        </div>
+
+                                                                                        <div class="rounded bg-light text-black filter-bubble me-1 mb-1 d-flex align-items-center">
+                                                                                            <span>username2</span> 
+                                                                                            <button type="button" class="ms-1 btn-close btn-close-white"></button>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    <!-- update button -->
+                                                                                    <div class="d-flex mt-3">
+                                                                                        <div class="mx-auto btn btn-sm btn-info"><i class="fa-regular fa-fw fa-floppy-disk me-2"></i>Update Contract</div>
+                                                                                    </div>
+                                                                                    
+                                                                                </div>
+                                                                            </div>
+                                                                            
+                                                                        </div>
+
                                                                         <upload-vue :user="saccountapi" :propcontract="contract" @tosign="toSign=$event" @done="done()" />
                                                                     </div>
 
