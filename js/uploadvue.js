@@ -222,7 +222,7 @@ methods: {
           dict[this.encryption.accounts[usernames[i]].key] = usernames[i]
         }
         const key = "#" + this.encryption.key;
-        if(keys.length)hive_keychain.requestEncodeMessage(this.user.name, keys, key, 'Memo', (response) => {
+        if(keys.length)hive_keychain.requestEncodeWithKeys(this.user.name, keys, key, 'Memo', (response) => {
             if (response.success) {
               console.log(response.result)
                 let encryptedKey = response.result;
