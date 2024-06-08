@@ -224,7 +224,7 @@ methods: {
           dict[this.encryption.accounts[usernames[i]].key] = usernames[i]
         }
         const key = "#" + this.encryption.key;
-        if(keys.length)hive_keychain.requestEncodeMessage(this.user, keys, key, 'Memo', (response) => {
+        if(keys.length)hive_keychain.requestEncodeMessage(this.user.name, keys, key, 'Memo', (response) => {
             if (response.success) {
               console.log(response.result)
                 let encryptedKey = response.result;
@@ -237,7 +237,7 @@ methods: {
         else resolve (null)
       })
     },
-    decryptMessage(username = this.user , encryptedMessage) {
+    decryptMessage(username = this.user.name , encryptedMessage) {
       return new Promise((resolve, reject) => {
         let encryptedKey = encryptedMessage.split("#")[1];
         let encryptedMessageOnly = encryptedMessage.split("#")[2];
@@ -676,7 +676,7 @@ mounted() {
     this.contract = this.propcontract;
     this.selectContract(this.contract.i, this.contract.b)
     this.encryption.key = CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Hex);
-    this.encryption.accounts[this.user.username] = {
+    this.encryption.accounts[this.user.name] = {
       key: '',
       enc_key: '',
     }
