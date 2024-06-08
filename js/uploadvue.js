@@ -196,7 +196,6 @@ methods: {
           this.fetching = false
           if(data.result){
               for (var i = 0; i < data.result.length; i++) {
-                console.log(data.result[i])
                   if(data.result[i].id){
                     this.encryption.accounts[data.result[i].name].key = data.result[i].memo_key
                   }
@@ -224,10 +223,10 @@ methods: {
         const key = "#" + this.encryption.key;
         if(keys.length)hive_keychain.requestEncodeWithKeys(this.user.name, keys, key, 'Memo', (response) => {
             if (response.success) {
-              console.log(response.result)
-                let encryptedKey = response.result;
-                this.encryption.accounts[username] = `#${encryptedKey}`
-                resolve(encryptedMessageWithKey = "#"+ encryptedKey)
+                for (var node in response.result){
+                  this.encryption.accounts[dict[node]] = `#${response.result[node]}`
+                }
+                resolve("OK")
             } else {
                 reject(response.message);
             }
