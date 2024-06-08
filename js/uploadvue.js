@@ -224,7 +224,7 @@ methods: {
         if(keys.length)hive_keychain.requestEncodeWithKeys(this.user.name, keys, key, 'Memo', (response) => {
             if (response.success) {
                 for (var node in response.result){
-                  this.encryption.accounts[dict[node]].enc_key = response.result[node]}
+                  this.encryption.accounts[dict[node]].enc_key = response.result[node]
                 }
                 resolve("OK")
             } else {
