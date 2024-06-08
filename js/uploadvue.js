@@ -35,7 +35,7 @@ export default {
                         </div>
                         
                         <!-- encrypted sharing -->
-                        <div v-if="encrytion.encrypted">
+                        <div v-if="encryption.encrypted">
                             <div class="fs-3 fw-lighter">Sharing:</div>
                             <p>You can share the decryption key with up to 20 other accounts to view the files</p>
                             
