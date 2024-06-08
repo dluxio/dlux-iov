@@ -1,4 +1,4 @@
-this.version = "2024.06.06.3";
+this.version = "2024.06.08.1";
 
 console.log( "SW:" + this.version + " - online.");
 
@@ -59,6 +59,7 @@ var urlsToCache = [
   "/js/buffer.js",
   "/js/cardvue.js",
   "/js/contractvue.js",
+  "/js/cryptojs.min.js",
   "/js/cycler.js",
   "/js/dd.js",
   "/js/detailvue-min.js",

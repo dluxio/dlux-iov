@@ -20,6 +20,53 @@ export default {
                         </div>
                     </div>
                 </form>
+                <!-- encryption banner -->
+                <div class="alert alert-danger d-flex align-items-center mx-lg-5">
+                    
+                    <div class="d-flex flex-column flex-grow-1 mx-1">
+                        <div class="d-flex justify-content-around flex-wrap fs-3 fw-lighter border-bottom border-light border-1 mb-2">
+                            <span class="me-auto">PRIVACY:</span>
+                            <span class="me-auto fw-bold">PUBLIC<i class="ms-2 fa-solid fa-fw fa-lock-open"></i></span>
+                        </div>
+                        <div class="mb-2">Files uploaded to this contract will not be encrypted, <b>they will be publicly available on SPK Network</b></div>
+                        <div class="form-check form-switch d-flex align-content-center ps-0 mb-2">
+                            <label class="form-check-label me-auto mb-0" for="encryptCheck">ENCRYPT FILES</label>
+                            <input class="form-check-input fs-2 ms-auto mt-0" type="checkbox" role="switch" id="encryptCheck" v-model="encrytion.encrypted"> 
+                        </div>
+                        
+                        <!-- encrypted sharing -->
+                        <div v-if="encrytion.encrypted">
+                            <div class="fs-3 fw-lighter">Sharing:</div>
+                            <p>You can share the decryption key with up to 20 other accounts to view the files</p>
+                            
+                            <div class="d-flex mb-2">
+                                <div class="me-1 flex-grow-1">
+                                    <div class="position-relative has-validation">
+                                        <input autocapitalize="off" placeholder="username" class="form-control border-light bg-darkg text-info" v-model="encryption.input" @blur="addUser()">
+                                    </div>
+                                </div>
+                                <div class="ms-1">
+                                    <div class="btn btn-lg btn-success"><i class="fa-solid fa-fw fa-plus"></i></div>
+                                </div>
+                            </div>
+                            
+                            <!-- shared accounts -->
+                            <div class="d-flex flex-row flex-wrap" v-for="(a,b,c) in encryption.accounts">
+                                <div class="rounded bg-light text-black filter-bubble me-1 mb-1 d-flex align-items-center"> <!-- warning class for unencrypted keys --> 
+                                    <span>{{b}}</span> 
+                                    <button type="button" class="ms-1 btn-close btn-close-white"></button>
+                                </div>
+                            </div>
+
+                            <!-- update button -->
+                            <div class="d-flex mt-3">
+                                <div @click="checkHive()" class="mx-auto btn btn-sm btn-info"><i class="fa-regular fa-fw fa-floppy-disk me-2"></i>Update Users</div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                </div>
                 <div v-if="File.length">
                     <div class=" pt-0">
                         <div id="listOfImgs" v-for="(file, index) in File">
@@ -96,9 +143,16 @@ props: {
 data() {
     return {
         files: {},
+        fetching: false,
         contract: {
             id: '',
             api: ''
+        },
+        encryption: {
+          input: '',
+          key: '',
+          encrypted: false,
+          accounts: {},
         },
         fileRequests: {},
         FileInfo: {},
@@ -109,6 +163,103 @@ data() {
 },
 emits: ["tosign", "done"],
 methods: {
+  addUser(){
+    if(this.encryption.input){
+      this.encryption.accounts[this.encryption.input] = {
+        key: '',
+        enc_key: '',
+      }
+      this.encryption.input = ''
+    }
+  },
+  checkHive(){
+    return new Promise((resolve, reject) => {
+      this.fetching = true
+      var accounts = Object.keys(this.encryption.accounts)
+      var newAccounts = []
+      for (var i = 0; i < accounts.length; i++) {
+        if(!this.encryption.accounts[accounts[i]]?.key){
+          newAccounts.push(accounts[i])
+        }
+      }
+        
+      if(newAccounts.length)fetch('https://hive-api.dlux.io', {
+          method: 'POST',
+          body: JSON.stringify({  
+              "jsonrpc": "2.0",
+              "method": "condenser_api.get_accounts",
+              "params": [newAccounts],
+              "id": 1
+          })
+      }).then(response => response.json())
+      .then(data => {
+          this.fetching = false
+          if(data.result){
+              for (var i = 0; i < data.result.length; i++) {
+                console.log(data.result[i])
+                  if(data.result[i].id){
+                      this.encryptKeyToUser(data.result[i].name).then(res => {
+                        this.encryption.accounts[data.result[i].name].key = data.result[i].memo_key
+                      })
+                  }
+              }
+              this.encryptKeyToUsers()
+              resolve(data.result)
+          } else {
+              reject(data.error)
+          }
+      })
+      .catch(e => {
+          this.fetching = false
+      })
+    })
+  },
+    encryptKeyToUsers(usernames) {
+      return new Promise((resolve, reject) => {
+        if(!usernames) usernames = Object.keys(this.encryption.accounts)
+        var keys = []
+        var dict = {}
+        for (var i = 0; i < usernames.length; i++) {
+          if(!this.encryption.accounts[usernames[i]].enc_key)keys.push(this.encryption.accounts[usernames[i]].key)
+          dict[this.encryption.accounts[usernames[i]].key] = usernames[i]
+        }
+        const key = "#" + this.encryption.key;
+        if(keys.length)hive_keychain.requestEncodeMessage(this.user, keys, key, 'Memo', (response) => {
+            if (response.success) {
+              console.log(response.result)
+                let encryptedKey = response.result;
+                this.encryption.accounts[username] = `#${encryptedKey}`
+                resolve(encryptedMessageWithKey = "#"+ encryptedKey)
+            } else {
+                reject(response.message);
+            }
+        });
+        else resolve (null)
+      })
+    },
+    decryptMessage(username = this.user , encryptedMessage) {
+      return new Promise((resolve, reject) => {
+        let encryptedKey = encryptedMessage.split("#")[1];
+        let encryptedMessageOnly = encryptedMessage.split("#")[2];
+        console.log("Encrypted message: ", encryptedMessageOnly);
+        hive_keychain.requestVerifyKey(username, '#'+encryptedKey, 'Memo', (response) => {
+            if (response.success) {
+                let key = response.result;
+                this.encryption.key = key
+                resolve(key)
+            } else {
+                reject(response.message);
+            }
+        });
+      })
+    },
+    sha256Encrypt(message, key) {
+      return CryptoJS.AES.encrypt(message, key).toString();
+    },
+    sha256Decrypt(encryptedMessage, key) {
+      const bytes = CryptoJS.AES.decrypt(encryptedMessage, key);
+      return bytes.toString(CryptoJS.enc.Utf8);
+    },
     uploadFile(e) {
         for (var i = 0; i < e.target.files.length; i++) {
           var reader = new FileReader();
@@ -524,5 +675,10 @@ computed: {
 mounted() {
     this.contract = this.propcontract;
     this.selectContract(this.contract.i, this.contract.b)
+    this.encryption.key = CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Hex);
+    this.encryption.accounts[this.user.username] = {
+      key: '',
+      enc_key: '',
+    }
 },
 };
