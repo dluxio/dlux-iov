@@ -198,9 +198,7 @@ methods: {
               for (var i = 0; i < data.result.length; i++) {
                 console.log(data.result[i])
                   if(data.result[i].id){
-                      this.encryptKeyToUser(data.result[i].name).then(res => {
-                        this.encryption.accounts[data.result[i].name].key = data.result[i].memo_key
-                      })
+                    this.encryption.accounts[data.result[i].name].key = data.result[i].memo_key
                   }
               }
               this.encryptKeyToUsers()
