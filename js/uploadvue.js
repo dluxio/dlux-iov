@@ -31,7 +31,7 @@ export default {
                         <div class="mb-2">Files uploaded to this contract will not be encrypted, <b>they will be publicly available on SPK Network</b></div>
                         <div class="form-check form-switch d-flex align-content-center ps-0 mb-2">
                             <label class="form-check-label me-auto mb-0" for="encryptCheck">ENCRYPT FILES</label>
-                            <input class="form-check-input fs-2 ms-auto mt-0" type="checkbox" role="switch" id="encryptCheck" v-model="encrytion.encrypted"> 
+                            <input class="form-check-input fs-2 ms-auto mt-0" type="checkbox" role="switch" id="encryptCheck" v-model="encryption.encrypted"> 
                         </div>
                         
                         <!-- encrypted sharing -->
