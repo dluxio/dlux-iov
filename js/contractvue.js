@@ -789,7 +789,7 @@ export default {
             } index
         },
         getSapi(user = this.account) {
-            fetch(this.sapi + "/@" + user)
+            if(user)fetch(this.sapi + "/@" + user)
                 .then((response) => response.json())
                 .then((data) => {
                     data.tick = data.tick || 0.01;
