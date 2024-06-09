@@ -276,23 +276,23 @@ methods: {
             const event = Event
             const target = event.currentTarget ? event.currentTarget : event.target
             const fileContent = target.result;
-            for (var i = 0; i < this.File.length; i++) {
+            for (var j = 0; j < this.File.length; i++) {
               if (
-                this.File[i].name == target.File.name
-                && this.File[i].size == target.File.size
+                this.File[j].name == target.File.name
+                && this.File[j].size == target.File.size
               ) {
-                this.hashOf(buffer.Buffer(fileContent), { i }).then((ret) => {
+                this.hashOf(buffer.Buffer(fileContent), { i: j }).then((ret) => {
                   const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash: ret.hash, index: ret.opts.i, size: target.File.size, name: target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
                   console.log({ dict })
                   fetch(`https://spktest.dlux.io/api/file/${ret.hash}`).then(r => r.json()).then(res => {
                     if(res.result == "Not found"){
                       this.FileInfo[dict.name] = dict
-                      const file = this.File[i];
-                      this.File.splice(i, 1, file);
+                      const file = this.File[ret.opts.i];
+                      this.File.splice(ret.opts.i, 1, file);
                     } else {
                       alert(`${target.File.name} already uploaded`)
                       delete this.FileInfo[dict.name]
-                      this.File.splice(i, 1)
+                      this.File.splice(ret.opts.i, 1)
                     }
                   })
                 })
@@ -322,21 +322,28 @@ methods: {
             const event = Event
             const target = event.currentTarget ? event.currentTarget : event.target
             const fileContent = event.target.result;
-            this.hashOf(buffer.Buffer(fileContent), {i}).then(hash => {
-              const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash: hash.hash, index: hash.opts.i, size: target.File.size, name: target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
-              console.log({ dict })
-                fetch(`https://spktest.dlux.io/api/file/${hash.hash}`).then(r => r.json()).then(res => {
-                  if(res.result == "Not found"){
-                    this.FileInfo[dict.name] = dict
-                    const file = this.File[i];
-                    this.File.splice(i, 1, file);
-                  } else {
-                    alert(`${target.File.name} already uploaded`)
-                    delete this.FileInfo[dict.name]
-                    this.File.splice(i, 1)
-                  }
+            for (var j = 0; j < this.File.length; i++) {
+              if (
+                this.File[j].name == target.File.name
+                && this.File[j].size == target.File.size
+              ) {
+                this.hashOf(buffer.Buffer(fileContent), { i: j }).then((ret) => {
+                  const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash: ret.hash, index: ret.opts.i, size: target.File.size, name: target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
+                  console.log({ dict })
+                  fetch(`https://spktest.dlux.io/api/file/${ret.hash}`).then(r => r.json()).then(res => {
+                    if(res.result == "Not found"){
+                      this.FileInfo[dict.name] = dict
+                      const file = this.File[ret.opts.i];
+                      this.File.splice(ret.opts.i, 1, file);
+                    } else {
+                      alert(`${target.File.name} already uploaded`)
+                      delete this.FileInfo[dict.name]
+                      this.File.splice(ret.opts.i, 1)
+                    }
+                  })
                 })
-            })
+              }
+            }
           };
           
           reader.readAsArrayBuffer(e.dataTransfer.files[i]);
