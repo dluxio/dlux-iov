@@ -261,6 +261,13 @@ methods: {
       const bytes = CryptoJS.AES.decrypt(encryptedMessage, key);
       return bytes.toString(CryptoJS.enc.Utf8);
     },
+    hashOf(buf, opts) {
+      return new Promise((resolve, reject) => {
+        Hash.of(buf, { unixfs: 'UnixFS' }).then(hash => {
+          resolve({hash, opts})
+        })
+      })
+    },
     uploadFile(e) {
         for (var i = 0; i < e.target.files.length; i++) {
           var reader = new FileReader();
@@ -274,8 +281,8 @@ methods: {
                 this.File[i].name == target.File.name
                 && this.File[i].size == target.File.size
               ) {
-                Hash.of(buffer.Buffer(fileContent), { unixfs: 'UnixFS' }).then((hash) => {
-                  const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash, index: i, size: target.File.size, name: target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
+                this.HashOf(buffer.Buffer(fileContent), { i }).then((ret) => {
+                  const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash: ret.hash, index: ret.i, size: target.File.size, name: target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
                   console.log({ dict })
                   fetch(`https://spktest.dlux.io/api/file/${hash}`).then(r => r.json()).then(res => {
                     if(res.result == "Not found"){
@@ -288,8 +295,7 @@ methods: {
                       this.File.splice(i, 1)
                     }
                   })
-                });
-                break
+                })
               }
             }
           };
@@ -316,12 +322,7 @@ methods: {
             const event = Event
             const target = event.currentTarget ? event.currentTarget : event.target
             const fileContent = event.target.result;
-            // for (var i = 0; i < this.File.length; i++) {
-            //   if (
-            //     this.File[i].name == target.File.name
-            //     && this.File[i].size == target.File.size
-            //   ) {
-            Hash.of(buffer.Buffer(fileContent)).then(hash => {
+            this.hashOf(buffer.Buffer(fileContent), {i}).then(hash => {
               const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash, index: i, size: target.File.size, name: target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
               console.log({ dict })
                 fetch(`https://spktest.dlux.io/api/file/${hash}`).then(r => r.json()).then(res => {
@@ -335,7 +336,6 @@ methods: {
                     this.File.splice(i, 1)
                   }
                 })
-              // var File = e.dataTransfer.files[i];
             })
           };
           
