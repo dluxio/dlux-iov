@@ -301,7 +301,8 @@ methods: {
         });
       })
     },
-    AESEncrypt(message, key) {
+    AESEncrypt(message, key = this.encryption.key) {
+      if(typeof message != 'string')message = CryptoJS.lib.WordArray.create(messaget)
       return CryptoJS.AES.encrypt(message, key).toString();
     },
     AESDecrypt(encryptedMessage, key) {
