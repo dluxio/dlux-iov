@@ -52,7 +52,7 @@ export default {
                             
                             <!-- shared accounts -->
                             <div class="d-flex flex-row flex-wrap" v-for="(a,b,c) in encryption.accounts">
-                                <div class="rounded text-black filter-bubble me-1 mb-1 d-flex align-items-center" :class="{'bg-light': encryption.accounts[b].enc_key; 'bg-warn': !encryption.accounts[b].enc_key}"> <!-- warning class for unencrypted keys --> 
+                                <div class="rounded text-black filter-bubble me-1 mb-1 d-flex align-items-center" :class="{'bg-light': encryption.accounts[b].enc_key, 'bg-warn': !encryption.accounts[b].enc_key}"> <!-- warning class for unencrypted keys --> 
                                     <span>{{b}}</span> 
                                     <button type="button" class="ms-1 btn-close btn-close-white" @click="delUser(b)"></button>
                                 </div>
