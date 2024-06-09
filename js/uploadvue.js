@@ -29,13 +29,12 @@ export default {
                             <span v-if="!encryption.encrypted" class="me-auto fw-bold">PUBLIC<i class="ms-2 fa-solid fa-fw fa-lock-open"></i></span>
                             <span v-if="encryption.encrypted" class="me-auto fw-bold">PRIVATE<i class="ms-2 fa-solid fa-fw fa-lock"></i></span>
                         </div>
-                        <div v-if="!encryption.encrypted" class="mb-2">Files uploaded to this contract will not be encrypted, <b>they will be publicly available on SPK Network</b></div>
-                        <div v-if="encryption.encrypted" class="mb-2">Files uploaded to this contract will be encrypted, <b>only the following accounts will have access.</b></div>
                         <div class="form-check form-switch d-flex align-content-center ps-0 mb-2">
                             <label class="form-check-label me-auto mb-0" for="encryptCheck">ENCRYPT FILES</label>
                             <input class="form-check-input fs-2 ms-auto mt-0" type="checkbox" role="switch" id="encryptCheck" v-model="encryption.encrypted"> 
                         </div>
-                        
+                        <div v-if="!encryption.encrypted" class="mb-2">Files uploaded to this contract will not be encrypted, <b>they will be publicly available on SPK Network</b></div>
+                        <div v-if="encryption.encrypted" class="mb-2">Files uploaded to this contract will be encrypted, <b>only the following accounts will have access.</b></div>
                         <!-- encrypted sharing -->
                         <div v-if="encryption.encrypted">
                             <div class="fs-3 fw-lighter">Sharing:</div>
