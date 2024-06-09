@@ -302,7 +302,7 @@ methods: {
       })
     },
     sha256Encrypt(message, key) {
-      return CryptoJS.AES.encrypt(message, key).toString();
+      return CryptoJS.AES.encrypt(message, key)
     },
     sha256Decrypt(encryptedMessage, key) {
       const bytes = CryptoJS.AES.decrypt(encryptedMessage, key);
@@ -336,7 +336,7 @@ methods: {
           })
           resolve(encrypted)
         };
-        reader.readAsArrayBuffer(fileInfo.fileContent);
+        reader.readAsArrayBuffer(this.File[fileInfo.index]);
       })
     },
     uploadFile(e) {
