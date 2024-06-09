@@ -98,7 +98,7 @@ export default {
                                                 class="fas fa-fw fa-trash-alt"></i></button>
                                     </div>
                                 </div>
-                                <div class="d-flex w-100">
+                                <div class="d-flex w-100" v-if="FileInfo[file.name]">
                                     <ul class="text-start w-100">
                                         <li class="">Bytes: {{file.size}}</li>
                                         <li class="">CID:
