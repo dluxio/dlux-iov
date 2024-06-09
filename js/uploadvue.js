@@ -85,11 +85,11 @@ export default {
                                         </div>
                                     </div>
                                     <div class="flex-shrink" v-if="File.length">
-                                        <button type="button" class="me-2 btn btn-secondary" v-if="file.actions.pause"
+                                        <button type="button" class="me-2 btn btn-secondary" v-if="File[FileInfo[file.name].index].actions.pause"
                                             @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Pause</button>
-                                        <button type="button" class="me-2 btn btn-secondary" v-if="file.actions.resume"
+                                        <button type="button" class="me-2 btn btn-secondary" v-if="File[FileInfo[file.name].index].actions.resume"
                                             @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Resume</button>
-                                        <button type="button" class="me-2 btn btn-secondary" v-if="file.actions.cancel"
+                                        <button type="button" class="me-2 btn btn-secondary" v-if="File[FileInfo[file.name].index].actions.cancel"
                                             @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Cancel</button>
                                     </div>
                                     <div class="ms-auto">
@@ -129,11 +129,11 @@ export default {
                                         </div>
                                     </div>
                                     <div class="flex-shrink" v-if="File.length">
-                                        <button type="button" class="me-2 btn btn-secondary" v-if="file.actions.pause"
+                                        <button type="button" class="me-2 btn btn-secondary" v-if="File[FileInfo[file.name].enc_index].actions.pause"
                                             @click="fileRequest[FileInfo[file.name].enc_index].resumeFileUpload()">Pause</button>
-                                        <button type="button" class="me-2 btn btn-secondary" v-if="file.actions.resume"
+                                        <button type="button" class="me-2 btn btn-secondary" v-if="File[FileInfo[file.name].enc_index].actions.resume"
                                             @click="fileRequest[FileInfo[file.name].enc_index].resumeFileUpload()">Resume</button>
-                                        <button type="button" class="me-2 btn btn-secondary" v-if="file.actions.cancel"
+                                        <button type="button" class="me-2 btn btn-secondary" v-if="File[FileInfo[file.name].enc_index].actions.cancel"
                                             @click="fileRequest[FileInfo[file.name].enc_index].resumeFileUpload()">Cancel</button>
                                     </div>
                                     <div class="ms-auto">
