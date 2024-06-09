@@ -46,15 +46,15 @@ export default {
                                     </div>
                                 </div>
                                 <div class="ms-1">
-                                    <div class="btn btn-lg btn-success"><i class="fa-solid fa-fw fa-plus"></i></div>
+                                    <div class="btn btn-lg btn-success" @click="addUser()"><i class="fa-solid fa-fw fa-plus"></i></div>
                                 </div>
                             </div>
                             
                             <!-- shared accounts -->
                             <div class="d-flex flex-row flex-wrap" v-for="(a,b,c) in encryption.accounts">
-                                <div class="rounded bg-light text-black filter-bubble me-1 mb-1 d-flex align-items-center"> <!-- warning class for unencrypted keys --> 
+                                <div class="rounded text-black filter-bubble me-1 mb-1 d-flex align-items-center" :class="{'bg-light': encryption.accounts[b].enc_key; 'bg-warn': !encryption.accounts[b].enc_key}"> <!-- warning class for unencrypted keys --> 
                                     <span>{{b}}</span> 
-                                    <button type="button" class="ms-1 btn-close btn-close-white"></button>
+                                    <button type="button" class="ms-1 btn-close btn-close-white" @click="delUser(b)"></button>
                                 </div>
                             </div>
 
@@ -171,6 +171,9 @@ methods: {
       }
       this.encryption.input = ''
     }
+  },
+  delUser(user){
+    delete this.encryption.accounts[user]
   },
   checkHive(){
     return new Promise((resolve, reject) => {
