@@ -276,7 +276,7 @@ methods: {
             const event = Event
             const target = event.currentTarget ? event.currentTarget : event.target
             const fileContent = target.result;
-            for (var j = 0; j < this.File.length; i++) {
+            for (var j = 0; j < this.File.length; j++) {
               if (
                 this.File[j].name == target.File.name
                 && this.File[j].size == target.File.size
@@ -323,7 +323,7 @@ methods: {
             const event = Event
             const target = event.currentTarget ? event.currentTarget : event.target
             const fileContent = event.target.result;
-            for (var j = 0; j < this.File.length; i++) {
+            for (var j = 0; j < this.File.length; j++) {
               if (
                 this.File[j].name == target.File.name
                 && this.File[j].size == target.File.size
