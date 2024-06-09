@@ -281,7 +281,7 @@ methods: {
                 this.File[i].name == target.File.name
                 && this.File[i].size == target.File.size
               ) {
-                this.HashOf(buffer.Buffer(fileContent), { i }).then((ret) => {
+                this.hashOf(buffer.Buffer(fileContent), { i }).then((ret) => {
                   const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash: ret.hash, index: ret.i, size: target.File.size, name: target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
                   console.log({ dict })
                   fetch(`https://spktest.dlux.io/api/file/${hash}`).then(r => r.json()).then(res => {
