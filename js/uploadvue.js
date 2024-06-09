@@ -26,7 +26,8 @@ export default {
                     <div class="d-flex flex-column flex-grow-1 mx-1">
                         <div class="d-flex justify-content-around flex-wrap fs-3 fw-lighter border-bottom border-light border-1 mb-2">
                             <span class="me-auto">PRIVACY:</span>
-                            <span class="me-auto fw-bold">PUBLIC<i class="ms-2 fa-solid fa-fw fa-lock-open"></i></span>
+                            <span v-if="!encryption.encrypted" class="me-auto fw-bold">PUBLIC<i class="ms-2 fa-solid fa-fw fa-lock-open"></i></span>
+                            <span v-if="encryption.encrypted" class="me-auto fw-bold">PRIVATE<i class="ms-2 fa-solid fa-fw fa-lock-closed"></i></span>
                         </div>
                         <div class="mb-2">Files uploaded to this contract will not be encrypted, <b>they will be publicly available on SPK Network</b></div>
                         <div class="form-check form-switch d-flex align-content-center ps-0 mb-2">
