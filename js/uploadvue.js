@@ -811,7 +811,7 @@ computed: {
         return Object.keys(this.files).length > 0;
     },
     unkeyed() {
-      if(!this.encryption.encrypted)return true
+      if(!this.encryption.encrypted)return false
       var accounts = Object.keys(this.encryption.accounts)
       for (var i = 0; i < accounts.length; i++) {
         if(!this.encryption.accounts[accounts[i]].enc_key)return true
