@@ -38,7 +38,7 @@ export default {
                         <!-- encrypted sharing -->
                         <div v-if="encryption.encrypted">
                             <div class="fs-3 fw-lighter">Sharing:</div>
-                            <p>You can share the decryption key with up to 20 other accounts to view the files</p>
+                            <p>You can share the decryption key with a few other accounts to view the files</p>
                             
                             <div class="d-flex mb-2">
                                 <div class="me-1 flex-grow-1">
@@ -337,7 +337,7 @@ methods: {
           };
           
           reader.readAsArrayBuffer(e.dataTransfer.files[i]);
-          var File = target.File
+          var File = e.dataTransfer.files[i].File
               File.progress = 0;
               File.actions = {
                 cancel: false,
