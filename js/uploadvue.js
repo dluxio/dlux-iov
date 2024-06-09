@@ -303,7 +303,7 @@ methods: {
     },
     AESEncrypt(message, key = this.encryption.key) {
       if(typeof message != 'string')message = CryptoJS.lib.WordArray.create(message)
-      return CryptoJS.AES.encrypt(message, key).toString();
+      return CryptoJS.AES.encrypt(message, key)
     },
     AESDecrypt(encryptedMessage, key) {
       const bytes = CryptoJS.AES.decrypt(encryptedMessage, key);
@@ -321,10 +321,8 @@ methods: {
         const reader = new FileReader();
         reader.onload = (event) => {
           const fileContent = event.target.result;
-          console.log({fileContent})
           const encrypted = this.AESEncrypt(fileContent, this.encryption.key);
-          console.log({encrypted})
-          newFile = new File([encrypted], fileInfo.name, { type: fileInfo.type });
+          var newFile = new File([encrypted], fileInfo.name, { type: fileInfo.type });
           newFile.progress = 0;
           newFile.actions = {
             cancel: false,
