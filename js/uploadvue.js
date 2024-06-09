@@ -295,6 +295,7 @@ methods: {
   
           reader.readAsArrayBuffer(e.target.files[i])
           var File = e.target.files[i];
+          File.hash = "computing..."
           File.progress = 0;
           File.actions = {
             cancel: false,
@@ -338,13 +339,14 @@ methods: {
           
           reader.readAsArrayBuffer(e.dataTransfer.files[i]);
           var File = e.dataTransfer.files[i]
-              File.progress = 0;
-              File.actions = {
-                cancel: false,
-                pause: false,
-                resume: false,
-              }
-              this.File.push(File);
+          File.hash = "computing..."
+          File.progress = 0;
+          File.actions = {
+            cancel: false,
+            pause: false,
+            resume: false,
+          }
+          this.File.push(File);
         }
         this.ready = true
       },
