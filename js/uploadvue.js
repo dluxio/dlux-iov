@@ -284,7 +284,7 @@ methods: {
                 this.hashOf(buffer.Buffer(fileContent), { i }).then((ret) => {
                   const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash: ret.hash, index: ret.i, size: target.File.size, name: target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
                   console.log({ dict })
-                  fetch(`https://spktest.dlux.io/api/file/${hash}`).then(r => r.json()).then(res => {
+                  fetch(`https://spktest.dlux.io/api/file/${ret.hash}`).then(r => r.json()).then(res => {
                     if(res.result == "Not found"){
                       this.FileInfo[dict.name] = dict
                       const file = this.File[i];
@@ -323,9 +323,9 @@ methods: {
             const target = event.currentTarget ? event.currentTarget : event.target
             const fileContent = event.target.result;
             this.hashOf(buffer.Buffer(fileContent), {i}).then(hash => {
-              const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash, index: i, size: target.File.size, name: target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
+              const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash: hash.hash, index: hash.i, size: target.File.size, name: target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
               console.log({ dict })
-                fetch(`https://spktest.dlux.io/api/file/${hash}`).then(r => r.json()).then(res => {
+                fetch(`https://spktest.dlux.io/api/file/${hash.hash}`).then(r => r.json()).then(res => {
                   if(res.result == "Not found"){
                     this.FileInfo[dict.name] = dict
                     const file = this.File[i];
