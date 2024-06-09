@@ -70,37 +70,37 @@ export default {
                 </div>
                 <div v-if="File.length">
                     <div class=" pt-0">
-                        <div id="listOfImgs" v-for="(file, index) in File">
+                        <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key,index) in FileInfo">
                             <div class="p-3 mb-2 bg-darkest" style="border-radius: 10px;">
                                 <div class="d-flex flex-wrap align-items-center pb-2 mb-2">
                                   <div>
                                     <h6 class="m-0 text-break">{{file.name}}</h6>
                                   </div>
-                                    <div class="flex-grow-1 mx-5" v-if="file.actions.cancel">
+                                    <div class="flex-grow-1 mx-5" v-if="File[FileInfo[file.name].index].actions.cancel">
                                         <div class="progress" role="progressbar" aria-label="Upload progress"
                                             aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
-                                            <div class="progress-bar" :style="'width: ' + file.progress + '%'">
-                                                {{file.progress}}%
+                                            <div class="progress-bar" :style="'width: ' + File[FileInfo[file.name].index].progress + '%'">
+                                                {{File[FileInfo[file.name].index].progress}}%
                                             </div>
                                         </div>
                                     </div>
                                     <div class="flex-shrink" v-if="File.length">
                                         <button type="button" class="me-2 btn btn-secondary" v-if="file.actions.pause"
-                                            @click="fileRequest[index].resumeFileUpload()">Pause</button>
+                                            @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Pause</button>
                                         <button type="button" class="me-2 btn btn-secondary" v-if="file.actions.resume"
-                                            @click="fileRequest[index].resumeFileUpload()">Resume</button>
+                                            @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Resume</button>
                                         <button type="button" class="me-2 btn btn-secondary" v-if="file.actions.cancel"
-                                            @click="fileRequest[index].resumeFileUpload()">Cancel</button>
+                                            @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Cancel</button>
                                     </div>
                                     <div class="ms-auto">
-                                        <button class="btn btn-danger" @click="deleteImg(index, file.name)"
+                                        <button class="btn btn-danger" @click="deleteImg(FileInfo[file.name].index, file.name)"
                                             data-toggle="tooltip" data-placement="top" title="Delete Asset"><i
                                                 class="fas fa-fw fa-trash-alt"></i></button>
                                     </div>
                                 </div>
                                 <div class="d-flex w-100" v-if="FileInfo[file.name]">
                                     <ul class="text-start w-100">
-                                        <li class="">Bytes: {{file.size}}</li>
+                                        <li class="">Bytes: {{File[FileInfo[file.name].index].size}}</li>
                                         <li class="">CID:
                                             {{FileInfo[file.name].hash}}</li>
                                         <li class="">Status:
@@ -114,9 +114,56 @@ export default {
                                 </div>
                             </div>
                         </div>
+                        <div id="listOfEncs"  v-if="encryption.encrypted" v-for="(file, key,index) in FileInfo">
+                            <div class="p-3 mb-2 bg-darkest" style="border-radius: 10px;">
+                                <div class="d-flex flex-wrap align-items-center pb-2 mb-2">
+                                  <div>
+                                    <h6 class="m-0 text-break">{{file.name}}</h6>
+                                  </div>
+                                    <div class="flex-grow-1 mx-5" v-if="File[FileInfo[file.name].enc_index].actions.cancel">
+                                        <div class="progress" role="progressbar" aria-label="Upload progress"
+                                            aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                                            <div class="progress-bar" :style="'width: ' + File[FileInfo[file.name].enc_index].progress + '%'">
+                                                {{File[FileInfo[file.name].enc_index].progress}}%
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex-shrink" v-if="File.length">
+                                        <button type="button" class="me-2 btn btn-secondary" v-if="file.actions.pause"
+                                            @click="fileRequest[FileInfo[file.name].enc_index].resumeFileUpload()">Pause</button>
+                                        <button type="button" class="me-2 btn btn-secondary" v-if="file.actions.resume"
+                                            @click="fileRequest[FileInfo[file.name].enc_index].resumeFileUpload()">Resume</button>
+                                        <button type="button" class="me-2 btn btn-secondary" v-if="file.actions.cancel"
+                                            @click="fileRequest[FileInfo[file.name].enc_index].resumeFileUpload()">Cancel</button>
+                                    </div>
+                                    <div class="ms-auto">
+                                        <button class="btn btn-danger" @click="deleteImg(FileInfo[file.name].enc_index, file.name)"
+                                            data-toggle="tooltip" data-placement="top" title="Delete Asset"><i
+                                                class="fas fa-fw fa-trash-alt"></i></button>
+                                    </div>
+                                </div>
+                                <div class="d-flex w-100" v-if="FileInfo[file.name]">
+                                    <ul class="text-start w-100">
+                                        <li class="">Bytes: {{File[FileInfo[file.name].enc_index].size}}</li>
+                                        <li class="">CID:
+                                            {{FileInfo[file.name].enc_hash}}</li>
+                                        <li class="">Status:
+                                            {{FileInfo[file.name].status}}
+                                        </li>
+                                        <li class=""><a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].enc_hash"
+                                                target="_blank">{{FileInfo[file.name].enc_hash}}<i
+                                                    class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="d-flex">
-                        <button type="button" class="ms-auto me-auto mt-2 btn btn-lg btn-info" :class="{'disabled': !ready}" :disabled="!ready" @click="signNUpload()"><i
+                        <div class="d-flex mt-3">
+                          <div v-if="unkeyed" @click="checkHive()" class="mx-auto btn btn-sm btn-success"><i class="fa-regular fa-fw fa-floppy-disk me-2"></i>Encrypt Keys</div>
+                        </div>
+                        <button type="button" class="ms-auto me-auto mt-2 btn btn-lg btn-info" :class="{'disabled': !reallyReady}" :disabled="!reallyReady" @click="signNUpload()"><i
                                 class="fa-solid fa-file-signature fa-fw me-2"></i>Sign and Upload</button>
                     </div>
                 </div>
@@ -268,6 +315,30 @@ methods: {
         })
       })
     },
+    encryptFileAndPlace(fileInfo) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const fileContent = event.target.result;
+          const encrypted = this.sha256Encrypt(fileContent, this.encryption.key);
+          newIndex = this.File.length
+          newFile = new File([encrypted], fileInfo.name, { type: fileInfo.type });
+          newFile.progress = 0;
+          newFile.actions = {
+            cancel: false,
+            pause: false,
+            resume: false,
+          }
+          this.hashOf(buffer.Buffer(encrypted), { i: newIndex }).then((ret) => {
+            this.fileInfo[newFile.name].enc_hash = ret.hash
+            this.fileInfo[newFile.name].enc_index = newIndex
+            this.File.push(newFile);
+          })
+          resolve(encrypted)
+        };
+        reader.readAsArrayBuffer(this.File[fileInfo.index]);
+      })
+    },
     uploadFile(e) {
         for (var i = 0; i < e.target.files.length; i++) {
           var reader = new FileReader();
@@ -289,6 +360,7 @@ methods: {
                       this.FileInfo[dict.name] = dict
                       const file = this.File[ret.opts.i];
                       this.File.splice(ret.opts.i, 1, file);
+                      this.encryptFileAndPlace(dict)
                     } else {
                       alert(`${target.File.name} already uploaded`)
                       delete this.FileInfo[dict.name]
@@ -329,13 +401,14 @@ methods: {
                 && this.File[j].size == target.File.size
               ) {
                 this.hashOf(buffer.Buffer(fileContent), { i: j }).then((ret) => {
-                  const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash: ret.hash, index: ret.opts.i, size: target.File.size, name: target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature' }
-                  console.log({ dict })
+                  const dict = { fileContent: new TextDecoder("utf-8").decode(fileContent), hash: ret.hash, index: ret.opts.i, size: target.File.size, name: target.File.name, nsfw: false, autoRenew: true, executable: false, path: e.target.id, progress: 0, status: 'Pending Signature' }
+                  
                   fetch(`https://spktest.dlux.io/api/file/${ret.hash}`).then(r => r.json()).then(res => {
                     if(res.result == "Not found"){
                       this.FileInfo[dict.name] = dict
                       const file = this.File[ret.opts.i];
                       this.File.splice(ret.opts.i, 1, file);
+                      this.encryptFileAndPlace(dict)
                     } else {
                       alert(`${target.File.name} already uploaded`)
                       delete this.FileInfo[dict.name]
@@ -376,9 +449,13 @@ methods: {
         var body = ""
         var names = Object.keys(this.FileInfo)
         var cids = []
-        for (var i = 0; i < names.length; i++) {
+        if(!this.encryption.encrypted)for (var i = 0; i < names.length; i++) {
           body += `,${this.FileInfo[names[i]].hash}`
           cids.push(this.FileInfo[names[i]].hash)
+        }
+        else for (var i = 0; i < names.length; i++) {
+          body += `,${this.FileInfo[names[i]].enc_hash}`
+          cids.push(this.FileInfo[names[i]].enc_hash)
         }
         this.contract.files = body
         this.signText(header + body).then(res => {
@@ -410,9 +487,48 @@ methods: {
             this.contract.api = res.services.IPFS[Object.keys(res.services.IPFS)[0]].a
           })
       },
+      stringOfKeys() {
+        if(!this.encryption.encrypted)return ''
+        var keys = []
+        var accounts = Object.keys(this.encryption.accounts)
+        for (var i = 0; i < accounts.length; i++) {
+          keys.push(`${this.encryption.accounts[accounts[i]].enc_key}@${accounts[i]}`)
+        }
+        return keys.join(';')
+      },
+      flagEncode(fileInfo) {
+        var num = 0
+        if(this.encryption.encrypted)num += 1
+        if(fileInfo.autoRenew)num += 2
+        if(fileInfo.nsfw)num += 4
+        if(fileInfo.executable)num += 8
+        var flags = this.NumberToBase64(num)
+        //append category chars here
+        return flags
+      },
+      Base64toNumber(chars) {
+        const glyphs =
+          "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
+        var result = 0;
+        chars = chars.split("");
+        for (var e = 0; e < chars.length; e++) {
+          result = result * 64 + glyphs.indexOf(chars[e]);
+        }
+        return result;
+      },
+      NumberToBase64(num) {
+        const glyphs =
+          "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
+        var result = "";
+        while (num > 0) {
+          result = glyphs[num % 64] + result;
+          num = Math.floor(num / 64);
+        }
+        return result;
+      },
       upload(cids = ['QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3'], contract ) { // = { api: 'https://ipfs.dlux.io', id: '1668913215284', sigs: {}, s: 10485760, t: 0 }) {
         var files = []
-        var meta = ','
+        var meta = `${this.stringOfKeys()},`
         for (var name in this.FileInfo) {
           for (var i = 0; i < cids.length; i++) {
             if (this.FileInfo[name].hash == cids[i]) {
@@ -422,7 +538,16 @@ methods: {
               var Filename = name.split('.').slice(0, -1).join('')
               //get everything after the last
               var ext = name.split('.').slice(-1).join('')
-              meta += `${Filename},${ext},,`
+              meta += `${Filename},${ext},${this.flagEncode(this.FileInfo[name])},`
+              break;
+            } else if(this.FileInfo[name].enc_hash == cids[i]){
+              this.File[this.FileInfo[name].enc_index].cid = cids[i]
+              files.push(this.File[this.FileInfo[name].enc_index])
+              //get everything before the last .
+              var Filename = name.split('.').slice(0, -1).join('')
+              //get everything after the last
+              var ext = name.split('.').slice(-1).join('')
+              meta += `${Filename},${ext},${this.flagEncode(this.FileInfo[name])},`
               break;
             }
           }
@@ -686,11 +811,15 @@ computed: {
         return Object.keys(this.files).length > 0;
     },
     unkeyed() {
+      if(!this.encryption.encrypted)return true
       var accounts = Object.keys(this.encryption.accounts)
       for (var i = 0; i < accounts.length; i++) {
         if(!this.encryption.accounts[accounts[i]].enc_key)return true
       }
       return false
+    },
+    reallyReady() {
+      return this.ready && !this.unkeyed
     }
 },
 mounted() {
