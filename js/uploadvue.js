@@ -337,7 +337,7 @@ methods: {
           };
           
           reader.readAsArrayBuffer(e.dataTransfer.files[i]);
-          var File = e.dataTransfer.files[i].File
+          var File = e.dataTransfer.files[i]
               File.progress = 0;
               File.actions = {
                 cancel: false,
