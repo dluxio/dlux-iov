@@ -1,3 +1,5 @@
+import { file } from "./spk-js";
+
 export default {
     template: `
     <!--file uploader-->
@@ -301,10 +303,10 @@ methods: {
         });
       })
     },
-    sha256Encrypt(message, key) {
-      return CryptoJS.AES.encrypt(message, key)
+    AESEncrypt(message, key) {
+      return CryptoJS.AES.encrypt(message, key).toString();
     },
-    sha256Decrypt(encryptedMessage, key) {
+    AESDecrypt(encryptedMessage, key) {
       const bytes = CryptoJS.AES.decrypt(encryptedMessage, key);
       return bytes.toString(CryptoJS.enc.Utf8);
     },
@@ -320,8 +322,9 @@ methods: {
         const reader = new FileReader();
         reader.onload = (event) => {
           const fileContent = event.target.result;
-          const encrypted = this.sha256Encrypt(fileContent, this.encryption.key);
-          newIndex = this.File.length
+          console.log({fileContent})
+          const encrypted = this.AESEncrypt(fileContent, this.encryption.key);
+          console.log({encrypted})
           newFile = new File([encrypted], fileInfo.name, { type: fileInfo.type });
           newFile.progress = 0;
           newFile.actions = {
@@ -330,6 +333,7 @@ methods: {
             resume: false,
           }
           this.hashOf(buffer.Buffer(encrypted), { i: newIndex }).then((ret) => {
+            const newIndex = this.File.length
             this.fileInfo[newFile.name].enc_hash = ret.hash
             this.fileInfo[newFile.name].enc_index = newIndex
             this.File.push(newFile);
