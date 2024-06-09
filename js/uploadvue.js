@@ -1,5 +1,3 @@
-import { file } from "./spk-js";
-
 export default {
     template: `
     <!--file uploader-->
