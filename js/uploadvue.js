@@ -144,7 +144,7 @@ export default {
                                 </div>
                                 <div class="d-flex w-100" v-if="FileInfo[file.name]">
                                     <ul class="text-start w-100">
-                                        <li class="">Bytes: {{File[FileInfo[file.name].enc_index].size}}</li>
+                                        <li class="">Bytes: {{File[FileInfo[file.name].enc_index].enc_size}}</li>
                                         <li class="">CID:
                                             {{FileInfo[file.name].enc_hash}}</li>
                                         <li class="">Status:
@@ -329,10 +329,13 @@ methods: {
             pause: false,
             resume: false,
           }
-          this.hashOf(buffer.Buffer(encrypted), { i: newIndex }).then((ret) => {
+          const buf = buffer.Buffer(encrypted)
+          const size = buf.byteLength
+          this.hashOf(buf, {}).then((ret) => {
             const newIndex = this.File.length
             this.fileInfo[newFile.name].enc_hash = ret.hash
             this.fileInfo[newFile.name].enc_index = newIndex
+            this.FileInfo[newFile.name].enc_size = size
             this.File.push(newFile);
           })
           resolve(encrypted)
