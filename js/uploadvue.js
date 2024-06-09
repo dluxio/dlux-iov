@@ -336,7 +336,7 @@ methods: {
           })
           resolve(encrypted)
         };
-        reader.readAsArrayBuffer(this.File[fileInfo.index]);
+        reader.readAsArrayBuffer(fileInfo.fileContent);
       })
     },
     uploadFile(e) {
