@@ -517,6 +517,15 @@ methods: {
         //append category chars here
         return flags
       },
+      flagDecode(flags) {
+        var num = this.Base64toNumber(flags)
+        var out = {}
+        if(num & 1)out.enc = true
+        if(num & 2)out.autoRenew = true
+        if(num & 4)out.nsfw = true
+        if(num & 8)out.executable = true
+        return out
+      },
       Base64toNumber(chars) {
         const glyphs =
           "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
@@ -591,7 +600,7 @@ methods: {
             this.File[this.FileInfo[f.name].index].actions.cancel = true
             this.File[this.FileInfo[f.name].index].progress = e.loaded / e.total * 100
             // const fileObj = files.get(file);
-            this.FileInfo[f.name].status = `uploading(${this.File[this.FileInfo[f.name].index].progress}%)`
+            this.FileInfo[f.name].status = this.File[this.FileInfo[f.name].index].progress < 100 ?`uploading(${this.File[this.FileInfo[f.name].index].progress}%)` : 'done'
             // fileObj.status = FILE_STATUS.UPLOADING;
             // fileObj.percentage = e.percentage;
             // fileObj.uploadedChunkSize = e.loaded;
