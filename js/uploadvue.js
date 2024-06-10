@@ -323,19 +323,20 @@ methods: {
           const fileContent = event.target.result;
           const encrypted = this.AESEncrypt(fileContent, this.encryption.key);
           var newFile = new File([encrypted], fileInfo.name, { type: fileInfo.type });
+          console.log({ newFile })
           newFile.progress = 0;
           newFile.actions = {
             cancel: false,
             pause: false,
             resume: false,
           }
-          const buf = buffer.Buffer(encrypted)
+          const buf = buffer.Buffer(newFile)
           const size = buf.byteLength
           this.hashOf(buf, {}).then((ret) => {
             const newIndex = this.File.length
-            this.fileInfo[newFile.name].enc_hash = ret.hash
-            this.fileInfo[newFile.name].enc_index = newIndex
-            this.FileInfo[newFile.name].enc_size = size
+            this.fileInfo[fileInfo.name].enc_hash = ret.hash
+            this.fileInfo[fileInfo.name].enc_index = newIndex
+            this.FileInfo[fileInfo.name].enc_size = size
             this.File.push(newFile);
           })
           resolve(encrypted)
