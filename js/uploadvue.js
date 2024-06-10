@@ -549,7 +549,7 @@ methods: {
               var Filename = name.split('.').slice(0, -1).join('')
               //get everything after the last
               var ext = name.split('.').slice(-1).join('')
-              meta += `${Filename},${ext},${this.flagEncode(this.FileInfo[name])},`
+              meta += `${Filename},${ext},,${this.flagEncode(this.FileInfo[name])}`
               break;
             } else if(this.FileInfo[name].enc_hash == cids[i]){
               this.File[this.FileInfo[name].enc_index].cid = cids[i]
