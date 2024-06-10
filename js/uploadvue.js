@@ -325,6 +325,7 @@ methods: {
           var newFile = new File([encrypted], fileInfo.name, { type: fileInfo.type });
           console.log({ newFile })
           newFile.progress = 0;
+          newFile.status = 'Pending Signature';
           newFile.actions = {
             cancel: false,
             pause: false,
