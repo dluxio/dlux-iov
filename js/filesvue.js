@@ -2,7 +2,7 @@ export default {
     template: `
 <div v-for="(size, file, index) in files" class="card rounded p-0 my-2 mx-1" style="max-width:200px">
         <a :href="'https://ipfs.dlux.io/ipfs/' + file" target="_blank" class="no-decoration">
-        <h5 class="m-0 ms-auto align-self-end">{{newMeta[contract.i][index * 4 + 1] || file}</h5>
+        <h5 class="m-0 ms-auto align-self-end">{{newMeta[contract.i][index * 4 + 1] || file}}</h5>
         <h5 class="m-0 ms-auto align-self-end"><span class="badge square rounded-top border border-bottom-0 bg-info border-light-50" :class="smartColor(newMeta[contract.i][index * 4 + 4])"><i :class="smartIcon(newMeta[contract.i][index * 4 + 4])"></i>{{ newMeta[contract.i][index * 4 + 2] }}</span></h5>
             <img :src="smartThumb(contract.i, index, file)" onerror="this.style.display='none'"
             class="card-img-top rounded-top" :alt="file">
