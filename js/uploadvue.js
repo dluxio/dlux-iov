@@ -558,7 +558,7 @@ methods: {
               var Filename = name.split('.').slice(0, -1).join('')
               //get everything after the last
               var ext = name.split('.').slice(-1).join('')
-              meta += `${Filename},${ext},${this.flagEncode(this.FileInfo[name])},`
+              meta += `${Filename},${ext},,${this.flagEncode(this.FileInfo[name])}`
               break;
             }
           }
