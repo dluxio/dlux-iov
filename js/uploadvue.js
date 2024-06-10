@@ -334,8 +334,8 @@ methods: {
           const size = buf.byteLength
           this.hashOf(buf, {}).then((ret) => {
             const newIndex = this.File.length
-            this.fileInfo[fileInfo.name].enc_hash = ret.hash
-            this.fileInfo[fileInfo.name].enc_index = newIndex
+            this.FileInfo[fileInfo.name].enc_hash = ret.hash
+            this.FileInfo[fileInfo.name].enc_index = newIndex
             this.FileInfo[fileInfo.name].enc_size = size
             this.File.push(newFile);
           })
