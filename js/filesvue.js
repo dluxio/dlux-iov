@@ -159,7 +159,7 @@ methods: {
         if(num & 8)out.executable = true
         return out
     },
-    Base64toNumber(chars) {
+    Base64toNumber(chars = "0") {
         const glyphs = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
         var result = 0;
         chars = chars.split("");
