@@ -115,7 +115,7 @@ export default {
                             </div>
                         </div>
                         <div id="listOfEncs"  v-if="encryption.encrypted" v-for="(file, key,index) in FileInfo">
-                            <div class="p-3 mb-2 bg-darkest" style="border-radius: 10px;">
+                            <div class="p-3 mb-2 bg-warning" style="border-radius: 10px;">
                                 <div class="d-flex flex-wrap align-items-center pb-2 mb-2">
                                   <div>
                                     <h6 class="m-0 text-break">{{file.name}}</h6>
