@@ -303,7 +303,8 @@ methods: {
     },
     AESEncrypt(message, key = this.encryption.key) {
       if(typeof message != 'string')message = CryptoJS.lib.WordArray.create(message)
-      return CryptoJS.AES.encrypt(message, key).toBlob()
+      const enc = CryptoJS.AES.encrypt(message, key).toString()
+      return new Blob([enc], { type: 'text/plain' });
     },
     AESDecrypt(encryptedMessage, key) {
       const bytes = CryptoJS.AES.decrypt(encryptedMessage, key);
