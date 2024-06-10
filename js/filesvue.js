@@ -54,7 +54,7 @@ methods: {
         this.$emit("addassets", { id, contract: contract.i });
     },
     smartIcon(flags){
-        //get first char of flags
+        if(!flags[0])return 'fa-solid fa-file'
         const flag = this.flagDecode(flags[0])
         if (flag.enc) return 'fa-solid fa-file-shield'
         else if (flag.nsfw)return 'fa-solid fa-triangle-exclamation'
@@ -62,7 +62,7 @@ methods: {
         else return 'fa-solid fa-file'
     },
     smartColor(flags){
-        //get first char of flags
+        if(!flags[0])return 'bg-info'
         const flag = this.flagDecode(flags[0])
         if (flag.nsfw) return 'bg-danger'
         else if (flag.executable)return 'bg-warning'
