@@ -55,7 +55,7 @@ methods: {
     },
     smartIcon(flags){
         //get first char of flags
-        const flag = this.flagDecode(this.Base64toNumber(flags[0]))
+        const flag = this.flagDecode(flags[0])
         if (flag.enc) return 'fa-solid fa-file-shield'
         else if (flag.nsfw)return 'fa-solid fa-triangle-exclamation'
         else if (flag.executable)return 'fa-solid fa-cog'
@@ -63,7 +63,7 @@ methods: {
     },
     smartColor(flags){
         //get first char of flags
-        const flag = this.flagDecode(this.Base64toNumber(flags[0]))
+        const flag = this.flagDecode(flags[0])
         if (flag.nsfw) return 'bg-danger'
         else if (flag.executable)return 'bg-warning'
         else if (flag.enc)return 'bg-dark'
@@ -151,7 +151,7 @@ methods: {
         return flags
     },
     flagDecode(flags) {
-        var num = this.Base64toNumber(flags)
+        var num = this.Base64toNumber(flags[0])
         var out = {}
         if(num & 1)out.enc = true
         if(num & 2)out.autoRenew = true
@@ -160,7 +160,10 @@ methods: {
         return out
     },
     Base64toNumber(chars = "0") {
-        if(typeof chars != 'string')return 0
+        if(typeof chars != 'string'){
+            console.log({chars})
+            return 0
+        }
         const glyphs = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
         var result = 0;
         chars = chars.split("");
