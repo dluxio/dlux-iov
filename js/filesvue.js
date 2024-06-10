@@ -160,6 +160,7 @@ methods: {
         return out
     },
     Base64toNumber(chars = "0") {
+        if(typeof chars != 'string')return 0
         const glyphs = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
         var result = 0;
         chars = chars.split("");
