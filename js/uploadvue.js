@@ -303,8 +303,7 @@ methods: {
     },
     AESEncrypt(message, key = this.encryption.key) {
       if(typeof message != 'string')message = CryptoJS.lib.WordArray.create(message)
-      const enc = CryptoJS.AES.encrypt(message, key).toString()
-      return new Blob([enc], { type: 'text/plain' });
+      return CryptoJS.AES.encrypt(message, key).toString()
     },
     AESDecrypt(encryptedMessage, key) {
       const bytes = CryptoJS.AES.decrypt(encryptedMessage, key);
@@ -323,7 +322,7 @@ methods: {
         reader.onload = (event) => {
           const fileContent = event.target.result;
           const encrypted = this.AESEncrypt(fileContent, this.encryption.key);
-          var newFile = new File([encrypted], fileInfo.name, { type: fileInfo.type });
+          var newFile = new File(encrypted, fileInfo.name, { type: fileInfo.type });
           console.log({ newFile })
           newFile.progress = 0;
           newFile.status = 'Pending Signature';
