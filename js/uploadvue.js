@@ -322,7 +322,7 @@ methods: {
         reader.onload = (event) => {
           const fileContent = event.target.result;
           const encrypted = this.AESEncrypt(fileContent, this.encryption.key);
-          var newFile = new File(encrypted, fileInfo.name, { type: fileInfo.type });
+          var newFile = new File([encrypted], fileInfo.name, { type: fileInfo.type });
           console.log({ newFile })
           newFile.progress = 0;
           newFile.status = 'Pending Signature';
@@ -331,17 +331,21 @@ methods: {
             pause: false,
             resume: false,
           }
-          const buf = buffer.Buffer(encrypted)
-          const size = buf.byteLength
-          console.log({ size })
-          this.hashOf(buf, {}).then((ret) => {
-            const newIndex = this.File.length
-            this.FileInfo[fileInfo.name].enc_hash = ret.hash
-            this.FileInfo[fileInfo.name].enc_index = newIndex
-            this.FileInfo[fileInfo.name].enc_size = size
-            this.File.push(newFile);
-          })
-          resolve(encrypted)
+          const Reader = new FileReader();
+          Reader.onload = (Event) => {
+            const encFileContent = Event.target.result;
+            const buf = buffer.Buffer(encFileContent)
+            const size = buf.byteLength
+            this.hashOf(buf, {}).then((ret) => {
+              const newIndex = this.File.length
+              this.FileInfo[fileInfo.name].enc_hash = ret.hash
+              this.FileInfo[fileInfo.name].enc_index = newIndex
+              this.FileInfo[fileInfo.name].enc_size = size
+              this.File.push(newFile);
+            })
+            resolve(encrypted)
+          }
+          Reader.readAsArrayBuffer(newFile);
         };
         reader.readAsArrayBuffer(this.File[fileInfo.index]);
       })
