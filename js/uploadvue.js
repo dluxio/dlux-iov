@@ -330,7 +330,7 @@ methods: {
             pause: false,
             resume: false,
           }
-          const buf = buffer.Buffer(newFile)
+          const buf = buffer.Buffer(encrypted)
           const size = buf.byteLength
           this.hashOf(buf, {}).then((ret) => {
             const newIndex = this.File.length
