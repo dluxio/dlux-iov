@@ -323,7 +323,7 @@ methods: {
         reader.onload = (event) => {
           const fileContent = event.target.result;
           const encrypted = this.AESEncrypt(fileContent, this.encryption.key);
-          var newFile = new File(encrypted, fileInfo.name, { type: fileInfo.type });
+          var newFile = new File([encrypted], fileInfo.name, { type: fileInfo.type });
           console.log({ newFile })
           newFile.progress = 0;
           newFile.status = 'Pending Signature';
