@@ -332,6 +332,7 @@ methods: {
           }
           const buf = buffer.Buffer(encrypted)
           const size = buf.byteLength
+          console.log({ size })
           this.hashOf(buf, {}).then((ret) => {
             const newIndex = this.File.length
             this.FileInfo[fileInfo.name].enc_hash = ret.hash
