@@ -144,7 +144,7 @@ export default {
                                 </div>
                                 <div class="d-flex w-100" v-if="FileInfo[file.name]">
                                     <ul class="text-start w-100">
-                                        <li class="">Bytes: {{File[FileInfo[file.name].enc_index].enc_size}}</li>
+                                        <li class="">Bytes: {{FileInfo[file.name].enc_size}}</li>
                                         <li class="">CID:
                                             {{FileInfo[file.name].enc_hash}}</li>
                                         <li class="">Status:
