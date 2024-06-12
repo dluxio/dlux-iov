@@ -165,19 +165,20 @@ export default {
                                 </div>
                             </div>
                             <div class="ms-1">
-                                <div class="btn btn-lg btn-primary" @click="addUser()"><i class="fa-solid fa-fw fa-plus"></i></div>
+                                <div class="btn btn-lg btn-light" @click="addUser()"><i class="fa-solid fa-fw fa-plus"></i></div>
                             </div>
                         </div>
                         <!-- shared accounts -->
                         <div class="d-flex flex-row flex-wrap" >
-                            <div v-for="(a,b,c) in encryption.accounts" class="rounded text-black filter-bubble me-1 mb-1 d-flex align-items-center" :class="{'bg-success': encryption.accounts[b].enc_key, 'bg-warning': !encryption.accounts[b].enc_key}"> <!-- warning class for unencrypted keys --> 
-                                <span>{{b}}</span> 
-                                <div v-if="b != contract.t"><button type="button" class="ms-1 btn-close btn-close-white" @click="delUser(b)"></button></div>
+                            <div v-for="(a,b,c) in encryption.accounts" class="rounded text-black filter-bubble bg-white me-1 mb-1 d-flex align-items-center"> <!-- warning class for unencrypted keys --> 
+                               <i class="fa-solid fa-key fa-fw me-1"  :class="{'text-success': encryption.accounts[b].enc_key, 'text-warning': !encryption.accounts[b].enc_key}"  ></i>  
+                            <span>{{b}}</span> 
+                                <div v-if="b != contract.t"><button type="button" class="ms-1 btn-close small btn-close-white" @click="delUser(b)"></button></div>
                             </div>
                         </div>
                         <!-- update button -->
                         <div class="d-flex mt-3">
-                            <div v-if="unkeyed" @click="checkHive()" class="mx-auto btn btn-lg btn-success"><i class="fa-regular fa-fw fa-floppy-disk me-2"></i>Encrypt Keys</div>
+                            <div v-if="unkeyed" @click="checkHive()" class="mx-auto btn btn-lg btn-outline-warning"><i class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</div>
                         </div>
                     </div>
                     <div class="d-flex mb-1" v-if="contract.c == 1">
