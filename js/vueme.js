@@ -922,6 +922,7 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
                       this.services[user].channel = 1
                       this.services[user].memo = "Contract Open"
                     } else setTimeout(()=>{
+                      if(!this.services[user])this.services[user] = {}
                       this.services[user].channel = 1
                       this.services[user].memo = "Contract Open"
                       }, 3000)
