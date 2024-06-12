@@ -854,7 +854,7 @@ export default {
                                 const encAccounts = encData.split(';')
                                 for (var i = 0; i < encAccounts.length; i++) {
                                     const encA  = encAccounts[i].split('@')[1]
-                                    data.file_contracts[node].encryption.accounts[encAccounts[i]] = {
+                                    data.file_contracts[node].encryption.accounts[encA] = {
                                         enc_key: encAccounts[i].split('@')[0],
                                         key: '',
                                         done: true,
