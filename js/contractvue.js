@@ -353,7 +353,7 @@ export default {
                                                                         <p>You can add accounts to view these files.</p>
                                                                         <div class="d-flex mb-2">
                                                                             <div class="me-1 flex-grow-1">
-                                                  class="position-relative                               <div class="position-relative has-validation">
+                                                                                <div class="position-relative has-validation">
                                                                                     <input autocapitalize="off" placeholder="username" class="form-control border-light bg-darkg text-info" v-model="contract.encryption.input" @blur="addUser(contract.i)">
                                                                                 </div>
                                                                             </div>
@@ -681,6 +681,18 @@ export default {
     methods: {
         getdelimed(string, del = ',', index = 0) {
             return string.split(del)[index] ? string.split(del)[index] : ''
+        },
+        addUser(id){
+            if(this.encryption.input){
+                this.contracts[this.contractIDs[id].index].encryption.accounts[this.contracts[this.contractIDs[id].index].encryption.input] = {
+                key: '',
+                enc_key: '',
+              }
+              this.contracts[this.contractIDs[id].index].encryption.input = ''
+            }
+        },
+        delUser(id, user){
+            delete this.contracts[this.contractIDs[id].index].encryption.accounts[user]
         },
         smartThumb(contract, index,cid) {
             var thumb = this.newMeta[contract][index * 4 + 3] || ''
@@ -1192,7 +1204,7 @@ export default {
         },
         unkeyed(obj) {
             if(!obj)return false
-            if(!this.contracts[this.contractIDs[obj].index].encryptio)return false
+            if(!this.contracts[this.contractIDs[obj].index].encryption)return false
             for (var node in this.contracts[this.contractIDs[obj].index].encryption.accounts ){
                 if (!this.contracts[obj].encryption.accounts[node].enc_key)return true
             }
