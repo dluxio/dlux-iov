@@ -398,7 +398,7 @@ export default {
                                                                                         </div>
                                                                                     </div>
                                                                                 
-                                                                                <div class="d-flex">
+                                                                                <div class="d-flex" v-if="metaMismatch(contract.i)">
                                                                                     <button type="button" class="btn btn-sm btn-primary my-2 mx-auto" @click="update_meta(contract.i)">
                                                                                         <i class="fa-solid fa-floppy-disk fa-fw me-1"></i>Save Metadata</button>
                                                                                 </div>
@@ -454,6 +454,10 @@ export default {
                                                                                 <!-- update button -->
                                                                                 <div class="d-flex mt-3">
                                                                                     <div v-if="unkeyed(contract.i)" @click="checkHive()" class="mx-auto btn btn-lg btn-outline-warning"><i class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</div>
+                                                                                </div>
+                                                                                <div class="d-flex" v-if="!unkeyed(contract.i) && metaMismatch(contract.i)">
+                                                                                    <button type="button" class="btn btn-sm btn-primary my-2 mx-auto" @click="update_meta(contract.i)">
+                                                                                        <i class="fa-solid fa-floppy-disk fa-fw me-1"></i>Save Metadata</button>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -794,8 +798,8 @@ export default {
           },
           decryptKey(id){
             return new Promise((resolve, reject) => {
-              const key = this.contractIDs[id].encryption.accounts[this.account].enc_key;
-              hive_keychain.requestVerifyKey(this.account, key, 'Memo', (response) => {
+              const key = this.contractIDs[id].encryption.accounts[this.spkapi.name].enc_key;
+              hive_keychain.requestVerifyKey(this.spkapi.name, key, 'Memo', (response) => {
                   if (response.success) {
                       this.contractIDs[id].encryption.key = response.result.split('#')[1]
                       resolve("OK")
@@ -872,8 +876,25 @@ export default {
             if(num & 8)out.executable = true
             return out
         },
+        metaMismatch(id){
+            var enc_string = ''
+            for(var acc in this.contractIDs[id].encryption.accounts){
+                if(this.contractIDs[id].encryption.accounts[acc].enc_key)enc_string += `#${this.contractIDs[id].encryption.accounts[acc].enc_key}@${acc};`
+            }
+            //remove last ;
+            enc_string = enc_string.slice(0, -1)
+            this.newMeta[id][0] = enc_string
+            if(this.contractIDs[id].m != `${this.newMeta[id].join(',')}`) return true
+        },
         update_meta(contract) {
             console.log(this.newMeta[contract], contract)
+            var enc_string = ''
+            for(var acc in this.contractIDs[contract].encryption.accounts){
+                if(this.contractIDs[contract].encryption.accounts[acc].enc_key)enc_string += `#${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`
+            }
+            //remove last ;
+            enc_string = enc_string.slice(0, -1)
+            this.newMeta[contract][0] = enc_string
             var meta = this.newMeta[contract]
             var cja = {
                 id: contract,
