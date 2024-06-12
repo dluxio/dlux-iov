@@ -394,16 +394,18 @@ export default {
                                                                                                     <i class="ms-2 fa-solid fa-fw fa-up-right-from-square"></i></a>
                                                                                                     <span class="small ms-1">({{size > 1 ? size/1000000 : size/1000000}} MB)</span>
                                                                                                 </div>
-                                                                                                <div  v-if="flagDecode(contract.m).enc && !contract.encryption.key" v-for="(a,b,c) in contract.encryption.accounts" class="rounded bg-white text-black filter-bubble me-1 mb-1 d-flex align-items-center" > <!-- warning class for unencrypted keys --> 
-                                                                                                    <div class="d-flex align-items-center" v-if="b == spkapi.name">
-                                                                                                        <i class="fa-solid fa-key fa-fw me-1" :class="{'text-success': contract.encryption.accounts[b].enc_key, 'text-warning': !contract.encryption.accounts[b].enc_key}"></i>
-                                                                                                        <span>{{b}}</span>
-                                                                                                        
-                                                                                                        <div><button type="button" class="ms-2 small btn-white" @click="decryptKey(contract.i)"><i class="fa-solid fa-fw mx-1 fa-lock-open" aria-hidden="true"></i></button></div>
+                                                                                                <div v-if="flagDecode(contract.m).enc && !contract.encryption.key" v-for="(a,b,c) in contract.encryption.accounts">
+                                                                                                    <div v-if="b == spkapi.name" class="rounded bg-white text-black filter-bubble me-1 mb-1 d-flex align-items-center" > <!-- warning class for unencrypted keys --> 
+                                                                                                        <div class="d-flex align-items-center">
+                                                                                                            <i class="fa-solid fa-key fa-fw me-1" :class="{'text-success': contract.encryption.accounts[b].enc_key, 'text-warning': !contract.encryption.accounts[b].enc_key}"></i>
+                                                                                                            <span>{{b}}</span>
+                                                                                                            
+                                                                                                            <div><button type="button" class="ms-2 small btn-white" @click="decryptKey(contract.i)"><i class="fa-solid fa-fw mx-1 fa-lock-open" aria-hidden="true"></i></button></div>
+                                                                                                        </div>
                                                                                                     </div>
                                                                                                 </div>
                                                                                                 <div class="d-flex" v-if="flagDecode(contract.m).enc && contract.encryption.key">
-                                                                                                    <button type="button" class="btn btn-sm btn-primary my-2 mx-auto" @click="downloadFile(cid, contract.i)">
+                                                                                                    <button type="button" class="btn btn-sm btn-primary my-2 mx-auto" @click="downloadFile(cid, contract.i)">Download</button>
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
