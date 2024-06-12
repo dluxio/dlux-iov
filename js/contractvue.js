@@ -879,7 +879,7 @@ export default {
         metaMismatch(id){
             var enc_string = ''
             for(var acc in this.contractIDs[id].encryption.accounts){
-                if(this.contractIDs[id].encryption.accounts[acc].enc_key)enc_string += `#${this.contractIDs[id].encryption.accounts[acc].enc_key}@${acc};`
+                if(this.contractIDs[id].encryption.accounts[acc].enc_key)enc_string += `${this.contractIDs[id].encryption.accounts[acc].enc_key}@${acc};`
             }
             //remove last ;
             enc_string = enc_string.slice(0, -1)
@@ -890,7 +890,7 @@ export default {
             console.log(this.newMeta[contract], contract)
             var enc_string = ''
             for(var acc in this.contractIDs[contract].encryption.accounts){
-                if(this.contractIDs[contract].encryption.accounts[acc].enc_key)enc_string += `#${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`
+                if(this.contractIDs[contract].encryption.accounts[acc].enc_key)enc_string += `${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`
             }
             //remove last ;
             enc_string = enc_string.slice(0, -1)
