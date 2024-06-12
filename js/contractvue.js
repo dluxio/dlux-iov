@@ -856,7 +856,9 @@ export default {
                                 for (var i = 0; i < encAccounts.length; i++) {
                                     const encA  = encAccounts[i].split('@')[1]
                                     data.file_contracts[node].encryption.accounts[encAccounts[i]] = {
-                                        enc_key: encAccounts[i].split('@')[0]
+                                        enc_key: encAccounts[i].split('@')[0],
+                                        key: '',
+                                        done: true,
                                     }
                                 }
                                 this.newMeta[data.file_contracts[node].i] = data.file_contracts[node].m.split(",")
