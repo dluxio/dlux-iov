@@ -419,7 +419,7 @@ export default {
                                                                                 <div class="d-flex mb-2">
                                                                                     <div class="me-1 flex-grow-1">
                                                                                         <div class="position-relative has-validation">
-                                                                                            <input autocapitalize="off" placeholder="username" class="form-control border-light bg-darkg text-info" v-model="contract.encryption.input" @blur="addUser(contract.i)" @keyup.enter="addUser(contract.i)">
+                                                                                            <input autocapitalize="off" placeholder="username" class="form-control border-light bg-darkg text-info" v-model="contract.encryption.input" @keyup.enter="addUser(contract.i)">
                                                                                         </div>
                                                                                     </div>
                                                                                     <div class="ms-1">
