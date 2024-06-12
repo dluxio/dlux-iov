@@ -395,7 +395,7 @@ export default {
                                                                                                     <span class="small ms-1">({{size > 1 ? size/1000000 : size/1000000}} MB)</span>
                                                                                                 </div>
                                                                                                 <div  v-if="flagDecode(contract.m).enc && !contract.encryption.key" v-for="(a,b,c) in contract.encryption.accounts" class="rounded bg-white text-black filter-bubble me-1 mb-1 d-flex align-items-center" > <!-- warning class for unencrypted keys --> 
-                                                                                                    <div class="d-flex align-items-center" v-if="b == spkapi.name>
+                                                                                                    <div class="d-flex align-items-center" v-if="b == spkapi.name">
                                                                                                         <i class="fa-solid fa-key fa-fw me-1" :class="{'text-success': contract.encryption.accounts[b].enc_key, 'text-warning': !contract.encryption.accounts[b].enc_key}"></i>
                                                                                                         <span>{{b}}</span>
                                                                                                         
