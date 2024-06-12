@@ -735,95 +735,117 @@ export default {
         getdelimed(string, del = ',', index = 0) {
             return string.split(del)[index] ? string.split(del)[index] : ''
         },
-        addUser(id){
-            if(this.contractIDs[id].encryption){
+        addUser(id) {
+            if (this.contractIDs[id].encryption) {
                 this.contractIDs[id].encryption.accounts[this.contractIDs[id].encryption.input] = {
-                key: '',
-                enc_key: '',
-              }
-              this.contractIDs[id].encryption.input = ''
+                    key: '',
+                    enc_key: '',
+                }
+                this.contractIDs[id].encryption.input = ''
             }
         },
-        delUser(id, user){
+        delUser(id, user) {
             delete this.contractIDs[id].encryption.accounts[user]
         },
-        checkHive(id){
+        checkHive(id) {
             return new Promise((resolve, reject) => {
-              this.fetching = true
-              var accounts = Object.keys(this.contractIDs[id].encryption.accounts)
-              var newAccounts = []
-              for (var i = 0; i < accounts.length; i++) {
-                if(!this.contractIDs[id].encryption.accounts[accounts[i]]?.key){
-                  newAccounts.push(accounts[i])
+                this.fetching = true
+                var accounts = Object.keys(this.contractIDs[id].encryption.accounts)
+                var newAccounts = []
+                for (var i = 0; i < accounts.length; i++) {
+                    if (!this.contractIDs[id].encryption.accounts[accounts[i]]?.key) {
+                        newAccounts.push(accounts[i])
+                    }
                 }
-              }
-                
-              if(newAccounts.length)fetch('https://hive-api.dlux.io', {
-                  method: 'POST',
-                  body: JSON.stringify({  
-                      "jsonrpc": "2.0",
-                      "method": "condenser_api.get_accounts",
-                      "params": [newAccounts],
-                      "id": 1
-                  })
-              }).then(response => response.json())
-              .then(data => {
-                  this.fetching = false
-                  if(data.result){
-                      for (var i = 0; i < data.result.length; i++) {
-                          if(data.result[i].id){
-                            this.contractIDs[id].encryption.accounts[data.result[i].name].key = data.result[i].memo_key
-                          }
-                      }
-                      this.encryptKeyToUsers(id)
-                      resolve(data.result)
-                  } else {
-                      reject(data.error)
-                  }
-              })
-              .catch(e => {
-                  this.fetching = false
-              })
+
+                if (newAccounts.length) fetch('https://hive-api.dlux.io', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        "jsonrpc": "2.0",
+                        "method": "condenser_api.get_accounts",
+                        "params": [newAccounts],
+                        "id": 1
+                    })
+                }).then(response => response.json())
+                    .then(data => {
+                        this.fetching = false
+                        if (data.result) {
+                            for (var i = 0; i < data.result.length; i++) {
+                                if (data.result[i].id) {
+                                    this.contractIDs[id].encryption.accounts[data.result[i].name].key = data.result[i].memo_key
+                                }
+                            }
+                            this.encryptKeyToUsers(id)
+                            resolve(data.result)
+                        } else {
+                            reject(data.error)
+                        }
+                    })
+                    .catch(e => {
+                        this.fetching = false
+                    })
             })
-          },
-          encryptKeyToUsers(id) {
+        },
+        encryptKeyToUsers(id) {
             return new Promise((resolve, reject) => {
-              const usernames = Object.keys(this.contractIDs[id].encryption.accounts)
-              var keys = []
-              var dict = {}
-              for (var i = 0; i < usernames.length; i++) {
-                if(!this.contractIDs[id].encryption.accounts[usernames[i]].enc_key)keys.push(this.contractIDs[id].encryption.accounts[usernames[i]].key)
-                dict[this.contractIDs[id].encryption.accounts[usernames[i]].key] = usernames[i]
-              }
-              const key = "#" + this.contractIDs[id].encryption.key;
-              if(keys.length)hive_keychain.requestEncodeWithKeys(this.account, keys, key, 'Memo', (response) => {
-                console.log(response)
-                  if (response.success) {
-                      for (var node in response.result){
-                        this.contractIDs[id].encryption.accounts[dict[node]].enc_key = response.result[node]
-                      }
-                      resolve("OK")
-                  } else {
-                      reject(response.message);
-                  }
-              });
-              else resolve (null)
+                const usernames = Object.keys(this.contractIDs[id].encryption.accounts)
+                var keys = []
+                var dict = {}
+                for (var i = 0; i < usernames.length; i++) {
+                    if (!this.contractIDs[id].encryption.accounts[usernames[i]].enc_key) keys.push(this.contractIDs[id].encryption.accounts[usernames[i]].key)
+                    dict[this.contractIDs[id].encryption.accounts[usernames[i]].key] = usernames[i]
+                }
+                const key = "#" + this.contractIDs[id].encryption.key;
+                if (keys.length) hive_keychain.requestEncodeWithKeys(this.account, keys, key, 'Memo', (response) => {
+                    console.log(response)
+                    if (response.success) {
+                        for (var node in response.result) {
+                            this.contractIDs[id].encryption.accounts[dict[node]].enc_key = response.result[node]
+                        }
+                        resolve("OK")
+                    } else {
+                        reject(response.message);
+                    }
+                });
+                else resolve(null)
             })
-          },
-          decryptKey(id){
+        },
+        decryptKey(id) {
             return new Promise((resolve, reject) => {
-              const key = this.contractIDs[id].encryption.accounts[this.spkapi.name].enc_key;
-              hive_keychain.requestVerifyKey(this.spkapi.name, key, 'Memo', (response) => {
-                  if (response.success) {
-                      this.contractIDs[id].encryption.key = response.result.split('#')[1]
-                      resolve("OK")
-                  } else {
-                      reject(response.message);
-                  }
-              });
+                const key = this.contractIDs[id].encryption.accounts[this.spkapi.name].enc_key;
+                hive_keychain.requestVerifyKey(this.spkapi.name, key, 'Memo', (response) => {
+                    if (response.success) {
+                        this.contractIDs[id].encryption.key = response.result.split('#')[1]
+                        resolve("OK")
+                    } else {
+                        reject(response.message);
+                    }
+                });
             })
-          },
-        smartThumb(contract, index,cid) {
+        },
+        AESDecrypt(encryptedMessage, key) {
+            const bytes = CryptoJS.AES.decrypt(encryptedMessage, key);
+            return bytes.toString(CryptoJS.enc.Utf8);
+        },
+        downloadFile(cid, id) {
+            fetch(`https://ipfs.dlux.io/ipfs/${cid}`)
+            .then((response) => response.blob())
+            .then((blob) => {
+                if(encrypted){
+                    var key = this.contractIDs[id].encryption.key
+                    if (!key) return;
+                    blob = this.AESDecrypt(blob, key);
+                }
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = cid;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            });
+        },
+        smartThumb(contract, index, cid) {
             var thumb = this.newMeta[contract][index * 4 + 3] || ''
             if (thumb.includes('Qm')) return `https://ipfs.dlux.io/ipfs/${thumb}`
             if (thumb.includes('https')) return thumb
@@ -881,30 +903,30 @@ export default {
             }
         },
         flagDecode(flags = "") {
-            if(flags.indexOf(',') > -1)flags = flags.split(',')[4]
+            if (flags.indexOf(',') > -1) flags = flags.split(',')[4]
             var num = this.Base64toNumber(flags[0])
             var out = {}
-            if(num & 1)out.enc = true
-            if(num & 2)out.autoRenew = true
-            if(num & 4)out.nsfw = true
-            if(num & 8)out.executable = true
+            if (num & 1) out.enc = true
+            if (num & 2) out.autoRenew = true
+            if (num & 4) out.nsfw = true
+            if (num & 8) out.executable = true
             return out
         },
-        metaMismatch(id){
+        metaMismatch(id) {
             var enc_string = ''
-            for(var acc in this.contractIDs[id].encryption.accounts){
-                if(this.contractIDs[id].encryption.accounts[acc].enc_key)enc_string += `${this.contractIDs[id].encryption.accounts[acc].enc_key}@${acc};`
+            for (var acc in this.contractIDs[id].encryption.accounts) {
+                if (this.contractIDs[id].encryption.accounts[acc].enc_key) enc_string += `${this.contractIDs[id].encryption.accounts[acc].enc_key}@${acc};`
             }
             //remove last ;
             enc_string = enc_string.slice(0, -1)
             this.newMeta[id][0] = enc_string
-            if(this.contractIDs[id].m != `${this.newMeta[id].join(',')}`) return true
+            if (this.contractIDs[id].m != `${this.newMeta[id].join(',')}`) return true
         },
         update_meta(contract) {
             console.log(this.newMeta[contract], contract)
             var enc_string = ''
-            for(var acc in this.contractIDs[contract].encryption.accounts){
-                if(this.contractIDs[contract].encryption.accounts[acc].enc_key)enc_string += `${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`
+            for (var acc in this.contractIDs[contract].encryption.accounts) {
+                if (this.contractIDs[contract].encryption.accounts[acc].enc_key) enc_string += `${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`
             }
             //remove last ;
             enc_string = enc_string.slice(0, -1)
@@ -984,7 +1006,7 @@ export default {
             } index
         },
         getSapi(user = this.account) {
-            if(user)fetch(this.sapi + "/@" + user)
+            if (user) fetch(this.sapi + "/@" + user)
                 .then((response) => response.json())
                 .then((data) => {
                     data.tick = data.tick || 0.01;
@@ -1011,7 +1033,7 @@ export default {
                                 const encData = data.file_contracts[node].m.split(',')[0] || ''
                                 const encAccounts = encData.split(';')
                                 for (var i = 0; i < encAccounts.length; i++) {
-                                    const encA  = encAccounts[i].split('@')[1]
+                                    const encA = encAccounts[i].split('@')[1]
                                     data.file_contracts[node].encryption.accounts[encA] = {
                                         enc_key: encAccounts[i].split('@')[0],
                                         key: '',
@@ -1022,7 +1044,7 @@ export default {
                             }
                             this.links[data.file_contracts[node].i] = ""
                             var links = "", j = 0
-                            for(var i = 1; i < this.newMeta[data.file_contracts[node].i].length; i+=4){
+                            for (var i = 1; i < this.newMeta[data.file_contracts[node].i].length; i += 4) {
                                 links += `![${this.newMeta[data.file_contracts[node].i][i]}](https://ipfs.dlux.io/ipfs/${data.file_contracts[node]?.df[j]})\n`
                                 j++
                             }
@@ -1031,7 +1053,7 @@ export default {
 
                             this.contracts.push(data.file_contracts[node]);
                             this.contractIDs[data.file_contracts[node].i].index = this.contracts.length - 1;
-                            
+
                         }
                         for (var user in data.channels) {
                             for (var node in data.channels[user]) {
@@ -1288,8 +1310,8 @@ export default {
             return total
         },
         Base64toNumber(chars = "") {
-            if(typeof chars != 'string'){
-                console.log({chars})
+            if (typeof chars != 'string') {
+                console.log({ chars })
                 return 0
             }
             const glyphs =
@@ -1349,10 +1371,10 @@ export default {
             }
         },
         unkeyed(obj) {
-            if(!obj)return false
-            if(!this.contracts[this.contractIDs[obj].index].encryption)return false
-            for (var node in this.contracts[this.contractIDs[obj].index].encryption.accounts ){
-                if (!this.contracts[this.contractIDs[obj].index].encryption.accounts[node].enc_key)return true
+            if (!obj) return false
+            if (!this.contracts[this.contractIDs[obj].index].encryption) return false
+            for (var node in this.contracts[this.contractIDs[obj].index].encryption.accounts) {
+                if (!this.contracts[this.contractIDs[obj].index].encryption.accounts[node].enc_key) return true
             }
             return false
         },
