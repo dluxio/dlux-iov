@@ -439,7 +439,7 @@ export default {
                                                                                 <!-- shared accounts -->
                                                                                 <div class="d-flex flex-row flex-wrap">
                                                                                     <div  v-for="(a,b,c) in contract.encryption.accounts" class="rounded text-black filter-bubble me-1 mb-1 d-flex align-items-center" :class="{'bg-success': contract.encryption.accounts[b].enc_key, 'bg-warning': !contract.encryption.accounts[b].enc_key}"> <!-- warning class for unencrypted keys --> 
-                                                                                        <span>{{b}} {{contract.t}}</span> 
+                                                                                        <span>{{b}}</span> 
                                                                                         <div v-if="b != contract.t"><button type="button" class="ms-1 btn-close btn-close-white" @click="delUser(contract.i, b)"></button></div>
                                                                                     </div>
                                                                                 </div>
