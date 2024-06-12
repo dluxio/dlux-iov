@@ -344,11 +344,13 @@ export default {
                                                                     
 
                                                                     <!-- post -->
-                                                                    <div v-if="account == contract.t && !postpage && contract.c == 2" class="mb-3">
-                                                                        <post-vue :account="account"
-                                                                        :prop_bens="[contract.s]"
-                                                                        :prop_links="links[contract.i]"
-                                                                        @tosign="toSign=$event" />
+                                                                    <div v-if="account == contract.t && !postpage && contract.c == 2">
+                                                                        <div class="mb-3 mx-lg-5">
+                                                                            <post-vue :account="account"
+                                                                            :prop_bens="[contract.s]"
+                                                                            :prop_links="links[contract.i]"
+                                                                            @tosign="toSign=$event" />
+                                                                        </div>
                                                                     </div>
 
                                                                     <!-- drag & drop well + upload list + privacy & sharing -->
@@ -358,47 +360,50 @@ export default {
 
                                                                     
 
-                                                                    <!-- files list -->
-                                                                    <div v-if="contract.df" class="card mx-auto px-4 py-2 mb-3 bg-img-none bg-blur-darkg mx-lg-5">
+                                                                    
 
-                                                                        <div class="d-flex flex-column">
-                                                                            <h2 class="mb-3">Files <i class="fa-solid fa-fw ms-2 fa-paperclip"></i></h2>
-                                                                            <ol class="text-start mx-auto">
-                                                                                <li class="mb-2" v-for="(size, cid, index) in contract.df">
-                                                                                    <div class="d-flex align-items-center">    
-                                                                                        <div class="d-flex mx-2">
-                                                                                            <img class="img-thumbnail bg-light" :src="smartThumb(contract.i,index,cid)" width="100px" onerror="if (this.src != '/img/other-file-type-svgrepo-com.svg') this.src = '/img/other-file-type-svgrepo-com.svg'">
-                                                                                        </div>
-                                                                                        <div class="d-flex flex-column my-auto"> 
-                                                                                            <div class="d-flex mb-1">
-                                                                                                <div class="me-1">
-                                                                                                    <div class="position-relative has-validation">
-                                                                                                        <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 1]" placeholder="File Name" pattern="[a-zA-Z0-9_\-]{3,25}" class="form-control form-control-sm bg-dark border-dark text-info">
+                                                                    <!-- files list -->
+                                                                    <div v-if="contract.df">
+                                                                        <div class="card px-4 py-2 mb-2 bg-img-none bg-blur-darkg mx-lg-5">
+                                                                            <div class="d-flex flex-column">
+                                                                                <h2 class="mb-3">Files <i class="fa-solid fa-fw ms-2 fa-paperclip"></i></h2>
+                                                                                <ol class="text-start mx-auto">
+                                                                                    <li class="mb-2" v-for="(size, cid, index) in contract.df">
+                                                                                        <div class="d-flex align-items-center">    
+                                                                                            <div class="d-flex mx-2">
+                                                                                                <img class="img-thumbnail bg-light" :src="smartThumb(contract.i,index,cid)" width="100px" onerror="if (this.src != '/img/other-file-type-svgrepo-com.svg') this.src = '/img/other-file-type-svgrepo-com.svg'">
+                                                                                            </div>
+                                                                                            <div class="d-flex flex-column my-auto"> 
+                                                                                                <div class="d-flex mb-1">
+                                                                                                    <div class="me-1">
+                                                                                                        <div class="position-relative has-validation">
+                                                                                                            <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 1]" placeholder="File Name" pattern="[a-zA-Z0-9_\-]{3,25}" class="form-control form-control-sm bg-dark border-dark text-info">
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    <div class="mx-1">
+                                                                                                        <div class="position-relative has-validation">
+                                                                                                            <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 2]" placeholder="File Type" pattern="[a-zA-Z0-9]{1,4}" class="form-control form-control-sm bg-dark border-dark text-info">
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    <div class="ms-1">
+                                                                                                        <div class="position-relative has-validation">
+                                                                                                            <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 3]" placeholder="Thumbnail" pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+" class="form-control form-control-sm bg-dark border-dark text-info">
+                                                                                                        </div>
                                                                                                     </div>
                                                                                                 </div>
-                                                                                                <div class="mx-1">
-                                                                                                    <div class="position-relative has-validation">
-                                                                                                        <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 2]" placeholder="File Type" pattern="[a-zA-Z0-9]{1,4}" class="form-control form-control-sm bg-dark border-dark text-info">
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                                <div class="ms-1">
-                                                                                                    <div class="position-relative has-validation">
-                                                                                                        <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 3]" placeholder="Thumbnail" pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+" class="form-control form-control-sm bg-dark border-dark text-info">
-                                                                                                    </div>
+                                                                                                <div class="d-flex mb-1">
+                                                                                                    <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="no-decoration text-break text-primary">{{cid}}
+                                                                                                    <i class="ms-2 fa-solid fa-fw fa-up-right-from-square"></i></a>
+                                                                                                    <span class="small ms-1">({{size > 1 ? size/1000000 : size/1000000}} MB)</span>
                                                                                                 </div>
                                                                                             </div>
-                                                                                            <div class="d-flex mb-1">
-                                                                                                <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="no-decoration text-break text-primary">{{cid}}
-                                                                                                <i class="ms-2 fa-solid fa-fw fa-up-right-from-square"></i></a>
-                                                                                                <span class="small ms-1">({{size > 1 ? size/1000000 : size/1000000}} MB)</span>
-                                                                                            </div>
                                                                                         </div>
-                                                                                    </div>
-                                                                                </li>
-                                                                            </ol>
-                                                                            <div class="d-flex">
-                                                                                <button type="button" class="btn btn-sm btn-info my-2 mx-auto" @click="update_meta(contract.i)">
-                                                                                    <i class="fa-solid fa-floppy-disk fa-fw me-1"></i>Save Metadata</button>
+                                                                                    </li>
+                                                                                </ol>
+                                                                                <div class="d-flex">
+                                                                                    <button type="button" class="btn btn-sm btn-primary my-2 mx-auto" @click="update_meta(contract.i)">
+                                                                                        <i class="fa-solid fa-floppy-disk fa-fw me-1"></i>Save Metadata</button>
+                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -406,10 +411,14 @@ export default {
 
                                                                     <!-- extension -->
                                                                     <div v-if="contract.c == 3">
-                                                                        <extension-vue :node-view="nodeview"
-                                                                        :contract="contract" :sstats="sstats"
-                                                                        :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
-                                                                        @tosign="toSign=$event"></extension-vue>
+                                                                        <div class="alert alert-info align-items-center mx-lg-5 d-flex bg-img-none">
+                                                                            <div class="mx-auto">
+                                                                                <extension-vue :node-view="nodeview"
+                                                                                :contract="contract" :sstats="sstats"
+                                                                                :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
+                                                                                @tosign="toSign=$event"></extension-vue>
+                                                                            </div>
+                                                                        </div>
                                                                     </div>
 
 
@@ -417,22 +426,8 @@ export default {
                                                                     <div v-if="flagDecode(contract.m).enc">
                                                                         <div class="alert alert-secondary d-flex align-items-center mx-lg-5">
                                                                             <div class="d-flex flex-column flex-grow-1 mx-1">
-                                                                                <div class="d-flex justify-content-around flex-wrap fs-3 fw-lighter border-bottom border-light border-1 mb-2">
-                                                                                    <span class="me-auto">PRIVACY:</span>
-                                                                                    <span  class="fw-bold">PUBLIC<i class="ms-2 fa-solid fa-fw fa-lock-open"></i></span>
-                                                                                    <span  class="fw-bold">PRIVATE<i class="ms-2 fa-solid fa-fw fa-lock"></i></span>
-                                                                                </div>
-                                                                                <div v-if="contract.c == 1" class="form-check form-switch d-flex align-content-center ps-0 mb-2">
-                                                                                    <label class="form-check-label mb-0" for="encryptCheck">ENCRYPT FILES</label>
-                                                                                    <input class="form-check-input fs-2 ms-auto mt-0" type="checkbox" role="switch" id="encryptCheck" v-model="encryption.encrypted"> 
-                                                                                </div>
-                                                                                <div  class="mb-2">These files are not encrypted, <b>they will be publicly available on SPK Network</b>
-                                                                                </div>
-                                                                                <div class="mb-2">These files are encrypted, <b>only the following accounts will have access.</b>
-                                                                                </div>
-
                                                                                 <div class="fs-3 fw-lighter">Sharing:</div>
-                                                                                <p>You can add accounts to view these files.</p>
+                                                                                <p>These files are encrypted. You can add and remove accounts that can decrypt them.</p>
                                                                                 <div class="d-flex mb-2">
                                                                                     <div class="me-1 flex-grow-1">
                                                                                         <div class="position-relative has-validation">
@@ -461,13 +456,13 @@ export default {
                                                                     
 
                                                                     <!-- contract details -->
-                                                                    <div class="d-flex flex-wrap justify-content-center mb-3 small">
+                                                                    <div class="d-flex flex-wrap justify-content-center mb-3 small mx-lg-5">
 
                                                                         
                                                                         <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                             <div> Privacy </div>
-                                                                            <i class="fa-solid fa-user fa-fw mx-1" aria-hidden="true"></i>
-                                                                            <div>@{{contract.t}}</div>
+                                                                            <i class="fa-solid fa-lock-open fa-fw mx-1" aria-hidden="true"></i>
+                                                                            <div>Public</div>
                                                                         </div>
                                                                         <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                             <div> Sponsor </div>
