@@ -345,34 +345,11 @@ export default {
                                                                     </div>
 
                                                                     <!-- drag & drop well + upload list + privacy & sharing -->
-                                                                    <upload-vue :user="saccountapi" :propcontract="contract" @tosign="toSign=$event" @done="done()" />
-
-                                                                    <!-- encrypted sharing -->
-                                                                    <div v-if="flagDecode(contract.m).enc">
-                                                                        <div class="fs-3 fw-lighter">Sharing:</div>
-                                                                        <p>You can add accounts to view these files.</p>
-                                                                        <div class="d-flex mb-2">
-                                                                            <div class="me-1 flex-grow-1">
-                                                                                <div class="position-relative has-validation">
-                                                                                    <input autocapitalize="off" placeholder="username" class="form-control border-light bg-darkg text-info" v-model="contract.encryption.input" @blur="addUser(contract.i)">
-                                                                                </div>
-                                                                            </div>
-                                                                            <div class="ms-1">
-                                                                                <div class="btn btn-lg btn-primary" @click="addUser(contract.i)"><i class="fa-solid fa-fw fa-plus"></i></div>
-                                                                            </div>
-                                                                        </div>
-                                                                        <!-- shared accounts -->
-                                                                        <div class="d-flex flex-row flex-wrap" v-for="(a,b,c) in contract.encryption.accounts">
-                                                                            <div class="rounded text-black filter-bubble me-1 mb-1 d-flex align-items-center" :class="{'bg-success': contract.encryption.accounts[b].enc_key, 'bg-warning': !contract.encryption.accounts[b].enc_key}"> <!-- warning class for unencrypted keys --> 
-                                                                                <span>{{b}}</span> 
-                                                                                <button type="button" class="ms-1 btn-close btn-close-white" @click="delUser(contract.i, b)"></button>
-                                                                            </div>
-                                                                        </div>
-                                                                        <!-- update button -->
-                                                                        <div class="d-flex mt-3">
-                                                                            <div v-if="unkeyed(contract.i)" @click="checkHive()" class="mx-auto btn btn-lg btn-success"><i class="fa-regular fa-fw fa-floppy-disk me-2"></i>Encrypt Keys</div>
-                                                                        </div>
+                                                                    <div v-if="contract.c == 1">
+                                                                        <upload-vue :user="saccountapi" :propcontract="contract" @tosign="toSign=$event" @done="done()" />
                                                                     </div>
+
+                                                                    
 
                                                                     <!-- files list -->
                                                                     <div v-if="contract.df" class="card mx-auto px-4 py-2 mb-3 bg-img-none bg-blur-darkg mx-lg-5">
@@ -419,7 +396,50 @@ export default {
                                                                         </div>
                                                                     </div>
 
-                                                                   
+                                                                   <!-- encrypted sharing -->
+                                                                    <div v-if="flagDecode(contract.m).enc">
+                                                                        <div class="alert alert-secondary d-flex align-items-center mx-lg-5">
+                                                                            <div class="d-flex flex-column flex-grow-1 mx-1">
+                                                                                <div class="d-flex justify-content-around flex-wrap fs-3 fw-lighter border-bottom border-light border-1 mb-2">
+                                                                                    <span class="me-auto">PRIVACY:</span>
+                                                                                    <span  class="fw-bold">PUBLIC<i class="ms-2 fa-solid fa-fw fa-lock-open"></i></span>
+                                                                                    <span  class="fw-bold">PRIVATE<i class="ms-2 fa-solid fa-fw fa-lock"></i></span>
+                                                                                </div>
+                                                                                <div v-if="contract.c == 1" class="form-check form-switch d-flex align-content-center ps-0 mb-2">
+                                                                                    <label class="form-check-label mb-0" for="encryptCheck">ENCRYPT FILES</label>
+                                                                                    <input class="form-check-input fs-2 ms-auto mt-0" type="checkbox" role="switch" id="encryptCheck" v-model="encryption.encrypted"> 
+                                                                                </div>
+                                                                                <div  class="mb-2">These files are not encrypted, <b>they will be publicly available on SPK Network</b>
+                                                                                </div>
+                                                                                <div class="mb-2">These files are encrypted, <b>only the following accounts will have access.</b>
+                                                                                </div>
+
+                                                                                <div class="fs-3 fw-lighter">Sharing:</div>
+                                                                                <p>You can add accounts to view these files.</p>
+                                                                                <div class="d-flex mb-2">
+                                                                                    <div class="me-1 flex-grow-1">
+                                                                                        <div class="position-relative has-validation">
+                                                                                            <input autocapitalize="off" placeholder="username" class="form-control border-light bg-darkg text-info" v-model="contract.encryption.input" @blur="addUser(contract.i)" @keyup.enter="addUser(contract.i)">
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="ms-1">
+                                                                                        <div class="btn btn-lg btn-primary" @click="addUser(contract.i)"><i class="fa-solid fa-fw fa-plus"></i></div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <!-- shared accounts -->
+                                                                                <div class="d-flex flex-row flex-wrap" v-for="(a,b,c) in contract.encryption.accounts">
+                                                                                    <div class="rounded text-black filter-bubble me-1 mb-1 d-flex align-items-center" :class="{'bg-success': contract.encryption.accounts[b].enc_key, 'bg-warning': !contract.encryption.accounts[b].enc_key}"> <!-- warning class for unencrypted keys --> 
+                                                                                        <span>{{b}}</span> 
+                                                                                        <button type="button" class="ms-1 btn-close btn-close-white" @click="delUser(contract.i, b)"></button>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <!-- update button -->
+                                                                                <div class="d-flex mt-3">
+                                                                                    <div v-if="unkeyed(contract.i)" @click="checkHive()" class="mx-auto btn btn-lg btn-success"><i class="fa-regular fa-fw fa-floppy-disk me-2"></i>Encrypt Keys</div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
 
                                                                     <!-- extension -->
                                                                     <div v-if="contract.c == 3">
