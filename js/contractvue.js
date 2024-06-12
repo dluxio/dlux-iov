@@ -775,7 +775,7 @@ export default {
           },
           encryptKeyToUsers(id) {
             return new Promise((resolve, reject) => {
-              if(!usernames) usernames = Object.keys(this.contractIDs[id].encryption.accounts)
+              const usernames = Object.keys(this.contractIDs[id].encryption.accounts)
               var keys = []
               var dict = {}
               for (var i = 0; i < usernames.length; i++) {
