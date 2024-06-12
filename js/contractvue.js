@@ -459,7 +459,7 @@ export default {
                                                                                         <div class="d-flex align-items-center">
                                                                                             <i class="fa-solid fa-key fa-fw me-1" :class="{'text-success': contract.encryption.accounts[b].enc_key, 'text-warning': !contract.encryption.accounts[b].enc_key}"></i>
                                                                                             <span>{{b}}</span>
-                                                                                            <div v-if="b != contract.t"><button type="button" class="ms-2 btn-close small btn-close-white" @click="delUser(contract.i, b)"></button></div>
+                                                                                            <div v-if="spkapi.name != contract.t"><button type="button" class="ms-2 btn-close small btn-close-white" @click="delUser(contract.i, b)"></button></div>
                                                                                             <div v-if="b == spkapi.name && !contract.encryption.key"><button type="button" class="ms-2 small btn-white" @click="decryptKey(contract.i)"><i class="fa-solid fa-fw mx-1 fa-lock-open" aria-hidden="true"></i></button></div>
                                                                                         </div>
                                                                                     </div>
