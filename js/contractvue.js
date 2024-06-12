@@ -784,6 +784,7 @@ export default {
               }
               const key = "#" + this.contractIDs[id].encryption.key;
               if(keys.length)hive_keychain.requestEncodeWithKeys(this.account, keys, key, 'Memo', (response) => {
+                console.log(response)
                   if (response.success) {
                       for (var node in response.result){
                         this.contractIDs[id].encryption.accounts[dict[node]].enc_key = response.result[node]
