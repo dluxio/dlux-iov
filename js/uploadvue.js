@@ -126,21 +126,38 @@ export default {
             <!-- encryption banner -->
             <div class="alert alert-danger d-flex align-items-center mx-lg-5">
                 <div class="d-flex flex-column flex-grow-1 mx-1">
-                    <div class="d-flex justify-content-around flex-wrap fs-3 fw-lighter border-bottom border-light border-1 mb-2">
-                        <span class="me-auto">PRIVACY:</span>
-                        <span v-if="!encryption.encrypted" class="fw-bold">PUBLIC<i class="ms-2 fa-solid fa-fw fa-lock-open"></i></span>
-                        <span v-if="encryption.encrypted" class="fw-bold">PRIVATE<i class="ms-2 fa-solid fa-fw fa-lock"></i></span>
+
+                    <!-- bubble preview -->
+                    <div class="d-flex justify-content-around flex-wrap fs-3 fw-lighter mb-3">
+                        <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
+                            <div> Privacy </div>
+                            <span v-if="!encryption.encrypted"><i class="mx-2 fa-solid fa-fw fa-lock-open"></i></span>
+                            <span v-if="encryption.encrypted"><i class="mx-2 fa-solid fa-fw fa-lock"></i></span>
+                            <div> 
+                              <span v-if="!encryption.encrypted" class="fw-bold">Public</span>
+                              <span v-if="encryption.encrypted" class="fw-bold">Private</span>
+                            </div>
+                        </div>
                     </div>
-                    <div v-if="contract.c == 1" class="form-check form-switch d-flex align-content-center ps-0 mb-2">
-                        <label class="form-check-label mb-0" for="encryptCheck">ENCRYPT FILES</label>
-                        <input class="form-check-input fs-2 ms-auto mt-0" type="checkbox" role="switch" id="encryptCheck" v-model="encryption.encrypted"> 
+
+                    <!-- encrypt switch -->
+                    <div v-if="contract.c == 1" class="border-top border-bottom border-light border-1 py-2 mb-2">
+                      <div  class="form-check form-switch d-flex align-items-center ps-0 mt-2 mb-3">
+                          <label class="form-check-label mb-0" for="encryptCheck">ENCRYPT FILES</label>
+                          <input class="form-check-input fs-2 ms-auto mt-0" type="checkbox" role="switch" id="encryptCheck" v-model="encryption.encrypted"> 
+                      </div>
+
+                      <div v-if="!encryption.encrypted" class="mb-2">Files uploaded to this contract will not be encrypted, <b>they will be publicly available on SPK Network</b></div>
+                      <div v-if="encryption.encrypted" class="mb-2">Files uploaded to this contract will be encrypted, <b>only the accounts you add will have access.</b></div>
+
+                      
                     </div>
-                    <div v-if="!encryption.encrypted" class="mb-2">Files uploaded to this contract will not be encrypted, <b>they will be publicly available on SPK Network</b></div>
-                    <div v-if="encryption.encrypted" class="mb-2">Files uploaded to this contract will be encrypted, <b>only the following accounts will have access.</b></div>
+
+                    
                     <!-- encrypted sharing -->
                     <div v-if="encryption.encrypted">
                         <div class="fs-3 fw-lighter">Sharing:</div>
-                        <p>You can share the decryption key with a few other accounts to view the files</p>
+                        <p>You can share the decryption key with a few other accounts to view the files, and you can revoke access at any time.</p>
                         <div class="d-flex mb-2">
                             <div class="me-1 flex-grow-1">
                                 <div class="position-relative has-validation">

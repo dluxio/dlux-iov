@@ -328,11 +328,11 @@ export default {
 
                                                                     <!-- post -->
                                                                     <div v-if="contract.c == 2" class="mb-3">
-                                                                        <!-- upload banner -->
+                                                                        <!-- post banner -->
                                                                         <div class="alert alert-warning d-flex align-items-center mx-lg-5">
                                                                             <div class="d-flex flex-grow-1 flex-wrap me-1 align-items-center">
                                                                                 <div class="mx-1">
-                                                                                    <div class="fs-3 fw-lighter">You have {{exp_to_time(contract.e)}} to post for this contract</div>
+                                                                                    <div class="fs-3 fw-lighter">You have {{exp_to_time(contract.e)}} to post this contract</div>
                                                                                 </div>
                                                                             </div>
                                                                             <div class="ms-auto d-flex flex-wrap align-items-center fs-1 text-warning justify-content-center me-2 mx-1">
@@ -365,7 +365,7 @@ export default {
                                                                             <h2 class="mb-3">Files <i class="fa-solid fa-fw ms-2 fa-paperclip"></i></h2>
                                                                             <ol class="text-start mx-auto">
                                                                                 <li class="mb-2" v-for="(size, cid, index) in contract.df">
-                                                                                    <div class="d-flex align-content-center">    
+                                                                                    <div class="d-flex align-items-center">    
                                                                                         <div class="d-flex mx-2">
                                                                                             <img class="img-thumbnail bg-light" :src="smartThumb(contract.i,index,cid)" width="100px" onerror="if (this.src != '/img/other-file-type-svgrepo-com.svg') this.src = '/img/other-file-type-svgrepo-com.svg'">
                                                                                         </div>
@@ -411,7 +411,7 @@ export default {
                                                                         :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
                                                                         @tosign="toSign=$event"></extension-vue>
                                                                     </div>
-                                                                    
+
 
                                                                    <!-- encrypted sharing -->
                                                                     <div v-if="flagDecode(contract.m).enc">
@@ -463,11 +463,11 @@ export default {
                                                                     <!-- contract details -->
                                                                     <div class="d-flex flex-wrap justify-content-center mb-3 small">
 
+                                                                        
                                                                         <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
-                                                                            <div> Owner </div>
+                                                                            <div> Privacy </div>
                                                                             <i class="fa-solid fa-user fa-fw mx-1" aria-hidden="true"></i>
-                                                                            <div><a :href="'/@' + contract.t"
-                                                                            class="no-decoration text-primary">@{{contract.t}}</a></div>
+                                                                            <div>@{{contract.t}}</div>
                                                                         </div>
                                                                         <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                             <div> Sponsor </div>
