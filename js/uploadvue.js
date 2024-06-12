@@ -4,71 +4,28 @@ export default {
     <Transition>
         <div v-if="contract.i">
             <div>
-                <form onsubmit="return false;">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="ms-auto me-auto my-3">
-                            <label for="formFile" class="btn btn-lg btn-light"><i
-                                    class="fa-solid fa-file-circle-plus fa-fw me-2"></i>Select Files</label>
-                            <input class="d-none" id="formFile" type="file" multiple @change="uploadFile">
-                        </div>
-                    </div>
-                    <div class="pb-2">
-                        <div class="mx-lg-5 py-5 text-center lead rounded"
-                            style="border-width: 2px; border-style: dashed; background-color:rgba(0,0,0,0.3);"
-                            id="img-well" @drop="dragFile($event)" @dragenter.prevent @dragover.prevent>
-                            Or drag file(s) here
-                        </div>
-                    </div>
-                </form>
-                <!-- encryption banner -->
-                <div class="alert alert-danger d-flex align-items-center mx-lg-5">
-                    
-                    <div class="d-flex flex-column flex-grow-1 mx-1">
-                        <div class="d-flex justify-content-around flex-wrap fs-3 fw-lighter border-bottom border-light border-1 mb-2">
-                            <span class="me-auto">PRIVACY:</span>
-                            <span v-if="!encryption.encrypted" class="me-auto fw-bold">PUBLIC<i class="ms-2 fa-solid fa-fw fa-lock-open"></i></span>
-                            <span v-if="encryption.encrypted" class="me-auto fw-bold">PRIVATE<i class="ms-2 fa-solid fa-fw fa-lock"></i></span>
-                        </div>
-                        <div class="form-check form-switch d-flex align-content-center ps-0 mb-2">
-                            <label class="form-check-label me-auto mb-0" for="encryptCheck">ENCRYPT FILES</label>
-                            <input class="form-check-input fs-2 ms-auto mt-0" type="checkbox" role="switch" id="encryptCheck" v-model="encryption.encrypted"> 
-                        </div>
-                        <div v-if="!encryption.encrypted" class="mb-2">Files uploaded to this contract will not be encrypted, <b>they will be publicly available on SPK Network</b></div>
-                        <div v-if="encryption.encrypted" class="mb-2">Files uploaded to this contract will be encrypted, <b>only the following accounts will have access.</b></div>
-                        <!-- encrypted sharing -->
-                        <div v-if="encryption.encrypted">
-                            <div class="fs-3 fw-lighter">Sharing:</div>
-                            <p>You can share the decryption key with a few other accounts to view the files</p>
-                            
-                            <div class="d-flex mb-2">
-                                <div class="me-1 flex-grow-1">
-                                    <div class="position-relative has-validation">
-                                        <input autocapitalize="off" placeholder="username" class="form-control border-light bg-darkg text-info" v-model="encryption.input" @blur="addUser()">
-                                    </div>
-                                </div>
-                                <div class="ms-1">
-                                    <div class="btn btn-lg btn-success" @click="addUser()"><i class="fa-solid fa-fw fa-plus"></i></div>
-                                </div>
-                            </div>
-                            
-                            <!-- shared accounts -->
-                            <div class="d-flex flex-row flex-wrap" v-for="(a,b,c) in encryption.accounts">
-                                <div class="rounded text-black filter-bubble me-1 mb-1 d-flex align-items-center" :class="{'bg-success': encryption.accounts[b].enc_key, 'bg-warning': !encryption.accounts[b].enc_key}"> <!-- warning class for unencrypted keys --> 
-                                    <span>{{b}}</span> 
-                                    <button type="button" class="ms-1 btn-close btn-close-white" @click="delUser(b)"></button>
-                                </div>
-                            </div>
-
-                            <!-- update button -->
-                            <div class="d-flex mt-3">
-                                <div v-if="unkeyed" @click="checkHive()" class="mx-auto btn btn-sm btn-success"><i class="fa-regular fa-fw fa-floppy-disk me-2"></i>Encrypt Keys</div>
-                            </div>
-                            
-                        </div>
-                    </div>
-                    
+                <div v-if="contract.c == 1">
+                  <form onsubmit="return false;">
+                      <div class="d-flex justify-content-between align-items-center">
+                          <div class="ms-auto me-auto my-3">
+                              <label for="formFile" class="btn btn-lg btn-light"><i
+                                      class="fa-solid fa-file-circle-plus fa-fw me-2"></i>Select Files</label>
+                              <input class="d-none" id="formFile" type="file" multiple @change="uploadFile">
+                          </div>
+                      </div>
+                      <div class="pb-2">
+                          <div class="mx-lg-5 py-5 text-center lead rounded"
+                              style="border-width: 2px; border-style: dashed; background-color:rgba(0,0,0,0.3);"
+                              id="img-well" @drop="dragFile($event)" @dragenter.prevent @dragover.prevent>
+                              Or drag file(s) here
+                          </div>
+                      </div>
+                  </form>
                 </div>
-                <div v-if="File.length">
+
+                
+
+                <div v-if="File.length" class="mx-lg-5">
                     <div class=" pt-0">
                         <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key,index) in FileInfo">
                             <div class="p-3 mb-2 bg-darkest" style="border-radius: 10px;">
@@ -159,15 +116,66 @@ export default {
                             </div>
                         </div>
                     </div>
-                    <div class="d-flex">
-                        <div class="d-flex mt-3">
-                          <div v-if="unkeyed" @click="checkHive()" class="mx-auto btn btn-sm btn-success"><i class="fa-regular fa-fw fa-floppy-disk me-2"></i>Encrypt Keys</div>
-                        </div>
-                        <button type="button" class="ms-auto me-auto mt-2 btn btn-lg btn-info" :class="{'disabled': !reallyReady}" :disabled="!reallyReady" @click="signNUpload()"><i
-                                class="fa-solid fa-file-signature fa-fw me-2"></i>Sign and Upload</button>
-                    </div>
+                    
                 </div>
             </div>
+
+            <!-- encryption banner -->
+                <div class="alert alert-danger d-flex align-items-center mx-lg-5">
+                    
+                    <div class="d-flex flex-column flex-grow-1 mx-1">
+                        <div class="d-flex justify-content-around flex-wrap fs-3 fw-lighter border-bottom border-light border-1 mb-2">
+                            <span class="me-auto">PRIVACY:</span>
+                            <span v-if="!encryption.encrypted" class="me-auto fw-bold">PUBLIC<i class="ms-2 fa-solid fa-fw fa-lock-open"></i></span>
+                            <span v-if="encryption.encrypted" class="me-auto fw-bold">PRIVATE<i class="ms-2 fa-solid fa-fw fa-lock"></i></span>
+                        </div>
+                        <div v-if="contract.c == 1" class="form-check form-switch d-flex align-content-center ps-0 mb-2">
+                            <label class="form-check-label me-auto mb-0" for="encryptCheck">ENCRYPT FILES</label>
+                            <input class="form-check-input fs-2 ms-auto mt-0" type="checkbox" role="switch" id="encryptCheck" v-model="encryption.encrypted"> 
+                        </div>
+                        <div v-if="!encryption.encrypted" class="mb-2">Files uploaded to this contract will not be encrypted, <b>they will be publicly available on SPK Network</b></div>
+                        <div v-if="encryption.encrypted" class="mb-2">Files uploaded to this contract will be encrypted, <b>only the following accounts will have access.</b></div>
+
+                        <!-- encrypted sharing -->
+                        <div v-if="encryption.encrypted">
+                            <div class="fs-3 fw-lighter">Sharing:</div>
+                            <p>You can share the decryption key with a few other accounts to view the files</p>
+                            
+                            <div class="d-flex mb-2">
+                                <div class="me-1 flex-grow-1">
+                                    <div class="position-relative has-validation">
+                                        <input autocapitalize="off" placeholder="username" class="form-control border-light bg-darkg text-info" v-model="encryption.input" @blur="addUser()">
+                                    </div>
+                                </div>
+                                <div class="ms-1">
+                                    <div class="btn btn-lg btn-primary" @click="addUser()"><i class="fa-solid fa-fw fa-plus"></i></div>
+                                </div>
+                            </div>
+                            
+                            <!-- shared accounts -->
+                            <div class="d-flex flex-row flex-wrap" v-for="(a,b,c) in encryption.accounts">
+                                <div class="rounded text-black filter-bubble me-1 mb-1 d-flex align-items-center" :class="{'bg-success': encryption.accounts[b].enc_key, 'bg-warning': !encryption.accounts[b].enc_key}"> <!-- warning class for unencrypted keys --> 
+                                    <span>{{b}}</span> 
+                                    <button type="button" class="ms-1 btn-close btn-close-white" @click="delUser(b)"></button>
+                                </div>
+                            </div>
+
+                            <!-- update button -->
+                            <div class="d-flex mt-3">
+                                <div v-if="unkeyed" @click="checkHive()" class="mx-auto btn btn-lg btn-success"><i class="fa-regular fa-fw fa-floppy-disk me-2"></i>Encrypt Keys</div>
+                            </div>
+                            
+                            
+                        </div>
+
+                        <div class="d-flex" v-if="contract.c == 1">
+                          <button type="button" class="ms-auto me-auto mt-2 btn btn-lg btn-info" :class="{'disabled': !reallyReady}" :disabled="!reallyReady" @click="signNUpload()"><i
+                                  class="fa-solid fa-file-signature fa-fw me-2"></i>Sign and Upload</button>
+                          </div>
+                    </div>
+                    
+                </div>
+
         </div>
     </Transition>
    `,
