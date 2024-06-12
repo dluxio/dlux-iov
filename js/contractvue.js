@@ -751,7 +751,7 @@ export default {
                     return '/img/other-file-type-svgrepo-com.svg'
             }
         },
-        flagDecode(flags) {
+        flagDecode(flags = "") {
             if(flags.indexOf(',') > -1)flags = flags.split(',')[4]
             var num = this.Base64toNumber(flags[0])
             var out = {}
