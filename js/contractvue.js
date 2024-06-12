@@ -453,7 +453,7 @@ export default {
                                                                                 </div>
                                                                                 <!-- update button -->
                                                                                 <div class="d-flex mt-3">
-                                                                                    <div v-if="unkeyed(contract.i)" @click="checkHive()" class="mx-auto btn btn-lg btn-outline-warning"><i class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</div>
+                                                                                    <div v-if="unkeyed(contract.i)" @click="checkHive(contract.i)" class="mx-auto btn btn-lg btn-outline-warning"><i class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</div>
                                                                                 </div>
                                                                                 <div class="d-flex" v-if="!unkeyed(contract.i) && metaMismatch(contract.i)">
                                                                                     <button type="button" class="btn btn-sm btn-primary my-2 mx-auto" @click="update_meta(contract.i)">
