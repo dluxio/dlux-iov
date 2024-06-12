@@ -1188,7 +1188,7 @@ export default {
         },
         unkeyed(obj) {
             if(!obj)return false
-            for (node in this.contracts[this.contractIDs[obj].index].encryption.accounts ){
+            for (var node in this.contracts[this.contractIDs[obj].index].encryption.accounts ){
                 if (!this.contracts[obj].encryption.accounts[node].enc_key)return true
             }
             return false
