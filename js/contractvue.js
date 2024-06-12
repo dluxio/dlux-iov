@@ -829,8 +829,9 @@ export default {
         },
         downloadFile(cid, id) {
             fetch(`https://ipfs.dlux.io/ipfs/${cid}`)
-            .then((response) => response.blob())
+            .then((response) => response.text())
             .then((blob) => {
+                console.log(blob)
                 if (!this.contractIDs[id].encryption.key) return alert('Not Decrypted')
                 blob = this.AESDecrypt(blob, this.contractIDs[id].encryption.key);
                 console.log(blob)
