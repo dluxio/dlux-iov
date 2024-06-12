@@ -470,8 +470,8 @@ export default {
 
                                                                         <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                             <div> Privacy </div>
-                                                                            <i class="fa-solid fa-lock-open fa-fw mx-1" aria-hidden="true"></i>
-                                                                            <div>Public</div>
+                                                                            <i class="fa-solid fa-fw mx-1" :class="{'fa-lock-open': !flagDecode(contract.m).enc, 'fa-lock': flagDecode(contract.m).enc}" aria-hidden="true"></i>
+                                                                            <div>{{flagDecode(contract.m).enc ? 'Private' : 'Public'}}</div>
                                                                         </div>
                                                                         <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                             <div> Owner </div>
