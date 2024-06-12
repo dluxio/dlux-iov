@@ -124,7 +124,7 @@ export default {
 
 
             <!-- encryption banner -->
-            <div class="alert alert-danger d-flex align-items-center mx-lg-5">
+            <div class="alert alert-danger d-flex align-items-center mx-lg-5 bg-img-none">
                 <div class="d-flex flex-column flex-grow-1 mx-1">
 
                     <!-- bubble preview -->
