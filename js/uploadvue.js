@@ -124,11 +124,11 @@ export default {
 
 
             <!-- encryption banner -->
-            <div class="alert alert-danger d-flex align-items-center mx-lg-5 bg-img-none">
-                <div class="d-flex flex-column flex-grow-1 mx-1">
+            <div class="card card-body d-flex align-items-center mx-lg-5 my-3">
+                <div class="d-flex flex-column w-100 flex-grow-1 mx-1 px-md-2 px-lg-5">
 
                     <!-- bubble preview -->
-                    <div class="d-flex justify-content-around flex-wrap fs-3 fw-lighter mb-3">
+                    <div class="d-flex justify-content-center flex-wrap fs-3 fw-lighter mb-3">
                         <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                             <div> Privacy </div>
                             <span v-if="!encryption.encrypted"><i class="mx-2 fa-solid fa-fw fa-lock-open"></i></span>
@@ -141,7 +141,7 @@ export default {
                     </div>
 
                     <!-- encrypt switch -->
-                    <div v-if="contract.c == 1" class="border-top border-bottom border-light border-1 py-2 mb-2">
+                    <div v-if="contract.c == 1" class="flex-grow-1 border-top border-bottom border-light border-1 py-2 mb-2">
                       <div  class="form-check form-switch d-flex align-items-center ps-0 mt-2 mb-3">
                           <label class="form-check-label mb-0" for="encryptCheck">ENCRYPT FILES</label>
                           <input class="form-check-input fs-2 ms-auto mt-0" type="checkbox" role="switch" id="encryptCheck" v-model="encryption.encrypted"> 
@@ -180,7 +180,7 @@ export default {
                             <div v-if="unkeyed" @click="checkHive()" class="mx-auto btn btn-lg btn-success"><i class="fa-regular fa-fw fa-floppy-disk me-2"></i>Encrypt Keys</div>
                         </div>
                     </div>
-                    <div class="d-flex" v-if="contract.c == 1">
+                    <div class="d-flex mb-1" v-if="contract.c == 1">
                       <button type="button" class="ms-auto me-auto mt-2 btn btn-lg btn-info" :class="{'disabled': !reallyReady}" :disabled="!reallyReady" @click="signNUpload()"><i
                               class="fa-solid fa-file-signature fa-fw me-2"></i>Sign and Upload</button>
                       </div>

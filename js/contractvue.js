@@ -305,15 +305,14 @@ export default {
                                                                 <div class="d-flex flex-column border border-white rounded text-start p-2" style="background-color:rgba(0,0,0,0.3);">
 
                                                                     <!-- contract ID -->
-                                                                    <div class="d-flex justify-content-center small text-white-50 mb-2">
+                                                                    <div class="d-flex justify-content-center small text-white-50 mb-3">
                                                                         <div class="text-center"> Contract ID <i class="fa-solid fa-file-contract fa-fw mx-1" aria-hidden="true"></i><span class="text-break">{{contract.i}}</span>
                                                                         </div>
                                                                     </div>
                                                                
 
-                                                                    <!-- upload -->
+                                                                    <!-- upload time banner -->
                                                                     <div v-if="contract.c == 1" class="mb-3">
-                                                                        <!-- upload banner -->
                                                                         <div class="alert alert-warning d-flex align-items-center mx-lg-5">
                                                                             <div class="d-flex flex-grow-1 flex-wrap me-1 align-items-center">
                                                                                 <div class="mx-1">
@@ -326,13 +325,12 @@ export default {
                                                                         </div>
                                                                     </div>
 
-                                                                    <!-- post -->
+                                                                    <!-- post time banner -->
                                                                     <div v-if="contract.c == 2" class="mb-3">
-                                                                        <!-- post banner -->
                                                                         <div class="alert alert-warning d-flex align-items-center mx-lg-5">
                                                                             <div class="d-flex flex-grow-1 flex-wrap me-1 align-items-center">
                                                                                 <div class="mx-1">
-                                                                                    <div class="fs-3 fw-lighter">You have {{exp_to_time(contract.e)}} to post this contract</div>
+                                                                                    <div class="fs-3 fw-lighter">You have {{exp_to_time(contract.e)}} to publish this contract</div>
                                                                                 </div>
                                                                             </div>
                                                                             <div class="ms-auto d-flex flex-wrap align-items-center fs-1 text-warning justify-content-center me-2 mx-1">
@@ -353,7 +351,7 @@ export default {
                                                                         </div>
                                                                     </div>
 
-                                                                    <!-- drag & drop well + upload list + privacy & sharing -->
+                                                                    <!-- upload -->
                                                                     <div v-if="contract.c == 1">
                                                                         <upload-vue :user="saccountapi" :propcontract="contract" @tosign="toSign=$event" @done="done()" />
                                                                     </div>
@@ -366,9 +364,9 @@ export default {
                                                                     <div v-if="contract.df">
                                                                         <div class="card px-4 py-2 mb-2 bg-img-none bg-blur-darkg mx-lg-5">
                                                                             <div class="d-flex flex-column">
-                                                                                <h2 class="mb-3">Files <i class="fa-solid fa-fw ms-2 fa-paperclip"></i></h2>
-                                                                                <ol class="text-start mx-auto">
-                                                                                    <li class="mb-2" v-for="(size, cid, index) in contract.df">
+                                                                                <h2 class="mb-3">Files </h2>
+                                                                                
+                                                                                    <div class="mb-2" v-for="(size, cid, index) in contract.df">
                                                                                         <div class="d-flex align-items-center">    
                                                                                             <div class="d-flex mx-2">
                                                                                                 <img class="img-thumbnail bg-light" :src="smartThumb(contract.i,index,cid)" width="100px" onerror="if (this.src != '/img/other-file-type-svgrepo-com.svg') this.src = '/img/other-file-type-svgrepo-com.svg'">
@@ -398,8 +396,8 @@ export default {
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
-                                                                                    </li>
-                                                                                </ol>
+                                                                                    </div>
+                                                                                
                                                                                 <div class="d-flex">
                                                                                     <button type="button" class="btn btn-sm btn-primary my-2 mx-auto" @click="update_meta(contract.i)">
                                                                                         <i class="fa-solid fa-floppy-disk fa-fw me-1"></i>Save Metadata</button>
@@ -411,7 +409,7 @@ export default {
 
                                                                     <!-- extension -->
                                                                     <div v-if="contract.c == 3">
-                                                                        <div class="alert alert-info align-items-center mx-lg-5 d-flex">
+                                                                        <div class="alert alert-info align-items-center mx-lg-5 d-flex bg-img-none my-3">
                                                                             <div class="mx-auto">
                                                                                 <extension-vue :node-view="nodeview"
                                                                                 :contract="contract" :sstats="sstats"
@@ -424,7 +422,7 @@ export default {
 
                                                                    <!-- encrypted sharing -->
                                                                     <div v-if="flagDecode(contract.m).enc">
-                                                                        <div class="alert alert-secondary d-flex align-items-center mx-lg-5 bg-img-none">
+                                                                        <div class="card card-body align-items-center mx-lg-5 my-3">
                                                                             <div class="d-flex flex-column flex-grow-1 mx-1">
                                                                                 <div class="fs-3 fw-lighter">Sharing:</div>
                                                                                 <p>These files are encrypted. You can add and remove accounts that can decrypt them.</p>
@@ -439,15 +437,15 @@ export default {
                                                                                     </div>
                                                                                 </div>
                                                                                 <!-- shared accounts -->
-                                                                                <div class="d-flex flex-row flex-wrap" v-for="(a,b,c) in contract.encryption.accounts">
-                                                                                    <div class="rounded text-black filter-bubble me-1 mb-1 d-flex align-items-center" :class="{'bg-success': contract.encryption.accounts[b].enc_key, 'bg-warning': !contract.encryption.accounts[b].enc_key}"> <!-- warning class for unencrypted keys --> 
-                                                                                        <span>{{b}}</span> 
-                                                                                        <button type="button" class="ms-1 btn-close btn-close-white" @click="delUser(contract.i, b)"></button>
+                                                                                <div class="d-flex flex-row flex-wrap">
+                                                                                    <div  v-for="(a,b,c) in contract.encryption.accounts" class="rounded text-black filter-bubble me-1 mb-1 d-flex align-items-center" :class="{'bg-success': contract.encryption.accounts[b].enc_key, 'bg-warning': !contract.encryption.accounts[b].enc_key}"> <!-- warning class for unencrypted keys --> 
+                                                                                        <span>{{b}} {{contract.t}}</span> 
+                                                                                        <div v-if="b != contract.t"><button type="button" class="ms-1 btn-close btn-close-white" @click="delUser(contract.i, b)"></button></div>
                                                                                     </div>
                                                                                 </div>
                                                                                 <!-- update button -->
                                                                                 <div class="d-flex mt-3">
-                                                                                    <div v-if="unkeyed(contract.i)" @click="checkHive()" class="mx-auto btn btn-lg btn-success"><i class="fa-regular fa-fw fa-floppy-disk me-2"></i>Encrypt Keys</div>
+                                                                                    <div v-if="unkeyed(contract.i)" @click="checkHive()" class="mx-auto btn btn-lg btn-primary"><i class="fa-regular fa-fw fa-floppy-disk me-2"></i>Encrypt Keys</div>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -456,14 +454,18 @@ export default {
                                                                     
 
                                                                     <!-- contract details -->
-                                                                    <div class="d-flex flex-wrap justify-content-center mb-3 small mx-lg-5">
+                                                                    <div class="d-flex flex-wrap justify-content-center my-3 small mx-lg-5">
 
-                                                                        
                                                                         <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                             <div> Privacy </div>
                                                                             <i class="fa-solid fa-lock-open fa-fw mx-1" aria-hidden="true"></i>
                                                                             <div>Public</div>
                                                                         </div>
+                                                                        <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
+                                                                            <div> Owner </div>
+                                                                            <i class="fa-solid fa-user fa-fw mx-1" aria-hidden="true"></i>
+                                                                            <div><a :href="'/@' + contract.t" class="no-decoration text-primary">@{{contract.t}}</a></div>
+                                                                            </div>
                                                                         <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                             <div> Sponsor </div>
                                                                             <i class="fa-solid fa-user-shield fa-fw mx-1" aria-hidden="true"></i>
