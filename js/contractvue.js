@@ -426,8 +426,8 @@ export default {
                                                                             <div class="d-flex flex-column flex-grow-1 mx-1">
                                                                                 <div class="fs-3 fw-lighter">Sharing:</div>
                                                                                 <p v-if="contract.t == account">These files are encrypted. You can add and remove accounts that can decrypt them.</p>
-                                                                                <p v-if="contract.t != account">These files are encrypted and shared with the following accounts.</p>
-                                                                                <div class="d-flex mb-2" v-if="contract.t == account && contract.encryption.key">
+                                                                                <p v-if="contract.t != spkapi.name">These files are encrypted and shared with the following accounts.</p>
+                                                                                <div class="d-flex mb-2" v-if="contract.t == spkapi.name && contract.encryption.key">
                                                                                     <div class="me-1 flex-grow-1">
                                                                                         <div class="position-relative has-validation">
                                                                                             <input autocapitalize="off" placeholder="username" class="form-control border-light bg-darkg text-info" v-model="contract.encryption.input" @keyup.enter="addUser(contract.i)">
@@ -437,7 +437,7 @@ export default {
                                                                                         <div class="btn btn-lg btn-light" @click="addUser(contract.i)"><i class="fa-solid fa-fw fa-plus"></i></div>
                                                                                     </div>
                                                                                 </div>
-                                                                                <div class="ms-1" v-if="contract.t == account && !contract.encryption.key">
+                                                                                <div class="ms-1" v-if="contract.t == spkapi.name && !contract.encryption.key">
                                                                                         <div class="btn btn-lg btn-light" @click="decryptKey(contract.i)">Decrypt to Modify</div>
                                                                                 </div>
                                                                                 <!-- shared accounts -->
@@ -447,7 +447,7 @@ export default {
                                                                                             <i class="fa-solid fa-key fa-fw me-1" :class="{'text-success': contract.encryption.accounts[b].enc_key, 'text-warning': !contract.encryption.accounts[b].enc_key}"></i>
                                                                                             <span>{{b}}</span>
                                                                                             <div v-if="b != contract.t"><button type="button" class="ms-2 btn-close small btn-close-white" @click="delUser(contract.i, b)"></button></div>
-                                                                                            <div v-if="b == account"><button type="button" class="ms-2 btn-close small btn-close-white" @click="decryptKey(contract.i)">Unlock</button></div>
+                                                                                            <div v-if="b == spkapi.name"><button type="button" class="ms-2 btn-close small btn-close-white" @click="decryptKey(contract.i)">Unlock</button></div>
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
