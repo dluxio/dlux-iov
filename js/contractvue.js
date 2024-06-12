@@ -703,12 +703,12 @@ export default {
             return string.split(del)[index] ? string.split(del)[index] : ''
         },
         addUser(id){
-            if(this.encryption.input){
-                this.contracts[this.contractIDs[id].index].encryption.accounts[this.contracts[this.contractIDs[id].index].encryption.input] = {
+            if(this.contractIDs[id].encryption){
+                this.contractIDs[id].encryption.accounts[this.contractIDs[id].encryption.input] = {
                 key: '',
                 enc_key: '',
               }
-              this.contracts[this.contractIDs[id].index].encryption.input = ''
+              this.contractIDs[id].encryption.input = ''
             }
         },
         delUser(id, user){

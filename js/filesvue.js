@@ -2,13 +2,15 @@ export default {
     template: `
 <div v-for="(size, file, index) in files" class="card rounded p-0 my-2 mx-1" style="max-width:200px">
         <a :href="'https://ipfs.dlux.io/ipfs/' + file" target="_blank" class="no-decoration">
-        <h5 class="m-0 ms-auto align-self-end">{{newMeta[contract.i][index * 4 + 1] || file}}</h5>
+        <h4 class="m-0 ms-auto align-self-end">{{newMeta[contract.i][index * 4 + 1] || file}}</h4>
         <h5 class="m-0 ms-auto align-self-end"><span class="badge square rounded-top border border-bottom-0 bg-info border-light-50" :class="smartColor(newMeta[contract.i][index * 4 + 4])"><i :class="smartIcon(newMeta[contract.i][index * 4 + 4])"></i>{{ newMeta[contract.i][index * 4 + 2] }}</span></h5>
-            <img :src="smartThumb(contract.i, index, file)" onerror="this.style.display='none'"
+            <img :src="smartThumb(contract.i, index, file)" onerror="this.src='/img/other-file-type-svgrepo-com.svg'"
             class="card-img-top rounded-top" :alt="file">
             <div class="card-body">
                 <span class="text-break small text-muted">{{fancyBytes(size)}}</span><br>
-                <button type="button" class="text-break small text-muted" @click="copyText(contract.i)">Copy Contract ID to Clipboard</button>
+                <button v-if="!flagDecode(newMeta[contract.i][index * 4 + 4]).enc && !decoded" type="button" class="text-break small text-muted" @click="decode(contract.i)">Decrypt</button>
+                <button v-if="!flagDecode(newMeta[contract.i][index * 4 + 4]).enc && decoded" type="button" class="text-break small text-muted" @click="download(contract.i, file)">Download</button>
+                <button v-if="!flagDecode(newMeta[contract.i][index * 4 + 4]).enc" type="button" class="text-break small text-muted" @click="download(file)">Download</button>
             </div>
         </a>
         <div class="card-footer mt-auto text-center border-0" v-if="assets">
@@ -46,12 +48,35 @@ data() {
     return {
         files: {},
         newMeta: {},
+        decoded: false,
     };
 },
 emits: [ "addassets" ],
 methods: {
     addAsset(id, contract) {
         this.$emit("addassets", { id, contract: contract.i });
+    },
+    AESDecrypt(encryptedMessage, key) {
+        const bytes = CryptoJS.AES.decrypt(encryptedMessage, key);
+        return bytes.toString(CryptoJS.enc.Utf8);
+    },
+    download(fileInfo, data = false, MIME_TYPE = "image/png") {
+        if(data){
+            var blob = new Blob([data], {type: MIME_TYPE});
+            window.location.href = window.URL.createObjectURL(blob);
+        } else {
+            fetch(`https://ipfs.dlux.io/ipfs/${fileInfo}`)
+            .then((response) => response.blob())
+            .then((blob) => {
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = fileInfo;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            });
+        }
     },
     smartIcon(flags){
         if(!flags[0])return 'fa-solid fa-file'
