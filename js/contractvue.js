@@ -831,10 +831,9 @@ export default {
             fetch(`https://ipfs.dlux.io/ipfs/${cid}`)
             .then((response) => response.text())
             .then((blob) => {
-                console.log(blob)
                 if (!this.contractIDs[id].encryption.key) return alert('Not Decrypted')
                 blob = this.AESDecrypt(blob, this.contractIDs[id].encryption.key);
-                console.log(blob)
+                blob = new Blob([blob]);
                 var url = window.URL.createObjectURL(blob);
                 var a = document.createElement('a');
                 a.href = url;
