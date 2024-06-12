@@ -319,13 +319,20 @@ export default {
                                                                                 <div class="mx-1">
                                                                                     <div class="fs-3 fw-lighter">You have {{exp_to_time(contract.e)}} to start this contract</div>
                                                                                 </div>
-                                                                                <div class="mx-1 ms-auto me-auto d-none">
-                                                                                <ol class="mb-0">
-                                                                                        <li>Add all files</li>
-                                                                                        <li>Click Sign and Upload</li>
-                                                                                        <li>Authorize via keychain</li>
-                                                                                    </ol>
-                                                                                
+                                                                            </div>
+                                                                            <div class="ms-auto d-flex flex-wrap align-items-center fs-1 text-warning justify-content-center me-2 mx-1">
+                                                                                <i class="fa-solid fa-bell fa-fw ms-2"></i>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- post -->
+                                                                    <div v-if="contract.c == 2" class="mb-3">
+                                                                        <!-- upload banner -->
+                                                                        <div class="alert alert-warning d-flex align-items-center mx-lg-5">
+                                                                            <div class="d-flex flex-grow-1 flex-wrap me-1 align-items-center">
+                                                                                <div class="mx-1">
+                                                                                    <div class="fs-3 fw-lighter">You have {{exp_to_time(contract.e)}} to post for this contract</div>
                                                                                 </div>
                                                                             </div>
                                                                             <div class="ms-auto d-flex flex-wrap align-items-center fs-1 text-warning justify-content-center me-2 mx-1">
@@ -396,6 +403,16 @@ export default {
                                                                         </div>
                                                                     </div>
 
+
+                                                                    <!-- extension -->
+                                                                    <div v-if="contract.c == 3">
+                                                                        <extension-vue :node-view="nodeview"
+                                                                        :contract="contract" :sstats="sstats"
+                                                                        :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
+                                                                        @tosign="toSign=$event"></extension-vue>
+                                                                    </div>
+                                                                    
+
                                                                    <!-- encrypted sharing -->
                                                                     <div v-if="flagDecode(contract.m).enc">
                                                                         <div class="alert alert-secondary d-flex align-items-center mx-lg-5">
@@ -441,13 +458,7 @@ export default {
                                                                         </div>
                                                                     </div>
 
-                                                                    <!-- extension -->
-                                                                    <div v-if="contract.c == 3">
-                                                                        <extension-vue :node-view="nodeview"
-                                                                        :contract="contract" :sstats="sstats"
-                                                                        :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
-                                                                        @tosign="toSign=$event"></extension-vue>
-                                                                    </div>
+                                                                    
 
                                                                     <!-- contract details -->
                                                                     <div class="d-flex flex-wrap justify-content-center mb-3 small">
