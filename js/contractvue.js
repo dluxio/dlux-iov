@@ -1186,6 +1186,12 @@ export default {
                 setTimeout(this.hideLowRep, 1000)
             }
         },
+        unkeyed(obj) {
+            for (node in this.contracts[obj].encryption.accounts ){
+                if (!this.contracts[obj].encryption.accounts[node].enc_key)return false
+            }
+            return true
+        },
         setRating(rating) {
             this.post.rating = rating;
         },
