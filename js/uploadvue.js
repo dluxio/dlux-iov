@@ -617,14 +617,16 @@ methods: {
           },
           onError: (e, f) => {
             console.log('options.onError', e, f)
-            // const fileObj = files.get(file);
-            this.FileInfo[e.name].status = '!!ERROR!!'
-            // fileObj.status = FILE_STATUS.FAILED;
-            // fileObj.percentage = 100;
-            this.File[this.FileInfo[e.name].index].actions.pause = false
-            this.File[this.FileInfo[e.name].index].actions.resume = true
-            this.File[this.FileInfo[e.name].index].actions.cancel = true
-            // updateFileElement(fileObj);
+            if(e.name){
+              // const fileObj = files.get(file);
+              this.FileInfo[e.name].status = '!!ERROR!!'
+              // fileObj.status = FILE_STATUS.FAILED;
+              // fileObj.percentage = 100;
+              this.File[this.FileInfo[e.name].index].actions.pause = false
+              this.File[this.FileInfo[e.name].index].actions.resume = true
+              this.File[this.FileInfo[e.name].index].actions.cancel = true
+              // updateFileElement(fileObj);
+            }
           },
           onComplete: (e, f) => {
             console.log('options.onComplete', e, f)
