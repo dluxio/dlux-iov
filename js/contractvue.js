@@ -851,7 +851,7 @@ export default {
                                 this.newMeta[data.file_contracts[node].i] = new Array(filesNum * 4 + 1).fill('')
                             } else {
                                 const encData = data.file_contracts[node].m.split(',')[0] || ''
-                                encAccounts = encData.split(';')
+                                const encAccounts = encData.split(';')
                                 for (var i = 0; i < encAccounts.length; i++) {
                                     const encA  = encAccounts[i].split('@')[1]
                                     data.file_contracts[node].encryption.accounts[encAccounts[i]] = {
