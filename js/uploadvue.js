@@ -28,10 +28,10 @@ export default {
                 <div v-if="File.length" class="mx-lg-5">
                     <div class=" pt-0">
                         <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key,index) in FileInfo">
-                            <div class="p-3 mb-2 bg-darkest" style="border-radius: 10px;">
+                            <div class="p-3 mb-2 card card-body bg-img-none" style="border-radius: 10px;">
                                 <div class="d-flex flex-wrap align-items-center pb-2 mb-2">
                                   <div>
-                                    <h6 class="m-0 text-break">{{file.name}}</h6>
+                                    <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}}</h6>
                                   </div>
                                     <div class="flex-grow-1 mx-5" v-if="File[FileInfo[file.name].index].actions.cancel">
                                         <div class="progress" role="progressbar" aria-label="Upload progress"
@@ -72,10 +72,10 @@ export default {
                             </div>
                         </div>
                         <div id="listOfEncs"  v-if="encryption.encrypted" v-for="(file, key,index) in FileInfo">
-                            <div class="p-3 mb-2 bg-warning" style="border-radius: 10px;">
+                            <div class="p-3 mb-2 card card-body bg-img-none">
                                 <div class="d-flex flex-wrap align-items-center pb-2 mb-2">
                                   <div>
-                                    <h6 class="m-0 text-break">{{file.name}}</h6>
+                                    <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i class="fa-solid fa-lock fa-fw"></i></span>{{file.name}}</h6>
                                   </div>
                                     <div class="flex-grow-1 mx-5" v-if="File[FileInfo[file.name].enc_index].actions.cancel">
                                         <div class="progress" role="progressbar" aria-label="Upload progress"
