@@ -424,7 +424,7 @@ export default {
 
                                                                    <!-- encrypted sharing -->
                                                                     <div v-if="flagDecode(contract.m).enc">
-                                                                        <div class="alert alert-secondary d-flex align-items-center mx-lg-5">
+                                                                        <div class="alert alert-secondary d-flex align-items-center mx-lg-5 bg-img-none">
                                                                             <div class="d-flex flex-column flex-grow-1 mx-1">
                                                                                 <div class="fs-3 fw-lighter">Sharing:</div>
                                                                                 <p>These files are encrypted. You can add and remove accounts that can decrypt them.</p>
