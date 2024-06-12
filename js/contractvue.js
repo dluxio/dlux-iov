@@ -1129,7 +1129,11 @@ export default {
             if (total > (this.saccountapi.spk_power * 1000)) total = (this.saccountapi.spk_power * 1000)
             return total
         },
-        Base64toNumber(chars) {
+        Base64toNumber(chars = "") {
+            if(typeof chars != 'string'){
+                console.log({chars})
+                return 0
+            }
             const glyphs =
                 "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
             var result = 0;
