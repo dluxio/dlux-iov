@@ -137,7 +137,7 @@ export default {
                         <div v-if="encryption.encrypted" class="mb-2">Files uploaded to this contract will be encrypted, <b>only the following accounts will have access.</b></div>
 
                         <!-- encrypted sharing -->
-                        <div v-if="encryption.encrypted">
+                        <div v-if="encryption.encrypted || contract.c == 2 || contract.c == 3">
                             <div class="fs-3 fw-lighter">Sharing:</div>
                             <p>You can share the decryption key with a few other accounts to view the files</p>
                             
