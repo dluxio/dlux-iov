@@ -405,7 +405,7 @@ export default {
                                                                                                     </div>
                                                                                                 </div>
                                                                                                 <div class="d-flex" v-if="flagDecode(contract.m).enc && contract.encryption.key">
-                                                                                                    <button type="button" class="btn btn-sm btn-primary my-2 mx-auto" @click="downloadFile(cid, contract.i)">Download</button>
+                                                                                                    <button type="button" class="btn btn-sm btn-primary my-2 mx-auto" @click="downloadFile(cid, contract.i, index)">Download</button>
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
@@ -827,17 +827,18 @@ export default {
             const bytes = CryptoJS.AES.decrypt(encryptedMessage, key);
             return bytes.toString(CryptoJS.enc.Utf8);
         },
-        downloadFile(cid, id) {
+        downloadFile(cid, id, index) {
             fetch(`https://ipfs.dlux.io/ipfs/${cid}`)
             .then((response) => response.text())
             .then((blob) => {
+                const name = this.newMeta[id][index * 4 + 1] + '.' + this.newMeta[id][index * 4 + 2] || 'file'
                 if (!this.contractIDs[id].encryption.key) return alert('Not Decrypted')
                 blob = this.AESDecrypt(blob, this.contractIDs[id].encryption.key);
                 blob = new Blob([blob]);
                 var url = window.URL.createObjectURL(blob);
                 var a = document.createElement('a');
                 a.href = url;
-                a.download = cid;
+                a.download = name;
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
