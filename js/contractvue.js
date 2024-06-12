@@ -1206,7 +1206,7 @@ export default {
             if(!obj)return false
             if(!this.contracts[this.contractIDs[obj].index].encryption)return false
             for (var node in this.contracts[this.contractIDs[obj].index].encryption.accounts ){
-                if (!this.contracts[obj].encryption.accounts[node].enc_key)return true
+                if (!this.contracts[this.contractIDs[obj].index].encryption.accounts[node].enc_key)return true
             }
             return false
         },
