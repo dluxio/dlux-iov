@@ -4,6 +4,7 @@ import FilesVue from "/js/filesvue.js";
 import UploadVue from "/js/uploadvue.js";
 import ModalVue from "/js/modalvue.js";
 import PostVue from "/js/postvue.js";
+import { enc } from "./cryptojs.min";
 
 export default {
     components: {
@@ -346,6 +347,33 @@ export default {
 
                                                                     <!-- drag & drop well + upload list + privacy & sharing -->
                                                                     <upload-vue :user="saccountapi" :propcontract="contract" @tosign="toSign=$event" @done="done()" />
+
+                                                                    <!-- encrypted sharing -->
+                                                                    <div v-if="flagDecode(contract.m).enc">
+                                                                        <div class="fs-3 fw-lighter">Sharing:</div>
+                                                                        <p>You can add accounts to view these files.</p>
+                                                                        <div class="d-flex mb-2">
+                                                                            <div class="me-1 flex-grow-1">
+                                                  class="position-relative                               <div class="position-relative has-validation">
+                                                                                    <input autocapitalize="off" placeholder="username" class="form-control border-light bg-darkg text-info" v-model="contract.encryption.input" @blur="addUser(contract.i)">
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="ms-1">
+                                                                                <div class="btn btn-lg btn-primary" @click="addUser(contract.i)"><i class="fa-solid fa-fw fa-plus"></i></div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <!-- shared accounts -->
+                                                                        <div class="d-flex flex-row flex-wrap" v-for="(a,b,c) in contract.encryption.accounts">
+                                                                            <div class="rounded text-black filter-bubble me-1 mb-1 d-flex align-items-center" :class="{'bg-success': contract.encryption.accounts[b].enc_key, 'bg-warning': !contract.encryption.accounts[b].enc_key}"> <!-- warning class for unencrypted keys --> 
+                                                                                <span>{{b}}</span> 
+                                                                                <button type="button" class="ms-1 btn-close btn-close-white" @click="delUser(contract.i, b)"></button>
+                                                                            </div>
+                                                                        </div>
+                                                                        <!-- update button -->
+                                                                        <div class="d-flex mt-3">
+                                                                            <div v-if="unkeyed(contract.i)" @click="checkHive()" class="mx-auto btn btn-lg btn-success"><i class="fa-regular fa-fw fa-floppy-disk me-2"></i>Encrypt Keys</div>
+                                                                        </div>
+                                                                    </div>
 
                                                                     <!-- files list -->
                                                                     <div v-if="contract.df" class="card mx-auto px-4 py-2 mb-3 bg-img-none bg-blur-darkg mx-lg-5">
@@ -712,6 +740,16 @@ export default {
                     return '/img/other-file-type-svgrepo-com.svg'
             }
         },
+        flagDecode(flags) {
+            if(flags.indexOf(',') > -1)flags = flags.split(',')[4]
+            var num = this.Base64toNumber(flags[0])
+            var out = {}
+            if(num & 1)out.enc = true
+            if(num & 2)out.autoRenew = true
+            if(num & 4)out.nsfw = true
+            if(num & 8)out.executable = true
+            return out
+        },
         update_meta(contract) {
             console.log(this.newMeta[contract], contract)
             var meta = this.newMeta[contract]
@@ -803,11 +841,24 @@ export default {
                     // Storage nodes won't get contracts from here, we'll need some props from the contract
                     if (!this.nodeview) {
                         for (var node in data.file_contracts) {
+                            data.file_contracts[node].encryption = {
+                                input: "",
+                                key: "",
+                                accounts: {},
+                            }
                             if (!data.file_contracts[node].m) {
                                 data.file_contracts[node].m = ""
                                 const filesNum = data.file_contracts[node]?.df ? Object.keys(data.file_contracts[node].df).length : 0
                                 this.newMeta[data.file_contracts[node].i] = new Array(filesNum * 4 + 1).fill('')
                             } else {
+                                const encData = data.file_contracts[node].m.split(',')[0] || ''
+                                encAccounts = encData.split(';')
+                                for (var i = 0; i < encAccounts.length; i++) {
+                                    const encA  = encAccounts[i].split('@')[1]
+                                    data.file_contracts[node].encryption.accounts[encAccounts[i]] = {
+                                        enc_key: encAccounts[i].split('@')[0]
+                                    }
+                                }
                                 this.newMeta[data.file_contracts[node].i] = data.file_contracts[node].m.split(",")
                             }
                             this.links[data.file_contracts[node].i] = ""
@@ -818,6 +869,7 @@ export default {
                             }
                             this.links[data.file_contracts[node].i] = links
                             this.contractIDs[data.file_contracts[node].i] = data.file_contracts[node];
+
                             this.contracts.push(data.file_contracts[node]);
                             this.contractIDs[data.file_contracts[node].i].index = this.contracts.length - 1;
                             
