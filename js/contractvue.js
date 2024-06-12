@@ -833,6 +833,7 @@ export default {
             .then((blob) => {
                 if (!this.contractIDs[id].encryption.key) return alert('Not Decrypted')
                 blob = this.AESDecrypt(blob, this.contractIDs[id].encryption.key);
+                console.log(blob)
                 var url = window.URL.createObjectURL(blob);
                 var a = document.createElement('a');
                 a.href = url;
