@@ -796,9 +796,8 @@ export default {
             return new Promise((resolve, reject) => {
               const key = this.contractIDs[id].encryption.accounts[this.account].enc_key;
               hive_keychain.requestVerifyKey(this.account, key, 'Memo', (response) => {
-                console.log(response)
                   if (response.success) {
-                      this.contractIDs[id].encryption.key = ''
+                      this.contractIDs[id].encryption.key = response.result.split('#')[1]
                       resolve("OK")
                   } else {
                       reject(response.message);
