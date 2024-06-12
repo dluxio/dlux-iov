@@ -723,8 +723,70 @@ export default {
             }
         },
         delUser(id, user){
-            delete this.contracts[this.contractIDs[id].index].encryption.accounts[user]
+            delete this.contractIDs[id].encryption.accounts[user]
         },
+        checkHive(id){
+            return new Promise((resolve, reject) => {
+              this.fetching = true
+              var accounts = Object.keys(this.contractIDs[id].encryption.accounts)
+              var newAccounts = []
+              for (var i = 0; i < accounts.length; i++) {
+                if(!this.contractIDs[id].encryption.accounts[accounts[i]]?.key){
+                  newAccounts.push(accounts[i])
+                }
+              }
+                
+              if(newAccounts.length)fetch('https://hive-api.dlux.io', {
+                  method: 'POST',
+                  body: JSON.stringify({  
+                      "jsonrpc": "2.0",
+                      "method": "condenser_api.get_accounts",
+                      "params": [newAccounts],
+                      "id": 1
+                  })
+              }).then(response => response.json())
+              .then(data => {
+                  this.fetching = false
+                  if(data.result){
+                      for (var i = 0; i < data.result.length; i++) {
+                          if(data.result[i].id){
+                            this.contractIDs[id].encryption.accounts[data.result[i].name].key = data.result[i].memo_key
+                          }
+                      }
+                      this.encryptKeyToUsers(id)
+                      resolve(data.result)
+                  } else {
+                      reject(data.error)
+                  }
+              })
+              .catch(e => {
+                  this.fetching = false
+              })
+            })
+          },
+          encryptKeyToUsers(id) {
+            return new Promise((resolve, reject) => {
+              if(!usernames) usernames = Object.keys(this.contractIDs[id].encryption.accounts)
+              var keys = []
+              var dict = {}
+              for (var i = 0; i < usernames.length; i++) {
+                if(!this.contractIDs[id].encryption.accounts[usernames[i]].enc_key)keys.push(this.contractIDs[id].encryption.accounts[usernames[i]].key)
+                dict[this.contractIDs[id].encryption.accounts[usernames[i]].key] = usernames[i]
+              }
+              const key = "#" + this.contractIDs[id].encryption.key;
+              if(keys.length)hive_keychain.requestEncodeWithKeys(this.account, keys, key, 'Memo', (response) => {
+                  if (response.success) {
+                      for (var node in response.result){
+                        this.contractIDs[id].encryption.accounts[dict[node]].enc_key = response.result[node]
+                      }
+                      resolve("OK")
+                  } else {
+                      reject(response.message);
+                  }
+              });
+              else resolve (null)
+            })
+          },
         smartThumb(contract, index,cid) {
             var thumb = this.newMeta[contract][index * 4 + 3] || ''
             if (thumb.includes('Qm')) return `https://ipfs.dlux.io/ipfs/${thumb}`
