@@ -411,7 +411,7 @@ export default {
 
                                                                     <!-- extension -->
                                                                     <div v-if="contract.c == 3">
-                                                                        <div class="alert alert-info align-items-center mx-lg-5 d-flex bg-img-none">
+                                                                        <div class="alert alert-info align-items-center mx-lg-5 d-flex">
                                                                             <div class="mx-auto">
                                                                                 <extension-vue :node-view="nodeview"
                                                                                 :contract="contract" :sstats="sstats"
