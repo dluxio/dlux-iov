@@ -4,7 +4,6 @@ import FilesVue from "/js/filesvue.js";
 import UploadVue from "/js/uploadvue.js";
 import ModalVue from "/js/modalvue.js";
 import PostVue from "/js/postvue.js";
-import { enc } from "./cryptojs.min";
 
 export default {
     components: {
