@@ -459,7 +459,7 @@ export default {
                                                                                         <div class="btn btn-lg btn-light" @click="decryptKey(contract.i)">Decrypt to Modify</div>
                                                                                 </div>
                                                                                 <!-- shared accounts -->
-                                                                                <div class="d-flex flex-row flex-wrap">
+                                                                                <div class="d-flex flex-row flex-wrap mt-2">
                                                                                     <div  v-for="(a,b,c) in contract.encryption.accounts" class="rounded bg-white text-black filter-bubble me-1 mb-1 d-flex align-items-center" > <!-- warning class for unencrypted keys --> 
                                                                                         <div class="d-flex align-items-center">
                                                                                             <i class="fa-solid fa-key fa-fw me-1" :class="{'text-success': contract.encryption.accounts[b].enc_key, 'text-warning': !contract.encryption.accounts[b].enc_key}"></i>
@@ -486,11 +486,7 @@ export default {
                                                                     <!-- contract details -->
                                                                     <div class="d-flex flex-wrap justify-content-center my-3 small mx-lg-5">
 
-                                                                        <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
-                                                                            <div> Privacy </div>
-                                                                            <i class="fa-solid fa-fw mx-1" :class="{'fa-lock-open': !flagDecode(contract.m).enc, 'fa-lock': flagDecode(contract.m).enc}" aria-hidden="true"></i>
-                                                                            <div>{{flagDecode(contract.m).enc ? 'Private' : 'Public'}}</div>
-                                                                        </div>
+                                                                        
                                                                         <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                             <div> Owner </div>
                                                                             <i class="fa-solid fa-user fa-fw mx-1" aria-hidden="true"></i>
@@ -541,6 +537,11 @@ export default {
                                                                             <div> Status </div>
                                                                             <i class="fa-solid fa-signal fa-fw mx-1" aria-hidden="true"></i>
                                                                             <div> {{contract.c == 1 ? 'Waiting For Upload' : 'Uploaded'}}</div>
+                                                                        </div>
+                                                                        <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
+                                                                            <div> Privacy </div>
+                                                                            <i class="fa-solid fa-fw mx-1" :class="{'fa-lock-open': !flagDecode(contract.m).enc, 'fa-lock': flagDecode(contract.m).enc}" aria-hidden="true"></i>
+                                                                            <div>{{flagDecode(contract.m).enc ? 'Private' : 'Public'}}</div>
                                                                         </div>
                             
                                                                     </div>

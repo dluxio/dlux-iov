@@ -8,9 +8,10 @@ export default {
             class="card-img-top rounded-top" :alt="file">
             <div class="card-body">
                 <span class="text-break small text-muted">{{fancyBytes(size)}}</span><br>
-                <button v-if="!flagDecode(newMeta[contract.i][index * 4 + 4]).enc && !decoded" type="button" class="text-break small text-muted" @click="decode(contract.i)">Decrypt</button>
-                <button v-if="!flagDecode(newMeta[contract.i][index * 4 + 4]).enc && decoded" type="button" class="text-break small text-muted" @click="download(contract.i, file)">Download</button>
-                <button v-if="!flagDecode(newMeta[contract.i][index * 4 + 4]).enc" type="button" class="text-break small text-muted" @click="download(file)">Download</button>
+                <button v-if="flagDecode(newMeta[contract.i][index * 4 + 4]).enc && !decoded" type="button" class="text-break small text-muted" @click="decode(contract.i)">Decrypt</button>
+                <button v-if="flagDecode(newMeta[contract.i][index * 4 + 4]).enc && decoded" type="button" class="text-break small text-muted" @click="download(contract.i, file)">Download</button>
+                
+                <button v-if="flagDecode(newMeta[contract.i][index * 4 + 4]).enc" type="button" class="d-none text-break small text-muted" @click="download(file)">Download</button>
             </div>
         </a>
         <div class="card-footer mt-auto text-center border-0" v-if="assets">
