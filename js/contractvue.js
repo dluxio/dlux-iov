@@ -448,8 +448,8 @@ export default {
                                                                                 <p v-if="contract.t != spkapi.name">{{pluralFiles(contract.i) ? 'This file is' : 'These files are'}} encrypted and shared with the following accounts.</p>
                                                                                 
                                                                                 <!-- decrypt button -->
-                                                                                <div class="ms-auto me-auto" v-if="contract.t == spkapi.name && !contract.encryption.key">
-                                                                                        <div class="btn btn-lg btn-primary mb-2" @click="decryptKey(contract.i)">Decrypt to Modify</div>
+                                                                                <div class="ms-auto me-auto mb-2" v-if="contract.t == spkapi.name && !contract.encryption.key">
+                                                                                        <div class="btn btn-lg btn-light" @click="decryptKey(contract.i)">Decrypt to Modify<i class="fa-solid fa-fw ms-2 fa-lock-open"></i></div>
                                                                                 </div>
                                                                                 
                                                                                 <!-- username input add -->
