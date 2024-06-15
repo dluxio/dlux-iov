@@ -409,7 +409,7 @@ export default {
                                                                                                     </div>
                                                                                                     <!-- file detail modal -->
                                                                                                     <div>
-                                                                                                        <button type="button" class="w-100 btn btn-sm btn-info mx-auto" data-bs-toggle="modal" data-bs-target="#fileModal">Edit Metadata<i class="fa-solid fa-table-list fa-fw ms-2"></i></button>
+                                                                                                        <button type="button" class="w-100 btn btn-sm btn-info mx-auto" data-bs-toggle="modal" data-bs-target="#fileModal"><span class="d-flex align-items-center w-100">Metadata<i class="fa-solid fa-table-list fa-fw ms-3"></i></span></button>
                                                                                                     </div>
                                                                                                 </div>
                                                                                                 
