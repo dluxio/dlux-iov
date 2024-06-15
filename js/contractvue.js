@@ -364,7 +364,7 @@ export default {
                                                                     <div v-if="contract.df">
                                                                         <div class="card px-4 py-2 mb-2 bg-img-none bg-blur-darkg mx-lg-5">
                                                                             <div class="d-flex flex-column">
-                                                                                <h2 class="mb-3">File{{pluralFiles(contract.i) ? '' : 's'}} </h2>
+                                                                                <h2 class="mb-3">File{{pluralFiles(contract.i) ? 's' : ''}} </h2>
                                                                                 
                                                                                     <div class="mb-2" v-for="(size, cid, index) in contract.df">
                                                                                          

@@ -650,7 +650,7 @@ export default {
       if (response.success == true) {
         obj.status = "Hive TX Success:\nAwaiting Layer 2 confirmation...";
         obj.delay = 100000;
-        obj.link = "https://hiveblocks.com/tx/" + response.result.id;
+        obj.link = "https://hivehub.dev/tx/" + response.result.id;
         obj.txid = response.result.id;
         this.ops.push(obj);
         this.cleanOps(); //also stores it in localStorage
