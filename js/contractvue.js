@@ -446,6 +446,13 @@ export default {
                                                                                 <div class="fs-3 fw-lighter">Sharing:</div>
                                                                                 <p v-if="contract.t == spkapi.name">{{pluralFiles(contract.i) ? 'This file is' : 'These files are'}} encrypted. You can add and remove accounts that can decrypt {{pluralFiles(contract.i) ? 'it' : 'them'}}.</p>
                                                                                 <p v-if="contract.t != spkapi.name">{{pluralFiles(contract.i) ? 'This file is' : 'These files are'}} encrypted and shared with the following accounts.</p>
+                                                                                
+                                                                                <!-- decrypt button -->
+                                                                                <div class="ms-auto me-auto" v-if="contract.t == spkapi.name && !contract.encryption.key">
+                                                                                        <div class="btn btn-lg btn-primary mb-2" @click="decryptKey(contract.i)">Decrypt to Modify</div>
+                                                                                </div>
+                                                                                
+                                                                                <!-- username input add -->
                                                                                 <div class="d-flex mb-2" v-if="contract.t == spkapi.name && contract.encryption.key">
                                                                                     <div class="me-1 flex-grow-1">
                                                                                         <div class="position-relative has-validation">
@@ -469,9 +476,7 @@ export default {
                                                                                     </div>
                                                                                 </div>
 
-                                                                                <div class="ms-auto me-auto" v-if="contract.t == spkapi.name && !contract.encryption.key">
-                                                                                        <div class="btn btn-sm btn-primary" @click="decryptKey(contract.i)">Decrypt to Modify</div>
-                                                                                </div>
+                                                                                
                                                                                 <!-- update button -->
                                                                                 <div class="d-flex mt-3">
                                                                                     <div v-if="unkeyed(contract.i)" @click="checkHive(contract.i)" class="mx-auto btn btn-lg btn-outline-warning"><i class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</div>
