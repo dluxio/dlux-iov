@@ -478,12 +478,11 @@ export default {
 
                                                                                 
                                                                                 <!-- update button -->
-                                                                                <div class="d-flex mt-3">
-                                                                                    <div v-if="unkeyed(contract.i)" @click="checkHive(contract.i)" class="mx-auto btn btn-lg btn-outline-warning"><i class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</div>
+                                                                                <div class="d-flex mt-3 text-center">
+                                                                                    <div v-if="unkeyed(contract.i)" class="mx-auto btn btn-lg btn-outline-warning" @click="checkHive(contract.i)"><i class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</div>
                                                                                 </div>
-                                                                                <div class="d-flex" v-if="!unkeyed(contract.i) && metaMismatch(contract.i)">
-                                                                                    <button type="button" class="btn btn-lg btn-outline-warning my-2 mx-auto" @click="update_meta(contract.i)">
-                                                                                        <i class="fa-solid fa-floppy-disk fa-fw me-1"></i>Update Sharing</button>
+                                                                                <div class="d-flex">
+                                                                                    <div v-if="!unkeyed(contract.i) && metaMismatch(contract.i)" class="btn btn-lg btn-outline-warning mx-auto" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-1"></i>Update Sharing</div>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
