@@ -470,13 +470,16 @@ export default {
                                                                                 </div>
 
                                                                                 <div class="ms-auto me-auto" v-if="contract.t == spkapi.name && !contract.encryption.key">
-                                                                                        <div class="btn btn-lg btn-light" @click="decryptKey(contract.i)">Decrypt to Modify</div>
+                                                                                        <div class="btn btn-sm btn-primary" @click="decryptKey(contract.i)">Decrypt to Modify</div>
                                                                                 </div>
                                                                                 <!-- update button -->
                                                                                 <div class="d-flex mt-3">
                                                                                     <div v-if="unkeyed(contract.i)" @click="checkHive(contract.i)" class="mx-auto btn btn-lg btn-outline-warning"><i class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</div>
                                                                                 </div>
-                                                                                
+                                                                                <div class="d-flex" v-if="!unkeyed(contract.i) && metaMismatch(contract.i)">
+                                                                                    <button type="button" class="btn btn-lg btn-outline-primary my-2 mx-auto" @click="update_meta(contract.i)">
+                                                                                        <i class="fa-solid fa-floppy-disk fa-fw me-1"></i>Update Sharing</button>
+                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     </div>
