@@ -367,53 +367,54 @@ export default {
                                                                                 <h2 class="mb-3">File{{pluralFiles(contract.i) ? '' : 's'}} </h2>
                                                                                 
                                                                                     <div class="mb-2" v-for="(size, cid, index) in contract.df">
-                                                                                        <div class="d-flex align-items-center">    
-                                                                                            <div class="d-flex mx-2">
-                                                                                                <img class="img-thumbnail bg-light" :src="smartThumb(contract.i,index,cid)" width="100px" onerror="if (this.src != '/img/other-file-type-svgrepo-com.svg') this.src = '/img/other-file-type-svgrepo-com.svg'">
-                                                                                            </div>
-                                                                                            <div class="d-flex flex-column my-auto"> 
-                                                                                                <div class="d-flex mb-1">
-                                                                                                    <div class="me-1">
+                                                                                         
+                                                                                            
+                                                                                            <div class="d-flex flex-wrap align-items-center my-auto"> 
+
+                                                                                                <div class="d-flex flex-column justify-content-center">
+                                                                                                    <a href="#/" class="no-decoration" data-bs-toggle="modal" data-bs-target="#fileModal"><img class="img-thumbnail bg-light" :src="smartThumb(contract.i,index,cid)" width="100px" onerror="if (this.src != '/img/other-file-type-svgrepo-com.svg') this.src = '/img/other-file-type-svgrepo-com.svg'"></a>
+                                                                                                    <span class="small text-center mt-1">{{size > 1 ? size/1000000 : size/1000000}} MB</span>
+                                                                                                </div>
+
+                                                                                                <div class="d-flex flex-column mb-1 mx-3">
+                                                                                                    <div class="mb-1">
                                                                                                         <div class="position-relative has-validation">
-                                                                                                            <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 1]" placeholder="File Name" pattern="[a-zA-Z0-9_\-]{3,25}" class="form-control form-control-sm bg-dark border-dark text-info">
+                                                                                                            <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 1]" placeholder="File Name" pattern="[a-zA-Z0-9]{3,25}" class="form-control form-control-sm bg-dark border-dark text-info">
                                                                                                         </div>
                                                                                                     </div>
-                                                                                                    <div class="mx-1">
+                                                                                                    <div class="mb-1">
                                                                                                         <div class="position-relative has-validation">
                                                                                                             <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 2]" placeholder="File Type" pattern="[a-zA-Z0-9]{1,4}" class="form-control form-control-sm bg-dark border-dark text-info">
                                                                                                         </div>
                                                                                                     </div>
-                                                                                                    <div class="ms-1">
+                                                                                                    <div class="mb-1">
                                                                                                         <div class="position-relative has-validation">
                                                                                                             <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 3]" placeholder="Thumbnail" pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+" class="form-control form-control-sm bg-dark border-dark text-info">
                                                                                                         </div>
                                                                                                     </div>
                                                                                                 </div>
-                                                                                                <div class="d-flex mb-1" v-if="!flagDecode(contract.m).enc">
-                                                                                                    <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="no-decoration text-break text-primary">{{cid}}
-                                                                                                    <i class="ms-2 fa-solid fa-fw fa-up-right-from-square"></i></a>
-                                                                                                    <span class="small ms-1">({{size > 1 ? size/1000000 : size/1000000}} MB)</span>
-                                                                                                </div>
-                                                                                                <div v-if="flagDecode(contract.m).enc && !contract.encryption.key" v-for="(a,b,c) in contract.encryption.accounts">
-                                                                                                    <div v-if="b == spkapi.name" class="d-flex flex-row flex-wrap mt-2"> <!-- warning class for unencrypted keys --> 
-                                                                                                        <div class="rounded bg-white text-black filter-bubble me-1 mb-1 d-flex align-items-center">
-                                                                                                            <div class="d-flex align-items-center">
-                                                                                                                <i class="fa-solid fa-key fa-fw me-1" :class="{'text-success': contract.encryption.accounts[b].enc_key, 'text-warning': !contract.encryption.accounts[b].enc_key}"></i>
-                                                                                                                <span>{{b}}</span>
-                                                                                                                <div>
-                                                                                                                    <button type="button" class="ms-2 small btn-white" @click="decryptKey(contract.i)">
-                                                                                                                        <i class="fa-solid fa-fw mx-1 fa-lock-open" aria-hidden="true"></i>
-                                                                                                                    </button>
-                                                                                                                </div>
-                                                                                                            </div>
-                                                                                                        </div>
+                                                                                                
+                                                                                                <div class="d-flex flex-column ms-auto">
+                                                                                                    <!-- link -->
+                                                                                                    <div v-if="!flagDecode(contract.m).enc">
+                                                                                                        <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="btn btn-sm btn-primary mb-1 mx-auto">File URL<i class="ms-2 fa-solid fa-fw fa-up-right-from-square"></i></a>
+                                                                                                    </div>
+                                                                                                    <!-- decrypt -->
+                                                                                                    <div v-if="flagDecode(contract.m).enc && !contract.encryption.key">
+                                                                                                        <button type="button" class="btn btn-sm btn-primary mb-1 mx-auto" @click="decryptKey(contract.i)">Decrypt</button>
+                                                                                                    </div>
+                                                                                                    <!-- download -->
+                                                                                                    <div v-if="flagDecode(contract.m).enc && contract.encryption.key">
+                                                                                                        <button type="button" class="btn btn-sm btn-primary mb-1 mx-auto" @click="downloadFile(cid, contract.i, index)">Download</button>
+                                                                                                    </div>
+                                                                                                    <!-- file detail modal -->
+                                                                                                    <div>
+                                                                                                        <button type="button" class="btn btn-sm btn-info mb-1 mx-auto" data-bs-toggle="modal" data-bs-target="#fileModal">Edit Metadata</button>
                                                                                                     </div>
                                                                                                 </div>
-                                                                                                <div class="d-flex" v-if="flagDecode(contract.m).enc && contract.encryption.key">
-                                                                                                    <button type="button" class="btn btn-sm btn-primary my-2 mx-auto" @click="downloadFile(cid, contract.i, index)">Download</button>
-                                                                                                </div>
+                                                                                                
                                                                                             </div>
-                                                                                        </div>
+                                                                                        
                                                                                     </div>
                                                                                 
                                                                                 <div class="d-flex" v-if="metaMismatch(contract.i)">
@@ -462,7 +463,7 @@ export default {
                                                                                         <div class="d-flex align-items-center">
                                                                                             <i class="fa-solid fa-key fa-fw me-1" :class="{'text-success': contract.encryption.accounts[b].enc_key, 'text-warning': !contract.encryption.accounts[b].enc_key}"></i>
                                                                                             <span>{{b}}</span>
-                                                                                            <div v-if="spkapi.name != contract.t || b != contract.t"><button type="button" class="ms-2 btn-close small btn-close-white" @click="delUser(contract.i, b)"></button></div>
+                                                                                            <div v-if="contract.encryption.key && b != contract.t"><button type="button" class="ms-2 btn-close small btn-close-white" @click="delUser(contract.i, b)"></button></div>
                                                                                             <div v-if="b == spkapi.name && !contract.encryption.key"><button type="button" class="ms-2 small btn-white" @click="decryptKey(contract.i)"><i class="fa-solid fa-fw mx-1 fa-lock-open" aria-hidden="true"></i></button></div>
                                                                                         </div>
                                                                                     </div>
@@ -553,6 +554,11 @@ export default {
                                                                         <i class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>End Contract</button>
                                                                     </div>
                                                                 </div>
+
+   
+                                                               
+
+                                                                
                                                             </td>
                                                         </tr>
                                                     </tbody>
@@ -562,13 +568,16 @@ export default {
                                     </tr>
                                 </tbody>
                             </table>
+                            
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 </div>
+
 `,
     props: {
         account: {
