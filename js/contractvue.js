@@ -455,9 +455,7 @@ export default {
                                                                                         <div class="btn btn-lg btn-light" @click="addUser(contract.i)"><i class="fa-solid fa-fw fa-plus"></i></div>
                                                                                     </div>
                                                                                 </div>
-                                                                                <div class="ms-1" v-if="contract.t == spkapi.name && !contract.encryption.key">
-                                                                                        <div class="btn btn-lg btn-light" @click="decryptKey(contract.i)">Decrypt to Modify</div>
-                                                                                </div>
+                                                                                
                                                                                 <!-- shared accounts -->
                                                                                 <div class="d-flex flex-row flex-wrap mt-2">
                                                                                     <div  v-for="(a,b,c) in contract.encryption.accounts" class="rounded bg-white text-black filter-bubble me-1 mb-1 d-flex align-items-center" > <!-- warning class for unencrypted keys --> 
@@ -468,6 +466,10 @@ export default {
                                                                                             <div v-if="b == spkapi.name && !contract.encryption.key"><button type="button" class="ms-2 small btn-white" @click="decryptKey(contract.i)"><i class="fa-solid fa-fw mx-1 fa-lock-open" aria-hidden="true"></i></button></div>
                                                                                         </div>
                                                                                     </div>
+                                                                                </div>
+
+                                                                                <div class="ms-auto me-auto" v-if="contract.t == spkapi.name && !contract.encryption.key">
+                                                                                        <div class="btn btn-lg btn-light" @click="decryptKey(contract.i)">Decrypt to Modify</div>
                                                                                 </div>
                                                                                 <!-- update button -->
                                                                                 <div class="d-flex mt-3">
