@@ -359,7 +359,7 @@ export default {
 
                                                                     <!-- extension -->
                                                                     <div v-if="contract.c == 3">
-                                                                        <div class="alert alert-info align-items-center mx-lg-5 d-flex card card-body my-3">
+                                                                        <div class="alert alert-primary align-items-center mx-lg-5 d-flex my-3">
                                                                             <div class="mx-auto">
                                                                                 <extension-vue :node-view="nodeview"
                                                                                 :contract="contract" :sstats="sstats"
