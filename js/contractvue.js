@@ -359,7 +359,7 @@ export default {
 
                                                                     <!-- extension -->
                                                                     <div v-if="contract.c == 3">
-                                                                        <div class="alert alert-info align-items-center mx-lg-5 d-flex bg-img-none bg-dark my-3">
+                                                                        <div class="alert alert-info align-items-center mx-lg-5 d-flex card card-body my-3">
                                                                             <div class="mx-auto">
                                                                                 <extension-vue :node-view="nodeview"
                                                                                 :contract="contract" :sstats="sstats"
@@ -369,7 +369,7 @@ export default {
                                                                         </div>
                                                                     </div>
 
-
+                                                                    
                                                                     <!-- files list -->
                                                                     <div v-if="contract.df">
                                                                         <div class="card px-4 py-2 mb-2 bg-img-none bg-blur-darkg mx-lg-5">
