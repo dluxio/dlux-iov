@@ -171,7 +171,7 @@ export default {
                         <!-- shared accounts -->
                         <div class="d-flex flex-row flex-wrap" >
                             <div v-for="(a,b,c) in encryption.accounts" class="rounded text-black filter-bubble bg-white me-1 mb-1 d-flex align-items-center"> <!-- warning class for unencrypted keys --> 
-                               <i class="fa-solid fa-key fa-fw me-1"  :class="{'text-success': encryption.accounts[b].enc_key, 'text-warning': !encryption.accounts[b].enc_key}"  ></i>  
+                               <i class="fa-solid fa-key fa-fw me-1"  :class="{'text-primary': encryption.accounts[b].enc_key, 'text-warning': !encryption.accounts[b].enc_key}"  ></i>  
                             <span>{{b}}</span> 
                                 <div v-if="b != contract.t"><button type="button" class="ms-1 btn-close small btn-close-white" @click="delUser(b)"></button></div>
                             </div>
