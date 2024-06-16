@@ -18,7 +18,7 @@ export default {
                             Contract</div>
                         <ol type="1" class="my-1">
                             <div v-for="(acc, prop, index) in contract.n">
-                                <li><a :href="'/@' + acc " class="no-decoration text-primary">@{{acc}}</a></li>
+                                <li><a :href="'/@' + acc " class="no-decoration text-info">@{{acc}}</a></li>
                                 <div v-if="index == Object.keys(contract.n).length - 1 && index + 1 < contract.p"
                                     v-for="i in (contract.p - (index + 1))">
                                     <li>Open</li>
@@ -56,7 +56,7 @@ export default {
                     <div class="text-lead text-uppercase text-white-50 text-center pb-05 mt-1 border-bottom">Storage Nodes</div>
                     <ol type="1" class="my-1">
                         <div v-for="(acc, prop, index) in contract.n">
-                            <li><a :href="'/@' + acc " class="no-decoration text-primary">@{{acc}}</a></li>
+                            <li><a :href="'/@' + acc " class="no-decoration text-info">@{{acc}}</a></li>
                             <div v-if="index == Object.keys(contract.n).length - 1 && index + 1 < contract.p"
                                 v-for="i in (contract.p - (index + 1))">
                                 <li>Open</li>
@@ -93,19 +93,19 @@ export default {
                     <input name="time" v-model="contract.extend" @change="customTime = false;updateCost(contract.i)" title="1 Day"
                         class="btn-check" :id="'option1-' + contract.i" type="radio" value="1"
                         checked>
-                    <label class="btn btn-sm btn-outline-primary" :for="'option1-' + contract.i">1D</label>
+                    <label class="btn btn-sm btn-outline-info" :for="'option1-' + contract.i">1D</label>
                     <input name="time" v-model="contract.extend" @change="customTime = false;updateCost(contract.i)" title="1 Week"
                         class="btn-check" :id="'option2-' + contract.i" type="radio" value="7"
                     >
-                    <label class="btn btn-sm btn-outline-primary" :for="'option2-' + contract.i">1W</label>
+                    <label class="btn btn-sm btn-outline-info" :for="'option2-' + contract.i">1W</label>
                     <input name="time" v-model="contract.extend" @change="customTime = false;updateCost(contract.i)" title="1 Month"
                         class="btn-check" :id="'option3-' + contract.i" type="radio" value="30"
                     >
-                    <label class="btn btn-sm btn-outline-primary" :for="'option3-' + contract.i">1M</label>
+                    <label class="btn btn-sm btn-outline-info" :for="'option3-' + contract.i">1M</label>
                     <input name="time" v-model="contract.extend" @change="customTime = false;updateCost(contract.i)" title="1 Year"
                         class="btn-check" :id="'option4-' + contract.i" type="radio" value="365"
                     >
-                    <label class="btn btn-sm btn-outline-primary" :for="'option4-' + contract.i">1Y</label>
+                    <label class="btn btn-sm btn-outline-info" :for="'option4-' + contract.i">1Y</label>
                 </div>
                 
                 
@@ -113,16 +113,16 @@ export default {
                 <!-- input -->
                 <div class=" mt-1">
                     <div class="position-relative">
-                        <input type="number" step="1" min="1" class="pe-4 form-control btn-sm text-start border-primary text-primary"
+                        <input type="number" step="1" min="1" class="pe-4 form-control btn-sm text-start border-info text-info"
                             v-model="contract.extend" @change="updateCost(contract.i)" style="min-width: 60px;" placeholder="0">
-                            <span class="position-absolute text-primary me-1 end-0 top-50 translate-middle-y">
+                            <span class="position-absolute text-info me-1 end-0 top-50 translate-middle-y">
                             Day<span v-if="contract.extend != 1">s</span>
                         </span>
                     </div>
                 </div>
                 
                 <!-- add node button-->
-                <div class="d-flex align-items-center text-wrap ms-auto mt-1 btn btn-sm btn-outline-primary p-0">
+                <div class="d-flex align-items-center text-wrap ms-auto mt-1 btn btn-sm btn-outline-info p-0">
                     <label :for="'spread-' + contract.i" role="button" class="ps-1">&nbsp;</label>
                     <input class="form control" :id="'spread-' + contract.i" type="checkbox" role="button"
                         v-model="spread" @change="updateCost(contract.i)">
