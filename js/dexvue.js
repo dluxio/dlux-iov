@@ -895,6 +895,7 @@ var app = new Vue({
             memo: JSON.stringify({
               rate: this.buyPrice,
               hours: this.buyHours,
+              token: this.TOKEN,
             }),
           },
           txid: "buydex",
@@ -912,6 +913,7 @@ var app = new Vue({
             memo: JSON.stringify({
               rate: this.buyPrice,
               hours: this.buyHours,
+              token: this.TOKEN,
             }),
           },
           txid: "buydex",
