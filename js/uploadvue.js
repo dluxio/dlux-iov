@@ -178,12 +178,12 @@ export default {
                         </div>
                         <!-- update button -->
                         <div class="d-flex mt-3">
-                            <a href="#/" v-if="unkeyed" @click="checkHive()" class="mx-auto btn btn-lg btn-outline-warning"><i class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</a>
+                            <button v-if="unkeyed" @click="checkHive()" class="mx-auto btn btn-lg btn-outline-warning"><i class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</button>
                         </div>
                     </div>
                     <div class="d-flex mb-1" v-if="contract.c == 1">
-                      <a href="#/" class="ms-auto me-auto mt-2 btn btn-lg btn-info" :class="{'disabled': !reallyReady}" :disabled="!reallyReady" @click="signNUpload()"><i
-                              class="fa-solid fa-file-signature fa-fw me-2"></i>Sign and Upload</a>
+                      <button class="ms-auto me-auto mt-2 btn btn-lg btn-info" :class="{'disabled': !reallyReady}" :disabled="!reallyReady" @click="signNUpload()"><i
+                              class="fa-solid fa-file-signature fa-fw me-2"></i>Sign and Upload</button>
                       </div>
                 </div>
             </div>
