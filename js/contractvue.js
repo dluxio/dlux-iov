@@ -416,6 +416,57 @@ export default {
                                                                                             </div>
                                                                                         
                                                                                     </div>
+
+                                                                                    <!-- encrypted sharing -->
+                                                                                    <div v-if="flagDecode(contract.m).enc">
+                                                                                        <div class="card card-body align-items-center mx-lg-5 my-3">
+                                                                                            <div class="d-flex flex-column flex-grow-1 mx-1">
+                                                                                                <div class="fs-3 fw-lighter">Sharing:</div>
+                                                                                                <p v-if="contract.t == spkapi.name">{{pluralFiles(contract.i) ? 'This file is' : 'These files are'}} encrypted. You can add and remove accounts that can decrypt {{pluralFiles(contract.i) ? 'it' : 'them'}}.</p>
+                                                                                                <p v-if="contract.t != spkapi.name">{{pluralFiles(contract.i) ? 'This file is' : 'These files are'}} encrypted and shared with the following accounts.</p>
+                                                                                                
+                                                                                                <!-- decrypt button -->
+                                                                                                <div class="mb-2" v-if="contract.t == spkapi.name && !contract.encryption.key">
+                                                                                                        <div class="w-100 btn btn-lg btn-dark" @click="decryptKey(contract.i)">Decrypt to Modify<i class="fa-solid fa-fw ms-2 fa-lock-open"></i></div>
+                                                                                                </div>
+                                                                                                
+                                                                                                <!-- username input add -->
+                                                                                                <div class="d-flex mb-2" v-if="contract.t == spkapi.name && contract.encryption.key">
+                                                                                                    <div class="me-1 flex-grow-1">
+                                                                                                        <div class="position-relative has-validation">
+                                                                                                            <input autocapitalize="off" placeholder="username" class="form-control border-light bg-darkg text-info" v-model="contract.encryption.input" @keyup.enter="addUser(contract.i)">
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    <div class="ms-1">
+                                                                                                        <div class="btn btn-lg btn-light" @click="addUser(contract.i)"><i class="fa-solid fa-fw fa-plus"></i></div>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                                
+                                                                                                <!-- shared accounts -->
+                                                                                                <div class="d-flex flex-row flex-wrap">
+                                                                                                    <div v-for="(a,b,c) in contract.encryption.accounts">
+                                                                                                        <div :class="{'bg-white' : contract.encryption.key && b != contract.t, 'bg-white-50' : !contract.encryption.key || b == contract.t}" class="rounded text-black filter-bubble me-1 mb-1 d-flex align-items-center">    
+                                                                                                            <div class="d-flex align-items-center">
+                                                                                                                <i class="fa-solid fa-key fa-fw me-1" :class="{'text-primary': contract.encryption.accounts[b].enc_key, 'text-warning': !contract.encryption.accounts[b].enc_key}"></i>
+                                                                                                                <span>{{b}}</span>
+                                                                                                                <div v-if="contract.t == spkapi.name && contract.encryption.key && b != contract.t"><button type="button" class="ms-2 btn-close small btn-close-white" @click="delUser(contract.i, b)"></button></div>
+                                                                                                                <div v-if="b == spkapi.name && !contract.encryption.key"><button type="button" class="d-none ms-2 small btn-white" @click="decryptKey(contract.i)"><i class="fa-solid fa-fw mx-1 fa-lock-open" aria-hidden="true"></i></button></div>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </div>
+
+                                                                                                
+                                                                                                <!-- update button -->
+                                                                                                <div class="d-flex mt-3 text-center">
+                                                                                                    <button v-if="unkeyed(contract.i)" class="mx-auto btn btn-lg btn-outline-warning" @click="checkHive(contract.i)"><i class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</button>
+                                                                                                </div>
+                                                                                                <div class="d-flex">
+                                                                                                    <button v-if="!unkeyed(contract.i) && metaMismatch(contract.i)" class="btn btn-lg btn-outline-warning mx-auto" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
                                                                                 
                                                                                 <div class="d-flex" v-if="metaMismatch(contract.i)">
                                                                                     <button type="button" class="btn btn-lg btn-outline-warning my-2 mx-auto" @click="update_meta(contract.i)">
@@ -439,56 +490,7 @@ export default {
                                                                     </div>
 
 
-                                                                   <!-- encrypted sharing -->
-                                                                    <div v-if="flagDecode(contract.m).enc">
-                                                                        <div class="card card-body align-items-center mx-lg-5 my-3">
-                                                                            <div class="d-flex flex-column flex-grow-1 mx-1">
-                                                                                <div class="fs-3 fw-lighter">Sharing:</div>
-                                                                                <p v-if="contract.t == spkapi.name">{{pluralFiles(contract.i) ? 'This file is' : 'These files are'}} encrypted. You can add and remove accounts that can decrypt {{pluralFiles(contract.i) ? 'it' : 'them'}}.</p>
-                                                                                <p v-if="contract.t != spkapi.name">{{pluralFiles(contract.i) ? 'This file is' : 'These files are'}} encrypted and shared with the following accounts.</p>
-                                                                                
-                                                                                <!-- decrypt button -->
-                                                                                <div class="mb-2" v-if="contract.t == spkapi.name && !contract.encryption.key">
-                                                                                        <div class="w-100 btn btn-lg btn-dark" @click="decryptKey(contract.i)">Decrypt to Modify<i class="fa-solid fa-fw ms-2 fa-lock-open"></i></div>
-                                                                                </div>
-                                                                                
-                                                                                <!-- username input add -->
-                                                                                <div class="d-flex mb-2" v-if="contract.t == spkapi.name && contract.encryption.key">
-                                                                                    <div class="me-1 flex-grow-1">
-                                                                                        <div class="position-relative has-validation">
-                                                                                            <input autocapitalize="off" placeholder="username" class="form-control border-light bg-darkg text-info" v-model="contract.encryption.input" @keyup.enter="addUser(contract.i)">
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div class="ms-1">
-                                                                                        <div class="btn btn-lg btn-light" @click="addUser(contract.i)"><i class="fa-solid fa-fw fa-plus"></i></div>
-                                                                                    </div>
-                                                                                </div>
-                                                                                
-                                                                                <!-- shared accounts -->
-                                                                                <div class="d-flex flex-row flex-wrap">
-                                                                                    <div v-for="(a,b,c) in contract.encryption.accounts">
-                                                                                        <div :class="{'bg-white' : contract.encryption.key && b != contract.t, 'bg-white-50' : !contract.encryption.key || b == contract.t}" class="rounded text-black filter-bubble me-1 mb-1 d-flex align-items-center">    
-                                                                                            <div class="d-flex align-items-center">
-                                                                                                <i class="fa-solid fa-key fa-fw me-1" :class="{'text-primary': contract.encryption.accounts[b].enc_key, 'text-warning': !contract.encryption.accounts[b].enc_key}"></i>
-                                                                                                <span>{{b}}</span>
-                                                                                                <div v-if="contract.t == spkapi.name && contract.encryption.key && b != contract.t"><button type="button" class="ms-2 btn-close small btn-close-white" @click="delUser(contract.i, b)"></button></div>
-                                                                                                <div v-if="b == spkapi.name && !contract.encryption.key"><button type="button" class="d-none ms-2 small btn-white" @click="decryptKey(contract.i)"><i class="fa-solid fa-fw mx-1 fa-lock-open" aria-hidden="true"></i></button></div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-
-                                                                                
-                                                                                <!-- update button -->
-                                                                                <div class="d-flex mt-3 text-center">
-                                                                                    <button v-if="unkeyed(contract.i)" class="mx-auto btn btn-lg btn-outline-warning" @click="checkHive(contract.i)"><i class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</button>
-                                                                                </div>
-                                                                                <div class="d-flex">
-                                                                                    <button v-if="!unkeyed(contract.i) && metaMismatch(contract.i)" class="btn btn-lg btn-outline-warning mx-auto" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
+                                                                   
 
                                                                     
 
