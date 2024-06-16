@@ -3,23 +3,24 @@ export default {
     <form id="contractForm" class="d-flex flex-column flex-grow-1">
 
      <!-- node banner -->
-            <div v-if="hasStorage && !nodeview" class="alert alert-secondary d-flex align-items-center py-1 ps-2 pe-1 mx-2 mt-2">
+            <div v-if="hasStorage && !nodeview" :class="{'alert-success' : isStored, 'alert-danger' : !isStored}" class="alert d-flex align-items-center py-1 ps-2 pe-1 mx-2 mt-2 mb-1">
                 <div class="me-1">{{isStored ? 'Your node is storing this contract' : 'Your node is not storing this contract'}}</div>
                 <div class="ms-auto d-flex flex-wrap align-items-center justify-content-center mb-1">
-
+                    <button style="max-width:100px;" type="button" class="flex-grow-1 btn btn-sm btn-warning ms-1 mt-1"
+                        @click="">
+                        <i class="fa-solid fa-flag fa-fw me-1"></i>Flag
+                    </button>
                     <button style="max-width:100px;" type="button" @click="store(contract.i, isStored)"
                         class="flex-grow-1 ms-1 mt-1 btn btn-sm text-nowrap"
                         :class="{'btn-success': !isStored, 'btn-danger': isStored}">
                         <span v-if="!isStored"><i class="fa-solid fa-square-plus fa-fw me-1"></i>Add</span>
                         <span v-if="isStored"><i class="fa-solid fa-trash-can fa-fw me-1"></i>Remove</span>
                     </button>
-                    <button style="max-width:100px;" type="button" class="flex-grow-1 btn btn-sm btn-warning ms-1 mt-1"
-                        @click="">
-                        <i class="fa-solid fa-flag fa-fw me-1"></i>Flag</button>
+                    
                 </div>
             </div>
 
-        <div class="px-3 py-2 d-flex flex-grow-1">
+        <div class="d-flex flex-grow-1">
 
             <!-- detail banner -->
             <div class="d-flex d-none flex-column mb-2">
@@ -53,8 +54,9 @@ export default {
 
            
 
-            <div class="d-flex flex-grow-1 flex-wrap">
-                <div class="d-flex flex-column">
+            <div class="d-flex flex-grow-1 flex-wrap mt-1">
+
+                <div class="d-flex mx-2 flex-column">
                     <div class="fs-1 fw-bold">SPK Network</div>
                     <!-- storage nodes -->
                     <div class="d-flex flex-column justify-content-around px-2 mb-2" style="max-width: 300px">
