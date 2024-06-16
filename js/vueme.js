@@ -1027,11 +1027,11 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
       this.toSign = {
         type: "cja",
         cj: cja,
-        id: `spkcc_register_authority`,
+        id: `spkccT_register_authority`,
         msg: `Registering: ${this.account}:${this.accountinfo.posting.key_auths[0][0]}`,
         ops: ["getSapi"],
         api: sapi,
-        txid: `spkcc_register_authority`,
+        txid: `spkccT_register_authority`,
       };
       setTimeout(() => {this.getSPKUser()}, 7000);
     },

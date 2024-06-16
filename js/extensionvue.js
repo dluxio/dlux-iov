@@ -242,7 +242,7 @@ export default {
                 cj: {
                   items: [contract]
                 },
-                id: `spkcc_${!remove ? 'store' : 'remove'}`,
+                id: `spkccT_${!remove ? 'store' : 'remove'}`,
                 msg: `Storing ${contract}...`,
                 ops: ["getTokenUser"],
                 api: "https://spktest.dlux.io",
@@ -325,7 +325,7 @@ export default {
                   file_owner: contract.t,
                   power: this.spread ? 1 : 0,
                 },
-                id: `spkcc_extend`,
+                id: `spkccT_extend`,
                 msg: `Extending ${contract.i}...`,
                 ops: ["getTokenUser"],
                 api: "https://spktest.dlux.io",
@@ -340,7 +340,7 @@ export default {
                 cj: {
                   id: contract.i,
                 },
-                id: `spkcc_contract_close`,
+                id: `spkccT_contract_close`,
                 msg: `Canceling ${contract.i}...`,
                 ops: ["getTokenUser", "getSapi"],
                 api: "https://spktest.dlux.io",

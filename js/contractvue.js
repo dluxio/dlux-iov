@@ -964,11 +964,11 @@ export default {
                 this.toSign = {
                     type: "cja",
                     cj: cja,
-                    id: `spkcc_update_metadata`,
+                    id: `spkccT_update_metadata`,
                     msg: `Updating Metadata for Contract: ${contract}`,
                     ops: ["getSapi"],
                     api: this.sapi,
-                    txid: `spkcc_update_meta`,
+                    txid: `spkccT_update_meta`,
                 };
                 resolve('OK')
         })
@@ -986,11 +986,11 @@ export default {
             this.toSign = {
                 type: "cja",
                 cj: cja,
-                id: `spkcc_register_authority`,
+                id: `spkccT_register_authority`,
                 msg: `Registering: ${this.account}:${this.accountinfo.posting.key_auths[0][0]}`,
                 ops: ["getSapi"],
                 api: this.sapi,
-                txid: `spkcc_register_authority`,
+                txid: `spkccT_register_authority`,
             };
         },
         addAssets(id, contract) {
@@ -1204,7 +1204,7 @@ export default {
                     file_owner: contract.t,
                     power: this.spread ? 1 : 0,
                 },
-                id: `spkcc_extend`,
+                id: `spkccT_extend`,
                 msg: `Extending ${contract.i}...`,
                 ops: ["getTokenUser"],
                 api: "https://spktest.dlux.io",
@@ -1219,7 +1219,7 @@ export default {
                 cj: {
                     items: [contract]
                 },
-                id: `spkcc_${!remove ? 'store' : 'remove'}`,
+                id: `spkccT_${!remove ? 'store' : 'remove'}`,
                 msg: `Storing ${contract}...`,
                 ops: ["getTokenUser"],
                 api: "https://spktest.dlux.io",
@@ -1429,7 +1429,7 @@ export default {
                 cj: {
                     id: contract.i,
                 },
-                id: `spkcc_contract_close`,
+                id: `spkccT_contract_close`,
                 msg: `Canceling ${contract.i}...`,
                 ops: ["getTokenUser", "getSapi"],
                 api: "https://spktest.dlux.io",

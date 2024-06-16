@@ -376,7 +376,7 @@ methods: {
               file_owner: contract.t,
               power: up ? 1 : 0,
             },
-            id: `spkcc_extend`,
+            id: `spkccT_extend`,
             msg: `Extending ${contract}...`,
             ops: ["getTokenUser"],
             api: "https://spktest.dlux.io",
@@ -450,7 +450,7 @@ methods: {
             cj: {
               items: [contract]
             },
-            id: `spkcc_${!remove ? 'store' : 'remove'}`,
+            id: `spkccT_${!remove ? 'store' : 'remove'}`,
             msg: `Storing ${contract}...`,
             ops: ["getTokenUser"],
             api: "https://spktest.dlux.io",

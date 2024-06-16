@@ -65,7 +65,7 @@
           var op = [_config.config.account, [["custom_json", {
             "required_auths": [_config.config.account],
             "required_posting_auths": [],
-            "id": `spkcc_${test ? 'T' : ''}send`,
+            "id": `spkcc${test ? 'T' : ''}_${test ? 'T' : ''}send`,
             "json": JSON.stringify(tx)
           }]], "active"];
           _config.config.broadcast(op).then(res => {
@@ -93,7 +93,7 @@
           var op = [_config.config.account, [["custom_json", {
             "required_auths": [_config.config.account],
             "required_posting_auths": [],
-            "id": `spkcc_${test ? 'T' : ''}spk_send`,
+            "id": `spkcc${test ? 'T' : ''}_${test ? 'T' : ''}spk_send`,
             "json": JSON.stringify(tx)
           }]], "active"];
           _config.config.broadcast(op).then(res => {
@@ -135,7 +135,7 @@
           var op = [_config.config.account, [["custom_json", {
             "required_auths": [_config.config.account],
             "required_posting_auths": [],
-            "id": `spkcc_remove`,
+            "id": `spkcc${test ? 'T' : ''}_remove`,
             "json": JSON.stringify(tx)
           }]], "active"];
           _config.config.broadcast(op).then(res => {
@@ -168,7 +168,7 @@
           var op = [_config.config.account, [["custom_json", {
             "required_auths": [_config.config.account],
             "required_posting_auths": [],
-            "id": `spkcc_register_authority`,
+            "id": `spkcc${test ? 'T' : ''}_register_authority`,
             "json": JSON.stringify(tx)
           }]], "active"];
           _config.config.broadcast(op).then(res => {
@@ -202,7 +202,7 @@
         var op = [_config.config.account, [["custom_json", {
           "required_auths": [_config.config.account],
           "required_posting_auths": [],
-          "id": `spkcc_shares_claim`,
+          "id": `spkcc${test ? 'T' : ''}_shares_claim`,
           "json": JSON.stringify(tx)
         }]], "active"];
         _config.config.broadcast(op).then(res => {
@@ -227,7 +227,7 @@
           var op = [_config.config.account, [["custom_json", {
             "required_auths": [_config.config.account],
             "required_posting_auths": [],
-            "id": "spkcc_channel_open",
+            "id": "spkcc${test ? 'T' : ''}_channel_open",
             "json": `{\"broca\":\"${parseInt(broca)}\",\"broker\":\"${broker}\",\"to\":\"${uploader}\",\"contract\":\"${contract}\",\"slots\":\"${slots}\"}`
           }]], "active"];
           _config.config.broadcast(op).then(res => {
@@ -247,7 +247,7 @@
         var op = [_config.config.account, [["custom_json", {
           "required_auths": [_config.config.account],
           "required_posting_auths": [],
-          "id": "spkcc_extend",
+          "id": "spkcc${test ? 'T' : ''}_extend",
           "json": `{\"broca\":${parseInt(broca)},\"id\":\"${cid}\",\"file_owner\":\"${fileOwner}\",\"power\":0}`
         }]], "active"];
         _config.config.broadcast(op).then(res => {
@@ -289,7 +289,7 @@
         var op = [_config.config.account, [["custom_json", {
           "required_auths": [_config.config.account],
           "required_posting_auths": [],
-          "id": "spkcc_dex_sell",
+          "id": "spkcc${test ? 'T' : ''}_dex_sell",
           "json": `{\"larynx\":${amount},\"${type}\":${rate},\"hours\":${hours}}`
         }]], "active"];
         _config.config.broadcast(op).then(res => {
@@ -306,7 +306,7 @@
         var op = [_config.config.account, [["custom_json", {
           "required_auths": [_config.config.account],
           "required_posting_auths": [],
-          "id": "spkcc_dex_clear",
+          "id": "spkcc${test ? 'T' : ''}_dex_clear",
           "json": `{\"txid\":\"${txid}\"}`
         }]], "active"];
         _config.config.broadcast(op).then(res => {
@@ -323,7 +323,7 @@
         var op = [_config.config.account, [["custom_json", {
           "required_auths": [_config.config.account],
           "required_posting_auths": [],
-          "id": "spkcc_register_service",
+          "id": "spkcc${test ? 'T' : ''}_register_service",
           "json": `{\"amount\":${parseInt(amount)},\"type\":\"${type}\",\"id\":\"${id}\",\"api\":\"${api}\"}`
         }]], "active"];
         _config.config.broadcast(op).then(res => {
@@ -341,7 +341,7 @@
         var op = [_config.config.account, [["custom_json", {
           "required_auths": [_config.config.account],
           "required_posting_auths": [],
-          "id": "spkcc_register_service_type",
+          "id": "spkcc${test ? 'T' : ''}_register_service_type",
           "json": "{\"amount\":${parseInt(amount)},\"type\":\"${type}\",\"Long_Name\":\"${name}\"}"
         }]], "active"];
         _config.config.broadcast(op).then(res => {
@@ -358,7 +358,7 @@
         var op = [_config.config.account, [["custom_json", {
           "required_auths": [_config.config.account],
           "required_posting_auths": [],
-          "id": "spkcc_power_down",
+          "id": "spkcc${test ? 'T' : ''}_power_down",
           "json": `{\"amount\":${parseInt(amount)}}`
         }]], "active"];
         _config.config.broadcast(op).then(res => {
@@ -375,7 +375,7 @@
         var op = [_config.config.account, [["custom_json", {
           "required_auths": [_config.config.account],
           "required_posting_auths": [],
-          "id": "spkcc_power_down",
+          "id": "spkcc${test ? 'T' : ''}_power_down",
           "json": `{\"amount\":${parseInt(amount)}}`
         }]], "active"];
         _config.config.broadcast(op).then(res => {
@@ -392,7 +392,7 @@
         var op = [_config.config.account, [["custom_json", {
           "required_auths": [_config.config.account],
           "required_posting_auths": [],
-          "id": "spkcc_power_up",
+          "id": "spkcc${test ? 'T' : ''}_power_up",
           "json": `{\"amount\":${parseInt(amount)}}`
         }]], "active"];
         _config.config.broadcast(op).then(res => {
@@ -409,7 +409,7 @@
         var op = [_config.config.account, [["custom_json", {
           "required_auths": [_config.config.account],
           "required_posting_auths": [],
-          "id": "spkcc_gov_up",
+          "id": "spkcc${test ? 'T' : ''}_gov_up",
           "json": `{\"amount\":${parseInt(amount)}}`
         }]], "active"];
         _config.config.broadcast(op).then(res => {
@@ -426,7 +426,7 @@
         var op = [_config.config.account, [["custom_json", {
           "required_auths": [_config.config.account],
           "required_posting_auths": [],
-          "id": "spkcc_gov_down",
+          "id": "spkcc${test ? 'T' : ''}_gov_down",
           "json": `{\"amount\":${parseInt(amount)}}`
         }]], "active"];
         _config.config.broadcast(op).then(res => {
@@ -443,7 +443,7 @@
         var op = [_config.config.account, [["custom_json", {
           "required_auths": [_config.config.account],
           "required_posting_auths": [],
-          "id": "spkcc_spk_up",
+          "id": "spkcc${test ? 'T' : ''}_spk_up",
           "json": `{\"amount\":${parseInt(amount)}}`
         }]], "active"];
         _config.config.broadcast(op).then(res => {
@@ -460,7 +460,7 @@
         var op = [_config.config.account, [["custom_json", {
           "required_auths": [_config.config.account],
           "required_posting_auths": [],
-          "id": "spkcc_spk_down",
+          "id": "spkcc${test ? 'T' : ''}_spk_down",
           "json": `{\"amount\":${parseInt(amount)}}`
         }]], "active"];
         _config.config.broadcast(op).then(res => {
@@ -477,7 +477,7 @@
         var op = [_config.config.account, [["custom_json", {
           "required_auths": [_config.config.account],
           "required_posting_auths": [],
-          "id": "spkcc_spk_vote",
+          "id": "spkcc${test ? 'T' : ''}_spk_vote",
           "json": JSON.stringify(votes)
         }]], "active"];
         _config.config.broadcast(op).then(res => {
@@ -524,7 +524,7 @@
           var op = [_config.config.account, [["custom_json", {
             "required_auths": [_config.config.account],
             "required_posting_auths": [],
-            "id": `spkcc_store`,
+            "id": `spkcc${test ? 'T' : ''}_store`,
             "json": JSON.stringify(tx)
           }]], "active"];
           _config.config.broadcast(op).then(res => {
@@ -550,7 +550,7 @@
         var op = [_config.config.account, [["custom_json", {
           "required_auths": [_config.config.account],
           "required_posting_auths": [],
-          "id": `spkcc_val_vote`,
+          "id": `spkcc${test ? 'T' : ''}_val_vote`,
           "json": JSON.stringify(tx)
         }]], "active"];
         _config.config.broadcast(op).then(res => {
@@ -572,7 +572,7 @@
         var op = [_config.config.account, [["custom_json", {
           "required_auths": [_config.config.account],
           "required_posting_auths": [],
-          "id": `spkcc_validator_burn`,
+          "id": `spkcc${test ? 'T' : ''}_validator_burn`,
           "json": JSON.stringify(tx)
         }]], "active"];
         _config.config.broadcast(op).then(res => {

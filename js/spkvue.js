@@ -865,11 +865,11 @@ createApp({
       this.toSign = {
         type: "cja",
         cj: cja,
-        id: `spkcc_spk_vote`,
+        id: `spkcc${test ? 'T' : ''}_spk_vote`,
         msg: `Voting...`,
         ops: ["getSapi"],
         api: sapi,
-        txid: `spkcc_spk_vote`,
+        txid: `spkcc${test ? 'T' : ''}_spk_vote`,
       };
     },
     updatePubkey() {
@@ -879,11 +879,11 @@ createApp({
       this.toSign = {
         type: "cja",
         cj: cja,
-        id: `spkcc_register_authority`,
+        id: `spkcc${test ? 'T' : ''}_register_authority`,
         msg: `Registering: ${this.account}:${this.accountinfo.posting.key_auths[0][0]}`,
         ops: ["getSapi"],
         api: sapi,
-        txid: `spkcc_register_authority`,
+        txid: `spkcc${test ? 'T' : ''}_register_authority`,
       };
     },
     getSetPhotos(s, c) {

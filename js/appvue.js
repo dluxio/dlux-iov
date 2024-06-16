@@ -581,7 +581,7 @@ createApp({
             file_owner: contract.t,
             power: this.up ? 1 : 0,
           },
-          id: `spkcc_extend`,
+          id: `spkccT_extend`,
           msg: `Extending ${contract}...`,
           ops: ["getTokenUser"],
           api: "https://spktest.dlux.io",
