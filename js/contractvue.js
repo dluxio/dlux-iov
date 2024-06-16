@@ -418,8 +418,8 @@ export default {
                                                                                     </div>
                                                                                 
                                                                                 <div class="d-flex" v-if="metaMismatch(contract.i)">
-                                                                                    <button type="button" class="btn btn-sm btn-primary my-2 mx-auto" @click="update_meta(contract.i)">
-                                                                                        <i class="fa-solid fa-floppy-disk fa-fw me-1"></i>Save Metadata</button>
+                                                                                    <button type="button" class="btn btn-lg btn-outline-warning my-2 mx-auto" @click="update_meta(contract.i)">
+                                                                                        <i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save</button>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -484,7 +484,7 @@ export default {
                                                                                     <a href="javascript:void(0)" v-if="unkeyed(contract.i)" class="mx-auto btn btn-lg btn-outline-warning text-warning" @click="checkHive(contract.i)"><i class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</a>
                                                                                 </div>
                                                                                 <div class="d-flex">
-                                                                                    <a href="javascript:void(0)" v-if="!unkeyed(contract.i) && metaMismatch(contract.i)" class="btn btn-lg btn-outline-warning text-warning mx-auto" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-1"></i>Update Sharing</a>
+                                                                                    <a href="javascript:void(0)" v-if="!unkeyed(contract.i) && metaMismatch(contract.i)" class="btn btn-lg btn-outline-warning text-warning mx-auto" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save</a>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
