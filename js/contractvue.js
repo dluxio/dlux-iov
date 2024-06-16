@@ -465,7 +465,7 @@ export default {
                                                                                 </div>
                                                                                 
                                                                                 <!-- shared accounts -->
-                                                                                <div class="d-flex flex-row flex-wrap mt-2">
+                                                                                <div class="d-flex flex-row flex-wrap">
                                                                                     <div v-for="(a,b,c) in contract.encryption.accounts">
                                                                                         <div :class="{'bg-white' : contract.encryption.key && b != contract.t, 'bg-white-50' : !contract.encryption.key || b == contract.t}" class="rounded text-black filter-bubble me-1 mb-1 d-flex align-items-center">    
                                                                                             <div class="d-flex align-items-center">
