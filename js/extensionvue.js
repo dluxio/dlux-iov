@@ -53,7 +53,7 @@ export default {
 
            
 
-            <div class="d-flex flex-grow-1">
+            <div class="d-flex flex-grow-1 flex-wrap">
                 <div class="d-flex flex-column">
                     <div class="fs-1 fw-bold">SPK Network</div>
                     <!-- storage nodes -->
