@@ -359,7 +359,7 @@ export default {
 
                                                                     <!-- extension -->
                                                                     <div v-if="contract.c == 3" class="mx-1">
-                                                                        <div class="align-items-center mx-lg-5 d-flex my-3 gradient-border bg-dark">
+                                                                        <div class="align-items-center mx-lg-5 d-flex mb-3 gradient-border bg-dark">
                                                                             <div class="mx-auto">
                                                                                 <extension-vue :node-view="nodeview"
                                                                                 :contract="contract" :sstats="sstats"
