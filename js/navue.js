@@ -657,7 +657,7 @@ export default {
         this.statusPinger(response.result.id, obj.api, 0);
       }
     },
-    statusPinger(txid, api, r) {
+    statusPingerT(txid, api, r) {
       if (r > 30) return;
       fetch(api + "/api/status/" + txid)
         .then((re) => re.json())
