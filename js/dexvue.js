@@ -1403,7 +1403,7 @@ var app = new Vue({
           localStorage.removeItem(`hhp:${user}`);
         }
           fetch("https://hive-api.dlux.io", {
-            body: `{"jsonrpc":"2.0", "method":"condenser_api.list_proposal_votes", "params":[["${user}", 234], 1, "by_voter_proposal", "ascending", "active"], "id":1}`,
+            body: `{"jsonrpc":"2.0", "method":"condenser_api.list_proposal_votes", "params":[["${user}", 275], 1, "by_voter_proposal", "ascending", "active"], "id":1}`,
             headers: {
               "Content-Type": "application/x-www-form-urlencoded",
             },
