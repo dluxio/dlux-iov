@@ -418,10 +418,10 @@ export default {
                                                                                     </div>
 
                                                                                     <!-- encrypted sharing -->
-                                                                                    <div v-if="flagDecode(contract.m).enc">
-                                                                                        <div class="card card-body align-items-center mx-lg-5 my-3">
-                                                                                            <div class="d-flex flex-column flex-grow-1 mx-1">
-                                                                                                <div class="fs-3 fw-lighter">Sharing:</div>
+                                                                                    <div v-if="flagDecode(contract.m).enc" class="mt-3">
+                                                                                        
+                                                                                            <div class="d-flex flex-column flex-grow-1">
+                                                                                                <div class="fs-3 fw-lighter">Sharing</div>
                                                                                                 <p v-if="contract.t == spkapi.name">{{pluralFiles(contract.i) ? 'This file is' : 'These files are'}} encrypted. You can add and remove accounts that can decrypt {{pluralFiles(contract.i) ? 'it' : 'them'}}.</p>
                                                                                                 <p v-if="contract.t != spkapi.name">{{pluralFiles(contract.i) ? 'This file is' : 'These files are'}} encrypted and shared with the following accounts.</p>
                                                                                                 
@@ -465,7 +465,7 @@ export default {
                                                                                                     <button v-if="!unkeyed(contract.i) && metaMismatch(contract.i)" class="btn btn-lg btn-outline-warning mx-auto" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
                                                                                                 </div>
                                                                                             </div>
-                                                                                        </div>
+                                                                                        
                                                                                     </div>
                                                                                 
                                                                                 <div class="d-flex" v-if="metaMismatch(contract.i)">
