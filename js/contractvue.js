@@ -433,7 +433,7 @@ export default {
                                                                                             <div class="d-flex flex-column flex-grow-1">
                                                                                                 <div class="fs-3 fw-lighter">Sharing</div>
                                                                                                 <p v-if="contract.t == spkapi.name">{{pluralFiles(contract.i) ? 'These files are' : 'This file is'}} encrypted. You can add and remove accounts that can decrypt {{pluralFiles(contract.i) ? 'them' : 'it'}}.</p>
-                                                                                                <p v-if="contract.t != spkapi.name">{{pluralFiles(contract.i) ? 'These files are' : 'This file is'}} encrypted and shared with the following account{{pluralFiles(contract.i) ? 's' : ''}}.</p>
+                                                                                                <p v-if="contract.t != spkapi.name">{{pluralFiles(contract.i) ? 'These files are' : 'This file is'}} encrypted and shared with the following:</p>
                                                                                                 
                                                                                                 <!-- decrypt button -->
                                                                                                 <div class="mb-2" v-if="contract.t == spkapi.name && !contract.encryption.key">
