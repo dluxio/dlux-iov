@@ -449,7 +449,7 @@ export default {
                                                                                 
                                                                                 <!-- decrypt button -->
                                                                                 <div class="ms-auto me-auto mb-2" v-if="contract.t == spkapi.name && !contract.encryption.key">
-                                                                                        <div class="btn btn-lg btn-light" @click="decryptKey(contract.i)">Decrypt to Modify<i class="fa-solid fa-fw ms-2 fa-lock-open"></i></div>
+                                                                                        <div class="w-100 btn btn-lg btn-outline-dark" @click="decryptKey(contract.i)">Decrypt to Modify<i class="fa-solid fa-fw ms-2 fa-lock-open"></i></div>
                                                                                 </div>
                                                                                 
                                                                                 <!-- username input add -->
