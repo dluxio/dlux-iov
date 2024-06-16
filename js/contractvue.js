@@ -467,15 +467,17 @@ export default {
                                                                                                 </div>
 
                                                                                                 
-                                                                                                <!-- update button -->
-                                                                                                <div class="d-flex mt-3 text-center">
-                                                                                                    <button v-if="unkeyed(contract.i)" class="mx-auto btn btn-lg btn-outline-warning" type="button" @click="checkHive(contract.i)"><i class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</button>
-                                                                                                </div>
-                                                                                                <div class="d-flex">
-                                                                                                    <button v-if="metaMismatch(contract.i)" class="btn btn-lg btn-outline-warning mx-auto" type="button" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
-                                                                                                </div>
+                                                                                               
                                                                                             </div>
                                                                                         
+                                                                                    </div>
+
+                                                                                     <!-- update button -->
+                                                                                    <div class="d-flex mt-3 text-center">
+                                                                                        <button v-if="unkeyed(contract.i)" class="mx-auto btn btn-lg btn-outline-warning" type="button" @click="checkHive(contract.i)"><i class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</button>
+                                                                                    </div>
+                                                                                    <div class="d-flex">
+                                                                                        <button v-if="metaMismatch(contract.i)" class="btn btn-lg btn-outline-warning mx-auto" type="button" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
                                                                                     </div>
                                                                             </div>
                                                                         </div>
