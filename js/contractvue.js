@@ -942,29 +942,31 @@ export default {
             if (this.contractIDs[id].m != `${this.newMeta[id].join(',')}`) return true
         },
         update_meta(contract) {
-            console.log(this.newMeta[contract], contract)
-            var enc_string = ''
-            for (var acc in this.contractIDs[contract].encryption.accounts) {
-                if (this.contractIDs[contract].encryption.accounts[acc].enc_key) enc_string += `${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`
-            }
-            //remove last ;
-            enc_string = enc_string.slice(0, -1)
-            this.newMeta[contract][0] = enc_string
-            var meta = this.newMeta[contract]
-            var cja = {
-                id: contract,
-                m: meta.join(',')
-            };
-            this.toSign = {
-                type: "cja",
-                cj: cja,
-                id: `spkcc_update_metadata`,
-                msg: `Updating Metadata for Contract: ${contract}`,
-                ops: ["getSapi"],
-                api: this.sapi,
-                txid: `spkcc_update_meta`,
-            };
-            return false
+            return new Promise((resolve, reject) => {
+                console.log(this.newMeta[contract], contract)
+                var enc_string = ''
+                for (var acc in this.contractIDs[contract].encryption.accounts) {
+                    if (this.contractIDs[contract].encryption.accounts[acc].enc_key) enc_string += `${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`
+                }
+                //remove last ;
+                enc_string = enc_string.slice(0, -1)
+                this.newMeta[contract][0] = enc_string
+                var meta = this.newMeta[contract]
+                var cja = {
+                    id: contract,
+                    m: meta.join(',')
+                };
+                this.toSign = {
+                    type: "cja",
+                    cj: cja,
+                    id: `spkcc_update_metadata`,
+                    msg: `Updating Metadata for Contract: ${contract}`,
+                    ops: ["getSapi"],
+                    api: this.sapi,
+                    txid: `spkcc_update_meta`,
+                };
+                resolve('OK')
+        })
         },
         done() {
             this.$emit('done')
