@@ -356,9 +356,19 @@ export default {
                                                                         <upload-vue :user="saccountapi" :propcontract="contract" @tosign="toSign=$event" @done="done()" />
                                                                     </div>
 
-                                                                    
 
-                                                                    
+                                                                    <!-- extension -->
+                                                                    <div v-if="contract.c == 3">
+                                                                        <div class="alert alert-info align-items-center mx-lg-5 d-flex bg-img-none bg-dark my-3">
+                                                                            <div class="mx-auto">
+                                                                                <extension-vue :node-view="nodeview"
+                                                                                :contract="contract" :sstats="sstats"
+                                                                                :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
+                                                                                @tosign="toSign=$event"></extension-vue>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
 
                                                                     <!-- files list -->
                                                                     <div v-if="contract.df">
@@ -472,17 +482,7 @@ export default {
                                                                     </div>
 
 
-                                                                    <!-- extension -->
-                                                                    <div v-if="contract.c == 3">
-                                                                        <div class="alert alert-info align-items-center mx-lg-5 d-flex bg-img-none my-3">
-                                                                            <div class="mx-auto">
-                                                                                <extension-vue :node-view="nodeview"
-                                                                                :contract="contract" :sstats="sstats"
-                                                                                :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
-                                                                                @tosign="toSign=$event"></extension-vue>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
+                                                                    
 
 
                                                                    
