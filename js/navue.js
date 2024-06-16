@@ -592,7 +592,7 @@ export default {
         this.HAS_.ws_status = "This Browser does not support HAS (WebSocket)";
       }
     },
-    HKCsignT(op) {
+    HKCsign(op) {
       return new Promise((resolve, reject) => {
         if (window.hive_keychain) {
           if (typeof op[1] == "string") op[1] = JSON.parse(op[1]);
