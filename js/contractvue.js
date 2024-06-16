@@ -453,7 +453,7 @@ export default {
                                                                                                 </div>
                                                                                                 
                                                                                                 <!-- shared accounts -->
-                                                                                                <div class="d-flex flex-row flex-wrap">
+                                                                                                <div class="d-flex flex-row flex-wrap mb-2">
                                                                                                     <div v-for="(a,b,c) in contract.encryption.accounts">
                                                                                                         <div :class="{'bg-white' : contract.encryption.key && b != contract.t, 'bg-white-50' : !contract.encryption.key || b == contract.t}" class="rounded text-black filter-bubble me-1 mb-1 d-flex align-items-center">    
                                                                                                             <div class="d-flex align-items-center">
@@ -468,8 +468,8 @@ export default {
 
                                                                                                  <!-- encrypt / save button -->
                                                                                                 <div class="d-flex text-center">
-                                                                                                    <button v-if="unkeyed(contract.i)" class="mx-auto my-2 btn btn-lg btn-outline-warning" type="button" @click="checkHive(contract.i)"><i class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</button>
-                                                                                                    <button v-if="metaMismatch(contract.i) && !unkeyed(contract.i)" class="btn btn-lg btn-outline-warning mx-auto my-2" type="button" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
+                                                                                                    <button v-if="unkeyed(contract.i)" class="mx-auto mb-2 btn btn-lg btn-outline-warning" type="button" @click="checkHive(contract.i)"><i class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</button>
+                                                                                                    <button v-if="metaMismatch(contract.i) && !unkeyed(contract.i)" class="btn btn-lg btn-outline-warning mx-auto mb-2" type="button" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
                                                                                                 </div>
 
                                                                                                 
@@ -480,7 +480,7 @@ export default {
 
                                                                                      <!-- save button -->
                                                                                     <div class="d-flex text-center">
-                                                                                        <button v-if="metaMismatch(contract.i) && !flagDecode(contract.m).enc" class="btn btn-lg btn-outline-warning mx-auto my-2" type="button" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
+                                                                                        <button v-if="metaMismatch(contract.i) && !flagDecode(contract.m).enc" class="btn btn-lg btn-outline-warning mx-auto mb-2" type="button" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
                                                                                     </div>
                                                                             </div>
                                                                         </div>
