@@ -20,7 +20,7 @@ export default {
     <div v-if="saccountapi.pubKey == 'NA'" class="d-flex">
         <div class="d-flex justify-content-center p-3">
             <div class="text-center" style="max-width: 600px;">
-                <p class="lead">Join the SPK Network to store your files on IPFS</p>
+                <p class="lead">Click Register Account to join the SPK Network and store your files on IPFS</p>
                 <div class="d-flex justify-content-center">
                 <button type="button" class="btn btn-primary" @click="updatePubkey()">
                 <i class="fa-solid fa-user-plus fa-fw me-1"></i> Register Account
