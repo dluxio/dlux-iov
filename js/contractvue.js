@@ -964,6 +964,7 @@ export default {
                 api: this.sapi,
                 txid: `spkcc_update_meta`,
             };
+            return false
         },
         done() {
             this.$emit('done')
