@@ -1025,7 +1025,7 @@ export default {
             } index
         },
         pluralFiles(id){
-            return this.newMeta[id].length > 5
+            return this.newMeta[id].length > 7
         },
         getSapi(user = this.account) {
             if (user) fetch(this.sapi + "/@" + user)
