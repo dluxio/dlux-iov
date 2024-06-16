@@ -479,7 +479,7 @@ export default {
 
                                                                                      <!-- save button -->
                                                                                     <div class="d-flex">
-                                                                                        <button v-if="metaMismatch(contract.i)" class="btn btn-lg btn-outline-warning mx-auto" type="button" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
+                                                                                        <button v-if="metaMismatch(contract.i) && !unkeyed(contract.i)" class="btn btn-lg btn-outline-warning mx-auto" type="button" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
                                                                                     </div>
                                                                             </div>
                                                                         </div>
