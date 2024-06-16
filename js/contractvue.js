@@ -358,14 +358,14 @@ export default {
 
 
                                                                     <!-- extension -->
-                                                                    <div v-if="contract.c == 3" class="mx-1">
-                                                                        <div class="align-items-center mx-lg-5 d-flex mb-3 gradient-border bg-dark">
-                                                                            <div class="mx-auto">
+                                                                    <div v-if="contract.c == 3" class="mx-1 d-flex flex-grow-1">
+                                                                        <div class="align-items-center mx-lg-5 d-flex flex-grow-1 mb-3 gradient-border bg-dark">
+                                                                            
                                                                                 <extension-vue :node-view="nodeview"
                                                                                 :contract="contract" :sstats="sstats"
                                                                                 :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
                                                                                 @tosign="toSign=$event"></extension-vue>
-                                                                            </div>
+                                                                            
                                                                         </div>
                                                                     </div>
 
