@@ -481,10 +481,10 @@ export default {
                                                                                 
                                                                                 <!-- update button -->
                                                                                 <div class="d-flex mt-3 text-center">
-                                                                                    <a href="#!" v-if="unkeyed(contract.i)" class="mx-auto btn btn-lg btn-outline-warning text-warning" @click="checkHive(contract.i)"><i class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</a>
+                                                                                    <a href="#" v-if="unkeyed(contract.i)" class="mx-auto btn btn-lg btn-outline-warning text-warning" @click="checkHive(contract.i)"><i class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</a>
                                                                                 </div>
                                                                                 <div class="d-flex">
-                                                                                    <a href="#!" v-if="!unkeyed(contract.i) && metaMismatch(contract.i)" class="btn btn-lg btn-outline-warning text-warning mx-auto" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-1"></i>Update Sharing</a>
+                                                                                    <a href="#" v-if="!unkeyed(contract.i) && metaMismatch(contract.i)" class="btn btn-lg btn-outline-warning text-warning mx-auto" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-1"></i>Update Sharing</a>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
