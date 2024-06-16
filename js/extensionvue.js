@@ -3,7 +3,7 @@ export default {
     <form id="contractForm" class="d-flex flex-column flex-grow-1">
 
      <!-- node banner -->
-            <div v-if="hasStorage && !nodeview" class="alert alert-secondary d-flex align-items-center py-1 ps-2 pe-1 mx-2 mb-2">
+            <div v-if="hasStorage && !nodeview" class="alert alert-secondary d-flex align-items-center py-1 ps-2 pe-1 mx-2 mt-2">
                 <div class="me-1">{{isStored ? 'Your node is storing this contract' : 'Your node is not storing this contract'}}</div>
                 <div class="ms-auto d-flex flex-wrap align-items-center justify-content-center mb-1">
 
