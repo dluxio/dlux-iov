@@ -467,11 +467,6 @@ export default {
                                                                                             </div>
                                                                                         
                                                                                     </div>
-                                                                                
-                                                                                <div class="d-flex" v-if="metaMismatch(contract.i)">
-                                                                                    <button type="button" class="btn btn-lg btn-outline-warning my-2 mx-auto" @click="update_meta(contract.i)">
-                                                                                        <i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
-                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     </div>
