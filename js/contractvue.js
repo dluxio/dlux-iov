@@ -467,7 +467,7 @@ export default {
                                                                                 <!-- shared accounts -->
                                                                                 <div class="d-flex flex-row flex-wrap mt-2">
                                                                                     <div v-for="(a,b,c) in contract.encryption.accounts" :class="{'bg-white' : contract.encryption.key && b != contract.t, 'bg-white-50' : !contract.encryption.key || b == contract.t}" class="rounded text-black filter-bubble me-1 mb-1 d-flex align-items-center" > <!-- warning class for unencrypted keys --> 
-                                                                                        <div class="d-flex align-items-center">
+                                                                                        <div v-if="b != contract.t" class="d-flex align-items-center">
                                                                                             <i class="fa-solid fa-key fa-fw me-1" :class="{'text-success': contract.encryption.accounts[b].enc_key, 'text-warning': !contract.encryption.accounts[b].enc_key}"></i>
                                                                                             <span>{{b}}</span>
                                                                                             <div v-if="contract.t == spkapi.name && contract.encryption.key && b != contract.t"><button type="button" class="ms-2 btn-close small btn-close-white" @click="delUser(contract.i, b)"></button></div>
