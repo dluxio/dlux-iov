@@ -17,7 +17,7 @@ export default {
         return {
           silent: false,
           items: [],
-          choices: this.[this.prop_type],
+          choices: this[this.prop_type],
           renderChoiceLimit: -1,
           maxItemCount: 2,
           addItems: true,
