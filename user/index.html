@@ -1326,10 +1326,10 @@
                             <!-- choices-js -->
                             <div class="text-black">
                                 <label class="text-white">Choose Tags</label>
-                                <select multiple id="select-tag" ></select>
+                                <choices-vue ref="select-tag"></choices-vue>
                             
                                 <label class="text-white">Choose Labels</label>
-                                <select multiple id="select-label"></select>
+                                <choices-vue ref="select-label"></choices-vue>
                             </div>
 
                             <div class="card my-3">
@@ -1609,122 +1609,6 @@
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-    <script>
-         document.addEventListener('DOMContentLoaded', function () {
-            const selectLabel = document.getElementById('select-label');
-            new Choices(selectLabel, {
-                silent: false,
-                items: [],
-                choices: [{
-                    value: 'photography',
-                    label: 'Photography',
-                    selected: false,
-                    disabled: false,
-                    },
-                    {
-                    value: 'work',
-                    label: 'Work',
-                    selected: false,
-                    disabled: false,
-                    customProperties: {
-                        description: 'Custom description about Option 2',
-                        random: 'Another random custom property'
-                    },
-                    }],
-                renderChoiceLimit: -1,
-                maxItemCount: 2,
-                addItems: true,
-                addItemFilter: null,
-                removeItems: true,
-                removeItemButton: true,
-                editItems: true,
-                allowHTML: false,
-                duplicateItemsAllowed: true,
-                delimiter: ',',
-                paste: true,
-                searchEnabled: true,
-                searchChoices: true,
-                searchFloor: 1,
-                searchResultLimit: 4,
-                searchFields: ['label', 'value'],
-                position: 'auto',
-                resetScrollPosition: true,
-                shouldSort: true,
-                shouldSortItems: false,
-                sorter: function(a, b) {
-                    return b.label.length - a.label.length;
-                    },
-                placeholder: true,
-                placeholderValue: null,
-                searchPlaceholderValue: null,
-                prependValue: null,
-                appendValue: null,
-                renderSelectedChoices: 'auto',
-                loadingText: 'Loading...',
-                noResultsText: 'No results found',
-                noChoicesText: 'No choices to choose from',
-                itemSelectText: 'Press to select',
-                uniqueItemText: 'Only unique values can be added',
-                customAddItemText: 'Only values matching specific conditions can be added'
-            });
-            const selectTag = document.getElementById('select-tag');
-            new Choices(selectTag, {
-                silent: false,
-                items: [],
-                choices: [{
-                    value: 'encrypted',
-                    label: 'Encrypted',
-                    selected: false,
-                    disabled: false,
-                    },
-                    {
-                    value: 'nsfw',
-                    label: 'NSFW',
-                    selected: false,
-                    disabled: false,
-                    customProperties: {
-                        description: 'Custom description about Option 2',
-                        random: 'Another random custom property'
-                    },
-                    }],
-                renderChoiceLimit: -1,
-                maxItemCount: 2,
-                addItems: true,
-                addItemFilter: null,
-                removeItems: true,
-                removeItemButton: true,
-                editItems: true,
-                allowHTML: false,
-                duplicateItemsAllowed: true,
-                delimiter: ',',
-                paste: true,
-                searchEnabled: true,
-                searchChoices: true,
-                searchFloor: 1,
-                searchResultLimit: 4,
-                searchFields: ['label', 'value'],
-                position: 'auto',
-                resetScrollPosition: true,
-                shouldSort: true,
-                shouldSortItems: false,
-                sorter: function(a, b) {
-                    return b.label.length - a.label.length;
-                    },
-                placeholder: true,
-                placeholderValue: null,
-                searchPlaceholderValue: null,
-                prependValue: null,
-                appendValue: null,
-                renderSelectedChoices: 'auto',
-                loadingText: 'Loading...',
-                noResultsText: 'No results found',
-                noChoicesText: 'No choices to choose from',
-                itemSelectText: 'Press to select',
-                uniqueItemText: 'Only unique values can be added',
-                customAddItemText: 'Only values matching specific conditions can be added'
-            });
-         });
-    </script>
 
 </body>
 

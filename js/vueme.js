@@ -8,6 +8,7 @@ import ModalVue from "/js/modalvue.js";
 import Marker from "/js/marker-min.js";
 import Ratings from "/js/ratings-min.js";
 import MDE from "/js/mde-min.js";
+import ChoicesVue from '/js/choices-vue.js';
 import Replies from "/js/replies-min.js";
 import CardVue from "/js/cardvue.js";
 import Tagify from "/js/tagifyvue.js";
@@ -886,6 +887,7 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
     "fttransfer": FTTransfer,
     "nftdetail": NFTDetail,
     "tagify": Tagify,
+    "choices-vue": ChoicesVue,
   },
   methods: {
     getSetPhotos(s, c) {
