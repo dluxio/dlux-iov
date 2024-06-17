@@ -65,7 +65,7 @@ export default {
           uniqueItemText: 'Only unique values can be added',
           customAddItemText: 'Only values matching specific conditions can be added',
           callbackOnCreateTemplates: (template) => {
-            this.passData(template)
+            console.log(template)
           }
         }
       }
