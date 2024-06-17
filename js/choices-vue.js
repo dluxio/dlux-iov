@@ -65,7 +65,7 @@ export default {
           uniqueItemText: 'Only unique values can be added',
           customAddItemText: 'Only values matching specific conditions can be added',
           callbackOnCreateTemplates: function (template) {
-            this.$emit("data", template)
+            this.passData(template)
           }
         }
       }
@@ -78,6 +78,9 @@ export default {
     }
   },
   methods: {
+    passData(d){
+      this.$emit("data", template)
+    },
     setUp() {
 
       if (!Choices) this.msg = 'Choices not loaded'
