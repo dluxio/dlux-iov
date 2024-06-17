@@ -18,7 +18,7 @@ export default {
           silent: false,
           items: [],
           renderChoiceLimit: -1,
-          maxItemCount: 2,
+          maxItemCount: -1,
           addItems: true,
           addItemFilter: null,
           removeItems: true,
