@@ -407,7 +407,7 @@ export default {
                                                                                                     </div>
                                                                                                 </div>
                                                                                                 
-                                                                                                <div class="d-flex flex-column"> 
+                                                                                                <div class="d-flex flex-column flex-grow-1 me-2"> 
                                                                                                     <!-- choices-js -->
                                                                                                     <div class="text-black">
                                                                                                         <label class="text-white">Choose Tags</label>
