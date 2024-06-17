@@ -63,7 +63,10 @@ export default {
           noChoicesText: 'No choices to choose from',
           itemSelectText: 'Press to select',
           uniqueItemText: 'Only unique values can be added',
-          customAddItemText: 'Only values matching specific conditions can be added'
+          customAddItemText: 'Only values matching specific conditions can be added',
+          callbackOnCreateTemplates: function (template) {
+            this.$emit("data", template)
+          }
         }
       }
     },

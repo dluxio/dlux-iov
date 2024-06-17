@@ -1821,6 +1821,9 @@ function giveFT(setname, to, qty, callback){
       if (prefix == "duat_") return "https://inconceivable.hivehoneycomb.com";
       else return "";
     },
+    log(d){
+      console.log(d)
+    },
     meltNFT(item) {
       var cja = {
           set: item.setname,
