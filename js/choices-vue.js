@@ -65,13 +65,14 @@ export default {
           uniqueItemText: 'Only unique values can be added',
           customAddItemText: 'Only values matching specific conditions can be added'
         }
-    }
+      }
+    },
   },
   data() {
     return {
       msg: "",
       Choices: null,
-    };
+    }
   },
   methods: {
     setUp() {
@@ -93,4 +94,4 @@ export default {
   mounted() {
     this.setUp()
   }
-};
+}
