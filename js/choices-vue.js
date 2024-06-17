@@ -78,9 +78,9 @@ export default {
     setUp() {
 
       if (!Choices) this.msg = 'Choices not loaded'
-      else if (this.ref == '') this.msg = 'Ref not set'
+      else if (this.reference == '') this.msg = 'Ref not set'
       else {
-        this.Choices = new Choices(this.$refs[this.ref], this.opts)
+        this.Choices = new Choices(this.$refs[this.reference], this.opts)
       }
     },
   },
