@@ -90,13 +90,14 @@ export default {
       }
     },
   },
-  // watch: {
-  //   'prop_value': {
-  //     handler: function () {
-  //     },
-  //     deep: true
-  //   },
-  // },
+  watch: {
+    'Choices': {
+      handler: function (o,n) {
+        console.log(o,n)
+      },
+      deep: true
+    },
+  },
   mounted() {
     this.setUp()
   }
