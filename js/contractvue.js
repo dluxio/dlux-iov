@@ -4,6 +4,7 @@ import FilesVue from "/js/filesvue.js";
 import UploadVue from "/js/uploadvue.js";
 import ModalVue from "/js/modalvue.js";
 import PostVue from "/js/postvue.js";
+import ChoicesVue from '/js/choices-vue.js';
 
 
 export default {
@@ -14,7 +15,7 @@ export default {
         "upload-vue": UploadVue,
         "modal-vue": ModalVue,
         "post-vue": PostVue,
-
+        "choices-vue": ChoicesVue
     },
     template: `
     <div class="d-flex justify-content-center mt-2">
