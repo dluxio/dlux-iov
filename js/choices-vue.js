@@ -64,7 +64,7 @@ export default {
           itemSelectText: 'Press to select',
           uniqueItemText: 'Only unique values can be added',
           customAddItemText: 'Only values matching specific conditions can be added',
-          callbackOnCreateTemplates: function (template) {
+          callbackOnCreateTemplates: (template) => {
             this.passData(template)
           }
         }
