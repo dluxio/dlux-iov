@@ -17,7 +17,6 @@ export default {
         return {
           silent: false,
           items: [],
-          choices: this[this.prop_type],
           renderChoiceLimit: -1,
           maxItemCount: 2,
           addItems: true,
@@ -88,11 +87,12 @@ export default {
       this.$emit("data", template)
     },
     setUp() {
-
+      var opts = this.opts
+      opts.choices = this[this.prop_type]
       if (!Choices) this.msg = 'Choices not loaded'
       else if (this.reference == '') this.msg = 'Ref not set'
       else {
-        this.Choices = new Choices(this.$refs[this.reference], this.opts)
+        this.Choices = new Choices(this.$refs[this.reference], opts)
       }
     },
   },
