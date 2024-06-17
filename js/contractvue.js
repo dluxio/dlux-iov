@@ -411,10 +411,10 @@ export default {
                                                                                                     <!-- choices-js -->
                                                                                                     <div class="text-black">
                                                                                                         <label class="text-white">Choose Tags</label>
-                                                                                                        <choices-vue ref="select-tag" prop_type;"tags"></choices-vue>
+                                                                                                        <choices-vue ref="select-tag" prop_type="tags"></choices-vue>
                                                                                                     
                                                                                                         <label class="text-white">Choose Labels</label>
-                                                                                                        <choices-vue ref="select-label" prop_type;"labels></choices-vue>
+                                                                                                        <choices-vue ref="select-label" prop_type="labels></choices-vue>
                                                                                                     </div>
                                                                                                 </div> 
 
