@@ -5,6 +5,7 @@ import UploadVue from "/js/uploadvue.js";
 import ModalVue from "/js/modalvue.js";
 import PostVue from "/js/postvue.js";
 
+
 export default {
     components: {
         "pop-vue": Pop,
@@ -12,7 +13,8 @@ export default {
         "files-vue": FilesVue,
         "upload-vue": UploadVue,
         "modal-vue": ModalVue,
-        "post-vue": PostVue
+        "post-vue": PostVue,
+
     },
     template: `
     <div class="d-flex justify-content-center mt-2">
@@ -423,38 +425,10 @@ export default {
                                                                                                     </select>
                                                                                                 </div>
 
-                                                                                                <div class="choices" data-type="select-multiple" role="combobox" aria-autocomplete="list" aria-haspopup="true"
-                                                                                                    aria-expanded="false">
-                                                                                                    <div class="choices__inner"><select class="form-control choices__input" name="choices-multiple-remove-button"
-                                                                                                            id="choices-multiple-remove-button" placeholder="This is a placeholder" multiple="" hidden="" tabindex="-1"
-                                                                                                            data-choice="active">
-                                                                                                            <option value="Choice 1" data-custom-properties="[object Object]">Choice 1</option>
-                                                                                                        </select>
-                                                                                                        <div class="choices__list choices__list--multiple">
-                                                                                                            <div class="choices__item choices__item--selectable" data-item="" data-id="1" data-value="Choice 1"
-                                                                                                                data-custom-properties="[object Object]" aria-selected="true" data-deletable="">Choice 1<button
-                                                                                                                    type="button" class="choices__button" aria-label="Remove item: 'Choice 1'" data-button="">Remove
-                                                                                                                    item</button></div>
-                                                                                                        </div><input type="search" name="search_terms" class="choices__input choices__input--cloned" autocomplete="off"
-                                                                                                            spellcheck="false" role="textbox" aria-autocomplete="list" aria-label="null">
-                                                                                                    </div>
-                                                                                                    <div class="choices__list choices__list--dropdown" aria-expanded="false">
-                                                                                                        <div class="choices__list" aria-multiselectable="true" role="listbox">
-                                                                                                            <div id="choices--choices-multiple-remove-button-item-choice-2"
-                                                                                                                class="choices__item choices__item--choice choices__item--selectable is-highlighted" role="option"
-                                                                                                                data-choice="" data-id="2" data-value="Choice 2" data-select-text="Press to select"
-                                                                                                                data-choice-selectable="" aria-selected="true">Choice 2</div>
-                                                                                                            <div id="choices--choices-multiple-remove-button-item-choice-3"
-                                                                                                                class="choices__item choices__item--choice choices__item--selectable" role="option" data-choice=""
-                                                                                                                data-id="3" data-value="Choice 3" data-select-text="Press to select" data-choice-selectable="">Choice 3
-                                                                                                            </div>
-                                                                                                            <div id="choices--choices-multiple-remove-button-item-choice-4"
-                                                                                                                class="choices__item choices__item--choice choices__item--selectable" role="option" data-choice=""
-                                                                                                                data-id="4" data-value="Choice 4" data-select-text="Press to select" data-choice-selectable="">Choice 4
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                </div>
+
+                                                                                               
+
+                                                                                               
                                                                                                 
                                                                                                 <div class="d-flex flex-column ms-auto">
                                                                                                     <!-- link -->
@@ -906,20 +880,20 @@ export default {
         },
         downloadFile(cid, id, index) {
             fetch(`https://ipfs.dlux.io/ipfs/${cid}`)
-            .then((response) => response.text())
-            .then((blob) => {
-                const name = this.newMeta[id][index * 4 + 1] + '.' + this.newMeta[id][index * 4 + 2] || 'file'
-                if (!this.contractIDs[id].encryption.key) return alert('Not Decrypted')
-                blob = this.AESDecrypt(blob, this.contractIDs[id].encryption.key);
-                blob = new Blob([blob]);
-                var url = window.URL.createObjectURL(blob);
-                var a = document.createElement('a');
-                a.href = url;
-                a.download = name;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-            });
+                .then((response) => response.text())
+                .then((blob) => {
+                    const name = this.newMeta[id][index * 4 + 1] + '.' + this.newMeta[id][index * 4 + 2] || 'file'
+                    if (!this.contractIDs[id].encryption.key) return alert('Not Decrypted')
+                    blob = this.AESDecrypt(blob, this.contractIDs[id].encryption.key);
+                    blob = new Blob([blob]);
+                    var url = window.URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = name;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                });
         },
         smartThumb(contract, index, cid) {
             var thumb = this.newMeta[contract][index * 4 + 3] || ''
@@ -1023,7 +997,7 @@ export default {
                     txid: `spkccT_update_meta`,
                 };
                 resolve('OK')
-        })
+            })
         },
         done() {
             this.$emit('done')
@@ -1084,7 +1058,7 @@ export default {
                     break;
             } index
         },
-        pluralFiles(id){
+        pluralFiles(id) {
             return this.newMeta[id].length > 7
         },
         getSapi(user = this.account) {
@@ -1560,6 +1534,7 @@ export default {
                 this.contractIDs[this.prop_contracts[node].i].index = this.prop_contracts.length - 1;
             }
         }
+        
     },
 };
 
