@@ -25,6 +25,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
     <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
+    <!-- Include Choices CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    
     <script>
         var hash
         marked.use(markedLinkifyIt({
@@ -133,16 +136,18 @@
                         <div class="mt-5 mb-2">
                             <ul id="usertabs" class="nav nav-tabs" role="tablist">
                                 <li class="nav-item"> <a class="nav-link active" id="blogtab" role="tab"
-                                        data-bs-toggle="tab" aria-controls="blog" aria-expanded="true" @click="activeTab = 'blog'"
-                                        href="#blog">Blog</a>
+                                        data-bs-toggle="tab" aria-controls="blog" aria-expanded="true"
+                                        @click="activeTab = 'blog'" href="#blog">Blog</a>
                                 </li>
-                                <li class="nav-item"> <a class="nav-link" id="wallettab" role="tab" data-bs-toggle="tab" @click="activeTab = 'wallet'"
-                                        aria-controls="wallet" aria-expanded="true" href="#wallet">Wallet</a></li>
-                                <li class="nav-item"> <a class="nav-link" id="inventorytab" role="tab" @click="activeTab = 'inventory'"
-                                        data-bs-toggle="tab" aria-controls="inventory" aria-expanded="true"
-                                        href="#inventory">Inventory</a></li>
-                                <li class="nav-item"> <a class="nav-link" id="filestab" role="tab" data-bs-toggle="tab" @click="activeTab = 'files'"
-                                        aria-controls="files" aria-expanded="true" href="#files">Files</a></li>
+                                <li class="nav-item"> <a class="nav-link" id="wallettab" role="tab" data-bs-toggle="tab"
+                                        @click="activeTab = 'wallet'" aria-controls="wallet" aria-expanded="true"
+                                        href="#wallet">Wallet</a></li>
+                                <li class="nav-item"> <a class="nav-link" id="inventorytab" role="tab"
+                                        @click="activeTab = 'inventory'" data-bs-toggle="tab" aria-controls="inventory"
+                                        aria-expanded="true" href="#inventory">Inventory</a></li>
+                                <li class="nav-item"> <a class="nav-link" id="filestab" role="tab" data-bs-toggle="tab"
+                                        @click="activeTab = 'files'" aria-controls="files" aria-expanded="true"
+                                        href="#files">Files</a></li>
                                 <!--<li class="nav-item d-none" v-show="me"> <a class="nav-link" id="settingstab" role="tab"
                                     data-bs-toggle="tab" aria-controls="settings" aria-expanded="true"
                                     href="#settings">Settings</a></li>-->
@@ -173,14 +178,16 @@
                     <div role="tabpanel" class="tab-pane fade" id="wallet" aria-labelledby="wallettab">
                         <div class="p-3">
                             <ul id="wallettabs" class="nav nav-pills justify-content-center" role="tablist">
-                                <li class="nav-item"> <a class="nav-link active" href="#dlux" id="dluxtab" role="tab" @click="activeTab = 'wallet'"
-                                        data-bs-toggle="tab" aria-controls="dlux" aria-expanded="true">DLUX</a></li>
-                                <li class="nav-item"> <a class="nav-link d-flex align-items-center" href="#spk" @click="activeTab = 'wallet'"
-                                        id="spktab" role="tab" data-bs-toggle="tab" aria-controls="spk"
-                                        aria-expanded="true">SPK</a>
+                                <li class="nav-item"> <a class="nav-link active" href="#dlux" id="dluxtab" role="tab"
+                                        @click="activeTab = 'wallet'" data-bs-toggle="tab" aria-controls="dlux"
+                                        aria-expanded="true">DLUX</a></li>
+                                <li class="nav-item"> <a class="nav-link d-flex align-items-center" href="#spk"
+                                        @click="activeTab = 'wallet'" id="spktab" role="tab" data-bs-toggle="tab"
+                                        aria-controls="spk" aria-expanded="true">SPK</a>
                                 </li>
-                                <li class="nav-item"> <a class="nav-link" href="#hive" id="hivetab" role="tab" @click="activeTab = 'wallet'"
-                                        data-bs-toggle="tab" aria-controls="hive" aria-expanded="true">HIVE</a>
+                                <li class="nav-item"> <a class="nav-link" href="#hive" id="hivetab" role="tab"
+                                        @click="activeTab = 'wallet'" data-bs-toggle="tab" aria-controls="hive"
+                                        aria-expanded="true">HIVE</a>
                                 </li>
                             </ul>
                         </div>
@@ -1316,8 +1323,9 @@
                     <div role="tabpanel" ref="filesTab" class="tab-pane fade" id="files" aria-labelledby="filestab">
                         <div class="container">
                             <div class="card my-3">
-                                <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount" @tosign="toSign=$event"
-                                    :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi" @done="getSapi"></contract-vue>
+                                <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount"
+                                    @tosign="toSign=$event" :prop_contracts="contracts" :accountinfo="accountinfo"
+                                    :spkapi="spkapi" @done="getSapi"></contract-vue>
                             </div>
                         </div>
                     </div>
@@ -1385,7 +1393,8 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <spk-vue v-if="reloaded"  node="false" :account="account" @tosign="toSign=$event;log($event)" />
+                            <spk-vue v-if="reloaded" node="false" :account="account"
+                                @tosign="toSign=$event;log($event)" />
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
@@ -1405,14 +1414,16 @@
 
                         <div class="modal-body text-start">
                             <div v-for="spon in services" v-if="reloaded">
-                                <button v-if="spon.provider" :disabled="spon.channel" @click="petitionForContract(spon.provider)"
+                                <button v-if="spon.provider" :disabled="spon.channel"
+                                    @click="petitionForContract(spon.provider)"
                                     class="btn btn-lg text-white btn-outline-primary w-100 border d-flex justify-content-between align-items-center"><span
                                         class="lead">@{{spon.provider}}</span><span
                                         class="small text-warning">{{spon.memo}}</span></button>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary d-none" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-secondary d-none"
+                                data-bs-dismiss="modal">Close</button>
 
                         </div>
 
@@ -1438,21 +1449,21 @@
                     :info="getSetDetailsInfo(focusItem.script)" />
             </div>
 
-             <!-- file detail modal -->
+            <!-- file detail modal -->
             <div class="modal fade" id="fileModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        ...
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save changes</button>
-                    </div>
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            ...
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary">Save changes</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1573,21 +1584,24 @@
     <script>
         // Add JavaScript to toggle collapse on <tr> click
         document.addEventListener('DOMContentLoaded', function () {
-          var trElements = document.querySelectorAll('.table tbody tr[data-bs-toggle="collapse"]');
-          trElements.forEach(function (tr) {
-            tr.addEventListener('click', function () {
-              var target = document.querySelector(this.getAttribute('href'));
-              if (target.classList.contains('show')) {
-                target.classList.remove('show');
-                target.setAttribute('aria-expanded', 'false');
-              } else {
-                target.classList.add('show');
-                target.setAttribute('aria-expanded', 'true');
-              }
+            var trElements = document.querySelectorAll('.table tbody tr[data-bs-toggle="collapse"]');
+            trElements.forEach(function (tr) {
+                tr.addEventListener('click', function () {
+                    var target = document.querySelector(this.getAttribute('href'));
+                    if (target.classList.contains('show')) {
+                        target.classList.remove('show');
+                        target.setAttribute('aria-expanded', 'false');
+                    } else {
+                        target.classList.add('show');
+                        target.setAttribute('aria-expanded', 'true');
+                    }
+                });
             });
-          });
         });
-      </script>
+    </script>
+    <!-- Include Choices JavaScript (latest) -->
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 </body>
+
 
 </html>

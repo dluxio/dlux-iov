@@ -403,6 +403,58 @@ export default {
                                                                                                         </div>
                                                                                                     </div>
                                                                                                 </div>
+                                                                                                <div class="d-flex flex-column">
+                                                                                                    <label>Tags (2)</label>
+                                                                                                    <select class="form-select form-select-sm" multiple aria-label="Default select example">
+                                                                                                    
+                                                                                                        <option value="1">NSFW</option>
+                                                                                                        <option value="2">Two</option>
+                                                                                                        <option value="3">Three</option>
+                                                                                                    </select>
+                                                                                                </div>
+                                                                                                <div class="d-flex flex-column">
+                                                                                                    <label>Labels (2)</label>
+                                                                                                    <select class="form-select form-select-sm" multiple aria-label="Default select example">
+                                                                                                        
+                                                                                                        <option value="1">Photography</option>
+                                                                                                        <option value="2">Document</option>
+                                                                                                        <option value="3">Work</option>
+                                                                                                        <option value="4">Travel</option>
+                                                                                                    </select>
+                                                                                                </div>
+
+                                                                                                <div class="choices" data-type="select-multiple" role="combobox" aria-autocomplete="list" aria-haspopup="true"
+                                                                                                    aria-expanded="false">
+                                                                                                    <div class="choices__inner"><select class="form-control choices__input" name="choices-multiple-remove-button"
+                                                                                                            id="choices-multiple-remove-button" placeholder="This is a placeholder" multiple="" hidden="" tabindex="-1"
+                                                                                                            data-choice="active">
+                                                                                                            <option value="Choice 1" data-custom-properties="[object Object]">Choice 1</option>
+                                                                                                        </select>
+                                                                                                        <div class="choices__list choices__list--multiple">
+                                                                                                            <div class="choices__item choices__item--selectable" data-item="" data-id="1" data-value="Choice 1"
+                                                                                                                data-custom-properties="[object Object]" aria-selected="true" data-deletable="">Choice 1<button
+                                                                                                                    type="button" class="choices__button" aria-label="Remove item: 'Choice 1'" data-button="">Remove
+                                                                                                                    item</button></div>
+                                                                                                        </div><input type="search" name="search_terms" class="choices__input choices__input--cloned" autocomplete="off"
+                                                                                                            spellcheck="false" role="textbox" aria-autocomplete="list" aria-label="null">
+                                                                                                    </div>
+                                                                                                    <div class="choices__list choices__list--dropdown" aria-expanded="false">
+                                                                                                        <div class="choices__list" aria-multiselectable="true" role="listbox">
+                                                                                                            <div id="choices--choices-multiple-remove-button-item-choice-2"
+                                                                                                                class="choices__item choices__item--choice choices__item--selectable is-highlighted" role="option"
+                                                                                                                data-choice="" data-id="2" data-value="Choice 2" data-select-text="Press to select"
+                                                                                                                data-choice-selectable="" aria-selected="true">Choice 2</div>
+                                                                                                            <div id="choices--choices-multiple-remove-button-item-choice-3"
+                                                                                                                class="choices__item choices__item--choice choices__item--selectable" role="option" data-choice=""
+                                                                                                                data-id="3" data-value="Choice 3" data-select-text="Press to select" data-choice-selectable="">Choice 3
+                                                                                                            </div>
+                                                                                                            <div id="choices--choices-multiple-remove-button-item-choice-4"
+                                                                                                                class="choices__item choices__item--choice choices__item--selectable" role="option" data-choice=""
+                                                                                                                data-id="4" data-value="Choice 4" data-select-text="Press to select" data-choice-selectable="">Choice 4
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </div>
                                                                                                 
                                                                                                 <div class="d-flex flex-column ms-auto">
                                                                                                     <!-- link -->
