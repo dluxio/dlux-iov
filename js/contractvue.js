@@ -405,31 +405,18 @@ export default {
                                                                                                         </div>
                                                                                                     </div>
                                                                                                 </div>
-                                                                                                <div class="d-flex flex-column">
-                                                                                                    <label>Tags (2)</label>
-                                                                                                    <select class="form-select form-select-sm" multiple aria-label="Default select example">
-                                                                                                    
-                                                                                                        <option value="1">NSFW</option>
-                                                                                                        <option value="2">Two</option>
-                                                                                                        <option value="3">Three</option>
-                                                                                                    </select>
-                                                                                                </div>
-                                                                                                <div class="d-flex flex-column">
-                                                                                                    <label>Labels (2)</label>
-                                                                                                    <select class="form-select form-select-sm" multiple aria-label="Default select example">
-                                                                                                        
-                                                                                                        <option value="1">Photography</option>
-                                                                                                        <option value="2">Document</option>
-                                                                                                        <option value="3">Work</option>
-                                                                                                        <option value="4">Travel</option>
-                                                                                                    </select>
-                                                                                                </div>
-
-
-                                                                                               
-
-                                                                                               
                                                                                                 
+                                                                                                <div class="d-flex flex-column"> 
+                                                                                                    <!-- choices-js -->
+                                                                                                    <div class="text-black">
+                                                                                                        <label class="text-white">Choose Tags</label>
+                                                                                                        <choices-vue ref="select-tag"></choices-vue>
+                                                                                                    
+                                                                                                        <label class="text-white">Choose Labels</label>
+                                                                                                        <choices-vue ref="select-label"></choices-vue>
+                                                                                                    </div>
+                                                                                                </div> 
+
                                                                                                 <div class="d-flex flex-column ms-auto">
                                                                                                     <!-- link -->
                                                                                                     <div v-if="!flagDecode(contract.m).enc">

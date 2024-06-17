@@ -1323,15 +1323,6 @@
                     <!-- files tab -->
                     <div role="tabpanel" ref="filesTab" class="tab-pane fade" id="files" aria-labelledby="filestab">
                         <div class="container">
-                            <!-- choices-js -->
-                            <div class="text-black">
-                                <label class="text-white">Choose Tags</label>
-                                <choices-vue ref="select-tag"></choices-vue>
-                            
-                                <label class="text-white">Choose Labels</label>
-                                <choices-vue ref="select-label"></choices-vue>
-                            </div>
-
                             <div class="card my-3">
                                 <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount"
                                     @tosign="toSign=$event" :prop_contracts="contracts" :accountinfo="accountinfo"
