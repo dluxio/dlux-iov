@@ -7,28 +7,17 @@ export default {
       type: String,
       default: "default"
     },
+    prop_type: {
+      type: String,
+      default: "tags"
+    },
     opts: {
       type: Object,
       default: () => {
         return {
           silent: false,
           items: [],
-          choices: [{
-            value: 'encrypted',
-            label: 'Encrypted',
-            selected: false,
-            disabled: false,
-          },
-          {
-            value: 'nsfw',
-            label: 'NSFW',
-            selected: false,
-            disabled: false,
-            customProperties: {
-              description: 'Custom description about Option 2',
-              random: 'Another random custom property'
-            },
-          }],
+          choices: this.[this.prop_type],
           renderChoiceLimit: -1,
           maxItemCount: 2,
           addItems: true,
@@ -75,6 +64,23 @@ export default {
     return {
       msg: "",
       Choices: null,
+      tags: [{
+        value: 'encrypted',
+        label: 'Encrypted',
+        selected: false,
+        disabled: false,
+      },
+      {
+        value: 'nsfw',
+        label: 'NSFW',
+        selected: false,
+        disabled: false,
+        customProperties: {
+          description: 'Custom description about Option 2',
+          random: 'Another random custom property'
+        },
+      }],
+      labels: [],
     }
   },
   methods: {
