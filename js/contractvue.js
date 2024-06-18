@@ -391,20 +391,25 @@ export default {
                                                                                                        
                                                                                                         <span class="small text-center mb-2">{{size > 1 ? size/1000000 : size/1000000}} MB</span>
                                                                                                         
+                                                                                                        <!-- link -->
                                                                                                         <div>
                                                                                                             <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="w-100 btn btn-sm btn-info mb-1 mx-auto"><span class="d-flex align-items-center">URL<i class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
                                                                                                         </div>
-                                                                                                        <!-- link -->
+                                                                                                        <!-- download  -->
                                                                                                         <div v-if="!flagDecode(contract.m).enc">
                                                                                                             <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="downloadFile(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
                                                                                                         </div>
-                                                                                                        <!-- decrypt -->
+                                                                                                        <!-- decrypt  -->
                                                                                                         <div v-if="flagDecode(contract.m).enc && !contract.encryption.key">
                                                                                                             <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="decryptKey(contract.i)"><span class="d-flex align-items-center w-100">Decrypt<i class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
                                                                                                         </div>
-                                                                                                        <!-- download -->
+                                                                                                        <!-- download enc -->
                                                                                                         <div v-if="flagDecode(contract.m).enc && contract.encryption.key">
                                                                                                             <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="downloadFile(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
+                                                                                                        </div>
+                                                                                                         <!-- add to post -->
+                                                                                                        <div v-if="contract.c == 2">
+                                                                                                            <button type="button" class="w-100 btn btn-sm btn-warning mb-1 mx-auto"><span class="d-flex align-items-center w-100">Add to Post<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
                                                                                                         </div>
 
                                                                                                         
