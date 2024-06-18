@@ -430,7 +430,7 @@ export default {
                                                                                                         </div>
                                                                                                     </div>
 
-                                                                                                    <!-- choices-js -->
+                                                                                                    <!-- choices-js
                                                                                                     <div class="mb-1">
                                                                                                         <label class="mb-1">Tags</label>
                                                                                                         <choices-vue ref="select-tag" prop_type="tags"></choices-vue>
@@ -438,7 +438,7 @@ export default {
                                                                                                     <div class="mb-1">
                                                                                                         <label class="mb-1">Labels</label>
                                                                                                         <choices-vue ref="select-label" prop_type="labels"></choices-vue>
-                                                                                                    </div>
+                                                                                                    </div> -->
                                                                                                     
                                                                                                 </div>
 
