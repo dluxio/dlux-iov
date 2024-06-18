@@ -304,137 +304,137 @@ export default {
         selected: false,
         disabled: false,
       },
-      // {
-      //   value: 38,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 39,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 40,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 41,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 42,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 43,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 44,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 45,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 46,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 47,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 48,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 49,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 50,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 51,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 52,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 53,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 54,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 55,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 56,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 57,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 58,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 59,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 60,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 61,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 62,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // },{
-      //   value: 63,
-      //   label: '',
-      //   selected: false,
-      //   disabled: false,
-      // }
+      {
+        value: 38,
+        label: 'Receipts',
+        selected: false,
+        disabled: false,
+      },{
+        value: 39,
+        label: 'Design',
+        selected: false,
+        disabled: false,
+      },{
+        value: 40,
+        label: 'Development',
+        selected: false,
+        disabled: false,
+      },{
+        value: 41,
+        label: 'Testing',
+        selected: false,
+        disabled: false,
+      },{
+        value: 42,
+        label: 'Maintenance',
+        selected: false,
+        disabled: false,
+      },{
+        value: 43,
+        label: 'Resources',
+        selected: false,
+        disabled: false,
+      },{
+        value: 44,
+        label: 'Templates',
+        selected: false,
+        disabled: false,
+      },{
+        value: 45,
+        label: 'Guidelines',
+        selected: false,
+        disabled: false,
+      },{
+        value: 46,
+        label: 'Reference',
+        selected: false,
+        disabled: false,
+      },{
+        value: 47,
+        label: 'Archives',
+        selected: false,
+        disabled: false,
+      },{
+        value: 48,
+        label: 'Backups',
+        selected: false,
+        disabled: false,
+      },{
+        value: 49,
+        label: 'Drafts',
+        selected: false,
+        disabled: false,
+      },{
+        value: 50,
+        label: 'Final',
+        selected: false,
+        disabled: false,
+      },{
+        value: 51,
+        label: 'Pending',
+        selected: false,
+        disabled: false,
+      },{
+        value: 52,
+        label: 'Approved',
+        selected: false,
+        disabled: false,
+      },{
+        value: 53,
+        label: 'Rejected',
+        selected: false,
+        disabled: false,
+      },{
+        value: 54,
+        label: 'Urgent',
+        selected: false,
+        disabled: false,
+      },{
+        value: 55,
+        label: 'Goals',
+        selected: false,
+        disabled: false,
+      },{
+        value: 56,
+        label: 'Tasks',
+        selected: false,
+        disabled: false,
+      },{
+        value: 57,
+        label: 'Ideas',
+        selected: false,
+        disabled: false,
+      },{
+        value: 58,
+        label: 'Meetings',
+        selected: false,
+        disabled: false,
+      },{
+        value: 59,
+        label: 'Follow-Up',
+        selected: false,
+        disabled: false,
+      },{
+        value: 60,
+        label: 'Feedback',
+        selected: false,
+        disabled: false,
+      },{
+        value: 61,
+        label: 'Surveys',
+        selected: false,
+        disabled: false,
+      },{
+        value: 62,
+        label: 'Networking',
+        selected: false,
+        disabled: false,
+      },{
+        value: 63,
+        label: 'Miscellaneous',
+        selected: false,
+        disabled: false,
+      }
     ],
     }
   },
