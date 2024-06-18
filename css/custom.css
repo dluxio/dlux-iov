@@ -12802,6 +12802,22 @@ td {
   padding: 30px;
 }
 
+.CodeMirror-fullscreen {
+  z-index: 1100 !important;
+}
+
+.editor-toolbar.fullscreen {
+  z-index: 1100 !important;
+}
+
+.editor-toolbar.fullscreen {
+  z-index: 1100 !important;
+}
+
+.editor-preview-active-side {
+  z-index: 1100 !important;
+}
+
 .bg-special {
   background-image: linear-gradient(to right, rgb(194, 255, 182), rgb(255, 163, 182), rgb(221, 169, 255), rgb(162, 209, 255));
 }
