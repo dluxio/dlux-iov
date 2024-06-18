@@ -1,6 +1,6 @@
 export default {
     template: `<div :id="'contract-' +  contract.id" class="d-flex flex-grow-1">
-    <form id="contractForm" class="d-flex flex-column flex-grow-1 py-lg-3 px-lg-5">
+    <form id="contractForm" class="d-flex flex-column flex-grow-1 p-2 py-lg-3 px-lg-5">
 
      <!-- node banner -->
             <div v-if="hasStorage && !nodeview" :class="{'alert-success' : isStored, 'alert-danger' : !isStored}" class="alert d-flex align-items-center py-1 ps-2 pe-1 mx-2 mt-2 mb-1">
@@ -54,7 +54,7 @@ export default {
 
            
 
-            <div class="d-flex flex-grow-1 flex-wrap">
+            <div class="d-flex flex-grow-1 flex-wrap justify-content-around">
 
                 <div class="d-flex m-2 flex-column">
                     <div class="fs-1 fw-bold align-items-start">SPK Network</div>
@@ -94,7 +94,7 @@ export default {
                 </div>
 
                 <!-- extend time input -->
-                <div class="d-flex m-2 ms-auto flex-column justify-content-around" style="max-width: 300px">
+                <div class="d-flex m-2 flex-column justify-content-around" style="max-width: 300px">
             
                 
                     <!-- selector -->

@@ -304,8 +304,8 @@ export default {
 
                                                         <!-- detail view -->
                                                         <tr class="collapse" :id="replace(contract.i)">
-                                                            <td class="border-0" colspan="4">
-                                                                <div class="d-flex flex-column border border-white rounded text-start p-2" style="background-color:rgba(0,0,0,0.3);">
+                                                            <td class="border-0 px-0 px-md-1" colspan="4">
+                                                                <div class="d-flex flex-column border border-white rounded text-start px-md-2 py-2" style="background-color:rgba(0,0,0,0.3);">
 
                                                                     <!-- contract ID -->
                                                                     <div class="d-flex justify-content-center small text-white-50 mb-3">
@@ -375,63 +375,76 @@ export default {
                                                                     
                                                                     <!-- files list -->
                                                                     <div v-if="contract.df">
-                                                                        <div class="card px-4 py-2 mb-2 bg-img-none bg-blur-darkg mx-lg-5">
+                                                                        <div class="card px-md-1 px-lg-2 pt-2 mt-2 bg-img-none bg-blur-darkg mx-lg-5">
                                                                             <div class="d-flex flex-column">
-                                                                                <h2 class="mb-3">File{{pluralFiles(contract.i) ? 's' : ''}} </h2>
+                                                                                <h2 class="mx-auto ms-md-1">File{{pluralFiles(contract.i) ? 's' : ''}} </h2>
                                                                                 
-                                                                                    <div class="mb-2 bg-darker rounded p-2" v-for="(size, cid, index) in contract.df">
+                                                                                    <div class="mt-2 mb-md-2 bg-darker rounded p-2" v-for="(size, cid, index) in contract.df">
 
-                                                                                            <div class="d-flex flex-wrap align-items-center justify-content-center"> 
+                                                                                            <div class="row align-items-center"> 
 
-                                                                                                <div class="d-flex flex-column justify-content-center mx-1">
-                                                                                                    <a href="#/" class="no-decoration" data-bs-toggle="modal" data-bs-target="#fileModal"><img class="img-thumbnail bg-light" :src="smartThumb(contract.i,index,cid)" width="300px" onerror="if (this.src != '/img/other-file-type-svgrepo-com.svg') this.src = '/img/other-file-type-svgrepo-com.svg'"></a>
-                                                                                                    <span class="small text-center mt-1">{{size > 1 ? size/1000000 : size/1000000}} MB</span>
+                                                                                                <div class="col-md-4">
+                                                                                                    <div class="d-flex flex-column justify-content-center">
+
+                                                                                                        <a href="#/" class="no-decoration text-center mb-1" data-bs-toggle="modal" data-bs-target="#fileModal">
+                                                                                                            <img class="img-thumbnail bg-light" :src="smartThumb(contract.i,index,cid)" width="300px" onerror="if (this.src != '/img/other-file-type-svgrepo-com.svg') this.src = '/img/other-file-type-svgrepo-com.svg'">
+                                                                                                        </a>
+                                                                                                        <span class="small text-center mb-2">{{size > 1 ? size/1000000 : size/1000000}} MB</span>
+                                                                                                        
+                                                                                                        <div>
+                                                                                                            <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="w-100 btn btn-sm btn-info mb-1 mx-auto"><span class="d-flex align-items-center">URL<i class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
+                                                                                                        </div>
+                                                                                                        <!-- link -->
+                                                                                                        <div v-if="!flagDecode(contract.m).enc">
+                                                                                                            <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="downloadFile(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
+                                                                                                        </div>
+                                                                                                        <!-- decrypt -->
+                                                                                                        <div v-if="flagDecode(contract.m).enc && !contract.encryption.key">
+                                                                                                            <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="decryptKey(contract.i)"><span class="d-flex align-items-center w-100">Decrypt<i class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
+                                                                                                        </div>
+                                                                                                        <!-- download -->
+                                                                                                        <div v-if="flagDecode(contract.m).enc && contract.encryption.key">
+                                                                                                            <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="downloadFile(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
+                                                                                                        </div>
+
+                                                                                                        
+
+                                                                                                        
+                                                                                                    </div>
                                                                                                 </div>
 
-                                                                                                <div class="d-flex flex-column flex-grow-1 mx-1 mx-lg-4"> 
+                                                                                                <div class="col-md-8"> 
+                                                                            
                                                                                                     <div class="mb-1">    
-                                                                                                        <label class="ms-1">File Name</label>
-                                                                                                        <div class="input-group input-group-sm flex-grow-1">
-                                                                                                            <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 1]" placeholder="File Name" pattern="[a-zA-Z0-9]{3,25}" class="form-control form-control-sm">
+                                                                                                        <label class="mb-1">File Name</label>
+                                                                                                        <div class="input-group">
+                                                                                                            <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 1]" placeholder="File Name" pattern="[a-zA-Z0-9]{3,25}" class="form-control">
                                                                                                             <span class="input-group-text">.</span>
-                                                                                                            <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 2]" placeholder="File Type" pattern="[a-zA-Z0-9]{1,4}" class="form-control form-control-sm col-3 col-lg-2">
+                                                                                                            <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 2]" placeholder="File Type" pattern="[a-zA-Z0-9]{1,4}" class="form-control">
                                                                                                         </div>
                                                                                                     </div>
                                                                                                     <div class="mb-1">
-                                                                                                        <label class="ms-1">Thumbnail</label>
+                                                                                                        <label class="mb-1">Thumbnail</label>
                                                                                                         <div class="position-relative has-validation">
-                                                                                                            <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 3]" placeholder="https://your-thumbnail-image.png" pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+" class="form-control form-control-sm">
+                                                                                                            <input autocapitalize="off" v-model="newMeta[contract.i][index * 4 + 3]" placeholder="https://your-thumbnail-image.png" pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+" class="form-control">
                                                                                                         </div>
                                                                                                     </div>
 
                                                                                                     <!-- choices-js -->
                                                                                                     <div class="mb-1">
-                                                                                                        <label class="ms-1">Tags</label>
+                                                                                                        <label class="mb-1">Tags</label>
                                                                                                         <choices-vue ref="select-tag" prop_type="tags"></choices-vue>
                                                                                                     </div>
                                                                                                     <div class="mb-1">
-                                                                                                        <label class="ms-1">Labels</label>
+                                                                                                        <label class="mb-1">Labels</label>
                                                                                                         <choices-vue ref="select-label" prop_type="labels"></choices-vue>
                                                                                                     </div>
+                                                                                                    
                                                                                                 </div>
 
                                                                                             </div>
 
-                                                                                            <div class="d-flex justify-content-center mt-2">
-                                                                                                <!-- link -->
-                                                                                                <div v-if="!flagDecode(contract.m).enc">
-                                                                                                    <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="w-100 btn btn-sm btn-primary mb-2 mx-auto"><span class="d-flex align-items-center w-100">File URL<i class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
-                                                                                                </div>
-                                                                                                <!-- decrypt -->
-                                                                                                <div v-if="flagDecode(contract.m).enc && !contract.encryption.key">
-                                                                                                    <button type="button" class="w-100 btn btn-sm btn-primary mb-2 mx-auto" @click="decryptKey(contract.i)"><span class="d-flex align-items-center w-100">Decrypt<i class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
-                                                                                                </div>
-                                                                                                <!-- download -->
-                                                                                                <div v-if="flagDecode(contract.m).enc && contract.encryption.key">
-                                                                                                    <button type="button" class="w-100 btn btn-sm btn-primary mb-2 mx-auto" @click="downloadFile(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
-                                                                                                </div>
-                                                                                                
-                                                                                            </div>
+                                                                                            
                                                                                   
                                                                                         
                                                                                     </div>
@@ -489,7 +502,7 @@ export default {
 
                                                                                      <!-- save button -->
                                                                                     <div class="d-flex text-center">
-                                                                                        <button v-if="metaMismatch(contract.i) && !flagDecode(contract.m).enc" class="btn btn-lg btn-outline-warning mx-auto mb-2" type="button" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
+                                                                                        <button v-if="metaMismatch(contract.i) && !flagDecode(contract.m).enc" class="btn btn-lg btn-outline-warning mx-auto my-2" type="button" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
                                                                                     </div>
                                                                             </div>
                                                                         </div>
