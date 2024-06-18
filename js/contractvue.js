@@ -879,9 +879,10 @@ export default {
                 .then((response) => response.text())
                 .then((blob) => {
                     const name = this.newMeta[id][index * 4 + 1] + '.' + this.newMeta[id][index * 4 + 2] || 'file'
-                    if (!this.contractIDs[id].encryption.key) return alert('Not Decrypted')
-                    blob = this.AESDecrypt(blob, this.contractIDs[id].encryption.key);
+                    if (this.contractIDs[id].encryption.key){
+                        blob = this.AESDecrypt(blob, this.contractIDs[id].encryption.key);
                     blob = new Blob([blob]);
+                    }
                     var url = window.URL.createObjectURL(blob);
                     var a = document.createElement('a');
                     a.href = url;
