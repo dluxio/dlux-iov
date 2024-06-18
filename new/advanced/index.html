@@ -168,16 +168,20 @@
 </head>
 
 <body class="d-flex h-100 align-items-stretch text-white">
+    
     <div id="app" class="d-flex w-100 flex-column w-100">
+        
         <div>
             <nav-vue @login="account = $event;newme($event)" @logout="account = '';removeUser()" @ack="removeOp($event)"
                 @refresh="run($event)" :op="toSign" :lapi="lapi" />
         </div>
         <main role="main" class="mb-auto" style="margin-top: 170px;">
+            
             <div class="container-fluid fixed-top px-0" style="margin-top: 94px; z-index: 900;">
                 <div class="d-flex flex-column justify-content-between align-items-center nav-blur px-2"
                     style="background-color: rgba(0,0,0,0.6)">
                     <div class="py-1 px-1 w-100" style="max-width: 1800px;">
+                        
                         <!-- toolbar -->
                         <div class="d-flex justify-content-between align-items-center">
                             <!-- post type dropdown -->
@@ -279,6 +283,7 @@
 
             <!-- 360 -->
             <div v-if="postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'">
+                
                 <!-- widgets -->
                 <div class="d-flex flex-wrap justify-content-around mb-3">
                     <!-- File URL Widget -->
@@ -405,19 +410,20 @@
                     <!-- Post Details Widget -->
                     <div class="collapse col-lg-6 p-1" id="editPost">
                         <div class="modal position-static d-block">
-                            <div class="modal-content">
-                            <div class="modal-header px-3 py-2 item">
-                                <h5 class="modal-title">Post Details</h5>
-                                <a role="button" class="btn-close" data-bs-toggle="collapse" aria-label="Close"
-                                    href="#editPost"></a>
-                            </div>
-                            <div class="modal-body">
-                                <post-vue :account="account" :prop_json="postCustom_json" :prop_bens="postBens"
-                                    @tosign="toSign=$event" />
+                            <div class="bg-dark rounded">
+                                <div class="modal-header px-3 py-2 item">
+                                    <h5 class="modal-title">Post Details</h5>
+                                    <a role="button" class="btn-close" data-bs-toggle="collapse" aria-label="Close"
+                                        href="#editPost"></a>
+                                </div>
+                            
+                                <div class="modal-body" style="margin: top 170px;">
+                                    <post-vue :account="account" :prop_json="postCustom_json" :prop_bens="postBens" @tosign="toSign=$event" />
+                                </div>
                             </div>
                         </div>
+
                     </div>
-</div>
                 </div>
 
 
