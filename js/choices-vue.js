@@ -23,7 +23,7 @@ export default {
           addItemFilter: null,
           removeItems: true,
           removeItemButton: true,
-          editItems: true,
+          editItems: false,
           allowHTML: false,
           duplicateItemsAllowed: true,
           delimiter: ',',
