@@ -38,7 +38,7 @@ export default {
           shouldSort: true,
           shouldSortItems: false,
           sorter: function (a, b) {
-            return b.label.length - a.label.length;
+            return b.value - a.value;
           },
           placeholder: true,
           placeholderValue: null,
