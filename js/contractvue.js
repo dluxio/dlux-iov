@@ -881,15 +881,26 @@ export default {
                     const name = this.newMeta[id][index * 4 + 1] + '.' + this.newMeta[id][index * 4 + 2] || 'file'
                     if (this.contractIDs[id].encryption.key){
                         blob = this.AESDecrypt(blob, this.contractIDs[id].encryption.key);
-                    blob = new Blob([blob]);
+                        blob = new Blob([blob]);
                     }
-                    var url = window.URL.createObjectURL(blob);
-                    var a = document.createElement('a');
-                    a.href = url;
-                    a.download = name;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
+                    try{
+                        var url = window.URL.createObjectURL(blob);
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = name;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    } catch (e) {
+                        var url = window.URL.createObjectURL(response);
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = name;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    }
+                    
                 });
         },
         smartThumb(contract, index, cid) {
