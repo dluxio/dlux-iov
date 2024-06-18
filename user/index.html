@@ -1324,7 +1324,7 @@
                     <!-- files tab -->
                     <div role="tabpanel" ref="filesTab" class="tab-pane fade" id="files" aria-labelledby="filestab">
                         <div class="container">
-                            <div class="card my-3">
+                            <div class="rounded my-3 pt-2" style="background-color:rgba(255,255,255,0.3);">
                                 <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount"
                                     @tosign="toSign=$event" :prop_contracts="contracts" :accountinfo="accountinfo"
                                     :spkapi="spkapi" @done="getSapi"></contract-vue>

@@ -375,7 +375,7 @@ export default {
                                                                     
                                                                     <!-- files list -->
                                                                     <div v-if="contract.df">
-                                                                        <div class="card px-md-1 px-lg-2 pt-2 mt-2 bg-img-none bg-blur-darkg mx-lg-5">
+                                                                        <div class="px-md-1 px-lg-2 pt-2 mt-2 bg-darkg mx-lg-5">
                                                                             <div class="d-flex flex-column">
                                                                                 <h2 class="mx-auto ms-md-1">File{{pluralFiles(contract.i) ? 's' : ''}} </h2>
                                                                                 
