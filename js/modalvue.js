@@ -9,6 +9,7 @@ export default {
       d: {
         spkprefix: "spkcc",
         valWorkable: [],
+        test: false
       },
     };
   },
@@ -94,9 +95,9 @@ export default {
                       </div>
                   </div>
                   <div class="modal-footer"> 
-                    <div class="me-auto btn-group border border-info rounded px-2 py-1" role="group" aria-label="Transact on Mirror Network Only" v-if="token == 'SPK' || token == 'LARYNX'">
+                    <div class="me-auto btn-group border border-info rounded px-2 py-1" role="group" aria-label="Transaction on Test Network Only" v-if="token == 'SPK' || token == 'LARYNX'">
                       <input id="sendmirror" type="checkbox" v-model="d.test" class="me-2">
-                      <label for="sendmirror">Mirror Network Only</label>
+                      <label for="sendmirror">Test Network Only</label>
                     </div>
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> 
                   <button :disabled="!d.valid" type="submit" class="btn btn-primary" @click="send" data-bs-dismiss="modal">Send</button> 
@@ -152,9 +153,9 @@ export default {
                   </div>
                 </div>
                 <div class="modal-footer">
-                  <div class="me-auto btn-group border border-info rounded px-2 py-1" role="group" aria-label="Transact on Mirror Network Only" v-if="token == 'SPK' || token == 'LARYNX'">
+                  <div class="me-auto btn-group border border-info rounded px-2 py-1" role="group" aria-label="Transact on Test Network Only" v-if="token == 'SPK' || token == 'LARYNX'">
                     <input id="delegatemirror" type="checkbox" v-model="d.test" class="me-2">
-                    <label for="delegatemirror">Mirror Network Only</label>
+                    <label for="delegatemirror">Test Network Only</label>
                   </div>
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> 
                   <button :disabled="!d.to" type="submit" class="btn btn-primary" @click="delegate" data-bs-dismiss="modal">Confirm</button> 
@@ -186,9 +187,9 @@ export default {
                         </div>
                         </div>
                         <div class="modal-footer">
-                          <div class="me-auto btn-group border border-info rounded px-2 py-1" role="group" aria-label="Transact on Mirror Network Only" v-if="token == 'LARYNX'">
+                          <div class="me-auto btn-group border border-info rounded px-2 py-1" role="group" aria-label="Transact on Test Network Only" v-if="token == 'LARYNX'">
                             <input id="pwrupmirror" type="checkbox" v-model="d.test" class="me-2">
-                            <label for="pwrupmirror">Mirror Network Only</label>
+                            <label for="pwrupmirror">Test Network Only</label>
                           </div>
                           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                           <button type="button" class="btn btn-primary" @click="power" data-bs-dismiss="modal">Continue</button>
@@ -464,7 +465,7 @@ export default {
             cj: {
               amount: 0,
             },
-            id: `${this.d.spkprefix}_${this.d.test ? 'T' : ''}power_down`,
+            id: `${this.d.spkprefix}${this.d.test ? 'T' : ''}_${this.d.test ? 'T' : ''}power_down`,
             msg: `Canceling Power Down...`,
             ops: ["getSapi"],
             api: "https://spkinstant.hivehoneycomb.com",
@@ -478,7 +479,7 @@ export default {
               to: this.d.account,
               amount: 0,
             },
-            id: `${this.d.spkprefix}_${this.d.test ? 'T' : ''}power_grant`,
+            id: `${this.d.spkprefix}${this.d.test ? 'T' : ''}_${this.d.test ? 'T' : ''}power_grant`,
             msg: `Canceling Power Down...`,
             ops: ["getSapi"],
             api: "https://spkinstant.hivehoneycomb.com",
@@ -540,7 +541,7 @@ export default {
             amount: parseInt(this.d.amount * 1000),
             memo: this.d.memo,
           },
-          id: `${this.d.spkprefix}_${this.d.test ? 'T' : ''}spk_send`,
+          id: `${this.d.spkprefix}${this.d.test ? 'T' : ''}_${this.d.test ? 'T' : ''}spk_send`,
           msg: `Trying to send ${this.d.token}...`,
           ops: ["getSapi"],
           api: "https://spkinstant.hivehoneycomb.com",
@@ -554,7 +555,7 @@ export default {
             amount: parseInt(this.d.amount * 1000),
             memo: this.d.memo,
           },
-          id: `${this.d.spkprefix}_${this.d.test ? 'T' : ''}send`,
+          id: `${this.d.spkprefix}${this.d.test ? 'T' : ''}_${this.d.test ? 'T' : ''}send`,
           msg: `Trying to send ${this.d.token}...`,
           ops: ["getSapi"],
           api: "https://spkinstant.hivehoneycomb.com",
@@ -610,7 +611,7 @@ export default {
             to: this.d.to,
             amount: parseInt(this.d.amount * 1000),
           },
-          id: `${this.d.spkprefix}_${this.d.test ? 'T' : ''}power_grant`,
+          id: `${this.d.spkprefix}${this.d.test ? 'T' : ''}_${this.d.test ? 'T' : ''}power_grant`,
           msg: `Trying to delegate ${this.d.token}...`,
           ops: ["getSapi"],
           api: "https://spkinstant.hivehoneycomb.com",
@@ -709,7 +710,7 @@ export default {
           cj: {
             amount: parseInt(this.d.amount * 1000),
           },
-          id: `spkccT_${this.d.test ? 'T' : ''}power_down`,
+          id: `spkcc${this.d.test ? 'T' : ''}_${this.d.test ? 'T' : ''}power_down`,
           msg: `Trying to power down ${this.d.token}...`,
           ops: ["getSapi"],
           api: "https://spkinstant.hivehoneycomb.com",
@@ -951,6 +952,9 @@ export default {
     html: {
       default: true,
     },
+    test: {
+      default: false,
+    }
   },
   computed:{
     difVote: {
