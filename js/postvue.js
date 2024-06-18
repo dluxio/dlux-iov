@@ -8,7 +8,7 @@ export default {
     <div class="accordion-body">
     <form onsubmit="return false;">
         <div class="form-group mb-3">
-            <label for="username">Author</label>
+            <label class="mb-1" for="username">Author</label>
             <div class="input-group">
                 <span
                     class="input-group-text">@</span>
@@ -18,7 +18,7 @@ export default {
             </div>
         </div>
         <div class="form-group mb-3">
-            <label for="title">Title</label>
+            <label class="mb-1" for="title">Title</label>
             <input type="text"
                 class="form-control" id="title"
                 placeholder="Enter an attention grabbing title" v-model="postTitle"
@@ -30,13 +30,12 @@ export default {
             </small>
         </div>
         <div class="form-group mb-3">
-            <label for="body">Post Body</label>
+            <label class="mb-1" for="body">Post Body</label>
             <mde id="body" @data="postBody = $event" :prop_value="postBody"/>
         </div>
         <div class="form-group mb-3">
-            <label for="tags">Tags</label><br>
-            <tagify class="rounded w-100"
-                @data="postTags = $event" id="tags" />
+            <label class="mb-1" for="tags">Tags</label><br>
+            <tagify class="rounded p-1 w-100" @data="postTags = $event" id="tags" style="height: 50px" />
         </div>
         <bennies :list="postBens" @updatebennies="postBens = $event" />
         <!--<ul v-if="postBens.length">
