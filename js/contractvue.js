@@ -386,9 +386,9 @@ export default {
                                                                                                 <div class="col-md-4">
                                                                                                     <div class="d-flex flex-column justify-content-center">
 
-                                                                                                        <a href="#/" class="no-decoration text-center mb-1" data-bs-toggle="modal" data-bs-target="#fileModal">
-                                                                                                            <img class="img-thumbnail bg-light" :src="smartThumb(contract.i,index,cid)" width="300px" onerror="if (this.src != '/img/other-file-type-svgrepo-com.svg') this.src = '/img/other-file-type-svgrepo-com.svg'">
-                                                                                                        </a>
+                                                                                                        
+                                                                                                        <img class="img-fluid rounded bg-light" :src="smartThumb(contract.i,index,cid)" width="300px" onerror="if (this.src != '/img/other-file-type-svgrepo-com.svg') this.src = '/img/other-file-type-svgrepo-com.svg'">
+                                                                                                       
                                                                                                         <span class="small text-center mb-2">{{size > 1 ? size/1000000 : size/1000000}} MB</span>
                                                                                                         
                                                                                                         <div>
