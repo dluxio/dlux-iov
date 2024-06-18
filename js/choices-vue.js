@@ -24,7 +24,7 @@ export default {
           removeItems: true,
           removeItemButton: true,
           editItems: false,
-          allowHTML: false,
+          allowHTML: true,
           duplicateItemsAllowed: true,
           delimiter: ',',
           paste: true,
@@ -89,353 +89,326 @@ export default {
       ],
       labels: [{
         value: 0,
-        label: 'Important',
+        label: '<i class="fa-solid fa-exclamation fa-fw me-1"></i>Important',
         selected: false,
         disabled: false,
-      },{
+      }, {
         value: 1,
-        label: 'Red',
+        label: '<i class="fa-solid fa-star fa-fw me-1"></i>Favorite',
         selected: false,
         disabled: false,
-      },
-      {
+      }, {
         value: 2,
-        label: 'Orange',
+        label: '<i class="fa-solid fa-dice fa-fw me-1"></i>Random',
         selected: false,
         disabled: false,
-      },
-      {
+      }, {
         value: 3,
-        label: 'Yellow',
+        label: '<i class="fa-solid fa-circle fa-fw me-1 text-red"></i>Red',
         selected: false,
         disabled: false,
-      },
-      {
+      }, {
         value: 4,
-        label: 'Green',
+        label: '<i class="fa-solid fa-circle fa-fw me-1 text-orange"></i>Orange',
         selected: false,
         disabled: false,
-      },
-      {
+      }, {
         value: 5,
-        label: 'Blue',
+        label: '<i class="fa-solid fa-circle fa-fw me-1 text-yellow"></i>Yellow',
         selected: false,
         disabled: false,
-      },
-      {
+      }, {
         value: 6,
-        label: 'Purple',
+        label: '<i class="fa-solid fa-circle fa-fw me-1 text-green"></i>Green',
         selected: false,
         disabled: false,
-      },
-      {
+      }, {
         value: 7,
-        label: 'Grey',
+        label: '<i class="fa-solid fa-circle fa-fw me-1 text-blue"></i>Blue',
         selected: false,
         disabled: false,
-      },
-      {
+      }, {
         value: 8,
+        label: '<i class="fa-solid fa-circle fa-fw me-1 text-purple"></i>Purple',
+        selected: false,
+        disabled: false,
+      }, {
+        value: 9,
+        label: '<i class="fa-solid fa-circle fa-fw me-1 text-grey"></i>Grey',
+        selected: false,
+        disabled: false,
+      }, {
+        value: 10,
         label: 'Work',
         selected: false,
         disabled: false,
-      },
-      {
-        value: 9,
+      }, {
+        value: 11,
         label: 'Personal',
         selected: false,
         disabled: false,
-      },
-      {
-        value: 10,
+      }, {
+        value: 12,
         label: 'Family',
         selected: false,
         disabled: false,
-      },
-      {
-        value: 11,
+      }, {
+        value: 13,
         label: 'Friends',
         selected: false,
         disabled: false,
-      },
-      {
-        value: 12,
+      }, {
+        value: 14,
         label: 'Projects',
         selected: false,
         disabled: false,
-      },
-      {
-        value: 13,
+      }, {
+        value: 15,
         label: 'Finance',
         selected: false,
         disabled: false,
-      },
-      {
-        value: 14,
+      }, {
+        value: 16,
         label: 'Health',
         selected: false,
         disabled: false,
-      },
-      {
-        value: 15,
+      }, {
+        value: 17,
         label: 'Education',
         selected: false,
         disabled: false,
-      },
-      {
-        value: 16,
+      }, {
+        value: 18,
         label: 'Travel',
         selected: false,
         disabled: false,
-      },
-      {
-        value: 17,
+      }, {
+        value: 19,
         label: 'Events',
         selected: false,
         disabled: false,
-      },{
-        value: 18,
+      }, {
+        value: 20,
         label: 'Photography',
         selected: false,
         disabled: false,
-      },{
-        value: 19,
+      }, {
+        value: 21,
         label: 'Gaming',
         selected: false,
         disabled: false,
-      },{
-        value: 20,
+      }, {
+        value: 22,
         label: 'Sports',
         selected: false,
         disabled: false,
-      },{
-        value: 21,
+      }, {
+        value: 23,
         label: 'Blogging',
         selected: false,
         disabled: false,
-      },{
-        value: 22,
-        label: 'Journalism',
-        selected: false,
-        disabled: false,
-      },{
-        value: 21,
-        label: 'Research',
-        selected: false,
-        disabled: false,
-      },{
-        value: 22,
+      }, {
+        value: 24,
         label: 'Meme',
         selected: false,
         disabled: false,
-      },{
-        value: 23,
+      }, {
+        value: 25,
         label: 'Music',
         selected: false,
         disabled: false,
-      },{
-        value: 24,
+      }, {
+        value: 26,
         label: 'Media',
         selected: false,
         disabled: false,
-      },{
-        value: 25,
+      }, {
+        value: 27,
+        label: 'Journalism',
+        selected: false,
+        disabled: false,
+      }, {
+        value: 28,
         label: 'News',
         selected: false,
         disabled: false,
-      },{
-        value: 26,
+      }, {
+        value: 29,
         label: 'Archive',
         selected: false,
         disabled: false,
-      },{
-        value: 27,
+      }, {
+        value: 30,
         label: 'Fashion',
         selected: false,
         disabled: false,
-      },{
-        value: 28,
+      }, {
+        value: 31,
         label: 'Food',
         selected: false,
         disabled: false,
-      },{
-        value: 29,
+      }, {
+        value: 32,
         label: 'Cooking',
         selected: false,
         disabled: false,
-      },{
-        value: 30,
+      }, {
+        value: 33,
         label: 'DIY',
         selected: false,
         disabled: false,
-      },{
-        value: 31,
+      }, {
+        value: 34,
         label: 'Art',
         selected: false,
         disabled: false,
-      },{
-        value: 32,
+      }, {
+        value: 35,
         label: 'Design',
         selected: false,
         disabled: false,
-      },{
-        value: 33,
+      }, {
+        value: 36,
         label: 'Technology',
         selected: false,
         disabled: false,
-      },{
-        value: 34,
+      }, {
+        value: 37,
         label: 'Religion',
         selected: false,
         disabled: false,
-      },{
-        value: 35,
+      }, {
+        value: 38,
         label: 'Government',
         selected: false,
         disabled: false,
-      },{
-        value: 36,
+      }, {
+        value: 39,
         label: 'Politics',
         selected: false,
         disabled: false,
-      },{
-        value: 37,
+      }, {
+        value: 40,
         label: 'Science',
         selected: false,
         disabled: false,
-      },
-      {
-        value: 38,
+      }, {
+        value: 41,
         label: 'Receipts',
         selected: false,
         disabled: false,
-      },{
-        value: 39,
-        label: 'Design',
-        selected: false,
-        disabled: false,
-      },{
-        value: 40,
+      }, {
+        value: 42,
         label: 'Development',
         selected: false,
         disabled: false,
-      },{
-        value: 41,
-        label: 'Testing',
-        selected: false,
-        disabled: false,
-      },{
-        value: 42,
-        label: 'Maintenance',
-        selected: false,
-        disabled: false,
-      },{
+      }, {
         value: 43,
         label: 'Resources',
         selected: false,
         disabled: false,
-      },{
+      }, {
         value: 44,
         label: 'Templates',
         selected: false,
         disabled: false,
-      },{
+      }, {
         value: 45,
         label: 'Guidelines',
         selected: false,
         disabled: false,
-      },{
+      }, {
         value: 46,
         label: 'Reference',
         selected: false,
         disabled: false,
-      },{
-        value: 47,
-        label: 'Archives',
+      }, {
+        value: 67,
+        label: 'Research',
         selected: false,
         disabled: false,
-      },{
+      }, {
         value: 48,
         label: 'Backups',
         selected: false,
         disabled: false,
-      },{
+      }, {
         value: 49,
         label: 'Drafts',
         selected: false,
         disabled: false,
-      },{
+      }, {
         value: 50,
         label: 'Final',
         selected: false,
         disabled: false,
-      },{
+      }, {
         value: 51,
         label: 'Pending',
         selected: false,
         disabled: false,
-      },{
+      }, {
         value: 52,
         label: 'Approved',
         selected: false,
         disabled: false,
-      },{
+      }, {
         value: 53,
         label: 'Rejected',
         selected: false,
         disabled: false,
-      },{
+      }, {
         value: 54,
         label: 'Urgent',
         selected: false,
         disabled: false,
-      },{
+      }, {
         value: 55,
         label: 'Goals',
         selected: false,
         disabled: false,
-      },{
+      }, {
         value: 56,
         label: 'Tasks',
         selected: false,
         disabled: false,
-      },{
+      }, {
         value: 57,
         label: 'Ideas',
         selected: false,
         disabled: false,
-      },{
+      }, {
         value: 58,
         label: 'Meetings',
         selected: false,
         disabled: false,
-      },{
+      }, {
         value: 59,
         label: 'Follow-Up',
         selected: false,
         disabled: false,
-      },{
+      }, {
         value: 60,
         label: 'Feedback',
         selected: false,
         disabled: false,
-      },{
+      }, {
         value: 61,
         label: 'Surveys',
         selected: false,
         disabled: false,
-      },{
+      }, {
         value: 62,
         label: 'Networking',
         selected: false,
         disabled: false,
-      },{
+      }, {
         value: 63,
         label: 'Miscellaneous',
         selected: false,
         disabled: false,
       }
-    ],
+      ],
     }
   },
   methods: {

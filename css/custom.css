@@ -12810,6 +12810,34 @@ td {
   margin-bottom: 0px !important;
 }
 
+.text-red {
+  color: red;
+}
+
+.text-orange {
+  color: orange;
+}
+
+.text-yellow {
+  color: yellow;
+}
+
+.text-green {
+  color: green;
+}
+
+.text-blue {
+  color: blue;
+}
+
+.text-purple {
+  color: purple;
+}
+
+.text-grey {
+  color: grey;
+}
+
 .choices__inner {
   background-color: #212529 !important;
   border-color: rgba(255, 255, 255, 0.4) !important;
