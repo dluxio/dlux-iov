@@ -1190,7 +1190,7 @@ export default {
                 }
             }
         },
-        handleTag(m){
+        handleTag(id,i,m){
             var num = this.Base64toNumber(this.newMeta[id][i][0])
             if(m.action == 'added'){
                 num += m.value
