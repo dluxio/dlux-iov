@@ -230,16 +230,17 @@ computed: {
 },
 mounted() {
     for (const contract of this.contracts) {
-        this.contract[contract.i] = contract;
+        const id = this.contracts[contract].i
+        this.contract[contract.i] = this.contracts[contract];
         for (const file of contract.df) {
-            this.filesArray.push(file);
+            this.filesArray.push(this.contracts[contract][file]);
         }
-        if (!this.contract[contract.i].m) {
-            this.contract[contract.i].m = ""
-            const filesNum = this.contract?.df ? Object.keys(this.contract[contract.i].df).length : 0
-            this.newMeta[this.contract.i] = new Array(filesNum * 4 + 1).fill('')
+        if (!this.contracts[id].m) {
+            this.contract[id].m = ""
+            const filesNum = this.contract?.df ? Object.keys(this.contract[id].df).length : 0
+            this.newMeta[this.id] = new Array(filesNum * 4 + 1).fill('')
         } else {
-            this.newMeta[this.contract.i] = this.contract[contract.i].m.split(",")
+            this.newMeta[this.id] = this.contract[id].m.split(",")
         }
     }
     this.files = this.contract.df;
