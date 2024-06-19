@@ -945,9 +945,9 @@ export default {
                 case 'webp':
                 case 'tiff':
                 case 'tif':
-                    return `https://ipfs.dlux.io/ipfs/${cid}`
+                    return `/img/png-file-type-svgrepo-com.svg`
                 case 'svg':
-                    return `https://ipfs.dlux.io/ipfs/${cid}`
+                    return `/img/png-file-type-svgrepo-com.svg`
                 case 'mp4':
                 case 'mov':
                     return `/img/mov-file-type-svgrepo-com.svg`
