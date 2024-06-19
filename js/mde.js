@@ -38,6 +38,7 @@ export default {
       element: this.$refs.mde,
       dragDrop: false
     });
+    this.mde.value(this.insert)
     this.mde.codemirror.on("change", () => {
       this.$emit("data", this.mde.value())
     });
