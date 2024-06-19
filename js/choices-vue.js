@@ -11,56 +11,55 @@ export default {
       type: String,
       default: "tags"
     },
-    opts: {
-      type: Object,
-      default: () => {
-        return {
-          silent: false,
-          items: [],
-          renderChoiceLimit: -1,
-          maxItemCount: -1,
-          addItems: true,
-          addItemFilter: null,
-          removeItems: true,
-          removeItemButton: true,
-          editItems: false,
-          allowHTML: true,
-          duplicateItemsAllowed: true,
-          delimiter: ',',
-          paste: true,
-          searchEnabled: true,
-          searchChoices: true,
-          searchFloor: 1,
-          searchResultLimit: 4,
-          searchFields: ['label', 'value'],
-          position: 'auto',
-          resetScrollPosition: true,
-          shouldSort: true,
-          shouldSortItems: false,
-          sorter: function (a, b) {
-            return a.value - b.value;
-          },
-          placeholder: true,
-          placeholderValue: null,
-          searchPlaceholderValue: null,
-          prependValue: null,
-          appendValue: null,
-          renderSelectedChoices: 'auto',
-          loadingText: 'Loading...',
-          noResultsText: 'No results found',
-          noChoicesText: 'No choices to choose from',
-          itemSelectText: 'Press to select',
-          uniqueItemText: 'Only unique values can be added',
-          customAddItemText: 'Only values matching specific conditions can be added',
-          // callbackOnCreateTemplates: function (template) {
-          //   console.log(template)
-          // }
-        }
-      }
-    },
+    prop_selections: {
+      type: String,
+      default: "2"
+    }
   },
   data() {
     return {
+      opts: {
+        silent: false,
+        items: [],
+        renderChoiceLimit: -1,
+        maxItemCount: -1,
+        addItems: true,
+        addItemFilter: null,
+        removeItems: true,
+        removeItemButton: true,
+        editItems: false,
+        allowHTML: true,
+        duplicateItemsAllowed: true,
+        delimiter: ',',
+        paste: true,
+        searchEnabled: true,
+        searchChoices: true,
+        searchFloor: 1,
+        searchResultLimit: 4,
+        searchFields: ['label', 'value'],
+        position: 'auto',
+        resetScrollPosition: true,
+        shouldSort: true,
+        shouldSortItems: false,
+        sorter: function (a, b) {
+          return a.value - b.value;
+        },
+        placeholder: true,
+        placeholderValue: null,
+        searchPlaceholderValue: null,
+        prependValue: null,
+        appendValue: null,
+        renderSelectedChoices: 'auto',
+        loadingText: 'Loading...',
+        noResultsText: 'No results found',
+        noChoicesText: 'No choices to choose from',
+        itemSelectText: 'Press to select',
+        uniqueItemText: 'Only unique values can be added',
+        customAddItemText: 'Only values matching specific conditions can be added',
+        // callbackOnCreateTemplates: function (template) {
+        //   console.log(template)
+        // }
+      },
       msg: "",
       Choices: null,
       tags: [{
@@ -403,7 +402,7 @@ export default {
         selected: false,
         disabled: false,
       }, {
-        value: "-",
+        value: "=",
         label: '<i class="fa-solid fa-user-secret fa-fw me-1"></i>Classified',
         selected: false,
         disabled: false,
@@ -412,31 +411,61 @@ export default {
     }
   },
   methods: {
+    Base64toNumber(chars) {
+      const glyphs =
+        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
+      var result = 0;
+      chars = chars.split("");
+      for (var e = 0; e < chars.length; e++) {
+        result = result * 64 + glyphs.indexOf(chars[e]);
+      }
+      return result;
+    },
     passData(d) {
       this.$emit("data", template)
     },
+    init() {
+      var prop_selections = []
+      if(this.prop_type == 'tags') {
+        const num = this.Base64toNumber(this.prop_selections[0])
+        if(num & 2) prop_selections.push(this.tags[0])
+        if(num & 4) prop_selections.push(this.tags[1])
+        if(num & 8) prop_selections.push(this.tags[2])
+        this.opts.items = prop_selections
+      } else {
+        for (var i = 1; i < this.prop_selections.length; i++) {
+          prop_selections.push(this.labels[this.Base64toNumber(this.prop_selections[i])])
+        }
+        this.opts.items = prop_selections
+      }
+
+    },
     setUp() {
+      this.init()
       var opts = this.opts
       opts.choices = this[this.prop_type]
       if (!Choices) this.msg = 'Choices not loaded'
       else if (this.reference == '') this.msg = 'Ref not set'
       else {
         this.Choices = new Choices(this.$refs[this.reference], opts)
-        this.$refs[this.reference].addEventListener('addItem', this.handleSelectChange);
+        this.$refs[this.reference].addEventListener('addItem', this.handleAdd);
+        this.$refs[this.reference].addEventListener('removeItem', this.handleRemove);
       }
     },
-    handleSelectChange(e) {
-      console.log(e)
-	    this.$emit('data', e.detail.value);
-    }
-  },
-  watch: {
-    'Choices': {
-      handler: function (o, n) {
-        console.log(o, n)
-      },
-      deep: true
+    handleAdd(e) {
+      const message = {
+        item: e.detail.value,
+        action: 'added'
+      }
+	    this.$emit('data', message);
     },
+    handleRemove(e) {
+      const message = {
+        item: e.detail.value,
+        action: 'removed'
+      }
+	    this.$emit('data', message);
+    }
   },
   mounted() {
     this.setUp()

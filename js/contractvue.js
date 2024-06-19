@@ -439,11 +439,11 @@ export default {
                                                                                                     <!-- choices-js-->
                                                                                                     <div class="mb-1">
                                                                                                         <label class="mb-1">Tags</label>
-                                                                                                        <choices-vue ref="select-tag" prop_type="tags" @data="handleTag($event)"></choices-vue>
+                                                                                                        <choices-vue ref="select-tag" :prop_selections="newMeta[contract.i][index * 4 + 4]" prop_type="tags" @data="handleTag(contract.i, index * 4 + 4, $event)"></choices-vue>
                                                                                                     </div>
                                                                                                     <div class="mb-1">
                                                                                                         <label class="mb-1">Labels</label>
-                                                                                                        <choices-vue ref="select-label" prop_type="labels" @data="handleLabel($event)"></choices-vue>
+                                                                                                        <choices-vue ref="select-label" :prop_selections="newMeta[contract.i][index * 4 + 4]" prop_type="labels" @data="handleLabel(contract.i, index * 4 + 3, $event)"></choices-vue>
                                                                                                     </div> 
                                                                                                     
                                                                                                 </div>
@@ -1177,11 +1177,22 @@ export default {
                     this.getSapi()
                 });
         },
-        handleLabel(e){
-            console.log('hl', e)
+        handleLabel(id,i,m){
+            if(m.action == 'added'){
+                var string = this.newMeta[id][i]
+                if(!string) string = '2'
+                this.newMeta[id][i] += m.value
+
+            } else {
+                var string = this.newMeta[id][i]
+                var arr = string.split('')
+                for (var j = 1; j < arr.length; j++){
+                    if (arr[j] == m.value) arr.splice(j,1)
+                }
+            }
         },
-        handleTag(e){
-            console.log('ht', e)
+        handleTag(m){
+            
         },
         when(arr) {
             if (!arr.length) return "";
