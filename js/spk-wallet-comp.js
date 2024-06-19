@@ -1,4 +1,3 @@
-import test from 'node:test';
 import ModalVue from './modalvue.js'
 
 export default {
