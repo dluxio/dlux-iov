@@ -421,7 +421,7 @@ export default {
                                                                                                                 <path class="st0" d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
                                                                                                                     c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
                                                                                                                     c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z"/>
-                                                                                                                <text transform="matrix(1 0 0 1 183.3494 471.9725)" class="st1 st2" style="text-transform: uppercase; font-family: 'Arial Bold'; font-size: 149px;">{{newMeta[contract.i][index * 4 + 2]}}</text>
+                                                                                                                <text transform="matrix(1 0 0 1 183.3494 471.9725)" class="st1 st2" style="text-transform: uppercase; font-size: 149px;">{{newMeta[contract.i][index * 4 + 2]}}</text>
                                                                                                             </g>
                                                                                                         </svg>
                                                                                                     </div>
