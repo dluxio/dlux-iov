@@ -1194,15 +1194,12 @@ export default {
         },
         handleTag(id,i,m){
             var num = this.Base64toNumber(this.newMeta[id][i][0]) || 0
-            console.log({num}, m)
             if(m.action == 'added'){
-                if (! num & m.value)num += m.item
-                console.log(num & m.value, num)
+                if (num & m.item){}
+                else num += m.item
                 this.newMeta[id][i] = this.NumberToBase64(num) + this.newMeta[id][i].slice(1)
             } else {
-                console.log('remove', m.item)
-                if (num & m.value) num -= m.value
-                console.log(num & m.value, num)
+                if (num & m.item) num -= m.item
                 this.newMeta[id][i] = this.NumberToBase64(num) + this.newMeta[id][i].slice(1)
             }
         },
