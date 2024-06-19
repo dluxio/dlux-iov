@@ -359,6 +359,7 @@ export default {
           if (typeof this.prop_bens[i] == "string") this.addBen(this.prop_bens[i].split(',')[0], this.prop_bens[i].split(',')[1])
           else this.addBen(this.prop_bens[i].account, this.prop_bens[i].weight)
         }
+        this.save()
       },
       deep: true
     },
@@ -367,6 +368,7 @@ export default {
         for (var i = 0; i < this.prop_contracts.length; i++) {
           this.addBen(this.prop_contracts[i].s.split(',')[0], this.prop_contracts[i].s.split(',')[1])
         }
+        this.save()
       }
     },
     'prop_json'(newValue) {
@@ -374,13 +376,31 @@ export default {
         for (var node in this.prop_json) {
           this.postCustom_json[node] = this.prop_json[node]
         }
+        this.save()
       }
     },
     'prop_insert'(newValue) {
       if (newValue) {
         this.insert = newValue
       }
-    }
+      this.save()
+    },
+    'postBody'(newValue) {
+      this.save()
+    },
+    'postTags'(newValue) {
+      this.save()
+    },
+    'postTitle'(newValue) {
+      this.save()
+    },
+    'postPermlink'(newValue) {
+      this.save()
+    },
+    'postBens'(newValue) {
+      this.save()
+    },
+    
   },
   mounted() {
     if (!this.load()) {
