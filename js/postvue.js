@@ -308,7 +308,7 @@ export default {
         this.postCustom_json = data.json
         this.postPermlink = data.permlink
         setTimeout(() => {
-          this.insert = this.prop_insert
+          this.insert = this.data.body
         }, 100)
         return true
       }
