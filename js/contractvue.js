@@ -1033,6 +1033,7 @@ export default {
             })
             }).then(() => {
                 this.contractIDs[contract].m = cja.m
+                console.log(this.contractIDs[contract].m, cja.m)
                 resolve('OK')
             }).catch(e => {})
         },
