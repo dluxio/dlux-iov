@@ -22,7 +22,7 @@ export default {
         silent: false,
         items: [],
         renderChoiceLimit: -1,
-        maxItemCount: -1,
+        maxItemCount: 8,
         addItems: true,
         addItemFilter: null,
         removeItems: true,
