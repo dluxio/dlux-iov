@@ -1030,12 +1030,15 @@ export default {
                     api: this.sapi,
                     txid: `spkccT_update_meta`,
                 };
+                })
+                removeSave.then(() => {
+                    this.contractIDs[contract].m = cja.m
+                    console.log(this.contractIDs[contract].m, cja.m)
+                    resolve('OK')
+                }).catch(e => {
+                    reject(e)
+                })
             })
-            }).then(() => {
-                this.contractIDs[contract].m = cja.m
-                console.log(this.contractIDs[contract].m, cja.m)
-                resolve('OK')
-            }).catch(e => {})
         },
         done() {
             this.$emit('done')
