@@ -284,6 +284,34 @@ export default {
         this.postPermlink = text;
       }
     },
+    save() {
+      if (this.prop_uid) {
+        const postData = {
+          title: this.postTitle,
+          body: this.postBody,
+          tags: this.postTags,
+          bens: this.postBens,
+          json: this.postCustom_json,
+          permlink: this.postPermlink
+        }
+        localStorage.setItem(this.prop_uid, JSON.stringify(postData))
+      }
+    },
+    loadPost() {
+      const postData = localStorage.getItem(this.prop_uid)
+      if (postData) {
+        const data = JSON.parse(postData)
+        this.postTitle = data.title
+        this.postBody = data.body
+        this.insert = data.body
+        this.postTags = data.tags
+        this.postBens = data.bens
+        this.postCustom_json = data.json
+        this.postPermlink = data.permlink
+        return true
+      }
+      return false
+    }
   },
   computed: {
     validPost() {
@@ -317,34 +345,6 @@ export default {
       }
       return isnt
 
-    },
-    save() {
-      if (this.prop_uid) {
-        const postData = {
-          title: this.postTitle,
-          body: this.postBody,
-          tags: this.postTags,
-          bens: this.postBens,
-          json: this.postCustom_json,
-          permlink: this.postPermlink
-        }
-        localStorage.setItem(this.prop_uid, JSON.stringify(postData))
-      }
-    },
-    loadPost() {
-      const postData = localStorage.getItem(this.prop_uid)
-      if (postData) {
-        const data = JSON.parse(postData)
-        this.postTitle = data.title
-        this.postBody = data.body
-        this.insert = data.body
-        this.postTags = data.tags
-        this.postBens = data.bens
-        this.postCustom_json = data.json
-        this.postPermlink = data.permlink
-        return true
-      }
-      return false
     }
   },
   components: {
