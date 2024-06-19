@@ -1189,12 +1189,13 @@ export default {
                 for (var j = 1; j < arr.length; j++){
                     if (arr[j] == m.item) arr.splice(j,1)
                 }
+                this.newMeta[id][i] = arr.join('')
             }
         },
         handleTag(id,i,m){
             var num = this.Base64toNumber(this.newMeta[id][i][0])
             if(m.action == 'added'){
-                num += m.item
+                if (num & m.value == 0)num += m.item
                 this.newMeta[id][i] = this.NumberToBase64(num) + this.newMeta[id][i].slice(1)
             } else {
                 console.log('remove', m.item)
