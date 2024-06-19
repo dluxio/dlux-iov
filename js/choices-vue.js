@@ -408,6 +408,7 @@ export default {
         disabled: false,
       }
       ],
+      selections: "2"
     }
   },
   methods: {
@@ -425,19 +426,17 @@ export default {
       this.$emit("data", template)
     },
     init() {
-      var prop_selections = []
       if(this.prop_type == 'tags') {
-        const num = this.Base64toNumber(this.prop_selections[0]) || 2
-        if(num & 2) prop_selections.push(this.tags[0])
-        if(num & 4) prop_selections.push(this.tags[1])
-        if(num & 8) prop_selections.push(this.tags[2])
-        this.opts.items = prop_selections
+        const num = this.Base64toNumber(this.prop_selections[0])
+        if(num & 2) this.selections.push(this.tags[0])
+        if(num & 4) this.selections.push(this.tags[1])
+        if(num & 8) this.selections.push(this.tags[2])
+        this.opts.items = this.selections
       } else {
         for (var i = 1; i < this.prop_selections.length; i++) {
-          prop_selections.push(this.labels[this.Base64toNumber(this.prop_selections[i])])
+          this.selections.push(this.labels[this.Base64toNumber(this.prop_selections[i])])
         }
-        this.opts.items = prop_selections
-        console.log(this.opts.items)
+        this.opts.items = this.selections
       }
 
     },
