@@ -86,7 +86,18 @@
         <main role="main" class="mb-auto text-white" v-cloak style="padding-top: 94px;">
             <div class="container-fluid px-0">
                 <div v-if="!pageAccount && !account">
-                    <p>Please login</p>
+                    <div class="container-fluid mt-2">
+                        <div class="container mt-2 pt-md-5">
+                            <div class="card p-1 p-md-3 mt-5 m-lg-5">
+                                <div class="card-body text-center">
+                                    <div class="fs-2 lead mb-3">
+                                        Login to see this page
+                                    </div>
+                                    <button class="fs-6 btn btn-success btn-success-lg text-black" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers" style="font-family: &quot;Lucida Console&quot;, Monaco, monospace;">login</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div v-if="pageAccount || account">
 
