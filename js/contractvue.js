@@ -797,9 +797,9 @@ export default {
         getdelimed(string, del = ',', index = 0) {
             return string.split(del)[index] ? string.split(del)[index] : ''
         },
-        addToPost(cid, contract, index, loc = 'self'){
+        addToPost(cid, contract, index, loc = 'self') {
             var string = this.smartThumb(contract, index, cid)
-            if(string.includes('ipfs/')){
+            if (string.includes('ipfs/')) {
                 string = `![${this.newMeta[contract][index * 4 + 1]}](${string})`
             } else {
                 string = `[${this.newMeta[contract][index * 4 + 1]}.${this.newMeta[contract][index * 4 + 2]}](https://ipfs.dlux.io/ipfs/${cid})`
@@ -903,11 +903,11 @@ export default {
                 .then((response) => response.text())
                 .then((blob) => {
                     const name = this.newMeta[id][index * 4 + 1] + '.' + this.newMeta[id][index * 4 + 2] || 'file'
-                    if (this.contractIDs[id].encryption.key){
+                    if (this.contractIDs[id].encryption.key) {
                         blob = this.AESDecrypt(blob, this.contractIDs[id].encryption.key);
                         blob = new Blob([blob]);
                     }
-                    try{
+                    try {
                         var url = window.URL.createObjectURL(blob);
                         var a = document.createElement('a');
                         a.href = url;
@@ -924,7 +924,7 @@ export default {
                         a.click();
                         window.URL.revokeObjectURL(url);
                     }
-                    
+
                 });
         },
         smartThumb(contract, index, cid) {
@@ -1019,17 +1019,22 @@ export default {
                     id: contract,
                     m: meta.join(',')
                 };
+                const removeSave = new Promise((res, rej) => {
                 this.toSign = {
                     type: "cja",
                     cj: cja,
                     id: `spkccT_update_metadata`,
                     msg: `Updating Metadata for Contract: ${contract}`,
                     ops: [],
+                    callbacks: [res, rej],
                     api: this.sapi,
                     txid: `spkccT_update_meta`,
                 };
-                resolve('OK')
             })
+            }).then(() => {
+                this.contractIDs[contract].m = cja.m
+                resolve('OK')
+            }).catch(e => {})
         },
         done() {
             this.$emit('done')
@@ -1186,25 +1191,25 @@ export default {
                     this.getSapi()
                 });
         },
-        handleLabel(id,i,m){
-            if(m.action == 'added'){
+        handleLabel(id, i, m) {
+            if (m.action == 'added') {
                 var string = this.newMeta[id][i]
-                if(!string) string = '2'
+                if (!string) string = '2'
                 this.newMeta[id][i] += m.item
             } else {
                 console.log('remove', m.item)
                 var string = this.newMeta[id][i]
                 var arr = string.split('')
-                for (var j = 1; j < arr.length; j++){
-                    if (arr[j] == m.item) arr.splice(j,1)
+                for (var j = 1; j < arr.length; j++) {
+                    if (arr[j] == m.item) arr.splice(j, 1)
                 }
                 this.newMeta[id][i] = arr.join('')
             }
         },
-        handleTag(id,i,m){
+        handleTag(id, i, m) {
             var num = this.Base64toNumber(this.newMeta[id][i][0]) || 0
-            if(m.action == 'added'){
-                if (num & m.item){}
+            if (m.action == 'added') {
+                if (num & m.item) { }
                 else num += m.item
                 this.newMeta[id][i] = (this.NumberToBase64(num) || "0") + this.newMeta[id][i].slice(1)
             } else {
@@ -1602,7 +1607,7 @@ export default {
                 this.contractIDs[this.prop_contracts[node].i].index = this.prop_contracts.length - 1;
             }
         }
-        
+
     },
 };
 
