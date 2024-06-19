@@ -447,6 +447,7 @@ export default {
       if (!Choices) this.msg = 'Choices not loaded'
       else if (this.reference == '') this.msg = 'Ref not set'
       else {
+        console.log(opts)
         this.Choices = new Choices(this.$refs[this.reference], opts)
         this.$refs[this.reference].addEventListener('addItem', this.handleAdd);
         this.$refs[this.reference].addEventListener('removeItem', this.handleRemove);
