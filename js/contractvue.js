@@ -305,7 +305,7 @@ export default {
                                                         <!-- detail view -->
                                                         <tr class="collapse" :id="replace(contract.i)">
                                                             <td class="border-0 px-0 px-md-1" colspan="4">
-                                                                <div class="d-flex flex-column border border-white rounded text-start px-md-2 py-2" style="background-color:rgba(0,0,0,0.3);">
+                                                                <div class="d-flex flex-column border border-white rounded text-start py-2" style="background-color:rgba(0,0,0,0.3);">
 
                                                                     <!-- contract ID -->
                                                                     <div class="d-flex justify-content-center small text-white-50 mb-3">
@@ -329,8 +329,8 @@ export default {
                                                                     </div>
 
                                                                     <!-- post time banner -->
-                                                                    <div v-if="contract.c == 2" class="mx-1 mb-3">
-                                                                        <div class="alert alert-warning d-flex align-items-center mx-lg-5">
+                                                                    <div v-if="contract.c == 2" class="mx-1 mx-lg-5 mb-3">
+                                                                        <div class="alert alert-warning d-flex align-items-center ">
                                                                             <div class="d-flex flex-grow-1 flex-wrap me-1 align-items-center">
                                                                                 <div class="mx-1">
                                                                                     <div class="fs-3 fw-lighter">You have {{exp_to_time(contract.e)}} to publish this contract</div>
@@ -376,7 +376,7 @@ export default {
                                                                     
                                                                     <!-- files list -->
                                                                     <div v-if="contract.df">
-                                                                        <div class="p-sm-1 px-lg-2 pt-2 mt-2 mx-lg-5 rounded" style="background-color:rgba(0,0,0,0.3)">
+                                                                        <div class="p-sm-1 px-lg-2 pt-2 mt-2 mx-1 mx-lg-5 rounded" style="background-color:rgba(0,0,0,0.3)">
                                                                             <div class="d-flex flex-column">
                                                                                 <h2 class="mx-auto ms-md-1">File{{pluralFiles(contract.i) ? 's' : ''}} </h2>
                                                                                 
