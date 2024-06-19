@@ -10,7 +10,7 @@ export default {
     },
     methods: {
       insertText(value) {
-        //this.mde.value(value);
+        console.log("insertText", value)
         var pos = this.mde.codemirror.getCursor();
         this.mde.codemirror.setSelection(pos, pos);
         this.mde.codemirror.replaceSelection(value);
