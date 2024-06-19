@@ -174,6 +174,7 @@ methods: {
         }
     },
     fancyBytes(bytes) {
+        console.log({bytes})
         var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
         while (bytes > 1024) {
             bytes = bytes / 1024
@@ -224,7 +225,6 @@ methods: {
         if(this.contracts[i].c == 1)continue
         const id = this.contracts[i].i
         this.contract[id] = this.contracts[i];
-        console.log(this.contracts[i], 'df')
         var keys = Object.keys(this.contracts[i].df)
         for (var j in keys) {
             const f = {
