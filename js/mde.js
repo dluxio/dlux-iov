@@ -18,12 +18,12 @@ export default {
       }
     },
     watch: {
-      'prop_insert': {  
-        if(newValue) {
-          console.log("watch", newValue)
-          this.insertText(newValue);
+      'prop_insert'(newValue){
+        if(newValue){
+            console.log(2, {newValue})
+            this.insertText(newValue)
         }
-      },
+    }
     },
     mounted() {
 
