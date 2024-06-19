@@ -960,19 +960,15 @@ export default {
             if (thumb.includes('https')) return thumb
             switch (this.newMeta[contract][index * 4 + 2]) {
                 case 'jpg':
-                    return `/img/jpg-file-type-svgrepo-com.svg`
                 case 'jpeg':
-                    return `/img/jpg-file-type-svgrepo-com.svg`
                 case 'png':
-                    return `/img/png-file-type-svgrepo-com.svg`
                 case 'gif':
                 case 'bmp':
                 case 'webp':
                 case 'tiff':
                 case 'tif':
-                    return `/img/png-file-type-svgrepo-com.svg`
                 case 'svg':
-                    return `/img/png-file-type-svgrepo-com.svg`
+                    return `https://ipfs.dlux.io/ipfs/${cid}`
                 case 'mp4':
                 case 'mov':
                     return `/img/mov-file-type-svgrepo-com.svg`
