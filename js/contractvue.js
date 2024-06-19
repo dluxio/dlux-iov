@@ -403,11 +403,7 @@ export default {
                                                                                                     <div class="bg-light rounded">    
                                                                                                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                                                                                                                 viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve" >
-                                                                                                            <style type="text/css">
-                                                                                                                .st0{fill:#101010;}
-                                                                                                                .st1{font-family:'Arial-BoldMT';}
-                                                                                                                .st2{font-size:149px;}
-                                                                                                            </style>
+                                                                                                            
                                                                                                             <g >
                                                                                                                 <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10
                                                                                                                     S655.5,210,650,210z"/>
