@@ -3654,7 +3654,21 @@ function buyNFT(setname, uid, price, type, callback){
         console.log('active');
       }
     },
-    init() {
+    init(reset = false) {
+      if(reset){
+        if (location.pathname.split("/@")[1]) {
+          this.pageAccount = location.pathname.split("/@")[1]
+          if (this.pageAccount.indexOf('/') > -1) {
+            this.pagePermlink = this.pageAccount.split('/')[1]
+            this.pageAccount = this.pageAccount.split('/')[0]
+          }
+        } else if (location.pathname.split("/new/")[1]) {
+          this.builder = true
+        } else {
+          this.pageAccount = this.account;
+          this.me = true;
+        }
+      }
       this.getIPFSproviders()
       this.getMARKETS()
       if (!this.me) {
