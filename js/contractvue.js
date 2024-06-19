@@ -350,6 +350,7 @@ export default {
                                                                             <post-vue :account="account"
                                                                             :prop_bens="[contract.s]"
                                                                             :prop_links="links[contract.i]"
+                                                                            :prop_insert="postBodyAdder[contract.i]"
                                                                             @tosign="toSign=$event" />
                                                                         </div>
                                                                     </div>
@@ -789,6 +790,7 @@ export default {
         },
         addToPost(cid, contract, index, loc = 'self'){
             var string = this.smartThumb(contract, index, cid)
+            console.log(string)
             if(string.includes('ipfs.dlux.io')){
                 string = `![${this.newMeta[contract][index * 4 + 1]}](${string})`
             } else {
