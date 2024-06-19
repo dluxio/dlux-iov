@@ -77,11 +77,10 @@ export default {
                     <div class="btn-group" role="group"
                         aria-label="SPK Actions">
                         <button type="button" class="btn btn-info p-0">
-                            <modal-vue type="send" token="SPK" 
+                            <modal-vue type="send" token="SPK" :test="test"
                                 :balance="saccountapi.spk" :account="account"
                                 @modalsign="sendIt($event)" v-slot:trigger>
-                                <span class="p-2 trigger"
-                                    :test="test"><i
+                                <span class="p-2 trigger"><i
                                         class="fas fa-paper-plane me-2"></i>Send</span>
                             </modal-vue>
                         </button>
@@ -95,7 +94,7 @@ export default {
                                 aria-expanded="false"></button>
                             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                 aria-labelledby="btnGroupDrop1">
-                                <modal-vue type="power" token="SPK" 
+                                <modal-vue type="power" token="SPK" :test="test"
                                     func="Power Up" :balance="saccountapi.spk"
                                     :account="account"
                                     @modalsign="sendIt($event)" v-slot:trigger>
@@ -254,6 +253,7 @@ export default {
                                     func="Power Down"
                                     :balance="saccountapi.spk_power"
                                     :account="account"
+                                    :test="test"
                                     @modalsign="sendIt($event)" v-slot:trigger>
                                     <button class="dropdown-item trigger"
                                         type="button"><i
@@ -262,6 +262,7 @@ export default {
                                 </modal-vue>
                                 <modal-vue type="power" token="SPK" 
                                     func="Election"
+                                    :test="test"
                                     :balance="saccountapi.spk_power"
                                     :account="account" :smarkets="smarkets.node"
                                     :current="saccountapi.spk_vote"
@@ -317,7 +318,7 @@ export default {
                             </div>
                             <!-- new contract -->
                             <div v-if="saccountapi.pubKey != 'NA'">
-                            <modal-vue type="build" token="BROCA" 
+                            <modal-vue type="build" token="BROCA"  :test="test"
                                 :balance="broca_calc(saccountapi.broca)" 
                                 :account="account" @modalsign="sendIt($event)"
                                 :ipfsproviders="ipfsProviders" v-slot:trigger>
@@ -335,7 +336,7 @@ export default {
                                 aria-expanded="false"></button>
                             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                 aria-labelledby="btnGroupDrop1">
-                                <modal-vue type="power" token="SPK" 
+                                <modal-vue type="power" token="SPK" :test="test"
                                     func="Power Down"
                                     :balance="saccountapi.spk_power"
                                     :account="account"
@@ -417,7 +418,7 @@ export default {
                     <div class="btn-group" role="group"
                         aria-label="LARYNX Actions">
                         <button type="button" class="btn btn-info p-0">
-                            <modal-vue type="send" token="LARYNX" 
+                            <modal-vue type="send" token="LARYNX"
                                 :balance="saccountapi.balance"
                                 :account="account" @modalsign="sendIt($event)"
                                 :test="test" v-slot:trigger>
@@ -435,7 +436,7 @@ export default {
                                 aria-expanded="false"></button>
                             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                 aria-labelledby="btnGroupDrop1">
-                                <modal-vue type="power" token="LARYNX" 
+                                <modal-vue type="power" token="LARYNX"
                                     func="Power Up"
                                     :balance="saccountapi.balance"
                                     :account="account"
@@ -445,7 +446,7 @@ export default {
                                         type="button"><i
                                             class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
                                 </modal-vue>
-                                <modal-vue type="power" :dis="!isNode" 
+                                <modal-vue type="power" :dis="!isNode"
                                     token="LARYNX" func="Lock Liquidity"
                                     :balance="saccountapi.balance"
                                     :account="account"
@@ -456,7 +457,7 @@ export default {
                                         type="button"><i
                                             class="fas fa-lock fa-fw me-2"></i>Lock Liquidity</button>
                                 </modal-vue>
-                                <modal-vue type="power" token="LARYNX" 
+                                <modal-vue type="power" token="LARYNX"  :test="test"
                                     func="Register a Service"
                                     :balance="saccountapi.balance"
                                     :min="spkStats.IPFSRate/1000"
@@ -468,7 +469,7 @@ export default {
                                         A Service
                                     </button>
                                 </modal-vue>
-                                <modal-vue type="power" token="LARYNX" 
+                                <modal-vue type="power" token="LARYNX" :test="test"
                                     func="Register a Service Type"
                                     :balance="saccountapi.balance"
                                     :min="spkStats.IPFSRate/1000"
@@ -480,7 +481,7 @@ export default {
                                         A Service Type
                                     </button>
                                 </modal-vue>
-                                <modal-vue v-if="isNode" type="power" 
+                                <modal-vue v-if="isNode" type="power" :test="test"
                                     token="LARYNX" func="Register a Validator"
                                     :balance="saccountapi.balance"
                                     :min="isValidator ? '0.001' : spkStats.IPFSRate/1000"
@@ -549,7 +550,7 @@ export default {
 
                             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                 aria-labelledby="btnGroupDrop1">
-                                <modal-vue type="power" token="LARYNX" 
+                                <modal-vue type="power" token="LARYNX"
                                     func="Unlock Liquidity"
                                     :balance="saccountapi.gov"
                                     :test="test"
@@ -658,23 +659,23 @@ export default {
 
                                 <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
                                     aria-labelledby="btnGroupDrop1">
-                                    <modal-vue type="power" token="LARYNX" 
+                                    <modal-vue type="power" token="LARYNX" :test="test"
                                         func="Power Down"
                                         :balance="saccountapi.poweredUp"
                                         :account="account"
                                         @modalsign="sendIt($event)"
-                                        :test="test" v-slot:trigger>
+                                         v-slot:trigger>
                                         <button
                                             :disabled="!saccountapi.poweredUp"
                                             class="dropdown-item trigger" 
                                             type="button"><i class="fas fa-angle-double-down fa-fw me-2"></i>Power Down</button>
                                     </modal-vue>
-                                    <modal-vue 
+                                    <modal-vue :test="test"
                                         v-show="when(saccountapi.powerDowns)"
                                         type="confirm" token="LARYNX"
                                         func="powercancel" :account="account"
                                         @modalsign="sendIt($event)"
-                                        :test="test" v-slot:trigger>
+                                        v-slot:trigger>
                                         <button class="dropdown-item trigger"
                                             type="button">
                                             <i class="fa-solid fa-xmark fa-fw me-2"></i>Cancel Power Down</button>
