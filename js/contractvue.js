@@ -77,56 +77,58 @@ export default {
             <!-- contracts -->
             <div role="tabpanel" class="tab-pane show active" id="contractsTab" aria-labelledby="contractstab">
                 <!-- top menu -->
-                <div class="card-header mb-2 d-flex flex-wrap justify-content-center align-items-center">
-                    <h2 class="my-1 ms-lg-3 fw-light text-start">{{title}}</h2>
-                    <div class="d-flex flex-wrap flex-grow-1 mx-lg-3">
-                        <!-- tools 1 -->
-                        <div class="d-flex mb-1 flex-wrap ms-auto order-lg-last">
-                            <div class="d-flex flex-wrap justify-content-center ms-auto me-auto">
+                <div class="pb-1 mb-2 border-bottom border-2 border-light">
+                    <div class="mx-1 mx-lg-3 d-flex flex-wrap justify-content-center align-items-center">
+                        <h2 class="my-1 fw-light text-start">{{title}}</h2>
+                        <div class="d-flex flex-wrap flex-grow-1 ms-2">
+                            <!-- tools 1 -->
+                            <div class="d-flex mb-1 flex-wrap ms-auto order-lg-last">
+                                <div class="d-flex flex-wrap justify-content-center ms-auto me-auto">
 
-                                <!-- new contract button -->
-                                <button v-if="saccountapi.pubKey != 'NA' && saccountapi.spk_power" type="button"
-                                    class="btn btn-primary mt-1 me-1">
-                                    <modal-vue type="build" token="BROCA" :balance="broca_calc(saccountapi.broca)"
-                                        :account="account" @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
-                                        v-slot:trigger>
-                                        <span slot="trigger" class="trigger"><i
-                                                class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
-                                    </modal-vue>
-                                </button>
+                                    <!-- new contract button -->
+                                    <button v-if="saccountapi.pubKey != 'NA' && saccountapi.spk_power" type="button"
+                                        class="btn btn-primary mt-1 me-1">
+                                        <modal-vue type="build" token="BROCA" :balance="broca_calc(saccountapi.broca)"
+                                            :account="account" @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
+                                            v-slot:trigger>
+                                            <span slot="trigger" class="trigger"><i
+                                                    class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
+                                        </modal-vue>
+                                    </button>
 
-                                <!-- free button -->
-                                <button v-if="saccountapi.pubKey != 'NA'" type="button" class="btn btn-danger mt-1 me-1"
-                                    data-bs-toggle="modal" data-bs-target="#sponsoredModal">
-                                    <span class=""></span><i class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE
-                                </button>
+                                    <!-- free button -->
+                                    <button v-if="saccountapi.pubKey != 'NA'" type="button" class="btn btn-danger mt-1 me-1"
+                                        data-bs-toggle="modal" data-bs-target="#sponsoredModal">
+                                        <span class=""></span><i class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE
+                                    </button>
 
-                                <!-- spk wallet button -->
-                                <button v-if="!nodeview" type="button" class="mt-1 btn btn-secondary d-flex" data-bs-toggle="modal" data-bs-target="#spkWalletModal">
-                                    <i class="fa-solid fa-wallet fa-fw me-1 my-auto"></i>
-                                    <span class="my-auto">SPK</span>
-                                    <span class="badge small text-bg-warning ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
-                                </button>
-                                
+                                    <!-- spk wallet button -->
+                                    <button v-if="!nodeview" type="button" class="mt-1 btn btn-secondary d-flex" data-bs-toggle="modal" data-bs-target="#spkWalletModal">
+                                        <i class="fa-solid fa-wallet fa-fw me-1 my-auto"></i>
+                                        <span class="my-auto">SPK</span>
+                                        <span class="badge small text-bg-warning ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
+                                    </button>
+                                    
+                                </div>
                             </div>
-                        </div>
-                        <!-- tools 2 (hidden) -->
-                        <div>
-                            <div
-                                class="d-none position-relative flex-grow-1 me-1 order-lg-first d-flex align-items-center">
-                                <!-- search bar -->
-                                <span class="flex-grow-1">
-                                    <span class="position-absolute ps-2 top-50 translate-middle-y">
-                                        <i class="fa-solid fa-magnifying-glass fa-fw"></i>
+                            <!-- tools 2 (hidden) -->
+                            <div>
+                                <div
+                                    class="d-none position-relative flex-grow-1 me-1 order-lg-first d-flex align-items-center">
+                                    <!-- search bar -->
+                                    <span class="flex-grow-1">
+                                        <span class="position-absolute ps-2 top-50 translate-middle-y">
+                                            <i class="fa-solid fa-magnifying-glass fa-fw"></i>
+                                        </span>
+                                        <input type="search" class="ps-4 form-control text-info border-light"
+                                            placeholder="Search" @keyup.enter="postSelect.entry = 'search';getPosts()"
+                                            @search="postSelect.entry = 'search';getPosts()">
                                     </span>
-                                    <input type="search" class="ps-4 form-control text-info border-light"
-                                        placeholder="Search" @keyup.enter="postSelect.entry = 'search';getPosts()"
-                                        @search="postSelect.entry = 'search';getPosts()">
-                                </span>
-                                <!-- filter button -->
-                                <button type="button" class="btn btn-secondary ms-1">
-                                    <span class=""></span><i class="fa-solid fa-filter"></i>
-                                </button>
+                                    <!-- filter button -->
+                                    <button type="button" class="btn btn-secondary ms-1">
+                                        <span class=""></span><i class="fa-solid fa-filter"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
