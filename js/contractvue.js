@@ -353,6 +353,7 @@ export default {
                                                                             <div class="bg-dark px-1 py-2 p-lg-3 mt-2 rounded">
                                                                                 <post-vue :account="account"
                                                                                 :prop_bens="[contract.s]"
+                                                                                :prop_uid="contract.i"
                                                                                 :prop_links="links[contract.i]"
                                                                                 :prop_insert="postBodyAdder[contract.i]"
                                                                                 @tosign="toSign=$event" />
