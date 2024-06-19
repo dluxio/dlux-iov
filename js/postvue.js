@@ -302,12 +302,14 @@ export default {
       if (postData) {
         const data = JSON.parse(postData)
         this.postTitle = data.title
-        this.postBody = data.body
-        this.insert = data.body
+        //this.postBody = data.body
         this.postTags = data.tags
         this.postBens = data.bens
         this.postCustom_json = data.json
         this.postPermlink = data.permlink
+        setTimeout(() => {
+          this.insert = this.prop_insert
+        }, 100)
         return true
       }
       return false
