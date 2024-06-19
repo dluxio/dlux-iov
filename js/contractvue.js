@@ -1197,10 +1197,10 @@ export default {
             if(m.action == 'added'){
                 if (num & m.item){}
                 else num += m.item
-                this.newMeta[id][i] = this.NumberToBase64(num) + this.newMeta[id][i].slice(1)
+                this.newMeta[id][i] = (this.NumberToBase64(num) || "0") + this.newMeta[id][i].slice(1)
             } else {
                 if (num & m.item) num -= m.item
-                this.newMeta[id][i] = this.NumberToBase64(num) || "0" + this.newMeta[id][i].slice(1)
+                this.newMeta[id][i] = (this.NumberToBase64(num) || "0") + this.newMeta[id][i].slice(1)
             }
         },
         NumberToBase64(num) {
