@@ -342,9 +342,9 @@ watch: {
             }
         }
     },
-    'prop_links'(newValue){
+    'prop_insert'(newValue){
         if(newValue){
-            this.postBody += this.prop_links
+            console.log({newValue})
         }
     }
 },
