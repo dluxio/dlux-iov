@@ -14,28 +14,28 @@ export default {
                     class="input-group-text">@</span>
                 <input type="text"
                     class="form-control text-info"
-                    readonly id="username" v-model="account">
+                    readonly v-model="account">
             </div>
         </div>
         <div class="form-group mb-3">
             <label class="mb-1" for="title">Title</label>
             <input type="text"
-                class="form-control" id="title"
+                class="form-control"
                 placeholder="Enter an attention grabbing title" v-model="postTitle"
                 @blur="permlink()">
-            <small id="permlinkPreview" class="form-text text-muted d-flex"><span
-                    id="permlink" class="mr-auto">Permlink:
+            <small class="form-text text-muted d-flex"><span
+                    class="mr-auto">Permlink:
                     https://dlux.io/{{postCustom_json.vrHash ? 'dlux' : postTags.length ? postTags[0] : 'blog'}}/@{{account}}/{{postPermlink}}</span>
                 <!-- <a href="#" class="ml-auto"> Edit Permlink</a> -->
             </small>
         </div>
         <div class="form-group mb-3">
             <label class="mb-1" for="body">Post Body</label>
-            <mde id="body" @data="postBody = $event" :insert="insert"/>
+            <mde @data="postBody = $event" :insert="insert"/>
         </div>
         <div class="form-group mb-3">
             <label class="mb-1" for="tags">Tags</label><br>
-            <tagify class="rounded p-1 w-100" @data="postTags = $event" id="tags" style="height: 50px" />
+            <tagify class="rounded p-1 w-100" @data="postTags = $event" style="height: 50px" />
         </div>
         <bennies :list="postBens" @updatebennies="postBens = $event" />
         <!--<ul v-if="postBens.length">
