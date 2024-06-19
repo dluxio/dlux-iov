@@ -330,8 +330,8 @@ export default {
                             class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                             disabled></button>
                         <div class="btn-group" role="group" v-if="me">
-                            <button type="button"
-                                class="btn btn-info dropdown-toggle"
+                            <button disabled type="button"
+                                class="disabled btn btn-info dropdown-toggle"
                                 data-bs-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="false"></button>
                             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
