@@ -389,7 +389,7 @@ export default {
                                                                                                         
                                                                                                         <img class="img-fluid rounded bg-light" :src="smartThumb(contract.i,index,cid)" width="300px" onerror="if (this.src != '/img/other-file-type-svgrepo-com.svg') this.src = '/img/other-file-type-svgrepo-com.svg'">
                                                                                                        
-                                                                                                        <span class="small text-center mb-2">{{size > 1 ? size/1000000 : size/1000000}} MB</span>
+                                                                                                        <span class="small text-center mb-2">{{fancyBytes(size)}}</span>
                                                                                                         
                                                                                                         <!-- link -->
                                                                                                         <div>
@@ -545,8 +545,7 @@ export default {
                                                                         <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                             <div> Size </div>
                                                                             <i class="fa-solid fa-warehouse fa-fw mx-1" aria-hidden="true"></i>
-                                                                            <div>{{contract.c > 1 ? contract.u/1000000 :
-                                                                            contract.a/1000000}} MB</div>
+                                                                            <div>{{contract.c > 1 ? fancyBytes(contract.u) : fancyBytes(contract.a)}}</div>
                                                                         </div>
                                                                         <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                             <div> Redundancy </div>
