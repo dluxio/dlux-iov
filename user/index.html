@@ -80,7 +80,7 @@
     <div id="app" v-cloak class="d-flex flex-column w-100">
         <!-- navbar -->
         <div v-scroll="handleScroll">
-            <nav-vue @login="account = $event;newme($event)" @logout="account = '';removeUser()" @ack="removeOp($event)"
+            <nav-vue @login="account = $event;newme($event)" @logout="account = '';init(true)" @ack="removeOp($event)"
                 @refresh="run($event)" :op="toSign" :lapi="lapi" />
         </div>
         <main role="main" class="mb-auto text-white" v-cloak style="padding-top: 94px;">

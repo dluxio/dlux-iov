@@ -75,12 +75,12 @@ let user = localStorage.getItem("user") || "GUEST";
 let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
 
 // var app = new Vue({
-  // vue 2
-  // el: "#app", // vue 2
-  createApp({
-    directives:{
-      scroll
-    },
+// vue 2
+// el: "#app", // vue 2
+createApp({
+  directives: {
+    scroll
+  },
   data() {
     return {
       fileRequests: {},
@@ -88,7 +88,7 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
       debounceScroll: 0,
       lastScroll: 0,
       activeTab: "blog",
-      relations: {"follows":false,"ignores":false,"blacklists":false,"follows_blacklists":false,"follows_muted":false},
+      relations: { "follows": false, "ignores": false, "blacklists": false, "follows_blacklists": false, "follows_muted": false },
       sets: {},
       chains: {
         dlux: {
@@ -492,70 +492,86 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
       tokenGov: {
         title: "SPK VOTE",
         options: [
-          {id:"spk_cycle_length",
-          range_low: 28800,
-          range_high: 2592000,
-          info: "Time in blocks to complete a power down cycle. 4 cycles to completely divest. 28800 blocks per day.",
-          val: 200000,
-          step: 1,
-          unit: "Blocks",
-          title: "Down Power Period"}, 
-          {id:"dex_fee",
+          {
+            id: "spk_cycle_length",
+            range_low: 28800,
+            range_high: 2592000,
+            info: "Time in blocks to complete a power down cycle. 4 cycles to completely divest. 28800 blocks per day.",
+            val: 200000,
+            step: 1,
+            unit: "Blocks",
+            title: "Down Power Period"
+          },
+          {
+            id: "dex_fee",
             range_low: 0,
             range_high: 0.01,
             info: "Share of DEX completed DEX trades to allocate over the collateral group.",
             val: 0.00505,
             step: 0.000001,
             unit: "",
-            title: "DEX Fee" }, 
-          {id:"dex_max",
+            title: "DEX Fee"
+          },
+          {
+            id: "dex_max",
             range_low: 28800,
             range_high: 2592000,
             info: "Largest open trade size in relation to held collateral.",
             val: 97.38,
             step: 1,
             unit: "%",
-            title: "Max Trade Size" }, 
-          {id:"dex_slope",
+            title: "Max Trade Size"
+          },
+          {
+            id: "dex_slope",
             range_low: 0,
             range_high: 100,
             info: "0 Allows any size buy orders to be placed. 1 will disallow large buy orders at low prices.",
             val: 48.02,
             step: 0.01,
             unit: "%",
-            title: "Max Lowball Trade Size" }, 
-          {id:"spk_rate_ldel",
+            title: "Max Lowball Trade Size"
+          },
+          {
+            id: "spk_rate_ldel",
             range_low: 0.00001, //current lpow
             range_high: 0.0001, //current lgov
             info: "SPK generation rate for delegated LARYNX Power",
             val: 0.00015,
             step: 1,
             unit: "",
-            title: "SPK Gen Rate: Delegated" }, 
-          {id:"spk_rate_lgov",
+            title: "SPK Gen Rate: Delegated"
+          },
+          {
+            id: "spk_rate_lgov",
             range_low: 0.00015, //current ldel
             range_high: 0.01,
             info: "SPK generation rate for Larynx Locked",
             val: 0.001,
             step: 0.000001,
             unit: "",
-            title: "SPK Gen Rate: Locked" }, 
-          {id:"spk_rate_lpow",
+            title: "SPK Gen Rate: Locked"
+          },
+          {
+            id: "spk_rate_lpow",
             range_low: 0.000001,
             range_high: 0.00015, //current ldel
             info: "SPK generation rate for undelegated Larynx Power",
             val: 0.0001,
             step: 0.000001,
             unit: "",
-            title: "Min SPK Gen Rate: Min" }, 
-          {id:"max_coll_members",
+            title: "Min SPK Gen Rate: Min"
+          },
+          {
+            id: "max_coll_members",
             range_low: 25,
             range_high: 79,
             info: "The Max number of accounts that can share DEX fees. The richer half of this group controls outflows from the multisig wallet.",
             val: 25,
             step: 1,
             unit: "Accounts",
-            title: "Size of collateral group"}
+            title: "Size of collateral group"
+          }
         ]
       },
       features: {
@@ -893,11 +909,11 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
     getSetPhotos(s, c) {
       return s.setname ? `https://ipfs.dlux.io/ipfs/${s.set[c]}` : "";
     },
-    callSWfunction(id,o,cb) {
+    callSWfunction(id, o, cb) {
       return new Promise((resolve, reject) => {
         if (activeWorker) {
-          if(!o.uid)o.uid = ""
-          this.serviceWorkerPromises[`${o.script}:${o.uid}`] = {resolve, reject}
+          if (!o.uid) o.uid = ""
+          this.serviceWorkerPromises[`${o.script}:${o.uid}`] = { resolve, reject }
           activeWorker.postMessage({
             id: id,
             o: o
@@ -909,68 +925,68 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
     },
     getSPKUser() {
       console.log('SPK User Update')
-      if(this.account)fetch("https://spktest.dlux.io/@" + this.account)
-          .then((response) => response.json())
-          .then((data) => {
-            this.spkapi = data
-            for (var node in data.file_contracts) {
-              this.contractIDs[data.file_contracts[node].i] = data.file_contracts[node];
-              this.contracts.push(data.file_contracts[node]);
-              this.contractIDs[data.file_contracts[node].i].index = this.contracts.length - 1;
+      if (this.account) fetch("https://spktest.dlux.io/@" + this.account)
+        .then((response) => response.json())
+        .then((data) => {
+          this.spkapi = data
+          for (var node in data.file_contracts) {
+            this.contractIDs[data.file_contracts[node].i] = data.file_contracts[node];
+            this.contracts.push(data.file_contracts[node]);
+            this.contractIDs[data.file_contracts[node].i].index = this.contracts.length - 1;
+          }
+          for (var user in data.channels) {
+            for (var node in data.channels[user]) {
+              if (this.services[user]) {
+                this.services[user].channel = 1
+                this.services[user].memo = "Contract Open"
+              } else setTimeout(() => {
+                if (!this.services[user]) this.services[user] = {}
+                this.services[user].channel = 1
+                this.services[user].memo = "Contract Open"
+              }, 3000)
+              if (this.contractIDs[data.channels[user][node].i]) continue
+              else {
+                this.contractIDs[data.channels[user][node].i] = data.channels[user][node];
+                this.contracts.push(data.channels[user][node]);
+                this.contractIDs[data.channels[user][node].i].index = this.contracts.length - 1;
+              }
             }
-            for (var user in data.channels) {
-                for (var node in data.channels[user]) {
-                    if(this.services[user]){
-                      this.services[user].channel = 1
-                      this.services[user].memo = "Contract Open"
-                    } else setTimeout(()=>{
-                      if(!this.services[user])this.services[user] = {}
-                      this.services[user].channel = 1
-                      this.services[user].memo = "Contract Open"
-                      }, 3000)
-                    if(this.contractIDs[data.channels[user][node].i])continue
-                    else {
-                        this.contractIDs[data.channels[user][node].i] = data.channels[user][node];
-                        this.contracts.push(data.channels[user][node]);
-                        this.contractIDs[data.channels[user][node].i].index = this.contracts.length - 1;
-                    }
-                }
-            }
-          });
+          }
+        });
     },
     uploadFile(e) {
-        for (var i = 0; i < e.target.files.length; i++) {
-          var reader = new FileReader();
-          reader.File = e.target.files[i]
-          reader.onload = (event) => {
-            const fileContent = event.target.result;
-            for(var i = 0; i < this.File.length; i++){
-              if (
-                this.File[i].name == event.currentTarget.File.name
-                && this.File[i].size == event.currentTarget.File.size
-              ) {
-                // Hash.of(fileContent).then((hash) => {
+      for (var i = 0; i < e.target.files.length; i++) {
+        var reader = new FileReader();
+        reader.File = e.target.files[i]
+        reader.onload = (event) => {
+          const fileContent = event.target.result;
+          for (var i = 0; i < this.File.length; i++) {
+            if (
+              this.File[i].name == event.currentTarget.File.name
+              && this.File[i].size == event.currentTarget.File.size
+            ) {
+              // Hash.of(fileContent).then((hash) => {
 
-                //   const dict = {hash, index:i, size: event.currentTarget.File.size, name: event.currentTarget.File.name, path:e.target.id, progress: '..........'}
-                //   this.FileInfo[dict.name] = dict
-                //   const file = this.File[i];
-                //   this.File.splice(i, 1, file);
-                // });
-                Hash.of(fileContent).then(async (hash)=>{
-                  var current_contract = "Not found"
-                  current_contract = {result} = await fetch(`https://spktest.dlux.io/api/file/${hash}`)
-                  if(current_contract == "Not found"){
-                    const dict = {hash, index:i, size: event.currentTarget.File.size, name: event.currentTarget.File.name}
-                    this.FileInfo[dict.name] = dict
-                  } else {
-                    alert("File already uploaded")
-                  }
-                })
-              }
+              //   const dict = {hash, index:i, size: event.currentTarget.File.size, name: event.currentTarget.File.name, path:e.target.id, progress: '..........'}
+              //   this.FileInfo[dict.name] = dict
+              //   const file = this.File[i];
+              //   this.File.splice(i, 1, file);
+              // });
+              Hash.of(fileContent).then(async (hash) => {
+                var current_contract = "Not found"
+                current_contract = { result } = await fetch(`https://spktest.dlux.io/api/file/${hash}`)
+                if (current_contract == "Not found") {
+                  const dict = { hash, index: i, size: event.currentTarget.File.size, name: event.currentTarget.File.name }
+                  this.FileInfo[dict.name] = dict
+                } else {
+                  alert("File already uploaded")
+                }
+              })
+            }
           };
           reader.readAsBinaryString(e.target.files[i]);
           var File = e.target.files[i];
-           File.progress = '..........';
+          File.progress = '..........';
           // File.hash = "";
           // File.md5 = ""
           this.File.push(File);
@@ -983,16 +999,16 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
         reader.File = e.dataTransfer.files[i]
         reader.onload = (event) => {
           const fileContent = event.target.result;
-          for(var i = 0; i < this.File.length; i++){
+          for (var i = 0; i < this.File.length; i++) {
             if (
               this.File[i].name == event.currentTarget.File.name
               && this.File[i].size == event.currentTarget.File.size
             ) {
-              Hash.of(fileContent).then(async (hash)=>{
+              Hash.of(fileContent).then(async (hash) => {
                 var current_contract = "Not found"
-                current_contract = {result} = await fetch(`https://spktest.dlux.io/api/file/${hash}`)
-                if(current_contract == "Not found"){
-                  const dict = {hash, index:i, size: event.currentTarget.File.size, name: event.currentTarget.File.name}
+                current_contract = { result } = await fetch(`https://spktest.dlux.io/api/file/${hash}`)
+                if (current_contract == "Not found") {
+                  const dict = { hash, index: i, size: event.currentTarget.File.size, name: event.currentTarget.File.name }
                   this.FileInfo[dict.name] = dict
                 }
               })
@@ -1008,16 +1024,16 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
         this.File.push(File);
       }
     },
-    togglePin(index){
+    togglePin(index) {
       this.File[index].pin = !this.File[index].pin;
     },
     updateMemo(provider, times) {
-      if(times < 21){
+      if (times < 21) {
         setTimeout(() => {
           this.services[provider].memo = `Sending${times % 3 == 0 ? '.' : times % 3 == 1 ? '..' : '...'}`
           this.updateMemo(provider, times + 1)
         }, 333)
-      }else{
+      } else {
         this.services[provider].memo = `Validating`
         this.getSapi()
       }
@@ -1035,7 +1051,7 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
         api: sapi,
         txid: `spkccT_register_authority`,
       };
-      setTimeout(() => {this.getSPKUser()}, 7000);
+      setTimeout(() => { this.getSPKUser() }, 7000);
     },
     petitionForContract(provider = 'dlux-io',) {
       this.services[provider].memo = 'Preparing'
@@ -1048,93 +1064,93 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
           this.updateMemo(provider, 0)
         })
     },
-    deleteImg (index){
+    deleteImg(index) {
       this.File.splice(index, 1)
     },
-    validPost(){
+    validPost() {
       var valid = true
-      if(!this.postPermlink)valid = false
+      if (!this.postPermlink) valid = false
       if (!this.postTitle) valid = false;
       if (!this.postBody) valid = false;
       if (!this.postCustom_json.assets.length) valid = false;
       this.disablePost = !valid
     },
     permlink(text) {
-			if (text) {
-				text.replace(/[\W_]+/g, '-').replace(' ', '-').toLowerCase()
-				text = text.replace(' ', '-')
-				text = text.replace(/[\W_]+/g, '')
-				text = text.toLowerCase()
-				this.postPermlink = text
-			} else {
-				text = this.postTitle
-				text = text.replace(' ', '-')
-				text = text.replace(/[\W_]+/g, '-')
-				text = text.toLowerCase()
-				this.postPermlink = text;
-			}
-		},
-    follow(acc, what = 'blog'){
+      if (text) {
+        text.replace(/[\W_]+/g, '-').replace(' ', '-').toLowerCase()
+        text = text.replace(' ', '-')
+        text = text.replace(/[\W_]+/g, '')
+        text = text.toLowerCase()
+        this.postPermlink = text
+      } else {
+        text = this.postTitle
+        text = text.replace(' ', '-')
+        text = text.replace(/[\W_]+/g, '-')
+        text = text.toLowerCase()
+        this.postPermlink = text;
+      }
+    },
+    follow(acc, what = 'blog') {
       this.toSign = {
         type: "raw",
         key: "posting",
-        op: [["follow", {follower: this.account, following: acc, what: [what]}]],
+        op: [["follow", { follower: this.account, following: acc, what: [what] }]],
         callbacks: [res],
         txid: "Sign Auth Headers",
       }
     },
-    unfollow(acc){
+    unfollow(acc) {
       this.toSign = {
         type: "raw",
         key: "posting",
-        op: [["follow", {follower: this.account, following: acc, what: []}]],
+        op: [["follow", { follower: this.account, following: acc, what: [] }]],
         callbacks: [],
         txid: "unfollow:" + acc,
       }
     },
     post() {
-			var tags = this.postTags.toLowerCase().split(',')
-			this.postCustom_json.tags = ['dlux']
-			for (i = 0; i < tags.length; i++) {
-				if (tags[i] != 'dlux') {
-					this.postCustom_json.tags.push(tags[i].replace(/[\W_]+/g, "-"));
-				}
-			}
-			if (this.account) {
-				const operations = [["comment",
-					{
-						"parent_author": "",
-						"parent_permlink": "dlux",
-						"author": this.account,
-						"permlink": this.postPermlink,
-						"title": this.postTitle,
-						"body": simplemde.value() + `\n***\n#### [View in VR @ dlux.io](https://dlux.io/dlux/@${this.account}/${this.postPermlink})\n`,
-						"json_metadata": JSON.stringify(this.postCustom_json)
-					}],
-				["comment_options",
-					{
-						"author": this.account,
-						"permlink": this.postPermlink,
-						"max_accepted_payout": "1000000.000 HBD",
-						"percent_hbd": 10000,
-						"allow_votes": true,
-						"allow_curation_rewards": true,
-						"extensions":
-							[[0,
-								{
-									"beneficiaries":
-										[{
-											"account": "dlux-io",
-											"weight": 1000
-										}]
-								}]]
-					}]]
-				hive_keychain.requestBroadcast(localStorage.getItem('user'), operations, 'active', function (response) {
-					console.log(response);
-				});
-			}
-		},
-    appFile(data){
+      var tags = this.postTags.toLowerCase().split(',')
+      this.postCustom_json.tags = ['dlux']
+      for (i = 0; i < tags.length; i++) {
+        if (tags[i] != 'dlux') {
+          this.postCustom_json.tags.push(tags[i].replace(/[\W_]+/g, "-"));
+        }
+      }
+      if (this.account) {
+        const operations = [["comment",
+          {
+            "parent_author": "",
+            "parent_permlink": "dlux",
+            "author": this.account,
+            "permlink": this.postPermlink,
+            "title": this.postTitle,
+            "body": simplemde.value() + `\n***\n#### [View in VR @ dlux.io](https://dlux.io/dlux/@${this.account}/${this.postPermlink})\n`,
+            "json_metadata": JSON.stringify(this.postCustom_json)
+          }],
+        ["comment_options",
+          {
+            "author": this.account,
+            "permlink": this.postPermlink,
+            "max_accepted_payout": "1000000.000 HBD",
+            "percent_hbd": 10000,
+            "allow_votes": true,
+            "allow_curation_rewards": true,
+            "extensions":
+              [[0,
+                {
+                  "beneficiaries":
+                    [{
+                      "account": "dlux-io",
+                      "weight": 1000
+                    }]
+                }]]
+          }]]
+        hive_keychain.requestBroadcast(localStorage.getItem('user'), operations, 'active', function (response) {
+          console.log(response);
+        });
+      }
+    },
+    appFile(data) {
       console.log(data)
       this.frameData = data
       this.postCustom_json.vrHash = ''
@@ -1164,7 +1180,7 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
     addAsset(cid, contract, name = '', thumbHash = '', type = 'ts') {
       var found = -1
       if (!cid) return false
-      if(typeof cid == 'object'){
+      if (typeof cid == 'object') {
         contract = cid.contract
         cid = cid.id
       }
@@ -1219,9 +1235,9 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
       }
       this.dluxMock()
     },
-    changeAppType(type = 'Blog'){
+    changeAppType(type = 'Blog') {
       this.appType = type
-      if(type == 'Blog'){
+      if (type == 'Blog') {
         delete this.postCustom_json.vrHash
       }
       this.postCustom_json.subApp = type
@@ -1255,7 +1271,7 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
       }
       this.dluxMock()
     },
-    resetCamera(){
+    resetCamera() {
       var target = this.$refs.aframePreview.contentWindow
       target.postMessage({
         'func': 'resetCamera',
@@ -1401,88 +1417,117 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
           this.ipfsProviders = data.providers
         });
     },
-    getMARKETS(){
+    getMARKETS() {
       console.log('Getting Markets')
       fetch("https://spktest.dlux.io/services/MARKET")
         .then((response) => response.json())
         .then((data) => {
           console.log(data)
-          for(var listing = 0; listing < data.services.length; listing++){
+          for (var listing = 0; listing < data.services.length; listing++) {
             console.log(data.services[listing])
             var ids = Object.keys(data.services[listing])
-           
+
             this.services[`${data.services[listing][ids[0]].b}`] = {
               address: data.services[listing][ids[0]].a,
               memo: JSON.parse(data.services[listing][ids[0]].m),
               channel: 0,
               provider: data.services[listing][ids[0]].b
             }
-          
-        }
-        this.getSPKUser()
-      });
+
+          }
+          this.getSPKUser()
+        });
     },
-    upload(cid = 'QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3', contract = {api: 'https://127.0.0.1:5050', id: '1668913215284', sigs: {QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3: '20548a0032e0cf51ba75721743d2ec6fac180f7bc773ce3d77b769d9c4c9fa9dbb7d59503f05be8edcaac00d5d66709b0bce977f3207785913f7fbad2773ae4ac2'}}){
-   
+    upload(cid = 'QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3', contract = { api: 'https://127.0.0.1:5050', id: '1668913215284', sigs: { QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3: '20548a0032e0cf51ba75721743d2ec6fac180f7bc773ce3d77b769d9c4c9fa9dbb7d59503f05be8edcaac00d5d66709b0bce977f3207785913f7fbad2773ae4ac2' } }) {
+
       const ENDPOINTS = {
-          UPLOAD: `${contract.api}/upload`,
-          UPLOAD_STATUS: `${contract.api}/upload-check`,
-          UPLOAD_REQUEST: `${contract.api}/upload-authorize`
+        UPLOAD: `${contract.api}/upload`,
+        UPLOAD_STATUS: `${contract.api}/upload-check`,
+        UPLOAD_REQUEST: `${contract.api}/upload-authorize`
       };
       const defaultOptions = {
-          url: ENDPOINTS.UPLOAD,
-          startingByte: 0,
-          cid,
-          onAbort() {},
-          onProgress() {},
-          onError() {},
-          onComplete() {}
+        url: ENDPOINTS.UPLOAD,
+        startingByte: 0,
+        cid,
+        onAbort() { },
+        onProgress() { },
+        onError() { },
+        onComplete() { }
       };
       const uploadFileChunks = (file, options) => {
         const formData = new FormData();
         const req = new XMLHttpRequest();
         const chunk = file.slice(options.startingByte);
-        
+
         formData.append('chunk', chunk, file.name);
         formData.append('cid', options.cid);
-        
+
         req.open('POST', options.url, true);
         req.setRequestHeader(
-          'Content-Range',    `bytes=${options.startingByte}-${options.startingByte+chunk.size}/${file.size}`
+          'Content-Range', `bytes=${options.startingByte}-${options.startingByte + chunk.size}/${file.size}`
         );
         req.setRequestHeader('X-Cid', options.cid);
-        
+
         req.onload = (e) => {
-              if (req.status === 200) {
-                  options.onComplete(e, file);
-              } else {
-                  options.onError(e, file);
-              }
-            };
-        
+          if (req.status === 200) {
+            options.onComplete(e, file);
+          } else {
+            options.onError(e, file);
+          }
+        };
+
         req.upload.onprogress = (e) => {
           const loaded = options.startingByte + e.loaded;
-          options.onProgress({...e,
+          options.onProgress({
+            ...e,
             loaded,
             total: file.size,
             percentage: loaded * 100 / file.size
           }, file);
         };
-        
+
         req.ontimeout = (e) => options.onError(e, file);
-        
+
         req.onabort = (e) => options.onAbort(e, file);
-        
+
         req.onerror = (e) => options.onError(e, file);
-        
+
         this.fileRequests[cid].request = req;
-        
+
         req.send(formData);
       };
       const uploadFile = (file, options) => {
         return fetch(ENDPOINTS.UPLOAD_REQUEST, {
           method: 'GET',
           headers: {
+            'Content-Type': 'application/json',
+            'sig': contract.sigs[cid],
+            'account': this.account,
+            'contract': contract.id,
+            'cid': cid
+          }
+        })
+          .then(res => res.json())
+          .then(res => {
+            options = { ...options, ...res };
+            this.fileRequests[cid] = { request: null, options }
+            uploadFileChunks(file, options);
+          })
+          .catch(e => {
+            options.onError({ ...e, file })
+          })
+      };
+      const abortFileUpload = (file) => { };
+      const retryFileUpload = (file) => { };
+      const clearFileUpload = (file) => { };
+      const resumeFileUpload = (file) => {
+        const fileReq = this.fileRequests[cid];
+
+        if (fileReq) {
+          return fetch(
+            `${ENDPOINTS.UPLOAD_STATUS}`, {
+            method: 'GET',
+            headers: {
               'Content-Type': 'application/json',
               'sig': contract.sigs[cid],
               'account': this.account,
@@ -1490,62 +1535,34 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
               'cid': cid
             }
           })
-          .then(res => res.json())
-          .then(res => {
-              options = {...options, ...res};
-              this.fileRequests[cid] =  {request: null, options}
-              uploadFileChunks(file, options);
-          })
-          .catch(e => {
-              options.onError({...e, file})
-      })
-   };
-   const abortFileUpload = (file) => {};
-   const retryFileUpload = (file) => {};
-   const clearFileUpload = (file) => {};
-   const resumeFileUpload = (file) => {
-      const fileReq = this.fileRequests[cid];
-		
-        if (fileReq) {
-      return fetch(
-              `${ENDPOINTS.UPLOAD_STATUS}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'sig': contract.sigs[cid],
-                    'account': this.account,
-                    'contract': contract.id,
-                    'cid': cid
-                  }
-                })
-      .then(res => res.json())
-      .then(res => {
-                uploadFileChunks(
-                  file, 
-                  {
-                      ...fileReq.options, 
-                      startingByte: Number(res.totalChunkUploaded)
-                  }
-                );
-      })
-      .catch(e => {
-                fileReq.options.onError({...e, file})
-      })
-    }
-   };
-   return (files, options = defaultOptions) => {
-      [...files]
-        .forEach(file => {
-            uploadFile(file, {...defaultOptions, ...options})
-        });
-		
-	return {
-	    abortFileUpload,
-            retryFileUpload,
-	    clearFileUpload,
-	    resumeFileUpload
-	};
-   }
+            .then(res => res.json())
+            .then(res => {
+              uploadFileChunks(
+                file,
+                {
+                  ...fileReq.options,
+                  startingByte: Number(res.totalChunkUploaded)
+                }
+              );
+            })
+            .catch(e => {
+              fileReq.options.onError({ ...e, file })
+            })
+        }
+      };
+      return (files, options = defaultOptions) => {
+        [...files]
+          .forEach(file => {
+            uploadFile(file, { ...defaultOptions, ...options })
+          });
+
+        return {
+          abortFileUpload,
+          retryFileUpload,
+          clearFileUpload,
+          resumeFileUpload
+        };
+      }
     },
     uploadAndTrack(name, contract) {
       this.validateHeaders(this.FileInfo[name].hash).then((headers) => {
@@ -1553,21 +1570,21 @@ let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
         const setFileElement = (file) => {
           // create file element here
         }
-        const onProgress = (e, file) => {};
-        const onError = (e, file) => {};
-        const onAbort = (e, file) => {};
-        const onComplete = (e, file) => {};
+        const onProgress = (e, file) => { };
+        const onError = (e, file) => { };
+        const onAbort = (e, file) => { };
+        const onComplete = (e, file) => { };
         return (uploadedFiles) => {
           [...uploadedFiles].forEach(setFileElement);
-      
-        //append progress box
-        uploader = uploadFiles(uploadedFiles, {
+
+          //append progress box
+          uploader = uploadFiles(uploadedFiles, {
             onProgress,
             onError,
             onAbort,
             onComplete
-        });
-      }
+          });
+        }
         // var formdata = new FormData();
         // console.log(this.FileInfo[name].path)
         // console.log(document.getElementById(this.FileInfo[name].path))
@@ -1670,11 +1687,9 @@ function giveFT(setname, to, qty, callback){
         type: "cja",
         cj: cja,
         id: `${this.prefix}ft_transfer`,
-        msg: `Trying to give ${parseInt(this.giveFTqty)} ${
-          this.mint_detail.setname
-        } mint token${parseInt(this.giveFTqty) > 1 ? "s" : ""} to ${
-          this.giveFTusername
-        }`,
+        msg: `Trying to give ${parseInt(this.giveFTqty)} ${this.mint_detail.setname
+          } mint token${parseInt(this.giveFTqty) > 1 ? "s" : ""} to ${this.giveFTusername
+          }`,
         ops: ["getTokenUser", "getUserNFTs"],
         api: this.apiFor(this.prefix),
         txid: `${this.prefix} _ft_transfer`,
@@ -1720,8 +1735,8 @@ function giveFT(setname, to, qty, callback){
     },
     openFT(item) {
       var cja = {
-          set: item.setname,
-        },
+        set: item.setname,
+      },
         type = "cja";
       this.toSign = {
         type,
@@ -1733,7 +1748,7 @@ function giveFT(setname, to, qty, callback){
         txid: `${item.setname}_nft_mint`,
       };
     },
-    modal (event){
+    modal(event) {
       this.transferModal = event.item
       this.transferMint = event.mint
       this.transferModal.show = true
@@ -1741,9 +1756,9 @@ function giveFT(setname, to, qty, callback){
     },
     acceptFT(item) {
       var cja = {
-          set: item.setname,
-          uid: item.uid,
-        },
+        set: item.setname,
+        uid: item.uid,
+      },
         type = "cja";
       this.toSign = {
         type,
@@ -1758,9 +1773,9 @@ function giveFT(setname, to, qty, callback){
 
     rejectFT(item) {
       var cja = {
-          set: item.setname,
-          uid: item.uid,
-        },
+        set: item.setname,
+        uid: item.uid,
+      },
         type = "cja";
       this.toSign = {
         type,
@@ -1782,27 +1797,27 @@ function giveFT(setname, to, qty, callback){
           profile_image: `${this.dataAPI}/pfp/${this.account}?${item.setname}-${item.uid}`,
         };
       var cja = [
-          [
-            "custom_json",
-            {
-              required_auths: [],
-              required_posting_auths: [this.account],
-              id: `${this.prefix}nft_pfp`,
-              json: JSON.stringify({
-                set: item.setname,
-                uid: item.uid,
-              }),
-            },
-          ],
-          [
-            "account_update2",
-            {
-              account: this.account,
-              json_metadata: "",
-              posting_json_metadata: JSON.stringify(pjm),
-            },
-          ],
+        [
+          "custom_json",
+          {
+            required_auths: [],
+            required_posting_auths: [this.account],
+            id: `${this.prefix}nft_pfp`,
+            json: JSON.stringify({
+              set: item.setname,
+              uid: item.uid,
+            }),
+          },
         ],
+        [
+          "account_update2",
+          {
+            account: this.account,
+            json_metadata: "",
+            posting_json_metadata: JSON.stringify(pjm),
+          },
+        ],
+      ],
         type = "raw";
       this.toSign = {
         type,
@@ -1821,14 +1836,14 @@ function giveFT(setname, to, qty, callback){
       if (prefix == "duat_") return "https://inconceivable.hivehoneycomb.com";
       else return "";
     },
-    log(d){
+    log(d) {
       console.log(d)
     },
     meltNFT(item) {
       var cja = {
-          set: item.setname,
-          uid: item.uid,
-        },
+        set: item.setname,
+        uid: item.uid,
+      },
         type = "cja";
       this.toSign = {
         type,
@@ -1852,10 +1867,10 @@ function giveNFT(setname, uid, to, callback){
     giveNFT(item) {
       if (this.nftTradeAllowed) {
         var cja = {
-            set: item.setname,
-            uid: item.uid,
-            to: this.nftTradeTabTo,
-          },
+          set: item.setname,
+          uid: item.uid,
+          to: this.nftTradeTabTo,
+        },
           type = "cja";
         this.toSign = {
           type,
@@ -1871,12 +1886,12 @@ function giveNFT(setname, uid, to, callback){
     tradeNFT(item) {
       if (this.nftTradeAllowed) {
         var cja = {
-            set: item.setname,
-            uid: item.uid,
-            price: parseInt(this.nftTradeTabPrice * 1000),
-            type: this.nftTradeTabToken,
-            to: this.nftTradeTabTo,
-          },
+          set: item.setname,
+          uid: item.uid,
+          price: parseInt(this.nftTradeTabPrice * 1000),
+          type: this.nftTradeTabToken,
+          to: this.nftTradeTabTo,
+        },
           type = "cja";
         this.toSign = {
           type,
@@ -1891,11 +1906,11 @@ function giveNFT(setname, uid, to, callback){
     },
     sellNFT(item) {
       var cja = {
-          set: item.setname,
-          uid: item.uid,
-          price: parseInt(this.nftSellTabPrice * 1000),
-          type: this.nftSellTabToken,
-        },
+        set: item.setname,
+        uid: item.uid,
+        price: parseInt(this.nftSellTabPrice * 1000),
+        type: this.nftSellTabToken,
+      },
         type = "cja";
       this.toSign = {
         type,
@@ -1914,9 +1929,9 @@ function sellNFTcancel(setname, uid, callback){
 */
     cancelNFT(item) {
       var cja = {
-          set: item.setname,
-          uid: item.uid,
-        },
+        set: item.setname,
+        uid: item.uid,
+      },
         type = "cja";
       this.toSign = {
         type,
@@ -1930,9 +1945,9 @@ function sellNFTcancel(setname, uid, callback){
     },
     cancelFT(item) {
       var cja = {
-          set: item.setname,
-          uid: item.uid,
-        },
+        set: item.setname,
+        uid: item.uid,
+      },
         type = "cja";
       this.toSign = {
         type,
@@ -1953,10 +1968,10 @@ function buyNFT(setname, uid, price, type, callback){
 */
     buyNFT(item) {
       var cja = {
-          set: item.setname,
-          uid: item.uid,
-          price: item.price.amount,
-        },
+        set: item.setname,
+        uid: item.uid,
+        price: item.price.amount,
+      },
         type = "cja";
       if (item.price.token == "HIVE" || item.price.token == "HBD") {
         type = "xfr";
@@ -1976,14 +1991,14 @@ function buyNFT(setname, uid, price, type, callback){
     },
     auctionNFT(item) {
       var cja = {
-          set: item.setname,
-          uid: item.uid,
-          price: parseInt(this.nftAuctionTabPrice * 1000),
-          type:
-            this.nftAuctionTabToken != this.TOKEN ? this.nftAuctionTabToken : 0,
-          now: false,
-          time: this.nftAuctionTabTime,
-        },
+        set: item.setname,
+        uid: item.uid,
+        price: parseInt(this.nftAuctionTabPrice * 1000),
+        type:
+          this.nftAuctionTabToken != this.TOKEN ? this.nftAuctionTabToken : 0,
+        now: false,
+        time: this.nftAuctionTabTime,
+      },
         type = "cja";
       this.toSign = {
         type,
@@ -1997,10 +2012,10 @@ function buyNFT(setname, uid, price, type, callback){
     },
     bidNFT(item) {
       var cja = {
-          set: item.setname,
-          uid: item.uid,
-          bid_amount: parseInt(this.nftAuctionTabPrice * 1000),
-        },
+        set: item.setname,
+        uid: item.uid,
+        bid_amount: parseInt(this.nftAuctionTabPrice * 1000),
+      },
         type = "cja";
       if (this.itemModal.auction.price.token == "HIVE") {
         type = "xfr";
@@ -2056,11 +2071,11 @@ function buyNFT(setname, uid, price, type, callback){
       out = out.replace(/\.?0+$/, "");
       return out + post;
     },
-    reply(deets){
+    reply(deets) {
       console.log('getReply:', deets)
-      if(!deets.json_metadata)deets.json_metadata = JSON.stringify({})
+      if (!deets.json_metadata) deets.json_metadata = JSON.stringify({})
       var operations = []
-      if(deets.bens){
+      if (deets.bens) {
         operations.push(["comment_options",
           {
             "author": this.account,
@@ -2076,7 +2091,7 @@ function buyNFT(setname, uid, price, type, callback){
                     deets.bens
                 }]]
           }])
-          delete deets.bens
+        delete deets.bens
       }
       operations.unshift(["comment", deets])
       this.toSign = {
@@ -2090,7 +2105,7 @@ function buyNFT(setname, uid, price, type, callback){
     },
     vote(url) {
       var key, slider, flag
-      if(typeof url == 'object'){
+      if (typeof url == 'object') {
         slider = url.slider
         flag = url.flag
         url = url.url
@@ -2140,15 +2155,15 @@ function buyNFT(setname, uid, price, type, callback){
       this.posturls[url].comment = text;
       this.comment(url);
     },
-    setRating(url, rating){
+    setRating(url, rating) {
       this.posturls[url].rating = rating;
     },
     comment(url) {
       var meta = this.posturls[url].edit
         ? this.posturls[url].json_metadata
         : {
-            tags: this.posturls[url].json_metadata.tags,
-          };
+          tags: this.posturls[url].json_metadata.tags,
+        };
       if (this.posturls[url].rating)
         meta.review = { rating: this.posturls[url].rating };
       this.toSign = {
@@ -2192,10 +2207,10 @@ function buyNFT(setname, uid, price, type, callback){
         if (
           document.documentElement.clientHeight + window.scrollY >
           document.documentElement.scrollHeight -
-            document.documentElement.clientHeight * 2
+          document.documentElement.clientHeight * 2
         ) {
-          if(this.activeTab == 'blog')this.getPosts();
-          else if(this.activeTab == 'nfts')this.getNFTs()
+          if (this.activeTab == 'blog') this.getPosts();
+          else if (this.activeTab == 'nfts') this.getNFTs()
         }
       }
     },
@@ -2227,7 +2242,7 @@ function buyNFT(setname, uid, price, type, callback){
       this[modal].item = this[modal].items[this[modal].index];
     },
     modalSelect(key) {
-      if(key.indexOf('/@') > 0)
+      if (key.indexOf('/@') > 0)
         key = '/@' + key.split('/@')[1];
       this.displayPost.index = key;
       this.displayPost.item = this.posturls[key];
@@ -2235,11 +2250,11 @@ function buyNFT(setname, uid, price, type, callback){
       if (
         this.displayPost.item?.children &&
         !this.displayPost.item.replies.length
-      )this.getReplies(
-          this.displayPost.item.author,
-          this.displayPost.item.permlink,
-          true
-        )
+      ) this.getReplies(
+        this.displayPost.item.author,
+        this.displayPost.item.permlink,
+        true
+      )
     },
     getRewardFund() {
       fetch(this.hapi, {
@@ -2327,7 +2342,7 @@ function buyNFT(setname, uid, price, type, callback){
         this.toSign = {};
       }
     },
-    log(event){
+    log(event) {
       console.log(event)
     },
     getReplies(a, p, c) {
@@ -2341,41 +2356,41 @@ function buyNFT(setname, uid, price, type, callback){
         })
           .then((res) => res.json())
           .then((r) => {
-          const key = `/@${a}/${p}`
-          var authors = []
-          for (let i = 0; i < r.result.length; i++) {
-            authors.push(r.result[i].author)
-            r.result[i].edit = false;
-            if(r.result[i].children)this.getReplies(r.result[i].author, r.result[i].permlink)
-            if (r.result[i].json_metadata) {
-              try {
-                r.result[i].json_metadata = JSON.parse(
-                  r.result[i].json_metadata
-                );
-              } catch (e) {}
-            }
-            const repKey =`/@${r.result[i].author}/${r.result[i].permlink}`
-            if(c){
-              const rating = r.result[i].json_metadata?.review?.rating || 0
-              if(rating > 0){
-                this.posturls[key].ratings += 1
-                this.posturls[key].rating = parseFloat(( (rating + this.posturls[key].rating) / this.posturls[key].ratings)).toFixed(2)
+            const key = `/@${a}/${p}`
+            var authors = []
+            for (let i = 0; i < r.result.length; i++) {
+              authors.push(r.result[i].author)
+              r.result[i].edit = false;
+              if (r.result[i].children) this.getReplies(r.result[i].author, r.result[i].permlink)
+              if (r.result[i].json_metadata) {
+                try {
+                  r.result[i].json_metadata = JSON.parse(
+                    r.result[i].json_metadata
+                  );
+                } catch (e) { }
               }
-            }
-            this.posturls[repKey] =
-              r.result[i];
-            if (r.result[i].slider < 0) {
-              r.result[i].flag = true;
-              r.result[i].slider =
-                r.result[i].slider * -1;
+              const repKey = `/@${r.result[i].author}/${r.result[i].permlink}`
+              if (c) {
+                const rating = r.result[i].json_metadata?.review?.rating || 0
+                if (rating > 0) {
+                  this.posturls[key].ratings += 1
+                  this.posturls[key].rating = parseFloat(((rating + this.posturls[key].rating) / this.posturls[key].ratings)).toFixed(2)
+                }
+              }
+              this.posturls[repKey] =
+                r.result[i];
+              if (r.result[i].slider < 0) {
+                r.result[i].flag = true;
+                r.result[i].slider =
+                  r.result[i].slider * -1;
 
+              }
+              this.posturls[repKey].rep = "...";
+              this.posturls[repKey].rating = this.posturls[repKey].json_metadata?.review?.rating || 0
+              this.rep(repKey)
             }
-            this.posturls[repKey].rep = "...";
-            this.posturls[repKey].rating = this.posturls[repKey].json_metadata?.review?.rating || 0
-            this.rep(repKey)
-          }
-          this.posturls[key].replies = r.result;
-          this.getHiveAuthors(authors)
+            this.posturls[key].replies = r.result;
+            this.getHiveAuthors(authors)
           })
           .catch((err) => {
             reject(err);
@@ -2501,19 +2516,19 @@ function buyNFT(setname, uid, price, type, callback){
     toUpperCase(value) {
       return value.toUpperCase();
     },
-    gt(a,b){
-      return parseFloat(a)>parseFloat(b);
+    gt(a, b) {
+      return parseFloat(a) > parseFloat(b);
     },
     formatNumber(t, n, r, e) { // number, decimals, decimal separator, thousands separator
       if (typeof t != "number") {
         const parts = t ? t.split(" ") : []
         var maybe = 0
         for (i = 0; i < parts.length; i++) {
-          if (parseFloat(parts[i])>0){
+          if (parseFloat(parts[i]) > 0) {
             maybe += parseFloat(parts[i])
           }
         }
-        if (maybe>parseFloat(t)){
+        if (maybe > parseFloat(t)) {
           t = maybe
         } else {
           t = parseFloat(t)
@@ -2528,7 +2543,7 @@ function buyNFT(setname, uid, price, type, callback){
         i = a[0],
         o = 1 < a.length ? r + a[1] : "";
       if (e)
-        for (var c = /(\d+)(\d{3})/; c.test(i); )
+        for (var c = /(\d+)(\d{3})/; c.test(i);)
           i = i.replace(c, "$1" + e + "$2");
       return (u ? "-" : "") + i + o;
     },
@@ -2627,11 +2642,9 @@ function buyNFT(setname, uid, price, type, callback){
       ) {
         this.postSelect[this.postSelect.entry].p = true;
         fetch("https://hive-api.dlux.io", {
-          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_blog_entries", "params":["${
-            this.pageAccount
-          }",${this.postSelect[this.postSelect.entry].o},${
-            this.postSelect[this.postSelect.entry].a
-          }], "id":1}`,
+          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_blog_entries", "params":["${this.pageAccount
+            }",${this.postSelect[this.postSelect.entry].o},${this.postSelect[this.postSelect.entry].a
+            }], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
@@ -2647,12 +2660,12 @@ function buyNFT(setname, uid, price, type, callback){
               this.postSelect[this.postSelect.entry].e = true;
             for (var i = 0; i < res.result.length; i++) {
               res.result[i].type = "Blog";
-              if(this.postSelect[this.postSelect.entry].o != res.result[i].entry_id - 1){
+              if (this.postSelect[this.postSelect.entry].o != res.result[i].entry_id - 1) {
                 this.postSelect[this.postSelect.entry].o = res.result[i].entry_id - 1;
               }
               if (
                 !this.posturls[
-                  `/@${res.result[i].author}/${res.result[i].permlink}`
+                `/@${res.result[i].author}/${res.result[i].permlink}`
                 ]
               ) {
                 this.posturls[
@@ -2718,7 +2731,7 @@ function buyNFT(setname, uid, price, type, callback){
                 hasVoted: false,
                 contract: {}
               };
-              if(!this.posturls[key].ratings){
+              if (!this.posturls[key].ratings) {
                 this.posturls[key].ratings = 0
                 this.posturls[key].rating = 0
               }
@@ -2748,15 +2761,15 @@ function buyNFT(setname, uid, price, type, callback){
                 this.posturls[key].pic = this.picFind(
                   this.posturls[key].json_metadata
                 );
-                if(this.posturls[key].json_metadata.assets){
-                  for(var i = 0; i < this.posturls[key].json_metadata.assets.length; i++){
-                    if(this.posturls[key].json_metadata.assets[i].contract){
+                if (this.posturls[key].json_metadata.assets) {
+                  for (var i = 0; i < this.posturls[key].json_metadata.assets.length; i++) {
+                    if (this.posturls[key].json_metadata.assets[i].contract) {
                       this.posturls[key].contract[this.posturls[key].json_metadata.assets[i].contract] = {}
                       contracts = true
                     }
                   }
                 }
-                if(contracts){
+                if (contracts) {
                   this.getContracts(key)
                 }
                 if (
@@ -2764,7 +2777,7 @@ function buyNFT(setname, uid, price, type, callback){
                   "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
                   this.posturls[key].json_metadata.vrHash ||
                   "QmZF2ZEZK8WBVUT7dnQyzA6eApLGnMXgNaJtWHFc3PCpqV" ==
-                  this.posturls[key].json_metadata.vrHash || 
+                  this.posturls[key].json_metadata.vrHash ||
                   "Qma4dk3mWP325HrHYBDz3UdL9h1A6q8CSvZdc8JhqfgiMp" == this.posturls[key].json_metadata.vrHash
                 )
                   type = "360";
@@ -2802,20 +2815,20 @@ function buyNFT(setname, uid, price, type, callback){
                 this.posturls[key].created
               );
               this.selectPosts();
-              if(modal)this.modalSelect(key)
+              if (modal) this.modalSelect(key)
             }
           });
       } else {
         console.log("no author or permlink", a, p);
       }
     },
-    getContracts(url){
+    getContracts(url) {
       var contracts = [],
         getContract = (u, id) => {
           fetch('https://spktest.dlux.io/api/fileContract/' + id)
             .then((r) => r.json())
             .then((res) => {
-              if(typeof res.result != "string"){
+              if (typeof res.result != "string") {
                 res.result.extend = "7"
                 this.contracts[id] = res.result
                 this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
@@ -2824,11 +2837,11 @@ function buyNFT(setname, uid, price, type, callback){
               }
             });
         }
-      for(var contract in this.posturls[url].contract){
+      for (var contract in this.posturls[url].contract) {
         contracts.push(contract)
       }
       contracts = [...new Set(contracts)]
-      for(var i = 0; i < contracts.length; i++){
+      for (var i = 0; i < contracts.length; i++) {
         getContract(url, contracts[i])
       }
     },
@@ -2915,7 +2928,7 @@ function buyNFT(setname, uid, price, type, callback){
       var arr;
       try {
         arr = json.image[0];
-      } catch (e) {}
+      } catch (e) { }
       if (typeof json.image == "string") {
         return json.image;
       } else if (typeof arr == "string") {
@@ -2986,8 +2999,8 @@ function buyNFT(setname, uid, price, type, callback){
           localStorage.setItem("hbdprice", JSON.stringify(data));
         })
         .catch((error) => {
-            const data = localStorage.getItem("hbdprice") || '{"hive_dollar": {"usd": 0}}';
-            this.hbdprice = JSON.parse(data);
+          const data = localStorage.getItem("hbdprice") || '{"hive_dollar": {"usd": 0}}';
+          this.hbdprice = JSON.parse(data);
         })
     },
     getSNodes() {
@@ -3031,9 +3044,9 @@ function buyNFT(setname, uid, price, type, callback){
           parseInt(
             this.saccountapi.granted?.t > 0 ? this.saccountapi.granted.t : 0
           ) +
-            parseInt(
-              this.saccountapi.granting?.t > 0 ? this.saccountapi.granting.t : 0
-            ),
+          parseInt(
+            this.saccountapi.granting?.t > 0 ? this.saccountapi.granting.t : 0
+          ),
           t,
           this.sstats.spk_rate_ldel
         );
@@ -3124,7 +3137,7 @@ function buyNFT(setname, uid, price, type, callback){
         );
       }
     },
-    addBens(obj){
+    addBens(obj) {
       console.log(obj)
       this.postBens.push(obj)
     },
@@ -3282,7 +3295,7 @@ function buyNFT(setname, uid, price, type, callback){
             this.bargov = (data.gov / 1000).toFixed(3);
             this.accountapi = data;
             this.denoms.DLUX = {
-              balance:  `${this.formatNumber((data.balance / 1000).toFixed(3), 3, '.', ',')} DLUX`
+              balance: `${this.formatNumber((data.balance / 1000).toFixed(3), 3, '.', ',')} DLUX`
             }
             this.dluxval =
               (data.balance + data.gov + data.poweredUp + data.claim) / 1000;
@@ -3368,7 +3381,7 @@ function buyNFT(setname, uid, price, type, callback){
           var pfp = "";
           try {
             pfp = this.accountinfo.posting_json_metadata.profile.profile_image;
-          } catch (e) {}
+          } catch (e) { }
           const total_vests =
             parseInt(this.accountinfo.vesting_shares) +
             parseInt(this.accountinfo.received_vesting_shares) -
@@ -3436,14 +3449,13 @@ function buyNFT(setname, uid, price, type, callback){
     },
     callScript(o) {
       return new Promise((resolve, reject) => {
-        if(this.serviceWorker){
+        if (this.serviceWorker) {
           this.callSWfunction('callScript', o).then((r) => {
             resolve(r)
-          }).catch((e) => {console.log('Service Worker not found', e);this.serviceWorker = false; this.callScript(o).then((r) => {resolve(r)})})
+          }).catch((e) => { console.log('Service Worker not found', e); this.serviceWorker = false; this.callScript(o).then((r) => { resolve(r) }) })
         } else if (this.nftscripts[o.script]) {
-          const code = `(//${this.nftscripts[o.script]}\n)("${
-            o.uid ? o.uid : 0
-          }")`;
+          const code = `(//${this.nftscripts[o.script]}\n)("${o.uid ? o.uid : 0
+            }")`;
           var computed = eval(code);
           computed.uid = o.uid || "";
           computed.owner = o.owner || "";
@@ -3601,20 +3613,20 @@ function buyNFT(setname, uid, price, type, callback){
       this.getFeedPrice();
       this.getSapi(this.pageAccount, false);
       this.getTokenUser(this.pageAccount, false);
-      if(!this.me)this.accountRelations(this.pageAccount);
+      if (!this.me) this.accountRelations(this.pageAccount);
       this.getNFTs(this.pageAccount);
     },
-    goBack(){
+    goBack() {
       window.history.back();
     },
     getIcon(s) {
       return this.baseScript[s] ? this.baseScript[s].set.faicon : "";
     },
-    mintsQty(item){
+    mintsQty(item) {
       return this.getMint(this.chains[item.token]?.sets[item.set]?.set, 'qty')
     },
-    injectIndex(dir){
-      switch(dir){
+    injectIndex(dir) {
+      switch (dir) {
         case 'up':
           this.activeIndexUp()
           break;
@@ -3626,13 +3638,13 @@ function buyNFT(setname, uid, price, type, callback){
       }
       this.focusItem = this[this.focusItem.source][this.activeIndex]
     },
-    activeIndexUp(){
-      console.log(this.activeIndex,this[this.focusItem.source].length,this.focusItem)
-      if(this.activeIndex < this[this.focusItem.source].length - 1) this.activeIndex++
+    activeIndexUp() {
+      console.log(this.activeIndex, this[this.focusItem.source].length, this.focusItem)
+      if (this.activeIndex < this[this.focusItem.source].length - 1) this.activeIndex++
       else this.activeIndex = 0
     },
-    activeIndexDn(){
-      if(this.activeIndex > 0) this.activeIndex--
+    activeIndexDn() {
+      if (this.activeIndex > 0) this.activeIndex--
       else this.activeIndex = this[this.focusItem.source].length - 1
     },
     onClassChange(classAttrValue) {
@@ -3641,7 +3653,64 @@ function buyNFT(setname, uid, price, type, callback){
       if (classList.includes('active')) {
         console.log('active');
       }
-    }
+    },
+    init(reset = false) {
+      if(reset){
+        if (location.pathname.split("/@")[1]) {
+          this.pageAccount = location.pathname.split("/@")[1]
+          if (this.pageAccount.indexOf('/') > -1) {
+            this.pagePermlink = this.pageAccount.split('/')[1]
+            this.pageAccount = this.pageAccount.split('/')[0]
+          }
+        } else if (location.pathname.split("/new/")[1]) {
+          this.builder = true
+        } else {
+          this.pageAccount = this.account;
+          this.me = true;
+        }
+      }
+      this.getIPFSproviders()
+      this.getMARKETS()
+      if (!this.me) {
+        this.focus.account = this.pageAccount;
+        this.sapi = sapi;
+        this.checkAccount("pageAccount", "focus");
+        this.getHiveUser();
+        this.getSPKUser()
+        this.accountRelations(this.pageAccount);
+        this.getHiveStats();
+        this.getQuotes();
+        this.getSNodes();
+        this.getPosts();
+        this.getProtocol();
+        this.getSpkStats();
+        this.getRewardFund();
+        this.getFeedPrice();
+        this.getSapi(this.pageAccount, false);
+        //this.getTokenUser(this.pageAccount, false);
+        //this.getNFTs(this.pageAccount);
+      }
+      if (!this.builder) {
+        deepLink();
+        this.activeTab = hash?.[1] || 'blog'
+        this.observer = new MutationObserver(mutations => {
+          for (const m of mutations) {
+            const newValue = m.target.getAttribute(m.attributeName);
+            this.$nextTick(() => {
+              console.log('tick')
+              this.onClassChange(newValue, m.oldValue);
+            });
+          }
+        });
+
+        this.observer.observe(this.$refs.filesTab, {
+          attributes: true,
+          attributeOldValue: true,
+          attributeFilter: ['class'],
+        });
+      }
+
+    },
   },
   mounted() {
     // Check for active service worker
@@ -3667,63 +3736,23 @@ function buyNFT(setname, uid, price, type, callback){
         this.pagePermlink = this.pageAccount.split('/')[1]
         this.pageAccount = this.pageAccount.split('/')[0]
       }
-    } else if(location.pathname.split("/new/")[1]) {
+    } else if (location.pathname.split("/new/")[1]) {
       this.builder = true
     } else {
       this.pageAccount = this.account;
       this.me = true;
     }
     if (this.pageAccount == this.account) this.me = true;
-    if(this.pagePermlink){
+    if (this.pagePermlink) {
       this.getContent(this.pageAccount, this.pagePermlink, true)
     } else {
-      this.getIPFSproviders()
-      this.getMARKETS()
-      if(!this.me){
-        this.focus.account = this.pageAccount;
-        this.sapi = sapi;
-        this.checkAccount("pageAccount", "focus");
-        this.getHiveUser();
-        this.getSPKUser()
-        this.accountRelations(this.pageAccount);
-        this.getHiveStats();
-        this.getQuotes();
-        this.getSNodes();
-        this.getPosts();
-        this.getProtocol();
-        this.getSpkStats();
-        this.getRewardFund();
-        this.getFeedPrice();
-        this.getSapi(this.pageAccount, false);
-        //this.getTokenUser(this.pageAccount, false);
-        //this.getNFTs(this.pageAccount);
-      }
-      if(!this.builder){
-        deepLink();
-        this.activeTab = hash?.[1] || 'blog'
-        this.observer = new MutationObserver(mutations => {
-          for (const m of mutations) {
-            const newValue = m.target.getAttribute(m.attributeName);
-            this.$nextTick(() => {
-              console.log('tick')
-              this.onClassChange(newValue, m.oldValue);
-            });
-          }
-        });
-      
-        this.observer.observe(this.$refs.filesTab, {
-          attributes: true,
-          attributeOldValue : true,
-          attributeFilter: ['class'],
-        });
-      }
-
+      this.init()
     }
   },
   beforeDestroy() {
     this.observer.disconnect();
   },
-  unmounted () {
+  unmounted() {
     window.removeEventListener('scroll', this.handleScroll);
   },
   watch: {
@@ -3735,7 +3764,7 @@ function buyNFT(setname, uid, price, type, callback){
         this.postSelect[this.postSelect.entry].e = false;
       }
     },
-    
+
   },
   computed: {
     location: {
@@ -3776,9 +3805,9 @@ function buyNFT(setname, uid, price, type, callback){
         return unbenned
       }
     },
-    compiledMarkdown: function() {
-      return DOMPurify.sanitize( marked.parse(this.postBody, { sanitize: true }))
-          },
+    compiledMarkdown: function () {
+      return DOMPurify.sanitize(marked.parse(this.postBody, { sanitize: true }))
+    },
     voteVal() {
       return (
         (this.accountinfo.rshares / parseInt(this.rewardFund.recent_claims)) *
