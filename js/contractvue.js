@@ -791,7 +791,7 @@ export default {
         addToPost(cid, contract, index, loc = 'self'){
             var string = this.smartThumb(contract, index, cid)
             if(string.includes('ipfs/')){
-                string = `![${this.newMeta[contract][index * 4 + 1]}.${this.newMeta[contract][index * 4 + 2]}](${string})`
+                string = `![${this.newMeta[contract][index * 4 + 1]}](${string})`
             } else {
                 string = `[${this.newMeta[contract][index * 4 + 1]}.${this.newMeta[contract][index * 4 + 2]}](https://ipfs.dlux.io/ipfs/${cid})`
             }
