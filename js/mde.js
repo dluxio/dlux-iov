@@ -20,6 +20,7 @@ export default {
     watch: {
       'prop_insert': {  
         handler: function (newValue) {
+          console.log("watch", newValue)
           this.insertText(newValue);
         }
       },
