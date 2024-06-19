@@ -1181,19 +1181,19 @@ export default {
             if(m.action == 'added'){
                 var string = this.newMeta[id][i]
                 if(!string) string = '2'
-                this.newMeta[id][i] += m.value
+                this.newMeta[id][i] += m.item
             } else {
                 var string = this.newMeta[id][i]
                 var arr = string.split('')
                 for (var j = 1; j < arr.length; j++){
-                    if (arr[j] == m.value) arr.splice(j,1)
+                    if (arr[j] == m.item) arr.splice(j,1)
                 }
             }
         },
         handleTag(id,i,m){
             var num = this.Base64toNumber(this.newMeta[id][i][0])
             if(m.action == 'added'){
-                num += m.value
+                num += m.item
                 this.newMeta[id][i] = this.NumberToBase64(num) + this.newMeta[id][i].slice(1)
             } else {
                 if (num & m.value) num -= m.value
