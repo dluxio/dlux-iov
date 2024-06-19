@@ -1193,7 +1193,7 @@ export default {
             }
         },
         handleTag(id,i,m){
-            var num = this.Base64toNumber(this.newMeta[id][i][0])
+            var num = this.Base64toNumber(this.newMeta[id][i][0]) || 0
             if(m.action == 'added'){
                 if (num & m.value == 0)num += m.item
                 this.newMeta[id][i] = this.NumberToBase64(num) + this.newMeta[id][i].slice(1)
