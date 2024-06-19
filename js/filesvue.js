@@ -71,7 +71,7 @@ props: {
 data() {
     return {
         files: {},
-        fileArray: [],
+        filesArray: [],
         contract: {},
         newMeta: {},
         decoded: false,
@@ -232,7 +232,7 @@ mounted() {
     for (const contract of this.contracts) {
         this.contract[contract.i] = contract;
         for (const file of contract.df) {
-            this.fileArray.push(file);
+            this.filesArray.push(file);
         }
         if (!this.contract[contract.i].m) {
             this.contract[contract.i].m = ""
