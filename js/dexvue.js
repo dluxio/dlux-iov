@@ -1216,14 +1216,24 @@ var app = new Vue({
         .then((response) => response.json())
         .then((data) => {
           this.hiveprice = data;
-        });
+          localStorage.setItem("hiveprice", JSON.stringify(data));
+        })
+        .catch((error) => {
+          const data = localStorage.getItem("hiveprice") || '{"hive": {"usd": 0}}';
+          this.hiveprice = JSON.parse(data);
+        })
       fetch(
         "https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&amp;vs_currencies=usd"
       )
         .then((response) => response.json())
         .then((data) => {
           this.hbdprice = data;
-        });
+          localStorage.setItem("hbdprice", JSON.stringify(data));
+        })
+        .catch((error) => {
+            const data = localStorage.getItem("hbdprice") || '{"hive_dollar": {"usd": 0}}';
+            this.hbdprice = JSON.parse(data);
+        })
     },
     getNodes() {
       fetch(this.lapi + "/runners")
