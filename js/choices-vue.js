@@ -427,7 +427,7 @@ export default {
     },
     handleSelectChange(e) {
       console.log(e)
-	    this.$emit('data', e.target.value);
+	    this.$emit('data', e.detail.value);
     }
   },
   watch: {
