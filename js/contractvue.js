@@ -346,7 +346,7 @@ export default {
 
                                                                     <!-- post -->
                                                                     <div v-if="account == contract.t && !postpage && contract.c == 2">
-                                                                        <div class="mb-3 mx-lg-5">
+                                                                        <div class="mb-3 mx-lg-5 bg-dark rounded px-1 py-2 p-lg-3">
                                                                             <post-vue :account="account"
                                                                             :prop_bens="[contract.s]"
                                                                             :prop_links="links[contract.i]"
@@ -376,11 +376,11 @@ export default {
                                                                     
                                                                     <!-- files list -->
                                                                     <div v-if="contract.df">
-                                                                        <div class="px-md-1 px-lg-2 pt-2 mt-2 bg-darkg mx-lg-5">
+                                                                        <div class="px-md-1 px-lg-2 pt-2 mt-2 mx-lg-5 rounded" style="background-color:rgba(0,0,0,0.3)">
                                                                             <div class="d-flex flex-column">
                                                                                 <h2 class="mx-auto ms-md-1">File{{pluralFiles(contract.i) ? 's' : ''}} </h2>
                                                                                 
-                                                                                    <div class="mt-2 mb-md-2 bg-darker rounded p-2" v-for="(size, cid, index) in contract.df">
+                                                                                    <div class="mt-2 mb-md-2 rounded bg-dark p-2" v-for="(size, cid, index) in contract.df">
 
                                                                                             <div class="row align-items-center"> 
 
@@ -388,7 +388,7 @@ export default {
                                                                                                     <div class="d-flex flex-column justify-content-center">
 
                                                                                                         
-                                                                                                        <img class="img-fluid rounded bg-light" :src="smartThumb(contract.i,index,cid)" width="300px" onerror="if (this.src != '/img/other-file-type-svgrepo-com.svg') this.src = '/img/other-file-type-svgrepo-com.svg'">
+                                                                                                        <img class="mx-auto img-fluid rounded bg-light" :src="smartThumb(contract.i,index,cid)" width="314px" onerror="if (this.src != '/img/other-file-type-svgrepo-com.svg') this.src = '/img/other-file-type-svgrepo-com.svg'">
                                                                                                        
                                                                                                         <span class="small text-center mb-2">{{fancyBytes(size)}}</span>
                                                                                                         
@@ -436,7 +436,7 @@ export default {
                                                                                                         </div>
                                                                                                     </div>
 
-                                                                                                    <!-- choices-js
+                                                                                                    <!-- choices-js-->
                                                                                                     <div class="mb-1">
                                                                                                         <label class="mb-1">Tags</label>
                                                                                                         <choices-vue ref="select-tag" prop_type="tags"></choices-vue>
@@ -444,7 +444,7 @@ export default {
                                                                                                     <div class="mb-1">
                                                                                                         <label class="mb-1">Labels</label>
                                                                                                         <choices-vue ref="select-label" prop_type="labels"></choices-vue>
-                                                                                                    </div> -->
+                                                                                                    </div> 
                                                                                                     
                                                                                                 </div>
 
