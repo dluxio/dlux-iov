@@ -315,7 +315,7 @@ export default {
                                                                
 
                                                                     <!-- upload time banner -->
-                                                                    <div v-if="contract.c == 1" class="mb-3">
+                                                                    <div v-if="contract.c == 1" class="mx-1 mb-3">
                                                                         <div class="alert alert-warning d-flex align-items-center mx-lg-5">
                                                                             <div class="d-flex flex-grow-1 flex-wrap me-1 align-items-center">
                                                                                 <div class="mx-1">
@@ -329,7 +329,7 @@ export default {
                                                                     </div>
 
                                                                     <!-- post time banner -->
-                                                                    <div v-if="contract.c == 2" class="mb-3">
+                                                                    <div v-if="contract.c == 2" class="mx-1 mb-3">
                                                                         <div class="alert alert-warning d-flex align-items-center mx-lg-5">
                                                                             <div class="d-flex flex-grow-1 flex-wrap me-1 align-items-center">
                                                                                 <div class="mx-1">
@@ -345,8 +345,8 @@ export default {
                                                                     
 
                                                                     <!-- post -->
-                                                                    <div v-if="account == contract.t && !postpage && contract.c == 2">
-                                                                        <div class="mb-3 mx-lg-5 bg-dark rounded px-1 py-2 p-lg-3">
+                                                                    <div v-if="account == contract.t && !postpage && contract.c == 2" class="mb-3 mx-1 mx-lg-5 p-sm-1 p-lg-2 rounded " style="background-color:rgba(0,0,0,0.3)">
+                                                                        <div class="bg-dark px-1 py-2 p-lg-3 rounded">
                                                                             <post-vue :account="account"
                                                                             :prop_bens="[contract.s]"
                                                                             :prop_links="links[contract.i]"
@@ -356,7 +356,7 @@ export default {
                                                                     </div>
 
                                                                     <!-- upload -->
-                                                                    <div v-if="contract.c == 1">
+                                                                    <div v-if="contract.c == 1" class="mx-1">
                                                                         <upload-vue :user="saccountapi" :propcontract="contract" @tosign="toSign=$event" @done="done()" />
                                                                     </div>
 
@@ -376,7 +376,7 @@ export default {
                                                                     
                                                                     <!-- files list -->
                                                                     <div v-if="contract.df">
-                                                                        <div class="px-md-1 px-lg-2 pt-2 mt-2 mx-lg-5 rounded" style="background-color:rgba(0,0,0,0.3)">
+                                                                        <div class="p-sm-1 px-lg-2 pt-2 mt-2 mx-lg-5 rounded" style="background-color:rgba(0,0,0,0.3)">
                                                                             <div class="d-flex flex-column">
                                                                                 <h2 class="mx-auto ms-md-1">File{{pluralFiles(contract.i) ? 's' : ''}} </h2>
                                                                                 
