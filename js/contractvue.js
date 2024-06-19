@@ -443,7 +443,7 @@ export default {
                                                                                                     </div>
                                                                                                     <div class="mb-1">
                                                                                                         <label class="mb-1">Labels</label>
-                                                                                                        <choices-vue ref="select-label" :prop_selections="newMeta[contract.i][index * 4 + 4]" prop_type="labels" @data="handleLabel(contract.i, index * 4 + 3, $event)"></choices-vue>
+                                                                                                        <choices-vue ref="select-label" :prop_selections="newMeta[contract.i][index * 4 + 4]" prop_type="labels" @data="handleLabel(contract.i, index * 4 + 4, $event)"></choices-vue>
                                                                                                     </div> 
                                                                                                     
                                                                                                 </div>
@@ -1182,7 +1182,6 @@ export default {
                 var string = this.newMeta[id][i]
                 if(!string) string = '2'
                 this.newMeta[id][i] += m.value
-
             } else {
                 var string = this.newMeta[id][i]
                 var arr = string.split('')
@@ -1192,7 +1191,23 @@ export default {
             }
         },
         handleTag(m){
-            
+            var num = this.Base64toNumber(this.newMeta[id][i][0])
+            if(m.action == 'added'){
+                num += m.value
+                this.newMeta[id][i] = this.NumberToBase64(num) + this.newMeta[id][i].slice(1)
+            } else {
+                if (num & m.value) num -= m.value
+                this.newMeta[id][i] = this.NumberToBase64(num) + this.newMeta[id][i].slice(1)
+            }
+        },
+        NumberToBase64(num) {
+            const glyphs = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
+            var result = "";
+            while (num > 0) {
+                result = glyphs[num % 64] + result;
+                num = Math.floor(num / 64);
+            }
+            return result;
         },
         when(arr) {
             if (!arr.length) return "";
