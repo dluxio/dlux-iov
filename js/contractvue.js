@@ -409,7 +409,7 @@ export default {
                                                                                                         </div>
                                                                                                          <!-- add to post -->
                                                                                                         <div v-if="contract.c == 2">
-                                                                                                            <button type="button" class="w-100 btn btn-sm btn-warning mb-1 mx-auto"><span class="d-flex align-items-center w-100">Add to Post<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
+                                                                                                            <button type="button" class="w-100 btn btn-sm btn-warning mb-1 mx-auto" @click="addToPost(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Add to Post<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
                                                                                                         </div>
 
                                                                                                         
@@ -660,6 +660,7 @@ export default {
     data() {
         return {
             contracts: [],
+            postBodyAdder: {},
             newMeta: {},
             state2contracts: [],
             tick: "1",
@@ -785,6 +786,15 @@ export default {
     methods: {
         getdelimed(string, del = ',', index = 0) {
             return string.split(del)[index] ? string.split(del)[index] : ''
+        },
+        addToPost(cid, contract, index, loc = 'self'){
+            var string = this.smartThumb(contract, index, cid)
+            if(string.includes('ipfs.dlux.io')){
+                string = `![${this.newMeta[contract][index * 4 + 1]}](${string})`
+            } else {
+                string = `[${this.newMeta[contract][index * 4 + 1]}.${this.newMeta[contract][index * 4 + 2]}](https://ipfs.dlux.io/ipfs/${cid})`
+            }
+            this.postBodyAdder[`${loc == 'self' ? contract : loc}`] = string
         },
         addUser(id) {
             if (this.contractIDs[id].encryption) {
@@ -1121,6 +1131,7 @@ export default {
 
                             this.contracts.push(data.file_contracts[node]);
                             this.contractIDs[data.file_contracts[node].i].index = this.contracts.length - 1;
+                            this.postBodyAdder[data.file_contracts[node].i] = ""
 
                         }
                         for (var user in data.channels) {

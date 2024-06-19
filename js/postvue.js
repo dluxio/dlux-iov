@@ -100,6 +100,11 @@ props: {
         default: function () {
             return {}
         },
+    },
+    prop_insert: {
+        type: String,
+        required: false,
+        default: ""
     }
 },
 data() {

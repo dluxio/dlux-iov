@@ -10,7 +10,7 @@ export default {
     },
     methods: {
       insertText(value) {
-        this.mde.value(value);
+        //this.mde.value(value);
         var pos = this.mde.codemirror.getCursor();
         this.mde.codemirror.setSelection(pos, pos);
         this.mde.codemirror.replaceSelection(value);
@@ -19,7 +19,7 @@ export default {
     watch: {
       'prop_insert': {
         handler: function () {
-          this.mde.insertText(this.prop_value);
+          this.insertText(this.prop_value);
         }
       },
     },
