@@ -240,7 +240,7 @@ export default {
                                                                         <i class="fa-solid fa-file fa-fw"></i>
                                                                     </div>
                                                                     <div>
-                                                                        {{contract.c > 1 ? contract.u/1000000 : contract.a/1000000}} MB
+                                                                        {{contract.c > 1 ? fancyBytes(contract.u) : fancyBytes(contract.a)}}
                                                                     </div>
                                                                 </div>
                                                             </th>
