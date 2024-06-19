@@ -23,11 +23,14 @@ export default {
     }
   },
   watch: {
-    'insert'(newValue) {
-      if (newValue) {
-        console.log(2, { newValue })
-        this.insertText(newValue)
-      }
+    'insert': {
+      handler: function (newValue) {
+        if (newValue) {
+          console.log(2, { newValue })
+          this.insertText(newValue)
+        }
+      },
+      deep: true
     }
   },
   mounted() {
