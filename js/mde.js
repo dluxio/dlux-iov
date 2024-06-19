@@ -16,7 +16,6 @@ export default {
   },
   methods: {
     insertText(value) {
-      console.log("insertText", value)
       var pos = this.mde.codemirror.getCursor();
       this.mde.codemirror.setSelection(pos, pos);
       this.mde.codemirror.replaceSelection(value);
@@ -27,7 +26,6 @@ export default {
     'insert': {
       handler: function (newValue) {
         if (newValue) {
-          console.log(2, { newValue })
           this.insertText(newValue)
         }
       },
@@ -41,7 +39,6 @@ export default {
       dragDrop: false
     });
     this.mde.codemirror.on("change", () => {
-      console.log("change", this.mde.value())
       this.$emit("data", this.mde.value())
     });
   }

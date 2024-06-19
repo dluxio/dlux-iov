@@ -345,7 +345,6 @@ export default {
     },
     'prop_insert'(newValue) {
       if (newValue) {
-        console.log({ newValue })
         this.insert = newValue
       }
     }
