@@ -1395,7 +1395,7 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <spk-vue v-if="reloaded" node="false" :account="account"
+                            <spk-vue v-if="reloaded" node="false" :account="account" :test="true"
                                 @tosign="toSign=$event;log($event)" />
                         </div>
                         <div class="modal-footer">

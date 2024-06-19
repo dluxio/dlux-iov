@@ -952,9 +952,6 @@ export default {
     html: {
       default: true,
     },
-    test: {
-      default: false,
-    }
   },
   computed:{
     difVote: {

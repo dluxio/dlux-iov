@@ -1,3 +1,4 @@
+import test from 'node:test';
 import ModalVue from './modalvue.js'
 
 export default {
@@ -81,7 +82,7 @@ export default {
                                 :balance="saccountapi.spk" :account="account"
                                 @modalsign="sendIt($event)" v-slot:trigger>
                                 <span class="p-2 trigger"
-                                    :test="sapi == 'https://spktest.dlux.io' ? true : false"><i
+                                    :test="test"><i
                                         class="fas fa-paper-plane me-2"></i>Send</span>
                             </modal-vue>
                         </button>
@@ -420,7 +421,7 @@ export default {
                             <modal-vue type="send" token="LARYNX" 
                                 :balance="saccountapi.balance"
                                 :account="account" @modalsign="sendIt($event)"
-                                :test="sapi == 'https://spktest.dlux.io' ? true : false" v-slot:trigger>
+                                :test="test" v-slot:trigger>
                                 <span class="p-2 trigger"><i
                                         class="fas fa-paper-plane me-2"></i>Send</span>
                             </modal-vue>
@@ -440,7 +441,7 @@ export default {
                                     :balance="saccountapi.balance"
                                     :account="account"
                                     @modalsign="sendIt($event)"
-                                    :test="sapi == 'https://spktest.dlux.io' ? true : false" v-slot:trigger>
+                                    :test="test" v-slot:trigger>
                                     <button class="dropdown-item trigger"
                                         type="button"><i
                                             class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
@@ -450,7 +451,7 @@ export default {
                                     :balance="saccountapi.balance"
                                     :account="account"
                                     @modalsign="sendIt($event)"
-                                    :test="sapi == 'https://spktest.dlux.io' ? true : false" v-slot:trigger>
+                                    :test="test" v-slot:trigger>
                                     <button class="dropdown-item trigger"
                                         :disabled="!isNode" 
                                         type="button"><i
@@ -552,7 +553,7 @@ export default {
                                 <modal-vue type="power" token="LARYNX" 
                                     func="Unlock Liquidity"
                                     :balance="saccountapi.gov"
-                                    :test="sapi == 'https://spktest.dlux.io' ? true : false"
+                                    :test="test"
                                     :account="account"
                                     @modalsign="sendIt($event)" v-slot:trigger>
                                     <button class="dropdown-item trigger" 
@@ -641,7 +642,7 @@ export default {
                                     :balance="saccountapi.poweredUp"
                                     :account="account"
                                     @modalsign="sendIt($event)"
-                                    :test="sapi == 'https://spktest.dlux.io' ? true : false" v-slot:trigger><span
+                                    :test="test" v-slot:trigger><span
                                         class="p-2 trigger">
                                         <i class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
                                 </modal-vue>
@@ -663,7 +664,7 @@ export default {
                                         :balance="saccountapi.poweredUp"
                                         :account="account"
                                         @modalsign="sendIt($event)"
-                                        :test="sapi == 'https://spktest.dlux.io' ? true : false" v-slot:trigger>
+                                        :test="test" v-slot:trigger>
                                         <button
                                             :disabled="!saccountapi.poweredUp"
                                             class="dropdown-item trigger" 
@@ -674,7 +675,7 @@ export default {
                                         type="confirm" token="LARYNX"
                                         func="powercancel" :account="account"
                                         @modalsign="sendIt($event)"
-                                        :test="sapi == 'https://spktest.dlux.io' ? true : false" v-slot:trigger>
+                                        :test="test" v-slot:trigger>
                                         <button class="dropdown-item trigger"
                                             type="button">
                                             <i class="fa-solid fa-xmark fa-fw me-2"></i>Cancel Power Down</button>
@@ -691,7 +692,7 @@ export default {
                         <modal-vue type="confirm" token="LARYNX" 
                             func="powercancel" :account="account"
                             @modalsign="sendIt($event)"
-                            :test="sapi == 'https://spktest.dlux.io' ? true : false" v-slot:trigger>
+                            :test="test" v-slot:trigger>
                             <button class="btn btn-sm btn-outline-danger trigger"
                                 type="button">
                                 STOP</button>
@@ -713,7 +714,7 @@ export default {
                                         :balance="saccountapi.poweredUp"
                                         :account="account"
                                         @modalsign="sendIt($event)"
-                                        :test="sapi == 'https://spktest.dlux.io' ? true : false" v-slot:trigger>
+                                        :test="test" v-slot:trigger>
                                         <button type="button"
                                             class="ms-1 btn btn-secondary trigger"><i
                                                 class="fas fa-fw fa-user-edit"></i></button>
@@ -723,7 +724,7 @@ export default {
                                         :to="b" amount="0" :stats="spkStats"
                                         :balance="saccountapi.poweredUp"
                                         :account="account"
-                                        :test="sapi == 'https://spktest.dlux.io' ? true : false"
+                                        :test="test"
                                         @modalsign="sendIt($event)" v-slot:trigger>
                                         <button class="ms-1 btn btn-danger ms-1 trigger"
                                             type="button"><i
@@ -794,6 +795,10 @@ export default {
             },
             required: false
         },
+        test: {
+            type: Boolean,
+            default: false,
+        }
         // ipfsproviders: {
         //     default: function () {
         //       return {
