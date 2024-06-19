@@ -232,10 +232,10 @@ mounted() {
     for (const contract of this.contracts) {
         const id = this.contracts[contract].i
         this.contract[contract.i] = this.contracts[contract];
-        for (const file of contract.df) {
+        for (const file of this.contracts[contract].df) {
             this.filesArray.push(this.contracts[contract][file]);
         }
-        if (!this.contracts[id].m) {
+        if (!this.contract[id].m) {
             this.contract[id].m = ""
             const filesNum = this.contract?.df ? Object.keys(this.contract[id].df).length : 0
             this.newMeta[this.id] = new Array(filesNum * 4 + 1).fill('')
