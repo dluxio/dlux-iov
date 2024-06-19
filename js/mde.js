@@ -14,12 +14,13 @@ export default {
         var pos = this.mde.codemirror.getCursor();
         this.mde.codemirror.setSelection(pos, pos);
         this.mde.codemirror.replaceSelection(value);
+
       }
     },
     watch: {
       'prop_insert': {
         handler: function () {
-          this.insertText(this.prop_value);
+          this.insertText(this.prop_insert);
         }
       },
     },
