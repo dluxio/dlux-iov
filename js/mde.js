@@ -18,9 +18,9 @@ export default {
       }
     },
     watch: {
-      'prop_insert': {
-        handler: function () {
-          this.insertText(this.prop_insert);
+      'prop_insert': {  
+        handler: function (newValue) {
+          this.insertText(newValue);
         }
       },
     },
