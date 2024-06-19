@@ -105,6 +105,11 @@ export default {
       type: String,
       required: false,
       default: ""
+    },
+    prop_uid: {
+      type: String,
+      required: false,
+      default: ""
     }
   },
   data() {
@@ -312,6 +317,34 @@ export default {
       }
       return isnt
 
+    },
+    save() {
+      if (this.prop_uid) {
+        const postData = {
+          title: this.postTitle,
+          body: this.postBody,
+          tags: this.postTags,
+          bens: this.postBens,
+          json: this.postCustom_json,
+          permlink: this.postPermlink
+        }
+        localStorage.setItem(this.prop_uid, JSON.stringify(postData))
+      }
+    },
+    load() {
+      const postData = localStorage.getItem(this.prop_uid)
+      if (postData) {
+        const data = JSON.parse(postData)
+        this.postTitle = data.title
+        this.postBody = data.body
+        this.insert = data.body
+        this.postTags = data.tags
+        this.postBens = data.bens
+        this.postCustom_json = data.json
+        this.postPermlink = data.permlink
+        return true
+      }
+      return false
     }
   },
   components: {
@@ -350,17 +383,18 @@ export default {
     }
   },
   mounted() {
-    for (var i = 0; i < this.prop_bens.length; i++) {
-      if (typeof this.prop_bens[i] == "string") this.addBen(this.prop_bens[i].split(',')[0], this.prop_bens[i].split(',')[1])
-      else this.addBen(this.prop_bens[i].account, this.prop_bens[i].weight)
+    if (!this.load()) {
+      for (var i = 0; i < this.prop_bens.length; i++) {
+        if (typeof this.prop_bens[i] == "string") this.addBen(this.prop_bens[i].split(',')[0], this.prop_bens[i].split(',')[1])
+        else this.addBen(this.prop_bens[i].account, this.prop_bens[i].weight)
+      }
+      for (var node in this.prop_json) {
+        this.postCustom_json[node] = this.prop_json[node]
+      }
+      for (var i = 0; i < this.prop_contracts.length; i++) {
+        this.addBen(this.prop_contracts[i].s.split(',')[0], this.prop_contracts[i].s.split(',')[1])
+        this.postCustom_json = this.prop_json[node]
+      }
     }
-    for (var node in this.prop_json) {
-      this.postCustom_json[node] = this.prop_json[node]
-    }
-    for (var i = 0; i < this.prop_contracts.length; i++) {
-      this.addBen(this.prop_contracts[i].s.split(',')[0], this.prop_contracts[i].s.split(',')[1])
-      this.postCustom_json = this.prop_json[node]
-    }
-    this.postBody = this.prop_links
   },
 };
