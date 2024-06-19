@@ -1,17 +1,13 @@
 export default {
     template: `
-<div v-for="(size, file, index) in filesArray" class="card rounded p-0 my-2 mx-1" style="max-width:200px">
+<div v-for="file in filesArray" class="card rounded p-0 my-2 mx-1" style="max-width:200px">
         <a :href="'https://ipfs.dlux.io/ipfs/' + file" target="_blank" class="no-decoration">
-        <h4 class="m-0 ms-auto align-self-end">{{newMeta[contract.i][index * 4 + 1] || file}}</h4>
-        <h5 class="m-0 ms-auto align-self-end"><span class="badge square rounded-top border border-bottom-0 bg-info border-light-50" :class="smartColor(newMeta[contract.i][index * 4 + 4])"><i :class="smartIcon(newMeta[contract.i][index * 4 + 4])"></i>{{ newMeta[contract.i][index * 4 + 2] }}</span></h5>
+        <h4 class="m-0 ms-auto align-self-end">{{newMeta[file.i][file.index * 4 + 1] || file}}</h4>
+        <h5 class="m-0 ms-auto align-self-end"><span class="badge square rounded-top border border-bottom-0 bg-info border-light-50" :class="smartColor(newMeta[file.i][file.index * 4 + 4])"><i :class="smartIcon(newMeta[file.i][file.index * 4 + 4])"></i>{{ newMeta[file.i][file.index * 4 + 2] }}</span></h5>
             <div class="bg-light rounded">    
                                                                                                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                                                                                                                 viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve" >
-                                                                                                            <style type="text/css">
-                                                                                                                .st0{fill:#101010;}
-                                                                                                                .st1{font-family:'Arial-BoldMT';}
-                                                                                                                .st2{font-size:149px;}
-                                                                                                            </style>
+                                                                                                            <!--<style type="text/css"> .st0{fill:#101010;} .st1{font-family:'Arial-BoldMT';} .st2  {font-size:149px;}  </style> -->
                                                                                                             <g >
                                                                                                                 <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10
                                                                                                                     S655.5,210,650,210z"/>
@@ -25,16 +21,16 @@ export default {
                                                                                                                 <path class="st0" d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
                                                                                                                     c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
                                                                                                                     c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z"/>
-                                                                                                                <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2" style="text-transform: uppercase; font-size: 149px;">{{newMeta[contract.i][index * 4 + 2]}}</text>
+                                                                                                                <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2" style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.index * 4 + 2]}}</text>
                                                                                                             </g>
                                                                                                         </svg>
                                                                                                     </div>
             <div class="card-body">
-                <span class="text-break small text-muted">{{fancyBytes(size)}}</span><br>
-                <button v-if="flagDecode(newMeta[contract.i][index * 4 + 4]).enc && !decoded" type="button" class="text-break small text-muted" @click="decode(contract.i)">Decrypt</button>
-                <button v-if="flagDecode(newMeta[contract.i][index * 4 + 4]).enc && decoded" type="button" class="text-break small text-muted" @click="download(contract.i, file)">Download</button>
+                <span class="text-break small text-muted">{{fancyBytes(file.s)}}</span><br>
+                <button v-if="flagDecode(newMeta[file.i][file.index * 4 + 4]).enc && !decoded" type="button" class="text-break small text-muted" @click="decode(file.i)">Decrypt</button>
+                <button v-if="flagDecode(newMeta[file.i][file.index * 4 + 4]).enc && decoded" type="button" class="text-break small text-muted" @click="download(file.i, file)">Download</button>
                 
-                <button v-if="flagDecode(newMeta[contract.i][index * 4 + 4]).enc" type="button" class="d-none text-break small text-muted" @click="download(file)">Download</button>
+                <button v-if="flagDecode(newMeta[file.i][file.index * 4 + 4]).enc" type="button" class="d-none text-break small text-muted" @click="download(file)">Download</button>
             </div>
         </a>
         <div class="card-footer mt-auto text-center border-0" v-if="assets">
@@ -75,13 +71,13 @@ data() {
         contract: {},
         newMeta: {},
         decoded: false,
-
+        debounce: null,
     };
 },
 emits: [ "addassets" ],
 methods: {
     addAsset(id, contract) {
-        this.$emit("addassets", { id, contract: contract.i });
+        this.$emit("addassets", { id, contract });
     },
     AESDecrypt(encryptedMessage, key) {
         const bytes = CryptoJS.AES.decrypt(encryptedMessage, key);
@@ -105,7 +101,7 @@ methods: {
             });
         }
     },
-    smartIcon(flags){
+    smartIcon(flags = ""){
         if(!flags[0])return 'fa-solid fa-file'
         const flag = this.flagDecode(flags[0])
         if (flag.enc) return 'fa-solid fa-file-shield'
@@ -113,7 +109,7 @@ methods: {
         else if (flag.executable)return 'fa-solid fa-cog'
         else return 'fa-solid fa-file'
     },
-    smartColor(flags){
+    smartColor(flags = ""){
         if(!flags[0])return 'bg-info'
         const flag = this.flagDecode(flags[0])
         if (flag.nsfw) return 'bg-danger'
@@ -191,7 +187,7 @@ methods: {
     copyText(text){
         navigator.clipboard.writeText(text)
     },
-    flagDecode(flags) {
+    flagDecode(flags = "") {
         var num = this.Base64toNumber(flags[0])
         var out = {}
         if(num & 1)out.enc = true
@@ -222,27 +218,48 @@ methods: {
         }
         return result;
     },
+    init(){
+
+    for (var i in this.contracts) {
+        const id = this.contracts[i].i
+        this.contract[id] = this.contracts[i];
+        var keys = Object.keys(this.contracts[i].df)
+        for (var j in keys) {
+            const f = {
+                i: id,
+                f: keys[i],
+                index: j,
+                s: this.contracts[i].df[keys[i]]
+            }
+            this.filesArray.push(f);
+        }
+        if (!this.contract[id].m) {
+            this.contract[id].m = ""
+            const filesNum = this.contracts[i].df ? Object.keys(this.contracts[i].df).length : 0
+            this.newMeta[id] = new Array(filesNum * 4 + 1).fill('')
+        } else {
+            this.newMeta[id] = this.contract[id].m.split(",")
+        }
+    }
+    this.files = this.contract.df;
+    }
 },
 computed: {
     hasFiles() {
         return Object.keys(this.files).length > 0;
     }
 },
-mounted() {
-    for (const contract of this.contracts) {
-        const id = this.contracts[contract].i
-        this.contract[contract.i] = this.contracts[contract];
-        for (const file of this.contracts[contract].df) {
-            this.filesArray.push(this.contracts[contract][file]);
-        }
-        if (!this.contract[id].m) {
-            this.contract[id].m = ""
-            const filesNum = this.contract?.df ? Object.keys(this.contract[id].df).length : 0
-            this.newMeta[this.id] = new Array(filesNum * 4 + 1).fill('')
-        } else {
-            this.newMeta[this.id] = this.contract[id].m.split(",")
-        }
+watch: {
+    'contracts': {
+        handler: function (newValue) {
+            if (this.debounce && new Date().getTime() - this.debounce < 1000) {
+                return
+            }
+            this.init()
+            this.debounce = new Date().getTime()
+        },
+        deep: true
     }
-    this.files = this.contract.df;
 },
+mounted() {},
 };

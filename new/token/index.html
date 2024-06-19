@@ -331,12 +331,12 @@
 												<div>
 													<div class="btn-group bg-dark">
 														<input type="radio" name="tokenFeaturesIco" id="setYesIco"
-															autocomplete="off" class="btn-check">
+															autocomplete="off" class="btn-check" @click="newToken.featico = true">
 														<label for="setYesIco"
 															class="btn btn-outline-primary">YES</label>
 														<input type="radio" name="tokenFeaturesIco" id="setNoIco"
 															autocomplete="off" checked class="btn-check">
-														<label for="setNoIco" class="btn btn-outline-primary">NO</label>
+														<label for="setNoIco" class="btn btn-outline-primary" @click="newToken.featico = false">NO</label>
 													</div>
 												</div>
 												<div id="tokenFeaturesIcoHelp" class="form-text">Do you want ICO</div>
