@@ -231,7 +231,7 @@ methods: {
                 i: id,
                 f: keys[i],
                 index: j,
-                s: this.contracts[i].df[keys[i]]
+                s: this.contracts[i].df[keys[j]]
             }
             this.filesArray.push(f);
         }
