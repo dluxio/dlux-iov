@@ -1,11 +1,34 @@
 export default {
     template: `
-<div v-for="(size, file, index) in files" class="card rounded p-0 my-2 mx-1" style="max-width:200px">
+<div v-for="(size, file, index) in filesArray" class="card rounded p-0 my-2 mx-1" style="max-width:200px">
         <a :href="'https://ipfs.dlux.io/ipfs/' + file" target="_blank" class="no-decoration">
         <h4 class="m-0 ms-auto align-self-end">{{newMeta[contract.i][index * 4 + 1] || file}}</h4>
         <h5 class="m-0 ms-auto align-self-end"><span class="badge square rounded-top border border-bottom-0 bg-info border-light-50" :class="smartColor(newMeta[contract.i][index * 4 + 4])"><i :class="smartIcon(newMeta[contract.i][index * 4 + 4])"></i>{{ newMeta[contract.i][index * 4 + 2] }}</span></h5>
-            <img :src="smartThumb(contract.i, index, file)" onerror="this.src='/img/other-file-type-svgrepo-com.svg'"
-            class="card-img-top rounded-top" :alt="file">
+            <div class="bg-light rounded">    
+                                                                                                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                                                                                                                viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve" >
+                                                                                                            <style type="text/css">
+                                                                                                                .st0{fill:#101010;}
+                                                                                                                .st1{font-family:'Arial-BoldMT';}
+                                                                                                                .st2{font-size:149px;}
+                                                                                                            </style>
+                                                                                                            <g >
+                                                                                                                <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10
+                                                                                                                    S655.5,210,650,210z"/>
+                                                                                                                <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10
+                                                                                                                    s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
+                                                                                                                    C660,305.2,655.5,309.7,650,309.7z"/>
+                                                                                                                <path class="st0" d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400
+                                                                                                                    c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z"/>
+                                                                                                                <path class="st0" d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z"/>
+                                                                                                                <path class="st0" d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z"/>
+                                                                                                                <path class="st0" d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
+                                                                                                                    c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
+                                                                                                                    c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z"/>
+                                                                                                                <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2" style="text-transform: uppercase; font-size: 149px;">{{newMeta[contract.i][index * 4 + 2]}}</text>
+                                                                                                            </g>
+                                                                                                        </svg>
+                                                                                                    </div>
             <div class="card-body">
                 <span class="text-break small text-muted">{{fancyBytes(size)}}</span><br>
                 <button v-if="flagDecode(newMeta[contract.i][index * 4 + 4]).enc && !decoded" type="button" class="text-break small text-muted" @click="decode(contract.i)">Decrypt</button>
@@ -26,10 +49,10 @@ props: {
         type: Boolean,
         default: false,
     },
-    contract: {
+    contracts: {
         type: Object,
         default: function () {
-            return {
+            return [{
                 n: {},
                 p: 3,
                 df: {},
@@ -41,15 +64,18 @@ props: {
                 t: 10,
                 extend: 7,
 
-            };
+            }];
         }
     },
 },
 data() {
     return {
         files: {},
+        fileArray: [],
+        contract: {},
         newMeta: {},
         decoded: false,
+
     };
 },
 emits: [ "addassets" ],
@@ -108,7 +134,6 @@ methods: {
             case 'webp':
             case 'tiff':
             case 'tif':
-                return `https://ipfs.dlux.io/ipfs/${cid}`
             case 'svg':
                 return `https://ipfs.dlux.io/ipfs/${cid}`
             case 'mp4':
@@ -166,16 +191,6 @@ methods: {
     copyText(text){
         navigator.clipboard.writeText(text)
     },
-    flagEncode(fileInfo) {
-        var num = 0
-        if(this.encryption.encrypted)num += 1
-        if(fileInfo.autoRenew)num += 2
-        if(fileInfo.nsfw)num += 4
-        if(fileInfo.executable)num += 8
-        var flags = this.NumberToBase64(num)
-        //append category chars here
-        return flags
-    },
     flagDecode(flags) {
         var num = this.Base64toNumber(flags[0])
         var out = {}
@@ -214,13 +229,19 @@ computed: {
     }
 },
 mounted() {
-    this.files = this.contract.df;
-    if (!this.contract.m) {
-        this.contract.m = ""
-        const filesNum = this.contract?.df ? Object.keys(this.contract.df).length : 0
-        this.newMeta[this.contract.i] = new Array(filesNum * 4 + 1).fill('')
-    } else {
-        this.newMeta[this.contract.i] = this.contract.m.split(",")
+    for (const contract of this.contracts) {
+        this.contract[contract.i] = contract;
+        for (const file of contract.df) {
+            this.fileArray.push(file);
+        }
+        if (!this.contract[contract.i].m) {
+            this.contract[contract.i].m = ""
+            const filesNum = this.contract?.df ? Object.keys(this.contract[contract.i].df).length : 0
+            this.newMeta[this.contract.i] = new Array(filesNum * 4 + 1).fill('')
+        } else {
+            this.newMeta[this.contract.i] = this.contract[contract.i].m.split(",")
+        }
     }
+    this.files = this.contract.df;
 },
 };

@@ -68,9 +68,9 @@ export default {
                 </div>
                 <!-- has files -->
                 <div v-if="!hasFiles" class="d-flex flex-wrap justify-content-center">
-                    <div class="d-flex flex-wrap justify-content-center" v-for="contract in contracts">
+                    <div class="d-flex flex-wrap justify-content-center">
                         <files-vue :assets="assets" @addassets="addAssets($event)"
-                            :contract="contract"></files-vue>
+                            :contracts="contracts"></files-vue>
                     </div>
                 </div>
             </div>
