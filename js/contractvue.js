@@ -1024,7 +1024,7 @@ export default {
                     cj: cja,
                     id: `spkccT_update_metadata`,
                     msg: `Updating Metadata for Contract: ${contract}`,
-                    ops: ["getSapi"],
+                    ops: [],
                     api: this.sapi,
                     txid: `spkccT_update_meta`,
                 };
