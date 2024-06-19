@@ -398,19 +398,19 @@ export default {
                                                                                                         </div>
                                                                                                         <!-- download  -->
                                                                                                         <div class="d-none" v-if="!flagDecode(contract.m).enc">
-                                                                                                            <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="downloadFile(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
+                                                                                                            <button type="button" class="w-100 btn btn-sm btn-info mb-1 mx-auto" @click="downloadFile(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
                                                                                                         </div>
                                                                                                         <!-- decrypt  -->
                                                                                                         <div v-if="flagDecode(contract.m).enc && !contract.encryption.key">
-                                                                                                            <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="decryptKey(contract.i)"><span class="d-flex align-items-center w-100">Decrypt<i class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
+                                                                                                            <button type="button" class="w-100 btn btn-sm btn-info mb-1 mx-auto" @click="decryptKey(contract.i)"><span class="d-flex align-items-center w-100">Decrypt<i class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
                                                                                                         </div>
                                                                                                         <!-- download enc -->
                                                                                                         <div v-if="flagDecode(contract.m).enc && contract.encryption.key">
-                                                                                                            <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="downloadFile(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
+                                                                                                            <button type="button" class="w-100 btn btn-sm btn-info mb-1 mx-auto" @click="downloadFile(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
                                                                                                         </div>
                                                                                                          <!-- add to post -->
                                                                                                         <div v-if="contract.c == 2">
-                                                                                                            <button type="button" class="w-100 btn btn-sm btn-warning mb-1 mx-auto" @click="addToPost(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Add to Post<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
+                                                                                                            <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="addToPost(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Add to Post<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
                                                                                                         </div>
 
                                                                                                         
