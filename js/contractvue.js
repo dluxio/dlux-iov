@@ -393,11 +393,11 @@ export default {
                                                                                                         <span class="small text-center mb-2">{{fancyBytes(size)}}</span>
                                                                                                         
                                                                                                         <!-- link -->
-                                                                                                        <div>
+                                                                                                        <div v-if="!flagDecode(contract.m).enc">
                                                                                                             <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="w-100 btn btn-sm btn-info mb-1 mx-auto"><span class="d-flex align-items-center">URL<i class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
                                                                                                         </div>
                                                                                                         <!-- download  -->
-                                                                                                        <div v-if="!flagDecode(contract.m).enc">
+                                                                                                        <div class="d-none" v-if="!flagDecode(contract.m).enc">
                                                                                                             <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="downloadFile(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
                                                                                                         </div>
                                                                                                         <!-- decrypt  -->
