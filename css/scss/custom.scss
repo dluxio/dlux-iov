@@ -865,9 +865,12 @@ a-scene {
 
 .btn-purp {
   color: #fff;
-  background: #9300ff;
+  background: #851ecf;
 }
-
+.btn-purp:hover {
+  color: #fff;
+  background: #851ecfa3;
+}
 .btn-outline-purp {
   color: #fff;
   border-color: #9300ff;

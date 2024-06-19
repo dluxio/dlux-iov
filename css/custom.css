@@ -13247,7 +13247,12 @@ a-scene {
 
 .btn-purp {
   color: #fff;
-  background: #9300ff;
+  background: #851ecf;
+}
+
+.btn-purp:hover {
+  color: #fff;
+  background: rgba(133, 30, 207, 0.6392156863);
 }
 
 .btn-outline-purp {
