@@ -399,8 +399,30 @@ export default {
                                                                                                 <div class="d-flex flex-column justify-content-center">
 
                                                                                                     
-                                                                                                    <img class="mx-auto img-fluid rounded bg-light" :src="smartThumb(contract.i,index,cid)" width="314px" onerror="if (this.src != '/img/other-file-type-svgrepo-com.svg') this.src = '/img/other-file-type-svgrepo-com.svg'">
-                                                                                                    
+                                                                                                    <!--<img class="mx-auto img-fluid rounded bg-light" :src="smartThumb(contract.i,index,cid)" width="314px" onerror="if (this.src != '/img/other-file-type-svgrepo-com.svg') this.src = '/img/other-file-type-svgrepo-com.svg'"> -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+     viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
+<style type="text/css">
+    .st0{fill:#101010;}
+    .st1{font-family:'Arial-BoldMT';}
+    .st2{font-size:149px;}
+</style>
+<g id="xxx-word">
+    <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10
+        S655.5,210,650,210z"/>
+    <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10
+        s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
+        C660,305.2,655.5,309.7,650,309.7z"/>
+    <path class="st0" d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400
+        c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z"/>
+    <path class="st0" d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z"/>
+    <path class="st0" d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z"/>
+    <path class="st0" d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
+        c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
+        c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z"/>
+    <text transform="matrix(1 0 0 1 183.3494 471.9725)" class="st1 st2">{{newMeta[contract.i][index * 4 + 2]}}</text>
+</g>
+</svg>
                                                                                                     <span class="small text-center mb-2">{{fancyBytes(size)}}</span>
                                                                                                     
                                                                                                     <!-- link -->
@@ -1025,16 +1047,16 @@ export default {
                     m: meta.join(',')
                 };
                 const removeSave = new Promise((res, rej) => {
-                this.toSign = {
-                    type: "cja",
-                    cj: cja,
-                    id: `spkccT_update_metadata`,
-                    msg: `Updating Metadata for Contract: ${contract}`,
-                    ops: [],
-                    callbacks: [res, rej],
-                    api: this.sapi,
-                    txid: `spkccT_update_meta`,
-                };
+                    this.toSign = {
+                        type: "cja",
+                        cj: cja,
+                        id: `spkccT_update_metadata`,
+                        msg: `Updating Metadata for Contract: ${contract}`,
+                        ops: [],
+                        callbacks: [res, rej],
+                        api: this.sapi,
+                        txid: `spkccT_update_meta`,
+                    };
                 })
                 removeSave.then(() => {
                     this.contractIDs[contract].m = cja.m
