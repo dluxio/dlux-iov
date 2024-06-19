@@ -52,8 +52,10 @@ export default {
         </ul>
         <!-- tabs -->
         <div class="tab-content bg-color">
+            
             <!-- files -->
             <div role="tabpanel" class="tab-pane" id="filesTab" aria-labelledby="filestab">
+                
                 <!-- no files -->
                 <div v-if="hasFiles" class="ms-auto me-auto text-center">
                     <div class="ms-auto me-auto card px-3 py-2 mt-3 mb-4 bg-darker" style="max-width: 600px">
@@ -66,14 +68,16 @@ export default {
                         </p>
                     </div>
                 </div>
+                
                 <!-- has files -->
                 <div v-if="!hasFiles" class="d-flex flex-wrap justify-content-center">
-                    <div class="d-flex flex-wrap justify-content-center">
+                    
                         <files-vue :assets="assets" @addassets="addAssets($event)"
                             :contracts="contracts"></files-vue>
-                    </div>
+                   
                 </div>
             </div>
+            
             <!-- contracts -->
             <div role="tabpanel" class="tab-pane show active" id="contractsTab" aria-labelledby="contractstab">
                 <!-- top menu -->

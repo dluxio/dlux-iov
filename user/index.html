@@ -1373,7 +1373,7 @@
                         </div>
                         <!-- files tab -->
                         <div role="tabpanel" ref="filesTab" class="tab-pane fade" id="files" aria-labelledby="filestab">
-                            <div class="container">
+                            <div class="mx-lg-5">
                                 <div class="rounded my-3 pt-2" style="background-color:rgba(255,255,255,0.3);">
                                     <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount"
                                         @tosign="toSign=$event" :prop_contracts="contracts" :accountinfo="accountinfo"
@@ -1633,6 +1633,7 @@
         integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
     <script>
         // Add JavaScript to toggle collapse on <tr> click
         document.addEventListener('DOMContentLoaded', function () {

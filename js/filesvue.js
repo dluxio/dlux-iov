@@ -1,44 +1,74 @@
 export default {
     template: `
-<div v-for="file in filesArray" class="card rounded p-0 my-2 mx-1" style="max-width:200px">
-        <a :href="'https://ipfs.dlux.io/ipfs/' + file" target="_blank" class="no-decoration">
-        <h4 class="m-0 ms-auto align-self-end">{{newMeta[file.i][file.index * 4 + 1] || file}}</h4>
-        <h5 class="m-0 ms-auto align-self-end"><span class="badge square rounded-top border border-bottom-0 bg-info border-light-50" :class="smartColor(newMeta[file.i][file.index * 4 + 4])"><i :class="smartIcon(newMeta[file.i][file.index * 4 + 4])"></i>{{ newMeta[file.i][file.index * 4 + 2] }}</span></h5>
-            <div class="bg-light rounded">    
-                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                        viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve" >
-                   
-                    <g >
-                        <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10
-                            S655.5,210,650,210z"/>
-                        <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10
-                            s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
-                            C660,305.2,655.5,309.7,650,309.7z"/>
-                        <path class="st0" d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400
-                            c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z"/>
-                        <path class="st0" d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z"/>
-                        <path class="st0" d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z"/>
-                        <path class="st0" d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
-                            c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
-                            c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z"/>
-                        <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2" style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.index * 4 + 2]}}</text>
-                    </g>
-                </svg>
-            </div>
-            <div class="card-body">
-                <span class="text-break small text-muted">{{fancyBytes(file.s)}}</span><br>
-                <button v-if="flagDecode(newMeta[file.i][file.index * 4 + 4]).enc && !decoded" type="button" class="text-break small text-muted" @click="decode(file.i)">Decrypt</button>
-                <button v-if="flagDecode(newMeta[file.i][file.index * 4 + 4]).enc && decoded" type="button" class="text-break small text-muted" @click="download(file.i, file)">Download</button>
-                
-                <button v-if="flagDecode(newMeta[file.i][file.index * 4 + 4]).enc" type="button" class="d-none text-break small text-muted" @click="download(file)">Download</button>
-            </div>
-        </a>
-        <div class="card-footer mt-auto text-center border-0" v-if="assets">
-            <button type="button" class="btn btn-primary" @click="addAsset(file, contract)"><i
-                class="fa-solid fa-square-plus me-2"></i>Add</button>
-        </div>
+<div class="w-100 row bg-darker">
+    <div class="col-md-4 col-lg-3 col-xl-2">
+
     </div>
 
+    <div class="col-md-8 col-lg-9 col-xl-10">
+        <!-- items -->
+        <div class="row ">
+            <div class="card col-lg-3 my-2 me-2" v-for="file in filesArray">
+                <div class="">
+                    <h4 class="m-0 ms-auto align-self-end">{{newMeta[file.i][file.index * 4 + 1] || file}}</h4>
+                    <h5 class="m-0 ms-auto align-self-end"><span class="badge square rounded-top border border-bottom-0 bg-info border-light-50" :class="smartColor(newMeta[file.i][file.index * 4 + 4])"><i :class="smartIcon(newMeta[file.i][file.index * 4 + 4])"></i>{{ newMeta[file.i][file.index * 4 + 2] }}</span></h5>
+                    <div class="bg-light rounded">    
+                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                                viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
+                            <g>
+                                <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10
+                                    S655.5,210,650,210z"/>
+                                <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10
+                                    s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
+                                    C660,305.2,655.5,309.7,650,309.7z"/>
+                                <path class="st0" d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400
+                                    c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z"/>
+                                <path class="st0" d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z"/>
+                                <path class="st0" d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z"/>
+                                <path class="st0" d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
+                                    c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
+                                    c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z"/>
+                                <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2" style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.index * 4 + 2]}}</text>
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="mt-1">
+                    <!-- link -->
+                            <div v-if="!flagDecode(newMeta[file.i][file.index * 4 + 4]).enc">
+                                <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"><span class="d-flex align-items-center">URL<i class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
+                            </div>
+                            <!-- download  -->
+                            <div class="d-none">
+                                <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="downloadFile(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
+                            </div>
+                            <!-- decrypt  -->
+                            <div v-if="flagDecode(newMeta[file.i][file.index * 4 + 4]).enc && !decoded">
+                                <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="decode(file.i)"><span class="d-flex align-items-center w-100">Decrypt<i class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
+                            </div>
+                            <!-- download enc -->
+                            <div v-if="flagDecode(newMeta[file.i][file.index * 4 + 4]).enc && decoded">
+                                <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="download(file.i, file)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
+                            </div>
+                            <!-- add to post -->
+                            <div v-if="assets">
+                                <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto" @click="addToPost(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Add to Post<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
+                            </div>
+                            <!-- add to asset -->
+                            <div v-if="assets">
+                                <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto" @click="addAsset(file, contract)"><span class="d-flex align-items-center w-100">Add asset<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
+                            </div>
+
+                        <span class="text-break small text-muted">{{fancyBytes(file.s)}}</span><br>
+                        
+                       
+                    </div>
+                    <a :href="'https://ipfs.dlux.io/ipfs/' + file" target="_blank" class="no-decoration"></a>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
    `,
 props: {
     assets: {
