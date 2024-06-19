@@ -223,6 +223,7 @@ methods: {
     for (var i in this.contracts) {
         const id = this.contracts[i].i
         this.contract[id] = this.contracts[i];
+        console.log(this.contracts[i], 'df')
         var keys = Object.keys(this.contracts[i].df)
         for (var j in keys) {
             const f = {
