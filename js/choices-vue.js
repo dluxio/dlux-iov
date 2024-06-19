@@ -427,7 +427,7 @@ export default {
     init() {
       var prop_selections = []
       if(this.prop_type == 'tags') {
-        const num = this.Base64toNumber(this.prop_selections[0])
+        const num = this.Base64toNumber(this.prop_selections[0]) || 2
         if(num & 2) prop_selections.push(this.tags[0])
         if(num & 4) prop_selections.push(this.tags[1])
         if(num & 8) prop_selections.push(this.tags[2])
