@@ -1183,6 +1183,7 @@ export default {
                 if(!string) string = '2'
                 this.newMeta[id][i] += m.item
             } else {
+                console.log('remove', m.item)
                 var string = this.newMeta[id][i]
                 var arr = string.split('')
                 for (var j = 1; j < arr.length; j++){
@@ -1196,6 +1197,7 @@ export default {
                 num += m.item
                 this.newMeta[id][i] = this.NumberToBase64(num) + this.newMeta[id][i].slice(1)
             } else {
+                console.log('remove', m.item)
                 if (num & m.value) num -= m.value
                 this.newMeta[id][i] = this.NumberToBase64(num) + this.newMeta[id][i].slice(1)
             }
