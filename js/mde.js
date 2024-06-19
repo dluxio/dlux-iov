@@ -2,6 +2,11 @@ export default {
   name: "MDE",
   template: `<div><textarea ref="mde"/></div>`,
   emits: ["data"],
+  data() {
+    return {
+      mde: null
+    }
+  },
   props: {
     insert: {
       type: String,
