@@ -16,9 +16,13 @@ export default {
   },
   methods: {
     insertText(value) {
+      if(!this.mde.value())this.mde.value(value)
+      else {
+        //this.mde.codemirror.focus()
       var pos = this.mde.codemirror.getCursor();
       this.mde.codemirror.setSelection(pos, pos);
       this.mde.codemirror.replaceSelection(value);
+    }
 
     }
   },
