@@ -439,11 +439,11 @@ export default {
                                                                                                     <!-- choices-js-->
                                                                                                     <div class="mb-1">
                                                                                                         <label class="mb-1">Tags</label>
-                                                                                                        <choices-vue ref="select-tag" prop_type="tags"></choices-vue>
+                                                                                                        <choices-vue ref="select-tag" prop_type="tags" @data="handleTag($event)"></choices-vue>
                                                                                                     </div>
                                                                                                     <div class="mb-1">
                                                                                                         <label class="mb-1">Labels</label>
-                                                                                                        <choices-vue ref="select-label" prop_type="labels"></choices-vue>
+                                                                                                        <choices-vue ref="select-label" prop_type="labels" @data="handleLabel($event)"></choices-vue>
                                                                                                     </div> 
                                                                                                     
                                                                                                 </div>
@@ -1176,6 +1176,12 @@ export default {
                     }
                     this.getSapi()
                 });
+        },
+        handleLabel(e){
+            console.log('hl', e)
+        },
+        handleTag(e){
+            console.log('ht', e)
         },
         when(arr) {
             if (!arr.length) return "";
