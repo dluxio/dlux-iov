@@ -221,6 +221,7 @@ methods: {
     init(){
 
     for (var i in this.contracts) {
+        if(this.contracts[i].c > 1)continue
         const id = this.contracts[i].i
         this.contract[id] = this.contracts[i];
         console.log(this.contracts[i], 'df')
