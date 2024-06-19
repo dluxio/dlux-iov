@@ -179,6 +179,9 @@ export default {
       this.sign(op)
         .then((r) => {
           this.statusFinder(r, obj);
+          try {
+            obj.callbacks[0](`${obj.challenge}:${r}`, console.log("callback?"));
+          } catch (e) {}
         })
         .catch((e) => {
           console.log(e);
@@ -205,6 +208,9 @@ export default {
       this.sign(op)
         .then((r) => {
           this.statusFinder(r, obj);
+          try {
+            obj.callbacks[0](`${obj.challenge}:${r}`, console.log("callback?"));
+          } catch (e) {}
         })
         .catch((e) => {
           console.log(e);
