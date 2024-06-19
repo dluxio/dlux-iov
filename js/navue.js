@@ -215,6 +215,9 @@ export default {
       this.sign(op)
         .then((r) => {
           if (obj.id) this.statusFinder(r, obj);
+          try {
+            obj.callbacks[0](`${obj.challenge}:${r}`, console.log("callback?"));
+          } catch (e) {}
         })
         .catch((e) => {
           console.log(e);
