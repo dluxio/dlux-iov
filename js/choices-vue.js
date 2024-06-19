@@ -431,12 +431,10 @@ export default {
         if(num & 2) this.selections.push(this.tags[0])
         if(num & 4) this.selections.push(this.tags[1])
         if(num & 8) this.selections.push(this.tags[2])
-        this.opts.items = this.selections
       } else {
         for (var i = 1; i < this.prop_selections.length; i++) {
           this.selections.push(this.labels[this.Base64toNumber(this.prop_selections[i])])
         }
-        this.opts.items = this.selections
       }
 
     },
@@ -447,8 +445,7 @@ export default {
       if (!Choices) this.msg = 'Choices not loaded'
       else if (this.reference == '') this.msg = 'Ref not set'
       else {
-        console.log(opts)
-        this.Choices = new Choices(this.$refs[this.reference], opts)
+        this.Choices = new Choices(this.$refs[this.reference], opts).setValue(this.selections)
         this.$refs[this.reference].addEventListener('addItem', this.handleAdd);
         this.$refs[this.reference].addEventListener('removeItem', this.handleRemove);
       }
