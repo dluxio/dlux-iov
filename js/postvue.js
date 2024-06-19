@@ -331,7 +331,7 @@ export default {
         localStorage.setItem(this.prop_uid, JSON.stringify(postData))
       }
     },
-    load() {
+    loadPost() {
       const postData = localStorage.getItem(this.prop_uid)
       if (postData) {
         const data = JSON.parse(postData)
@@ -400,10 +400,11 @@ export default {
     'postBens'(newValue) {
       this.save()
     },
-    
+
   },
   mounted() {
-    if (!this.load()) {
+    const loaded = this.loadPost()
+    if (!loaded) {
       for (var i = 0; i < this.prop_bens.length; i++) {
         if (typeof this.prop_bens[i] == "string") this.addBen(this.prop_bens[i].split(',')[0], this.prop_bens[i].split(',')[1])
         else this.addBen(this.prop_bens[i].account, this.prop_bens[i].weight)
