@@ -935,8 +935,11 @@ export default {
             if (thumb.includes('https')) return thumb
             switch (this.newMeta[contract][index * 4 + 2]) {
                 case 'jpg':
+                    return `/img/jpg-file-type-svgrepo-com.svg`
                 case 'jpeg':
+                    return `/img/jpg-file-type-svgrepo-com.svg`
                 case 'png':
+                    return `/img/png-file-type-svgrepo-com.svg`
                 case 'gif':
                 case 'bmp':
                 case 'webp':
