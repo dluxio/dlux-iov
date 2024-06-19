@@ -10,6 +10,7 @@ export default {
   props: {
     insert: {
       type: String,
+      required: false,
       default: ""
     }
   },
@@ -40,6 +41,7 @@ export default {
       dragDrop: false
     });
     this.mde.codemirror.on("change", () => {
+      console.log("change", this.mde.value())
       this.$emit("data", this.mde.value())
     });
   }
