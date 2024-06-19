@@ -321,7 +321,6 @@ components: {
 watch: {
     'prop_bens': {
             handler: function () {
-                console.log('caught!');
                 for(var i = 0; i < this.prop_bens.length; i++){
                     if(typeof this.prop_bens[i] == "string")this.addBen(this.prop_bens[i].split(',')[0], this.prop_bens[i].split(',')[1])
                     else this.addBen(this.prop_bens[i].account, this.prop_bens[i].weight)
