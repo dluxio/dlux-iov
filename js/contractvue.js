@@ -933,13 +933,6 @@ export default {
             var thumb = this.newMeta[contract][index * 4 + 3] || ''
             if (thumb.includes('Qm')) return `https://ipfs.dlux.io/ipfs/${thumb}`
             if (thumb.includes('https')) return thumb
-            fetch(`https://ipfs.dlux.io/ipfs/${cid}`, {
-                method: 'GET',
-                headers: {'X-HTTP-Method-Override': 'HEAD'},
-                followRedirects: true  // Default is true anyway.
-              }).then(response => {
-                console.log(response)
-              })
             switch (this.newMeta[contract][index * 4 + 2]) {
                 case 'jpg':
                     return `/img/jpg-file-type-svgrepo-com.svg`
@@ -952,9 +945,9 @@ export default {
                 case 'webp':
                 case 'tiff':
                 case 'tif':
-                    return `https://ipfs.dlux.io/ipfs/${cid}`
+                    return `/img/png-file-type-svgrepo-com.svg`
                 case 'svg':
-                    return `https://ipfs.dlux.io/ipfs/${cid}`
+                    return `/img/png-file-type-svgrepo-com.svg`
                 case 'mp4':
                 case 'mov':
                     return `/img/mov-file-type-svgrepo-com.svg`
