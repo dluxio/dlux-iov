@@ -289,7 +289,7 @@ export default {
         const postData = {
           title: this.postTitle,
           body: this.postBody,
-          tags: this.postTags,
+          //tags: this.postTags,
           bens: this.postBens,
           json: this.postCustom_json,
           permlink: this.postPermlink
@@ -303,7 +303,7 @@ export default {
         const data = JSON.parse(postData)
         this.postTitle = data.title
         //this.postBody = data.body
-        this.postTags = data.tags
+        //this.postTags = data.tags
         this.postBens = data.bens
         this.postCustom_json = data.json
         this.postPermlink = data.permlink
