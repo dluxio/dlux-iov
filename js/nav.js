@@ -1,6 +1,6 @@
 function doOnLoad() {
   isChrome();
-  hive.api.setOptions({ url: "https://anyx.io" });
+  hive.api.setOptions({ url: "https://hive-api.dlux.io" });
 }
 
 function isChrome() {

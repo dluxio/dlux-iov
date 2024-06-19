@@ -926,7 +926,7 @@ export default {
           },
         checkAccount(name, key, enable) {
             return new Promise((resolve, reject) => {
-            fetch("https://anyx.io", {
+            fetch("https://hive-api.dlux.io", {
               body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${name}\"]], \"id\":1}`,
               headers: {
                 "Content-Type": "application/x-www-form-urlencoded",

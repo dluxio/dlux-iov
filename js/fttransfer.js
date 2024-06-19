@@ -986,7 +986,7 @@ export default {
             var arrStr = '["' + this.accs.join('","') + '"]'
             var body = `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[${arrStr}], \"id\":1}`
             console.log(body)
-            fetch("https://anyx.io", {
+            fetch("https://hive-api.dlux.io", {
               body,
               headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -1043,7 +1043,7 @@ export default {
             var arrStr = '["' + this.airdrop.to_array.join('","') + '"]'
             var body = `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[${arrStr}], \"id\":1}`
             console.log(body)
-            fetch("https://anyx.io", {
+            fetch("https://hive-api.dlux.io", {
               body,
               headers: {
                 "Content-Type": "application/x-www-form-urlencoded",

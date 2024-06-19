@@ -1457,7 +1457,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this.marketValue()
     },
     checkAccount(name, key) {
-      fetch("https://anyx.io", {
+      fetch("https://hive-api.dlux.io", {
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${this[name]}\"]], \"id\":1}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
