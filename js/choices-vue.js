@@ -408,7 +408,7 @@ export default {
         disabled: false,
       }
       ],
-      selections: "2"
+      selections: []
     }
   },
   methods: {
