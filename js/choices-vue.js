@@ -437,6 +437,7 @@ export default {
           prop_selections.push(this.labels[this.Base64toNumber(this.prop_selections[i])])
         }
         this.opts.items = prop_selections
+        console.log(this.opts.items)
       }
 
     },
