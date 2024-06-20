@@ -371,6 +371,7 @@ export default {
         return {
             files: {},
             filesArray: [],
+
             contract: {},
             newMeta: {},
             decoded: false,
@@ -606,6 +607,10 @@ export default {
             }
             return result;
         },
+        render() {
+            this.filesArray = Object.values(this.files)
+
+        },
         init() {
 
             for (var i in this.contracts) {
@@ -621,20 +626,27 @@ export default {
                 }
                 var keys = Object.keys(this.contracts[i].df)
                 for (var j in keys) {
+                    try{
+                        console.log(this.newMeta[id][j*4+4])
+                    } catch (e) {}
                     const f = {
                         i: id,
                         f: keys[i],
+                        c: this.contract[id].i.split(':')[2].split('-')[0],
+                        e: this.contract[id].e.split(':')[0],
                         index: j,
-                        lf: parseInt(this.Base64toNumber(this.contracts[i].m[j*4+4][0]) || 0),
-                        l: this.contracts[i].m[j*4+4] ? this.contracts[i].m[j*4+4].slice(1) || '' : '',
-                        s: this.contracts[i].df[keys[j]]
+                        lf: parseInt(this.Base64toNumber(this.newMeta[id][j*4+4][0]) || 0),
+                        l: this.newMeta[id][j*4+4] ? this.newMeta[id][j*4+4].slice(1) || '' : '',
+                        t: this.newMeta[id][j*4+3] || '',
+                        s: this.contract[id].df[keys[j]],
+                        p: false
                     }
-                    this.filesArray.push(f);
+                    this.files[f.f] = f
                 }
             }
+            this.render()
             // remove duplicates from filesArray
-            this.filesArray = this.filesArray.filter((v, i, a) => a.findIndex(t => (t.f === v.f)) === i)
-            this.files = this.contract.df;
+            //this.filesArray = this.filesArray.filter((v, i, a) => a.findIndex(t => (t.f === v.f)) === i)
         }
     },
     computed: {
