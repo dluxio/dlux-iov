@@ -10,12 +10,12 @@ export default {
 <div class="d-flex flex-grow-1 flex-column p-05 rounded m-05" style="background-color: rgba(0, 0, 0, 0.6);">
     <div class="pt-1">
         <!-- ACTION BAR -->
-                <div class="d-flex flex-wrap align-items-center justify-content-center">
+                <div class="d-flex align-items-center justify-content-center">
 
 
 
                     <!-- Tag -->
-                    <div class="order-1 dropdown d-none d-xl-block mb-1">
+                    <div class="order-1 dropdown d-none d-xl-block mb-1 d-none">
                         <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                             Tag
@@ -37,7 +37,7 @@ export default {
                     </div>
 
                     <!-- Color -->
-                    <div class="order-2 dropdown d-none d-xl-block mb-1">
+                    <div class="order-2 dropdown d-none d-xl-block mb-1 d-none">
                         <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                             Color
@@ -61,7 +61,7 @@ export default {
                     </div>
 
                     <!-- Label -->
-                    <div class="order-3 dropdown d-none d-xl-block mb-1">
+                    <div class="order-3 dropdown d-none d-xl-block mb-1 d-none">
                         <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                             Label
@@ -102,10 +102,10 @@ export default {
 
                         </div>
                         <!-- Sort -->
-                        <div class="dropdown mb-1 flex-fill">
+                        <div class="dropdown mb-1">
                             <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="dropdown"
                                 aria-expanded="false"><i class="fa-solid fa-sort fa-fw ms-1"></i>
-                                
+                                Date Created
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end bg-black">
                                 <li>
@@ -151,7 +151,8 @@ export default {
                             </ul>
                         </div>
                     </div>
-
+                </div>
+                <div class="d-flex flex-wrap align-items-center justify-content-center">
                     <!-- filter collapse-->
                     <div class="collapse order-last d-xl-none mx-1" id="collapseFilter">
                         <div class="d-flex flex-row flex-wrap">
@@ -167,7 +168,7 @@ export default {
                             </div> 
 
                             <!-- Tag -->
-                            <div class="order-1 dropdown mb-1">
+                            <div class="order-1 dropdown mb-1 d-none">
                                 <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
                                     data-bs-toggle="dropdown" aria-expanded="false">
                                     Tag
@@ -189,7 +190,7 @@ export default {
                             </div>
 
                             <!-- Color -->
-                            <div class="order-2 dropdown mb-1">
+                            <div class="order-2 dropdown mb-1 d-none">
                                 <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
                                     data-bs-toggle="dropdown" aria-expanded="false">
                                     Color
@@ -214,7 +215,7 @@ export default {
                             </div>
 
                             <!-- Label -->
-                            <div class="order-3 dropdown mb-1">
+                            <div class="order-3 dropdown mb-1 d-none">
                                 <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
                                     data-bs-toggle="dropdown" aria-expanded="false">
                                     Label
@@ -237,7 +238,7 @@ export default {
 
                         </div>
 
-                        <div class="d-flex flex-row flex-wrap mt-2 order-last" >
+                        <div class="d-none d-flex flex-row flex-wrap mt-2 order-last" >
                             <!-- Active Filters -->
                             <div
                                 class="rounded bg-secondary text-black filter-bubble me-1 mb-1 d-flex align-items-center">
@@ -257,7 +258,7 @@ export default {
                 </div>
                 <div class="d-flex align-items-center mx-1">
                     <h5 class="mb-0"> Items</h5>
-                    <div class="d-none d-sm-flex d-md-none ms-auto">
+                    <div class="ms-auto">
                         <div class="btn-group">
                             <input type="radio" class="btn-check" name="smView" id="setSingle" autocomplete="off" />
                             <label class="btn btn-outline-warning" for="setSingle"><i
@@ -270,7 +271,7 @@ export default {
                     </div>
 
                 </div>
-                <div class="d-flex flex-wrap mt-2 d-none d-xl-flex mx-1">
+                <div class="d-none d-flex flex-wrap mt-2 d-none d-xl-flex mx-1">
                     <!-- Active Filters -->
                     <div class="rounded bg-secondary text-black filter-bubble me-1 mb-1 d-flex align-items-center">
                         <span></span>
