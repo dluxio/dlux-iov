@@ -625,16 +625,15 @@ export default {
                         i: id,
                         f: keys[i],
                         index: j,
-                        lf: parseInt(this.contracts[i].m[j*4+4][0] || 0),
+                        lf: parseInt(this.Base64toNumber(this.contracts[i].m[j*4+4][0]) || 0),
                         l: this.contracts[i].m[j*4+4] ? this.contracts[i].m[j*4+4].slice(1) || '' : '',
                         s: this.contracts[i].df[keys[j]]
                     }
                     this.filesArray.push(f);
                 }
             }
-            this.filesArray = this.filesArray.filter((value, index, self) =>
-                index === self.findIndex((t) => (
-                  t.f === value.f)))
+            // remove duplicates from filesArray
+            this.filesArray = this.filesArray.filter((v, i, a) => a.findIndex(t => (t.f === v.f)) === i)
             this.files = this.contract.df;
         }
     },
