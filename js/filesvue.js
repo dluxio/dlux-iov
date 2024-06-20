@@ -335,7 +335,7 @@ export default {
                         <span class="text-break small text-muted">{{fancyBytes(file.s)}}</span>
                         <div class="d-flex ms-auto">
                             <span class="fa-stack">
-                                <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa" :class="'fa-stack-' + num + 'x'" :data-fa-transform="'right-' + (num * 2)"></i>
+                                <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa" :class="'fa-stack-1x'" :data-fa-transform="'right-' + (num * 2)"></i>
                             </span>
                             <div v-for="flag in flagsDecode(newMeta[file.i][file.index * 4 + 4])" >
                                 <!-- title="Labels"  -->
