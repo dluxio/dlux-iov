@@ -7,11 +7,11 @@ export default {
 
 
 
-                    <!-- Chain -->
+                    <!-- Tag -->
                     <div class="order-1 dropdown d-none d-xl-block mb-1">
                         <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
-                            Chain
+                            Tag
                         </button>
                         <ul class="dropdown-menu bg-black">
                             <li>
@@ -21,7 +21,7 @@ export default {
                                             class="form-check-input" type="checkbox" 
                                             id="item +'ChainCheck'">
                                         <label class="form-check-label" for="item +'ChainCheck'">
-                                            
+                                            Auto-renew
                                         </label>
                                     </div>
                                 </div>
@@ -29,11 +29,11 @@ export default {
                         </ul>
                     </div>
 
-                    <!-- Set -->
+                    <!-- Color -->
                     <div class="order-2 dropdown d-none d-xl-block mb-1">
                         <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
-                            Set
+                            Color
                         </button>
                         <ul class="dropdown-menu bg-black">
                             <div>
@@ -44,7 +44,7 @@ export default {
                                                 class="form-check-input" type="checkbox"
                                                  id="setname + 'SetCheck'">
                                             <label class="form-check-label" for="setname + 'SetCheck'">
-                                              
+                                              Red
                                             </label>
                                         </div>
                                     </div>
@@ -52,11 +52,12 @@ export default {
                             </div>
                         </ul>
                     </div>
-                    <!-- Status -->
+
+                    <!-- Label -->
                     <div class="order-3 dropdown d-none d-xl-block mb-1">
                         <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
-                            Status
+                            Label
                         </button>
                         <ul class="dropdown-menu bg-black">
                             <li>
@@ -66,34 +67,14 @@ export default {
                                             class="form-check-input" type="checkbox" 
                                             id="name + 'StatusCheck'">
                                         <label class="form-check-label" for="name + 'StatusCheck'">
-                                         
+                                            Important
                                         </label>
                                     </div>
                                 </div>
                             </li>
                         </ul>
                     </div>
-                    <!-- Currency -->
-                    <div class="order-4 dropdown d-none d-xl-block mb-1 ">
-                        <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Currency
-                        </button>
-                        <ul class="dropdown-menu bg-black">
-                            <li>
-                                <div class="py-1 px-2">
-                                    <div class="form-check">
-                                        <input @change="addFilters('Currency', name);displaynfts()"
-                                            class="form-check-input" type="checkbox" 
-                                            id="name + 'CurrencyCheck'">
-                                        <label class="form-check-label" for="name + 'CurrencyCheck'">
-                                           
-                                        </label>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
+
                     <!-- Search -->
                     <div class="position-relative flex-grow-1 mb-1 mx-1 order-md-5">
                         <span class="position-absolute top-50 translate-middle-y ps-2"><i
@@ -102,6 +83,7 @@ export default {
                             class="ps-4 form-control border-white" type="search"
                             placeholder="Search sets, items, and accounts">
                     </div>
+
                     <div class="d-flex order-last mx-1 w-sm-100 justify-content-between ">
                         <!-- Filter button -->
                         <div class="d-xl-none mb-1 me-2 flex-fill">
@@ -121,19 +103,43 @@ export default {
                             <ul class="dropdown-menu dropdown-menu-end bg-black">
                                 <li>
                                     <a @click="NFTselect.dir='asc';NFTselect.sort='price';displaynfts()"
-                                        class="dropdown-item" role="button">Price low to high</a>
+                                        class="dropdown-item" role="button">Date Created Ascending</a>
+                                </li>
+                                 <li>
+                                    <a @click="NFTselect.dir='asc';NFTselect.sort='price';displaynfts()"
+                                        class="dropdown-item" role="button">Date Created Descending</a>
                                 </li>
                                 <li>
                                     <a @click="NFTselect.dir='dec';NFTselect.sort='price';displaynfts()"
-                                        class="dropdown-item" role="button">Price high to low</a>
+                                        class="dropdown-item" role="button">Date Expiring Ascending</a>
+                                </li>
+                                <li>
+                                    <a @click="NFTselect.dir='dec';NFTselect.sort='price';displaynfts()"
+                                        class="dropdown-item" role="button">Date Expiring Descending</a>
                                 </li>
                                 <li>
                                     <a @click="NFTselect.dir='asc';NFTselect.sort='time';displaynfts()"
-                                        class="dropdown-item" role="button">Time ending soonest</a>
+                                        class="dropdown-item" role="button">File Size Increasing</a>
+                                </li>
+                                <li>
+                                    <a @click="NFTselect.dir='asc';NFTselect.sort='time';displaynfts()"
+                                        class="dropdown-item" role="button">File Size Decreasing</a>
                                 </li>
                                 <li>
                                     <a @click="NFTselect.dir='dec';NFTselect.sort='time';displaynfts()"
-                                        class="dropdown-item" role="button">Time ending latest</a>
+                                        class="dropdown-item" role="button">File Type Ascending</a>
+                                </li>
+                                <li>
+                                    <a @click="NFTselect.dir='dec';NFTselect.sort='time';displaynfts()"
+                                        class="dropdown-item" role="button">File Type Descending</a>
+                                </li>
+                                <li>
+                                    <a @click="NFTselect.dir='dec';NFTselect.sort='time';displaynfts()"
+                                        class="dropdown-item" role="button">File Name A-Z</a>
+                                </li>
+                                <li>
+                                    <a @click="NFTselect.dir='dec';NFTselect.sort='time';displaynfts()"
+                                        class="dropdown-item" role="button">File Name Z-A</a>
                                 </li>
                             </ul>
                         </div>
@@ -143,11 +149,11 @@ export default {
                     <div class="collapse order-last d-xl-none mx-1" id="collapseFilter">
                         <div class="d-flex flex-row flex-wrap">
 
-                            <!-- Chain -->
+                            <!-- Tag -->
                             <div class="order-1 dropdown mb-1">
                                 <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
                                     data-bs-toggle="dropdown" aria-expanded="false">
-                                    Chain
+                                    Tag
                                 </button>
                                 <ul class="dropdown-menu bg-black">
                                     <li>
@@ -157,18 +163,19 @@ export default {
                                                     class="form-check-input" type="checkbox"
                                                     >
                                                 <label class="form-check-label" for="item +'ChainCheck'">
-                                                   
+                                                   NSFW
                                                 </label>
                                             </div>
                                         </div>
                                     </li>
                                 </ul>
                             </div>
-                            <!-- Set -->
+
+                            <!-- Color -->
                             <div class="order-2 dropdown mb-1">
                                 <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
                                     data-bs-toggle="dropdown" aria-expanded="false">
-                                    Set
+                                    Color
                                 </button>
                                 <ul class="dropdown-menu bg-black">
                                     <div>
@@ -180,7 +187,7 @@ export default {
                                                         
                                                         id="setname + 'SetCheck'">
                                                     <label class="form-check-label" for="setname + 'SetCheck'">
-                                                       
+                                                       Red
                                                     </label>
                                                 </div>
                                             </div>
@@ -188,11 +195,12 @@ export default {
                                     </div>
                                 </ul>
                             </div>
-                            <!-- Status -->
+
+                            <!-- Label -->
                             <div class="order-3 dropdown mb-1">
                                 <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
                                     data-bs-toggle="dropdown" aria-expanded="false">
-                                    Status
+                                    Label
                                 </button>
                                 <ul class="dropdown-menu bg-black">
                                     <li>
@@ -201,33 +209,14 @@ export default {
                                                 <input @change="addFilters('Status', name);displaynfts()"
                                                     class="form-check-input" type="checkbox" >
                                                 <label class="form-check-label" for="name + 'StatusCheck'">
-                                                   
+                                                   Random
                                                 </label>
                                             </div>
                                         </div>
                                     </li>
                                 </ul>
                             </div>
-                            <!-- Currency -->
-                            <div class="order-4 dropdown mb-1 ">
-                                <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    Currency
-                                </button>
-                                <ul class="dropdown-menu bg-black">
-                                    <li>
-                                        <div class="py-1 px-2">
-                                            <div class="form-check">
-                                                <input @change="addFilters('Currency', name);displaynfts()"
-                                                    class="form-check-input" type="checkbox" >
-                                                <label class="form-check-label" for="name + 'CurrencyCheck'">
-                                                 
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
+                            
 
                         </div>
 
