@@ -58,7 +58,7 @@ required_auths: [
 * "slots": "an-account,1000"
    * Any Hive Account before the comma
    * A percent (acctually a per 10 mil) => 1000 = 10.00%
-* The condition for type 1 is a Hive post must be made with a benificary to "an-account" with at least xxxx fee.
+* The condition for type 1 is a Hive post must be made with a beneficiary to "an-account" with at least xxxx fee.
    * "dlux-io,500" => 5% to @dlux-io
    * "spknetwork,1111" => 11.11% to @spknetwork
 
