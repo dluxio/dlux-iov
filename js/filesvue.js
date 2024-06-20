@@ -1,4 +1,11 @@
+import ChoicesVue from '/js/choices-vue.js';
+import Pop from "/js/pop-min.js";
+
 export default {
+    components: {
+        "pop-vue": Pop,
+        "choices-vue": ChoicesVue
+    },
     template: `
 <div class="d-flex flex-grow-1 flex-column p-05 rounded m-05" style="background-color: rgba(0, 0, 0, 0.6);">
     <div class="pt-1">
