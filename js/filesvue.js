@@ -543,7 +543,6 @@ export default {
             }
         },
         fancyBytes(bytes, decimals = 0) {
-            console.log({ bytes })
             var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
             while (bytes > 1024) {
                 bytes = bytes / 1024
@@ -576,7 +575,6 @@ export default {
         },
         Base64toNumber(chars = "0") {
             if (typeof chars != 'string') {
-                console.log({ chars })
                 return 0
             }
             const glyphs = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
