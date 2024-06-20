@@ -10,9 +10,9 @@ export default {
 <div class="d-flex flex-grow-1 flex-column p-05 rounded m-05" style="background-color: rgba(0, 0, 0, 0.6);">
     <div class="pt-1">
         <!-- ACTION BAR -->
-        <div class="d-flex flex-wrap align-items-center justify-content-center">
+        <div class="d-flex flex-wrap align-items-center justify-content-center mx-1">
             <!-- Search -->
-            <div class="position-relative mb-1 mx-1">
+            <div class="position-relative flex-grow-1 mb-1 me-1">
                 <span class="position-absolute top-50 translate-middle-y ps-2"><i
                         class="fa-solid fa-magnifying-glass fa-fw"></i></span>
                 <input @keyup="render()" @change="render()" @search="render()"
@@ -21,11 +21,11 @@ export default {
             </div>
 
             <!-- choices-js-->
-            <div class="col-md-3 mb-1 mx-1">
+            <div class=" mb-1 mx-1" style="min-width: 300px !important;">
 
                 <choices-vue ref="select-tag" :prop_selections="filterFlags" prop_type="tags" @data="handleTag($event)"></choices-vue>
             </div>
-            <div class="col-md-3 mb-1 mx-1">
+            <div class="mb-1 mx-1" style="min-width: 300px !important;">
 
                 <choices-vue ref="select-label" :prop_selections="filterLabels" prop_type="labels" @data="handleLabel($event)"></choices-vue>
             </div> 
@@ -81,13 +81,13 @@ export default {
             </div>
         </div>
 
-        <div class="d-flex align-items-center mx-1">
+        <div class="d-flex align-items-center my-1 mx-1">
             <h5 class="mb-0"> Items</h5>
             <div class="ms-auto">
                 <div class="btn-group">
                     <input type="radio" class="btn-check" name="smView" id="setSingle" autocomplete="off" />
                     <label class="btn btn-outline-warning" for="setSingle"><i
-                            class="fa-regular fa-square fa-fw"></i></label>
+                            class="fa-solid fa-table-list fa-fw"></i></label>
                     <input type="radio" class="btn-check" name="smView" id="setDouble" autocomplete="off"
                         checked />
                     <label class="btn btn-outline-warning" for="setDouble"><i
