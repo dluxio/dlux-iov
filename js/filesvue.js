@@ -159,11 +159,11 @@ export default {
                         <!-- choices-js-->
                             <div class="mb-1">
                                 <label class="mb-1">Tags</label>
-                                <choices-vue ref="select-tag" :prop_selections="newMeta[contract.i][index * 4 + 4]" prop_type="tags" @data="handleTag(contract.i, index * 4 + 4, $event)"></choices-vue>
+                                <choices-vue ref="select-tag" :prop_selections="filterFlags" prop_type="tags" @data="handleTag($event)"></choices-vue>
                             </div>
                             <div class="mb-1">
                                 <label class="mb-1">Labels</label>
-                                <choices-vue ref="select-label" :prop_selections="newMeta[contract.i][index * 4 + 4]" prop_type="labels" @data="handleLabel(contract.i, index * 4 + 4, $event)"></choices-vue>
+                                <choices-vue ref="select-label" :prop_selections="filterLabels" prop_type="labels" @data="handleLabel($event)"></choices-vue>
                             </div> 
 
                             <!-- Tag -->
@@ -385,7 +385,13 @@ export default {
         return {
             files: {},
             filesArray: [],
-
+            filterFlags: "=",
+            filterLabels: "",
+            filesSelect: {
+                sort: "time",
+                dir: "dec",
+                search: "",
+            },
             contract: {},
             newMeta: {},
             decoded: false,
@@ -467,6 +473,31 @@ export default {
         AESDecrypt(encryptedMessage, key) {
             const bytes = CryptoJS.AES.decrypt(encryptedMessage, key);
             return bytes.toString(CryptoJS.enc.Utf8);
+        },
+        handleLabel(m) {
+            if (m.action == 'added') {
+                var string = this.filterLabels
+                if (!string) string = '2'
+                this.filterLabels += m.item
+            } else {
+                var string = this.filterLabels
+                var arr = string.split('')
+                for (var j = 1; j < arr.length; j++) {
+                    if (arr[j] == m.item) arr.splice(j, 1)
+                }
+                this.filterLabels = arr.join('')
+            }
+        },
+        handleTag(m) {
+            var num = this.Base64toNumber(this.filterFlags ) || 0
+            if (m.action == 'added') {
+                if (num & m.item) { }
+                else num += m.item
+                this.filterFlags = (this.NumberToBase64(num) || "0") + this.filterFlags
+            } else {
+                if (num & m.item) num -= m.item
+                this.filterFlags = (this.NumberToBase64(num) || "0") + this.filterFlags
+            }
         },
         download(fileInfo, data = false, MIME_TYPE = "image/png") {
             if (data) {
