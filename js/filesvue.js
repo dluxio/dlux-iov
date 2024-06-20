@@ -339,6 +339,9 @@ export default {
                                 <pop-vue :id="'popper-' + file.i + file.index + flag.l" :title="flag.l" trigger="hover">
                                     <i :class="flag.fa"></i>
                                 </pop-vue>
+                                <span class="fa-stack">
+                                    <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa" :class="'fa-stack-' + num + 'x'" :data-fa-transform="'right-' + (num * 2)"></i>
+                                </span>
                             </div>
                         </div>
                     </div>
