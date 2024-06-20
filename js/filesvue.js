@@ -310,7 +310,6 @@ export default {
 
                     <div class="mt-1">
                             {{flagDecode(newMeta[file.i][file.index * 4 + 4])}} ||
-                            {{labelsDecode(newMeta[file.i][file.index * 4 + 4], 1)}} ||
                             {{labelsDecode(newMeta[file.i][file.index * 4 + 4])}}
                             <!-- link -->
                             <div v-if="!flagDecode(newMeta[file.i][file.index * 4 + 4]).enc">
@@ -375,70 +374,70 @@ export default {
             decoded: false,
             debounce: null,
             labels: {
-                ["0"]: '<i class="fa-solid fa-sink fa-fw me-1"></i>Miscellaneous',
-                ["1"]: '<i class="fa-solid fa-exclamation fa-fw me-1"></i>Important',
-                ["2"]: '<i class="fa-solid fa-star fa-fw me-1"></i>Favorite',
-                ["3"]: '<i class="fa-solid fa-dice fa-fw me-1"></i>Random',
-                ["4"]: '<i class="fa-solid fa-circle fa-fw me-1 text-red"></i>Red',
-                ["5"]: '<i class="fa-solid fa-circle fa-fw me-1 text-orange"></i>Orange',
-                ["6"]: '<i class="fa-solid fa-circle fa-fw me-1 text-yellow"></i>Yellow',
-                ["7"]: '<i class="fa-solid fa-circle fa-fw me-1 text-green"></i>Green',
-                ["8"]: '<i class="fa-solid fa-circle fa-fw me-1 text-blue"></i>Blue',
-                ["9"]: '<i class="fa-solid fa-circle fa-fw me-1 text-purple"></i>Purple',
-                ["A"]: '<i class="fa-solid fa-circle fa-fw me-1 text-grey"></i>Grey',
-                ["B"]: '<i class="fa-solid fa-briefcase fa-fw me-1"></i>Work',
-                ["C"]: '<i class="fa-solid fa-heart fa-fw me-1"></i>Personal',
-                ["D"]: '<i class="fa-solid fa-people-roof fa-fw me-1"></i>Family',
-                ["E"]: '<i class="fa-solid fa-people-group fa-fw me-1"></i>Friends',
-                ["F"]: '<i class="fa-solid fa-rocket fa-fw me-1"></i>Projects',
-                ["G"]: '<i class="fa-solid fa-piggy-bank fa-fw me-1"></i>Finance',
-                ["H"]: '<i class="fa-solid fa-kit-medical fa-fw me-1"></i>Health',
-                ["I"]: '<i class="fa-solid fa-graduation-cap fa-fw me-1"></i>Education',
-                ["J"]: '<i class="fa-solid fa-compass fa-fw me-1"></i>Travel',
-                ["K"]: '<i class="fa-regular fa-calendar-days fa-fw me-1"></i>Events',
-                ["L"]: '<i class="fa-solid fa-camera fa-fw me-1"></i>Photography',
-                ["M"]: '<i class="fa-solid fa-gamepad fa-fw me-1"></i>Gaming',
-                ["N"]: '<i class="fa-solid fa-volleyball fa-fw me-1"></i>Sports',
-                ["O"]: '<i class="fa-solid fa-feather fa-fw me-1"></i>Blogging',
-                ["P"]: '<i class="fa-solid fa-crown fa-fw me-1"></i>Meme',
-                ["Q"]: '<i class="fa-solid fa-music fa-fw me-1"></i>Music',
-                ["R"]: '<i class="fa-solid fa-video fa-fw me-1"></i>Video',
-                ["S"]: '<i class="fa-solid fa-microphone fa-fw me-1"></i>Audio',
-                ["T"]: '<i class="fa-solid fa-newspaper fa-fw me-1"></i>News',
-                ["U"]: '<i class="fa-solid fa-code fa-fw me-1"></i>Development',
-                ["V"]: '<i class="fa-solid fa-hat-cowboy fa-fw me-1"></i>Fashion',
-                ["W"]: '<i class="fa-solid fa-burger fa-fw me-1"></i>Food',
-                ["X"]: '<i class="fa-solid fa-utensils fa-fw me-1"></i>Cooking',
-                ["Y"]: '<i class="fa-solid fa-toolbox fa-fw me-1"></i>DIY',
-                ["Z"]: '<i class="fa-solid fa-paintbrush fa-fw me-1"></i>Art',
-                ["a"]: '<i class="fa-solid fa-swatchbook fa-fw me-1"></i>Design',
-                ["b"]: '<i class="fa-solid fa-microchip fa-fw me-1"></i>Technology',
-                ["c"]: '<i class="fa-solid fa-cross fa-fw me-1"></i>Religion',
-                ["d"]: '<i class="fa-solid fa-scale-balanced fa-fw me-1"></i>Government',
-                ["e"]: '<i class="fa-solid fa-landmark-dome fa-fw me-1"></i>Politics',
-                ["f"]: '<i class="fa-solid fa-vial fa-fw me-1"></i>Science',
-                ["g"]: '<i class="fa-solid fa-magnifying-glass fa-fw me-1"></i>Research',
-                ["h"]: '<i class="fa-solid fa-receipt fa-fw me-1"></i>Receipts',
-                ["i"]: '<i class="fa-solid fa-envelope-open-text fa-fw me-1"></i>Correspondence',
-                ["j"]: '<i class="fa-solid fa-copy fa-fw me-1"></i>Templates',
-                ["k"]: '<i class="fa-solid fa-file-lines fa-fw me-1"></i>Resources',
-                ["l"]: '<i class="fa-solid fa-book-bookmark fa-fw me-1"></i>Reference',
-                ["m"]: '<i class="fa-solid fa-floppy-disk fa-fw me-1"></i>Backups',
-                ["n"]: '<i class="fa-solid fa-box-archive fa-fw me-1"></i>Archive',
-                ["o"]: '<i class="fa-solid fa-compass-drafting fa-fw me-1"></i>Drafts',
-                ["p"]: '<i class="fa-solid fa-flag-checkered fa-fw me-1"></i>Finished',
-                ["q"]: '<i class="fa-solid fa-paper-plane fa-fw me-1"></i>Sent',
-                ["r"]: '<i class="fa-solid fa-clock fa-fw me-1"></i>Pending',
-                ["s"]: '<i class="fa-solid fa-thumbs-up fa-fw me-1"></i>Approved',
-                ["t"]: '<i class="fa-solid fa-thumbs-down fa-fw me-1"></i>Rejected',
-                ["u"]: '<i class="fa-solid fa-lightbulb fa-fw me-1"></i>Ideas',
-                ["v"]: '<i class="fa-solid fa-bullseye fa-fw me-1"></i>Goals',
-                ["w"]: '<i class="fa-solid fa-list-check fa-fw me-1"></i>Tasks',
-                ["x"]: '<i class="fa-solid fa-gavel fa-fw me-1"></i>Legal',
-                ["y"]: '<i class="fa-solid fa-handshake fa-fw me-1"></i>Networking',
-                ["z"]: '<i class="fa-solid fa-comments fa-fw me-1"></i>Feedback',
-                ["+"]: '<i class="fa-solid fa-square-poll-vertical fa-fw me-1"></i>Surveys',
-                ["="]: '<i class="fa-solid fa-user-secret fa-fw me-1"></i>Classified',
+                ["0"]: { fa: "fa-solid fa-sink fa-fw me-1", l: "Miscellaneous"},
+                ["1"]: { fa: "fa-solid fa-exclamation fa-fw me-1", l: "Important"},
+                ["2"]: { fa: "fa-solid fa-star fa-fw me-1", l: "Favorite"},
+                ["3"]: { fa: "fa-solid fa-dice fa-fw me-1", l: "Random"},
+                ["4"]: { fa: "fa-solid fa-circle fa-fw me-1 text-red", l: "Red"},
+                ["5"]: { fa: "fa-solid fa-circle fa-fw me-1 text-orange", l: "Orange"},
+                ["6"]: { fa: "fa-solid fa-circle fa-fw me-1 text-yellow", l: "Yellow"},
+                ["7"]: { fa: "fa-solid fa-circle fa-fw me-1 text-green", l: "Green"},
+                ["8"]: { fa: "fa-solid fa-circle fa-fw me-1 text-blue", l: "Blue"},
+                ["9"]: { fa: "fa-solid fa-circle fa-fw me-1 text-purple", l: "Purple"},
+                ["A"]: { fa: "fa-solid fa-circle fa-fw me-1 text-grey", l: "Grey"},
+                ["B"]: { fa: "fa-solid fa-briefcase fa-fw me-1", l: "Work"},
+                ["C"]: { fa: "fa-solid fa-heart fa-fw me-1", l: "Personal"},
+                ["D"]: { fa: "fa-solid fa-people-roof fa-fw me-1", l: "Family"},
+                ["E"]: { fa: "fa-solid fa-people-group fa-fw me-1", l: "Friends"},
+                ["F"]: { fa: "fa-solid fa-rocket fa-fw me-1", l: "Projects"},
+                ["G"]: { fa: "fa-solid fa-piggy-bank fa-fw me-1", l: "Finance"},
+                ["H"]: { fa: "fa-solid fa-kit-medical fa-fw me-1", l: "Health"},
+                ["I"]: { fa: "fa-solid fa-graduation-cap fa-fw me-1", l: "Education"},
+                ["J"]: { fa: "fa-solid fa-compass fa-fw me-1", l: "Travel"},
+                ["K"]: { fa: "fa-regular fa-calendar-days fa-fw me-1", l: "Events"},
+                ["L"]: { fa: "fa-solid fa-camera fa-fw me-1", l: "Photography"},
+                ["M"]: { fa: "fa-solid fa-gamepad fa-fw me-1", l: "Gaming"},
+                ["N"]: { fa: "fa-solid fa-volleyball fa-fw me-1", l: "Sports"},
+                ["O"]: { fa: "fa-solid fa-feather fa-fw me-1", l: "Blogging"},
+                ["P"]: { fa: "fa-solid fa-crown fa-fw me-1", l: "Meme"},
+                ["Q"]: { fa: "fa-solid fa-music fa-fw me-1", l: "Music"},
+                ["R"]: { fa: "fa-solid fa-video fa-fw me-1", l: "Video"},
+                ["S"]: { fa: "fa-solid fa-microphone fa-fw me-1", l: "Audio"},
+                ["T"]: { fa: "fa-solid fa-newspaper fa-fw me-1", l: "News"},
+                ["U"]: { fa: "fa-solid fa-code fa-fw me-1", l: "Development"},
+                ["V"]: { fa: "fa-solid fa-hat-cowboy fa-fw me-1", l: "Fashion"},
+                ["W"]: { fa: "fa-solid fa-burger fa-fw me-1", l: "Food"},
+                ["X"]: { fa: "fa-solid fa-utensils fa-fw me-1", l: "Cooking"},
+                ["Y"]: { fa: "fa-solid fa-toolbox fa-fw me-1", l: "DIY"},
+                ["Z"]: { fa: "fa-solid fa-paintbrush fa-fw me-1", l: "Art"},
+                ["a"]: { fa: "fa-solid fa-swatchbook fa-fw me-1", l: "Design"},
+                ["b"]: { fa: "fa-solid fa-microchip fa-fw me-1", l: "Technology"},
+                ["c"]: { fa: "fa-solid fa-cross fa-fw me-1", l: "Religion"},
+                ["d"]: { fa: "fa-solid fa-scale-balanced fa-fw me-1", l: "Government"},
+                ["e"]: { fa: "fa-solid fa-landmark-dome fa-fw me-1", l: "Politics"},
+                ["f"]: { fa: "fa-solid fa-vial fa-fw me-1", l: "Science"},
+                ["g"]: { fa: "fa-solid fa-magnifying-glass fa-fw me-1", l: "Research"},
+                ["h"]: { fa: "fa-solid fa-receipt fa-fw me-1", l: "Receipts"},
+                ["i"]: { fa: "fa-solid fa-envelope-open-text fa-fw me-1", l: "Correspondence"},
+                ["j"]: { fa: "fa-solid fa-copy fa-fw me-1", l: "Templates"},
+                ["k"]: { fa: "fa-solid fa-file-lines fa-fw me-1", l: "Resources"},
+                ["l"]: { fa: "fa-solid fa-book-bookmark fa-fw me-1", l: "Reference"},
+                ["m"]: { fa: "fa-solid fa-floppy-disk fa-fw me-1", l: "Backups"},
+                ["n"]: { fa: "fa-solid fa-box-archive fa-fw me-1", l: "Archive"},
+                ["o"]: { fa: "fa-solid fa-compass-drafting fa-fw me-1", l: "Drafts"},
+                ["p"]: { fa: "fa-solid fa-flag-checkered fa-fw me-1", l: "Finished"},
+                ["q"]: { fa: "fa-solid fa-paper-plane fa-fw me-1", l: "Sent"},
+                ["r"]: { fa: "fa-solid fa-clock fa-fw me-1", l: "Pending"},
+                ["s"]: { fa: "fa-solid fa-thumbs-up fa-fw me-1", l: "Approved"},
+                ["t"]: { fa: "fa-solid fa-thumbs-down fa-fw me-1", l: "Rejected"},
+                ["u"]: { fa: "fa-solid fa-lightbulb fa-fw me-1", l: "Ideas"},
+                ["v"]: { fa: "fa-solid fa-bullseye fa-fw me-1", l: "Goals"},
+                ["w"]: { fa: "fa-solid fa-list-check fa-fw me-1", l: "Tasks"},
+                ["x"]: { fa: "fa-solid fa-gavel fa-fw me-1", l: "Legal"},
+                ["y"]: { fa: "fa-solid fa-handshake fa-fw me-1", l: "Networking"},
+                ["z"]: { fa: "fa-solid fa-comments fa-fw me-1", l: "Feedback"},
+                ["+"]: { fa: "fa-solid fa-square-poll-vertical fa-fw me-1", l: "Surveys"},
+                ["="]: { fa: "fa-solid fa-user-secret fa-fw me-1", l: "Classified"}
             }
 
         };
@@ -558,20 +557,21 @@ export default {
         },
         flagDecode(flags = "") {
             var num = this.Base64toNumber(flags[0])
-            var out = {}
-            if (num & 1) out.enc = true
-            if (num & 2) out.autoRenew = true
-            if (num & 4) out.nsfw = true
-            if (num & 8) out.executable = true
+            var out = []
+            if (num & 1) out.push({fa: '', l: "Encrypted"})
+            if (num & 2) out.push({fa: '', l: "AutoRenew"})
+            if (num & 4) out.push({fa: '', l: "NSFW"})
+            if (num & 8) out.push({fa: '', l: "Executable"})
             return out
         },
-        labelsDecode(flags = "", num = 0) {
-            var string = ""
-            if(flags.length < 2) return string
-            else if (num) return this.labels[flags[num]] || ''
+        labelsDecode(flags = "") {
+            var arr = []
+            if(flags.length < 2) return arr
             else for (var i = 1; i < flags.length; i++) {
-                string += this.labels[flags[i]] || ''
+                arr.push(this.labels[flags[i]])
             }
+            arr = new Set(arr)
+            return arr
         },
         Base64toNumber(chars = "0") {
             if (typeof chars != 'string') {
