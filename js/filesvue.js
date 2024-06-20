@@ -10,12 +10,12 @@ export default {
 <div class="d-flex flex-grow-1 flex-column p-05 rounded m-05" style="background-color: rgba(0, 0, 0, 0.6);">
     <div class="pt-1">
         <!-- ACTION BAR -->
-                <div class="d-flex align-items-center justify-content-center">
+                <div class="d-flex flex-wrap align-items-center justify-content-center">
 
 
 
                     <!-- Tag -->
-                    <div class="order-1 dropdown d-none d-xl-block mb-1 d-none">
+                    <div class="order-1 dropdown mb-1 d-none">
                         <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                             Tag
@@ -37,7 +37,7 @@ export default {
                     </div>
 
                     <!-- Color -->
-                    <div class="order-2 dropdown d-none d-xl-block mb-1 d-none">
+                    <div class="order-2 dropdown mb-1 d-none">
                         <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                             Color
@@ -61,7 +61,7 @@ export default {
                     </div>
 
                     <!-- Label -->
-                    <div class="order-3 dropdown d-none d-xl-block mb-1 d-none">
+                    <div class="order-3 dropdown mb-1 d-none">
                         <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                             Label
@@ -83,7 +83,7 @@ export default {
                     </div>
 
                     <!-- Search -->
-                    <div class="position-relative flex-grow-1 mb-1 mx-1 order-md-5">
+                    <div class="position-relative flex-grow-1 mb-1 mx-1">
                         <span class="position-absolute top-50 translate-middle-y ps-2"><i
                                 class="fa-solid fa-magnifying-glass fa-fw"></i></span>
                         <input @keyup="render()" @change="render()" @search="render()"
@@ -91,16 +91,18 @@ export default {
                             placeholder="Search names" v-model="filesSelect.search">
                     </div>
 
+                    <!-- choices-js-->
+                    <div class="mb-1">
+
+                        <choices-vue ref="select-tag" :prop_selections="filterFlags" prop_type="tags" @data="handleTag($event)"></choices-vue>
+                    </div>
+                    <div class="mb-1">
+
+                        <choices-vue ref="select-label" :prop_selections="filterLabels" prop_type="labels" @data="handleLabel($event)"></choices-vue>
+                    </div> 
+
                     <div class="d-flex order-last mx-1 w-sm-100 justify-content-between ">
-                        <!-- Filter button -->
-                        <div class="d-xl-none mb-1 me-2 flex-fill">
-                            <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collapseFilter" aria-expanded="false" aria-controls="collapseFilter">
-                                <i class="fa-solid fa-filter me-1"></i>Filter
-                            </button>
-
-
-                        </div>
+                      
                         <!-- Sort -->
                         <div class="dropdown mb-1">
                             <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="dropdown"
@@ -152,20 +154,12 @@ export default {
                         </div>
                     </div>
                 </div>
-                <div class="d-flex flex-wrap align-items-center justify-content-center">
+                <div class="d-none flex-wrap align-items-center justify-content-center">
                     <!-- filter collapse-->
                     <div class="collapse order-last d-xl-none mx-1" id="collapseFilter">
                         <div class="d-flex flex-row flex-wrap">
 
-                        <!-- choices-js-->
-                            <div class="mb-1">
-                                <label class="mb-1">Tags</label>
-                                <choices-vue ref="select-tag" :prop_selections="filterFlags" prop_type="tags" @data="handleTag($event)"></choices-vue>
-                            </div>
-                            <div class="mb-1">
-                                <label class="mb-1">Labels</label>
-                                <choices-vue ref="select-label" :prop_selections="filterLabels" prop_type="labels" @data="handleLabel($event)"></choices-vue>
-                            </div> 
+                        
 
                             <!-- Tag -->
                             <div class="order-1 dropdown mb-1 d-none">
