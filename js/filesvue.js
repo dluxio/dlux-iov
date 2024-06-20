@@ -24,7 +24,7 @@ export default {
                             <li>
                                 <div class="py-1 px-2">
                                     <div class="form-check">
-                                        <input @change="addFilters('Chain', item);displaynfts()"
+                                        <input @change="addFilters('Chain', item);render()"
                                             class="form-check-input" type="checkbox" 
                                             id="item +'ChainCheck'">
                                         <label class="form-check-label" for="item +'ChainCheck'">
@@ -47,7 +47,7 @@ export default {
                                 <li>
                                     <div class="py-1 px-2">
                                         <div class="form-check">
-                                            <input @change="addFilters('Set', setname, name);displaynfts()"
+                                            <input @change="addFilters('Set', setname, name);render()"
                                                 class="form-check-input" type="checkbox"
                                                  id="setname + 'SetCheck'">
                                             <label class="form-check-label" for="setname + 'SetCheck'">
@@ -70,7 +70,7 @@ export default {
                             <li>
                                 <div class="py-1 px-2">
                                     <div class="form-check">
-                                        <input @change="addFilters('Status', name);displaynfts()"
+                                        <input @change="addFilters('Status', name);render()"
                                             class="form-check-input" type="checkbox" 
                                             id="name + 'StatusCheck'">
                                         <label class="form-check-label" for="name + 'StatusCheck'">
@@ -86,9 +86,9 @@ export default {
                     <div class="position-relative flex-grow-1 mb-1 mx-1 order-md-5">
                         <span class="position-absolute top-50 translate-middle-y ps-2"><i
                                 class="fa-solid fa-magnifying-glass fa-fw"></i></span>
-                        <input @keyup="displaynfts()" @change="displaynfts()" @search="displaynfts()"
+                        <input @keyup="render()" @change="render()" @search="render()"
                             class="ps-4 form-control border-white" type="search"
-                            placeholder="Search sets, items, and accounts">
+                            placeholder="Search names" v-model="filesSelect.search">
                     </div>
 
                     <div class="d-flex order-last mx-1 w-sm-100 justify-content-between ">
@@ -109,43 +109,43 @@ export default {
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end bg-black">
                                 <li>
-                                    <a @click="NFTselect.dir='asc';NFTselect.sort='price';displaynfts()"
+                                    <a @click="filesSelect.dir='asc';filesSelect.sort='time';render()"
                                         class="dropdown-item" role="button">Date Created Ascending</a>
                                 </li>
                                  <li>
-                                    <a @click="NFTselect.dir='asc';NFTselect.sort='price';displaynfts()"
+                                    <a @click="filesSelect.dir='dec';filesSelect.sort='time';render()"
                                         class="dropdown-item" role="button">Date Created Descending</a>
                                 </li>
                                 <li>
-                                    <a @click="NFTselect.dir='dec';NFTselect.sort='price';displaynfts()"
+                                    <a @click="filesSelect.dir='asc';filesSelect.sort='exp';render()"
                                         class="dropdown-item" role="button">Date Expiring Ascending</a>
                                 </li>
                                 <li>
-                                    <a @click="NFTselect.dir='dec';NFTselect.sort='price';displaynfts()"
+                                    <a @click="filesSelect.dir='dec';filesSelect.sort='exp';render()"
                                         class="dropdown-item" role="button">Date Expiring Descending</a>
                                 </li>
                                 <li>
-                                    <a @click="NFTselect.dir='asc';NFTselect.sort='time';displaynfts()"
+                                    <a @click="filesSelect.dir='asc';filesSelect.sort='size';render()"
                                         class="dropdown-item" role="button">File Size Increasing</a>
                                 </li>
                                 <li>
-                                    <a @click="NFTselect.dir='asc';NFTselect.sort='time';displaynfts()"
+                                    <a @click="filesSelect.dir='dec';filesSelect.sort='size';render()"
                                         class="dropdown-item" role="button">File Size Decreasing</a>
                                 </li>
                                 <li>
-                                    <a @click="NFTselect.dir='dec';NFTselect.sort='time';displaynfts()"
+                                    <a @click="filesSelect.dir='asc';filesSelect.sort='type';render()"
                                         class="dropdown-item" role="button">File Type Ascending</a>
                                 </li>
                                 <li>
-                                    <a @click="NFTselect.dir='dec';NFTselect.sort='time';displaynfts()"
+                                    <a @click="filesSelect.dir='dec';filesSelect.sort='type';render()"
                                         class="dropdown-item" role="button">File Type Descending</a>
                                 </li>
                                 <li>
-                                    <a @click="NFTselect.dir='dec';NFTselect.sort='time';displaynfts()"
+                                    <a @click="filesSelect.dir='dec';filesSelect.sort='name';render()"
                                         class="dropdown-item" role="button">File Name A-Z</a>
                                 </li>
                                 <li>
-                                    <a @click="NFTselect.dir='dec';NFTselect.sort='time';displaynfts()"
+                                    <a @click="filesSelect.dir='asc';filesSelect.sort='name';render()"
                                         class="dropdown-item" role="button">File Name Z-A</a>
                                 </li>
                             </ul>
@@ -176,7 +176,7 @@ export default {
                                     <li>
                                         <div class="py-1 px-2">
                                             <div class="form-check">
-                                                <input @change="addFilters('Chain', item);displaynfts()"
+                                                <input @change="addFilters('Chain', item);render()"
                                                     class="form-check-input" type="checkbox"
                                                     >
                                                 <label class="form-check-label" for="item +'ChainCheck'">
@@ -199,7 +199,7 @@ export default {
                                         <li>
                                             <div class="py-1 px-2">
                                                 <div class="form-check">
-                                                    <input @change="addFilters('Set', setname, name);displaynfts()"
+                                                    <input @change="addFilters('Set', setname, name);render()"
                                                         class="form-check-input" type="checkbox"
                                                         
                                                         id="setname + 'SetCheck'">
@@ -223,7 +223,7 @@ export default {
                                     <li>
                                         <div class="py-1 px-2">
                                             <div class="form-check">
-                                                <input @change="addFilters('Status', name);displaynfts()"
+                                                <input @change="addFilters('Status', name);render()"
                                                     class="form-check-input" type="checkbox" >
                                                 <label class="form-check-label" for="name + 'StatusCheck'">
                                                    Random
@@ -340,7 +340,10 @@ export default {
                         <span class="text-break small text-muted">{{fancyBytes(file.s)}}</span>
                         <div class="d-flex ms-auto">
                             <div v-for="flag in flagsDecode(newMeta[file.i][file.index * 4 + 4])" >
-                                <span class="d-none">{{flag.l}}</span><i :class="flag.fa"></i>
+                                <!-- title="Labels"  -->
+                                <pop-vue :id="'popper-' + file.i + file.index + flag.l" :title="flag.l" trigger="hover">
+                                    <i :class="flag.fa"></i>
+                                </pop-vue>
                             </div>
                         </div>
                     </div>
@@ -348,7 +351,11 @@ export default {
                     <div class="d-flex flex-wrap rounded p-1" style="background-color: rgba(0, 0, 0, 0.6);">
                         
                         <div v-for="label in labelsDecode(newMeta[file.i][file.index * 4 + 4])">
-                            <span class="d-flex align-items-center w-100"><span class="d-none">{{label.l}}</span><i :class="label.fa"></i></span>
+                            <span class="d-flex align-items-center w-100">
+                                <pop-vue :id="'popperL-' + file.i + file.index + label.l" :title="label.l" trigger="hover">
+                                    <i :class="label.fa"></i>
+                                </pop-vue>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -385,7 +392,7 @@ export default {
         return {
             files: {},
             filesArray: [],
-            filterFlags: "=",
+            filterFlags: 0,
             filterLabels: "",
             filesSelect: {
                 sort: "time",
@@ -397,70 +404,70 @@ export default {
             decoded: false,
             debounce: null,
             labels: {
-                ["0"]: { fa: "fa-solid fa-sink fa-fw me-1 mb-1", l: "Miscellaneous"},
-                ["1"]: { fa: "fa-solid fa-exclamation fa-fw me-1 mb-1", l: "Important"},
-                ["2"]: { fa: "fa-solid fa-star fa-fw me-1 mb-1", l: "Favorite"},
-                ["3"]: { fa: "fa-solid fa-dice fa-fw me-1 mb-1", l: "Random"},
-                ["4"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-red", l: "Red"},
-                ["5"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-orange", l: "Orange"},
-                ["6"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-yellow", l: "Yellow"},
-                ["7"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-green", l: "Green"},
-                ["8"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-blue", l: "Blue"},
-                ["9"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-purple", l: "Purple"},
-                ["A"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-grey", l: "Grey"},
-                ["B"]: { fa: "fa-solid fa-briefcase fa-fw me-1 mb-1", l: "Work"},
-                ["C"]: { fa: "fa-solid fa-heart fa-fw me-1 mb-1", l: "Personal"},
-                ["D"]: { fa: "fa-solid fa-people-roof fa-fw me-1 mb-1", l: "Family"},
-                ["E"]: { fa: "fa-solid fa-people-group fa-fw me-1 mb-1", l: "Friends"},
-                ["F"]: { fa: "fa-solid fa-rocket fa-fw me-1 mb-1", l: "Projects"},
-                ["G"]: { fa: "fa-solid fa-piggy-bank fa-fw me-1 mb-1", l: "Finance"},
-                ["H"]: { fa: "fa-solid fa-kit-medical fa-fw me-1 mb-1", l: "Health"},
-                ["I"]: { fa: "fa-solid fa-graduation-cap fa-fw me-1 mb-1", l: "Education"},
-                ["J"]: { fa: "fa-solid fa-compass fa-fw me-1 mb-1", l: "Travel"},
-                ["K"]: { fa: "fa-regular fa-calendar-days fa-fw me-1 mb-1", l: "Events"},
-                ["L"]: { fa: "fa-solid fa-camera fa-fw me-1 mb-1", l: "Photography"},
-                ["M"]: { fa: "fa-solid fa-gamepad fa-fw me-1 mb-1", l: "Gaming"},
-                ["N"]: { fa: "fa-solid fa-volleyball fa-fw me-1 mb-1", l: "Sports"},
-                ["O"]: { fa: "fa-solid fa-feather fa-fw me-1 mb-1", l: "Blogging"},
-                ["P"]: { fa: "fa-solid fa-crown fa-fw me-1 mb-1", l: "Meme"},
-                ["Q"]: { fa: "fa-solid fa-music fa-fw me-1 mb-1", l: "Music"},
-                ["R"]: { fa: "fa-solid fa-video fa-fw me-1 mb-1", l: "Video"},
-                ["S"]: { fa: "fa-solid fa-microphone fa-fw me-1 mb-1", l: "Audio"},
-                ["T"]: { fa: "fa-solid fa-newspaper fa-fw me-1 mb-1", l: "News"},
-                ["U"]: { fa: "fa-solid fa-code fa-fw me-1 mb-1", l: "Development"},
-                ["V"]: { fa: "fa-solid fa-hat-cowboy fa-fw me-1 mb-1", l: "Fashion"},
-                ["W"]: { fa: "fa-solid fa-burger fa-fw me-1 mb-1", l: "Food"},
-                ["X"]: { fa: "fa-solid fa-utensils fa-fw me-1 mb-1", l: "Cooking"},
-                ["Y"]: { fa: "fa-solid fa-toolbox fa-fw me-1 mb-1", l: "DIY"},
-                ["Z"]: { fa: "fa-solid fa-paintbrush fa-fw me-1 mb-1", l: "Art"},
-                ["a"]: { fa: "fa-solid fa-swatchbook fa-fw me-1 mb-1", l: "Design"},
-                ["b"]: { fa: "fa-solid fa-microchip fa-fw me-1 mb-1", l: "Technology"},
-                ["c"]: { fa: "fa-solid fa-cross fa-fw me-1 mb-1", l: "Religion"},
-                ["d"]: { fa: "fa-solid fa-scale-balanced fa-fw me-1 mb-1", l: "Government"},
-                ["e"]: { fa: "fa-solid fa-landmark-dome fa-fw me-1 mb-1", l: "Politics"},
-                ["f"]: { fa: "fa-solid fa-vial fa-fw me-1 mb-1", l: "Science"},
-                ["g"]: { fa: "fa-solid fa-magnifying-glass fa-fw me-1 mb-1", l: "Research"},
-                ["h"]: { fa: "fa-solid fa-receipt fa-fw me-1 mb-1", l: "Receipts"},
-                ["i"]: { fa: "fa-solid fa-envelope-open-text fa-fw me-1 mb-1", l: "Correspondence"},
-                ["j"]: { fa: "fa-solid fa-copy fa-fw me-1 mb-1", l: "Templates"},
-                ["k"]: { fa: "fa-solid fa-file-lines fa-fw me-1 mb-1", l: "Resources"},
-                ["l"]: { fa: "fa-solid fa-book-bookmark fa-fw me-1 mb-1", l: "Reference"},
-                ["m"]: { fa: "fa-solid fa-floppy-disk fa-fw me-1 mb-1", l: "Backups"},
-                ["n"]: { fa: "fa-solid fa-box-archive fa-fw me-1 mb-1", l: "Archive"},
-                ["o"]: { fa: "fa-solid fa-compass-drafting fa-fw me-1 mb-1", l: "Drafts"},
-                ["p"]: { fa: "fa-solid fa-flag-checkered fa-fw me-1 mb-1", l: "Finished"},
-                ["q"]: { fa: "fa-solid fa-paper-plane fa-fw me-1 mb-1", l: "Sent"},
-                ["r"]: { fa: "fa-solid fa-clock fa-fw me-1 mb-1", l: "Pending"},
-                ["s"]: { fa: "fa-solid fa-thumbs-up fa-fw me-1 mb-1", l: "Approved"},
-                ["t"]: { fa: "fa-solid fa-thumbs-down fa-fw me-1 mb-1", l: "Rejected"},
-                ["u"]: { fa: "fa-solid fa-lightbulb fa-fw me-1 mb-1", l: "Ideas"},
-                ["v"]: { fa: "fa-solid fa-bullseye fa-fw me-1 mb-1", l: "Goals"},
-                ["w"]: { fa: "fa-solid fa-list-check fa-fw me-1 mb-1", l: "Tasks"},
-                ["x"]: { fa: "fa-solid fa-gavel fa-fw me-1 mb-1", l: "Legal"},
-                ["y"]: { fa: "fa-solid fa-handshake fa-fw me-1 mb-1", l: "Networking"},
-                ["z"]: { fa: "fa-solid fa-comments fa-fw me-1 mb-1", l: "Feedback"},
-                ["+"]: { fa: "fa-solid fa-square-poll-vertical fa-fw me-1 mb-1", l: "Surveys"},
-                ["="]: { fa: "fa-solid fa-user-secret fa-fw me-1 mb-1", l: "Classified"}
+                ["0"]: { fa: "fa-solid fa-sink fa-fw me-1 mb-1", l: "Miscellaneous" },
+                ["1"]: { fa: "fa-solid fa-exclamation fa-fw me-1 mb-1", l: "Important" },
+                ["2"]: { fa: "fa-solid fa-star fa-fw me-1 mb-1", l: "Favorite" },
+                ["3"]: { fa: "fa-solid fa-dice fa-fw me-1 mb-1", l: "Random" },
+                ["4"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-red", l: "Red" },
+                ["5"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-orange", l: "Orange" },
+                ["6"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-yellow", l: "Yellow" },
+                ["7"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-green", l: "Green" },
+                ["8"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-blue", l: "Blue" },
+                ["9"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-purple", l: "Purple" },
+                ["A"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-grey", l: "Grey" },
+                ["B"]: { fa: "fa-solid fa-briefcase fa-fw me-1 mb-1", l: "Work" },
+                ["C"]: { fa: "fa-solid fa-heart fa-fw me-1 mb-1", l: "Personal" },
+                ["D"]: { fa: "fa-solid fa-people-roof fa-fw me-1 mb-1", l: "Family" },
+                ["E"]: { fa: "fa-solid fa-people-group fa-fw me-1 mb-1", l: "Friends" },
+                ["F"]: { fa: "fa-solid fa-rocket fa-fw me-1 mb-1", l: "Projects" },
+                ["G"]: { fa: "fa-solid fa-piggy-bank fa-fw me-1 mb-1", l: "Finance" },
+                ["H"]: { fa: "fa-solid fa-kit-medical fa-fw me-1 mb-1", l: "Health" },
+                ["I"]: { fa: "fa-solid fa-graduation-cap fa-fw me-1 mb-1", l: "Education" },
+                ["J"]: { fa: "fa-solid fa-compass fa-fw me-1 mb-1", l: "Travel" },
+                ["K"]: { fa: "fa-regular fa-calendar-days fa-fw me-1 mb-1", l: "Events" },
+                ["L"]: { fa: "fa-solid fa-camera fa-fw me-1 mb-1", l: "Photography" },
+                ["M"]: { fa: "fa-solid fa-gamepad fa-fw me-1 mb-1", l: "Gaming" },
+                ["N"]: { fa: "fa-solid fa-volleyball fa-fw me-1 mb-1", l: "Sports" },
+                ["O"]: { fa: "fa-solid fa-feather fa-fw me-1 mb-1", l: "Blogging" },
+                ["P"]: { fa: "fa-solid fa-crown fa-fw me-1 mb-1", l: "Meme" },
+                ["Q"]: { fa: "fa-solid fa-music fa-fw me-1 mb-1", l: "Music" },
+                ["R"]: { fa: "fa-solid fa-video fa-fw me-1 mb-1", l: "Video" },
+                ["S"]: { fa: "fa-solid fa-microphone fa-fw me-1 mb-1", l: "Audio" },
+                ["T"]: { fa: "fa-solid fa-newspaper fa-fw me-1 mb-1", l: "News" },
+                ["U"]: { fa: "fa-solid fa-code fa-fw me-1 mb-1", l: "Development" },
+                ["V"]: { fa: "fa-solid fa-hat-cowboy fa-fw me-1 mb-1", l: "Fashion" },
+                ["W"]: { fa: "fa-solid fa-burger fa-fw me-1 mb-1", l: "Food" },
+                ["X"]: { fa: "fa-solid fa-utensils fa-fw me-1 mb-1", l: "Cooking" },
+                ["Y"]: { fa: "fa-solid fa-toolbox fa-fw me-1 mb-1", l: "DIY" },
+                ["Z"]: { fa: "fa-solid fa-paintbrush fa-fw me-1 mb-1", l: "Art" },
+                ["a"]: { fa: "fa-solid fa-swatchbook fa-fw me-1 mb-1", l: "Design" },
+                ["b"]: { fa: "fa-solid fa-microchip fa-fw me-1 mb-1", l: "Technology" },
+                ["c"]: { fa: "fa-solid fa-cross fa-fw me-1 mb-1", l: "Religion" },
+                ["d"]: { fa: "fa-solid fa-scale-balanced fa-fw me-1 mb-1", l: "Government" },
+                ["e"]: { fa: "fa-solid fa-landmark-dome fa-fw me-1 mb-1", l: "Politics" },
+                ["f"]: { fa: "fa-solid fa-vial fa-fw me-1 mb-1", l: "Science" },
+                ["g"]: { fa: "fa-solid fa-magnifying-glass fa-fw me-1 mb-1", l: "Research" },
+                ["h"]: { fa: "fa-solid fa-receipt fa-fw me-1 mb-1", l: "Receipts" },
+                ["i"]: { fa: "fa-solid fa-envelope-open-text fa-fw me-1 mb-1", l: "Correspondence" },
+                ["j"]: { fa: "fa-solid fa-copy fa-fw me-1 mb-1", l: "Templates" },
+                ["k"]: { fa: "fa-solid fa-file-lines fa-fw me-1 mb-1", l: "Resources" },
+                ["l"]: { fa: "fa-solid fa-book-bookmark fa-fw me-1 mb-1", l: "Reference" },
+                ["m"]: { fa: "fa-solid fa-floppy-disk fa-fw me-1 mb-1", l: "Backups" },
+                ["n"]: { fa: "fa-solid fa-box-archive fa-fw me-1 mb-1", l: "Archive" },
+                ["o"]: { fa: "fa-solid fa-compass-drafting fa-fw me-1 mb-1", l: "Drafts" },
+                ["p"]: { fa: "fa-solid fa-flag-checkered fa-fw me-1 mb-1", l: "Finished" },
+                ["q"]: { fa: "fa-solid fa-paper-plane fa-fw me-1 mb-1", l: "Sent" },
+                ["r"]: { fa: "fa-solid fa-clock fa-fw me-1 mb-1", l: "Pending" },
+                ["s"]: { fa: "fa-solid fa-thumbs-up fa-fw me-1 mb-1", l: "Approved" },
+                ["t"]: { fa: "fa-solid fa-thumbs-down fa-fw me-1 mb-1", l: "Rejected" },
+                ["u"]: { fa: "fa-solid fa-lightbulb fa-fw me-1 mb-1", l: "Ideas" },
+                ["v"]: { fa: "fa-solid fa-bullseye fa-fw me-1 mb-1", l: "Goals" },
+                ["w"]: { fa: "fa-solid fa-list-check fa-fw me-1 mb-1", l: "Tasks" },
+                ["x"]: { fa: "fa-solid fa-gavel fa-fw me-1 mb-1", l: "Legal" },
+                ["y"]: { fa: "fa-solid fa-handshake fa-fw me-1 mb-1", l: "Networking" },
+                ["z"]: { fa: "fa-solid fa-comments fa-fw me-1 mb-1", l: "Feedback" },
+                ["+"]: { fa: "fa-solid fa-square-poll-vertical fa-fw me-1 mb-1", l: "Surveys" },
+                ["="]: { fa: "fa-solid fa-user-secret fa-fw me-1 mb-1", l: "Classified" }
             }
 
         };
@@ -487,17 +494,19 @@ export default {
                 }
                 this.filterLabels = arr.join('')
             }
+            this.render()
         },
         handleTag(m) {
-            var num = this.Base64toNumber(this.filterFlags ) || 0
+            var num = this.Base64toNumber(this.filterFlags) || 0
             if (m.action == 'added') {
                 if (num & m.item) { }
                 else num += m.item
-                this.filterFlags = (this.NumberToBase64(num) || "0") + this.filterFlags
+                this.filterFlags = num
             } else {
                 if (num & m.item) num -= m.item
-                this.filterFlags = (this.NumberToBase64(num) || "0") + this.filterFlags
+                this.filterFlags = num
             }
+            this.render()
         },
         download(fileInfo, data = false, MIME_TYPE = "image/png") {
             if (data) {
@@ -616,15 +625,15 @@ export default {
         flagsDecode(flags = "") {
             var num = this.Base64toNumber(flags[0])
             var out = []
-            if (num & 1) out.push({fa: 'fa-solid fa-lock text-primary fa-fw me-1 mb-1', l: "Encrypted"})
-            if (num & 2) out.push({fa: 'fa-solid fa-arrows-rotate text-success fa-fw me-1 mb-1', l: "AutoRenew"})
-            if (num & 4) out.push({fa: 'fa-solid fa-radiation text-warning fa-fw me-1 mb-1', l: "NSFW"})
-            if (num & 8) out.push({fa: 'fa-regular fa-file-code text-info fa-fw me-1 mb-1', l: "Executable"})
+            if (num & 1) out.push({ fa: 'fa-solid fa-lock text-primary fa-fw me-1 mb-1', l: "Encrypted" })
+            if (num & 2) out.push({ fa: 'fa-solid fa-arrows-rotate text-success fa-fw me-1 mb-1', l: "AutoRenew" })
+            if (num & 4) out.push({ fa: 'fa-solid fa-radiation text-warning fa-fw me-1 mb-1', l: "NSFW" })
+            if (num & 8) out.push({ fa: 'fa-regular fa-file-code text-info fa-fw me-1 mb-1', l: "Executable" })
             return out
         },
         labelsDecode(flags = "") {
             var arr = []
-            if(flags.length < 2) return arr
+            if (flags.length < 2) return arr
             else for (var i = 1; i < flags.length; i++) {
                 arr.push(this.labels[flags[i]])
             }
@@ -657,6 +666,45 @@ export default {
             for (var i in this.files) {
                 this.filesArray.push(this.files[i])
             }
+            // filterFlags: "=",
+            // filterLabels: "",
+            // filesSelect: {
+            //     sort: "time",
+            //     dir: "dec",
+            //     search: "",
+            // },
+            this.filesArray = this.filesArray.filter((file) => {
+                if (this.filterFlags && !(this.filterFlags & file.lf)) return false
+                if (this.filterLabels) {
+                    const arr = this.filterLabels.split('')
+                    for (var j = 0; j < arr.length; j++) {
+                        if (file.l.indexOf(arr[j]) == -1) return false
+                        
+                    }
+                }
+                if (this.filesSelect.search && file.n.toLowerCase().indexOf(this.filesSelect.search.toLowerCase()) == -1) return false
+                return true
+            })
+            this.filesArray.sort((a, b) => {
+                if (this.filesSelect.sort == 'time') {
+                    if (this.filesSelect.dir == 'dec') return a.c - b.c
+                    else return b.c - a.c
+                } else if (this.filesSelect.sort == 'size') {
+                    if (this.filesSelect.dir == 'dec') return a.s - b.s
+                    else return b.s - a.s
+                } else if (this.filesSelect.sort == 'name') {
+                    if (this.filesSelect.dir == 'dec') return a.n.localeCompare(b.n)
+                    else return b.n.localeCompare(a.n)
+                } else if (this.filesSelect.sort == 'type') {
+                    if (this.filesSelect.dir == 'dec') return a.y - b.y
+                    else return b.s - a.s
+                } else if (this.filesSelect.sort == 'exp') {
+                    if (this.filesSelect.dir == 'dec') return a.e - b.e
+                    else return b.e - a.e
+                } else {
+                    return 0
+                }
+            })
 
         },
         init() {
@@ -674,18 +722,20 @@ export default {
                 }
                 var keys = Object.keys(this.contract[id].df)
                 for (var j in keys) {
-                    try{
-                        console.log(this.newMeta[id][j*4+4])
-                    } catch (e) {}
+                    try {
+                        console.log(this.newMeta[id][j * 4 + 4])
+                    } catch (e) { }
                     const f = {
                         i: id,
                         f: keys[j],
                         c: this.contract[id].i.split(':')[2].split('-')[0],
                         e: this.contract[id].e.split(':')[0],
+                        n: this.newMeta[id][j * 4 + 1] || keys[j],
+                        y: this.newMeta[id][j * 4 + 2] || keys[j],
                         index: j,
-                        lf: parseInt(this.Base64toNumber(this.newMeta[id][j*4+4][0]) || 0),
-                        l: this.newMeta[id][j*4+4] ? this.newMeta[id][j*4+4].slice(1) || '' : '',
-                        t: this.newMeta[id][j*4+3] || '',
+                        lf: parseInt(this.Base64toNumber(this.newMeta[id][j * 4 + 4][0]) || 0),
+                        l: this.newMeta[id][j * 4 + 4] ? this.newMeta[id][j * 4 + 4].slice(1) || '' : '',
+                        t: this.newMeta[id][j * 4 + 3] || '',
                         s: this.contract[id].df[keys[j]],
                         p: false
                     }
