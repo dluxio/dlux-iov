@@ -336,7 +336,7 @@ export default {
 
                     <div class="d-flex flex-column rounded p-1" style="background-color: rgba(0, 0, 0, 0.6);">
 
-                        <div v-if="!(file.l.length || files.lf)" class="ms-auto me-auto">
+                        <div v-if="!(file.l.length || file.lf)" class="ms-auto me-auto">
                             Edit
                         </div>
 
