@@ -330,12 +330,17 @@ export default {
                                 <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto" @click="addAsset(file, contract)"><span class="d-flex align-items-center w-100">Add asset<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
                             </div>
                     </div>
-                    <span class="text-break small text-muted">{{fancyBytes(file.s)}}</span>
+                    <div class="d-flex align-items-center">
+                        <span class="text-break small text-muted">{{fancyBytes(file.s)}}</span>
+                        <div class="d-flex ms-auto">
+                            <div v-for="flag in flagsDecode(newMeta[file.i][file.index * 4 + 4])" >
+                                <span class="d-none">{{flag.l}}</span><i :class="flag.fa"></i>
+                            </div>
+                        </div>
+                    </div>
                     
                     <div class="d-flex flex-wrap rounded p-1" style="background-color: rgba(0, 0, 0, 0.6);">
-                        <div v-for="flag in flagsDecode(newMeta[file.i][file.index * 4 + 4])">
-                            <span class="d-flex align-items-center w-100"><span class="d-none">{{flag.l}}</span><i :class="flag.fa"></i></span>
-                        </div>
+                        
                         <div v-for="label in labelsDecode(newMeta[file.i][file.index * 4 + 4])">
                             <span class="d-flex align-items-center w-100"><span class="d-none">{{label.l}}</span><i :class="label.fa"></i></span>
                         </div>
@@ -574,10 +579,10 @@ export default {
         flagsDecode(flags = "") {
             var num = this.Base64toNumber(flags[0])
             var out = []
-            if (num & 1) out.push({fa: 'fa-solid fa-lock fa-fw me-1 mb-1', l: "Encrypted"})
-            if (num & 2) out.push({fa: 'fa-solid fa-arrows-rotate text-green fa-fw me-1 mb-1', l: "AutoRenew"})
-            if (num & 4) out.push({fa: 'fa-solid fa-radiation text-yellow fa-fw me-1 mb-1', l: "NSFW"})
-            if (num & 8) out.push({fa: 'fa-regular fa-file-code text-blue fa-fw me-1 mb-1', l: "Executable"})
+            if (num & 1) out.push({fa: 'fa-solid fa-lock text-primary fa-fw me-1 mb-1', l: "Encrypted"})
+            if (num & 2) out.push({fa: 'fa-solid fa-arrows-rotate text-success fa-fw me-1 mb-1', l: "AutoRenew"})
+            if (num & 4) out.push({fa: 'fa-solid fa-radiation text-warning fa-fw me-1 mb-1', l: "NSFW"})
+            if (num & 8) out.push({fa: 'fa-regular fa-file-code text-info fa-fw me-1 mb-1', l: "Executable"})
             return out
         },
         labelsDecode(flags = "") {
