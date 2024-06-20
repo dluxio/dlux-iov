@@ -309,9 +309,12 @@ export default {
                     
 
                     <div class="mt-1">
+                            {{flagsDecode(newMeta[file.i][file.index * 4 + 4])}} ||
+                            {{labelsDecode(newMeta[file.i][file.index * 4 + 4], 1)}} ||
+                            {{labelsDecode(newMeta[file.i][file.index * 4 + 4])}}
                             <!-- link -->
                             <div v-if="!flagDecode(newMeta[file.i][file.index * 4 + 4]).enc">
-                                <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"><span class="d-flex align-items-center">URL<i class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
+                                <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"><span class="d-flex align-items-center">URL<i class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
                             </div>
                             <!-- decrypt  -->
                             <div v-if="flagDecode(newMeta[file.i][file.index * 4 + 4]).enc && !decoded">
@@ -323,7 +326,7 @@ export default {
                             </div>
                             <!-- add to post -->
                             <div v-if="assets">
-                                <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto" @click="addToPost(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Add to Post<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
+                                <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto" @click="addToPost(file.f, contract.i, index)"><span class="d-flex align-items-center w-100">Add to Post<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
                             </div>
                             <!-- add to asset -->
                             <div v-if="assets">
@@ -339,228 +342,303 @@ export default {
     </div>
 </div>
    `,
-props: {
-    assets: {
-        type: Boolean,
-        default: false,
-    },
-    contracts: {
-        type: Object,
-        default: function () {
-            return [{
-                n: {},
-                p: 3,
-                df: {},
-                nt: "0",
-                i: "a:1:1",
-                id: "a-1-1",
-                m: "",
-                u: 1,
-                t: 10,
-                extend: 7,
-
-            }];
-        }
-    },
-},
-data() {
-    return {
-        files: {},
-        filesArray: [],
-        contract: {},
-        newMeta: {},
-        decoded: false,
-        debounce: null,
-    };
-},
-emits: [ "addassets" ],
-methods: {
-    addAsset(id, contract) {
-        this.$emit("addassets", { id, contract });
-    },
-    AESDecrypt(encryptedMessage, key) {
-        const bytes = CryptoJS.AES.decrypt(encryptedMessage, key);
-        return bytes.toString(CryptoJS.enc.Utf8);
-    },
-    download(fileInfo, data = false, MIME_TYPE = "image/png") {
-        if(data){
-            var blob = new Blob([data], {type: MIME_TYPE});
-            window.location.href = window.URL.createObjectURL(blob);
-        } else {
-            fetch(`https://ipfs.dlux.io/ipfs/${fileInfo}`)
-            .then((response) => response.blob())
-            .then((blob) => {
-                var url = window.URL.createObjectURL(blob);
-                var a = document.createElement('a');
-                a.href = url;
-                a.download = fileInfo;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-            });
-        }
-    },
-    smartIcon(flags = ""){
-        if(!flags[0])return 'fa-solid fa-file'
-        const flag = this.flagDecode(flags[0])
-        if (flag.enc) return 'fa-solid fa-file-shield'
-        else if (flag.nsfw)return 'fa-solid fa-triangle-exclamation'
-        else if (flag.executable)return 'fa-solid fa-cog'
-        else return 'fa-solid fa-file'
-    },
-    smartColor(flags = ""){
-        if(!flags[0])return 'bg-info'
-        const flag = this.flagDecode(flags[0])
-        if (flag.nsfw) return 'bg-danger'
-        else if (flag.executable)return 'bg-warning'
-        else if (flag.enc)return 'bg-dark'
-        else return 'bg-info'
-    },
-    smartThumb(contract, index, cid) {
-        var thumb = this.newMeta[contract][index * 4 + 3] || ''
-        if (thumb.includes('Qm')) return `https://ipfs.dlux.io/ipfs/${thumb}`
-        if (thumb.includes('https')) return thumb
-        switch (this.newMeta[contract][index * 4 + 2]) {
-            case 'jpg':
-            case 'jpeg':
-            case 'png':
-            case 'gif':
-            case 'bmp':
-            case 'webp':
-            case 'tiff':
-            case 'tif':
-            case 'svg':
-                return `https://ipfs.dlux.io/ipfs/${cid}`
-            case 'mp4':
-            case 'mov':
-                return `/img/mov-file-type-svgrepo-com.svg`
-            case 'avi':
-                return `/img/avi-file-type-svgrepo-com.svg`
-            case 'gltf':
-            case 'glb':
-                return `/img/dluxdefault.png`
-            case 'html':
-            case 'htm':
-                return `/img/html-file-type-svgrepo-com.svg`
-            case 'pdf':
-                return `/img/pdf-file-type-svgrepo-com.svg`
-            case 'txt':
-            case 'json':
-            case 'md':
-            case 'xml':
-            case 'yaml':
-            case 'yml':
-            case 'js':
-                return `/img/txt-file-type-svgrepo-com.svg`
-            case 'csv':
-                return `/img/csv-file-type-svgrepo-com.svg`
-            case 'css':
-            case 'scss':
-                return `/img/css-file-type-svgrepo-com.svg`
-            case 'mp3':
-                return `/img/mp3-file-type-svgrepo-com.svg`
-            case 'wav':
-                return `/img/wav-file-type-svgrepo-com.svg`
-            case 'rar':
-                return `/img/rar-file-type-svgrepo-com.svg`
-            case 'zip':
-                return `/img/zip-file-type-svgrepo-com.svg`
-            case '':
-                return '/img/other-file-type-svgrepo-com.svg'
-            case 'enc': //encrypted
-            default:
-                return '/img/other-file-type-svgrepo-com.svg'
-        }
-    },
-    fancyBytes(bytes) {
-        console.log({bytes})
-        var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
-        while (bytes > 1024) {
-            bytes = bytes / 1024
-            counter++
-        }
-        return `${this.toFixed(bytes, 2)} ${p[counter]}B`
-    },
-    toFixed(n, digits) {
-        return parseFloat(n).toFixed(digits)
-    },
-    copyText(text){
-        navigator.clipboard.writeText(text)
-    },
-    flagDecode(flags = "") {
-        var num = this.Base64toNumber(flags[0])
-        var out = {}
-        if(num & 1)out.enc = true
-        if(num & 2)out.autoRenew = true
-        if(num & 4)out.nsfw = true
-        if(num & 8)out.executable = true
-        return out
-    },
-    Base64toNumber(chars = "0") {
-        if(typeof chars != 'string'){
-            console.log({chars})
-            return 0
-        }
-        const glyphs = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
-        var result = 0;
-        chars = chars.split("");
-        for (var e = 0; e < chars.length; e++) {
-            result = result * 64 + glyphs.indexOf(chars[e]);
-        }
-        return result;
-    },
-    NumberToBase64(num) {
-        const glyphs = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
-        var result = "";
-        while (num > 0) {
-            result = glyphs[num % 64] + result;
-            num = Math.floor(num / 64);
-        }
-        return result;
-    },
-    init(){
-
-    for (var i in this.contracts) {
-        if(this.contracts[i].c == 1)continue
-        const id = this.contracts[i].i
-        this.contract[id] = this.contracts[i];
-        var keys = Object.keys(this.contracts[i].df)
-        for (var j in keys) {
-            const f = {
-                i: id,
-                f: keys[i],
-                index: j,
-                s: this.contracts[i].df[keys[j]]
-            }
-            this.filesArray.push(f);
-        }
-        if (!this.contract[id].m) {
-            this.contract[id].m = ""
-            const filesNum = this.contracts[i].df ? Object.keys(this.contracts[i].df).length : 0
-            this.newMeta[id] = new Array(filesNum * 4 + 1).fill('')
-        } else {
-            this.newMeta[id] = this.contract[id].m.split(",")
-        }
-    }
-    this.files = this.contract.df;
-    }
-},
-computed: {
-    hasFiles() {
-        return Object.keys(this.files).length > 0;
-    }
-},
-watch: {
-    'contracts': {
-        handler: function (newValue) {
-            if (this.debounce && new Date().getTime() - this.debounce < 1000) {
-                return
-            }
-            this.init()
-            this.debounce = new Date().getTime()
+    props: {
+        assets: {
+            type: Boolean,
+            default: false,
         },
-        deep: true
-    }
-},
-mounted() {},
+        contracts: {
+            type: Object,
+            default: function () {
+                return [{
+                    n: {},
+                    p: 3,
+                    df: {},
+                    nt: "0",
+                    i: "a:1:1",
+                    id: "a-1-1",
+                    m: "",
+                    u: 1,
+                    t: 10,
+                    extend: 7,
+
+                }];
+            }
+        },
+    },
+    data() {
+        return {
+            files: {},
+            filesArray: [],
+            contract: {},
+            newMeta: {},
+            decoded: false,
+            debounce: null,
+            labels: {
+                ["0"]: '<i class="fa-solid fa-sink fa-fw me-1"></i>Miscellaneous',
+                ["1"]: '<i class="fa-solid fa-exclamation fa-fw me-1"></i>Important',
+                ["2"]: '<i class="fa-solid fa-star fa-fw me-1"></i>Favorite',
+                ["3"]: '<i class="fa-solid fa-dice fa-fw me-1"></i>Random',
+                ["4"]: '<i class="fa-solid fa-circle fa-fw me-1 text-red"></i>Red',
+                ["5"]: '<i class="fa-solid fa-circle fa-fw me-1 text-orange"></i>Orange',
+                ["6"]: '<i class="fa-solid fa-circle fa-fw me-1 text-yellow"></i>Yellow',
+                ["7"]: '<i class="fa-solid fa-circle fa-fw me-1 text-green"></i>Green',
+                ["8"]: '<i class="fa-solid fa-circle fa-fw me-1 text-blue"></i>Blue',
+                ["9"]: '<i class="fa-solid fa-circle fa-fw me-1 text-purple"></i>Purple',
+                ["A"]: '<i class="fa-solid fa-circle fa-fw me-1 text-grey"></i>Grey',
+                ["B"]: '<i class="fa-solid fa-briefcase fa-fw me-1"></i>Work',
+                ["C"]: '<i class="fa-solid fa-heart fa-fw me-1"></i>Personal',
+                ["D"]: '<i class="fa-solid fa-people-roof fa-fw me-1"></i>Family',
+                ["E"]: '<i class="fa-solid fa-people-group fa-fw me-1"></i>Friends',
+                ["F"]: '<i class="fa-solid fa-rocket fa-fw me-1"></i>Projects',
+                ["G"]: '<i class="fa-solid fa-piggy-bank fa-fw me-1"></i>Finance',
+                ["H"]: '<i class="fa-solid fa-kit-medical fa-fw me-1"></i>Health',
+                ["I"]: '<i class="fa-solid fa-graduation-cap fa-fw me-1"></i>Education',
+                ["J"]: '<i class="fa-solid fa-compass fa-fw me-1"></i>Travel',
+                ["K"]: '<i class="fa-regular fa-calendar-days fa-fw me-1"></i>Events',
+                ["L"]: '<i class="fa-solid fa-camera fa-fw me-1"></i>Photography',
+                ["M"]: '<i class="fa-solid fa-gamepad fa-fw me-1"></i>Gaming',
+                ["N"]: '<i class="fa-solid fa-volleyball fa-fw me-1"></i>Sports',
+                ["O"]: '<i class="fa-solid fa-feather fa-fw me-1"></i>Blogging',
+                ["P"]: '<i class="fa-solid fa-crown fa-fw me-1"></i>Meme',
+                ["Q"]: '<i class="fa-solid fa-music fa-fw me-1"></i>Music',
+                ["R"]: '<i class="fa-solid fa-video fa-fw me-1"></i>Video',
+                ["S"]: '<i class="fa-solid fa-microphone fa-fw me-1"></i>Audio',
+                ["T"]: '<i class="fa-solid fa-newspaper fa-fw me-1"></i>News',
+                ["U"]: '<i class="fa-solid fa-code fa-fw me-1"></i>Development',
+                ["V"]: '<i class="fa-solid fa-hat-cowboy fa-fw me-1"></i>Fashion',
+                ["W"]: '<i class="fa-solid fa-burger fa-fw me-1"></i>Food',
+                ["X"]: '<i class="fa-solid fa-utensils fa-fw me-1"></i>Cooking',
+                ["Y"]: '<i class="fa-solid fa-toolbox fa-fw me-1"></i>DIY',
+                ["Z"]: '<i class="fa-solid fa-paintbrush fa-fw me-1"></i>Art',
+                ["a"]: '<i class="fa-solid fa-swatchbook fa-fw me-1"></i>Design',
+                ["b"]: '<i class="fa-solid fa-microchip fa-fw me-1"></i>Technology',
+                ["c"]: '<i class="fa-solid fa-cross fa-fw me-1"></i>Religion',
+                ["d"]: '<i class="fa-solid fa-scale-balanced fa-fw me-1"></i>Government',
+                ["e"]: '<i class="fa-solid fa-landmark-dome fa-fw me-1"></i>Politics',
+                ["f"]: '<i class="fa-solid fa-vial fa-fw me-1"></i>Science',
+                ["g"]: '<i class="fa-solid fa-magnifying-glass fa-fw me-1"></i>Research',
+                ["h"]: '<i class="fa-solid fa-receipt fa-fw me-1"></i>Receipts',
+                ["i"]: '<i class="fa-solid fa-envelope-open-text fa-fw me-1"></i>Correspondence',
+                ["j"]: '<i class="fa-solid fa-copy fa-fw me-1"></i>Templates',
+                ["k"]: '<i class="fa-solid fa-file-lines fa-fw me-1"></i>Resources',
+                ["l"]: '<i class="fa-solid fa-book-bookmark fa-fw me-1"></i>Reference',
+                ["m"]: '<i class="fa-solid fa-floppy-disk fa-fw me-1"></i>Backups',
+                ["n"]: '<i class="fa-solid fa-box-archive fa-fw me-1"></i>Archive',
+                ["o"]: '<i class="fa-solid fa-compass-drafting fa-fw me-1"></i>Drafts',
+                ["p"]: '<i class="fa-solid fa-flag-checkered fa-fw me-1"></i>Finished',
+                ["q"]: '<i class="fa-solid fa-paper-plane fa-fw me-1"></i>Sent',
+                ["r"]: '<i class="fa-solid fa-clock fa-fw me-1"></i>Pending',
+                ["s"]: '<i class="fa-solid fa-thumbs-up fa-fw me-1"></i>Approved',
+                ["t"]: '<i class="fa-solid fa-thumbs-down fa-fw me-1"></i>Rejected',
+                ["u"]: '<i class="fa-solid fa-lightbulb fa-fw me-1"></i>Ideas',
+                ["v"]: '<i class="fa-solid fa-bullseye fa-fw me-1"></i>Goals',
+                ["w"]: '<i class="fa-solid fa-list-check fa-fw me-1"></i>Tasks',
+                ["x"]: '<i class="fa-solid fa-gavel fa-fw me-1"></i>Legal',
+                ["y"]: '<i class="fa-solid fa-handshake fa-fw me-1"></i>Networking',
+                ["z"]: '<i class="fa-solid fa-comments fa-fw me-1"></i>Feedback',
+                ["+"]: '<i class="fa-solid fa-square-poll-vertical fa-fw me-1"></i>Surveys',
+                ["="]: '<i class="fa-solid fa-user-secret fa-fw me-1"></i>Classified',
+            }
+
+        };
+    },
+    emits: ["addassets"],
+    methods: {
+        addAsset(id, contract) {
+            this.$emit("addassets", { id, contract });
+        },
+        AESDecrypt(encryptedMessage, key) {
+            const bytes = CryptoJS.AES.decrypt(encryptedMessage, key);
+            return bytes.toString(CryptoJS.enc.Utf8);
+        },
+        download(fileInfo, data = false, MIME_TYPE = "image/png") {
+            if (data) {
+                var blob = new Blob([data], { type: MIME_TYPE });
+                window.location.href = window.URL.createObjectURL(blob);
+            } else {
+                fetch(`https://ipfs.dlux.io/ipfs/${fileInfo}`)
+                    .then((response) => response.blob())
+                    .then((blob) => {
+                        var url = window.URL.createObjectURL(blob);
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = fileInfo;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    });
+            }
+        },
+        smartIcon(flags = "") {
+            if (!flags[0]) return 'fa-solid fa-file'
+            const flag = this.flagDecode(flags[0])
+            if (flag.enc) return 'fa-solid fa-file-shield'
+            else if (flag.nsfw) return 'fa-solid fa-triangle-exclamation'
+            else if (flag.executable) return 'fa-solid fa-cog'
+            else return 'fa-solid fa-file'
+        },
+        smartColor(flags = "") {
+            if (!flags[0]) return 'bg-info'
+            const flag = this.flagDecode(flags[0])
+            if (flag.nsfw) return 'bg-danger'
+            else if (flag.executable) return 'bg-warning'
+            else if (flag.enc) return 'bg-dark'
+            else return 'bg-info'
+        },
+        smartThumb(contract, index, cid) {
+            var thumb = this.newMeta[contract][index * 4 + 3] || ''
+            if (thumb.includes('Qm')) return `https://ipfs.dlux.io/ipfs/${thumb}`
+            if (thumb.includes('https')) return thumb
+            switch (this.newMeta[contract][index * 4 + 2]) {
+                case 'jpg':
+                case 'jpeg':
+                case 'png':
+                case 'gif':
+                case 'bmp':
+                case 'webp':
+                case 'tiff':
+                case 'tif':
+                case 'svg':
+                    return `https://ipfs.dlux.io/ipfs/${cid}`
+                case 'mp4':
+                case 'mov':
+                    return `/img/mov-file-type-svgrepo-com.svg`
+                case 'avi':
+                    return `/img/avi-file-type-svgrepo-com.svg`
+                case 'gltf':
+                case 'glb':
+                    return `/img/dluxdefault.png`
+                case 'html':
+                case 'htm':
+                    return `/img/html-file-type-svgrepo-com.svg`
+                case 'pdf':
+                    return `/img/pdf-file-type-svgrepo-com.svg`
+                case 'txt':
+                case 'json':
+                case 'md':
+                case 'xml':
+                case 'yaml':
+                case 'yml':
+                case 'js':
+                    return `/img/txt-file-type-svgrepo-com.svg`
+                case 'csv':
+                    return `/img/csv-file-type-svgrepo-com.svg`
+                case 'css':
+                case 'scss':
+                    return `/img/css-file-type-svgrepo-com.svg`
+                case 'mp3':
+                    return `/img/mp3-file-type-svgrepo-com.svg`
+                case 'wav':
+                    return `/img/wav-file-type-svgrepo-com.svg`
+                case 'rar':
+                    return `/img/rar-file-type-svgrepo-com.svg`
+                case 'zip':
+                    return `/img/zip-file-type-svgrepo-com.svg`
+                case '':
+                    return '/img/other-file-type-svgrepo-com.svg'
+                case 'enc': //encrypted
+                default:
+                    return '/img/other-file-type-svgrepo-com.svg'
+            }
+        },
+        fancyBytes(bytes, decimals = 0) {
+            console.log({ bytes })
+            var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
+            while (bytes > 1024) {
+                bytes = bytes / 1024
+                counter++
+            }
+            return `${this.toFixed(bytes, decimals)} ${p[counter]}B`
+        },
+        toFixed(n, digits) {
+            return parseFloat(n).toFixed(digits)
+        },
+        copyText(text) {
+            navigator.clipboard.writeText(text)
+        },
+        flagDecode(flags = "") {
+            var num = this.Base64toNumber(flags[0])
+            var out = {}
+            if (num & 1) out.enc = true
+            if (num & 2) out.autoRenew = true
+            if (num & 4) out.nsfw = true
+            if (num & 8) out.executable = true
+            return out
+        },
+        labelsDecode(flags = "", num = 0) {
+            var string = ""
+            if(flags.length < 2) return string
+            else if (num) return this.labels[flags[num]] || ''
+            else for (var i = 1; i < flags.length; i++) {
+                string += this.labels[flags[i]] || ''
+            }
+        },
+        Base64toNumber(chars = "0") {
+            if (typeof chars != 'string') {
+                console.log({ chars })
+                return 0
+            }
+            const glyphs = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
+            var result = 0;
+            chars = chars.split("");
+            for (var e = 0; e < chars.length; e++) {
+                result = result * 64 + glyphs.indexOf(chars[e]);
+            }
+            return result;
+        },
+        NumberToBase64(num) {
+            const glyphs = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
+            var result = "";
+            while (num > 0) {
+                result = glyphs[num % 64] + result;
+                num = Math.floor(num / 64);
+            }
+            return result;
+        },
+        init() {
+
+            for (var i in this.contracts) {
+                if (this.contracts[i].c == 1) continue
+                const id = this.contracts[i].i
+                this.contract[id] = this.contracts[i];
+                var keys = Object.keys(this.contracts[i].df)
+                for (var j in keys) {
+                    const f = {
+                        i: id,
+                        f: keys[i],
+                        index: j,
+                        s: this.contracts[i].df[keys[j]]
+                    }
+                    this.filesArray.push(f);
+                }
+                if (!this.contract[id].m) {
+                    this.contract[id].m = ""
+                    const filesNum = this.contracts[i].df ? Object.keys(this.contracts[i].df).length : 0
+                    this.newMeta[id] = new Array(filesNum * 4 + 1).fill('')
+                } else {
+                    this.newMeta[id] = this.contract[id].m.split(",")
+                }
+            }
+            this.files = this.contract.df;
+        }
+    },
+    computed: {
+        hasFiles() {
+            return Object.keys(this.files).length > 0;
+        }
+    },
+    watch: {
+        'contracts': {
+            handler: function (newValue) {
+                if (this.debounce && new Date().getTime() - this.debounce < 1000) {
+                    return
+                }
+                this.init()
+                this.debounce = new Date().getTime()
+            },
+            deep: true
+        }
+    },
+    mounted() { },
 };
