@@ -331,13 +331,20 @@ export default {
                                 <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto" @click="addAsset(file, contract)"><span class="d-flex align-items-center w-100">Add asset<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
                             </div>
                     </div>
-                    <div class="d-flex align-items-center">
-                        <span class="text-break small text-muted">{{fancyBytes(file.s)}}</span>
-                        <div class="d-flex ms-auto">
-                            <span class="fa-stack">
-                                <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa" :class="'fa-stack-1x'" :data-fa-transform="'right-' + (num * 2)"></i>
-                            </span>
-                            <div v-for="flag in flagsDecode(newMeta[file.i][file.index * 4 + 4])" >
+                    <div class="d-flex align-items-center justify-content-between">
+
+                        <div class="d-flex align-items-center text-break small text-muted">
+                            {{fancyBytes(file.s)}}
+                        </div>
+
+                        <div class="mx-1">
+                            <div class="d-flex align-items-center" style="margin-left: 15px">
+                                    <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa" :style="'margin-left: ' + -15 +'px !important;'"></i>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center ms-auto">
+                          <div v-for="flag in flagsDecode(newMeta[file.i][file.index * 4 + 4])" >
                                 <!-- title="Labels"  -->
                                 <pop-vue :id="'popper-' + file.i + file.index + flag.l" :title="flag.l" trigger="hover">
                                     <i :class="flag.fa"></i>
@@ -410,13 +417,13 @@ export default {
                 ["1"]: { fa: "fa-solid fa-exclamation fa-fw me-1 mb-1", l: "Important", c:0 },
                 ["2"]: { fa: "fa-solid fa-star fa-fw me-1 mb-1", l: "Favorite", c:0 },
                 ["3"]: { fa: "fa-solid fa-dice fa-fw me-1 mb-1", l: "Random", c:0 },
-                ["4"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-red", l: "Red", c:1},
-                ["5"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-orange", l: "Orange", c:1 },
-                ["6"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-yellow", l: "Yellow", c:1 },
-                ["7"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-green", l: "Green", c:1 },
-                ["8"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-blue", l: "Blue", c:1 },
-                ["9"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-purple", l: "Purple", c:1 },
-                ["A"]: { fa: "fa-solid fa-circle fa-fw me-1 mb-1 text-grey", l: "Grey", c:1 },
+                ["4"]: { fa: "fa-solid fa-circle fa-fw text-red", l: "Red", c:1},
+                ["5"]: { fa: "fa-solid fa-circle fa-fw text-orange", l: "Orange", c:1 },
+                ["6"]: { fa: "fa-solid fa-circle fa-fw text-yellow", l: "Yellow", c:1 },
+                ["7"]: { fa: "fa-solid fa-circle fa-fw text-green", l: "Green", c:1 },
+                ["8"]: { fa: "fa-solid fa-circle fa-fw text-blue", l: "Blue", c:1 },
+                ["9"]: { fa: "fa-solid fa-circle fa-fw text-purple", l: "Purple", c:1 },
+                ["A"]: { fa: "fa-solid fa-circle fa-fw text-grey", l: "Grey", c:1 },
                 ["B"]: { fa: "fa-solid fa-briefcase fa-fw me-1 mb-1", l: "Work", c:0 },
                 ["C"]: { fa: "fa-solid fa-heart fa-fw me-1 mb-1", l: "Personal", c:0 },
                 ["D"]: { fa: "fa-solid fa-people-roof fa-fw me-1 mb-1", l: "Family", c:0 },
