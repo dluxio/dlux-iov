@@ -309,8 +309,6 @@ export default {
                     
 
                     <div class="mt-1">
-                            {{flagDecode(newMeta[file.i][file.index * 4 + 4])}} ||
-                            {{labelsDecode(newMeta[file.i][file.index * 4 + 4])}}
                             <!-- link -->
                             <div v-if="!flagDecode(newMeta[file.i][file.index * 4 + 4]).enc">
                                 <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"><span class="d-flex align-items-center">URL<i class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
@@ -333,8 +331,12 @@ export default {
                             </div>
                     </div>
                     <span class="text-break small text-muted">{{fancyBytes(file.s)}}</span>
-                    
-                    
+                    <div v-for="flag in flagsDecode(newMeta[file.i][file.index * 4 + 4])">
+                        <span class="d-flex align-items-center w-100">{{flag.l}}<i :class="flag.fa"></i></span>
+                    </div>
+                    <div v-for="label in labelsDecode(newMeta[file.i][file.index * 4 + 4])">
+                        <span class="d-flex align-items-center w-100">{{label.l}}<i :class="label.fa"></i></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -557,11 +559,21 @@ export default {
         },
         flagDecode(flags = "") {
             var num = this.Base64toNumber(flags[0])
+            var out = {
+                enc: num & 1,
+                autoRenew: num & 2,
+                nsfw: num & 4,
+                executable: num & 8
+            }
+            return out
+        },
+        flagsDecode(flags = "") {
+            var num = this.Base64toNumber(flags[0])
             var out = []
-            if (num & 1) out.push({fa: '', l: "Encrypted"})
-            if (num & 2) out.push({fa: '', l: "AutoRenew"})
-            if (num & 4) out.push({fa: '', l: "NSFW"})
-            if (num & 8) out.push({fa: '', l: "Executable"})
+            if (num & 1) out.push({fa: 'fa-solid fa-lock', l: "Encrypted"})
+            if (num & 2) out.push({fa: 'fa-solid fa-arrows-rotate text-green', l: "AutoRenew"})
+            if (num & 4) out.push({fa: 'fa-solid fa-radiation text-yellow', l: "NSFW"})
+            if (num & 8) out.push({fa: 'fa-regular fa-file-code text-blue', l: "Executable"})
             return out
         },
         labelsDecode(flags = "") {
