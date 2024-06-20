@@ -1,6 +1,6 @@
 export default {
   name: "Choices",
-  template: `<select multiple id="select-tag" :ref="reference"></select>`,
+  template: `<select multiple id="select-tag" :ref="reference" style="min-width:45px !important;"></select>`,
   emits: ["data"],
   props: {
     reference: {

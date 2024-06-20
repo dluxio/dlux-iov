@@ -10,274 +10,93 @@ export default {
 <div class="d-flex flex-grow-1 flex-column p-05 rounded m-05" style="background-color: rgba(0, 0, 0, 0.6);">
     <div class="pt-1">
         <!-- ACTION BAR -->
-                <div class="d-flex flex-wrap align-items-center justify-content-center">
+        <div class="d-flex flex-wrap align-items-center justify-content-center">
+            <!-- Search -->
+            <div class="position-relative mb-1 mx-1">
+                <span class="position-absolute top-50 translate-middle-y ps-2"><i
+                        class="fa-solid fa-magnifying-glass fa-fw"></i></span>
+                <input @keyup="render()" @change="render()" @search="render()"
+                    class="ps-4 form-control border-white" type="search"
+                    placeholder="Search names" v-model="filesSelect.search">
+            </div>
 
+            <!-- choices-js-->
+            <div class="col-md-3 mb-1 mx-1">
 
+                <choices-vue ref="select-tag" :prop_selections="filterFlags" prop_type="tags" @data="handleTag($event)"></choices-vue>
+            </div>
+            <div class="col-md-3 mb-1 mx-1">
 
-                    <!-- Tag -->
-                    <div class="order-1 dropdown mb-1 d-none">
-                        <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Tag
-                        </button>
-                        <ul class="dropdown-menu bg-black">
-                            <li>
-                                <div class="py-1 px-2">
-                                    <div class="form-check">
-                                        <input @change="addFilters('Chain', item);render()"
-                                            class="form-check-input" type="checkbox" 
-                                            id="item +'ChainCheck'">
-                                        <label class="form-check-label" for="item +'ChainCheck'">
-                                            Auto-renew
-                                        </label>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
+                <choices-vue ref="select-label" :prop_selections="filterLabels" prop_type="labels" @data="handleLabel($event)"></choices-vue>
+            </div> 
 
-                    <!-- Color -->
-                    <div class="order-2 dropdown mb-1 d-none">
-                        <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Color
-                        </button>
-                        <ul class="dropdown-menu bg-black">
-                            <div>
-                                <li>
-                                    <div class="py-1 px-2">
-                                        <div class="form-check">
-                                            <input @change="addFilters('Set', setname, name);render()"
-                                                class="form-check-input" type="checkbox"
-                                                 id="setname + 'SetCheck'">
-                                            <label class="form-check-label" for="setname + 'SetCheck'">
-                                              Red
-                                            </label>
-                                        </div>
-                                    </div>
-                                </li>
-                            </div>
-                        </ul>
-                    </div>
+            <!-- Sort -->
+            <div class="dropdown mb-1">
+                <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="dropdown"
+                    aria-expanded="false"><i class="fa-solid fa-sort fa-fw ms-1"></i>
+                    Date Created
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end bg-black">
+                    <li>
+                        <a @click="filesSelect.dir='asc';filesSelect.sort='time';render()"
+                            class="dropdown-item" role="button">Date Created Ascending</a>
+                    </li>
+                        <li>
+                        <a @click="filesSelect.dir='dec';filesSelect.sort='time';render()"
+                            class="dropdown-item" role="button">Date Created Descending</a>
+                    </li>
+                    <li>
+                        <a @click="filesSelect.dir='asc';filesSelect.sort='exp';render()"
+                            class="dropdown-item" role="button">Date Expiring Ascending</a>
+                    </li>
+                    <li>
+                        <a @click="filesSelect.dir='dec';filesSelect.sort='exp';render()"
+                            class="dropdown-item" role="button">Date Expiring Descending</a>
+                    </li>
+                    <li>
+                        <a @click="filesSelect.dir='asc';filesSelect.sort='size';render()"
+                            class="dropdown-item" role="button">File Size Increasing</a>
+                    </li>
+                    <li>
+                        <a @click="filesSelect.dir='dec';filesSelect.sort='size';render()"
+                            class="dropdown-item" role="button">File Size Decreasing</a>
+                    </li>
+                    <li>
+                        <a @click="filesSelect.dir='asc';filesSelect.sort='type';render()"
+                            class="dropdown-item" role="button">File Type Ascending</a>
+                    </li>
+                    <li>
+                        <a @click="filesSelect.dir='dec';filesSelect.sort='type';render()"
+                            class="dropdown-item" role="button">File Type Descending</a>
+                    </li>
+                    <li>
+                        <a @click="filesSelect.dir='dec';filesSelect.sort='name';render()"
+                            class="dropdown-item" role="button">File Name A-Z</a>
+                    </li>
+                    <li>
+                        <a @click="filesSelect.dir='asc';filesSelect.sort='name';render()"
+                            class="dropdown-item" role="button">File Name Z-A</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
 
-                    <!-- Label -->
-                    <div class="order-3 dropdown mb-1 d-none">
-                        <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Label
-                        </button>
-                        <ul class="dropdown-menu bg-black">
-                            <li>
-                                <div class="py-1 px-2">
-                                    <div class="form-check">
-                                        <input @change="addFilters('Status', name);render()"
-                                            class="form-check-input" type="checkbox" 
-                                            id="name + 'StatusCheck'">
-                                        <label class="form-check-label" for="name + 'StatusCheck'">
-                                            Important
-                                        </label>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!-- Search -->
-                    <div class="position-relative flex-grow-1 mb-1 mx-1">
-                        <span class="position-absolute top-50 translate-middle-y ps-2"><i
-                                class="fa-solid fa-magnifying-glass fa-fw"></i></span>
-                        <input @keyup="render()" @change="render()" @search="render()"
-                            class="ps-4 form-control border-white" type="search"
-                            placeholder="Search names" v-model="filesSelect.search">
-                    </div>
-
-                    <!-- choices-js-->
-                    <div class="mb-1">
-
-                        <choices-vue ref="select-tag" :prop_selections="filterFlags" prop_type="tags" @data="handleTag($event)"></choices-vue>
-                    </div>
-                    <div class="mb-1">
-
-                        <choices-vue ref="select-label" :prop_selections="filterLabels" prop_type="labels" @data="handleLabel($event)"></choices-vue>
-                    </div> 
-
-                    <div class="d-flex order-last mx-1 w-sm-100 justify-content-between ">
-                      
-                        <!-- Sort -->
-                        <div class="dropdown mb-1">
-                            <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="dropdown"
-                                aria-expanded="false"><i class="fa-solid fa-sort fa-fw ms-1"></i>
-                                Date Created
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end bg-black">
-                                <li>
-                                    <a @click="filesSelect.dir='asc';filesSelect.sort='time';render()"
-                                        class="dropdown-item" role="button">Date Created Ascending</a>
-                                </li>
-                                 <li>
-                                    <a @click="filesSelect.dir='dec';filesSelect.sort='time';render()"
-                                        class="dropdown-item" role="button">Date Created Descending</a>
-                                </li>
-                                <li>
-                                    <a @click="filesSelect.dir='asc';filesSelect.sort='exp';render()"
-                                        class="dropdown-item" role="button">Date Expiring Ascending</a>
-                                </li>
-                                <li>
-                                    <a @click="filesSelect.dir='dec';filesSelect.sort='exp';render()"
-                                        class="dropdown-item" role="button">Date Expiring Descending</a>
-                                </li>
-                                <li>
-                                    <a @click="filesSelect.dir='asc';filesSelect.sort='size';render()"
-                                        class="dropdown-item" role="button">File Size Increasing</a>
-                                </li>
-                                <li>
-                                    <a @click="filesSelect.dir='dec';filesSelect.sort='size';render()"
-                                        class="dropdown-item" role="button">File Size Decreasing</a>
-                                </li>
-                                <li>
-                                    <a @click="filesSelect.dir='asc';filesSelect.sort='type';render()"
-                                        class="dropdown-item" role="button">File Type Ascending</a>
-                                </li>
-                                <li>
-                                    <a @click="filesSelect.dir='dec';filesSelect.sort='type';render()"
-                                        class="dropdown-item" role="button">File Type Descending</a>
-                                </li>
-                                <li>
-                                    <a @click="filesSelect.dir='dec';filesSelect.sort='name';render()"
-                                        class="dropdown-item" role="button">File Name A-Z</a>
-                                </li>
-                                <li>
-                                    <a @click="filesSelect.dir='asc';filesSelect.sort='name';render()"
-                                        class="dropdown-item" role="button">File Name Z-A</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+        <div class="d-flex align-items-center mx-1">
+            <h5 class="mb-0"> Items</h5>
+            <div class="ms-auto">
+                <div class="btn-group">
+                    <input type="radio" class="btn-check" name="smView" id="setSingle" autocomplete="off" />
+                    <label class="btn btn-outline-warning" for="setSingle"><i
+                            class="fa-regular fa-square fa-fw"></i></label>
+                    <input type="radio" class="btn-check" name="smView" id="setDouble" autocomplete="off"
+                        checked />
+                    <label class="btn btn-outline-warning" for="setDouble"><i
+                            class="fa-solid fa-table-cells-large fa-fw"></i></label>
                 </div>
-                <div class="d-none flex-wrap align-items-center justify-content-center">
-                    <!-- filter collapse-->
-                    <div class="collapse order-last d-xl-none mx-1" id="collapseFilter">
-                        <div class="d-flex flex-row flex-wrap">
-
-                        
-
-                            <!-- Tag -->
-                            <div class="order-1 dropdown mb-1 d-none">
-                                <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    Tag
-                                </button>
-                                <ul class="dropdown-menu bg-black">
-                                    <li>
-                                        <div class="py-1 px-2">
-                                            <div class="form-check">
-                                                <input @change="addFilters('Chain', item);render()"
-                                                    class="form-check-input" type="checkbox"
-                                                    >
-                                                <label class="form-check-label" for="item +'ChainCheck'">
-                                                   NSFW
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <!-- Color -->
-                            <div class="order-2 dropdown mb-1 d-none">
-                                <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    Color
-                                </button>
-                                <ul class="dropdown-menu bg-black">
-                                    <div>
-                                        <li>
-                                            <div class="py-1 px-2">
-                                                <div class="form-check">
-                                                    <input @change="addFilters('Set', setname, name);render()"
-                                                        class="form-check-input" type="checkbox"
-                                                        
-                                                        id="setname + 'SetCheck'">
-                                                    <label class="form-check-label" for="setname + 'SetCheck'">
-                                                       Red
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    </div>
-                                </ul>
-                            </div>
-
-                            <!-- Label -->
-                            <div class="order-3 dropdown mb-1 d-none">
-                                <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    Label
-                                </button>
-                                <ul class="dropdown-menu bg-black">
-                                    <li>
-                                        <div class="py-1 px-2">
-                                            <div class="form-check">
-                                                <input @change="addFilters('Status', name);render()"
-                                                    class="form-check-input" type="checkbox" >
-                                                <label class="form-check-label" for="name + 'StatusCheck'">
-                                                   Random
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
-                            
-
-                        </div>
-
-                        <div class="d-none d-flex flex-row flex-wrap mt-2 order-last" >
-                            <!-- Active Filters -->
-                            <div
-                                class="rounded bg-secondary text-black filter-bubble me-1 mb-1 d-flex align-items-center">
-                                <span></span>
-                                <button @click="clearFilters(item)" type="button"
-                                    class="ms-1 btn-close btn-close-white"></button>
-                            </div>
-                            <button @click="clearFilters()" type="button"
-                                class="btn btn-secondary mb-1">
-                                Clear All
-                            </button>
-                        </div>
-
-
-                    </div>
-
-                </div>
-                <div class="d-flex align-items-center mx-1">
-                    <h5 class="mb-0"> Items</h5>
-                    <div class="ms-auto">
-                        <div class="btn-group">
-                            <input type="radio" class="btn-check" name="smView" id="setSingle" autocomplete="off" />
-                            <label class="btn btn-outline-warning" for="setSingle"><i
-                                    class="fa-regular fa-square fa-fw"></i></label>
-                            <input type="radio" class="btn-check" name="smView" id="setDouble" autocomplete="off"
-                                checked />
-                            <label class="btn btn-outline-warning" for="setDouble"><i
-                                    class="fa-solid fa-table-cells-large fa-fw"></i></label>
-                        </div>
-                    </div>
-
-                </div>
-                <div class="d-none d-flex flex-wrap mt-2 d-none d-xl-flex mx-1">
-                    <!-- Active Filters -->
-                    <div class="rounded bg-secondary text-black filter-bubble me-1 mb-1 d-flex align-items-center">
-                        <span></span>
-                        <button @click="clearFilters(item)" type="button"
-                            class="ms-1 btn-close btn-close-white"></button>
-                    </div>
-                    <button @click="clearFilters()" type="button"
-                        class="btn btn-secondary mb-1">
-                        Clear All
-                    </button>
-                </div>
+            </div>
+        </div>
     </div>
+
 
     <div class="me-auto">
         <!-- items -->
@@ -336,7 +155,7 @@ export default {
 
                     <div class="d-flex flex-column rounded p-1" style="background-color: rgba(0, 0, 0, 0.6);">
 
-                        <div v-if="!(file.l.length || file.lf)" class="ms-auto me-auto">
+                        <div v-if="!(file.l.length || file.lf)" class="ms-auto me-auto muted">
                             Edit
                         </div>
 
