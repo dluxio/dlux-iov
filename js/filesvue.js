@@ -331,38 +331,47 @@ export default {
                                 <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto" @click="addAsset(file, contract)"><span class="d-flex align-items-center w-100">Add asset<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
                             </div>
                     </div>
-                    <div class="d-flex align-items-center justify-content-between">
 
-                        <div class="d-flex align-items-center text-break small text-muted">
-                            {{fancyBytes(file.s)}}
+                    
+
+                    <div class="d-flex flex-column rounded p-1" style="background-color: rgba(0, 0, 0, 0.6);">
+
+                        <div v-if="!file.l.length && !files.lf" class="ms-auto me-auto">
+                            Edit
                         </div>
 
-                        <div class="mx-1">
-                            <div class="d-flex align-items-center" style="margin-left: 15px">
-                                    <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa" :style="'margin-left: ' + -15 +'px !important;'"></i>
+                        <div class="d-flex align-items-center justify-content-between">
+                            
+                            <div class="me-1">
+                                <div class="d-flex align-items-center" style="margin-left: 15px">
+                                        <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa" :style="'margin-left: ' + -15 +'px !important;'"></i>
+                                </div>
+                            </div>
+
+                            <div class="mx-auto" v-for="label in labelsDecode(file.ll, 0)">
+                                <span class="d-flex align-items-center w-100">
+                                    <pop-vue :id="'popperL-' + file.i + file.index + label.l" title="Labels" trigger="hover">
+                                        <i :class="label.fa"></i>
+                                    </pop-vue>
+                                </span>
+                            </div>
+
+                            <div class="d-flex align-items-center ms-auto ms-1">
+                            <div v-for="flag in flagsDecode(newMeta[file.i][file.index * 4 + 4])" >
+                                    <!-- title="Labels"  -->
+                                    <pop-vue :id="'popper-' + file.i + file.index + flag.l" :title="flag.l" trigger="hover">
+                                        <i :class="flag.fa"></i>
+                                    </pop-vue>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="d-flex align-items-center ms-auto">
-                          <div v-for="flag in flagsDecode(newMeta[file.i][file.index * 4 + 4])" >
-                                <!-- title="Labels"  -->
-                                <pop-vue :id="'popper-' + file.i + file.index + flag.l" :title="flag.l" trigger="hover">
-                                    <i :class="flag.fa"></i>
-                                </pop-vue>
-                            </div>
-                        </div>
                     </div>
                     
-                    <div class="d-flex flex-wrap rounded p-1" style="background-color: rgba(0, 0, 0, 0.6);">
-                        
-                        <div v-for="label in labelsDecode(file.ll, 0)">
-                            <span class="d-flex align-items-center w-100">
-                                <pop-vue :id="'popperL-' + file.i + file.index + label.l" title="Labels" trigger="hover">
-                                    <i :class="label.fa"></i>
-                                </pop-vue>
-                            </span>
+                    <div class="d-flex align-items-center text-center text-break small text-muted">
+                                {{fancyBytes(file.s)}}
                         </div>
-                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -413,10 +422,10 @@ export default {
             decoded: false,
             debounce: null,
             labels: {
-                ["0"]: { fa: "fa-solid fa-sink fa-fw me-1 mb-1", l: "Miscellaneous", c:0 },
-                ["1"]: { fa: "fa-solid fa-exclamation fa-fw me-1 mb-1", l: "Important", c:0 },
-                ["2"]: { fa: "fa-solid fa-star fa-fw me-1 mb-1", l: "Favorite", c:0 },
-                ["3"]: { fa: "fa-solid fa-dice fa-fw me-1 mb-1", l: "Random", c:0 },
+                ["0"]: { fa: "fa-solid fa-sink fa-fw", l: "Miscellaneous", c:0 },
+                ["1"]: { fa: "fa-solid fa-exclamation fa-fw", l: "Important", c:0 },
+                ["2"]: { fa: "fa-solid fa-star fa-fw", l: "Favorite", c:0 },
+                ["3"]: { fa: "fa-solid fa-dice fa-fw", l: "Random", c:0 },
                 ["4"]: { fa: "fa-solid fa-circle fa-fw text-red", l: "Red", c:1},
                 ["5"]: { fa: "fa-solid fa-circle fa-fw text-orange", l: "Orange", c:1 },
                 ["6"]: { fa: "fa-solid fa-circle fa-fw text-yellow", l: "Yellow", c:1 },
@@ -424,59 +433,59 @@ export default {
                 ["8"]: { fa: "fa-solid fa-circle fa-fw text-blue", l: "Blue", c:1 },
                 ["9"]: { fa: "fa-solid fa-circle fa-fw text-purple", l: "Purple", c:1 },
                 ["A"]: { fa: "fa-solid fa-circle fa-fw text-grey", l: "Grey", c:1 },
-                ["B"]: { fa: "fa-solid fa-briefcase fa-fw me-1 mb-1", l: "Work", c:0 },
-                ["C"]: { fa: "fa-solid fa-heart fa-fw me-1 mb-1", l: "Personal", c:0 },
-                ["D"]: { fa: "fa-solid fa-people-roof fa-fw me-1 mb-1", l: "Family", c:0 },
-                ["E"]: { fa: "fa-solid fa-people-group fa-fw me-1 mb-1", l: "Friends", c:0 },
-                ["F"]: { fa: "fa-solid fa-rocket fa-fw me-1 mb-1", l: "Projects", c:0 },
-                ["G"]: { fa: "fa-solid fa-piggy-bank fa-fw me-1 mb-1", l: "Finance", c:0 },
-                ["H"]: { fa: "fa-solid fa-kit-medical fa-fw me-1 mb-1", l: "Health", c:0 },
-                ["I"]: { fa: "fa-solid fa-graduation-cap fa-fw me-1 mb-1", l: "Education", c:0 },
-                ["J"]: { fa: "fa-solid fa-compass fa-fw me-1 mb-1", l: "Travel", c:0 },
-                ["K"]: { fa: "fa-regular fa-calendar-days fa-fw me-1 mb-1", l: "Events", c:0 },
-                ["L"]: { fa: "fa-solid fa-camera fa-fw me-1 mb-1", l: "Photography", c:0 },
-                ["M"]: { fa: "fa-solid fa-gamepad fa-fw me-1 mb-1", l: "Gaming", c:0 },
-                ["N"]: { fa: "fa-solid fa-volleyball fa-fw me-1 mb-1", l: "Sports", c:0 },
-                ["O"]: { fa: "fa-solid fa-feather fa-fw me-1 mb-1", l: "Blogging", c:0 },
-                ["P"]: { fa: "fa-solid fa-crown fa-fw me-1 mb-1", l: "Meme", c:0 },
-                ["Q"]: { fa: "fa-solid fa-music fa-fw me-1 mb-1", l: "Music", c:0 },
-                ["R"]: { fa: "fa-solid fa-video fa-fw me-1 mb-1", l: "Video", c:0 },
-                ["S"]: { fa: "fa-solid fa-microphone fa-fw me-1 mb-1", l: "Audio", c:0 },
-                ["T"]: { fa: "fa-solid fa-newspaper fa-fw me-1 mb-1", l: "News", c:0 },
-                ["U"]: { fa: "fa-solid fa-code fa-fw me-1 mb-1", l: "Development", c:0 },
-                ["V"]: { fa: "fa-solid fa-hat-cowboy fa-fw me-1 mb-1", l: "Fashion", c:0 },
-                ["W"]: { fa: "fa-solid fa-burger fa-fw me-1 mb-1", l: "Food", c:0 },
-                ["X"]: { fa: "fa-solid fa-utensils fa-fw me-1 mb-1", l: "Cooking", c:0 },
-                ["Y"]: { fa: "fa-solid fa-toolbox fa-fw me-1 mb-1", l: "DIY", c:0 },
-                ["Z"]: { fa: "fa-solid fa-paintbrush fa-fw me-1 mb-1", l: "Art", c:0 },
-                ["a"]: { fa: "fa-solid fa-swatchbook fa-fw me-1 mb-1", l: "Design", c:0 },
-                ["b"]: { fa: "fa-solid fa-microchip fa-fw me-1 mb-1", l: "Technology", c:0 },
-                ["c"]: { fa: "fa-solid fa-cross fa-fw me-1 mb-1", l: "Religion", c:0 },
-                ["d"]: { fa: "fa-solid fa-scale-balanced fa-fw me-1 mb-1", l: "Government", c:0 },
-                ["e"]: { fa: "fa-solid fa-landmark-dome fa-fw me-1 mb-1", l: "Politics", c:0 },
-                ["f"]: { fa: "fa-solid fa-vial fa-fw me-1 mb-1", l: "Science", c:0 },
-                ["g"]: { fa: "fa-solid fa-magnifying-glass fa-fw me-1 mb-1", l: "Research", c:0 },
-                ["h"]: { fa: "fa-solid fa-receipt fa-fw me-1 mb-1", l: "Receipts", c:0 },
-                ["i"]: { fa: "fa-solid fa-envelope-open-text fa-fw me-1 mb-1", l: "Correspondence", c:0 },
-                ["j"]: { fa: "fa-solid fa-copy fa-fw me-1 mb-1", l: "Templates", c:0 },
-                ["k"]: { fa: "fa-solid fa-file-lines fa-fw me-1 mb-1", l: "Resources", c:0 },
-                ["l"]: { fa: "fa-solid fa-book-bookmark fa-fw me-1 mb-1", l: "Reference", c:0 },
-                ["m"]: { fa: "fa-solid fa-floppy-disk fa-fw me-1 mb-1", l: "Backups", c:0 },
-                ["n"]: { fa: "fa-solid fa-box-archive fa-fw me-1 mb-1", l: "Archive", c:0 },
-                ["o"]: { fa: "fa-solid fa-compass-drafting fa-fw me-1 mb-1", l: "Drafts", c:0 },
-                ["p"]: { fa: "fa-solid fa-flag-checkered fa-fw me-1 mb-1", l: "Finished", c:0 },
-                ["q"]: { fa: "fa-solid fa-paper-plane fa-fw me-1 mb-1", l: "Sent", c:0 },
-                ["r"]: { fa: "fa-solid fa-clock fa-fw me-1 mb-1", l: "Pending", c:0 },
-                ["s"]: { fa: "fa-solid fa-thumbs-up fa-fw me-1 mb-1", l: "Approved", c:0 },
-                ["t"]: { fa: "fa-solid fa-thumbs-down fa-fw me-1 mb-1", l: "Rejected", c:0 },
-                ["u"]: { fa: "fa-solid fa-lightbulb fa-fw me-1 mb-1", l: "Ideas", c:0 },
-                ["v"]: { fa: "fa-solid fa-bullseye fa-fw me-1 mb-1", l: "Goals", c:0 },
-                ["w"]: { fa: "fa-solid fa-list-check fa-fw me-1 mb-1", l: "Tasks", c:0 },
-                ["x"]: { fa: "fa-solid fa-gavel fa-fw me-1 mb-1", l: "Legal", c:0 },
-                ["y"]: { fa: "fa-solid fa-handshake fa-fw me-1 mb-1", l: "Networking", c:0 },
-                ["z"]: { fa: "fa-solid fa-comments fa-fw me-1 mb-1", l: "Feedback", c:0 },
-                ["+"]: { fa: "fa-solid fa-square-poll-vertical fa-fw me-1 mb-1", l: "Surveys", c:0 },
-                ["="]: { fa: "fa-solid fa-user-secret fa-fw me-1 mb-1", l: "Classified", c:0 }
+                ["B"]: { fa: "fa-solid fa-briefcase fa-fw", l: "Work", c:0 },
+                ["C"]: { fa: "fa-solid fa-heart fa-fw", l: "Personal", c:0 },
+                ["D"]: { fa: "fa-solid fa-people-roof fa-fw", l: "Family", c:0 },
+                ["E"]: { fa: "fa-solid fa-people-group fa-fw", l: "Friends", c:0 },
+                ["F"]: { fa: "fa-solid fa-rocket fa-fw", l: "Projects", c:0 },
+                ["G"]: { fa: "fa-solid fa-piggy-bank fa-fw", l: "Finance", c:0 },
+                ["H"]: { fa: "fa-solid fa-kit-medical fa-fw", l: "Health", c:0 },
+                ["I"]: { fa: "fa-solid fa-graduation-cap fa-fw", l: "Education", c:0 },
+                ["J"]: { fa: "fa-solid fa-compass fa-fw", l: "Travel", c:0 },
+                ["K"]: { fa: "fa-regular fa-calendar-days fa-fw", l: "Events", c:0 },
+                ["L"]: { fa: "fa-solid fa-camera fa-fw", l: "Photography", c:0 },
+                ["M"]: { fa: "fa-solid fa-gamepad fa-fw", l: "Gaming", c:0 },
+                ["N"]: { fa: "fa-solid fa-volleyball fa-fw", l: "Sports", c:0 },
+                ["O"]: { fa: "fa-solid fa-feather fa-fw", l: "Blogging", c:0 },
+                ["P"]: { fa: "fa-solid fa-crown fa-fw", l: "Meme", c:0 },
+                ["Q"]: { fa: "fa-solid fa-music fa-fw", l: "Music", c:0 },
+                ["R"]: { fa: "fa-solid fa-video fa-fw", l: "Video", c:0 },
+                ["S"]: { fa: "fa-solid fa-microphone fa-fw", l: "Audio", c:0 },
+                ["T"]: { fa: "fa-solid fa-newspaper fa-fw", l: "News", c:0 },
+                ["U"]: { fa: "fa-solid fa-code fa-fw", l: "Development", c:0 },
+                ["V"]: { fa: "fa-solid fa-hat-cowboy fa-fw", l: "Fashion", c:0 },
+                ["W"]: { fa: "fa-solid fa-burger fa-fw", l: "Food", c:0 },
+                ["X"]: { fa: "fa-solid fa-utensils fa-fw", l: "Cooking", c:0 },
+                ["Y"]: { fa: "fa-solid fa-toolbox fa-fw", l: "DIY", c:0 },
+                ["Z"]: { fa: "fa-solid fa-paintbrush fa-fw", l: "Art", c:0 },
+                ["a"]: { fa: "fa-solid fa-swatchbook fa-fw", l: "Design", c:0 },
+                ["b"]: { fa: "fa-solid fa-microchip fa-fw", l: "Technology", c:0 },
+                ["c"]: { fa: "fa-solid fa-cross fa-fw", l: "Religion", c:0 },
+                ["d"]: { fa: "fa-solid fa-scale-balanced fa-fw", l: "Government", c:0 },
+                ["e"]: { fa: "fa-solid fa-landmark-dome fa-fw", l: "Politics", c:0 },
+                ["f"]: { fa: "fa-solid fa-vial fa-fw", l: "Science", c:0 },
+                ["g"]: { fa: "fa-solid fa-magnifying-glass fa-fw", l: "Research", c:0 },
+                ["h"]: { fa: "fa-solid fa-receipt fa-fw", l: "Receipts", c:0 },
+                ["i"]: { fa: "fa-solid fa-envelope-open-text fa-fw", l: "Correspondence", c:0 },
+                ["j"]: { fa: "fa-solid fa-copy fa-fw", l: "Templates", c:0 },
+                ["k"]: { fa: "fa-solid fa-file-lines fa-fw", l: "Resources", c:0 },
+                ["l"]: { fa: "fa-solid fa-book-bookmark fa-fw", l: "Reference", c:0 },
+                ["m"]: { fa: "fa-solid fa-floppy-disk fa-fw", l: "Backups", c:0 },
+                ["n"]: { fa: "fa-solid fa-box-archive fa-fw", l: "Archive", c:0 },
+                ["o"]: { fa: "fa-solid fa-compass-drafting fa-fw", l: "Drafts", c:0 },
+                ["p"]: { fa: "fa-solid fa-flag-checkered fa-fw", l: "Finished", c:0 },
+                ["q"]: { fa: "fa-solid fa-paper-plane fa-fw", l: "Sent", c:0 },
+                ["r"]: { fa: "fa-solid fa-clock fa-fw", l: "Pending", c:0 },
+                ["s"]: { fa: "fa-solid fa-thumbs-up fa-fw", l: "Approved", c:0 },
+                ["t"]: { fa: "fa-solid fa-thumbs-down fa-fw", l: "Rejected", c:0 },
+                ["u"]: { fa: "fa-solid fa-lightbulb fa-fw", l: "Ideas", c:0 },
+                ["v"]: { fa: "fa-solid fa-bullseye fa-fw", l: "Goals", c:0 },
+                ["w"]: { fa: "fa-solid fa-list-check fa-fw", l: "Tasks", c:0 },
+                ["x"]: { fa: "fa-solid fa-gavel fa-fw", l: "Legal", c:0 },
+                ["y"]: { fa: "fa-solid fa-handshake fa-fw", l: "Networking", c:0 },
+                ["z"]: { fa: "fa-solid fa-comments fa-fw", l: "Feedback", c:0 },
+                ["+"]: { fa: "fa-solid fa-square-poll-vertical fa-fw", l: "Surveys", c:0 },
+                ["="]: { fa: "fa-solid fa-user-secret fa-fw", l: "Classified", c:0 }
             }
 
         };
@@ -634,10 +643,10 @@ export default {
         flagsDecode(flags = "") {
             var num = this.Base64toNumber(flags[0])
             var out = []
-            if (num & 1) out.push({ fa: 'fa-solid fa-lock text-primary fa-fw me-1 mb-1', l: "Encrypted" })
-            if (num & 2) out.push({ fa: 'fa-solid fa-arrows-rotate text-success fa-fw me-1 mb-1', l: "AutoRenew" })
-            if (num & 4) out.push({ fa: 'fa-solid fa-radiation text-warning fa-fw me-1 mb-1', l: "NSFW" })
-            if (num & 8) out.push({ fa: 'fa-regular fa-file-code text-info fa-fw me-1 mb-1', l: "Executable" })
+            if (num & 1) out.push({ fa: 'fa-solid fa-lock text-primary fa-fw', l: "Encrypted" })
+            if (num & 2) out.push({ fa: 'fa-solid fa-arrows-rotate text-success fa-fw', l: "AutoRenew" })
+            if (num & 4) out.push({ fa: 'fa-solid fa-radiation text-warning fa-fw', l: "NSFW" })
+            if (num & 8) out.push({ fa: 'fa-regular fa-file-code text-info fa-fw', l: "Executable" })
             return out
         },
         labelsDecode(flags = "", index = -1) {
