@@ -280,9 +280,9 @@ export default {
 
     <div class="me-auto">
         <!-- items -->
-        <div class="d-flex flex-wrap justify-content-between">
-            <div class="card bg-blur-darkg col-5 col-sm-4 col-md-3 col-lg-2 col-xl-1 m-05 p-05" v-for="file in filesArray" style="min-width:150px;">
-                <div class="text-center">
+        <div class="d-flex flex-wrap ">
+            <div class="card bg-blur-darkg col-4 col-sm-3 col-md-2 col-lg-1 col-xl-1 m-05 p-05 me-auto" v-for="file in filesArray" style="min-width:150px;">
+                <div class="text-start">
                     <a :href="'https://ipfs.dlux.io/ipfs/' + file" target="_blank" class="no-decoration"><div class="small text-black-50 text-truncate">{{newMeta[file.i][file.index * 4 + 1] || file}}.{{ newMeta[file.i][file.index * 4 + 2] }}</div></a>
                     <h5 class="m-0 ms-auto align-self-end"><span class="d-none badge square rounded-top border border-bottom-0 bg-info border-light-50" :class="smartColor(newMeta[file.i][file.index * 4 + 4])"><i :class="smartIcon(newMeta[file.i][file.index * 4 + 4])"></i>{{ newMeta[file.i][file.index * 4 + 2] }}</span></h5>
                     <div class="bg-light">    
