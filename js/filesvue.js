@@ -571,7 +571,7 @@ export default {
                 arr.push(this.labels[flags[i]])
             }
             arr = new Set(arr)
-            return arr
+            return new Array(...arr)
         },
         Base64toNumber(chars = "0") {
             if (typeof chars != 'string') {
