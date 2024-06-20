@@ -309,7 +309,7 @@ export default {
                     
 
                     <div class="mt-1">
-                            {{flagsDecode(newMeta[file.i][file.index * 4 + 4])}} ||
+                            {{flagDecode(newMeta[file.i][file.index * 4 + 4])}} ||
                             {{labelsDecode(newMeta[file.i][file.index * 4 + 4], 1)}} ||
                             {{labelsDecode(newMeta[file.i][file.index * 4 + 4])}}
                             <!-- link -->
