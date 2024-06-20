@@ -608,7 +608,10 @@ export default {
             return result;
         },
         render() {
-            this.filesArray = Object.values(this.files)
+            this.filesArray = []
+            for (var i in this.files) {
+                this.filesArray.push(this.files[i])
+            }
 
         },
         init() {
