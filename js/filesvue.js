@@ -627,7 +627,7 @@ export default {
                 } else {
                     this.newMeta[id] = this.contract[id].m.split(",")
                 }
-                var keys = Object.keys(this.contracts[i].df)
+                var keys = Object.keys(this.contract[id].df)
                 for (var j in keys) {
                     try{
                         console.log(this.newMeta[id][j*4+4])
