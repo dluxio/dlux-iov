@@ -1,7 +1,7 @@
 export default {
     template: `
-<div class="w-100 d-flex flex-column bg-dark p-05">
-    <div >
+<div class="d-flex flex-grow-1 flex-column p-05 rounded m-05" style="background-color: rgba(0, 0, 0, 0.6);">
+    <div class="pt-1">
         <!-- ACTION BAR -->
                 <div class="d-flex flex-wrap align-items-center justify-content-center">
 
@@ -278,13 +278,13 @@ export default {
                 </div>
     </div>
 
-    <div >
+    <div class="me-auto">
         <!-- items -->
-        <div class="d-flex flex-wrap ">
-            <div class="card col-5 col-sm-4 col-md-3 col-lg-2 col-xl-1 m-05 p-05" v-for="file in filesArray" style="min-width:150px;">
-                <div class="">
-                    
-                    <h5 class="m-0 ms-auto align-self-end"><span class="badge square rounded-top border border-bottom-0 bg-info border-light-50" :class="smartColor(newMeta[file.i][file.index * 4 + 4])"><i :class="smartIcon(newMeta[file.i][file.index * 4 + 4])"></i>{{ newMeta[file.i][file.index * 4 + 2] }}</span></h5>
+        <div class="d-flex flex-wrap justify-content-between">
+            <div class="card bg-blur-darkg col-5 col-sm-4 col-md-3 col-lg-2 col-xl-1 m-05 p-05" v-for="file in filesArray" style="min-width:150px;">
+                <div class="text-center">
+                    <a :href="'https://ipfs.dlux.io/ipfs/' + file" target="_blank" class="no-decoration"><div class="small text-black-50 text-truncate">{{newMeta[file.i][file.index * 4 + 1] || file}}.{{ newMeta[file.i][file.index * 4 + 2] }}</div></a>
+                    <h5 class="m-0 ms-auto align-self-end"><span class="d-none badge square rounded-top border border-bottom-0 bg-info border-light-50" :class="smartColor(newMeta[file.i][file.index * 4 + 4])"><i :class="smartIcon(newMeta[file.i][file.index * 4 + 4])"></i>{{ newMeta[file.i][file.index * 4 + 2] }}</span></h5>
                     <div class="bg-light">    
                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                                 viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
@@ -329,12 +329,9 @@ export default {
                             <div v-if="assets">
                                 <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto" @click="addAsset(file, contract)"><span class="d-flex align-items-center w-100">Add asset<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
                             </div>
-
-                        <span class="text-break small text-muted">{{fancyBytes(file.s)}}</span><br>
-                        
-                       
                     </div>
-                    <a :href="'https://ipfs.dlux.io/ipfs/' + file" target="_blank" class="no-decoration"><div class="small text-black-50">{{newMeta[file.i][file.index * 4 + 1] || file}}.{{ newMeta[file.i][file.index * 4 + 2] }}</div></a>
+                    <span class="text-break small text-muted">{{fancyBytes(file.s)}}</span>
+                    
                     
                 </div>
             </div>
