@@ -618,6 +618,7 @@ export default {
                     this.newMeta[id] = this.contract[id].m.split(",")
                 }
             }
+            this.filesArray = new Set(this.filesArray)
             this.files = this.contract.df;
         }
     },
