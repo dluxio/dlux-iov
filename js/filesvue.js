@@ -612,16 +612,6 @@ export default {
                 if (this.contracts[i].c == 1) continue
                 const id = this.contracts[i].i
                 this.contract[id] = this.contracts[i];
-                var keys = Object.keys(this.contracts[i].df)
-                for (var j in keys) {
-                    const f = {
-                        i: id,
-                        f: keys[i],
-                        index: j,
-                        s: this.contracts[i].df[keys[j]]
-                    }
-                    this.filesArray.push(f);
-                }
                 if (!this.contract[id].m) {
                     this.contract[id].m = ""
                     const filesNum = this.contracts[i].df ? Object.keys(this.contracts[i].df).length : 0
@@ -629,8 +619,22 @@ export default {
                 } else {
                     this.newMeta[id] = this.contract[id].m.split(",")
                 }
+                var keys = Object.keys(this.contracts[i].df)
+                for (var j in keys) {
+                    const f = {
+                        i: id,
+                        f: keys[i],
+                        index: j,
+                        lf: parseInt(this.contracts[i].m[j*4+4][0] || 0),
+                        l: this.contracts[i].m[j*4+4] ? this.contracts[i].m[j*4+4].slice(1) || '' : '',
+                        s: this.contracts[i].df[keys[j]]
+                    }
+                    this.filesArray.push(f);
+                }
             }
-            this.filesArray = new Set(this.filesArray)
+            this.filesArray = this.filesArray.filter((value, index, self) =>
+                index === self.findIndex((t) => (
+                  t.f === value.f)))
             this.files = this.contract.df;
         }
     },
