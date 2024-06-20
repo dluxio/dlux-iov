@@ -634,7 +634,7 @@ export default {
                     } catch (e) {}
                     const f = {
                         i: id,
-                        f: keys[i],
+                        f: keys[j],
                         c: this.contract[id].i.split(':')[2].split('-')[0],
                         e: this.contract[id].e.split(':')[0],
                         index: j,
