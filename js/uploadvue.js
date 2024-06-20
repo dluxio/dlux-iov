@@ -608,7 +608,7 @@ methods: {
           contract: contract,
           cid: null,
           cids: `${cids.join(',')}`,
-          meta,
+          meta: encodeURI(meta),
           onAbort: (e, f) => {
             console.log('options.onAbort')
             // const fileObj = files.get(file);
