@@ -387,6 +387,10 @@ export default {
                 }];
             }
         },
+        account: {
+            type: String,
+            default: "",
+        }
     },
     data() {
         return {
@@ -489,7 +493,7 @@ export default {
             } else {
                 var string = this.filterLabels
                 var arr = string.split('')
-                for (var j = 1; j < arr.length; j++) {
+                for (var j = 0; j < arr.length; j++) {
                     if (arr[j] == m.item) arr.splice(j, 1)
                 }
                 this.filterLabels = arr.join('')
@@ -660,6 +664,19 @@ export default {
                 num = Math.floor(num / 64);
             }
             return result;
+        },
+        decode(id) {
+            return new Promise((resolve, reject) => {
+                const key = this.contract[id].encryption.accounts[this.account].enc_key;
+                hive_keychain.requestVerifyKey(this.account, key, 'Memo', (response) => {
+                    if (response.success) {
+                        this.contract[id].encryption.key = response.result.split('#')[1]
+                        resolve("OK")
+                    } else {
+                        reject(response.message);
+                    }
+                });
+            })
         },
         render() {
             this.filesArray = []

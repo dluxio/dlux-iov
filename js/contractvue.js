@@ -72,7 +72,7 @@ export default {
                 <!-- has files -->
                 <div v-if="!hasFiles" class="d-flex flex-wrap justify-content-center">
                     
-                        <files-vue :assets="assets" @addassets="addAssets($event)"
+                        <files-vue :assets="assets" @addassets="addAssets($event)" account="spkapi.name"
                             :contracts="contracts"></files-vue>
                    
                 </div>
