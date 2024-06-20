@@ -1,18 +1,291 @@
 export default {
     template: `
-<div class="w-100 row bg-darker">
-    <div class="col-md-4 col-lg-3 col-xl-2">
+<div class="w-100 d-flex flex-column bg-dark p-05">
+    <div >
+        <!-- ACTION BAR -->
+                <div class="d-flex flex-wrap align-items-center justify-content-center">
 
+
+
+                    <!-- Chain -->
+                    <div class="order-1 dropdown d-none d-xl-block mb-1">
+                        <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Chain
+                        </button>
+                        <ul class="dropdown-menu bg-black">
+                            <li>
+                                <div class="py-1 px-2">
+                                    <div class="form-check">
+                                        <input @change="addFilters('Chain', item);displaynfts()"
+                                            class="form-check-input" type="checkbox" 
+                                            id="item +'ChainCheck'">
+                                        <label class="form-check-label" for="item +'ChainCheck'">
+                                            
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Set -->
+                    <div class="order-2 dropdown d-none d-xl-block mb-1">
+                        <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Set
+                        </button>
+                        <ul class="dropdown-menu bg-black">
+                            <div>
+                                <li>
+                                    <div class="py-1 px-2">
+                                        <div class="form-check">
+                                            <input @change="addFilters('Set', setname, name);displaynfts()"
+                                                class="form-check-input" type="checkbox"
+                                                 id="setname + 'SetCheck'">
+                                            <label class="form-check-label" for="setname + 'SetCheck'">
+                                              
+                                            </label>
+                                        </div>
+                                    </div>
+                                </li>
+                            </div>
+                        </ul>
+                    </div>
+                    <!-- Status -->
+                    <div class="order-3 dropdown d-none d-xl-block mb-1">
+                        <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Status
+                        </button>
+                        <ul class="dropdown-menu bg-black">
+                            <li>
+                                <div class="py-1 px-2">
+                                    <div class="form-check">
+                                        <input @change="addFilters('Status', name);displaynfts()"
+                                            class="form-check-input" type="checkbox" 
+                                            id="name + 'StatusCheck'">
+                                        <label class="form-check-label" for="name + 'StatusCheck'">
+                                         
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- Currency -->
+                    <div class="order-4 dropdown d-none d-xl-block mb-1 ">
+                        <button class="btn btn-outline-light dropdown-toggle mx-1" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Currency
+                        </button>
+                        <ul class="dropdown-menu bg-black">
+                            <li>
+                                <div class="py-1 px-2">
+                                    <div class="form-check">
+                                        <input @change="addFilters('Currency', name);displaynfts()"
+                                            class="form-check-input" type="checkbox" 
+                                            id="name + 'CurrencyCheck'">
+                                        <label class="form-check-label" for="name + 'CurrencyCheck'">
+                                           
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- Search -->
+                    <div class="position-relative flex-grow-1 mb-1 mx-1 order-md-5">
+                        <span class="position-absolute top-50 translate-middle-y ps-2"><i
+                                class="fa-solid fa-magnifying-glass fa-fw"></i></span>
+                        <input @keyup="displaynfts()" @change="displaynfts()" @search="displaynfts()"
+                            class="ps-4 form-control border-white" type="search"
+                            placeholder="Search sets, items, and accounts">
+                    </div>
+                    <div class="d-flex order-last mx-1 w-sm-100 justify-content-between ">
+                        <!-- Filter button -->
+                        <div class="d-xl-none mb-1 me-2 flex-fill">
+                            <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseFilter" aria-expanded="false" aria-controls="collapseFilter">
+                                <i class="fa-solid fa-filter me-1"></i>Filter
+                            </button>
+
+
+                        </div>
+                        <!-- Sort -->
+                        <div class="dropdown mb-1 flex-fill">
+                            <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="dropdown"
+                                aria-expanded="false"><i class="fa-solid fa-sort fa-fw ms-1"></i>
+                                
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end bg-black">
+                                <li>
+                                    <a @click="NFTselect.dir='asc';NFTselect.sort='price';displaynfts()"
+                                        class="dropdown-item" role="button">Price low to high</a>
+                                </li>
+                                <li>
+                                    <a @click="NFTselect.dir='dec';NFTselect.sort='price';displaynfts()"
+                                        class="dropdown-item" role="button">Price high to low</a>
+                                </li>
+                                <li>
+                                    <a @click="NFTselect.dir='asc';NFTselect.sort='time';displaynfts()"
+                                        class="dropdown-item" role="button">Time ending soonest</a>
+                                </li>
+                                <li>
+                                    <a @click="NFTselect.dir='dec';NFTselect.sort='time';displaynfts()"
+                                        class="dropdown-item" role="button">Time ending latest</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- filter collapse-->
+                    <div class="collapse order-last d-xl-none mx-1" id="collapseFilter">
+                        <div class="d-flex flex-row flex-wrap">
+
+                            <!-- Chain -->
+                            <div class="order-1 dropdown mb-1">
+                                <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    Chain
+                                </button>
+                                <ul class="dropdown-menu bg-black">
+                                    <li>
+                                        <div class="py-1 px-2">
+                                            <div class="form-check">
+                                                <input @change="addFilters('Chain', item);displaynfts()"
+                                                    class="form-check-input" type="checkbox"
+                                                    >
+                                                <label class="form-check-label" for="item +'ChainCheck'">
+                                                   
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- Set -->
+                            <div class="order-2 dropdown mb-1">
+                                <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    Set
+                                </button>
+                                <ul class="dropdown-menu bg-black">
+                                    <div>
+                                        <li>
+                                            <div class="py-1 px-2">
+                                                <div class="form-check">
+                                                    <input @change="addFilters('Set', setname, name);displaynfts()"
+                                                        class="form-check-input" type="checkbox"
+                                                        
+                                                        id="setname + 'SetCheck'">
+                                                    <label class="form-check-label" for="setname + 'SetCheck'">
+                                                       
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </div>
+                                </ul>
+                            </div>
+                            <!-- Status -->
+                            <div class="order-3 dropdown mb-1">
+                                <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    Status
+                                </button>
+                                <ul class="dropdown-menu bg-black">
+                                    <li>
+                                        <div class="py-1 px-2">
+                                            <div class="form-check">
+                                                <input @change="addFilters('Status', name);displaynfts()"
+                                                    class="form-check-input" type="checkbox" >
+                                                <label class="form-check-label" for="name + 'StatusCheck'">
+                                                   
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- Currency -->
+                            <div class="order-4 dropdown mb-1 ">
+                                <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    Currency
+                                </button>
+                                <ul class="dropdown-menu bg-black">
+                                    <li>
+                                        <div class="py-1 px-2">
+                                            <div class="form-check">
+                                                <input @change="addFilters('Currency', name);displaynfts()"
+                                                    class="form-check-input" type="checkbox" >
+                                                <label class="form-check-label" for="name + 'CurrencyCheck'">
+                                                 
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+
+                        </div>
+
+                        <div class="d-flex flex-row flex-wrap mt-2 order-last" >
+                            <!-- Active Filters -->
+                            <div
+                                class="rounded bg-secondary text-black filter-bubble me-1 mb-1 d-flex align-items-center">
+                                <span></span>
+                                <button @click="clearFilters(item)" type="button"
+                                    class="ms-1 btn-close btn-close-white"></button>
+                            </div>
+                            <button @click="clearFilters()" type="button"
+                                class="btn btn-secondary mb-1">
+                                Clear All
+                            </button>
+                        </div>
+
+
+                    </div>
+
+                </div>
+                <div class="d-flex align-items-center mx-1">
+                    <h5 class="mb-0"> Items</h5>
+                    <div class="d-none d-sm-flex d-md-none ms-auto">
+                        <div class="btn-group">
+                            <input type="radio" class="btn-check" name="smView" id="setSingle" autocomplete="off" />
+                            <label class="btn btn-outline-warning" for="setSingle"><i
+                                    class="fa-regular fa-square fa-fw"></i></label>
+                            <input type="radio" class="btn-check" name="smView" id="setDouble" autocomplete="off"
+                                checked />
+                            <label class="btn btn-outline-warning" for="setDouble"><i
+                                    class="fa-solid fa-table-cells-large fa-fw"></i></label>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="d-flex flex-wrap mt-2 d-none d-xl-flex mx-1">
+                    <!-- Active Filters -->
+                    <div class="rounded bg-secondary text-black filter-bubble me-1 mb-1 d-flex align-items-center">
+                        <span></span>
+                        <button @click="clearFilters(item)" type="button"
+                            class="ms-1 btn-close btn-close-white"></button>
+                    </div>
+                    <button @click="clearFilters()" type="button"
+                        class="btn btn-secondary mb-1">
+                        Clear All
+                    </button>
+                </div>
     </div>
 
-    <div class="col-md-8 col-lg-9 col-xl-10">
+    <div >
         <!-- items -->
-        <div class="row ">
-            <div class="card col-lg-3 my-2 me-2" v-for="file in filesArray">
+        <div class="d-flex flex-wrap ">
+            <div class="card col-5 col-sm-4 col-md-3 col-lg-2 col-xl-1 m-05 p-05" v-for="file in filesArray" style="min-width:150px;">
                 <div class="">
-                    <h4 class="m-0 ms-auto align-self-end">{{newMeta[file.i][file.index * 4 + 1] || file}}</h4>
+                    
                     <h5 class="m-0 ms-auto align-self-end"><span class="badge square rounded-top border border-bottom-0 bg-info border-light-50" :class="smartColor(newMeta[file.i][file.index * 4 + 4])"><i :class="smartIcon(newMeta[file.i][file.index * 4 + 4])"></i>{{ newMeta[file.i][file.index * 4 + 2] }}</span></h5>
-                    <div class="bg-light rounded">    
+                    <div class="bg-light">    
                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                                 viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
                             <g>
@@ -32,14 +305,13 @@ export default {
                             </g>
                         </svg>
                     </div>
+
+                    
+
                     <div class="mt-1">
-                    <!-- link -->
+                            <!-- link -->
                             <div v-if="!flagDecode(newMeta[file.i][file.index * 4 + 4]).enc">
                                 <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"><span class="d-flex align-items-center">URL<i class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
-                            </div>
-                            <!-- download  -->
-                            <div class="d-none">
-                                <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="downloadFile(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
                             </div>
                             <!-- decrypt  -->
                             <div v-if="flagDecode(newMeta[file.i][file.index * 4 + 4]).enc && !decoded">
@@ -62,7 +334,7 @@ export default {
                         
                        
                     </div>
-                    <a :href="'https://ipfs.dlux.io/ipfs/' + file" target="_blank" class="no-decoration"></a>
+                    <a :href="'https://ipfs.dlux.io/ipfs/' + file" target="_blank" class="no-decoration"><div class="small text-black-50">{{newMeta[file.i][file.index * 4 + 1] || file}}.{{ newMeta[file.i][file.index * 4 + 2] }}</div></a>
                     
                 </div>
             </div>

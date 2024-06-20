@@ -12946,6 +12946,39 @@ td {
   background-color: rgba(255, 193, 7, 0.7);
 }
 
+.mx-05 {
+  margin-left: 0.25em !important;
+  margin-right: 0.25em !important;
+}
+
+.my-05 {
+  margin-top: 0.25em !important;
+  margin-bottom: 0.25em !important;
+}
+
+.m-05 {
+  margin-left: 0.25em !important;
+  margin-right: 0.25em !important;
+  margin-top: 0.25em !important;
+  margin-bottom: 0.25em !important;
+}
+
+.ms-05 {
+  margin-left: 0.25em !important;
+}
+
+.me-05 {
+  margin-right: 0.25em !important;
+}
+
+.mt-05 {
+  margin-top: 0.25em !important;
+}
+
+.mb-05 {
+  margin-bottom: 0.25em !important;
+}
+
 .px-05 {
   padding-left: 0.25em !important;
   padding-right: 0.25em !important;
