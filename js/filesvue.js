@@ -149,6 +149,16 @@ export default {
                     <div class="collapse order-last d-xl-none mx-1" id="collapseFilter">
                         <div class="d-flex flex-row flex-wrap">
 
+                        <!-- choices-js-->
+                            <div class="mb-1">
+                                <label class="mb-1">Tags</label>
+                                <choices-vue ref="select-tag" :prop_selections="newMeta[contract.i][index * 4 + 4]" prop_type="tags" @data="handleTag(contract.i, index * 4 + 4, $event)"></choices-vue>
+                            </div>
+                            <div class="mb-1">
+                                <label class="mb-1">Labels</label>
+                                <choices-vue ref="select-label" :prop_selections="newMeta[contract.i][index * 4 + 4]" prop_type="labels" @data="handleLabel(contract.i, index * 4 + 4, $event)"></choices-vue>
+                            </div> 
+
                             <!-- Tag -->
                             <div class="order-1 dropdown mb-1">
                                 <button class="btn btn-outline-light dropdown-toggle me-2" type="button"
