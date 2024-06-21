@@ -2984,6 +2984,7 @@ function buyNFT(setname, uid, price, type, callback){
         .then((response) => response.json())
         .then((data) => {
           this.hiveprice = data;
+          console.log(JSON.stringify(data))
           localStorage.setItem("hiveprice", JSON.stringify(data));
         })
         .catch((error) => {
