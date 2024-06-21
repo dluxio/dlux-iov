@@ -317,7 +317,7 @@ export default {
                           <option class="text-white" v-for="(account, key) in ipfsproviders" :value="key">{{key}}</option>
                         </select>
                       </div>
-                      <label for="ben_to" class="small mb-1">Benificiary Account</label>
+                      <label for="ben_to" class="small mb-1">Beneficiary Account</label>
                       <div class="position-relative mb-3" id="ben_to">
                         <span class="position-absolute top-50 translate-middle-y ps-2">
                           <i class="fa-solid fa-at fa-fw"></i>
