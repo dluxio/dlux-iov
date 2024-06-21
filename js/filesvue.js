@@ -258,8 +258,8 @@ export default {
                             </div>
                         </td>
                         <td class="col-1">{{fancyBytes(file.s)}}</td>
-                        <td class="col-1">created</td>
-                        <td class="col-1">expires</td>
+                        <td class="col-1">{{blockToTime(file.c)}}</td>
+                        <td class="col-1">{{blockToTime(file.e)}}</td>
                         <td class="col-1">
                             <div class="mt-1">
                                 <!-- link -->
@@ -412,6 +412,10 @@ export default {
         account: {
             type: String,
             default: "",
+        },
+        current:{
+            type: Number,
+            default: 85000000,
         }
     },
     data() {
@@ -626,6 +630,10 @@ export default {
                 default:
                     return '/img/other-file-type-svgrepo-com.svg'
             }
+        },
+        blockToTime(block) {
+            const now = new Date().getTime()
+            return new Date(now - ((this.current - block) * 3000)).toLocaleString()
         },
         fancyBytes(bytes, decimals = 0) {
             var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']

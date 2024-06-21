@@ -12,7 +12,6 @@ export default {
       default: "tags"
     },
     prop_selections: {
-      type: String,
       default: "2"
     }
   },
