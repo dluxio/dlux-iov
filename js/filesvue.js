@@ -98,8 +98,8 @@ export default {
     </div>
 
 
-    <div class="me-auto">
-        <!-- items -->
+    <div class="">
+        <!-- item grid -->
         <div class="d-flex flex-wrap ">
             <div class="card bg-blur-darkg col-4 col-sm-3 col-md-2 col-lg-1 col-xl-1 m-05 p-05 me-auto" v-for="file in filesArray" style="min-width:150px;">
                 <div class="text-start">
@@ -131,7 +131,7 @@ export default {
                     <div class="mt-1">
                             <!-- link -->
                             <div v-if="!flagDecode(newMeta[file.i][file.index * 4 + 4]).enc">
-                                <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"><span class="d-flex align-items-center">URL<i class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
+                                <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank" class="w-100 btn btn-sm btn-info mb-1 mx-auto"><span class="d-flex align-items-center">URL<i class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
                             </div>
                             <!-- decrypt  -->
                             <div v-if="flagDecode(newMeta[file.i][file.index * 4 + 4]).enc && !decoded">
@@ -187,7 +187,7 @@ export default {
 
                     </div>
                     
-                    <div class="d-flex align-items-center text-center text-break small text-muted">
+                    <div class="d-flex align-items-center justify-content-center text-break small text-muted">
                                 {{fancyBytes(file.s)}}
                         </div>
                     

@@ -45,7 +45,7 @@ export default {
           return a.value - b.value;
         },
         placeholder: true,
-        placeholderValue: null,
+        placeholderValue: 'Tags',
         searchPlaceholderValue: null,
         prependValue: null,
         appendValue: null,
