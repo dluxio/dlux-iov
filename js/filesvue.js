@@ -90,11 +90,11 @@ export default {
             <h5 class="mb-0"> # Files</h5>
             <div class="ms-auto">
                 <div class="btn-group">
-                    <input type="radio" class="btn-check" name="smView" id="setSingle" autocomplete="off" />
+                    <input type="radio" class="btn-check" name="smView" id="setSingle" autocomplete="off" @click="viewOpts.list = true" :checked="viewOpts.list" />
                     <label class="btn btn-outline-warning" for="setSingle"><i
                             class="fa-solid fa-table-list fa-fw"></i></label>
-                    <input type="radio" class="btn-check" name="smView" id="setDouble" autocomplete="off"
-                        checked />
+                    <input type="radio" class="btn-check" name="smView" id="setDouble" autocomplete="off" @click="viewOpts.list = false"
+                        :checked="!viewOpts.list" />
                     <label class="btn btn-outline-warning" for="setDouble"><i
                             class="fa-solid fa-table-cells-large fa-fw"></i></label>
                 </div>
@@ -103,7 +103,7 @@ export default {
     </div>
 
     <div>
-        <div class="table-responsive">
+        <div class="table-responsive" v-if="viewOpts.list">
             <!-- item table -->
             <table class="table table-dark table-striped table-hover  align-middle mb-0">
                 <thead>
@@ -289,7 +289,7 @@ export default {
             </table>
         </div>
         <!-- item grid -->
-        <div class="d-flex flex-wrap">
+        <div class="d-flex flex-wrap" v-if="!viewOpts.list">
             <div class="card bg-blur-darkg col-4 col-sm-3 col-md-2 col-lg-1 col-xl-1 m-05 p-05 me-auto" v-for="file in filesArray" style="min-width:150px;">
                 <div class="text-start">
                     <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank" class="no-decoration"><div class="text-black text-truncate">{{newMeta[file.i][file.index * 4 + 1] || file.f}}</div></a>
@@ -426,6 +426,9 @@ export default {
                 search: "",
             },
             contract: {},
+            viewOpts: {
+                list: true,
+            },
             newMeta: {},
             decoded: false,
             debounce: null,

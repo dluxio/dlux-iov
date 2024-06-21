@@ -17,6 +17,9 @@ export default {
     trigger: {
       default: "click",
     },
+    fa: {
+      default: false,
+    },
     delay: {
       default: 0,
     },

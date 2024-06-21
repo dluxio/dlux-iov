@@ -442,6 +442,7 @@ export default {
       this.init()
       var opts = this.opts
       opts.choices = this[this.prop_type]
+      opts.placeholderValue = this.prop_type.charAt(0).toUpperCase() + this.prop_type.slice(1)
       if (!Choices) this.msg = 'Choices not loaded'
       else if (this.reference == '') this.msg = 'Ref not set'
       else {
