@@ -259,7 +259,7 @@ export default {
                         </td>
                         <td class="col-1">{{fancyBytes(file.s)}}</td>
                         <td class="col-1">{{blockToTime(file.c)}}</td>
-                        <td class="col-1"><i v-for="ar in flagsDecode(newMeta[file.i][file.index * 4 + 4], 2)" :class="ar.fa"></i>{{blockToTime(file.e)}}</td>
+                        <td class="col-1">{{blockToTime(file.e)}}<i v-for="ar in flagsDecode(newMeta[file.i][file.index * 4 + 4], 2)" :class="ar.fa"></i></td>
                         <td class="col-1">
                             <div class="mt-1">
                                 <!-- link -->
