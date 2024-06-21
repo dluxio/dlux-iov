@@ -668,9 +668,9 @@ export default {
             if(only) num = num & only
             if(omit) num = num & ~omit
             if (num & 1) out.push({ fa: 'fa-solid fa-lock text-primary fa-fw', l: "Encrypted" })
-            if (num & 2) out.push({ fa: 'fa-solid fa-arrows-rotate text-success fa-fw', l: "AutoRenew" })
-            if (num & 4) out.push({ fa: 'fa-solid fa-radiation text-warning fa-fw', l: "NSFW" })
-            if (num & 8) out.push({ fa: 'fa-regular fa-file-code text-info fa-fw', l: "Executable" })
+            if (num & 2) out.push({ fa: 'fa-solid fa-arrows-rotate text-success fa-fw fa-spin', l: "AutoRenew" })
+            if (num & 4) out.push({ fa: 'fa-solid fa-radiation text-warning fa-fw fa-beat-fade', l: "NSFW" })
+            if (num & 8) out.push({ fa: 'fa-regular fa-file-code text-info fa-fw fa-flip', l: "Executable" })
             return out
         },
         labelsDecode(flags = "", only = -1) {
