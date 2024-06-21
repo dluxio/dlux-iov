@@ -248,7 +248,7 @@ export default {
                                 </div>
 
                                 <div class="d-flex align-items-center">
-                                <div v-for="flag in flagsDecode(newMeta[file.i][file.index * 4 + 4])" >
+                                <div v-for="flag in flagsDecode(newMeta[file.i][file.index * 4 + 4], 0, 2)" >
                                         <!-- title="Labels"  -->
                                         <pop-vue :id="'popper-' + file.i + file.index + flag.l" :title="flag.l" trigger="hover">
                                             <i :class="flag.fa"></i>
@@ -259,7 +259,7 @@ export default {
                         </td>
                         <td class="col-1">{{fancyBytes(file.s)}}</td>
                         <td class="col-1">{{blockToTime(file.c)}}</td>
-                        <td class="col-1">{{blockToTime(file.e)}}</td>
+                        <td class="col-1"><i v-for="ar in flagsDecode(newMeta[file.i][file.index * 4 + 4], 2)" :class="ar.fa"></i>{{blockToTime(file.e)}}</td>
                         <td class="col-1">
                             <div class="mt-1">
                                 <!-- link -->
@@ -659,9 +659,11 @@ export default {
             }
             return out
         },
-        flagsDecode(flags = "") {
+        flagsDecode(flags = "", only = 0, omit = 0) {
             var num = this.Base64toNumber(flags[0])
             var out = []
+            if(only) num = num & only
+            if(omit) num = num & ~omit
             if (num & 1) out.push({ fa: 'fa-solid fa-lock text-primary fa-fw', l: "Encrypted" })
             if (num & 2) out.push({ fa: 'fa-solid fa-arrows-rotate text-success fa-fw', l: "AutoRenew" })
             if (num & 4) out.push({ fa: 'fa-solid fa-radiation text-warning fa-fw', l: "NSFW" })

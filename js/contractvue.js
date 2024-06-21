@@ -1010,9 +1010,11 @@ export default {
                     return '/img/other-file-type-svgrepo-com.svg'
             }
         },
-        flagDecode(flags = "") {
+        flagDecode(flags = "", flag = 0, omit = 0) {
+            if(flag) return this.Base64toNumber(flags[0]) & flag
             if (flags.indexOf(',') > -1) flags = flags.split(',')[4]
             var num = this.Base64toNumber(flags[0])
+            if(omit) num = num & ~omit
             var out = {}
             if (num & 1) out.enc = true
             if (num & 2) out.autoRenew = true
