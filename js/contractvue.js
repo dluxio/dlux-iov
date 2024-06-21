@@ -1155,7 +1155,7 @@ export default {
                                 const filesNum = data.file_contracts[node]?.df ? Object.keys(data.file_contracts[node].df).length : 0
                                 this.newMeta[data.file_contracts[node].i] = new Array(filesNum * 4 + 1).fill('')
                             } else {
-                                data.file_contracts[node].m = JSON.parse(data.file_contracts[node].m)
+                                if(data.file_contracts[node].m.indexOf('"') >= 0)data.file_contracts[node].m = JSON.parse(data.file_contracts[node].m)
                                 const encData = data.file_contracts[node].m.split(',')[0] || ''
                                 const encAccounts = encData.split(';')
                                 for (var i = 0; i < encAccounts.length; i++) {
