@@ -103,8 +103,8 @@ export default {
     </div>
 
     <div>
+        <!-- item table -->
         <div class="table-responsive">
-            <!-- item table -->
             <table class="table table-dark table-striped table-hover  align-middle mb-0">
                 <thead>
                     <tr>
