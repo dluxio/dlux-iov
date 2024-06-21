@@ -633,7 +633,10 @@ export default {
         },
         blockToTime(block) {
             const now = new Date().getTime()
-            return new Date(now - ((this.current - block) * 3000)).toLocaleString()
+            const then = new Date(now - ((this.current - block) * 3000))
+            // simple ago or until format
+
+            return then.toLocaleDateString()
         },
         fancyBytes(bytes, decimals = 0) {
             var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
