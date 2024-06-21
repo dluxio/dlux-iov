@@ -241,7 +241,7 @@ export default {
 
                                 <div class="me-1" v-for="label in labelsDecode(file.ll)">
                                     <span class="d-flex align-items-center">
-                                        <pop-vue :id="'popperL-' + file.i + file.index + label.l" title="label.l" trigger="hover">
+                                        <pop-vue :id="'popperL-' + file.i + file.index + label.l" :title="label.l" trigger="hover">
                                             <i :class="label.fa"></i>
                                         </pop-vue>
                                     </span>
