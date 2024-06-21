@@ -39,44 +39,49 @@ export default {
                 <ul class="dropdown-menu dropdown-menu-end bg-black">
                     <li>
                         <a @click="filesSelect.dir='asc';filesSelect.sort='time';render()"
-                            class="dropdown-item" role="button">Date Created Ascending</a>
+                            class="dropdown-item d-flex align-items-center" role="button"><i class="fa-solid fa-calendar-days fa-fw me-1"></i>Created<i class="fa-solid fa-caret-up fa-fw ms-auto"></i></a>
                     </li>
                         <li>
                         <a @click="filesSelect.dir='dec';filesSelect.sort='time';render()"
-                            class="dropdown-item" role="button">Date Created Descending</a>
+                            class="dropdown-item d-flex align-items-center" role="button"><i class="fa-solid fa-calendar-days fa-fw me-1"></i>Created<i class="fa-solid fa-caret-down fa-fw ms-auto"></i></a>
                     </li>
+                    <li><hr class="dropdown-divider"></li>
                     <li>
                         <a @click="filesSelect.dir='asc';filesSelect.sort='exp';render()"
-                            class="dropdown-item" role="button">Date Expiring Ascending</a>
+                            class="dropdown-item d-flex align-items-center" role="button"><i class="fa-solid fa-clock fa-fw me-1"></i><span class="me-1">Expiration</span><i class="fa-solid fa-caret-up fa-fw ms-auto"></i></a>
                     </li>
                     <li>
                         <a @click="filesSelect.dir='dec';filesSelect.sort='exp';render()"
-                            class="dropdown-item" role="button">Date Expiring Descending</a>
+                            class="dropdown-item d-flex align-items-center" role="button"><i class="fa-solid fa-clock fa-fw me-1"></i><span class="me-1">Expiration</span><i class="fa-solid fa-caret-down fa-fw ms-auto"></i></a>
                     </li>
+                    <li><hr class="dropdown-divider"></li>
                     <li>
                         <a @click="filesSelect.dir='asc';filesSelect.sort='size';render()"
-                            class="dropdown-item" role="button">File Size Increasing</a>
+                            class="dropdown-item d-flex align-items-center" role="button"><i class="fa-solid fa-database fa-fw me-1"></i>Size<i class="fa-solid fa-caret-up fa-fw ms-auto"></i></a>
                     </li>
                     <li>
                         <a @click="filesSelect.dir='dec';filesSelect.sort='size';render()"
-                            class="dropdown-item" role="button">File Size Decreasing</a>
+                            class="dropdown-item d-flex align-items-center" role="button"><i class="fa-solid fa-database fa-fw me-1"></i>Size<i class="fa-solid fa-caret-down fa-fw ms-auto"></i></a>
                     </li>
-                    <li>
-                        <a @click="filesSelect.dir='asc';filesSelect.sort='type';render()"
-                            class="dropdown-item" role="button">File Type Ascending</a>
-                    </li>
-                    <li>
-                        <a @click="filesSelect.dir='dec';filesSelect.sort='type';render()"
-                            class="dropdown-item" role="button">File Type Descending</a>
-                    </li>
+                    <li><hr class="dropdown-divider"></li>
                     <li>
                         <a @click="filesSelect.dir='dec';filesSelect.sort='name';render()"
-                            class="dropdown-item" role="button">File Name A-Z</a>
+                            class="dropdown-item d-flex align-items-center" role="button"><i class="fa-solid fa-tag fa-fw me-1"></i>Name<i class="fa-solid fa-caret-up fa-fw ms-auto"></i></a>
                     </li>
                     <li>
                         <a @click="filesSelect.dir='asc';filesSelect.sort='name';render()"
-                            class="dropdown-item" role="button">File Name Z-A</a>
+                            class="dropdown-item d-flex align-items-center" role="button"><i class="fa-solid fa-tag fa-fw me-1"></i>Name<i class="fa-solid fa-caret-down fa-fw ms-auto"></i></a>
                     </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a @click="filesSelect.dir='asc';filesSelect.sort='type';render()"
+                            class="dropdown-item d-flex align-items-center" role="button"><i class="fa-solid fa-layer-group fa-fw me-1"></i>Type<i class="fa-solid fa-caret-up fa-fw ms-auto"></i></a>
+                    </li>
+                    <li>
+                        <a @click="filesSelect.dir='dec';filesSelect.sort='type';render()"
+                            class="dropdown-item d-flex align-items-center" role="button"><i class="fa-solid fa-layer-group fa-fw me-1"></i>Type<i class="fa-solid fa-caret-down fa-fw ms-auto"></i></a>
+                    </li>
+                    
                 </ul>
             </div>
         </div>
@@ -97,10 +102,104 @@ export default {
         </div>
     </div>
 
+    <div>
+        <div>
+            <!-- item table -->
+            <table class="table table-hover text-center align-middle mb-0" id="files-table">
+                <thead>
+                    <tr>
+                        <!-- thumb -->
+                        <th scope="col">
+                            <div class="d-flex flex-wrap align-items-center justify-content-center">
+                                <div class="d-flex flex-wrap align-items-center justify-content-center">
+                                    <i class="fa-solid fa-image fa-fw"></i>
+                                    <span class="m-1">Thumbnail</span>
+                                </div>
+                                <div class="d-none d-flex align-items-center">
+                                    <button class="btn btn-sm btn-secondary"
+                                        @click="sortContracts('a','asc')"><i
+                                            class="fa-solid fa-caret-up"></i></button>
+                                    <button class="btn btn-sm btn-secondary ms-1"
+                                        @click="sortContracts('a','dec')"><i
+                                            class="fa-solid fa-caret-down"></i></button>
+                                </div>
+                            </div>
+                        </th>
+                        <!-- name -->
+                        <th scope="col">
+                            <div class="d-flex flex-wrap align-items-center justify-content-center">
+                                <div class="d-flex flex-wrap align-items-center justify-content-center">
+                                    <i class="fa-solid fa-file fa-fw"></i>
+                                    <span class="m-1">Filename</span>
+                                </div>
+                                <div class="d-none d-flex align-items-center">
+                                    <button class="btn btn-sm btn-secondary ms-1"
+                                        @click="sortContracts('c','asc')"><i
+                                            class="fa-solid fa-caret-up"></i></button>
+                                    <button class="btn btn-sm btn-secondary ms-1"
+                                        @click="sortContracts('c','dec')"><i
+                                            class="fa-solid fa-caret-down"></i></button>
+                                </div>
+                            </div>
+                        </th>
+                        <!-- tags & labels -->
+                        <th scope="col">
+                            <div class="d-flex flex-wrap align-items-center justify-content-center">
+                                <div class="d-flex flex-wrap align-items-center justify-content-center">
+                                    <i class="fa-solid fa-tag fa-fw"></i>
+                                    <span class="m-1">Tags & Labels</span>
+                                </div>
+                                <div class="d-none d-flex align-items-center">
+                                    <button class="btn btn-sm btn-secondary"
+                                        @click="sortContracts('e','dec')"><i
+                                            class="fa-solid fa-caret-up"></i></button>
+                                    <button class="btn btn-sm btn-secondary ms-1"
+                                        @click="sortContracts('e','asc')"><i
+                                            class="fa-solid fa-caret-down"></i></button>
+                                </div>
+                            </div>
+                        </th>
+                        <!-- created -->
+                        <th scope="col">
+                            <div class="d-flex flex-wrap align-items-center justify-content-center">
+                                <div class="d-flex flex-wrap align-items-center justify-content-center">
+                                    <i class="fa-solid fa-calendar-days fa-fw"></i>
+                                    <span class="m-1">Created</span>
+                                </div>
+                                <div class="d-none d-flex align-items-center">
+                                    <button class="btn btn-sm btn-secondary"
+                                        @click="sortContracts('e','dec')"><i
+                                            class="fa-solid fa-caret-up"></i></button>
+                                    <button class="btn btn-sm btn-secondary ms-1"
+                                        @click="sortContracts('e','asc')"><i
+                                            class="fa-solid fa-caret-down"></i></button>
+                                </div>
+                            </div>
+                        </th>
+                        <!-- expires -->
+                        <th scope="col">
+                            <div class="d-flex flex-wrap align-items-center justify-content-center">
+                                <div class="d-flex flex-wrap align-items-center justify-content-center">
+                                    <i class="fa-solid fa-clock fa-fw"></i>
+                                    <span class="m-1">Expires</span>
+                                </div>
+                                <div class="d-none d-flex align-items-center">
+                                    <button class="btn btn-sm btn-secondary"
+                                        @click="sortContracts('e','dec')"><i
+                                            class="fa-solid fa-caret-up"></i></button>
+                                    <button class="btn btn-sm btn-secondary ms-1"
+                                        @click="sortContracts('e','asc')"><i
+                                            class="fa-solid fa-caret-down"></i></button>
+                                </div>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
 
-    <div class="">
+            </table>
+        </div>
         <!-- item grid -->
-        <div class="d-flex flex-wrap ">
+        <div class="d-flex flex-wrap">
             <div class="card bg-blur-darkg col-4 col-sm-3 col-md-2 col-lg-1 col-xl-1 m-05 p-05 me-auto" v-for="file in filesArray" style="min-width:150px;">
                 <div class="text-start">
                     <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank" class="no-decoration"><div class="text-black text-truncate">{{newMeta[file.i][file.index * 4 + 1] || file.f}}</div></a>
