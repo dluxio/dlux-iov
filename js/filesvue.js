@@ -239,9 +239,9 @@ export default {
                                     </div>
 
 
-                                <div class="me-1" v-for="label in labelsDecode(file.ll, 0)">
+                                <div class="me-1" v-for="label in labelsDecode(file.ll)">
                                     <span class="d-flex align-items-center">
-                                        <pop-vue :id="'popperL-' + file.i + file.index + label.l" title="Labels" trigger="hover">
+                                        <pop-vue :id="'popperL-' + file.i + file.index + label.l" title="label.l" trigger="hover">
                                             <i :class="label.fa"></i>
                                         </pop-vue>
                                     </span>
@@ -673,11 +673,11 @@ export default {
             if (num & 8) out.push({ fa: 'fa-regular fa-file-code text-info fa-fw', l: "Executable" })
             return out
         },
-        labelsDecode(flags = "", index = -1) {
+        labelsDecode(flags = "", only = -1) {
             var arr = []
-            const len = index >= 0 ? 1 : flags.length
+            const len = only >= 0 ? 1 : flags.length
             if (flags.length < 2) return arr
-            else for (var i = (index >= 0 ? index : 0 ) ; i < len; i++) {
+            else for (var i = (only >= 0 ? only : 0 ) ; i < len; i++) {
                 arr.push(this.labels[flags[i]])
             }
             arr = new Set(arr)
