@@ -87,7 +87,7 @@ export default {
         </div>
 
         <div class="d-flex align-items-center my-1 mx-1">
-            <h5 class="mb-0"> Items</h5>
+            <h5 class="mb-0"> # Files</h5>
             <div class="ms-auto">
                 <div class="btn-group">
                     <input type="radio" class="btn-check" name="smView" id="setSingle" autocomplete="off" />
