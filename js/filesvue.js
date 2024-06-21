@@ -7,7 +7,7 @@ export default {
         "choices-vue": ChoicesVue
     },
     template: `
-<div class="d-flex flex-grow-1 flex-column p-05 rounded m-05" style="background-color: rgba(0, 0, 0, 0.6);">
+<div class="d-flex flex-grow-1 flex-column p-05 rounded m-05" style="background-color: rgba(0, 0, 0, 0.7);">
     <div class="pt-1">
         <!-- ACTION BAR -->
         <div class="d-flex flex-wrap align-items-center justify-content-center mx-1">
@@ -105,7 +105,7 @@ export default {
     <div>
         <div>
             <!-- item table -->
-            <table class="table table-hover text-center align-middle mb-0" id="files-table">
+            <table class="table table-dark table-hover text-center align-middle mb-0">
                 <thead>
                     <tr>
                         <!-- thumb -->
@@ -159,6 +159,23 @@ export default {
                                 </div>
                             </div>
                         </th>
+                        <!-- size -->
+                        <th scope="col">
+                            <div class="d-flex flex-wrap align-items-center justify-content-center">
+                                <div class="d-flex flex-wrap align-items-center justify-content-center">
+                                    <i class="fa-solid fa-database fa-fw"></i>
+                                    <span class="m-1">Size</span>
+                                </div>
+                                <div class="d-none d-flex align-items-center">
+                                    <button class="btn btn-sm btn-secondary"
+                                        @click="sortContracts('e','dec')"><i
+                                            class="fa-solid fa-caret-up"></i></button>
+                                    <button class="btn btn-sm btn-secondary ms-1"
+                                        @click="sortContracts('e','asc')"><i
+                                            class="fa-solid fa-caret-down"></i></button>
+                                </div>
+                            </div>
+                        </th>
                         <!-- created -->
                         <th scope="col">
                             <div class="d-flex flex-wrap align-items-center justify-content-center">
@@ -193,9 +210,105 @@ export default {
                                 </div>
                             </div>
                         </th>
+                        <!-- buttons -->
+                        <th scope="col">
+                            <div class="d-flex flex-wrap align-items-center justify-content-center">
+                                <div class="d-flex flex-wrap align-items-center justify-content-center">
+                                    
+                                    <span class="m-1"></span>
+                                </div>
+                                <div class="d-none d-flex align-items-center">
+                                    <button class="btn btn-sm btn-secondary"
+                                        @click="sortContracts('e','dec')"><i
+                                            class="fa-solid fa-caret-up"></i></button>
+                                    <button class="btn btn-sm btn-secondary ms-1"
+                                        @click="sortContracts('e','asc')"><i
+                                            class="fa-solid fa-caret-down"></i></button>
+                                </div>
+                            </div>
+                        </th>
                     </tr>
                 </thead>
+                <tbody>
+                    <tr v-for="file in filesArray">
+                    <th scope="row">
+                    <div class="bg-light" style="width:50px;">    
+                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                                viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
+                            <g>
+                                <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10
+                                    S655.5,210,650,210z"/>
+                                <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10
+                                    s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
+                                    C660,305.2,655.5,309.7,650,309.7z"/>
+                                <path class="st0" d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400
+                                    c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z"/>
+                                <path class="st0" d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z"/>
+                                <path class="st0" d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z"/>
+                                <path class="st0" d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
+                                    c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
+                                    c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z"/>
+                                <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2" style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.index * 4 + 2]}}</text>
+                            </g>
+                        </svg>
+                    </div></th>
+                    <td><div class="text-break">{{newMeta[file.i][file.index * 4 + 1] || file.f}}</div></td>
+                    <td>
+                        <div class="d-flex align-items-center justify-content-between">
+                            
+                            <div class="me-1">
+                                <div class="d-flex align-items-center" style="margin-left: 15px">
+                                        <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa" :style="'margin-left: ' + -15 +'px !important;'"></i>
+                                </div>
+                            </div>
 
+                            <div class="mx-auto" v-for="label in labelsDecode(file.ll, 0)">
+                                <span class="d-flex align-items-center w-100">
+                                    <pop-vue :id="'popperL-' + file.i + file.index + label.l" title="Labels" trigger="hover">
+                                        <i :class="label.fa"></i>
+                                    </pop-vue>
+                                </span>
+                            </div>
+
+                            <div class="d-flex align-items-center ms-auto ms-1">
+                            <div v-for="flag in flagsDecode(newMeta[file.i][file.index * 4 + 4])" >
+                                    <!-- title="Labels"  -->
+                                    <pop-vue :id="'popper-' + file.i + file.index + flag.l" :title="flag.l" trigger="hover">
+                                        <i :class="flag.fa"></i>
+                                    </pop-vue>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{fancyBytes(file.s)}}</td>
+                    <td>created</td>
+                    <td>expires</td>
+                    <td>
+                        <div class="mt-1">
+                            <!-- link -->
+                            <div v-if="!flagDecode(newMeta[file.i][file.index * 4 + 4]).enc">
+                                <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank" class="w-100 btn btn-sm btn-info mb-1 mx-auto"><span class="d-flex align-items-center">URL<i class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
+                            </div>
+                            <!-- decrypt  -->
+                            <div v-if="flagDecode(newMeta[file.i][file.index * 4 + 4]).enc && !decoded">
+                                <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="decode(file.i)"><span class="d-flex align-items-center w-100">Decrypt<i class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
+                            </div>
+                            <!-- download enc -->
+                            <div v-if="flagDecode(newMeta[file.i][file.index * 4 + 4]).enc && decoded">
+                                <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="download(file.i, file)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
+                            </div>
+                            <!-- add to post -->
+                            <div v-if="assets">
+                                <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto" @click="addToPost(file.f, contract.i, index)"><span class="d-flex align-items-center w-100">Add to Post<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
+                            </div>
+                            <!-- add to asset -->
+                            <div v-if="assets">
+                                <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto" @click="addAsset(file, contract)"><span class="d-flex align-items-center w-100">Add asset<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
+                            </div>
+                        </div>
+                    </td>
+                    </tr>
+                </tbody>
             </table>
         </div>
         <!-- item grid -->
