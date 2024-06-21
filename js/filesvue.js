@@ -90,12 +90,12 @@ export default {
             <h5 class="mb-0"> # Files</h5>
             <div class="ms-auto">
                 <div class="btn-group">
-                    <input type="radio" class="btn-check" name="smView" id="setSingle" autocomplete="off" />
-                    <label class="btn btn-outline-warning" for="setSingle"><i
+                    <input type="radio" class="btn-check" name="fileView" id="setList" autocomplete="off" />
+                    <label class="btn btn-outline-warning" for="setList"><i
                             class="fa-solid fa-table-list fa-fw"></i></label>
-                    <input type="radio" class="btn-check" name="smView" id="setDouble" autocomplete="off"
+                    <input type="radio" class="btn-check" name="fileView" id="setGrid" autocomplete="off"
                         checked />
-                    <label class="btn btn-outline-warning" for="setDouble"><i
+                    <label class="btn btn-outline-warning" for="setGrid"><i
                             class="fa-solid fa-table-cells-large fa-fw"></i></label>
                 </div>
             </div>
