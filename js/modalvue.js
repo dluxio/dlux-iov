@@ -317,14 +317,14 @@ export default {
                           <option class="text-white" v-for="(account, key) in ipfsproviders" :value="key">{{key}}</option>
                         </select>
                       </div>
-                      <label for="ben_to" class="small mb-1">Benificiary Account</label>
+                      <label for="ben_to" class="small mb-1">Beneficiary Account</label>
                       <div class="position-relative mb-3" id="ben_to">
                         <span class="position-absolute top-50 translate-middle-y ps-2">
                           <i class="fa-solid fa-at fa-fw"></i>
                         </span>   
                         <input class="ps-4 form-control text-white border-dark bg-dark" type="text" v-model="d.ben_to"> 
                       </div>
-                      <label for="ben" class="small mb-1">Requested Benificary Amount</label>
+                      <label for="ben" class="small mb-1">Requested Beneficiary Amount</label>
                       <div class="position-relative">
                       <input id="ben" class="pe-5 form-control text-white border-dark bg-dark" type="number" step="0.01" :min="0" :max="100" v-model="d.ben_amount"> 
                         <span class="position-absolute end-0 top-50 translate-middle-y px-2">
