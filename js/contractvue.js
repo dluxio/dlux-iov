@@ -107,10 +107,10 @@ export default {
                                     </button>
 
                                     <!-- spk wallet button -->
-                                    <button v-if="!nodeview" type="button" class="mt-1 btn btn-dark border border-warning text-warning d-flex" data-bs-toggle="modal" data-bs-target="#spkWalletModal">
+                                    <button v-if="!nodeview" type="button" class="mt-1 btn btn-secondary d-flex" data-bs-toggle="modal" data-bs-target="#spkWalletModal">
                                         <i class="fa-solid fa-wallet fa-fw me-1 my-auto"></i>
                                         <span class="my-auto">SPK</span>
-                                        <span class="badge small text-bg-warning text-black ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
+                                        <span class="badge small text-bg-warning ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
                                     </button>
                                     
                                 </div>
