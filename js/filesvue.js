@@ -23,18 +23,18 @@ export default {
             <!-- choices-js-->
             <div class=" mb-1 mx-1" style="min-width: 300px !important;">
 
-                <choices-vue ref="select-tag" :prop_selections="filterFlags" prop_type="tags" @data="handleTag($event)"></choices-vue>
+                <choices-vue ref="select-tag" :prop_selections="filterFlags" prop_function="search" prop_type="tags" @data="handleTag($event)"></choices-vue>
             </div>
             <div class="mb-1 mx-1" style="min-width: 300px !important;">
 
-                <choices-vue ref="select-label" :prop_selections="filterLabels" prop_type="labels" @data="handleLabel($event)"></choices-vue>
+                <choices-vue ref="select-label" :prop_selections="filterLabels" prop_function="search" prop_type="labels" @data="handleLabel($event)"></choices-vue>
             </div> 
 
             <!-- Sort -->
             <div class="dropdown mb-1">
                 <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="dropdown"
                     aria-expanded="false"><i class="fa-solid fa-sort fa-fw ms-1"></i>
-                    Date Created
+                    {{filesSelect.sort.charAt(0).toUpperCase() + filesSelect.sort.slice(1)}} {{filesSelect.dir == 'asc' ? 'Ascending' : 'Descending'}}
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end bg-black">
                     <li>
