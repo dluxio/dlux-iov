@@ -747,7 +747,7 @@ export default {
             </div>
             <!--account value-->
             <div
-                class="d-flex text-start align-items-center border-bottom border-secondary py-5">
+                class="d-flex text-start align-items-center border-secondary py-5">
                 <div class="">
                     <h4>Estimated Account Value</h4>
                     <p class="text-white-50">The approximate US Dollar value for all SPK assets in your account</p>
