@@ -23,11 +23,11 @@ export default {
             <!-- choices-js-->
             <div class=" mb-1 mx-1" style="min-width: 300px !important;">
 
-                <choices-vue ref="select-tag" :prop_selections="filterFlags" prop_type="tags" @data="handleTag($event)"></choices-vue>
+                <choices-vue ref="select-tag" :prop_selections="filterFlags" prop_function="search" prop_type="tags" @data="handleTag($event)"></choices-vue>
             </div>
             <div class="mb-1 mx-1" style="min-width: 300px !important;">
 
-                <choices-vue ref="select-label" :prop_selections="filterLabels" prop_type="labels" @data="handleLabel($event)"></choices-vue>
+                <choices-vue ref="select-label" :prop_selections="filterLabels" prop_function="search" prop_type="labels" @data="handleLabel($event)"></choices-vue>
             </div> 
 
             <!-- Sort -->

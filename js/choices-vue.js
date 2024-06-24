@@ -13,6 +13,10 @@ export default {
     },
     prop_selections: {
       default: "2"
+    },
+    prop_function: {
+      type: String,
+      default: "Set"
     }
   },
   data() {
@@ -21,14 +25,14 @@ export default {
         silent: false,
         items: [],
         renderChoiceLimit: -1,
-        maxItemCount: 8,
+        maxItemCount: 7,
         addItems: true,
         addItemFilter: null,
         removeItems: true,
         removeItemButton: true,
         editItems: false,
         allowHTML: true,
-        duplicateItemsAllowed: true,
+        duplicateItemsAllowed: false,
         delimiter: ',',
         paste: true,
         searchEnabled: true,
@@ -441,6 +445,7 @@ export default {
       this.init()
       var opts = this.opts
       opts.choices = this[this.prop_type]
+      opts.maxItemCount = this.prop_function == "search" ? -1 : 7
       opts.placeholderValue = this.prop_type.charAt(0).toUpperCase() + this.prop_type.slice(1)
       if (!Choices) this.msg = 'Choices not loaded'
       else if (this.reference == '') this.msg = 'Ref not set'
