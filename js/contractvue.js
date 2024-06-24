@@ -831,7 +831,11 @@ export default {
             } else {
                 string = `[${this.newMeta[contract][index * 4 + 1]}.${this.newMeta[contract][index * 4 + 2]}](https://ipfs.dlux.io/ipfs/${cid})`
             }
-            this.postBodyAdder[`${loc == 'self' ? contract : loc}`] = string
+            this.postBodyAdder[`${loc == 'self' ? contract : loc}`] = {
+                string,
+                contract: this.contractIDs[contract],
+                cid,
+            }
         },
         addUser(id) {
             if (this.contractIDs[id].encryption) {

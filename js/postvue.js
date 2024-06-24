@@ -102,9 +102,11 @@ export default {
       },
     },
     prop_insert: {
-      type: String,
+      type: Object,
       required: false,
-      default: ""
+      default: function () {
+        return {}
+      },
     },
     prop_uid: {
       type: String,
@@ -384,7 +386,8 @@ export default {
     },
     'prop_insert'(newValue) {
       if (newValue) {
-        this.insert = newValue
+        this.insert = newValue.string
+        this.postCustom_json.assets.push({ contract: newValue.contract.i, hash: cid })
       }
       this.save()
     },

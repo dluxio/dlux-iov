@@ -129,6 +129,23 @@ export default {
                                 </div>
                             </div>
                         </th>
+                        <!-- owners -->
+                        <th scope="col" class="col-2" v-if="owners.length > 1">
+                            <div class="d-flex flex-wrap align-items-center">
+                                <div class="d-flex flex-wrap align-items-center">
+                                    <i class="fa-solid fa-tag fa-fw"></i>
+                                    <span class="m-1">File Owner</span>
+                                </div>
+                                <div class="d-none d-flex align-items-center">
+                                    <button class="btn btn-sm btn-secondary"
+                                        @click="sortContracts('e','dec')"><i
+                                            class="fa-solid fa-caret-up"></i></button>
+                                    <button class="btn btn-sm btn-secondary ms-1"
+                                        @click="sortContracts('e','asc')"><i
+                                            class="fa-solid fa-caret-down"></i></button>
+                                </div>
+                            </div>
+                        </th>
                         <!-- tags & labels -->
                         <th scope="col" class="col-2">
                             <div class="d-flex flex-wrap align-items-center">
@@ -229,6 +246,9 @@ export default {
                         </th>
                         <td class="col-2">
                             <div class="text-break">{{newMeta[file.i][file.index * 4 + 1] || file.f}}</div>
+                        </td>
+                         <td class="col-2" v-if="owners.length > 1">
+                            <div class="text-break">@{{contrat[file.i].t}}</div>
                         </td>
                         <td class="col-2">
                             <div class="d-flex flex-wrap align-items-center">
@@ -403,7 +423,7 @@ export default {
                     id: "a-1-1",
                     m: "",
                     u: 1,
-                    t: 10,
+                    t: "",
                     extend: 7,
 
                 }];
@@ -421,6 +441,7 @@ export default {
     data() {
         return {
             files: {},
+            owners: [],
             filesArray: [],
             filterFlags: 0,
             filterLabels: "",
@@ -769,6 +790,7 @@ export default {
                 if (this.contracts[i].c == 1) continue
                 const id = this.contracts[i].i
                 this.contract[id] = this.contracts[i];
+                this.owners.push(this.contracts[i].t)
                 if (!this.contract[id].m) {
                     this.contract[id].m = ""
                     const filesNum = this.contracts[i].df ? Object.keys(this.contracts[i].df).length : 0
@@ -807,6 +829,7 @@ export default {
                     this.files[f.f] = f
                 }
             }
+            this.owners = [...new Set(this.owners)]
             this.render()
             // remove duplicates from filesArray
             //this.filesArray = this.filesArray.filter((v, i, a) => a.findIndex(t => (t.f === v.f)) === i)
