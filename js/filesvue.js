@@ -310,8 +310,8 @@ export default {
         </div>
         <!-- item grid -->
         <div class="d-flex flex-wrap" v-if="!viewOpts.list">
-            <div class="card bg-blur-darkg col-4 col-sm-3 col-md-2 col-lg-1 col-xl-1 m-05 p-05 me-auto" v-for="file in filesArray" style="min-width:150px;">
-                <div class="text-start">
+            <div class="file-grid" v-for="file in filesArray">
+                <div class="card bg-blur-darkg m-05 p-05 text-start">
                     <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank" class="no-decoration"><div class="text-black text-truncate">{{newMeta[file.i][file.index * 4 + 1] || file.f}}</div></a>
                     <h5 class="m-0 ms-auto align-self-end"><span class="d-none badge square rounded-top border border-bottom-0 bg-info border-light-50" :class="smartColor(newMeta[file.i][file.index * 4 + 4])"><i :class="smartIcon(newMeta[file.i][file.index * 4 + 4])"></i>{{ newMeta[file.i][file.index * 4 + 2] }}</span></h5>
                     <div class="bg-light">    

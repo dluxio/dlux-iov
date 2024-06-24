@@ -108,6 +108,37 @@ body {
   object-fit: cover;
 }
 
+.file-grid {
+  width: 100%;
+}
+
+@include media-breakpoint-up(sm) {
+  .file-grid {
+    width: 50%;
+  }
+}
+@include media-breakpoint-up(md) {
+  .file-grid {
+    width: 25%;
+  }
+}
+@include media-breakpoint-up(lg) {
+  .file-grid {
+    width: 20%;
+  }
+}
+@include media-breakpoint-up(xl) {
+  .file-grid {
+    width: 16.6%;
+  }
+}
+@include media-breakpoint-up(xxl) {
+  .file-grid {
+    width: 12.5%;
+  }
+}
+
+
 @media only screen and (max-width: 600px) {
   .banner-img {
     min-height: 200px;

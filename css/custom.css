@@ -12498,6 +12498,35 @@ body {
   object-fit: cover;
 }
 
+.file-grid {
+  width: 100%;
+}
+
+@media (min-width: 576px) {
+  .file-grid {
+    width: 50%;
+  }
+}
+@media (min-width: 768px) {
+  .file-grid {
+    width: 25%;
+  }
+}
+@media (min-width: 992px) {
+  .file-grid {
+    width: 20%;
+  }
+}
+@media (min-width: 1200px) {
+  .file-grid {
+    width: 16.6%;
+  }
+}
+@media (min-width: 1400px) {
+  .file-grid {
+    width: 12.5%;
+  }
+}
 @media only screen and (max-width: 600px) {
   .banner-img {
     min-height: 200px;
