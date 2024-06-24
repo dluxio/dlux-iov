@@ -34,7 +34,7 @@ export default {
             <div class="dropdown mb-1">
                 <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="dropdown"
                     aria-expanded="false"><i class="fa-solid fa-sort fa-fw ms-1"></i>
-                    Date Created
+                    {{filesSelect.sort.charAt(0).toUpperCase() + filesSelect.sort.slice(1)}} {{filesSelect.dir == 'asc' ? 'Ascending' : 'Descending'}}
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end bg-black">
                     <li>
