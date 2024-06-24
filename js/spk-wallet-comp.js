@@ -92,7 +92,7 @@ export default {
                                 class="btn btn-info dropdown-toggle"
                                 data-bs-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="false"></button>
-                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
+                            <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
                                 aria-labelledby="btnGroupDrop1">
                                 <modal-vue type="power" token="SPK" :test="test"
                                     func="Power Up" :balance="saccountapi.spk"
@@ -180,7 +180,7 @@ export default {
                                                     </h5>
                                                 </a>
                                                 <div
-                                                    class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
+                                                    class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end p-4 text-white-50 text-left bg-black">
                                                     <p>{{opt.info}}
                                                     </p>
                                                 </div>
@@ -247,7 +247,7 @@ export default {
                                 class="btn btn-info dropdown-toggle"
                                 data-bs-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="false"></button>
-                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
+                            <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
                                 aria-labelledby="btnGroupDrop1">
                                 <modal-vue type="power" token="SPK" 
                                     func="Power Down"
@@ -334,7 +334,7 @@ export default {
                                 class="disabled btn btn-info dropdown-toggle"
                                 data-bs-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="false"></button>
-                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
+                            <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
                                 aria-labelledby="btnGroupDrop1">
                                 <modal-vue type="power" token="SPK" :test="test"
                                     func="Power Down"
@@ -434,7 +434,7 @@ export default {
                                 class="btn btn-info dropdown-toggle"
                                 data-bs-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="false"></button>
-                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
+                            <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
                                 aria-labelledby="btnGroupDrop1">
                                 <modal-vue type="power" token="LARYNX"
                                     func="Power Up"
@@ -548,7 +548,7 @@ export default {
                                 data-bs-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="false"></button>
 
-                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
+                            <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
                                 aria-labelledby="btnGroupDrop1">
                                 <modal-vue type="power" token="LARYNX"
                                     func="Unlock Liquidity"
@@ -657,7 +657,7 @@ export default {
                                     aria-haspopup="true"
                                     aria-expanded="false"></button>
 
-                                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-white"
+                                <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
                                     aria-labelledby="btnGroupDrop1">
                                     <modal-vue type="power" token="LARYNX" :test="test"
                                         func="Power Down"
