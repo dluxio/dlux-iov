@@ -103,7 +103,7 @@ export default {
                                 </modal-vue>
                                 <div class="dropdown-divider">
                                 </div>
-                                <a class="dropdown-item" href="/dex/#larynx"
+                                <a class="dropdown-item" href="/dex/?api=https://spktest.dlux.io/spk#spk"
                                     id="buylink"><i
                                         class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
                             </ul>
