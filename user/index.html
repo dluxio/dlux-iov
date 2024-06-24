@@ -664,16 +664,7 @@
                                                             aria-expanded="false"></button>
                                                         <ul class="dropdown-menu bg-black dropdown-menu-end text-white"
                                                             aria-labelledby="btnGroupDrop1">
-                                                            <modal-vue type="power" token="LARYNX" func="Power Up"
-                                                                :balance="saccountapi.balance" :account="account"
-                                                                @modalsign="sendIt($event)" v-slot:trigger>
-                                                                <button class="dropdown-item trigger" slot="trigger"
-                                                                    type="button"><i
-                                                                        class="fas fa-angle-double-up fa-fw me-2"></i>Power
-                                                                    Up</button>
-                                                            </modal-vue>
-                                                            <div class="dropdown-divider"></div>
-                                                            <a class="dropdown-item" href="/dex/larynx" id="buylink"><i
+                                                            <a class="dropdown-item" href="/dex/?api=https://spktest.dlux.io/spk#spk" id="buylink"><i
                                                                     class="fas fa-coins fa-fw me-2"></i>Buy /
                                                                 Sell</a>
                                                         </ul>
