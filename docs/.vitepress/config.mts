@@ -10,8 +10,13 @@ export default defineConfig({
     nav: [
       { text: 'DLUX', link: '/dlux' },
       { text: 'SPK', link: '/spk' },
-      { text: 'Honeycomb', link: '/honeycomb' }
-
+      { text: 'Honeycomb', link: '/honeycomb' },
+      { text: '1.2.0',
+        items: [
+          { text: 'Changelog', link: '/changelog' },
+          { text: 'Contributing', link: '/contributing' },
+        ]
+      }
     ],
 
     sidebar: {
@@ -22,6 +27,13 @@ export default defineConfig({
         items: [
           { text: 'Markdown Examples', link: '/markdown-examples' },
           { text: 'Runtime API Examples', link: '/api-examples' }
+        ]
+      },
+      {
+        text: '1.2.0',
+        items: [
+          { text: 'Changelog', link: '/changelog' },
+          { text: 'Contributing', link: '/contributing' }
         ]
       },
     ],
