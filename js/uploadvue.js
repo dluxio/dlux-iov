@@ -396,7 +396,7 @@ methods: {
             const event = Event
             const target = event.currentTarget ? event.currentTarget : event.target
             const fileContent = target.result;
-            const thumb = makeThumb(fileContent)
+            const thumb = this.makeThumb(fileContent)
             for (var j = 0; j < this.File.length; j++) {
               if (
                 this.File[j].name == target.File.name
@@ -445,7 +445,7 @@ methods: {
             const event = Event
             const target = event.currentTarget ? event.currentTarget : event.target
             const fileContent = event.target.result;
-            const thumb = makeThumb(fileContent)
+            const thumb = this.makeThumb(fileContent)
             for (var j = 0; j < this.File.length; j++) {
               if (
                 this.File[j].name == target.File.name
