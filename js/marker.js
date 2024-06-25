@@ -55,7 +55,7 @@ export default {
               ""
             )
           : this.text
-      ), {FORBID_TAGS: ['script']})
+      ), {FORBID_TAGS: ['style']})
     },
   },
 };
