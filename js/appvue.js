@@ -4,7 +4,7 @@ import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
 import Popper from "/js/pop-min.js";
-import Marker from "/js/marker-min.js";
+import Marker from "/js/marker.js";
 import Ratings from "/js/ratings-min.js";
 import MDE from "/js/mde-min.js";
 import Replies from "/js/replies-min.js";
