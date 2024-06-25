@@ -1,4 +1,4 @@
-import Marker from "/js/marker-min.js";
+import Marker from "/js/marker.js";
 import Ratings from "/js/ratings-min.js";
 import MDE from "/js/mde-min.js";
 import Vote from "/js/vote-min.js";
