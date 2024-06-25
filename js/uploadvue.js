@@ -33,6 +33,9 @@ export default {
                                   <div>
                                     <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}}</h6>
                                   </div>
+                                    <div :ref="FileInfo[file.name].hash + 'thumb'">
+                                      
+                                    </div>
                                     <div class="flex-grow-1 mx-5" v-if="File[FileInfo[file.name].index].actions.cancel">
                                         <div class="progress" role="progressbar" aria-label="Upload progress"
                                             aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
@@ -325,6 +328,17 @@ methods: {
         });
       })
     },
+    makeThumb(img){
+      var canvas, ctx, thumbnail
+      canvas = document.createElement('canvas');
+      ctx = canvas.getContext('2d');
+      canvas.width = 128
+      canvas.height = 128
+      ctx.drawImage(img, 0, 0, 128, 128);
+      thumbnail = new Image();
+      thumbnail.src = canvas.toDataURL('image/jpeg', 70);
+      return thumbnail;
+    },
     AESEncrypt(message, key = this.encryption.key) {
       if(typeof message != 'string')message = CryptoJS.lib.WordArray.create(message)
       return CryptoJS.AES.encrypt(message, key).toString()
@@ -382,6 +396,7 @@ methods: {
             const event = Event
             const target = event.currentTarget ? event.currentTarget : event.target
             const fileContent = target.result;
+            const thumb = makeThumb(fileContent)
             for (var j = 0; j < this.File.length; j++) {
               if (
                 this.File[j].name == target.File.name
@@ -430,6 +445,7 @@ methods: {
             const event = Event
             const target = event.currentTarget ? event.currentTarget : event.target
             const fileContent = event.target.result;
+            const thumb = makeThumb(fileContent)
             for (var j = 0; j < this.File.length; j++) {
               if (
                 this.File[j].name == target.File.name
