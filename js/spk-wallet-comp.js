@@ -76,7 +76,7 @@ export default {
                     </h5>
                     <div class="btn-group" role="group"
                         aria-label="SPK Actions">
-                        <button type="button" class="btn btn-info p-0">
+                        <button type="button" class="btn btn-primary p-0">
                             <modal-vue type="send" token="SPK" :test="test"
                                 :balance="saccountapi.spk" :account="account"
                                 @modalsign="sendIt($event)" v-slot:trigger>
@@ -89,7 +89,7 @@ export default {
                             disabled></button>
                         <div class="btn-group" role="group" v-if="me">
                             <button type="button"
-                                class="btn btn-info dropdown-toggle"
+                                class="btn btn-primary dropdown-toggle"
                                 data-bs-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="false"></button>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
@@ -140,7 +140,7 @@ export default {
                     </h5>
                     <div class="btn-group" role="group"
                         aria-label="Power Actions">
-                        <button class="dropdown btn btn-info p-2"
+                        <button class="dropdown btn btn-primary p-2"
                             data-bs-auto-close="outside" href="#" role="button"
                             id="settingsDropdownBtn" data-bs-toggle="dropdown"
                             aria-expanded="false">
@@ -244,7 +244,7 @@ export default {
                             disabled></button>
                         <div class="btn-group" role="group" v-if="me">
                             <button type="button"
-                                class="btn btn-info dropdown-toggle"
+                                class="btn btn-primary dropdown-toggle"
                                 data-bs-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="false"></button>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
@@ -260,6 +260,7 @@ export default {
                                             class="fas fa-angle-double-down fa-fw me-2"></i>Power
                                         Down</button>
                                 </modal-vue>
+                                <div class="dropdown-divider"></div>
                                 <modal-vue type="power" token="SPK" 
                                     func="Election"
                                     :test="test"
@@ -310,7 +311,7 @@ export default {
 
                     <div class="btn-group" role="group"
                         aria-label="Power Actions">
-                        <button type="button" class="btn btn-info p-0">
+                        <button type="button" class="btn btn-primary p-0">
                             <!-- register -->
                             <div v-if="saccountapi.pubKey == 'NA'"
                             @click="updatePubkey">
@@ -331,7 +332,7 @@ export default {
                             disabled></button>
                         <div class="btn-group" role="group" v-if="me">
                             <button disabled type="button"
-                                class="disabled btn btn-info dropdown-toggle"
+                                class="disabled btn btn-primary dropdown-toggle"
                                 data-bs-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="false"></button>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
@@ -391,7 +392,7 @@ export default {
                     </div>
                     <div class="btn-group" role="group"
                         aria-label="LARYNX Claim">
-                        <button type="submit" class="btn btn-info "
+                        <button type="submit" class="btn btn-primary "
                             @click="rewardClaim('spkcc', 'shares_claim', spk2gov)"><i
                                 class="fas fa-coin"></i><i
                                 class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
@@ -417,7 +418,7 @@ export default {
                     </h5>
                     <div class="btn-group" role="group"
                         aria-label="LARYNX Actions">
-                        <button type="button" class="btn btn-info p-0">
+                        <button type="button" class="btn btn-primary p-0">
                             <modal-vue type="send" token="LARYNX"
                                 :balance="saccountapi.balance"
                                 :account="account" @modalsign="sendIt($event)"
@@ -431,7 +432,7 @@ export default {
                             disabled></button>
                         <div class="btn-group" role="group" v-if="me">
                             <button type="button"
-                                class="btn btn-info dropdown-toggle"
+                                class="btn btn-primary dropdown-toggle"
                                 data-bs-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="false"></button>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
@@ -535,7 +536,7 @@ export default {
                     <div class="btn-group" role="group"
                         aria-label="LARYNX Actions">
                         <button onclick="location.href='/dex/#larynx'"
-                            type="button" class="btn btn-info p-0">
+                            type="button" class="btn btn-primary p-0">
                             <span class="p-2"><i
                                     class="fa-solid fa-gear fa-fw me-2"></i>Options</span>
                         </button>
@@ -544,7 +545,7 @@ export default {
                             disabled></button>
                         <div class="btn-group" role="group" v-if="me">
                             <button id="btnGroupDrop1" type="button"
-                                class="btn btn-info dropdown-toggle"
+                                class="btn btn-primary dropdown-toggle"
                                 data-bs-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="false"></button>
 
@@ -635,7 +636,7 @@ export default {
 
                         <div class="btn-group" role="group"
                             aria-label="LARYNX Actions">
-                            <button class="btn btn-info p-0" type="button">
+                            <button class="btn btn-primary p-0" type="button">
                                 <modal-vue type="delegate" 
                                     :smarkets="smarkets.node" token="LARYNX"
                                     func="Lock Liquidity" :stats="spkStats"
@@ -652,7 +653,7 @@ export default {
                                 disabled></button>
                             <div class="btn-group" role="group" v-if="me">
                                 <button id="btnGroupDrop1" type="button"
-                                    class="btn btn-info dropdown-toggle"
+                                    class="btn btn-primary dropdown-toggle"
                                     data-bs-toggle="dropdown"
                                     aria-haspopup="true"
                                     aria-expanded="false"></button>
