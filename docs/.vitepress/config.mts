@@ -3,6 +3,9 @@ import { defineConfig } from 'vitepress'
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   base: '/docs/',
+  rewrites: {
+    'source/:page': 'destination/:page'
+  },
   title: "Documentation",
   description: "For DLUX Publishing, SPK Network, and Honeycomb L2's",
   themeConfig: {
