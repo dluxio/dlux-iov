@@ -16,13 +16,13 @@ This action transfers an NFT from one wallet to another.
 * to = string representing the wallet to receive the transfer
 
 #### example:
-
+```json
 `json:{
     set: 'dlux',
     uid: 'aa',
     to: 'somebody'
 }`
-
+```
 
 ### NFT Reserve Transfer (id: dlux_nft_reserve_transfer)
 
@@ -36,12 +36,14 @@ This action builds a token escrow contract with payment price and expiration. Se
 * price = integer representing price to complete the contract, with 3 precision. 
 
 #### example:
+```json
 `json:{
     set: 'dlux',
     uid: 'aa',
     to: 'somebody',
     price: 1000 // 1.000 DLUX 
 }`
+```
 
 ### NFT Reserve Complete (id: dlux_nft_reserve_complete)
 
@@ -52,11 +54,12 @@ This action fulfills an NFT escrow transfer via complete payment. Recipient of N
 * uid = string representing the unique ID of the NFT to be transferred
 
 #### example:
+```json
 `json:{
     set: 'dlux',
     uid: 'aa'
 }`
-
+```
 
 ### NFT Transfer Cancel (id: dlux_nft_transfer_cancel)
 
@@ -67,11 +70,12 @@ This action cancels an NFT transfer escrow contract.
 * uid = string representing the unique ID of the NFT to be transferred
 
 #### example:
+```json
 `json:{
     set: 'dlux',
     uid: 'AA'
 }`
-
+```
 
 ### NFT Delete (id: dlux_nft_delete)
 
@@ -82,11 +86,12 @@ This action will permanently delete an NFT. Cannot be undone. Changes NFT's owne
 * uid = string representing the unique ID of the NFT to be transferred
 
 #### example:
+```json
 `json:{
     set: 'dlux',
     uid: 'AA'
 }`
-
+```
 ### NFT Define (id: dlux_nft_define)
 
 This action defines a new NFT set.
@@ -104,6 +109,7 @@ This action defines a new NFT set.
 * bond = integer representing a burn value that can be preloaded into the contract
 
 #### example:
+```json
 `json: {
 "name":"dlux",
 "type": 1,
@@ -116,10 +122,11 @@ This action defines a new NFT set.
 "max_fee": 10000000,
 "bond": 1000, //A burn value that can be preloaded into the contract
 }`
-
+```
 #### script example:
-```<!DOCTYPE html>
-//<html><head><script>
+```html
+<!DOCTYPE html>
+<html><head><script>
 function compile (message, display) {
 const colors = ['#000000', '#AA0000', '#00AA00', '#AA5500', '#0000AA', '#AA00AA', '#00AAAA', '#AAAAAA', '#555555', '#FF5555', '#55FF55', '#FFFF55', '#5555FF', '#FF55FF', '#55FFFF', '#FFFFFF']
 const Base64 = {
@@ -162,9 +169,8 @@ const Base64 = {
         }
         
 }
-//</script>
-/*
-//<script>
+</script>
+<script>
 if (window.addEventListener) {
     window.addEventListener("message", onMessage, false);
     }
@@ -187,14 +193,15 @@ function onLoad(id){
         'message': id
         }, "*");
 }
-//</script>
-*/
-//</head>
-//<body id="body">Append ?NFT_UID to the address bar to see that NFT. "...html?A6"<script>const uid = location.href.split('?')[1]; if(uid){compile(uid, true)}else{onLoad(uid)}</script></body></html>
+</script>
+</head>
+<body id="body">Append ?NFT_UID to the address bar to see that NFT. "...html?A6"<script>const uid = location.href.split('?')[1]; if(uid){compile(uid, true)}else{onLoad(uid)}</script></body></html>
 ```
 
 The script should return:
+```json
 `{HTML:SVG, attributes:[{name:'Color 1', value: uColors[0]},{name:'Color 2', value: uColors[1]},{name:'Color 3', value: uColors[2]}], sealed:''} HTML, which may include Base64 Imgs, GTLF, etc... plus an array of attributes, and optionally a sealed picture`
+```
 
 
 ### NFT Mint (id: dlux_nft_mint)
@@ -205,10 +212,11 @@ This action mints a new NFT
 * set = string representing the name of the NFT set
 
 #### example:
+```json
 `json:{
     set: "dlux"
 }`
-
+```
 
 ### NFT Auction (id: dlux_nft_auction)
 
@@ -222,6 +230,7 @@ This action lists an NFT for auction on the market. Temporarily changes owner to
 * time = integer representing the number of days before auction is closed
 
 #### example:
+```json
 `json:{
     set: 'dlux',
     uid: 'AA',
@@ -229,7 +238,7 @@ This action lists an NFT for auction on the market. Temporarily changes owner to
     now: 10000, // not implemented
     time: 7 //integer days
 }`
-
+```
 
 ### NFT Auction bidding (id: dlux_nft_bid)
 
@@ -241,12 +250,13 @@ This action makes a bid for an active NFT action
 * bid_amount = integer representing amount to bid, with 3 precision. i.e. to bid 10.000 tokens, use 10000.
 
 #### example:
+```json
 `json:{
     set: 'dlux',
     uid: 'AA',
     bid_amount: 1000
 }`
-
+```
 ### NFT Sell (id: dlux_nft_sell)
 
 This lists an NFT for sale on the market.
@@ -257,12 +267,13 @@ This lists an NFT for sale on the market.
 * price = integer representing amount to sell the NFT for, with 3 precision. i.e. to list for 10.000 tokens, use 10000. Default value = 1000.
 
 #### example:
+```json
 `json:{
     set: 'dlux',
     uid: 'AA',
     price: 1000 // 1.000 DLUX
 }`
-
+```
 ### NFT Market Buy (id: dlux_nft_buy)
 
 #### params:
@@ -271,12 +282,13 @@ This lists an NFT for sale on the market.
 * price = integer representing amount to sell the NFT for, with 3 precision. i.e. to list for 10.000 tokens, use 10000. 
 
 #### example:
+```json
 `json:{
     set: 'dlux',
     uid: 'AA',
     price: 1000 // 1.000 DLUX
 }`
-
+```
 
 ### NFT Sell Cancel (id: dlux_nft_sell_cancel)
 
@@ -287,11 +299,12 @@ This action cancels an NFT market sale listing
 * uid = string representing the unique ID of the NFT to be transferred
 
 #### example:
+```json
 `json:{
     set: 'dlux',
     uid: 'AA'
 }`
-
+```
 ## FT (fungible token) Actions
 
 Similar to NFTs, DLUX offers a decentralized protocol for creating and trading NFT's. These tokens can be airdropped, auctioned, transferred, sold, bought, held in escrow, or bid on.
@@ -306,11 +319,12 @@ This action transfers a FT from wallet to wallet.
 
 
 #### example:
+```json
 `json:{
     set: 'dlux',
     to: 'somebody'
 }`
-
+```
 ### FT Airdrop (id: dlux_ft_airdrop)
 
 This action airdrops tokens to a list of wallets.
@@ -320,11 +334,12 @@ This action airdrops tokens to a list of wallets.
 * to = List of string representing wallet to airdrop to
 
 #### example:
+```json
 `json:{
     set: 'dlux',
     to: ['somebody','someother']
 }`
-
+```
 ### FT Escrow (id: dlux_ft_escrow)
 
 This action creates escrow contract for a token.

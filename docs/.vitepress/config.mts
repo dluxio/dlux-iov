@@ -3,6 +3,7 @@ import { defineConfig } from 'vitepress'
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   base: '/docs/',
+  lang: 'en-US',
   title: "Documentation",
   description: "For DLUX Publishing, SPK Network, and Honeycomb L2's",
   themeConfig: {
