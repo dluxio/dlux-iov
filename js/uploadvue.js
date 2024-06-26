@@ -33,10 +33,7 @@ export default {
                                   <div>
                                     <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}}</h6>
                                   </div>
-                                  <img :ref="'fileImg'+index"></img>
-                                    <div :ref="FileInfo[file.name].hash + 'thumb'">
-                                      
-                                    </div>
+                                  <img v-if="FileInfo['thumb' + file.name]" :src="FileInfo['thumb' + file.name].fileContent"></img>
                                     <div class="flex-grow-1 mx-5" v-if="File[FileInfo[file.name].index].actions.cancel">
                                         <div class="progress" role="progressbar" aria-label="Upload progress"
                                             aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
@@ -425,6 +422,7 @@ export default {
                     var thumb = new FileReader();
                     thumb.onload = (e) => {
                       var originalImage = new Image();
+                      this.$refs[`${ret.hash}-thumb`].src = e.target.result
                       originalImage.src = e.target.result
                       originalImage.addEventListener("load", function () {
                         var thumbnailImage = createThumbnail(originalImage);
