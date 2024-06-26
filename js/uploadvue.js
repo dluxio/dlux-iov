@@ -45,8 +45,8 @@ export default {
                                     </div>
                                     <div class="d-flex flex-column flex-grow-1 mx-1">
                                       <div class="fs-4 fw-bold border-bottom border-light border-2">Thumbnail ready for upload</div>
-                                      <div class="fw-6">Thumbnail Size: size</div>
-                                      <div class="fw-6">CID: cid</div>
+                                      <div class="fw-6">Thumbnail Size: {{fancyBytes(FileInfo['thumb' + file.name].size)}}</div>
+                                      <div class="fw-6">CID: {{FileInfo['thumb' + file.name].hash}}</div>
                                     </div>
                                   </div>
                                     <div class="flex-grow-1 mx-5" v-if="File[FileInfo[file.name].index].actions.cancel">
@@ -73,7 +73,7 @@ export default {
                                 </div>
                                 <div class="d-flex w-100" v-if="FileInfo[file.name]">
                                     <ul class="text-start w-100">
-                                        <li class="">Bytes: {{File[FileInfo[file.name].index].size}}</li>
+                                        <li class="">Bytes: {{fancyBytes(File[FileInfo[file.name].index].size)}}</li>
                                         <li class="">CID:
                                             {{FileInfo[file.name].hash}}</li>
                                         <li class="">Status:
@@ -118,7 +118,7 @@ export default {
                                 </div>
                                 <div class="d-flex w-100" v-if="FileInfo[file.name]">
                                     <ul class="text-start w-100">
-                                        <li class="">Bytes: {{FileInfo[file.name].enc_size}}</li>
+                                        <li class="">Bytes: {{fancyBytes(FileInfo[file.name].enc_size)}}</li>
                                         <li class="">CID:
                                             {{FileInfo[file.name].enc_hash}}</li>
                                         <li class="">Status:
@@ -264,6 +264,14 @@ export default {
     delUser(user) {
       delete this.encryption.accounts[user]
     },
+    fancyBytes(bytes) {
+      var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
+      while (bytes > 1024) {
+        bytes = bytes / 1024
+        counter++
+      }
+      return `${this.toFixed(bytes, 2)} ${p[counter]}B`
+    },
     checkHive() {
       return new Promise((resolve, reject) => {
         this.fetching = true
@@ -302,6 +310,9 @@ export default {
             this.fetching = false
           })
       })
+    },
+    toFixed(n, digits) {
+      return parseFloat(n).toFixed(digits)
     },
     encryptKeyToUsers(usernames) {
       return new Promise((resolve, reject) => {
