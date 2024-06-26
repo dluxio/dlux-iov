@@ -493,8 +493,10 @@ export default {
     },
     dragFile(e) {
       e.preventDefault();
+      var FilesTxs = {}
       for (var i = 0; i < e.dataTransfer.files.length; i++) {
         var reader = new FileReader();
+        FilesTxs[i] = e.dataTransfer.files[i]
         reader.File = e.dataTransfer.files[i]
         reader.onload = (Event) => {
           const event = Event
@@ -516,9 +518,9 @@ export default {
                     this.encryptFileAndPlace(dict)
                     let that = this
                     var thumb = new FileReader();
-                    thumb.onload = (e) => {
+                    thumb.onload = (ev) => {
                       var originalImage = new Image();
-                      originalImage.src = e.target.result
+                      originalImage.src = ev.target.result
                       originalImage.addEventListener("load", function () {
                         var thumbnailImage = createThumbnail(originalImage);
                         var newFile = new File([thumbnailImage.src], 'thumb' + target.File.name, { type: 'jpeg' });
@@ -558,7 +560,8 @@ export default {
                         return thumbnail;
                       }
                     }
-                    thumb.readAsDataURL(e.target.files[dict.index]);
+                    console.log(e.dataTransfer.files, dict.index)
+                    thumb.readAsDataURL(FilesTxs[dict.index]);
                   } else {
                     alert(`${target.File.name} already uploaded`)
                     delete this.FileInfo[dict.name]
@@ -572,15 +575,15 @@ export default {
         };
 
         reader.readAsArrayBuffer(e.dataTransfer.files[i]);
-        var File = e.dataTransfer.files[i]
-        File.hash = "computing..."
-        File.progress = 0;
-        File.actions = {
+        var file = e.dataTransfer.files[i]
+        file.hash = "computing..."
+        file.progress = 0;
+        file.actions = {
           cancel: false,
           pause: false,
           resume: false,
         }
-        this.File.push(File);
+        this.File.push(file);
       }
       this.ready = true
     },
