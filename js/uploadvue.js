@@ -331,7 +331,7 @@ export default {
     makeThumb(img) {
       return new Promise((resolve, reject) => {
         var originalImage = new Image();
-        originalImage.src = img;
+        originalImage['data-src'] = img
         originalImage.addEventListener("load", function () {
           var thumbnailImage = createThumbnail();
           resolve(thumbnailImage);
@@ -406,7 +406,9 @@ export default {
           const event = Event
           const target = event.currentTarget ? event.currentTarget : event.target
           const fileContent = target.result;
-          const thumb = this.makeThumb(fileContent)
+          this.makeThumb(fileContent).then((thumb) => {
+            console.log(thumb)
+          })
           for (var j = 0; j < this.File.length; j++) {
             if (
               this.File[j].name == target.File.name
@@ -455,7 +457,9 @@ export default {
           const event = Event
           const target = event.currentTarget ? event.currentTarget : event.target
           const fileContent = event.target.result;
-          const thumb = this.makeThumb(fileContent)
+          this.makeThumb(fileContent).then((thumb) => {
+            console.log(thumb)
+          })
           for (var j = 0; j < this.File.length; j++) {
             if (
               this.File[j].name == target.File.name
