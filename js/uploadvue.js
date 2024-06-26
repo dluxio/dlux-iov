@@ -76,7 +76,7 @@ export default {
                             </div>
                         </div>
                         <div id="listOfEncs"  v-if="encryption.encrypted" v-for="(file, key,index) in FileInfo">
-                            <div class="p-3 mb-2 card card-body bg-black">
+                            <div class="p-3 mb-2 card card-body bg-black" v-if="!FileInfo[file.name].is_thumb">
                                 <div class="d-flex flex-wrap align-items-center pb-2 mb-2">
                                   <div>
                                     <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i class="fa-solid fa-lock fa-fw"></i></span>{{file.name}}</h6>
@@ -444,7 +444,7 @@ export default {
                           const size = buf.byteLength
                           that.hashOf(buf, {}).then((ret) => {
                             const newIndex = that.File.length
-                            const dict = { fileContent: new TextDecoder("utf-8").decode(thumbFileContent), hash: ret.hash, index: newIndex, size: target.File.size, name: 'thumb' + target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature', is_thumb: true}
+                            const dict = { fileContent: new TextDecoder("utf-8").decode(thumbFileContent), hash: ret.hash, index: newIndex, size: Event.target.File.size, name: 'thumb' + target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature', is_thumb: true}
                             that.FileInfo[target.File.name].thumb_index = newIndex
                             that.FileInfo[target.File.name].thumb = ret.hash
                             that.FileInfo['thumb' + target.File.name] = dict
@@ -539,7 +539,7 @@ export default {
                           const size = buf.byteLength
                           that.hashOf(buf, {}).then((ret) => {
                             const newIndex = that.File.length
-                            const dict = { fileContent: new TextDecoder("utf-8").decode(thumbFileContent), hash: ret.hash, index: newIndex, size: target.File.size, name: 'thumb' + target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature', is_thumb: true}
+                            const dict = { fileContent: new TextDecoder("utf-8").decode(thumbFileContent), hash: ret.hash, index: newIndex, size: buf.byteLength, name: 'thumb' + target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature', is_thumb: true}
                             that.FileInfo[target.File.name].thumb_index = newIndex
                             that.FileInfo[target.File.name].thumb = ret.hash
                             that.FileInfo['thumb' + target.File.name] = dict
@@ -651,7 +651,7 @@ export default {
     },
     flagEncode(fileInfo) {
       var num = 0
-      if (this.encryption.encrypted) num += 1
+      if (fileInfo.encrypted) num += 1
       if (fileInfo.is_thumb) num += 2
       if (fileInfo.nsfw) num += 4
       if (fileInfo.executable) num += 8
