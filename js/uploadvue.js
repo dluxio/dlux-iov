@@ -560,7 +560,7 @@ export default {
                     const names = dict.name.replaceAll(',', '-').split('.')
                     const ext = names[names.length - 1]
                     const name = names.slice(0, names.length - 1).join('.')
-                    that.FileInfo[dict.name].meta = {
+                    this.FileInfo[dict.name].meta = {
                       name,
                       ext,
                       flag: "",
@@ -680,7 +680,7 @@ export default {
                     const names = dict.name.replaceAll(',', '-').split('.')
                     const ext = names[names.length - 1]
                     const name = names.slice(0, names.length - 1).join('.')
-                    that.FileInfo[dict.name].meta = {
+                    this.FileInfo[dict.name].meta = {
                       name,
                       ext,
                       flag: "",
