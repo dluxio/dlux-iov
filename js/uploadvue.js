@@ -29,7 +29,7 @@ export default {
                     <div class=" pt-0">
 
                         <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key,index) in FileInfo">
-                            <div class="p-3 mb-2 card card-body bg-black" style="border-radius: 10px;">
+                            <div class="p-3 mb-2 card card-body bg-black" style="border-radius: 10px;" v-if="!FileInfo[file.name].is_thumb">
                                 <div class="d-flex flex-wrap align-items-center pb-2 mb-2">
                                   <div>
                                     <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}}</h6>
