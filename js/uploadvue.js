@@ -139,13 +139,13 @@ export default {
                                     <!-- choices-js-->
                                     <div class="mb-1">
                                         <label class="mb-1">Tags</label>
-                                        <choices-vue ref="select-tag" prop_type="tags"
-                                            @data="handleTag(contract.i, index * 4 + 4, $event)"></choices-vue><!-- :prop_selections="newMeta[contract.i][index * 4 + 4]" -->
+                                        <choices-vue :ref="file.name +'select-tag'" prop_type="tags" :reference="file.name +'select-tag'"
+                                            @data="handleTag(file.name, $event)"></choices-vue>
                                     </div>
                                     <div class="mb-1">
                                         <label class="mb-1">Labels</label>
-                                        <choices-vue ref="select-label" prop_type="labels"
-                                            @data="handleLabel(contract.i, index * 4 + 4, $event)"></choices-vue><!-- :prop_selections="newMeta[contract.i][index * 4 + 4]" -->
+                                        <choices-vue :ref="file.name +'select-label'" prop_type="labels" :reference="file.name +'select-label'"
+                                            @data="handleLabel(file.name, $event)"></choices-vue>
                                     </div>
 
                                 </div>
