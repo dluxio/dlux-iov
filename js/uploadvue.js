@@ -557,7 +557,7 @@ export default {
                 fetch(`https://spktest.dlux.io/api/file/${ret.hash}`).then(r => r.json()).then(res => {
                   if (res.result == "Not found") {
                     this.FileInfo[dict.name] = dict
-                    const names = dict.name.replace(','/g, '-').split('.')
+                    const names = dict.name.replaceAll(',', '-').split('.')
                     const ext = names[names.length - 1]
                     const name = names.slice(0, names.length - 1).join('.')
                     that.FileInfo[dict.name].meta = {
@@ -598,7 +598,7 @@ export default {
                             that.FileInfo[target.File.name].thumb_index = newIndex
                             that.FileInfo[target.File.name].thumb = ret.hash
                             that.FileInfo['thumb' + target.File.name] = dict
-                            const names = dict.name.replace(','/g, '-').split('.')
+                            const names = dict.name.replaceAll(',', '-').split('.')
                             const ext = names[names.length - 1]
                             const name = names.slice(0, names.length - 1).join('.')
                             that.FileInfo['thumb' + target.File.name].meta = {
@@ -677,7 +677,7 @@ export default {
                 fetch(`https://spktest.dlux.io/api/file/${ret.hash}`).then(r => r.json()).then(res => {
                   if (res.result == "Not found") {
                     this.FileInfo[dict.name] = dict
-                    const names = dict.name.replace(','/g, '-').split('.')
+                    const names = dict.name.replaceAll(',', '-').split('.')
                     const ext = names[names.length - 1]
                     const name = names.slice(0, names.length - 1).join('.')
                     that.FileInfo[dict.name].meta = {
@@ -718,7 +718,7 @@ export default {
                             that.FileInfo[target.File.name].thumb_index = newIndex
                             that.FileInfo[target.File.name].thumb = ret.hash
                             that.FileInfo['thumb' + target.File.name] = dict
-                            const names = dict.name.replace(','/g, '-').split('.')
+                            const names = dict.name.replaceAll(',', '-').split('.')
                             const ext = names[names.length - 1]
                             const name = names.slice(0, names.length - 1).join('.')
                             that.FileInfo['thumb' + target.File.name].meta = {
