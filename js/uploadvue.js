@@ -1,9 +1,9 @@
 import ChoicesVue from '/js/choices-vue.js';
 
 export default {
-    components: {
-        "choices-vue": ChoicesVue
-    },
+  components: {
+    "choices-vue": ChoicesVue
+  },
   template: `
  <!--file uploader-->
     <Transition>
@@ -360,6 +360,32 @@ export default {
       }
       return `${this.toFixed(bytes, 2)} ${p[counter]}B`
     },
+    handleLabel(n, i, m) {
+      if (m.action == 'added') {
+        var string = this.FileInfo[n].meta.labels
+        if (!string) string = '2'
+        this.FileInfo[n].meta.labels += m.item
+      } else {
+        console.log('remove', m.item)
+        var string = this.FileInfo[n].meta.labels
+        var arr = string.split('')
+        for (var j = 1; j < arr.length; j++) {
+          if (arr[j] == m.item) arr.splice(j, 1)
+        }
+        this.FileInfo[n].meta.labels = arr.join('')
+      }
+    },
+    handleTag(n, m) {
+      var num = this.Base64toNumber(this.FileInfo[n].meta.flag) || 0
+      if (m.action == 'added') {
+        if (num & m.item) { }
+        else num += m.item
+        this.FileInfo[n].meta.flag = (this.NumberToBase64(num) || "0")
+      } else {
+        if (num & m.item) num -= m.item
+        this.FileInfo[n].meta.flag = (this.NumberToBase64(num) || "0")
+      }
+    },
     checkHive() {
       return new Promise((resolve, reject) => {
         this.fetching = true
@@ -531,6 +557,17 @@ export default {
                 fetch(`https://spktest.dlux.io/api/file/${ret.hash}`).then(r => r.json()).then(res => {
                   if (res.result == "Not found") {
                     this.FileInfo[dict.name] = dict
+                    const names = dict.name.replace(','/g, '-').split('.')
+                    const ext = names[names.length - 1]
+                    const name = names.slice(0, names.length - 1).join('.')
+                    that.FileInfo[dict.name].meta = {
+                      name,
+                      ext,
+                      flag: "",
+                      labels: "",
+                      thumb: "",
+                      license: "",
+                    }
                     const file = this.File[ret.opts.i];
                     this.File.splice(ret.opts.i, 1, file);
                     this.encryptFileAndPlace(dict)
@@ -561,7 +598,20 @@ export default {
                             that.FileInfo[target.File.name].thumb_index = newIndex
                             that.FileInfo[target.File.name].thumb = ret.hash
                             that.FileInfo['thumb' + target.File.name] = dict
+                            const names = dict.name.replace(','/g, '-').split('.')
+                            const ext = names[names.length - 1]
+                            const name = names.slice(0, names.length - 1).join('.')
+                            that.FileInfo['thumb' + target.File.name].meta = {
+                              name,
+                              ext,
+                              flag: "2",
+                              labels: "",
+                              thumb: "",
+                              license: "",
+                            }
+                            that.FileInfo[target.File.name].meta.thumb = ret.hash
                             that.File.push(newFile);
+                            
                           })
                         }
                         Reader.readAsArrayBuffer(newFile);
@@ -627,6 +677,17 @@ export default {
                 fetch(`https://spktest.dlux.io/api/file/${ret.hash}`).then(r => r.json()).then(res => {
                   if (res.result == "Not found") {
                     this.FileInfo[dict.name] = dict
+                    const names = dict.name.replace(','/g, '-').split('.')
+                    const ext = names[names.length - 1]
+                    const name = names.slice(0, names.length - 1).join('.')
+                    that.FileInfo[dict.name].meta = {
+                      name,
+                      ext,
+                      flag: "",
+                      labels: "",
+                      thumb: "",
+                      license: "",
+                    }
                     const file = this.File[ret.opts.i];
                     this.File.splice(ret.opts.i, 1, file);
                     this.encryptFileAndPlace(dict)
@@ -657,6 +718,18 @@ export default {
                             that.FileInfo[target.File.name].thumb_index = newIndex
                             that.FileInfo[target.File.name].thumb = ret.hash
                             that.FileInfo['thumb' + target.File.name] = dict
+                            const names = dict.name.replace(','/g, '-').split('.')
+                            const ext = names[names.length - 1]
+                            const name = names.slice(0, names.length - 1).join('.')
+                            that.FileInfo['thumb' + target.File.name].meta = {
+                              name,
+                              ext,
+                              flag: "2",
+                              labels: "",
+                              thumb: "",
+                              license: "",
+                            }
+                            that.FileInfo[target.File.name].meta.thumb = ret.hash
                             that.File.push(newFile);
                           })
                         }
