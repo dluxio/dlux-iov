@@ -421,6 +421,51 @@ export default {
                     const file = this.File[ret.opts.i];
                     this.File.splice(ret.opts.i, 1, file);
                     this.encryptFileAndPlace(dict)
+                    let that = this
+                    var thumb = new FileReader();
+                    thumb.onload = (e) => {
+                      var originalImage = new Image();
+                      originalImage.src = e.target.result
+                      originalImage.addEventListener("load", function () {
+                        var thumbnailImage = createThumbnail(originalImage);
+                        var newFile = new File([thumbnailImage.src], 'thumb' + target.File.name, { type: 'jpeg' });
+                        console.log({ newFile })
+                        newFile.progress = 0;
+                        newFile.status = 'Pending Signature';
+                        newFile.actions = {
+                          cancel: false,
+                          pause: false,
+                          resume: false,
+                        }
+                        const Reader = new FileReader()
+                        Reader.onload = (Event) => {
+                          const thumbFileContent = Event.target.result;
+                          const buf = buffer.Buffer(thumbFileContent)
+                          const size = buf.byteLength
+                          that.hashOf(buf, {}).then((ret) => {
+                            const newIndex = that.File.length
+                            const dict = { fileContent: new TextDecoder("utf-8").decode(thumbFileContent), hash: ret.hash, index: newIndex, size: target.File.size, name: 'thumb' + target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature', is_thumb: true}
+                            that.FileInfo[target.File.name].thumb_index = newIndex
+                            that.FileInfo[target.File.name].thumb = ret.hash
+                            that.FileInfo['thumb' + target.File.name] = dict
+                            that.File.push(newFile);
+                          })
+                        }
+                        Reader.readAsArrayBuffer(newFile);
+                      })
+                      function createThumbnail(image) {
+                        var canvas, ctx, thumbnail
+                        canvas = document.createElement('canvas');
+                        ctx = canvas.getContext('2d');
+                        canvas.width = 128
+                        canvas.height = 128
+                        ctx.drawImage(image, 0, 0, 128, 128);
+                        thumbnail = new Image();
+                        thumbnail.src = canvas.toDataURL('image/jpeg', 70);
+                        return thumbnail;
+                      }
+                    }
+                    thumb.readAsDataURL(e.target.files[dict.index]);
                   } else {
                     alert(`${target.File.name} already uploaded`)
                     delete this.FileInfo[dict.name]
@@ -434,38 +479,15 @@ export default {
         };
 
         reader.readAsArrayBuffer(e.target.files[i])
-        var File = e.target.files[i];
-        File.hash = "computing..."
-        File.progress = 0;
-        File.actions = {
+        var file = e.target.files[i];
+        file.hash = "computing..."
+        file.progress = 0;
+        file.actions = {
           cancel: false,
           pause: false,
           resume: false,
         }
-        this.File.push(File);
-        var thumb = new FileReader();
-        thumb.onload = (event) => {
-          var originalImage = new Image();
-          originalImage.src = event.target.result
-          originalImage.addEventListener("load", function () {
-            //originalImage.setAttribute('src', event.target.result)
-            console.log(originalImage)
-            var thumbnailImage = createThumbnail(originalImage);
-            console.log(thumbnailImage)
-          });
-          function createThumbnail(image) {
-            var canvas, ctx, thumbnail
-            canvas = document.createElement('canvas');
-            ctx = canvas.getContext('2d');
-            canvas.width = 128
-            canvas.height = 128
-            ctx.drawImage(image, 0, 0, 128, 128);
-            thumbnail = new Image();
-            thumbnail.src = canvas.toDataURL('image/jpeg', 70);
-            return thumbnail;
-          }
-        }
-        thumb.readAsDataURL(e.target.files[i]);
+        this.File.push(file);
       }
       this.ready = true
     },
@@ -492,6 +514,51 @@ export default {
                     const file = this.File[ret.opts.i];
                     this.File.splice(ret.opts.i, 1, file);
                     this.encryptFileAndPlace(dict)
+                    let that = this
+                    var thumb = new FileReader();
+                    thumb.onload = (e) => {
+                      var originalImage = new Image();
+                      originalImage.src = e.target.result
+                      originalImage.addEventListener("load", function () {
+                        var thumbnailImage = createThumbnail(originalImage);
+                        var newFile = new File([thumbnailImage.src], 'thumb' + target.File.name, { type: 'jpeg' });
+                        console.log({ newFile })
+                        newFile.progress = 0;
+                        newFile.status = 'Pending Signature';
+                        newFile.actions = {
+                          cancel: false,
+                          pause: false,
+                          resume: false,
+                        }
+                        const Reader = new FileReader()
+                        Reader.onload = (Event) => {
+                          const thumbFileContent = Event.target.result;
+                          const buf = buffer.Buffer(thumbFileContent)
+                          const size = buf.byteLength
+                          that.hashOf(buf, {}).then((ret) => {
+                            const newIndex = that.File.length
+                            const dict = { fileContent: new TextDecoder("utf-8").decode(thumbFileContent), hash: ret.hash, index: newIndex, size: target.File.size, name: 'thumb' + target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature', is_thumb: true}
+                            that.FileInfo[target.File.name].thumb_index = newIndex
+                            that.FileInfo[target.File.name].thumb = ret.hash
+                            that.FileInfo['thumb' + target.File.name] = dict
+                            that.File.push(newFile);
+                          })
+                        }
+                        Reader.readAsArrayBuffer(newFile);
+                      })
+                      function createThumbnail(image) {
+                        var canvas, ctx, thumbnail
+                        canvas = document.createElement('canvas');
+                        ctx = canvas.getContext('2d');
+                        canvas.width = 128
+                        canvas.height = 128
+                        ctx.drawImage(image, 0, 0, 128, 128);
+                        thumbnail = new Image();
+                        thumbnail.src = canvas.toDataURL('image/jpeg', 70);
+                        return thumbnail;
+                      }
+                    }
+                    thumb.readAsDataURL(e.target.files[dict.index]);
                   } else {
                     alert(`${target.File.name} already uploaded`)
                     delete this.FileInfo[dict.name]
@@ -582,9 +649,11 @@ export default {
     flagEncode(fileInfo) {
       var num = 0
       if (this.encryption.encrypted) num += 1
-      if (fileInfo.autoRenew) num += 2
+      if (fileInfo.is_thumb) num += 2
       if (fileInfo.nsfw) num += 4
       if (fileInfo.executable) num += 8
+      if (fileInfo.lic) num += 16
+      if (fileInfo.tbd) num += 32
       var flags = this.NumberToBase64(num)
       //append category chars here
       return flags
@@ -620,7 +689,7 @@ export default {
     },
     upload(cids = ['QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3'], contract) { // = { api: 'https://ipfs.dlux.io', id: '1668913215284', sigs: {}, s: 10485760, t: 0 }) {
       var files = []
-      var meta = `${this.stringOfKeys()},`
+      var meta = `1${this.stringOfKeys()},` //1 is auto renew
       for (var name in this.FileInfo) {
         for (var i = 0; i < cids.length; i++) {
           if (this.FileInfo[name].hash == cids[i]) {
@@ -630,7 +699,7 @@ export default {
             var Filename = name.split('.').slice(0, -1).join('')
             //get everything after the last
             var ext = name.split('.').slice(-1).join('')
-            meta += `${Filename},${ext},,${this.flagEncode(this.FileInfo[name])},`
+            meta += `${Filename},${ext},${this.FileInfo[name].thumb || ''},${this.flagEncode(this.FileInfo[name])},`
             break;
           } else if (this.FileInfo[name].enc_hash == cids[i]) {
             this.File[this.FileInfo[name].enc_index].cid = cids[i]
