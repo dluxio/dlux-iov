@@ -78,7 +78,7 @@ export default {
 
 
 
-                    <div class="d-flex flex-wrap align-items-center mx-1 mx-2 px-2 py-1 rounded bg-dark"
+                    <div class="d-flex flex-wrap align-items-center mx-1 my-2 px-2 py-1 rounded bg-dark"
                         v-if="FileInfo['thumb' + file.name]">
                         <div class="mx-1">
                             <img :src="FileInfo['thumb' + file.name].fileContent" class="img-thumbnail"></img>
