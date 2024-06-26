@@ -66,12 +66,6 @@ export default {
       msg: "",
       Choices: null,
       tags: [{
-        value: 2,
-        label: 'Auto-Renew',
-        selected: false,
-        disabled: false,
-      },
-      {
         value: 4,
         label: 'NSFW',
         selected: false,
@@ -87,7 +81,75 @@ export default {
         customProperties: {
           description: 'Is an executable file'
         },
-      }
+      },
+      //  {
+      //   value: 16,
+      //   label: 'Stock',
+      //   selected: false,
+      //   disabled: false,
+      //   customProperties: {
+      //     description: 'Smart License to allow commercial/other use'
+      //   },
+      // }
+      ],
+      license: [
+      {
+        value: "1",
+        label: 'CC BY',
+        selected: false,
+        disabled: false,
+        customProperties: {
+          description: 'Creative Commons Attribution License'
+        },
+      }, {
+        value: "2",
+        label: 'CC BY-SA',
+        selected: false,
+        disabled: false,
+        customProperties: {
+          description: 'Creative Commons Share Alike License'
+        },
+      }, {
+        value: "3",
+        label: 'CC BY-ND',
+        selected: false,
+        disabled: false,
+        customProperties: {
+          description: 'Creative Commons No Derivatives License'
+        },
+      }, {
+        value: "4",
+        label: 'CC BY-NC-ND',
+        selected: false,
+        disabled: false,
+        customProperties: {
+          description: 'Creative Commons Non-Commercial No Derivatives License'
+        }
+      }, {
+          value: "5",
+          label: 'CC BY-NC',
+          selected: false,
+          disabled: false,
+          customProperties: {
+            description: 'Creative Commons Non-Commercial License'
+          },
+        }, {
+          value: "6",
+          label: 'CC BY-NC-SA',
+          selected: false,
+          disabled: false,
+          customProperties: {
+            description: 'Creative Commons Non-Commercial Share Alike License'
+          },
+        },{
+          value: "7",
+          label: 'CC0',
+          selected: false,
+          disabled: false,
+          customProperties: {
+            description: 'CC0: Immediately enters public domain'
+          },
+        },
       ],
       labels: [{
         value: "0",
