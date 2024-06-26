@@ -400,6 +400,7 @@ export default {
       for (var i = 0; i < e.target.files.length; i++) {
         var reader = new FileReader();
         reader.File = e.target.files[i]
+        const thisFileIndex = i
         reader.onload = (Event) => {
           const event = Event
           const target = event.currentTarget ? event.currentTarget : event.target
@@ -422,7 +423,6 @@ export default {
                     var thumb = new FileReader();
                     thumb.onload = (e) => {
                       var originalImage = new Image();
-                      this.$refs[`${ret.hash}-thumb`].src = e.target.result
                       originalImage.src = e.target.result
                       originalImage.addEventListener("load", function () {
                         var thumbnailImage = createThumbnail(originalImage);
@@ -442,7 +442,7 @@ export default {
                           const size = buf.byteLength
                           that.hashOf(buf, {}).then((ret) => {
                             const newIndex = that.File.length
-                            const dict = { fileContent: new TextDecoder("utf-8").decode(thumbFileContent), hash: ret.hash, index: newIndex, size: Event.target.File.size, name: 'thumb' + target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature', is_thumb: true }
+                            const dict = { fileContent: new TextDecoder("utf-8").decode(thumbFileContent), hash: ret.hash, index: newIndex, size: buf.byteLength, name: 'thumb' + target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature', is_thumb: true }
                             that.FileInfo[target.File.name].thumb_index = newIndex
                             that.FileInfo[target.File.name].thumb = ret.hash
                             that.FileInfo['thumb' + target.File.name] = dict
@@ -463,7 +463,7 @@ export default {
                         return thumbnail;
                       }
                     }
-                    thumb.readAsDataURL(e.target.files[dict.index]);
+                    thumb.readAsDataURL(e.target.files[thisFileIndex]);
                   } else {
                     alert(`${target.File.name} already uploaded`)
                     delete this.FileInfo[dict.name]
@@ -493,6 +493,7 @@ export default {
       e.preventDefault();
       var FilesTxs = {}
       for (var i = 0; i < e.dataTransfer.files.length; i++) {
+        const thisFileIndex = i
         var reader = new FileReader();
         FilesTxs[i] = e.dataTransfer.files[i]
         reader.File = e.dataTransfer.files[i]
@@ -558,8 +559,7 @@ export default {
                         return thumbnail;
                       }
                     }
-                    console.log(e.dataTransfer.files, dict.index)
-                    thumb.readAsDataURL(FilesTxs[dict.index]);
+                    thumb.readAsDataURL(FilesTxs[thisFileIndex]);
                   } else {
                     alert(`${target.File.name} already uploaded`)
                     delete this.FileInfo[dict.name]
