@@ -331,7 +331,7 @@ export default {
     makeThumb(img) {
       return new Promise((resolve, reject) => {
         var originalImage = new Image();
-        originalImage['data-src'] = img
+        originalImage.src = img
         originalImage.addEventListener("load", function () {
           var thumbnailImage = createThumbnail();
           resolve(thumbnailImage);
@@ -400,6 +400,29 @@ export default {
     },
     uploadFile(e) {
       for (var i = 0; i < e.target.files.length; i++) {
+        var thumb = new FileReader();
+        thumb.onload = (event) => {
+          var originalImage = new Image();
+          originalImage.src = img
+          originalImage.addEventListener("load", function () {
+            originalImage.setAttribute('src', event.target.result)
+            var thumbnailImage = createThumbnail(originalImage);
+            console.log(thumbnailImage)
+          });
+          var thumbnailImage = createThumbnail();
+        function createThumbnail(image) {
+          var canvas, ctx, thumbnail
+          canvas = document.createElement('canvas');
+          ctx = canvas.getContext('2d');
+          canvas.width = 128
+          canvas.height = 128
+          ctx.drawImage(image, 0, 0, 128, 128);
+          thumbnail = new Image();
+          thumbnail.src = canvas.toDataURL('image/jpeg', 70);
+          return thumbnail;
+        }
+        }
+        thumb.readAsDataURL(e.target.files[i]);
         var reader = new FileReader();
         reader.File = e.target.files[i]
         reader.onload = (Event) => {
