@@ -3,7 +3,7 @@ export default {
     <!--file uploader-->
     <Transition>
         <div v-if="contract.i">
-            <div>
+           
                 <div >
                   <form onsubmit="return false;">
                       <div class="d-flex justify-content-between align-items-center">
@@ -34,21 +34,7 @@ export default {
                                   <div>
                                     <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}}</h6>
                                   </div>
-                                  <div class="d-flex flex-wrap align-items-center mx-1 px-2 py-1 rounded bg-dark" v-if="FileInfo['thumb' + file.name]">
-                                    <div class="mx-1">
-                                      <div class="position-relative">
-                                        <div class="position-absolute top-0 start-100 translate-middle"><button class="btn btn-sm btn-danger">x</button></div>
-                                        <div class="">
-                                          <img :src="FileInfo['thumb' + file.name].fileContent" class="img-thumbnail"></img>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div class="d-flex flex-column flex-grow-1 mx-1">
-                                      <div class="fs-4 fw-bold border-bottom border-light border-2">Thumbnail ready for upload</div>
-                                      <div class="fw-6">Thumbnail Size: {{fancyBytes(FileInfo['thumb' + file.name].size)}}</div>
-                                      <div class="fw-6">CID: {{FileInfo['thumb' + file.name].hash}}</div>
-                                    </div>
-                                  </div>
+                                  
                                     <div class="flex-grow-1 mx-5" v-if="File[FileInfo[file.name].index].actions.cancel">
                                         <div class="progress" role="progressbar" aria-label="Upload progress"
                                             aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
@@ -71,6 +57,7 @@ export default {
                                                 class="fas fa-fw fa-trash-alt"></i></button>
                                     </div>
                                 </div>
+
                                 <div class="d-flex w-100" v-if="FileInfo[file.name]">
                                     <ul class="text-start w-100">
                                         <li class="">Bytes: {{fancyBytes(File[FileInfo[file.name].index].size)}}</li>
@@ -85,6 +72,78 @@ export default {
                                         </li>
                                     </ul>
                                 </div>
+
+                                <div class="d-flex flex-wrap align-items-center mx-1 mb-1 px-2 py-1 rounded bg-dark" v-if="FileInfo['thumb' + file.name]">
+                                  <div class="mx-1">
+                                    <img :src="FileInfo['thumb' + file.name].fileContent" class="img-thumbnail"></img>
+                                  </div>
+                                  <div class="d-flex flex-column flex-grow-1 mx-1">
+                                    <div class="fs-5 fw-bold border-bottom border-light border-2">File thumbnail has been generated</div>
+                                    <div class="fw-6">Thumbnail Size: {{fancyBytes(FileInfo['thumb' + file.name].size)}}</div>
+                                    <div class="fw-6 text-break">CID: {{FileInfo['thumb' + file.name].hash}}</div>
+                                    <div class="d-flex align-items-center mt-2">
+                                      <div class="me-auto fs-5">
+                                        Use thumbnail
+                                      </div>
+                                      <div class="form-check form-switch">
+                                        <input class="form-check-input fs-4" type="checkbox" role="switch" id="includeThumb" checked>
+                                        <label class="form-check-label" for="includeThumb"></label>
+                                      </div>
+                                    </div>
+                                    
+                                  </div>
+                                  
+                                  <div>
+
+                                  </div>
+
+                                </div>
+                                <!--v-if="!FileInfo['thumb' + file.name]"-->
+                                <div class="d-flex flex-wrap align-items-center mx-1 px-2 py-2 mb-1 rounded bg-dark" >
+                                  <div class="flex-grow-1 mx-sm-2">
+                                    <div class="d-flex flex-column">
+                                      <label>Add a custom thumbnail</label>
+                                      <input class="form-control" placeholder="https://your-image-url.com">
+                                    </div>
+                                    <div class="d-flex flex-column">
+                                      <div class="position-relative">
+                                        <div class="position-absolute start-50 translate-middle rounded bg-secondary text-black px-2 py-1">Tags</div>
+
+                                        <div class="d-flex align-items-center mt-2">
+                                          <div class="me-auto fs-5">
+                                            NSFW (Not Safe For Work)
+                                          </div>
+                                          <div class="form-check form-switch">
+                                            <input class="form-check-input fs-4" type="checkbox" role="switch" id="includeThumb" checked>
+                                            <label class="form-check-label" for="includeThumb"></label>
+                                          </div>
+                                        </div>
+
+                                        <div class="d-flex align-items-center mt-2">
+                                          <div class="me-auto fs-5">
+                                            Executable
+                                          </div>
+                                          <div class="form-check form-switch">
+                                            <input class="form-check-input fs-4" type="checkbox" role="switch" id="includeThumb" checked>
+                                            <label class="form-check-label" for="includeThumb"></label>
+                                          </div>
+                                        </div>
+
+                                        <div class="d-flex align-items-center mt-2">
+                                          <div class="me-auto fs-5">
+                                            Licensable
+                                          </div>
+                                          <div class="form-check form-switch">
+                                            <input class="form-check-input fs-4" type="checkbox" role="switch" id="includeThumb" checked>
+                                            <label class="form-check-label" for="includeThumb"></label>
+                                          </div>
+                                        </div>
+                                        
+
+                                  </div>
+                                </div>
+
+                                
                             </div>
                         </div>
 
