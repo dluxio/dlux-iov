@@ -107,6 +107,10 @@ export default {
                     <div class="d-flex flex-wrap align-items-center mx-1 px-2 py-2 mb-1 rounded bg-dark">
                         <div class="flex-grow-1 mx-sm-2">
                             <div class="d-flex flex-column">
+                                <label>Add a custom thumbnail</label>
+                                <input class="form-control" placeholder="https://your-image-url.com">
+                            </div>
+                            <div class="d-flex flex-column">
                                 <div class="col-md-8">
 
                                     <div class="mb-1">
@@ -149,7 +153,7 @@ export default {
                     </div>
                 </div>
             </div>
-        </div>
+        
 
 
 
