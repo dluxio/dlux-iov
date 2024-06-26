@@ -27,13 +27,28 @@ export default {
 
                 <div v-if="File.length" class="mx-lg-5">
                     <div class=" pt-0">
+
                         <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key,index) in FileInfo">
                             <div class="p-3 mb-2 card card-body bg-black" style="border-radius: 10px;">
                                 <div class="d-flex flex-wrap align-items-center pb-2 mb-2">
                                   <div>
                                     <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}}</h6>
                                   </div>
-                                  <img v-if="FileInfo['thumb' + file.name]" :src="FileInfo['thumb' + file.name].fileContent"></img>
+                                  <div class="d-flex flex-wrap align-items-center mx-1" v-if="FileInfo['thumb' + file.name]">
+                                    <div class="mx-1">
+                                      <div class="position-relative bg-light">
+                                        <div class="position-absolute top-0 start-100 translate-middle"><button class="btn btn-sm btn-danger">x</button></div>
+                                        <div class="">
+                                          <img :src="FileInfo['thumb' + file.name].fileContent" class="img-fluid"></img>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div class="d-flex flex-column flex-grow-1 mx-1">
+                                      <div class="fs-4 fw-bold border-bottom border-light border-2">Thumbnail ready for upload</div>
+                                      <div class="fw-6">Thumbnail Size: size</div>
+                                      <div class="fw-6">CID: cid</div>
+                                    </div>
+                                  </div>
                                     <div class="flex-grow-1 mx-5" v-if="File[FileInfo[file.name].index].actions.cancel">
                                         <div class="progress" role="progressbar" aria-label="Upload progress"
                                             aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
@@ -72,6 +87,7 @@ export default {
                                 </div>
                             </div>
                         </div>
+
                         <div id="listOfEncs"  v-if="encryption.encrypted" v-for="(file, key,index) in FileInfo">
                             <div class="p-3 mb-2 card card-body bg-black" v-if="!FileInfo[file.name].is_thumb">
                                 <div class="d-flex flex-wrap align-items-center pb-2 mb-2">
