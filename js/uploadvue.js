@@ -444,7 +444,7 @@ export default {
                           const size = buf.byteLength
                           that.hashOf(buf, {}).then((ret) => {
                             const newIndex = that.File.length
-                            const dict = { fileContent: new TextDecoder("utf-8").decode(thumbFileContent), hash: ret.hash, index: newIndex, size: Event.target.File.size, name: 'thumb' + target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature', is_thumb: true}
+                            const dict = { fileContent: new TextDecoder("utf-8").decode(thumbFileContent), hash: ret.hash, index: newIndex, size: Event.target.File.size, name: 'thumb' + target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature', is_thumb: true }
                             that.FileInfo[target.File.name].thumb_index = newIndex
                             that.FileInfo[target.File.name].thumb = ret.hash
                             that.FileInfo['thumb' + target.File.name] = dict
@@ -539,7 +539,7 @@ export default {
                           const size = buf.byteLength
                           that.hashOf(buf, {}).then((ret) => {
                             const newIndex = that.File.length
-                            const dict = { fileContent: new TextDecoder("utf-8").decode(thumbFileContent), hash: ret.hash, index: newIndex, size: buf.byteLength, name: 'thumb' + target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature', is_thumb: true}
+                            const dict = { fileContent: new TextDecoder("utf-8").decode(thumbFileContent), hash: ret.hash, index: newIndex, size: buf.byteLength, name: 'thumb' + target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature', is_thumb: true }
                             that.FileInfo[target.File.name].thumb_index = newIndex
                             that.FileInfo[target.File.name].thumb = ret.hash
                             that.FileInfo['thumb' + target.File.name] = dict
@@ -607,8 +607,10 @@ export default {
         cids.push(this.FileInfo[names[i]].hash)
       }
       else for (var i = 0; i < names.length; i++) {
-        body += `,${this.FileInfo[names[i]].enc_hash}`
-        cids.push(this.FileInfo[names[i]].enc_hash)
+        if (this.FileInfo[names[i]].enc_hash) {
+          body += `,${this.FileInfo[names[i]].enc_hash}`
+          cids.push(this.FileInfo[names[i]].enc_hash)
+        }
       }
       this.contract.files = body
       this.signText(header + body).then(res => {
