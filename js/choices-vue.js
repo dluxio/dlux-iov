@@ -99,7 +99,8 @@ export default {
         selected: false,
         disabled: false,
         customProperties: {
-          description: 'Creative Commons Attribution License'
+          description: 'Creative Commons Attribution License',
+          link: 'https://creativecommons.org/licenses/by/4.0/'
         },
       }, {
         value: "2",
@@ -107,7 +108,8 @@ export default {
         selected: false,
         disabled: false,
         customProperties: {
-          description: 'Creative Commons Share Alike License'
+          description: 'Creative Commons Share Alike License',
+          link: 'https://creativecommons.org/licenses/by-sa/4.0/'
         },
       }, {
         value: "3",
@@ -115,7 +117,8 @@ export default {
         selected: false,
         disabled: false,
         customProperties: {
-          description: 'Creative Commons No Derivatives License'
+          description: 'Creative Commons No Derivatives License',
+          link: 'https://creativecommons.org/licenses/by-nd/4.0/'
         },
       }, {
         value: "4",
@@ -123,7 +126,8 @@ export default {
         selected: false,
         disabled: false,
         customProperties: {
-          description: 'Creative Commons Non-Commercial No Derivatives License'
+          description: 'Creative Commons Non-Commercial No Derivatives License',
+          link: 'https://creativecommons.org/licenses/by-nc-nd/4.0/'
         }
       }, {
           value: "5",
@@ -131,7 +135,8 @@ export default {
           selected: false,
           disabled: false,
           customProperties: {
-            description: 'Creative Commons Non-Commercial License'
+            description: 'Creative Commons Non-Commercial License',
+            link: 'https://creativecommons.org/licenses/by-nc/4.0/'
           },
         }, {
           value: "6",
@@ -139,7 +144,8 @@ export default {
           selected: false,
           disabled: false,
           customProperties: {
-            description: 'Creative Commons Non-Commercial Share Alike License'
+            description: 'Creative Commons Non-Commercial Share Alike License',
+            link: 'https://creativecommons.org/licenses/by-nc-sa/4.0/'
           },
         },{
           value: "7",
@@ -147,7 +153,8 @@ export default {
           selected: false,
           disabled: false,
           customProperties: {
-            description: 'CC0: Immediately enters public domain'
+            description: 'CC0: Immediately enters public domain',
+            link: 'https://creativecommons.org/publicdomain/zero/1.0/'
           },
         },
       ],
