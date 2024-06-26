@@ -34,12 +34,12 @@ export default {
                                   <div>
                                     <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}}</h6>
                                   </div>
-                                  <div class="d-flex flex-wrap align-items-center mx-1" v-if="FileInfo['thumb' + file.name]">
+                                  <div class="d-flex flex-wrap align-items-center mx-1 px-2 py-1 rounded bg-dark" v-if="FileInfo['thumb' + file.name]">
                                     <div class="mx-1">
-                                      <div class="position-relative bg-light">
+                                      <div class="position-relative">
                                         <div class="position-absolute top-0 start-100 translate-middle"><button class="btn btn-sm btn-danger">x</button></div>
                                         <div class="">
-                                          <img :src="FileInfo['thumb' + file.name].fileContent" class="img-fluid"></img>
+                                          <img :src="FileInfo['thumb' + file.name].fileContent" class="img-thumbnail"></img>
                                         </div>
                                       </div>
                                     </div>
