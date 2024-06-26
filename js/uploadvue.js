@@ -120,11 +120,11 @@ export default {
                                         <div class="input-group">
                                             <input autocapitalize="off" placeholder="File Name"
                                                 pattern="[a-zA-Z0-9]{3,25}"
-                                                class="form-control"><!-- v-model="newMeta[contract.i][index * 4 + 1]" -->
+                                                class="form-control" "v-model="FileInfo[file.name].meta.name">
                                             <span class="input-group-text">.</span>
                                             <input autocapitalize="off" placeholder="File Type"
                                                 pattern="[a-zA-Z0-9]{1,4}"
-                                                class="form-control"><!-- v-model="newMeta[contract.i][index * 4 + 2]" -->
+                                                class="form-control" "v-model="FileInfo[file.name].meta.ext">
                                         </div>
                                     </div>
                                     <div class="mb-1">
@@ -132,7 +132,7 @@ export default {
                                         <div class="position-relative has-validation">
                                             <input autocapitalize="off" placeholder="https://your-thumbnail-image.png"
                                                 pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+"
-                                                class="form-control"><!-- v-model="newMeta[contract.i][index * 4 + 3]" -->
+                                                class="form-control" "v-model="FileInfo[file.name].meta.thumb">
                                         </div>
                                     </div>
 
