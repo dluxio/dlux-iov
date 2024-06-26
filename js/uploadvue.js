@@ -360,7 +360,7 @@ export default {
       }
       return `${this.toFixed(bytes, 2)} ${p[counter]}B`
     },
-    handleLabel(n, i, m) {
+    handleLabel(n, m) {
       if (m.action == 'added') {
         var string = this.FileInfo[n].meta.labels
         if (!string) string = '2'
