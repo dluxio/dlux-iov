@@ -1,200 +1,211 @@
 export default {
   template: `
-    <!--file uploader-->
+ <!--file uploader-->
     <Transition>
         <div v-if="contract.i">
-           
-                <div >
-                  <form onsubmit="return false;">
-                      <div class="d-flex justify-content-between align-items-center">
-                          <div class="ms-auto me-auto my-3">
-                              <label for="formFile" class="btn btn-lg btn-light"><i
-                                      class="fa-solid fa-file-circle-plus fa-fw me-2"></i>Select Files</label>
-                              <input class="d-none" id="formFile" type="file" multiple @change="uploadFile">
-                          </div>
-                      </div>
-                      <div class="pb-2">
-                          <div class="mx-lg-5 py-5 text-center lead rounded"
-                              style="border-width: 2px; border-style: dashed; background-color:rgba(0,0,0,0.3);"
-                              id="img-well" @drop="dragFile($event)" @dragenter.prevent @dragover.prevent>
-                              Or drag file(s) here
-                          </div>
-                      </div>
-                  </form>
-                </div>
+            <div>
+                <form onsubmit="return false;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="ms-auto me-auto my-3">
+                            <label for="formFile" class="btn btn-lg btn-light"><i
+                                    class="fa-solid fa-file-circle-plus fa-fw me-2"></i>Select Files</label>
+                            <input class="d-none" id="formFile" type="file" multiple @change="uploadFile">
+                        </div>
+                    </div>
+                    <div class="pb-2">
+                        <div class="mx-lg-5 py-5 text-center lead rounded"
+                            style="border-width: 2px; border-style: dashed; background-color:rgba(0,0,0,0.3);"
+                            id="img-well" @drop="dragFile($event)" @dragenter.prevent @dragover.prevent>
+                            Or drag file(s) here
+                        </div>
+                    </div>
+                </form>
+            </div>
 
-                
 
-                <div v-if="File.length" class="mx-lg-5">
-                    <div class=" pt-0">
 
-                        <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key,index) in FileInfo">
-                            <div class="p-3 mb-2 card card-body bg-black" style="border-radius: 10px;" v-if="!FileInfo[file.name].is_thumb">
-                                <div class="d-flex flex-wrap align-items-center pb-2 mb-2">
-                                  <div>
-                                    <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}}</h6>
-                                  </div>
-                                  
-                                    <div class="flex-grow-1 mx-5" v-if="File[FileInfo[file.name].index].actions.cancel">
-                                        <div class="progress" role="progressbar" aria-label="Upload progress"
-                                            aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
-                                            <div class="progress-bar" :style="'width: ' + File[FileInfo[file.name].index].progress + '%'">
-                                                {{File[FileInfo[file.name].index].progress}}%
-                                            </div>
+            <div v-if="File.length" class="mx-lg-5">
+                <div class="pt-0">
+                    <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key,index) in FileInfo">
+                        <div class="p-3 mb-2 card card-body bg-black" style="border-radius: 10px;"
+                            v-if="!FileInfo[file.name].is_thumb">
+                            <div class="d-flex flex-wrap align-items-center pb-2 mb-2">
+                                <div>
+                                    <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i
+                                                class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}}</h6>
+                                </div>
+
+                                <div class="flex-grow-1 mx-5" v-if="File[FileInfo[file.name].index].actions.cancel">
+                                    <div class="progress" role="progressbar" aria-label="Upload progress"
+                                        aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                                        <div class="progress-bar"
+                                            :style="'width: ' + File[FileInfo[file.name].index].progress + '%'">
+                                            {{File[FileInfo[file.name].index].progress}}%
                                         </div>
                                     </div>
-                                    <div class="flex-shrink" v-if="File.length">
-                                        <button type="button" class="me-2 btn btn-secondary" v-if="File[FileInfo[file.name].index].actions.pause"
-                                            @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Pause</button>
-                                        <button type="button" class="me-2 btn btn-secondary" v-if="File[FileInfo[file.name].index].actions.resume"
-                                            @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Resume</button>
-                                        <button type="button" class="me-2 btn btn-secondary" v-if="File[FileInfo[file.name].index].actions.cancel"
-                                            @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Cancel</button>
-                                    </div>
-                                    <div class="ms-auto">
-                                        <button class="btn btn-danger" @click="deleteImg(FileInfo[file.name].index, file.name)"
-                                            data-toggle="tooltip" data-placement="top" title="Delete Asset"><i
-                                                class="fas fa-fw fa-trash-alt"></i></button>
-                                    </div>
                                 </div>
-
-                                <div class="d-flex w-100" v-if="FileInfo[file.name]">
-                                    <ul class="text-start w-100">
-                                        <li class="">Bytes: {{fancyBytes(File[FileInfo[file.name].index].size)}}</li>
-                                        <li class="">CID:
-                                            {{FileInfo[file.name].hash}}</li>
-                                        <li class="">Status:
-                                            {{FileInfo[file.name].status}}
-                                        </li>
-                                        <li class=""><a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
-                                                target="_blank">{{FileInfo[file.name].hash}}<i
-                                                    class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a>
-                                        </li>
-                                    </ul>
+                                <div class="flex-shrink" v-if="File.length">
+                                    <button type="button" class="me-2 btn btn-secondary"
+                                        v-if="File[FileInfo[file.name].index].actions.pause"
+                                        @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Pause</button>
+                                    <button type="button" class="me-2 btn btn-secondary"
+                                        v-if="File[FileInfo[file.name].index].actions.resume"
+                                        @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Resume</button>
+                                    <button type="button" class="me-2 btn btn-secondary"
+                                        v-if="File[FileInfo[file.name].index].actions.cancel"
+                                        @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Cancel</button>
                                 </div>
+                                <div class="ms-auto">
+                                    <button class="btn btn-danger"
+                                        @click="deleteImg(FileInfo[file.name].index, file.name)" data-toggle="tooltip"
+                                        data-placement="top" title="Delete Asset"><i
+                                            class="fas fa-fw fa-trash-alt"></i></button>
+                                </div>
+                            </div>
 
-                                <div class="d-flex flex-wrap align-items-center mx-1 mb-1 px-2 py-1 rounded bg-dark" v-if="FileInfo['thumb' + file.name]">
-                                  <div class="mx-1">
+                            <div class="d-flex w-100" v-if="FileInfo[file.name]">
+                                <ul class="text-start w-100">
+                                    <li class="">Bytes: {{fancyBytes(File[FileInfo[file.name].index].size)}}</li>
+                                    <li class="">CID:
+                                        {{FileInfo[file.name].hash}}</li>
+                                    <li class="">Status:
+                                        {{FileInfo[file.name].status}}
+                                    </li>
+                                    <li class=""><a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
+                                            target="_blank">{{FileInfo[file.name].hash}}<i
+                                                class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div class="d-flex flex-wrap align-items-center mx-1 mb-1 px-2 py-1 rounded bg-dark"
+                                v-if="FileInfo['thumb' + file.name]">
+                                <div class="mx-1">
                                     <img :src="FileInfo['thumb' + file.name].fileContent" class="img-thumbnail"></img>
-                                  </div>
-                                  <div class="d-flex flex-column flex-grow-1 mx-1">
-                                    <div class="fs-5 fw-bold border-bottom border-light border-2">File thumbnail has been generated</div>
-                                    <div class="fw-6">Thumbnail Size: {{fancyBytes(FileInfo['thumb' + file.name].size)}}</div>
+                                </div>
+                                <div class="d-flex flex-column flex-grow-1 mx-1">
+                                    <div class="fs-5 fw-bold border-bottom border-light border-2">File thumbnail has
+                                        been generated</div>
+                                    <div class="fw-6">Thumbnail Size: {{fancyBytes(FileInfo['thumb' + file.name].size)}}
+                                    </div>
                                     <div class="fw-6 text-break">CID: {{FileInfo['thumb' + file.name].hash}}</div>
                                     <div class="d-flex align-items-center mt-2">
-                                      <div class="me-auto fs-5">
-                                        Use thumbnail
-                                      </div>
-                                      <div class="form-check form-switch">
-                                        <input class="form-check-input fs-4" type="checkbox" role="switch" id="includeThumb" checked>
-                                        <label class="form-check-label" for="includeThumb"></label>
-                                      </div>
+                                        <div class="me-auto fs-5">
+                                            Use thumbnail
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input fs-4" type="checkbox" role="switch"
+                                                id="includeThumb" checked>
+                                            <label class="form-check-label" for="includeThumb"></label>
+                                        </div>
                                     </div>
-                                    
-                                  </div>
-                                  
-                                  <div>
-
-                                  </div>
-
                                 </div>
-                                <!--v-if="!FileInfo['thumb' + file.name]"-->
-                                <div class="d-flex flex-wrap align-items-center mx-1 px-2 py-2 mb-1 rounded bg-dark" >
-                                  <div class="flex-grow-1 mx-sm-2">
-                                    <div class="d-flex flex-column">
-                                      <label>Add a custom thumbnail</label>
-                                      <input class="form-control" placeholder="https://your-image-url.com">
-                                    </div>
-                                    <div class="d-flex flex-column">
-                                      <div class="position-relative">
-                                        <div class="position-absolute start-50 translate-middle rounded bg-secondary text-black px-2 py-1">Tags</div>
-
-                                        <div class="d-flex align-items-center mt-2">
-                                          <div class="me-auto fs-5">
-                                            NSFW (Not Safe For Work)
-                                          </div>
-                                          <div class="form-check form-switch">
-                                            <input class="form-check-input fs-4" type="checkbox" role="switch" id="includeThumb" checked>
-                                            <label class="form-check-label" for="includeThumb"></label>
-                                          </div>
-                                        </div>
-
-                                        <div class="d-flex align-items-center mt-2">
-                                          <div class="me-auto fs-5">
-                                            Executable
-                                          </div>
-                                          <div class="form-check form-switch">
-                                            <input class="form-check-input fs-4" type="checkbox" role="switch" id="includeThumb" checked>
-                                            <label class="form-check-label" for="includeThumb"></label>
-                                          </div>
-                                        </div>
-
-                                        <div class="d-flex align-items-center mt-2">
-                                          <div class="me-auto fs-5">
-                                            Licensable
-                                          </div>
-                                          <div class="form-check form-switch">
-                                            <input class="form-check-input fs-4" type="checkbox" role="switch" id="includeThumb" checked>
-                                            <label class="form-check-label" for="includeThumb"></label>
-                                          </div>
-                                        </div>
-                                        
-
-                                  </div>
+                                <div>
                                 </div>
-
-                                
                             </div>
-                        </div>
-
-                        <div id="listOfEncs"  v-if="encryption.encrypted" v-for="(file, key,index) in FileInfo">
-                            <div class="p-3 mb-2 card card-body bg-black" v-if="!FileInfo[file.name].is_thumb">
-                                <div class="d-flex flex-wrap align-items-center pb-2 mb-2">
-                                  <div>
-                                    <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i class="fa-solid fa-lock fa-fw"></i></span>{{file.name}}</h6>
-                                  </div>
-                                    <div class="flex-grow-1 mx-5" v-if="File[FileInfo[file.name].enc_index].actions.cancel">
-                                        <div class="progress" role="progressbar" aria-label="Upload progress"
-                                            aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
-                                            <div class="progress-bar" :style="'width: ' + File[FileInfo[file.name].enc_index].progress + '%'">
-                                                {{File[FileInfo[file.name].enc_index].progress}}%
+                            <!--v-if="!FileInfo['thumb' + file.name]"-->
+                            <div class="d-flex flex-wrap align-items-center mx-1 px-2 py-2 mb-1 rounded bg-dark">
+                                <div class="flex-grow-1 mx-sm-2">
+                                    <div class="d-flex flex-column">
+                                        <label>Add a custom thumbnail</label>
+                                        <input class="form-control" placeholder="https://your-image-url.com">
+                                    </div>
+                                    <div class="d-flex flex-column">
+                                        <div class="position-relative">
+                                            <div
+                                                class="position-absolute start-50 translate-middle rounded bg-secondary text-black px-2 py-1">
+                                                Tags</div>
+                                            <div class="d-flex align-items-center mt-2">
+                                                <div class="me-auto fs-5">
+                                                    NSFW (Not Safe For Work)
+                                                </div>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input fs-4" type="checkbox" role="switch"
+                                                        id="includeThumb" checked>
+                                                    <label class="form-check-label" for="includeThumb"></label>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex align-items-center mt-2">
+                                                <div class="me-auto fs-5">
+                                                    Executable
+                                                </div>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input fs-4" type="checkbox" role="switch"
+                                                        id="includeThumb" checked>
+                                                    <label class="form-check-label" for="includeThumb"></label>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex align-items-center mt-2">
+                                                <div class="me-auto fs-5">
+                                                    Licensable
+                                                </div>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input fs-4" type="checkbox" role="switch"
+                                                        id="includeThumb" checked>
+                                                    <label class="form-check-label" for="includeThumb"></label>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="flex-shrink" v-if="File.length">
-                                        <button type="button" class="me-2 btn btn-secondary" v-if="File[FileInfo[file.name].enc_index].actions.pause"
-                                            @click="fileRequest[FileInfo[file.name].enc_index].resumeFileUpload()">Pause</button>
-                                        <button type="button" class="me-2 btn btn-secondary" v-if="File[FileInfo[file.name].enc_index].actions.resume"
-                                            @click="fileRequest[FileInfo[file.name].enc_index].resumeFileUpload()">Resume</button>
-                                        <button type="button" class="me-2 btn btn-secondary" v-if="File[FileInfo[file.name].enc_index].actions.cancel"
-                                            @click="fileRequest[FileInfo[file.name].enc_index].resumeFileUpload()">Cancel</button>
-                                    </div>
-                                    <div class="ms-auto">
-                                        <button class="btn btn-danger" @click="deleteImg(FileInfo[file.name].enc_index, file.name)"
-                                            data-toggle="tooltip" data-placement="top" title="Delete Asset"><i
-                                                class="fas fa-fw fa-trash-alt"></i></button>
-                                    </div>
-                                </div>
-                                <div class="d-flex w-100" v-if="FileInfo[file.name]">
-                                    <ul class="text-start w-100">
-                                        <li class="">Bytes: {{fancyBytes(FileInfo[file.name].enc_size)}}</li>
-                                        <li class="">CID:
-                                            {{FileInfo[file.name].enc_hash}}</li>
-                                        <li class="">Status:
-                                            {{FileInfo[file.name].status}}
-                                        </li>
-                                        <li class=""><a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].enc_hash"
-                                                target="_blank">{{FileInfo[file.name].enc_hash}}<i
-                                                    class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a>
-                                        </li>
-                                    </ul>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
+
+                    <div id="listOfEncs" v-if="encryption.encrypted" v-for="(file, key,index) in FileInfo">
+                        <div class="p-3 mb-2 card card-body bg-black" v-if="!FileInfo[file.name].is_thumb">
+                            <div class="d-flex flex-wrap align-items-center pb-2 mb-2">
+                                <div>
+                                    <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i
+                                                class="fa-solid fa-lock fa-fw"></i></span>{{file.name}}</h6>
+                                </div>
+                                <div class="flex-grow-1 mx-5" v-if="File[FileInfo[file.name].enc_index].actions.cancel">
+                                    <div class="progress" role="progressbar" aria-label="Upload progress"
+                                        aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                                        <div class="progress-bar"
+                                            :style="'width: ' + File[FileInfo[file.name].enc_index].progress + '%'">
+                                            {{File[FileInfo[file.name].enc_index].progress}}%
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex-shrink" v-if="File.length">
+                                    <button type="button" class="me-2 btn btn-secondary"
+                                        v-if="File[FileInfo[file.name].enc_index].actions.pause"
+                                        @click="fileRequest[FileInfo[file.name].enc_index].resumeFileUpload()">Pause</button>
+                                    <button type="button" class="me-2 btn btn-secondary"
+                                        v-if="File[FileInfo[file.name].enc_index].actions.resume"
+                                        @click="fileRequest[FileInfo[file.name].enc_index].resumeFileUpload()">Resume</button>
+                                    <button type="button" class="me-2 btn btn-secondary"
+                                        v-if="File[FileInfo[file.name].enc_index].actions.cancel"
+                                        @click="fileRequest[FileInfo[file.name].enc_index].resumeFileUpload()">Cancel</button>
+                                </div>
+                                <div class="ms-auto">
+                                    <button class="btn btn-danger"
+                                        @click="deleteImg(FileInfo[file.name].enc_index, file.name)"
+                                        data-toggle="tooltip" data-placement="top" title="Delete Asset"><i
+                                            class="fas fa-fw fa-trash-alt"></i></button>
+                                </div>
+                            </div>
+                            <div class="d-flex w-100" v-if="FileInfo[file.name]">
+                                <ul class="text-start w-100">
+                                    <li class="">Bytes: {{fancyBytes(FileInfo[file.name].enc_size)}}</li>
+                                    <li class="">CID:
+                                        {{FileInfo[file.name].enc_hash}}</li>
+                                    <li class="">Status:
+                                        {{FileInfo[file.name].status}}
+                                    </li>
+                                    <li class=""><a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].enc_hash"
+                                            target="_blank">{{FileInfo[file.name].enc_hash}}<i
+                                                class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
             </div>
+
 
 
 
@@ -209,65 +220,79 @@ export default {
                             <div> Privacy </div>
                             <span v-if="!encryption.encrypted"><i class="mx-2 fa-solid fa-fw fa-lock-open"></i></span>
                             <span v-if="encryption.encrypted"><i class="mx-2 fa-solid fa-fw fa-lock"></i></span>
-                            <div> 
-                              <span v-if="!encryption.encrypted" class="fw-bold">Public</span>
-                              <span v-if="encryption.encrypted" class="fw-bold">Private</span>
+                            <div>
+                                <span v-if="!encryption.encrypted" class="fw-bold">Public</span>
+                                <span v-if="encryption.encrypted" class="fw-bold">Private</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- encrypt switch -->
-                    <div v-if="contract.c == 1" class="flex-grow-1 border-top border-bottom border-light border-1 py-2 mb-2">
-                      <div  class="form-check form-switch d-flex align-items-center ps-0 mt-2 mb-3">
-                          <label class="form-check-label mb-0" for="encryptCheck">ENCRYPT FILES</label>
-                          <input class="form-check-input fs-2 ms-auto mt-0" type="checkbox" role="switch" id="encryptCheck" v-model="encryption.encrypted"> 
-                      </div>
+                    <div v-if="contract.c == 1"
+                        class="flex-grow-1 border-top border-bottom border-light border-1 py-2 mb-2">
+                        <div class="form-check form-switch d-flex align-items-center ps-0 mt-2 mb-3">
+                            <label class="form-check-label mb-0" for="encryptCheck">ENCRYPT FILES</label>
+                            <input class="form-check-input fs-2 ms-auto mt-0" type="checkbox" role="switch"
+                                id="encryptCheck" v-model="encryption.encrypted">
+                        </div>
 
-                      <div v-if="!encryption.encrypted" class="mb-2">Files uploaded to this contract will not be encrypted, <b>they will be publicly available on SPK Network</b></div>
-                      <div v-if="encryption.encrypted" class="mb-2">Files uploaded to this contract will be encrypted, <b>only the accounts you add will have access.</b></div>
+                        <div v-if="!encryption.encrypted" class="mb-2">Files uploaded to this contract will not be
+                            encrypted, <b>they will be publicly available on SPK Network</b></div>
+                        <div v-if="encryption.encrypted" class="mb-2">Files uploaded to this contract will be encrypted,
+                            <b>only the accounts you add will have access.</b>
+                        </div>
 
-                      
+
                     </div>
 
-                    
+
                     <!-- encrypted sharing -->
                     <div v-if="encryption.encrypted">
                         <div class="fs-3 fw-lighter">Sharing:</div>
-                        <p>You can share the decryption key with a few other accounts to view the files, and you can revoke access at any time.</p>
+                        <p>You can share the decryption key with a few other accounts to view the files, and you can
+                            revoke
+                            access at any time.</p>
                         <div class="d-flex mb-2">
                             <div class="me-1 flex-grow-1">
                                 <div class="position-relative has-validation">
-                                    <input autocapitalize="off" placeholder="username" class="form-control border-light bg-darkg text-info" v-model="encryption.input" @blur="addUser()" @keyup.enter="addUser(contract.i)">
+                                    <input autocapitalize="off" placeholder="username"
+                                        class="form-control border-light bg-darkg text-info" v-model="encryption.input"
+                                        @blur="addUser()" @keyup.enter="addUser(contract.i)">
                                 </div>
                             </div>
                             <div class="ms-1">
-                                <div class="btn btn-lg btn-light" @click="addUser()"><i class="fa-solid fa-fw fa-plus"></i></div>
+                                <div class="btn btn-lg btn-light" @click="addUser()"><i
+                                        class="fa-solid fa-fw fa-plus"></i>
+                                </div>
                             </div>
                         </div>
                         <!-- shared accounts -->
-                        <div class="d-flex flex-row flex-wrap" >
-                            <div v-for="(a,b,c) in encryption.accounts" class="rounded text-black filter-bubble bg-white me-1 mb-1 d-flex align-items-center"> <!-- warning class for unencrypted keys --> 
-                               <i class="fa-solid fa-key fa-fw me-1"  :class="{'text-primary': encryption.accounts[b].enc_key, 'text-warning': !encryption.accounts[b].enc_key}"  ></i>  
-                            <span>{{b}}</span> 
-                                <div v-if="b != contract.t"><button type="button" class="ms-1 btn-close small btn-close-white" @click="delUser(b)"></button></div>
+                        <div class="d-flex flex-row flex-wrap">
+                            <div v-for="(a,b,c) in encryption.accounts"
+                                class="rounded text-black filter-bubble bg-white me-1 mb-1 d-flex align-items-center">
+                                <!-- warning class for unencrypted keys -->
+                                <i class="fa-solid fa-key fa-fw me-1"
+                                    :class="{'text-primary': encryption.accounts[b].enc_key, 'text-warning': !encryption.accounts[b].enc_key}"></i>
+                                <span>{{b}}</span>
+                                <div v-if="b != contract.t"><button type="button"
+                                        class="ms-1 btn-close small btn-close-white" @click="delUser(b)"></button></div>
                             </div>
                         </div>
                         <!-- update button -->
                         <div class="d-flex mt-3">
-                            <button v-if="unkeyed" @click="checkHive()" class="mx-auto btn btn-lg btn-outline-warning"><i class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</button>
+                            <button v-if="unkeyed" @click="checkHive()"
+                                class="mx-auto btn btn-lg btn-outline-warning"><i
+                                    class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</button>
                         </div>
                     </div>
                     <div class="d-flex mb-1" v-if="contract.c == 1">
-                      <button class="ms-auto me-auto mt-2 btn btn-lg btn-info" :class="{'disabled': !reallyReady}" :disabled="!reallyReady" @click="signNUpload()"><i
-                              class="fa-solid fa-file-signature fa-fw me-2"></i>Sign and Upload</button>
-                      </div>
+                        <button class="ms-auto me-auto mt-2 btn btn-lg btn-info" :class="{'disabled': !reallyReady}"
+                            :disabled="!reallyReady" @click="signNUpload()"><i
+                                class="fa-solid fa-file-signature fa-fw me-2"></i>Sign and Upload</button>
+                    </div>
                 </div>
             </div>
             <!-- end encryption banner -->
-
-
-
-
         </div>
     </Transition>
    `,
