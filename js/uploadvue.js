@@ -1,4 +1,9 @@
+import ChoicesVue from '/js/choices-vue.js';
+
 export default {
+    components: {
+        "choices-vue": ChoicesVue
+    },
   template: `
  <!--file uploader-->
     <Transition>
