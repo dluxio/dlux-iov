@@ -1256,6 +1256,7 @@ export default {
     totalSize() {
       var size = 0
       var cids = []
+      var names = Object.keys(this.FileInfo)
       if (!this.encryption.encrypted) for (var i = 0; i < names.length; i++) {
         if ((this.FileInfo[names[i]].is_thumb && !this.FileInfo[names[i]].use_thumb) || !this.FileInfo[names[i]].is_thumb) {
           cids.push(this.FileInfo[names[i]].hash)
