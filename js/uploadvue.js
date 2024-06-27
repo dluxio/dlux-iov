@@ -44,7 +44,7 @@ export default {
                     <div class="d-flex flex-wrap align-items-center  rounded-top  px-2 py-1">
                         <div>
                             <div class="fs-4 fw-light m-0 text-break"><span class="px-2 py-1 me-2 border border-light text-white rounded-pill"><i
-                                        class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}} (file+thumb size)</div>
+                                        class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}} {{ FileInfo['thumb' + file.name] ? fancyBytes(FileInfo['thumb' + file.name] + FileInfo[file.name]) : fancyBytes(FileInfo[file.name])}}</div>
                         </div>
 
                         <div class="flex-grow-1 mx-5" v-if="File[FileInfo[file.name].index].actions.cancel">
@@ -134,7 +134,7 @@ export default {
                                       
                                       <!-- link -->
                                       <div>
-                                          <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"><span class="d-flex align-items-center">URL<i class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
+                                          <a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash" target="_blank" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"><span class="d-flex align-items-center">URL<i class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
                                       </div>
                                       
                                     </div>
