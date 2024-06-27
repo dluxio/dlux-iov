@@ -387,7 +387,7 @@ export default {
     'prop_insert'(newValue) {
       if (newValue) {
         this.insert = newValue.string
-        this.postCustom_json.assets.push({ contract: newValue.contract.i, hash: cid })
+        this.postCustom_json.assets.push({ contract: newValue.contract.i, hash: newValue.cid })
       }
       this.save()
     },
