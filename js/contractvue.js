@@ -475,11 +475,11 @@ export default {
                                                                                                 <!-- choices-js-->
                                                                                                 <div class="mb-1">
                                                                                                     <label class="mb-1">Tags</label>
-                                                                                                    <choices-vue ref="select-tag" :prop_selections="newMeta[contract.i][index * 4 + 4]" prop_type="tags" @data="handleTag(contract.i, index * 4 + 4, $event)"></choices-vue>
+                                                                                                    <choices-vue ref="select-tag" :prop_selections="split(newMeta[contract.i][index * 4 + 4], 0, '-')" prop_type="tags" @data="handleTag(contract.i, index * 4 + 4, $event)"></choices-vue>
                                                                                                 </div>
                                                                                                 <div class="mb-1">
                                                                                                     <label class="mb-1">Labels</label>
-                                                                                                    <choices-vue ref="select-label" :prop_selections="newMeta[contract.i][index * 4 + 4]" prop_type="labels" @data="handleLabel(contract.i, index * 4 + 4, $event)"></choices-vue>
+                                                                                                    <choices-vue ref="select-label" :prop_selections="split(newMeta[contract.i][index * 4 + 4], 2, '-')" prop_type="labels" @data="handleLabel(contract.i, index * 4 + 4, $event)"></choices-vue>
                                                                                                 </div> 
                                                                                                 
                                                                                             </div>
@@ -836,6 +836,9 @@ export default {
                 contract: this.contractIDs[contract],
                 cid,
             }
+        },
+        split(string, index = 0, del = ',') {
+            return string.split(del)[index] ? string.split(del)[index] : ''
         },
         addUser(id) {
             if (this.contractIDs[id].encryption) {
