@@ -597,11 +597,7 @@ export default {
       })
     },
     resetThumb(n){
-      if (n.use_thumb) {
-      this.FileInfo[n].meta.thumb = "";
-      } else {
       this.FileInfo[n].meta.thumb = this.FileInfo[n].thumb;
-    }
     },
     uploadFile(e) {
       for (var i = 0; i < e.target.files.length; i++) {
