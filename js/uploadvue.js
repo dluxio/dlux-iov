@@ -32,7 +32,7 @@ export default {
         <div v-if="File.length" class="mx-lg-5 rounded" style="background-color:rgba(0,0,0,0.3)">
 
             <div class="d-flex mx-1">
-                <div class="mx-auto ms-md-1 mt-2 lead fs-2">{{ fileCount }}</div>
+                <div class="mx-auto ms-md-1 mt-2 lead fs-2">{{ fileCount }} | {{fancyBytes(totalSize)}}</div>
             </div>
 
             <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key,index) in FileInfo"
@@ -596,7 +596,7 @@ export default {
         reader.readAsDataURL(this.File[fileInfo.index]);
       })
     },
-    resetThumb(n){
+    resetThumb(n) {
       this.FileInfo[n].meta.thumb = this.FileInfo[n].thumb;
     },
     uploadFile(e) {
@@ -1252,6 +1252,20 @@ export default {
       }
       if (!this.encryption.encrypted) return `${files} file${files > 1 ? 's' : ''} ${thumbs ? `with ${thumbs} thumbnail${thumbs > 1 ? 's' : ''}` : ''}`
       else return `${files} encrypted file${files > 1 ? 's' : ''}`
+    },
+    totalSize() {
+      var size = 0
+      for (var name in this.FileInfo) {
+        for (var i = 0; i < cids.length; i++) {
+          if (this.FileInfo[name].hash == cids[i]) {
+            size += this.File[this.FileInfo[name].index].size
+            break;
+          } else if (this.FileInfo[name].enc_hash == cids[i]) {
+            size += this.File[this.FileInfo[name].enc_index].size
+            break;
+          }
+        }
+      }
     }
   },
   mounted() {
