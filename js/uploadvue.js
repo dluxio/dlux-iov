@@ -1278,6 +1278,7 @@ export default {
           }
         }
       }
+      return size
     }
   },
   mounted() {
