@@ -849,27 +849,24 @@ export default {
       var body = ""
       var names = Object.keys(this.FileInfo)
       var cids = []
-      var metaString = "1" + this.stringOfKeys()
+      var meta = {}
       if (!this.encryption.encrypted) for (var i = 0; i < names.length; i++) {
-        metaString += ','
         if ((this.FileInfo[names[i]].is_thumb && this.FileInfo[names[i]].use_thumb) || !this.FileInfo[names[i]].is_thumb) {
-          metaString += `${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},${this.FileInfo[names[i]].meta.thumb},${this.flagEncode(this.FileInfo[names[i]].meta.flag)}-${this.FileInfo[names[i]].meta.license}-${this.FileInfo[names[i]].meta.labels}`
+          meta[this.FileInfo[names[i]].hash]= `,${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},${this.FileInfo[names[i]].meta.thumb},${this.flagEncode(this.FileInfo[names[i]].meta.flag)}-${this.FileInfo[names[i]].meta.license}-${this.FileInfo[names[i]].meta.labels}`
           body += `,${this.FileInfo[names[i]].hash}`
           cids.push(this.FileInfo[names[i]].hash)
         }
       }
       else for (var i = 0; i < names.length; i++) {
-        metaString += ','
         if (this.FileInfo[names[i]].enc_hash) {
-          metaString += `${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},,${this.flagEncode(this.FileInfo[names[i]].meta.flag)}-${this.FileInfo[names[i]].meta.license}-${this.FileInfo[names[i]].meta.labels}`
+          meta[this.FileInfo[names[i]].enc_hash] = `,${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},,${this.flagEncode(this.FileInfo[names[i]].meta.flag)}-${this.FileInfo[names[i]].meta.license}-${this.FileInfo[names[i]].meta.labels}`
           body += `,${this.FileInfo[names[i]].enc_hash}`
           cids.push(this.FileInfo[names[i]].enc_hash)
         }
       }
       this.contract.files = body
       this.signText(header + body).then(res => {
-        console.log({ res })
-        this.metaString = metaString
+        this.meta = meta
         this.contract.fosig = res.split(":")[3]
         this.upload(cids, this.contract)
         this.ready = false
@@ -948,26 +945,18 @@ export default {
     upload(cids = ['QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3'], contract) { // = { api: 'https://ipfs.dlux.io', id: '1668913215284', sigs: {}, s: 10485760, t: 0 }) {
       cids = cids.sort()
       var files = []
-      var meta = `1${this.stringOfKeys()},` //1 is auto renew
+      var meta = `1${this.stringOfKeys()},`
       for (var name in this.FileInfo) {
         for (var i = 0; i < cids.length; i++) {
           if (this.FileInfo[name].hash == cids[i]) {
             this.File[this.FileInfo[name].index].cid = cids[i]
             files.push(this.File[this.FileInfo[name].index])
-            //get everything before the last .
-            var Filename = name.split('.').slice(0, -1).join('')
-            //get everything after the last
-            var ext = name.split('.').slice(-1).join('')
-            meta += `${Filename},${ext},${this.FileInfo[name].thumb || ''},${this.flagEncode(this.FileInfo[name])},`
+            meta += this.meta[cids[i]]
             break;
           } else if (this.FileInfo[name].enc_hash == cids[i]) {
             this.File[this.FileInfo[name].enc_index].cid = cids[i]
             files.push(this.File[this.FileInfo[name].enc_index])
-            //get everything before the last .
-            var Filename = name.split('.').slice(0, -1).join('')
-            //get everything after the last
-            var ext = name.split('.').slice(-1).join('')
-            meta += `${Filename},${ext},,${this.flagEncode(this.FileInfo[name])},`
+            meta += this.meta[cids[i]]
             break;
           }
         }
@@ -984,7 +973,7 @@ export default {
         contract: contract,
         cid: null,
         cids: `${cids.join(',')}`,
-        meta: encodeURI(this.metaString),
+        meta: encodeURI(meta),
         onAbort: (e, f) => {
           console.log('options.onAbort')
           // const fileObj = files.get(file);
