@@ -154,8 +154,13 @@ export default {
                                     </div>
                                     <div class="mb-1">
                                         <label class="mb-1">Thumbnail</label>
-                                        <div class="position-relative has-validation">
+                                        <div v-if="FileInfo['thumb' + file.name]" class="position-relative has-validation">
                                             <input autocapitalize="off" :disabled="FileInfo['thumb' + file.name].use_thumb" placeholder="https://your-thumbnail-image.png"
+                                                pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+"
+                                                class="form-control disabled" v-model="FileInfo[file.name].meta.thumb">
+                                        </div>
+                                        <div v-if="!FileInfo['thumb' + file.name]" class="position-relative has-validation">
+                                            <input autocapitalize="off" placeholder="https://your-thumbnail-image.png"
                                                 pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+"
                                                 class="form-control disabled" v-model="FileInfo[file.name].meta.thumb">
                                         </div>
