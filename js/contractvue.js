@@ -936,10 +936,18 @@ export default {
             fetch(`https://ipfs.dlux.io/ipfs/${cid}`)
                 .then((response) => response.text())
                 .then((blob) => {
+
                     const name = this.newMeta[id][index * 4 + 1] + '.' + this.newMeta[id][index * 4 + 2] || 'file'
                     if (this.contractIDs[id].encryption.key) {
                         blob = this.AESDecrypt(blob, this.contractIDs[id].encryption.key);
-                        blob = new Blob([blob]);
+                        var byteString = atob(blob.split(',')[1])
+                        var mimeString = blob.split(',')[0].split(':')[1].split(';')[0];
+                        var ab = new ArrayBuffer(byteString.length);
+                        var ia = new Uint8Array(ab);
+                        for (var i = 0; i < byteString.length; i++) {
+                            ia[i] = byteString.charCodeAt(i);
+                        }
+                        blob = new Blob([ab], { type: mimeString });
                     }
                     try {
                         var url = window.URL.createObjectURL(blob);
@@ -1018,10 +1026,10 @@ export default {
             }
         },
         flagDecode(flags = "", flag = 0, omit = 0) {
-            if(flag) return this.Base64toNumber(flags[0]) & flag
+            if (flag) return this.Base64toNumber(flags[0]) & flag
             if (flags.indexOf(',') > -1) flags = flags.split(',')[4]
             var num = this.Base64toNumber(flags[0])
-            if(omit) num = num & ~omit
+            if (omit) num = num & ~omit
             var out = {}
             if (num & 1) out.enc = true
             if (num & 2) out.autoRenew = true
@@ -1033,7 +1041,7 @@ export default {
             var enc_string = ''
             for (var acc in this.contractIDs[id].encryption.accounts) {
                 if (this.contractIDs[id].encryption.accounts[acc].enc_key) enc_string += `${this.contractIDs[id].encryption.accounts[acc].enc_key}@${acc};`
-                
+
             }
             //remove last ;
             enc_string = enc_string.slice(0, -1)
@@ -1164,7 +1172,7 @@ export default {
                                 const filesNum = data.file_contracts[node]?.df ? Object.keys(data.file_contracts[node].df).length : 0
                                 this.newMeta[data.file_contracts[node].i] = new Array(filesNum * 4 + 1).fill('')
                             } else {
-                                if(data.file_contracts[node].m.indexOf('"') >= 0)data.file_contracts[node].m = JSON.parse(data.file_contracts[node].m)
+                                if (data.file_contracts[node].m.indexOf('"') >= 0) data.file_contracts[node].m = JSON.parse(data.file_contracts[node].m)
                                 const encData = data.file_contracts[node].m.split(',')[0] || ''
                                 const encAccounts = encData.split(';')
                                 for (var i = 0; i < encAccounts.length; i++) {
