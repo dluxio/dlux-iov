@@ -43,7 +43,7 @@ export default {
 
                     <div class="d-flex flex-wrap align-items-center  rounded-top  px-2 py-1">
                         <div>
-                            <div class="fs-4 fw-light m-0 text-break"><span class="px-2 py-1 me-2 border border-light text-white rounded"><i
+                            <div class="fs-4 fw-light m-0 text-break"><span class="px-2 py-1 me-2 border border-light text-white rounded-pill"><i
                                         class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}} (file+thumb size)</div>
                         </div>
 
