@@ -30,13 +30,19 @@ export default {
 
 
         <div v-if="File.length" class="mx-lg-5" >
-            <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key,index) in FileInfo" style="background-color:rgba(0,0,0,0.3)" class="rounded">
-                <div class="p-3 mb-2 card card-body" style="border-radius: 10px; bg-dark" v-if="!FileInfo[file.name].is_thumb">
+        
+            <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key,index) in FileInfo" style="background-color:rgba(0,0,0,0.3)" class="rounded px-1 py-2 p-lg-2">
+            <div class="d-flex flex-wrap">
+              <div class="me-1 lead fs-2">1 File (size)</div>
+              <div class="mx-auto lead fs-2">1 Thumbnail (size)</div>
+              <div class="ms-1 lead fs-2">2 Total (size)</div>
+            </div>
+                <div class="my-2 bg-dark rounded" style="border-radius: 10px;" v-if="!FileInfo[file.name].is_thumb">
 
-                    <div class="d-flex flex-wrap align-items-center">
+                    <div class="d-flex flex-wrap align-items-center  rounded-top  px-2 py-1">
                         <div>
-                            <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i
-                                        class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}}</h6>
+                            <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 border-light text-white rounded"><i
+                                        class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}} (file+thumb size)</h6>
                         </div>
 
                         <div class="flex-grow-1 mx-5" v-if="File[FileInfo[file.name].index].actions.cancel">
@@ -59,7 +65,7 @@ export default {
                                 v-if="File[FileInfo[file.name].index].actions.cancel"
                                 @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Cancel</button>
                         </div>
-                        <div class="ms-auto">
+                        <div class="ms-auto my-1">
                             <button class="btn btn-danger" @click="deleteImg(FileInfo[file.name].index, file.name)"
                                 data-toggle="tooltip" data-placement="top" title="Delete Asset"><i
                                     class="fas fa-fw fa-trash-alt"></i></button>
@@ -70,13 +76,13 @@ export default {
 
 
 
-                    <div class="d-flex flex-wrap align-items-center mx-1 my-2 px-2 py-1 rounded" >
+                    <div class="d-flex flex-wrap align-items-center  px-2 py-1 text-dark" style="background-color:rgba(255,255,255,0.3)">
                         
                         <div class="d-flex flex-column flex-grow-1 mx-1">
                           
-                            <div class="d-flex align-items-center mt-2">
+                            <div class="d-flex align-items-center">
                                 <div class="me-auto fs-5">
-                                    Thumbnail ({{fancyBytes(FileInfo['thumb' + file.name].size)}})
+                                    Use auto-generated thumbnail <span class="small">({{fancyBytes(FileInfo['thumb' + file.name].size)}})</span>
                                 </div>
                                 <div class="form-check form-switch">
                                     <input class="form-check-input fs-4" type="checkbox" role="switch" id="includeThumb"
@@ -89,7 +95,7 @@ export default {
                         </div>
                     </div>
 
-                    <div class="d-flex flex-wrap align-items-center mx-1 px-2 py-2 mb-1 rounded">
+                    <div class="d-flex flex-wrap align-items-center  px-2 py-2 mb-1 rounded-bottom">
                         <div class="flex-grow-1 mx-sm-2">
                             
                             <div class="row align-items-center"> 
@@ -183,7 +189,7 @@ export default {
 
 
         <div id="listOfEncs" v-if="encryption.encrypted" v-for="(file, key,index) in FileInfo">
-            <div class="p-3 mb-2 card card-body bg-black" v-if="!FileInfo[file.name].is_thumb">
+            <div class="p-3 mb-2 bg-dark" v-if="!FileInfo[file.name].is_thumb">
                 <div class="d-flex flex-wrap align-items-center pb-2 mb-2">
                     <div>
                         <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i
