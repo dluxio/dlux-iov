@@ -1255,6 +1255,17 @@ export default {
     },
     totalSize() {
       var size = 0
+      var cids = []
+      if (!this.encryption.encrypted) for (var i = 0; i < names.length; i++) {
+        if ((this.FileInfo[names[i]].is_thumb && !this.FileInfo[names[i]].use_thumb) || !this.FileInfo[names[i]].is_thumb) {
+          cids.push(this.FileInfo[names[i]].hash)
+        }
+      }
+      else for (var i = 0; i < names.length; i++) {
+        if (this.FileInfo[names[i]].enc_hash) {
+          cids.push(this.FileInfo[names[i]].enc_hash)
+        }
+      }
       for (var name in this.FileInfo) {
         for (var i = 0; i < cids.length; i++) {
           if (this.FileInfo[name].hash == cids[i]) {
