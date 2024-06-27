@@ -87,7 +87,7 @@ export default {
                                     Use auto-generated thumbnail <span class="small">({{fancyBytes(FileInfo['thumb' + file.name].size)}})</span>
                                 </div>
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input fs-4" type="checkbox" role="switch" :id="'includeThumb' + file.name" v-model="FileInfo['thumb' + file.name].use_thumb">
+                                    <input class="form-check-input fs-4" @click="resetThumb(file.name)" type="checkbox" role="switch" :id="'includeThumb' + file.name" v-model="FileInfo['thumb' + file.name].use_thumb">
                                     <label class="form-check-label" :for="'includeThumb' + file.name"></label>
                                 </div>
                             </div>
@@ -581,6 +581,9 @@ export default {
         reader.readAsArrayBuffer(this.File[fileInfo.index]);
       })
     },
+    resetThumb(n){
+      this.FileInfo[n].meta.thumb = this.FileInfo[n].thumb
+    },
     uploadFile(e) {
       for (var i = 0; i < e.target.files.length; i++) {
         var reader = new FileReader();
@@ -655,7 +658,7 @@ export default {
                             }
                             that.FileInfo[target.File.name].meta.thumb = ret.hash
                             that.File.push(newFile);
-                            
+
                           })
                         }
                         Reader.readAsArrayBuffer(newFile);
@@ -832,12 +835,19 @@ export default {
       var body = ""
       var names = Object.keys(this.FileInfo)
       var cids = []
+      var metaString = "2"
       if (!this.encryption.encrypted) for (var i = 0; i < names.length; i++) {
-        body += `,${this.FileInfo[names[i]].hash}`
-        cids.push(this.FileInfo[names[i]].hash)
+        metaString += this.stringOfKeys() + ','
+        if ((this.FileInfo[names[i]].is_thumb && !this.FileInfo[names[i]].use_thumb) || !this.FileInfo[names[i]].is_thumb) {
+          metaString += `${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},${this.FileInfo[names[i]].meta.thumb},${this.flagEncode(this.FileInfo[names[i]].meta.flag)}-${this.FileInfo[names[i]].meta.license}-${this.FileInfo[names[i]].meta.labels}`
+          body += `,${this.FileInfo[names[i]].hash}`
+          cids.push(this.FileInfo[names[i]].hash)
+        }
       }
       else for (var i = 0; i < names.length; i++) {
+        metaString += this.stringOfKeys() + ','
         if (this.FileInfo[names[i]].enc_hash) {
+          metaString += `${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},,${this.flagEncode(this.FileInfo[names[i]].meta.flag)}-${this.FileInfo[names[i]].meta.license}-${this.FileInfo[names[i]].meta.labels}`
           body += `,${this.FileInfo[names[i]].enc_hash}`
           cids.push(this.FileInfo[names[i]].enc_hash)
         }
@@ -845,6 +855,7 @@ export default {
       this.contract.files = body
       this.signText(header + body).then(res => {
         console.log({ res })
+        this.metaString = metaString
         this.contract.fosig = res.split(":")[3]
         this.upload(cids, this.contract)
         this.ready = false
@@ -887,8 +898,6 @@ export default {
       if (fileInfo.is_thumb) num += 2
       if (fileInfo.nsfw) num += 4
       if (fileInfo.executable) num += 8
-      if (fileInfo.lic) num += 16
-      if (fileInfo.tbd) num += 32
       var flags = this.NumberToBase64(num)
       //append category chars here
       return flags
@@ -960,7 +969,7 @@ export default {
         contract: contract,
         cid: null,
         cids: `${cids.join(',')}`,
-        meta: encodeURI(meta),
+        meta: encodeURI(this.metaString),
         onAbort: (e, f) => {
           console.log('options.onAbort')
           // const fileObj = files.get(file);
@@ -1219,16 +1228,16 @@ export default {
     reallyReady() {
       return this.ready && !this.unkeyed
     },
-    fileCount(){
+    fileCount() {
       var thumbs = 0
       var files = 0
       for (var item in this.FileInfo) {
         if (this.FileInfo[item].use_thumb) thumbs++
-        else if (this.FileInfo[item].is_thumb) {}
+        else if (this.FileInfo[item].is_thumb) { }
         else files++
       }
-      if(!this.encryption.encrypted) return `${files} file${files > 1 ? 's' : ''} ${ thumbs ? `with ${thumbs} thumbnail${thumbs > 1 ? 's' : ''}` : ''}`
-      else return `${files} encrypted file${files > 1 ? 's' : ''}` 
+      if (!this.encryption.encrypted) return `${files} file${files > 1 ? 's' : ''} ${thumbs ? `with ${thumbs} thumbnail${thumbs > 1 ? 's' : ''}` : ''}`
+      else return `${files} encrypted file${files > 1 ? 's' : ''}`
     }
   },
   mounted() {
