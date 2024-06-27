@@ -168,6 +168,11 @@ export default {
                                             @data="handleTag(file.name, $event)"></choices-vue>
                                     </div>
                                     <div class="mb-1">
+                                        <label class="mb-1">License</label>
+                                        <choices-vue :ref="file.name +'license-tag'" prop_type="license" :reference="file.name +'license-tag'"
+                                            @data="handleLic(file.name, $event)"></choices-vue>
+                                    </div>
+                                    <div class="mb-1">
                                         <label class="mb-1">Labels</label>
                                         <choices-vue :ref="file.name +'select-label'" prop_type="labels" :reference="file.name +'select-label'"
                                             @data="handleLabel(file.name, $event)"></choices-vue>
@@ -404,6 +409,10 @@ export default {
         }
         this.FileInfo[n].meta.labels = arr.join('')
       }
+    },
+    handleLic(n, m) {
+      if (m.action == 'added') this.FileInfo[n].meta.license = m.item
+      else this.FileInfo[n].meta.license = ''
     },
     handleTag(n, m) {
       var num = this.Base64toNumber(this.FileInfo[n].meta.flag) || 0

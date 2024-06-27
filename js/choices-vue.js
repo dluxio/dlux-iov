@@ -515,6 +515,9 @@ export default {
       var opts = this.opts
       opts.choices = this[this.prop_type]
       opts.maxItemCount = this.prop_function == "search" ? -1 : 7
+      if(this.prop_type == 'license') {
+        opts.maxItemCount = 1
+      }
       opts.placeholderValue = this.prop_type.charAt(0).toUpperCase() + this.prop_type.slice(1)
       if (!Choices) this.msg = 'Choices not loaded'
       else if (this.reference == '') this.msg = 'Ref not set'
