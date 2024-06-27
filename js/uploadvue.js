@@ -852,7 +852,7 @@ export default {
       var metaString = "1" + this.stringOfKeys()
       if (!this.encryption.encrypted) for (var i = 0; i < names.length; i++) {
         metaString += ','
-        if ((this.FileInfo[names[i]].is_thumb && !this.FileInfo[names[i]].use_thumb) || !this.FileInfo[names[i]].is_thumb) {
+        if ((this.FileInfo[names[i]].is_thumb && this.FileInfo[names[i]].use_thumb) || !this.FileInfo[names[i]].is_thumb) {
           metaString += `${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},${this.FileInfo[names[i]].meta.thumb},${this.flagEncode(this.FileInfo[names[i]].meta.flag)}-${this.FileInfo[names[i]].meta.license}-${this.FileInfo[names[i]].meta.labels}`
           body += `,${this.FileInfo[names[i]].hash}`
           cids.push(this.FileInfo[names[i]].hash)
@@ -1258,7 +1258,7 @@ export default {
       var cids = []
       var names = Object.keys(this.FileInfo)
       if (!this.encryption.encrypted) for (var i = 0; i < names.length; i++) {
-        if (((this.FileInfo[names[i]].is_thumb && !this.FileInfo[names[i]].use_thumb)) || !this.FileInfo[names[i]].is_thumb) {
+        if ((this.FileInfo[names[i]].is_thumb && this.FileInfo[names[i]].use_thumb) || !this.FileInfo[names[i]].is_thumb) {
           cids.push(this.FileInfo[names[i]].hash)
         }
       }
