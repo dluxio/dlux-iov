@@ -34,7 +34,7 @@ export default {
                 <div class="p-3 mb-2 card card-body bg-black" style="border-radius: 10px;"
                     v-if="!FileInfo[file.name].is_thumb">
 
-                    <div class="d-flex flex-wrap align-items-center pb-2 mb-2">
+                    <div class="d-flex flex-wrap align-items-center">
                         <div>
                             <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i
                                         class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}}</h6>
@@ -67,19 +67,7 @@ export default {
                         </div>
                     </div>
 
-                    <div class="d-flex w-100" v-if="FileInfo[file.name]">
-
-                        <div class="">Bytes: {{fancyBytes(File[FileInfo[file.name].index].size)}}</div <div class="">
-                        CID:
-                        {{FileInfo[file.name].hash}}
-                    </div>
-                    <div class="">Status:
-                        {{FileInfo[file.name].status}}
-                    </div>
-                    <div class=""><a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
-                            target="_blank">{{FileInfo[file.name].hash}}<i
-                                class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a>
-                    </div>
+                   
 
 
 
@@ -89,14 +77,10 @@ export default {
                             <img :src="FileInfo['thumb' + file.name].fileContent" class="img-thumbnail"></img>
                         </div>
                         <div class="d-flex flex-column flex-grow-1 mx-1">
-                            <div class="fs-5 fw-bold border-bottom border-light border-2">File thumbnail has
-                                been generated</div>
-                            <div class="fw-6">Thumbnail Size: {{fancyBytes(FileInfo['thumb' + file.name].size)}}
-                            </div>
-                            <div class="fw-6 text-break">CID: {{FileInfo['thumb' + file.name].hash}}</div>
+                          
                             <div class="d-flex align-items-center mt-2">
                                 <div class="me-auto fs-5">
-                                    Use thumbnail
+                                    Thumbnail ({{fancyBytes(FileInfo['thumb' + file.name].size)}})
                                 </div>
                                 <div class="form-check form-switch">
                                     <input class="form-check-input fs-4" type="checkbox" role="switch" id="includeThumb"
@@ -112,7 +96,43 @@ export default {
                     <div class="d-flex flex-wrap align-items-center mx-1 px-2 py-2 mb-1 rounded bg-dark">
                         <div class="flex-grow-1 mx-sm-2">
                             
-                            <div class="d-flex flex-column">
+                            <div class="row align-items-center"> 
+
+                              <div class="col-md-4">
+                                  <div class="d-flex flex-column justify-content-center">
+
+                                      
+                                       <div class="bg-light rounded">    
+                                          <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                                                  viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve" >
+                                              
+                                              <g >
+                                                  <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10
+                                                      S655.5,210,650,210z"/>
+                                                  <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10
+                                                      s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
+                                                      C660,305.2,655.5,309.7,650,309.7z"/>
+                                                  <path class="st0" d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400
+                                                      c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z"/>
+                                                  <path class="st0" d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z"/>
+                                                  <path class="st0" d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z"/>
+                                                  <path class="st0" d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
+                                                      c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
+                                                      c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z"/>
+                                                  <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2" style="text-transform: uppercase; font-size: 149px;">{{FileInfo[file.name].meta.ext}}</text>
+                                              </g>
+                                          </svg>
+                                      </div>
+
+                                      <span class="small text-center mb-2">{{fancyBytes(File[FileInfo[file.name].index].size)}}</span>
+                                      
+                                      <!-- link -->
+                                      <div>
+                                          <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"><span class="d-flex align-items-center">URL<i class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
+                                      </div>
+                                      
+                                    </div>
+                                </div>
                                 <div class="col-md-8">
 
                                     <div class="mb-1">
@@ -152,7 +172,12 @@ export default {
 
                             </div>
                         </div>
+                        
                     </div>
+                     <div class="d-flex flex-column text-end d-none" v-if="FileInfo[file.name]">
+                        <div class="small text-muted">File: {{FileInfo[file.name].hash}}</div>
+                        <div class="small text-muted text-break">Thumbnail: {{FileInfo['thumb' + file.name].hash}}</div>
+                      </div> 
                 </div>
             </div>
         
