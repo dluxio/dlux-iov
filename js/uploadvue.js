@@ -83,7 +83,7 @@ export default {
                         <div class="d-flex flex-column flex-grow-1 mx-1">
                           
                             <div class="d-flex align-items-center">
-                                <div class="me-auto fs-5">
+                                <div class="me-auto fs-5" v-if="FileInfo['thumb' + file.name]">
                                     Use auto-generated thumbnail <span class="small">({{fancyBytes(FileInfo['thumb' + file.name].size)}})</span>
                                 </div>
                                 <div class="form-check form-switch">
