@@ -168,7 +168,7 @@ export default {
                                             @data="handleTag(file.name, $event)"></choices-vue>
                                     </div>
                                     <div class="mb-1">
-                                        <label class="mb-1">License</label>
+                                        <label class="mb-1">License <a href="https://creativecommons.org/share-your-work/cclicenses/" target="_blank"><i class="fa-solid fa-section"></i></a></label>
                                         <choices-vue :ref="file.name +'license-tag'" prop_type="license" :reference="file.name +'license-tag'"
                                             @data="handleLic(file.name, $event)"></choices-vue>
                                     </div>
