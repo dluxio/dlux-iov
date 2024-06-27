@@ -29,20 +29,22 @@ export default {
 
 
 
-        <div v-if="File.length" class="mx-lg-5" >
+        <div v-if="File.length" class="mx-lg-5 rounded" style="background-color:rgba(0,0,0,0.3)" >
+
+        <div class="d-flex mx-1">
+                <div class="mx-auto ms-md-1 mt-2 lead fs-2">1 File</div>
+              </div>
         
-            <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key,index) in FileInfo" style="background-color:rgba(0,0,0,0.3)" class="rounded px-1 py-2 p-lg-2">
-            <div class="d-flex flex-wrap">
-              <div class="me-1 lead fs-2">1 File (size)</div>
-              <div class="mx-auto lead fs-2">1 Thumbnail (size)</div>
-              <div class="ms-1 lead fs-2">2 Total (size)</div>
-            </div>
+            <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key,index) in FileInfo"  class="rounded px-1 p-lg-2">
+              
+            
+
                 <div class="my-2 bg-dark rounded" style="border-radius: 10px;" v-if="!FileInfo[file.name].is_thumb">
 
                     <div class="d-flex flex-wrap align-items-center  rounded-top  px-2 py-1">
                         <div>
-                            <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 border-light text-white rounded"><i
-                                        class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}} (file+thumb size)</h6>
+                            <div class="fs-4 fw-light m-0 text-break"><span class="px-2 py-1 me-2 border border-light text-white rounded"><i
+                                        class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}} (file+thumb size)</div>
                         </div>
 
                         <div class="flex-grow-1 mx-5" v-if="File[FileInfo[file.name].index].actions.cancel">
