@@ -800,9 +800,6 @@ export default {
                 }
                 var keys = Object.keys(this.contract[id].df)
                 for (var j in keys) {
-                    try {
-                        console.log(this.newMeta[id][j * 4 + 4])
-                    } catch (e) { }
                     var ll = "", lc = "", l = this.newMeta[id][j * 4 + 4] ? this.newMeta[id][j * 4 + 4].slice(1) || '' : ''
                     for (var k = 0; k < l.length; k++) {
                         if (this.labels[l[k]]) {

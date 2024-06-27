@@ -761,7 +761,6 @@ export default {
                       originalImage.addEventListener("load", function () {
                         var thumbnailImage = createThumbnail(originalImage);
                         var newFile = new File([thumbnailImage.src], 'thumb' + target.File.name, { type: 'jpeg' });
-                        console.log({ newFile })
                         newFile.progress = 0;
                         newFile.status = 'Pending Signature';
                         newFile.actions = {

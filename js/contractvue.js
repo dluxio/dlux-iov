@@ -1183,7 +1183,7 @@ export default {
 
                             this.contracts.push(data.file_contracts[node]);
                             this.contractIDs[data.file_contracts[node].i].index = this.contracts.length - 1;
-                            this.postBodyAdder[data.file_contracts[node].i] = ""
+                            this.postBodyAdder[data.file_contracts[node].i] = {}
 
                         }
                         for (var user in data.channels) {
