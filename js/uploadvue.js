@@ -29,10 +29,9 @@ export default {
 
 
 
-        <div v-if="File.length" class="mx-lg-5">
-            <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key,index) in FileInfo">
-                <div class="p-3 mb-2 card card-body bg-black" style="border-radius: 10px;"
-                    v-if="!FileInfo[file.name].is_thumb">
+        <div v-if="File.length" class="mx-lg-5" >
+            <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key,index) in FileInfo" style="background-color:rgba(0,0,0,0.3)" class="rounded">
+                <div class="p-3 mb-2 card card-body" style="border-radius: 10px; bg-dark" v-if="!FileInfo[file.name].is_thumb">
 
                     <div class="d-flex flex-wrap align-items-center">
                         <div>
@@ -71,11 +70,8 @@ export default {
 
 
 
-                    <div class="d-flex flex-wrap align-items-center mx-1 my-2 px-2 py-1 rounded bg-dark"
-                        v-if="FileInfo['thumb' + file.name]">
-                        <div class="mx-1">
-                            <img :src="FileInfo['thumb' + file.name].fileContent" class="img-thumbnail"></img>
-                        </div>
+                    <div class="d-flex flex-wrap align-items-center mx-1 my-2 px-2 py-1 rounded" >
+                        
                         <div class="d-flex flex-column flex-grow-1 mx-1">
                           
                             <div class="d-flex align-items-center mt-2">
@@ -93,7 +89,7 @@ export default {
                         </div>
                     </div>
 
-                    <div class="d-flex flex-wrap align-items-center mx-1 px-2 py-2 mb-1 rounded bg-dark">
+                    <div class="d-flex flex-wrap align-items-center mx-1 px-2 py-2 mb-1 rounded">
                         <div class="flex-grow-1 mx-sm-2">
                             
                             <div class="row align-items-center"> 
@@ -101,8 +97,10 @@ export default {
                               <div class="col-md-4">
                                   <div class="d-flex flex-column justify-content-center">
 
-                                      
-                                       <div class="bg-light rounded">    
+                                      <div class="mx-auto my-auto" v-if="FileInfo['thumb' + file.name]">
+                                          <img :src="FileInfo['thumb' + file.name].fileContent" class="img-thumbnail"></img>
+                                      </div>
+                                       <div class="bg-light rounded" v-if="!FileInfo['thumb' + file.name]" style="width:128px;">    
                                           <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                                                   viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve" >
                                               
@@ -150,9 +148,9 @@ export default {
                                     <div class="mb-1">
                                         <label class="mb-1">Thumbnail</label>
                                         <div class="position-relative has-validation">
-                                            <input autocapitalize="off" placeholder="https://your-thumbnail-image.png"
+                                            <input autocapitalize="off" disabled placeholder="https://your-thumbnail-image.png"
                                                 pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+"
-                                                class="form-control" v-model="FileInfo[file.name].meta.thumb">
+                                                class="form-control disabled" v-model="FileInfo[file.name].meta.thumb">
                                         </div>
                                     </div>
 
