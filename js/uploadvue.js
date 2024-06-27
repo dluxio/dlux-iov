@@ -44,7 +44,7 @@ export default {
                     <div class="d-flex flex-wrap align-items-center  rounded-top  px-2 py-1">
                         <div>
                             <div class="fs-4 fw-light m-0 text-break"><span class="px-2 py-1 me-2 border border-light text-white rounded-pill"><i
-                                        class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}} {{ FileInfo['thumb' + file.name] ? fancyBytes(FileInfo['thumb' + file.name] + FileInfo[file.name]) : fancyBytes(FileInfo[file.name])}}</div>
+                                        class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}} {{ FileInfo['thumb' + file.name] ? fancyBytes(FileInfo['thumb' + file.name].size + FileInfo[file.name].size) : fancyBytes(FileInfo[file.name].size)}}</div>
                         </div>
 
                         <div class="flex-grow-1 mx-5" v-if="File[FileInfo[file.name].index].actions.cancel">
@@ -80,10 +80,10 @@ export default {
 
                     <div class="d-flex flex-wrap align-items-center  px-2 py-1 text-dark" style="background-color:rgba(255,255,255,0.3)">
                         
-                        <div class="d-flex flex-column flex-grow-1 mx-1">
+                        <div class="d-flex flex-column flex-grow-1 mx-1" v-if="FileInfo['thumb' + file.name]">
                           
                             <div class="d-flex align-items-center">
-                                <div class="me-auto fs-5" v-if="FileInfo['thumb' + file.name]">
+                                <div class="me-auto fs-5">
                                     Use auto-generated thumbnail <span class="small">({{fancyBytes(FileInfo['thumb' + file.name].size)}})</span>
                                 </div>
                                 <div class="form-check form-switch">
