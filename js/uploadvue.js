@@ -180,7 +180,7 @@ export default {
                         </div>
                         
                     </div>
-                     <div class="d-flex flex-column text-end d-none" v-if="FileInfo[file.name]">
+                     <div class="d-flex flex-column text-end d-none" v-if="FileInfo['thumb' + file.name]">
                         <div class="small text-muted">File: {{FileInfo[file.name].hash}}</div>
                         <div class="small text-muted text-break">Thumbnail: {{FileInfo['thumb' + file.name].hash}}</div>
                       </div> 
