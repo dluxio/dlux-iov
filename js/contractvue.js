@@ -1033,11 +1033,12 @@ export default {
             var enc_string = ''
             for (var acc in this.contractIDs[id].encryption.accounts) {
                 if (this.contractIDs[id].encryption.accounts[acc].enc_key) enc_string += `${this.contractIDs[id].encryption.accounts[acc].enc_key}@${acc};`
+                
             }
             //remove last ;
             enc_string = enc_string.slice(0, -1)
             this.newMeta[id][0] = enc_string
-            if (this.contractIDs[id].m != `${this.newMeta[id].join(',')}`) return true
+            if (this.contractIDs[id].m != `1${this.newMeta[id].join(',')}`) return true
         },
         update_meta(contract) {
             return new Promise((resolve, reject) => {
@@ -1152,6 +1153,7 @@ export default {
                     // Storage nodes won't get contracts from here, we'll need some props from the contract
                     if (!this.nodeview) {
                         for (var node in data.file_contracts) {
+                            data.file_contracts[node].autoRenew = this.Base64toNumber(data.file_contracts[node].m[0] || 1) & 1
                             data.file_contracts[node].encryption = {
                                 input: "",
                                 key: "",
@@ -1168,7 +1170,7 @@ export default {
                                 for (var i = 0; i < encAccounts.length; i++) {
                                     const encA = encAccounts[i].split('@')[1]
                                     data.file_contracts[node].encryption.accounts[encA] = {
-                                        enc_key: encAccounts[i].split('@')[0],
+                                        enc_key: `#${encAccounts[i].split('@')[0].split('#')[1]}`,
                                         key: '',
                                         done: true,
                                     }
