@@ -32,7 +32,7 @@ export default {
         <div v-if="File.length" class="mx-lg-5 rounded" style="background-color:rgba(0,0,0,0.3)" >
 
         <div class="d-flex mx-1">
-                <div class="mx-auto ms-md-1 mt-2 lead fs-2">1 File</div>
+                <div class="mx-auto ms-md-1 mt-2 lead fs-2">{{ fileCount }}</div>
               </div>
         
             <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key,index) in FileInfo"  class="rounded px-1 p-lg-2">
@@ -1205,6 +1205,16 @@ export default {
     },
     reallyReady() {
       return this.ready && !this.unkeyed
+    },
+    fileCount(){
+      var thumbs = 0
+      var files = 0
+      for (var item in this.FileInfo) {
+        if (this.FileInfo[item].is_thumb) thumbs++
+        else files++
+      }
+      if(!this.encryption.encrypted) return `${files} file${files > 1 ? 's' : ''} ${ thumbs ? `with ${thumbs} thumbnail${thumbs > 1 ? 's' : ''}` : ''}`
+      else return `${files} encrypted file${files > 1 ? 's' : ''}` 
     }
   },
   mounted() {
