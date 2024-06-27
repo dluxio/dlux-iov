@@ -946,6 +946,7 @@ export default {
       return result;
     },
     upload(cids = ['QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3'], contract) { // = { api: 'https://ipfs.dlux.io', id: '1668913215284', sigs: {}, s: 10485760, t: 0 }) {
+      cids = cids.sort()
       var files = []
       var meta = `1${this.stringOfKeys()},` //1 is auto renew
       for (var name in this.FileInfo) {
