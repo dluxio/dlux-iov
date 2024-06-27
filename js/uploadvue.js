@@ -99,15 +99,15 @@ export default {
                     <div class="d-flex flex-wrap align-items-center  px-2 py-2 mb-1 rounded-bottom">
                         <div class="flex-grow-1 mx-sm-2">
                             
-                            <div class="row align-items-center"> 
+                            <div class="row align-items-stretch"> 
 
                               <div class="col-md-4">
                                   <div class="d-flex flex-column justify-content-center">
 
-                                      <div class="mx-auto my-auto" v-if="FileInfo['thumb' + file.name]">
+                                      <div class="mx-auto my-auto" v-if="FileInfo['thumb' + file.name] && FileInfo['thumb' + file.name].use_thumb">
                                           <img :src="FileInfo['thumb' + file.name].fileContent" class="img-thumbnail"></img>
                                       </div>
-                                       <div class="bg-light rounded" v-if="!FileInfo['thumb' + file.name]" style="width:128px;">    
+                                       <div class="bg-light rounded" v-if="!FileInfo['thumb' + file.name] || !FileInfo['thumb' + file.name].use_thumb" style="width:128px;">    
                                           <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                                                   viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve" >
                                               
