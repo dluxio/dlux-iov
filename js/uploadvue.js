@@ -87,9 +87,8 @@ export default {
                                     Use auto-generated thumbnail <span class="small">({{fancyBytes(FileInfo['thumb' + file.name].size)}})</span>
                                 </div>
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input fs-4" type="checkbox" role="switch" id="includeThumb"
-                                        checked>
-                                    <label class="form-check-label" for="includeThumb"></label>
+                                    <input class="form-check-input fs-4" type="checkbox" role="switch" :id="'includeThumb' + file.name" v-model="FileInfo['thumb' + file.name].use_thumb">
+                                    <label class="form-check-label" :for="'includeThumb' + file.name"></label>
                                 </div>
                             </div>
                         </div>
@@ -156,7 +155,7 @@ export default {
                                     <div class="mb-1">
                                         <label class="mb-1">Thumbnail</label>
                                         <div class="position-relative has-validation">
-                                            <input autocapitalize="off" disabled placeholder="https://your-thumbnail-image.png"
+                                            <input autocapitalize="off" :disabled="FileInfo['thumb' + file.name].use_thumb" placeholder="https://your-thumbnail-image.png"
                                                 pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+"
                                                 class="form-control disabled" v-model="FileInfo[file.name].meta.thumb">
                                         </div>
@@ -625,7 +624,7 @@ export default {
                           const size = buf.byteLength
                           that.hashOf(buf, {}).then((ret) => {
                             const newIndex = that.File.length
-                            const dict = { fileContent: new TextDecoder("utf-8").decode(thumbFileContent), hash: ret.hash, index: newIndex, size: buf.byteLength, name: 'thumb' + target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature', is_thumb: true }
+                            const dict = { fileContent: new TextDecoder("utf-8").decode(thumbFileContent), hash: ret.hash, index: newIndex, size: buf.byteLength, name: 'thumb' + target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature', is_thumb: true, use_thumb: true }
                             that.FileInfo[target.File.name].thumb_index = newIndex
                             that.FileInfo[target.File.name].thumb = ret.hash
                             that.FileInfo['thumb' + target.File.name] = dict
@@ -1210,7 +1209,8 @@ export default {
       var thumbs = 0
       var files = 0
       for (var item in this.FileInfo) {
-        if (this.FileInfo[item].is_thumb) thumbs++
+        if (this.FileInfo[item].use_thumb) thumbs++
+        else if (this.FileInfo[item].is_thumb) {}
         else files++
       }
       if(!this.encryption.encrypted) return `${files} file${files > 1 ? 's' : ''} ${ thumbs ? `with ${thumbs} thumbnail${thumbs > 1 ? 's' : ''}` : ''}`
