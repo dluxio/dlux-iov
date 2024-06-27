@@ -40,15 +40,13 @@ export default {
 
 
 
-                <div class="my-2 bg-dark rounded" style="border-radius: 10px;" v-if="!FileInfo[file.name].is_thumb">
+                <div class="my-2 bg-dark rounded" v-if="!FileInfo[file.name].is_thumb">
 
-                    <div class="d-flex flex-wrap align-items-center  rounded-top  px-2 py-1">
+                    <div class="d-flex flex-wrap align-items-center px-2 py-1">
                         <div>
                             <div class="fs-4 fw-light m-0 text-break"><span
                                     class="px-2 py-1 me-2 border border-light text-white rounded-pill"><i
-                                        class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}} {{ FileInfo['thumb'
-                                + file.name] ? fancyBytes(FileInfo['thumb' + file.name].size + FileInfo[file.name].size)
-                                : fancyBytes(FileInfo[file.name].size)}}</div>
+                                        class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}}</div>
                         </div>
 
                         <div class="flex-grow-1 mx-5" v-if="File[FileInfo[file.name].index].actions.cancel">
@@ -78,38 +76,26 @@ export default {
                         </div>
                     </div>
 
-
-
-
-
-                    <div class="d-flex flex-wrap align-items-center  px-2 py-1 text-dark"
-                        style="background-color:rgba(255,255,255,0.3)">
-
-                        <div class="d-flex flex-column flex-grow-1 mx-1" v-if="FileInfo['thumb' + file.name]">
-
-                            <div class="d-flex align-items-center">
-                                <div class="me-auto fs-5">
-                                    Use auto-generated thumbnail <span class="small">({{fancyBytes(FileInfo['thumb' +
-                                        file.name].size)}})</span>
-                                </div>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input fs-4" @click="resetThumb(file.name)" type="checkbox"
-                                        role="switch" :id="'includeThumb' + file.name"
-                                        v-model="FileInfo['thumb' + file.name].use_thumb">
-                                    <label class="form-check-label" :for="'includeThumb' + file.name"></label>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                        </div>
-                    </div>
-
                     <div class="d-flex flex-wrap align-items-center  px-2 py-2 mb-1 rounded-bottom">
-                        <div class="flex-grow-1 mx-sm-2">
+                        <div class="flex-grow-1">
 
                             <div class="d-flex flex-wrap justify-content-around">
 
-                                <div class="d-flex flex-column justify-content-center">
+                                <div class="d-flex flex-column justify-content-center py-2 rounded" style="background-color:rgba(0,0,0,0.3); min-width:350px;">
+
+                                    <div class="d-flex align-items-center px-2 py-1" v-if="FileInfo['thumb' + file.name]" >
+                                        <div class="me-auto fs-5 text-wrap">
+                                          Automatic Thumbnail
+                                          <span class="small d-none">({{fancyBytes(FileInfo['thumb' + file.name].size)}})</span>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input fs-4" @click="resetThumb(file.name)" type="checkbox"
+                                                role="switch" :id="'includeThumb' + file.name"
+                                                v-model="FileInfo['thumb' + file.name].use_thumb">
+                                            <label class="form-check-label" :for="'includeThumb' + file.name"></label>
+                                        </div>
+                                    </div>
+                                    
                                     <div class="mx-auto my-auto"
                                         v-if="FileInfo['thumb' + file.name] && FileInfo['thumb' + file.name].use_thumb">
                                         <img :src="FileInfo['thumb' + file.name].fileContent"
@@ -146,11 +132,11 @@ export default {
                                         </svg>
                                     </div>
 
-                                    <span
-                                        class="small text-center mb-2">{{fancyBytes(File[FileInfo[file.name].index].size)}}</span>
+                                   
+                                    <span class="fs-4 mx-auto"> {{ FileInfo['thumb' + file.name] && FileInfo['thumb' + file.name].use_thumb ? fancyBytes(FileInfo['thumb' + file.name].size + FileInfo[file.name].size) : fancyBytes(FileInfo[file.name].size)}} </span>
 
                                     <!-- link -->
-                                    <div>
+                                    <div class="mx-2">
                                         <a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
                                             target="_blank" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"><span
                                                 class="d-flex align-items-center">URL<i
