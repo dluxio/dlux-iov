@@ -1191,7 +1191,7 @@ export default {
                                 this.newMeta[data.file_contracts[node].i] = {
                                     autoRenew: renew,
                                 }
-                                var filesNames = data.file_contracts[node]?.df ? Object.keys(data.file_contracts[node].df).length : 0
+                                var filesNames = data.file_contracts[node]?.df ? Object.keys(data.file_contracts[node].df) : []
                                 filesNames = filesNames.sort((a, b) => {
                                     if (a > b) return 1
                                     else if (a < b) return -1
