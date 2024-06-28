@@ -1173,10 +1173,17 @@ export default {
                                 this.newMeta[data.file_contracts[node].i] = new Array(filesNum * 4 + 1).fill('')
                             } else {
                                 if (data.file_contracts[node].m.indexOf('"') >= 0) data.file_contracts[node].m = JSON.parse(data.file_contracts[node].m)
-                                const encData = data.file_contracts[node].m.split(',')[0] || ''
+                                var encData = data.file_contracts[node].m.split(',')[0] || ''
+                                var renew = false
+                                if(encData){
+                                    encData = encData.split('#')
+                                    renew = this.Base64toNumber(encData.shift()) & 1
+                                    if(encData.length)encData = '#' + encData.join('#') 
+                                }
                                 const encAccounts = encData.split(';')
                                 for (var i = 0; i < encAccounts.length; i++) {
                                     const encA = encAccounts[i].split('@')[1]
+                                    data.file_contracts[node].autorenew = renew
                                     data.file_contracts[node].encryption.accounts[encA] = {
                                         enc_key: `#${encAccounts[i].split('@')[0].split('#')[1]}`,
                                         key: '',
