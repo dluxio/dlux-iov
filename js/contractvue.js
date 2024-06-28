@@ -1175,12 +1175,13 @@ export default {
                                 if (data.file_contracts[node].m.indexOf('"') >= 0) data.file_contracts[node].m = JSON.parse(data.file_contracts[node].m)
                                 var encData = data.file_contracts[node].m.split(',')[0] || ''
                                 var renew = false
+                                var encAccounts = []
                                 if(encData){
                                     encData = encData.split('#')
                                     renew = this.Base64toNumber(encData.shift()) & 1
                                     if(encData.length)encData = '#' + encData.join('#') 
+                                    encAccounts = encData.split(';')
                                 }
-                                const encAccounts = encData.split(';')
                                 for (var i = 0; i < encAccounts.length; i++) {
                                     const encA = encAccounts[i].split('@')[1]
                                     data.file_contracts[node].autorenew = renew
