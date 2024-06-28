@@ -1148,14 +1148,15 @@ export default {
                                 data.file_contracts[node].m = ""
                                 this.newMeta[data.file_contracts[node].i] = {
                                     autoRenew: false,
+                                    m: "",
                                 }
-                                var filesNames = data.file_contracts[node]?.df ? Object.keys(data.file_contracts[node].df).length : 0
+                                var filesNames = data.file_contracts[node]?.df ? Object.keys(data.file_contracts[node].df) : []
                                 filesNames = filesNames.sort((a, b) => {
                                     if (a > b) return 1
                                     else if (a < b) return -1
                                     else return 0
                                 })
-                                for(var i = 0; i < filesNames; i++){
+                                for(var i = 0; i < filesNames.length; i++){
                                     this.newMeta[data.file_contracts[node].i][filesNames[i]] = {
                                         name: '',
                                         type: '',
@@ -1190,6 +1191,7 @@ export default {
                                 }
                                 this.newMeta[data.file_contracts[node].i] = {
                                     autoRenew: renew,
+                                    m: data.file_contracts[node].m,
                                 }
                                 var filesNames = data.file_contracts[node]?.df ? Object.keys(data.file_contracts[node].df) : []
                                 filesNames = filesNames.sort((a, b) => {
@@ -1198,7 +1200,7 @@ export default {
                                     else return 0
                                 })
                                 const slots = data.file_contracts[node].m.split(",")
-                                for(var i = 0; i < filesNames; i++){
+                                for(var i = 0; i < filesNames.length; i++){
                                     const flags = slots[i * 4 + 4]
                                     this.newMeta[data.file_contracts[node].i][filesNames[i]] = {
                                         name: slots[i * 4 + 1],
