@@ -852,7 +852,7 @@ export default {
       var meta = {}
       if (!this.encryption.encrypted) for (var i = 0; i < names.length; i++) {
         if ((this.FileInfo[names[i]].is_thumb && this.FileInfo[names[i]].use_thumb) || !this.FileInfo[names[i]].is_thumb) {
-          meta[this.FileInfo[names[i]].hash]= `,${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},${this.FileInfo[names[i]].meta.thumb},${this.flagEncode(this.FileInfo[names[i]].meta.flag)}-${this.FileInfo[names[i]].meta.license}-${this.FileInfo[names[i]].meta.labels}`
+          meta[this.FileInfo[names[i]].hash] = `,${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},${this.FileInfo[names[i]].meta.thumb},${this.flagEncode(this.FileInfo[names[i]].meta.flag)}-${this.FileInfo[names[i]].meta.license}-${this.FileInfo[names[i]].meta.labels}`
           body += `,${this.FileInfo[names[i]].hash}`
           cids.push(this.FileInfo[names[i]].hash)
         }
@@ -945,7 +945,7 @@ export default {
     upload(cids = ['QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3'], contract) { // = { api: 'https://ipfs.dlux.io', id: '1668913215284', sigs: {}, s: 10485760, t: 0 }) {
       cids = cids.sort()
       var files = []
-      var meta = `1${this.stringOfKeys()},`
+      var meta = `1${this.stringOfKeys()}`
       for (var name in this.FileInfo) {
         for (var i = 0; i < cids.length; i++) {
           if (this.FileInfo[name].hash == cids[i]) {
