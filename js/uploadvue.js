@@ -943,25 +943,26 @@ export default {
       return result;
     },
     upload(cids = ['QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3'], contract) { // = { api: 'https://ipfs.dlux.io', id: '1668913215284', sigs: {}, s: 10485760, t: 0 }) {
-      cids = cids.sort(function(a, b){
-        if(a < b) { return -1; }
-        if(a > b) { return 1; }
+      cids = cids.sort(function (a, b) {
+        if (a < b) { return -1; }
+        if (a > b) { return 1; }
         return 0;
-    })
-      console.log({ cids})
-      var files = []
+      })
       var meta = `1${this.stringOfKeys()}`
+      for (var i = 0; i < cids.length; i++) {
+        meta += this.meta[cids[i]]
+      }
+      console.log({ cids }, meta)
+      var files = []
       for (var name in this.FileInfo) {
         for (var i = 0; i < cids.length; i++) {
           if (this.FileInfo[name].hash == cids[i]) {
             this.File[this.FileInfo[name].index].cid = cids[i]
             files.push(this.File[this.FileInfo[name].index])
-            meta += this.meta[cids[i]]
             break;
           } else if (this.FileInfo[name].enc_hash == cids[i]) {
             this.File[this.FileInfo[name].enc_index].cid = cids[i]
             files.push(this.File[this.FileInfo[name].enc_index])
-            meta += this.meta[cids[i]]
             break;
           }
         }
