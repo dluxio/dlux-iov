@@ -1179,8 +1179,10 @@ export default {
                                 if(encData){
                                     encData = encData.split('#')
                                     renew = this.Base64toNumber(encData.shift()) & 1
-                                    if(encData.length)encData = '#' + encData.join('#') 
-                                    encAccounts = encData.split(';')
+                                    if(encData.length){
+                                        encData = '#' + encData.join('#') 
+                                        encAccounts = encData.split(';')
+                                    }
                                 }
                                 for (var i = 0; i < encAccounts.length; i++) {
                                     const encA = encAccounts[i].split('@')[1]
