@@ -992,7 +992,7 @@ export default {
             if (num & 8) out.executable = true
             return out
         },
-        metaMismatch(id) {
+        metaMismatch(contract) {
             var enc_string = `${this.newMeta[contract].contract.autoRenew ? 2 : 0}`
                 for (var acc in this.contractIDs[contract].encryption.accounts) {
                     if (this.contractIDs[contract].encryption.accounts[acc].enc_key) enc_string += `${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`
