@@ -1017,7 +1017,7 @@ export default {
         update_meta(contract) {
             return new Promise((resolve, reject) => {
                 console.log(this.newMeta[contract], contract)
-                var enc_string = `${this.newMeta[contract].contract.autoRenew ? 2 : 0}`
+                var enc_string = `${this.newMeta[contract].contract.autoRenew ? 1 : 0}`
                 for (var acc in this.contractIDs[contract].encryption.accounts) {
                     if (this.contractIDs[contract].encryption.accounts[acc].enc_key) enc_string += `${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`
                 }
@@ -1137,7 +1137,6 @@ export default {
                     // Storage nodes won't get contracts from here, we'll need some props from the contract
                     if (!this.nodeview) {
                         for (var node in data.file_contracts) {
-                            data.file_contracts[node].autoRenew = this.Base64toNumber(data.file_contracts[node].m[0] || 1) & 1
                             data.file_contracts[node].encryption = {
                                 input: "",
                                 key: "",
@@ -1146,6 +1145,7 @@ export default {
                             this.links[data.file_contracts[node].i] = ""
                             var links = ""
                             if (!data.file_contracts[node].m) {
+                                data.file_contracts[node].autoRenew = false
                                 data.file_contracts[node].m = ""
                                 this.newMeta[data.file_contracts[node].i] = {
                                     contract: {
@@ -1173,6 +1173,7 @@ export default {
                             } else {
                                 if (data.file_contracts[node].m.indexOf('"') >= 0) data.file_contracts[node].m = JSON.parse(data.file_contracts[node].m)
                                 var encData = data.file_contracts[node].m.split(',')[0] || ''
+                                data.file_contracts[node].autoRenew = this.Base64toNumber(encData[0] || '0') & 1
                                 var renew = false
                                 var encAccounts = []
                                 if(encData){
