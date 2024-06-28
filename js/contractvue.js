@@ -993,6 +993,7 @@ export default {
             return out
         },
         metaMismatch(contract) {
+            console.log(contract)
             var enc_string = `${this.newMeta[contract].contract.autoRenew ? 2 : 0}`
                 for (var acc in this.contractIDs[contract].encryption.accounts) {
                     if (this.contractIDs[contract].encryption.accounts[acc].enc_key) enc_string += `${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`
@@ -1147,8 +1148,10 @@ export default {
                             if (!data.file_contracts[node].m) {
                                 data.file_contracts[node].m = ""
                                 this.newMeta[data.file_contracts[node].i] = {
-                                    autoRenew: false,
-                                    m: "",
+                                    contract: {
+                                        autoRenew: false,
+                                        m: "",
+                                    }
                                 }
                                 var filesNames = data.file_contracts[node]?.df ? Object.keys(data.file_contracts[node].df) : []
                                 filesNames = filesNames.sort((a, b) => {
@@ -1190,8 +1193,10 @@ export default {
                                     }
                                 }
                                 this.newMeta[data.file_contracts[node].i] = {
-                                    autoRenew: renew,
-                                    m: data.file_contracts[node].m,
+                                    contract: {
+                                        autoRenew: renew,
+                                        m: data.file_contracts[node].m,
+                                    }
                                 }
                                 var filesNames = data.file_contracts[node]?.df ? Object.keys(data.file_contracts[node].df) : []
                                 filesNames = filesNames.sort((a, b) => {
