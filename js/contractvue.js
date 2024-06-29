@@ -1227,7 +1227,7 @@ export default {
                                 }
                                 for (var i = 0; i < encAccounts.length; i++) {
                                     const encA = encAccounts[i].split('@')[1]
-                                    data.file_contracts[node].autorenew = !!renew
+                                    data.file_contracts[node].autoRenew = !!renew
                                     data.file_contracts[node].encryption.accounts[encA] = {
                                         enc_key: `#${encAccounts[i].split('@')[0].split('#')[1]}`,
                                         key: '',
