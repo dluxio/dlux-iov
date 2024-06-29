@@ -1189,8 +1189,7 @@ export default {
                             } else {
                                 if (data.file_contracts[node].m.indexOf('"') >= 0) data.file_contracts[node].m = JSON.parse(data.file_contracts[node].m)
                                 var encData = data.file_contracts[node].m.split(',')[0] || ''
-                                var renew = false = this.Base64toNumber(encData[0] || '0') & 1
-                                var renew = false
+                                var renew  = this.Base64toNumber(encData[0] || '0') & 1
                                 var encAccounts = []
                                 var encrypted = false
                                 if(encData){
