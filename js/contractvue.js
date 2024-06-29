@@ -512,7 +512,7 @@ export default {
                                                                                     
                                                                                 </div>
 
-                                                                                <!-- encrypted sharing -->
+                                                                                <!-- encrypted sharing 
                                                                                 <div v-if="contract.c > 1 && newMeta[contract.i].contract.encrypted" class="mt-3">
                                                                                     
                                                                                         <div class="d-flex flex-column flex-grow-1">
@@ -561,12 +561,13 @@ export default {
                                                                                             
                                                                                         </div>
                                                                                     
-                                                                                </div>
+                                                                                </div> -->
 
-                                                                                    <!-- save button -->
+                                                                                    <!-- save button 
                                                                                 <div class="d-flex text-center">
                                                                                     <button v-if="contract.c > 1 && metaMismatch(contract.i) && !newMeta[contract.i].contract.encrypted" class="btn btn-lg btn-outline-warning mx-auto my-2" type="button" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
                                                                                 </div>
+                                                                                -->
                                                                             </div>
                                                                         </div>
                                                                     </div>
