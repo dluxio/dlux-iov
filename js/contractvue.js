@@ -1165,6 +1165,8 @@ export default {
                                         type: '',
                                         thumb: '',
                                         flags: '',
+                                        is_thumb: false,
+                                        encrypted: false,
                                         license: '',
                                         labels: '',
                                     }
@@ -1216,6 +1218,10 @@ export default {
                                         license: flags.indexOf('-') >= 0 ? flags.split('-')[1] : '',
                                         labels: flags.indexOf('-') >= 0 ? flags.split('-')[2] : flags.slice(1),
                                     }
+                                    if(this.Base64toNumber(this.newMeta[data.file_contracts[node].i][filesNames[i]].flags) & 1) this.newMeta[data.file_contracts[node].i][filesNames[i]].encrypted = true
+                                    else this.newMeta[data.file_contracts[node].i][filesNames[i]].encrypted = false
+                                    if(this.Base64toNumber(this.newMeta[data.file_contracts[node].i][filesNames[i]].flags) & 2) this.newMeta[data.file_contracts[node].i][filesNames[i]].is_thumb = true
+                                    else this.newMeta[data.file_contracts[node].i][filesNames[i]].is_thumb = false
                                     links += `![${this.newMeta[data.file_contracts[node].i][filesNames[i]].name}](https://ipfs.dlux.io/ipfs/${filesNames[i]})\n`
                                 }
                             }
