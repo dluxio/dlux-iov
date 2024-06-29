@@ -1020,12 +1020,12 @@ export default {
         },
         metaMismatch(contract) {
             console.log(contract)
-            var enc_string = `${this.newMeta[contract].contract.autoRenew ? '1' : ''}`
+            var enc_string = ''
                 for (var acc in this.contractIDs[contract].encryption.accounts) {
                     if (this.contractIDs[contract].encryption.accounts[acc].enc_key) enc_string += `${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`
                 }
                 //remove last ;
-                enc_string = enc_string.slice(0, -1)
+                enc_string = `${this.newMeta[contract].contract.autoRenew ? '1' : ''}${enc_string.slice(0, -1)}`
                 this.newMeta[contract].contract.enc_string = enc_string
                 var cids = Object.keys(this.newMeta[contract])
                 cids = cids.sort((a, b) => {
