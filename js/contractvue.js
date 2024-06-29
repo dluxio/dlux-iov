@@ -833,7 +833,8 @@ export default {
         getImgData(id, cid) {
             var string = this.smartThumb(id, cid)
             fetch(string).then(response => response.text()).then(data => {
-                this.newMeta[id][cid].thumb_data = data
+                if(data.indexOf('data:image/'))this.newMeta[id][cid].thumb_data = data
+                else this.newMeta[id][cid].thumb_data = string
             }).catch(e => {
                 this.newMeta[id][cid].thumb_data = string
             })
