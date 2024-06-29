@@ -57,15 +57,7 @@ export default {
             <div class="d-flex flex-grow-1 flex-wrap justify-content-around">
 
                 <div class="d-flex m-2 flex-column">
-                    <div class="fs-1 fw-bold align-items-start">SPK Network</div>
-                    <div class="input-group my-1 d-flex">
-                        <span class="input-group-text border-info flex-grow-1">
-                            <div class="form-check form-switch flex-grow-1 text-end fs-5">
-                                <input class="form-check-input" type="checkbox" role="switch" id="autoRenew" v-model="contract.autoRenew">
-                                <label class="form-check-label ms-auto" for="autoRenew">Auto-Renew</label>
-                            </div>
-                        </span>
-                    </div>
+                    
                     <!-- storage nodes -->
                     <div class="d-flex flex-column justify-content-around px-2 mb-2" style="max-width: 300px">
                         <div class=" mx-2">

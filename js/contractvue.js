@@ -373,26 +373,41 @@ export default {
                                                                     </div>
 
 
-                                                                    <!-- extension -->
-                                                                    <div v-if="contract.c == 3" class="mx-1 d-flex flex-grow-1">
-                                                                        <div class="align-items-center mx-lg-5 d-flex flex-grow-1 mb-3 gradient-border bg-dark">
-                                                                            
-                                                                                <extension-vue :node-view="nodeview"
-                                                                                :contract="contract" :sstats="sstats"
-                                                                                :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
-                                                                                @tosign="toSign=$event"></extension-vue>
-                                                                            
-                                                                        </div>
-                                                                    </div>
+                                                                   
 
                                                                     
                                                                     <!-- files list -->
                                                                     <div v-if="contract.df">
+                                                                        <div class="align-items-center mx-lg-5 d-flex flex-column mb-3 gradient-border bg-dark">
+                                                                            
+                                                                            <div class="d-flex">
+                                                                                <div class="fs-1 fw-bold align-items-start">SPK Network</div>
+                                                                                <div class="input-group my-1 d-flex">
+                                                                                    <span class="input-group-text border-info flex-grow-1">
+                                                                                        <div class="form-check form-switch flex-grow-1 text-end fs-5">
+                                                                                            <input class="form-check-input" type="checkbox" role="switch" id="autoRenew" v-model="contract.autoRenew">
+                                                                                            <label class="form-check-label ms-auto" for="autoRenew">Auto-Renew</label>
+                                                                                        </div>
+                                                                                    </span>
+                                                                                </div>
+
+                                                                                {{newMeta[contract.i].contract.autoRenew ? 'AutoRenew' : 'Not AutoRenew'}}
+                                                                            </div>
+
+                                                                            <!-- extension -->
+                                                                            <div v-if="contract.c == 3" class="mx-1 d-flex flex-grow-1">
+                                                                                        <extension-vue :node-view="nodeview"
+                                                                                        :contract="contract" :sstats="sstats"
+                                                                                        :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
+                                                                                        @tosign="toSign=$event"></extension-vue>
+                                                                                    
+                                                                                
+                                                                            </div>
+                                                                        </div>
                                                                         <div class="mb-3 mx-1 mx-lg-5 p-sm-1 p-lg-2 rounded" style="background-color:rgba(0,0,0,0.3)">
                                                                             <div class="d-flex flex-column">
                                                                                 <div>
                                                                                     <div class="mx-auto ms-md-1 mt-2 lead fs-2">{{pluralFiles(contract.i)}} File{{pluralFiles(contract.i) > 1 ? 's' : ''}}</div>
-                                                                                    {{newMeta[contract.i].contract.autoRenew ? 'AutoRenew' : 'Not AutoRenew'}}
                                                                                 </div>
                                                                                 
                                                                                 
