@@ -380,7 +380,7 @@ export default {
                                                                     <div v-if="contract.df">
                                                                         <div class="align-items-center mx-lg-5 d-flex flex-column mb-3 gradient-border bg-dark">
                                                                             
-                                                                            <div class="d-flex">
+                                                                            <div v-if="newMeta[contract.i]" class="d-flex">
                                                                                 <div class="fs-1 fw-bold align-items-start">SPK Network</div>
                                                                                 <div class="input-group my-1 d-flex">
                                                                                     <span class="input-group-text border-info flex-grow-1">
@@ -390,8 +390,6 @@ export default {
                                                                                         </div>
                                                                                     </span>
                                                                                 </div>
-
-                                                                                {{newMeta[contract.i].contract.autoRenew ? 'AutoRenew' : 'Not AutoRenew'}}
                                                                             </div>
 
                                                                             <!-- extension -->
