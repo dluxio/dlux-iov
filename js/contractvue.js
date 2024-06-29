@@ -855,12 +855,7 @@ export default {
             })
         },
         addToPost(cid, contract, loc = 'self') {
-            var string = this.smartThumb(contract, cid)
-            if (string.includes('ipfs/')) {
-                string = `![${this.newMeta[contract][cid].name}](${string})`
-            } else {
-                string = `[${this.newMeta[contract][cid].name}.${this.newMeta[contract][cid].type}](https://ipfs.dlux.io/ipfs/${cid})`
-            }
+            const string = `${this.newMeta[contract][cid].thumb ? '!' : ''}[${this.newMeta[contract][cid].name}.${this.newMeta[contract][cid].type}](https://ipfs.dlux.io/ipfs/${cid})`
             this.postBodyAdder[`${loc == 'self' ? contract : loc}`] = {
                 string,
                 contract: this.contractIDs[contract],
