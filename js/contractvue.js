@@ -550,7 +550,7 @@ export default {
 
                                                                                     <!-- save button -->
                                                                                 <div class="d-flex text-center">
-                                                                                    <button v-if="metaMismatch(contract.i) && !newMeta[contract.i][cid].encrypted" class="btn btn-lg btn-outline-warning mx-auto my-2" type="button" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
+                                                                                    <button v-if="metaMismatch(contract.i) && !newMeta[contract.i].contract.encrypted" class="btn btn-lg btn-outline-warning mx-auto my-2" type="button" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -620,8 +620,8 @@ export default {
                                                                         </div>
                                                                         <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                             <div> Privacy </div>
-                                                                            <i class="fa-solid fa-fw mx-1" :class="{'fa-lock-open': !newMeta[contract.i][cid].encrypted, 'fa-lock': newMeta[contract.i][cid].encrypted}" aria-hidden="true"></i>
-                                                                            <div>{{newMeta[contract.i][cid].encrypted ? 'Private' : 'Public'}}</div>
+                                                                            <i class="fa-solid fa-fw mx-1" :class="{'fa-lock-open': !newMeta[contract.i].contract.encrypted, 'fa-lock': newMeta[contract.i].contract.encrypted}" aria-hidden="true"></i>
+                                                                            <div>{{newMeta[contract.i].contract.encrypted ? 'Private' : 'Public'}}</div>
                                                                         </div>
                             
                                                                     </div>
