@@ -1206,12 +1206,12 @@ export default {
                             } else {
                                 if (data.file_contracts[node].m.indexOf('"') >= 0) data.file_contracts[node].m = JSON.parse(data.file_contracts[node].m)
                                 var encData = data.file_contracts[node].m.split(',')[0] || ''
-                                var renew  = !!(this.Base64toNumber(encData[0] || '0') & 1)
+                                var renew  = this.Base64toNumber(encData[0] || '0') & 1 ? true : false
                                 var encAccounts = []
                                 var encrypted = false
                                 if(encData){
                                     encData = encData.split('#')
-                                    renew = this.Base64toNumber(encData.shift()) & 1
+                                    renew = this.Base64toNumber(encData.shift()) & 1 ? true : false
                                     if(encData.length){
                                         encData = '#' + encData.join('#') 
                                         encAccounts = encData.split(';')
