@@ -346,8 +346,8 @@ export default {
                     </div>
                 </div>
                 <div class="d-flex mb-1" v-if="contract.c == 1">
-                    <button class="ms-auto me-auto mt-2 btn btn-lg btn-info" :class="{'disabled': !reallyReady}"
-                        :disabled="!reallyReady" @click="signNUpload()"><i
+                    <button class="ms-auto me-auto mt-2 btn btn-lg btn-info" :class="{'disabled': (!reallyReady && !filesReady)}"
+                        :disabled="!reallyReady && !filesReady" @click="signNUpload()"><i
                             class="fa-solid fa-file-signature fa-fw me-2"></i>Sign and Upload</button>
                 </div>
             </div>
@@ -1249,6 +1249,17 @@ export default {
       }
       if (!this.encryption.encrypted) return `${files} file${files > 1 ? 's' : ''} ${thumbs ? `with ${thumbs} thumbnail${thumbs > 1 ? 's' : ''}` : ''}`
       else return `${files} encrypted file${files > 1 ? 's' : ''}`
+    },
+    filesReady() {
+      var thumbs = 0
+      var files = 0
+      for (var item in this.FileInfo) {
+        if (this.FileInfo[item].use_thumb) thumbs++
+        else if (this.FileInfo[item].is_thumb) { }
+        else files++
+      }
+      if (!this.encryption.encrypted) return files > 1
+      else return files > 1
     },
     totalSize() {
       var size = 0
