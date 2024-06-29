@@ -404,7 +404,7 @@ export default {
                                                                                                 <div class="d-flex flex-column justify-content-center">
 
                                                                                                     
-                                                                                                    <img v-if="newMeta[contract.i][cid].thumb" class="mx-auto img-fluid rounded bg-light" :src="smartThumb(contract.i,cid)" width="314px" onerror="console.log($event)">
+                                                                                                    <img v-if="newMeta[contract.i][cid].thumb" class="mx-auto img-fluid rounded bg-light" :src="smartThumb(contract.i,cid)" width="314px" onerror="this.src = parseData(this.src)">
                                                                                                     <div v-else class="bg-light rounded">    
                                                                                                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                                                                                                                 viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve" >
@@ -829,6 +829,11 @@ export default {
     methods: {
         getdelimed(string, del = ',', index = 0) {
             return string.split(del)[index] ? string.split(del)[index] : ''
+        },
+        parseData(string) {
+            fetch(string).then(response => response.text()).then(data => {
+                return data
+            })
         },
         addToPost(cid, contract, loc = 'self') {
             var string = this.smartThumb(contract, cid)
