@@ -1222,6 +1222,8 @@ export default {
                                     else this.newMeta[data.file_contracts[node].i][filesNames[i]].encrypted = false
                                     if(this.Base64toNumber(this.newMeta[data.file_contracts[node].i][filesNames[i]].flags) & 2) this.newMeta[data.file_contracts[node].i][filesNames[i]].is_thumb = true
                                     else this.newMeta[data.file_contracts[node].i][filesNames[i]].is_thumb = false
+                                    if(this.Base64toNumber(this.newMeta[data.file_contracts[node].i][filesNames[i]].flags) & 4) this.newMeta[data.file_contracts[node].i][filesNames[i]].nsfw = true
+                                    else this.newMeta[data.file_contracts[node].i][filesNames[i]].nsfw = false
                                     links += `![${this.newMeta[data.file_contracts[node].i][filesNames[i]].name}](https://ipfs.dlux.io/ipfs/${filesNames[i]})\n`
                                 }
                             }
@@ -1295,9 +1297,33 @@ export default {
                 if (num & m.item) { }
                 else num += m.item
                 this.newMeta[id][cid].flags = (this.NumberToBase64(num) || "0")
+                switch (m.item){
+                    case 1:
+                        this.newMeta[id][cid].encrypted = true
+                        break
+                    case 2:
+                        this.newMeta[id][cid].is_thumb = true
+                        break
+                    case 4:
+                        this.newMeta[id][cid].nsfw = true
+                        break
+                    default:
+                }
             } else {
                 if (num & m.item) num -= m.item
                 this.newMeta[id][cid].flags = (this.NumberToBase64(num) || "0")
+                switch (m.item){
+                    case 1:
+                        this.newMeta[id][cid].encrypted = false
+                        break
+                    case 2:
+                        this.newMeta[id][cid].is_thumb = false
+                        break
+                    case 4:
+                        this.newMeta[id][cid].nsfw = false
+                        break
+                    default:
+                }
             }
         },
         NumberToBase64(num) {
