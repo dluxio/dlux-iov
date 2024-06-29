@@ -377,7 +377,7 @@ export default {
 
                                                                     
                                                                     <!-- files list -->
-                                                                    <div v-if="contract.df">
+                                                                    <div v-if="contract.c > 1">
                                                                         <div class="align-items-center mx-lg-5 d-flex flex-column mb-3 gradient-border bg-dark">
                                                                             
                                                                             <div v-if="newMeta[contract.i]" class="d-flex">
