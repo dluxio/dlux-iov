@@ -65,6 +65,11 @@
                     activeWorker = reg.active;
                 })
         }
+        function parseData(string) {
+            fetch(string).then(response => response.text()).then(data => {
+                return data
+            })
+        }
     </script>
     <script src="/js/purify.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
