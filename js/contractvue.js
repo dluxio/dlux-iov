@@ -469,7 +469,7 @@ export default {
                                                                                                 <div class="mb-1">
                                                                                                     <label class="mb-1">Thumbnail</label>
                                                                                                     <div class="position-relative has-validation">
-                                                                                                        <input autocapitalize="off" v-model="newMeta[contract.i][cid].thumb" placeholder="https://your-thumbnail-image.png" pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+" class="form-control">
+                                                                                                        <input autocapitalize="off" v-model="newMeta[contract.i][cid].thumb" @change="getImgData(contract.i, cid)" placeholder="https://your-thumbnail-image.png" pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+" class="form-control">
                                                                                                     </div>
                                                                                                 </div>
 
@@ -834,6 +834,8 @@ export default {
             var string = this.smartThumb(id, cid)
             fetch(string).then(response => response.text()).then(data => {
                 this.newMeta[id][cid].thumb_data = data
+            }).catch(e => {
+                this.newMeta[id][cid].thumb_data = string
             })
         },
         addToPost(cid, contract, loc = 'self') {
