@@ -90,8 +90,7 @@ export default {
                                         </div>
                                         <div class="form-check form-switch">
                                             <input class="form-check-input fs-4" @click="resetThumb(file.name)" type="checkbox"
-                                                role="switch" :id="'includeThumb' + file.name"
-                                                v-model="FileInfo['thumb' + file.name].use_thumb">
+                                                role="switch" :id="'includeThumb' + file.name" :checked="FileInfo['thumb' + file.name].use_thumb">
                                             <label class="form-check-label" :for="'includeThumb' + file.name"></label>
                                         </div>
                                     </div>
@@ -597,7 +596,8 @@ export default {
       })
     },
     resetThumb(n) {
-      this.FileInfo[n].meta.thumb = this.FileInfo[n].thumb;
+      this.FileInfo['thumb' + n].use_thumb = !this.FileInfo['thumb' + n].use_thumb
+      this.FileInfo[n].meta.thumb = this.FileInfo['thumb' + n].use_thumb ? this.FileInfo[n].thumb : ''
     },
     uploadFile(e) {
       for (var i = 0; i < e.target.files.length; i++) {
