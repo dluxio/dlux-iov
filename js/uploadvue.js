@@ -1253,9 +1253,7 @@ export default {
     filesReady() {
       var files = 0
       for (var item in this.FileInfo) {
-        if (this.FileInfo[item].use_thumb) thumbs++
-        else if (this.FileInfo[item].is_thumb) { }
-        else files++
+        if (! this.FileInfo[item].use_thumb && this.FileInfo[item].is_thumb)  files++
       }
       return files > 0
     },
