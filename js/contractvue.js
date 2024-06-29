@@ -634,7 +634,7 @@ export default {
                                                                             <i class="fa-solid fa-signal fa-fw mx-1" aria-hidden="true"></i>
                                                                             <div> {{contract.c == 1 ? 'Waiting For Upload' : 'Uploaded'}}</div>
                                                                         </div>
-                                                                        <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white" newMeta[contract.i]>
+                                                                        <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white" v-if="newMeta[contract.i]">
                                                                             <div> Privacy </div>
                                                                             <i class="fa-solid fa-fw mx-1" :class="{'fa-lock-open': !newMeta[contract.i].contract.encrypted, 'fa-lock': newMeta[contract.i].contract.encrypted}" aria-hidden="true"></i>
                                                                             <div>{{newMeta[contract.i].contract.encrypted ? 'Private' : 'Public'}}</div>
