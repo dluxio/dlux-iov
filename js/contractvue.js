@@ -397,10 +397,10 @@ export default {
                                                                                         <extension-vue :node-view="nodeview"
                                                                                         :contract="contract" :sstats="sstats"
                                                                                         :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
-                                                                                        @tosign="toSign=$event"></extension-vue>-->
+                                                                                        @tosign="toSign=$event"></extension-vue>
                                                                                     
                                                                                 
-                                                                            </div>
+                                                                            </div>-->
                                                                         </div>
                                                                         <div class="mb-3 mx-1 mx-lg-5 p-sm-1 p-lg-2 rounded" style="background-color:rgba(0,0,0,0.3)">
                                                                             <div class="d-flex flex-column">
