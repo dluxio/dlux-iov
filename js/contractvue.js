@@ -403,8 +403,8 @@ export default {
                                                                                                 <div class="d-flex flex-column justify-content-center">
 
                                                                                                     
-                                                                                                    <!--<img class="mx-auto img-fluid rounded bg-light" :src="smartThumb(contract.i,index,cid)" width="314px" onerror="if (this.src != '/img/other-file-type-svgrepo-com.svg') this.src = '/img/other-file-type-svgrepo-com.svg'"> -->
-                                                                                                    <div class="bg-light rounded">    
+                                                                                                    <img v-if="newMeta[contract.i][cid].thumb" class="mx-auto img-fluid rounded bg-light" :src="smartThumb(contract.i,cid)" width="314px" onerror="this.class = 'd-none'">
+                                                                                                    <div v-else class="bg-light rounded">    
                                                                                                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                                                                                                                 viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve" >
                                                                                                             
