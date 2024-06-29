@@ -1191,18 +1191,20 @@ export default {
                                 data.file_contracts[node].autoRenew = this.Base64toNumber(encData[0] || '0') & 1
                                 var renew = false
                                 var encAccounts = []
+                                var encrypted = false
                                 if(encData){
                                     encData = encData.split('#')
                                     renew = this.Base64toNumber(encData.shift()) & 1
                                     if(encData.length){
                                         encData = '#' + encData.join('#') 
                                         encAccounts = encData.split(';')
+                                        encrypted = true
                                     }
                                 }
                                 this.newMeta[data.file_contracts[node].i] = {
                                     contract: {
                                         autoRenew: renew,
-                                        encrypted: !!encData,
+                                        encrypted,
                                         m: data.file_contracts[node].m,
                                     }
                                 }
