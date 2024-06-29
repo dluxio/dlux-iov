@@ -1146,7 +1146,11 @@ export default {
             } index
         },
         pluralFiles(id) {
-            return Object.keys(this.newMeta[id]).length - 1
+            var count = 0
+            for (var i in this.newMeta[id]) {
+                if (i != 'contract' && !this.newMeta[id][i].is_thumb) count++
+            }
+            return count
         },
         getSapi(user = this.account) {
             if (user) fetch(this.sapi + "/@" + user)
