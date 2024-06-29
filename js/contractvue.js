@@ -392,6 +392,7 @@ export default {
                                                                             <div class="d-flex flex-column">
                                                                                 <div>
                                                                                     <div class="mx-auto ms-md-1 mt-2 lead fs-2">{{pluralFiles(contract.i)}} File{{pluralFiles(contract.i) > 1 ? 's' : ''}}</div>
+                                                                                    {{newMeta[contract.i].contract.autoRenew ? 'AutoRenew' : 'Not AutoRenew'}}
                                                                                 </div>
                                                                                 
                                                                                 
