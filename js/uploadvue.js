@@ -835,13 +835,14 @@ export default {
       this.ready = true
     },
     deleteImg(index, name) {
-      delete this.FileInfo[name]
       for (var item in this.FileInfo) {
         if (this.FileInfo[item].index > index) {
           this.FileInfo[item].index--
         }
       }
       this.File.splice(index, 1)
+      delete this.FileInfo[name]
+      delete this.FileInfo['thumb' + name]
     },
     signNUpload() {
       console.log(this.contract.i)
