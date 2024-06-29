@@ -430,19 +430,19 @@ export default {
                                                                                                     <span class="small text-center mb-2">{{fancyBytes(size)}}</span>
                                                                                                     
                                                                                                     <!-- link -->
-                                                                                                    <div v-if="!flagDecode(contract.m).enc">
+                                                                                                    <div v-if="!newMeta[contract.i][cid].encrypted">
                                                                                                         <a :href="'https://ipfs.dlux.io/ipfs/' + cid" target="_blank" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"><span class="d-flex align-items-center">URL<i class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
                                                                                                     </div>
                                                                                                     <!-- download  -->
-                                                                                                    <div class="d-none" v-if="!flagDecode(contract.m).enc">
+                                                                                                    <div class="d-none" v-if="!newMeta[contract.i][cid].encrypted">
                                                                                                         <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="downloadFile(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
                                                                                                     </div>
                                                                                                     <!-- decrypt  -->
-                                                                                                    <div v-if="flagDecode(contract.m).enc && !contract.encryption.key">
+                                                                                                    <div v-if="newMeta[contract.i][cid].encrypted && !contract.encryption.key">
                                                                                                         <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="decryptKey(contract.i)"><span class="d-flex align-items-center w-100">Decrypt<i class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
                                                                                                     </div>
                                                                                                     <!-- download enc -->
-                                                                                                    <div v-if="flagDecode(contract.m).enc && contract.encryption.key">
+                                                                                                    <div v-if="newMeta[contract.i][cid].encrypted && contract.encryption.key">
                                                                                                         <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="downloadFile(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
                                                                                                     </div>
                                                                                                         <!-- add to post -->
@@ -498,7 +498,7 @@ export default {
                                                                                 </div>
 
                                                                                 <!-- encrypted sharing -->
-                                                                                <div v-if="flagDecode(contract.m).enc" class="mt-3">
+                                                                                <div v-if="newMeta[contract.i].contract.encrypted" class="mt-3">
                                                                                     
                                                                                         <div class="d-flex flex-column flex-grow-1">
                                                                                             <div class="fs-3 fw-lighter">Sharing</div>
@@ -550,7 +550,7 @@ export default {
 
                                                                                     <!-- save button -->
                                                                                 <div class="d-flex text-center">
-                                                                                    <button v-if="metaMismatch(contract.i) && !flagDecode(contract.m).enc" class="btn btn-lg btn-outline-warning mx-auto my-2" type="button" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
+                                                                                    <button v-if="metaMismatch(contract.i) && !newMeta[contract.i][cid].encrypted" class="btn btn-lg btn-outline-warning mx-auto my-2" type="button" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -620,8 +620,8 @@ export default {
                                                                         </div>
                                                                         <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                             <div> Privacy </div>
-                                                                            <i class="fa-solid fa-fw mx-1" :class="{'fa-lock-open': !flagDecode(contract.m).enc, 'fa-lock': flagDecode(contract.m).enc}" aria-hidden="true"></i>
-                                                                            <div>{{flagDecode(contract.m).enc ? 'Private' : 'Public'}}</div>
+                                                                            <i class="fa-solid fa-fw mx-1" :class="{'fa-lock-open': !newMeta[contract.i][cid].encrypted, 'fa-lock': newMeta[contract.i][cid].encrypted}" aria-hidden="true"></i>
+                                                                            <div>{{newMeta[contract.i][cid].encrypted ? 'Private' : 'Public'}}</div>
                                                                         </div>
                             
                                                                     </div>
@@ -1161,6 +1161,7 @@ export default {
                                 this.newMeta[data.file_contracts[node].i] = {
                                     contract: {
                                         autoRenew: false,
+                                        encrypted: false,
                                         m: "",
                                     }
                                 }
@@ -1198,6 +1199,13 @@ export default {
                                         encAccounts = encData.split(';')
                                     }
                                 }
+                                this.newMeta[data.file_contracts[node].i] = {
+                                    contract: {
+                                        autoRenew: renew,
+                                        encrypted: !!encData,
+                                        m: data.file_contracts[node].m,
+                                    }
+                                }
                                 for (var i = 0; i < encAccounts.length; i++) {
                                     const encA = encAccounts[i].split('@')[1]
                                     data.file_contracts[node].autorenew = !!renew
@@ -1207,12 +1215,7 @@ export default {
                                         done: true,
                                     }
                                 }
-                                this.newMeta[data.file_contracts[node].i] = {
-                                    contract: {
-                                        autoRenew: renew,
-                                        m: data.file_contracts[node].m,
-                                    }
-                                }
+                                
                                 var filesNames = data.file_contracts[node]?.df ? Object.keys(data.file_contracts[node].df) : []
                                 filesNames = filesNames.sort((a, b) => {
                                     if (a > b) return 1
