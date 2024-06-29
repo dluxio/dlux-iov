@@ -504,7 +504,7 @@ export default {
         if(num & 4) this.selections.push(this.tags[0])
         if(num & 8) this.selections.push(this.tags[1])
       } else if (this.prop_type == 'license') {
-        this.selections.push(this.license[this.Base64toNumber(this.prop_selections[0])])
+        this.selections.push(this.license[this.prop_selections[0]])
       } else {
         for (var i = 1; i < this.prop_selections.length; i++) {
           this.selections.push(this.labels[this.Base64toNumber(this.prop_selections[i])])
