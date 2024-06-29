@@ -404,7 +404,7 @@ export default {
                                                                                                 <div class="d-flex flex-column justify-content-center">
 
                                                                                                     
-                                                                                                    <img v-if="newMeta[contract.i][cid].thumb" class="mx-auto img-fluid rounded bg-light" :src="smartThumb(contract.i,cid)" width="314px" onerror="this.class = 'd-none'">
+                                                                                                    <img v-if="newMeta[contract.i][cid].thumb" class="mx-auto img-fluid rounded bg-light" :src="smartThumb(contract.i,cid)" width="314px" onerror="console.log($event)">
                                                                                                     <div v-else class="bg-light rounded">    
                                                                                                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                                                                                                                 viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve" >
@@ -976,7 +976,7 @@ export default {
                 });
         },
         smartThumb(contract, cid) {
-            if (this.newMeta[contract][cid].thumb.includes('ipfs')) {
+            if (this.newMeta[contract][cid].thumb.includes('https://')) {
                 return this.newMeta[contract][cid].thumb
             } else if (this.newMeta[contract][cid].thumb.includes('Qm')) {
                 return `https://ipfs.dlux.io/ipfs/${this.newMeta[contract][cid].thumb}`
