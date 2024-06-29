@@ -385,14 +385,15 @@ export default {
                                                                                 <div class="input-group my-1 d-flex">
                                                                                     <span class="input-group-text border-info flex-grow-1">
                                                                                         <div class="form-check form-switch flex-grow-1 text-end fs-5">
-                                                                                            <input class="form-check-input" type="checkbox" role="switch" id="autoRenew" v-model="newMeta[contract.i].contract.autoRenew">
+                                                                                            <input class="form-check-input" type="checkbox" role="switch" id="autoRenew">
+                                                                                            <!-- v-model="newMeta[contract.i].contract.autoRenew" -->
                                                                                             <label class="form-check-label ms-auto" for="autoRenew">Auto-Renew</label>
                                                                                         </div>
                                                                                     </span>
                                                                                 </div>
                                                                             </div>
 
-                                                                            <!-- extension
+                                                                            <!-- extension -->
                                                                             <div v-if="contract.c == 3" class="mx-1 d-flex flex-grow-1">
                                                                                         <extension-vue :node-view="nodeview"
                                                                                         :contract="contract" :sstats="sstats"
@@ -400,7 +401,7 @@ export default {
                                                                                         @tosign="toSign=$event"></extension-vue>
                                                                                     
                                                                                 
-                                                                            </div>-->
+                                                                            </div>
                                                                         </div>
                                                                         <div class="mb-3 mx-1 mx-lg-5 p-sm-1 p-lg-2 rounded" style="background-color:rgba(0,0,0,0.3)">
                                                                             <div class="d-flex flex-column">
