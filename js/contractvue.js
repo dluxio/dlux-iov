@@ -385,9 +385,8 @@ export default {
                                                                                 <div class="input-group my-1 d-flex">
                                                                                     <span class="input-group-text border-info flex-grow-1">
                                                                                         <div class="form-check form-switch flex-grow-1 text-end fs-5">
-                                                                                            <input class="form-check-input" type="checkbox" role="switch" id="autoRenew">
-                                                                                            <!-- v-model="newMeta[contract.i].contract.autoRenew" -->
-                                                                                            <label class="form-check-label ms-auto" for="autoRenew">Auto-Renew</label>
+                                                                                            <input class="form-check-input" type="checkbox" role="switch" :id="contract.i + 'autoRenew'" v-model="newMeta[contract.i].contract.autoRenew">
+                                                                                            <label class="form-check-label ms-auto" :for="contract.i + 'autoRenew'">Auto-Renew</label>
                                                                                         </div>
                                                                                     </span>
                                                                                 </div>
@@ -512,8 +511,8 @@ export default {
                                                                                     
                                                                                 </div>
 
-                                                                                <!-- encrypted sharing  && newMeta[contract.i].contract.encrypted -->
-                                                                                <div v-if="contract.c > 1" class="mt-3">
+                                                                                <!-- encrypted sharing  -->
+                                                                                <div v-if="contract.c > 1 && newMeta[contract.i].contract.encrypted" class="mt-3">
                                                                                     
                                                                                         <div class="d-flex flex-column flex-grow-1">
                                                                                             <div class="fs-3 fw-lighter">Sharing</div>
@@ -563,11 +562,11 @@ export default {
                                                                                     
                                                                                 </div>
 
-                                                                                    <!-- save button 
+                                                                                    <!-- save button -->
                                                                                 <div class="d-flex text-center">
                                                                                     <button v-if="contract.c > 1 && metaMismatch(contract.i) && !newMeta[contract.i].contract.encrypted" class="btn btn-lg btn-outline-warning mx-auto my-2" type="button" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
                                                                                 </div>
-                                                                                -->
+                                                                                
                                                                             </div>
                                                                         </div>
                                                                     </div>
