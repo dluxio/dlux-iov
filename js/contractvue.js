@@ -385,7 +385,11 @@ export default {
                                                                                 <div class="input-group my-1 d-flex">
                                                                                     <span class="input-group-text border-info flex-grow-1">
                                                                                         <div class="form-check form-switch flex-grow-1 text-end fs-5">
+<<<<<<< HEAD
                                                                                             <input class="form-check-input" type="checkbox" role="switch" :id="contract.i + 'autoRenew'" :checked="newMeta[contract.i].contract.autoRenew" v-model="newMeta[contract.i].contract.autoRenew">
+=======
+                                                                                            <input class="form-check-input" type="checkbox" checked="" role="switch" :id="contract.i + 'autoRenew'" v-model="newMeta[contract.i].contract.autoRenew">
+>>>>>>> 589a2495a578377e50ce5abda1774c50bd7b209d
                                                                                             <label class="form-check-label ms-auto" :for="contract.i + 'autoRenew'">Auto-Renew</label>
                                                                                         </div>
                                                                                     </span>
@@ -1206,7 +1210,7 @@ export default {
                             } else {
                                 if (data.file_contracts[node].m.indexOf('"') >= 0) data.file_contracts[node].m = JSON.parse(data.file_contracts[node].m)
                                 var encData = data.file_contracts[node].m.split(',')[0] || ''
-                                var renew  = this.Base64toNumber(encData[0] || '0') & 1
+                                var renew  = !!(this.Base64toNumber(encData[0] || '0') & 1)
                                 var encAccounts = []
                                 var encrypted = false
                                 if(encData){
