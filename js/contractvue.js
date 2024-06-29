@@ -385,7 +385,7 @@ export default {
                                                                                 <div class="input-group my-1 d-flex">
                                                                                     <span class="input-group-text border-info flex-grow-1">
                                                                                         <div class="form-check form-switch flex-grow-1 text-end fs-5">
-                                                                                            <input class="form-check-input" type="checkbox" role="switch" :id="contract.i + 'autoRenew'" v-model="newMeta[contract.i].contract.autoRenew">
+                                                                                            <input class="form-check-input" type="checkbox" role="switch" :id="contract.i + 'autoRenew'" :checked="newMeta[contract.i].contract.autoRenew" v-model="newMeta[contract.i].contract.autoRenew">
                                                                                             <label class="form-check-label ms-auto" :for="contract.i + 'autoRenew'">Auto-Renew</label>
                                                                                         </div>
                                                                                     </span>
@@ -1019,7 +1019,6 @@ export default {
             return out
         },
         metaMismatch(contract) {
-            console.log(contract)
             var enc_string = ''
                 for (var acc in this.contractIDs[contract].encryption.accounts) {
                     if (this.contractIDs[contract].encryption.accounts[acc].enc_key) enc_string += `${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`
