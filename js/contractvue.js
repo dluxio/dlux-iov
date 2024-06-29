@@ -1038,6 +1038,7 @@ export default {
                         enc_string += `,${this.newMeta[contract][cids[i]].name},${this.newMeta[contract][cids[i]].type},${this.newMeta[contract][cids[i]].thumb},${this.newMeta[contract][cids[i]].flags}-${this.newMeta[contract][cids[i]].license}-${this.newMeta[contract][cids[i]].labels}`
                     }
                 }
+                if(this.newMeta[contract].contract.m != enc_string)console.log(this.newMeta[contract].contract.m, enc_string)
             if (this.newMeta[contract].contract.m != enc_string) return true
         },
         update_meta(contract) {
