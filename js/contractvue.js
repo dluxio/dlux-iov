@@ -380,7 +380,7 @@ export default {
                                                                     <div v-if="contract.c > 1">
                                                                         <div class="align-items-center mx-lg-5 d-flex flex-column mb-3 gradient-border bg-dark">
                                                                             
-                                                                            <div v-if="newMeta[contract.i]" class="d-flex">
+                                                                            <div v-if="contract.c > 2" class="d-flex">
                                                                                 <div class="fs-1 fw-bold align-items-start">SPK Network</div>
                                                                                 <div class="input-group my-1 d-flex">
                                                                                     <span class="input-group-text border-info flex-grow-1">
@@ -392,12 +392,12 @@ export default {
                                                                                 </div>
                                                                             </div>
 
-                                                                            <!-- extension -->
+                                                                            <!-- extension
                                                                             <div v-if="contract.c == 3" class="mx-1 d-flex flex-grow-1">
                                                                                         <extension-vue :node-view="nodeview"
                                                                                         :contract="contract" :sstats="sstats"
                                                                                         :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
-                                                                                        @tosign="toSign=$event"></extension-vue>
+                                                                                        @tosign="toSign=$event"></extension-vue>-->
                                                                                     
                                                                                 
                                                                             </div>
