@@ -461,7 +461,7 @@ export default {
                                                                                                     </div>
                                                                                                         <!-- add to post -->
                                                                                                     <div v-if="contract.c == 2">
-                                                                                                        <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto" @click="addToPost(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Add to Post<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
+                                                                                                        <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto" @click="addToPost(cid, contract.i)"><span class="d-flex align-items-center w-100">Add to Post<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
                                                                                                     </div>
 
                                                                                                     
@@ -1227,7 +1227,7 @@ export default {
                                 }
                                 for (var i = 0; i < encAccounts.length; i++) {
                                     const encA = encAccounts[i].split('@')[1]
-                                    data.file_contracts[node].autoRenew = !!renew
+                                    data.file_contracts[node].autoRenew = renew
                                     data.file_contracts[node].encryption.accounts[encA] = {
                                         enc_key: `#${encAccounts[i].split('@')[0].split('#')[1]}`,
                                         key: '',
