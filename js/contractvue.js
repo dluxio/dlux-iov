@@ -395,7 +395,8 @@ export default {
                                                                                 </div>
                                                                                 
                                                                                 
-                                                                                <div class="mt-2 rounded bg-dark p-2" v-for="(size, cid, index) in contract.df">
+                                                                                <div v-for="(size, cid, index) in contract.df">
+                                                                                    <div v-if="!newMeta[contract.i][cid].thumb" class="mt-2 rounded bg-dark p-2">
 
                                                                                         <div class="row align-items-center"> 
 
@@ -489,6 +490,7 @@ export default {
                                                                                             </div>
 
                                                                                         </div>
+                                                                                    </div>
 
                                                                                         
                                                                                 
