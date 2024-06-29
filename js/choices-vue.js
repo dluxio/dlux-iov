@@ -507,7 +507,7 @@ export default {
         const index = this.Base64toNumber(this.prop_selections)
         if(index && index <= this.license.length)this.selections.push(this.license[index - 1])
       } else {
-        for (var i = 1; i < this.prop_selections.length; i++) {
+        for (var i = 0; i < this.prop_selections.length; i++) {
           this.selections.push(this.labels[this.Base64toNumber(this.prop_selections[i])])
         }
       }
