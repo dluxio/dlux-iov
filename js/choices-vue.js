@@ -12,7 +12,7 @@ export default {
       default: "tags"
     },
     prop_selections: {
-      default: "2"
+      default: ""
     },
     prop_function: {
       type: String,
