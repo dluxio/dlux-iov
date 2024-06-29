@@ -396,7 +396,7 @@ export default {
                                                                                 
                                                                                 
                                                                                 <div v-for="(size, cid, index) in contract.df">
-                                                                                    <div v-if="!newMeta[contract.i][cid].thumb" class="mt-2 rounded bg-dark p-2">
+                                                                                    <div v-if="!newMeta[contract.i][cid].is_thumb" class="mt-2 rounded bg-dark p-2">
 
                                                                                         <div class="row align-items-center"> 
 
