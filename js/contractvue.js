@@ -404,7 +404,7 @@ export default {
                                                                                                 <div class="d-flex flex-column justify-content-center">
 
                                                                                                     
-                                                                                                    <img v-if="newMeta[contract.i][cid].thumb" class="mx-auto img-fluid rounded bg-light" :src="smartThumb(contract.i,cid)" width="314px" onerror="this.src = parseData(this.src)">
+                                                                                                    <img v-if="newMeta[contract.i][cid].thumb" class="mx-auto img-fluid rounded bg-light" :src="newMeta[contract.i][cid].thumb_data" width="314px" >
                                                                                                     <div v-else class="bg-light rounded">    
                                                                                                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                                                                                                                 viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve" >
@@ -830,9 +830,10 @@ export default {
         getdelimed(string, del = ',', index = 0) {
             return string.split(del)[index] ? string.split(del)[index] : ''
         },
-        parseData(string) {
+        getImgData(id, cid) {
+            var string = this.smartThumb(id, cid)
             fetch(string).then(response => response.text()).then(data => {
-                return data
+                this.newMeta[id][cid].thumb_data = data
             })
         },
         addToPost(cid, contract, loc = 'self') {
@@ -1177,6 +1178,7 @@ export default {
                                         license: '',
                                         labels: '',
                                     }
+                                    
                                     links += `![File ${i + 1}](https://ipfs.dlux.io/ipfs/${filesNames[i]})\n`
                                 }
                             } else {
@@ -1221,10 +1223,12 @@ export default {
                                         name: slots[i * 4 + 1],
                                         type: slots[i * 4 + 2],
                                         thumb: slots[i * 4 + 3],
+                                        thumb_data: slots[i * 4 + 3],
                                         flags: flags.indexOf('-') >= 0 ? flags.split('-')[0] : flags[0],
                                         license: flags.indexOf('-') >= 0 ? flags.split('-')[1] : '',
                                         labels: flags.indexOf('-') >= 0 ? flags.split('-')[2] : flags.slice(1),
                                     }
+                                    if(this.newMeta[data.file_contracts[node].i][filesNames[i]].thumb)this.getImgData(data.file_contracts[node].i, filesNames[i])
                                     if(this.Base64toNumber(this.newMeta[data.file_contracts[node].i][filesNames[i]].flags) & 1) this.newMeta[data.file_contracts[node].i][filesNames[i]].encrypted = true
                                     else this.newMeta[data.file_contracts[node].i][filesNames[i]].encrypted = false
                                     if(this.Base64toNumber(this.newMeta[data.file_contracts[node].i][filesNames[i]].flags) & 2) this.newMeta[data.file_contracts[node].i][filesNames[i]].is_thumb = true
