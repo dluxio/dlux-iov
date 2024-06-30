@@ -378,30 +378,30 @@ export default {
                                                                     
                                                                     <!-- files list -->
                                                                     <div v-if="contract.c > 1">
-                                                                        <div class="align-items-center mx-lg-5 d-flex flex-column mb-3 gradient-border bg-dark">
-                                                                            
-                                                                            <div v-if="contract.c > 2" class="d-flex">
-                                                                                <div class="fs-1 fw-bold align-items-start">SPK Network</div>
-                                                                                <div class="input-group my-1 d-flex">
-                                                                                    <span class="input-group-text border-info flex-grow-1">
-                                                                                        <div class="form-check form-switch flex-grow-1 text-end fs-5">
+
+                                                                        <div class="mx-1"> 
+                                                                            <div class="gradient-border bg-dark mb-3 mx-1 mx-lg-5 p-sm-1 p-lg-2"> 
+                                                                                <div v-if="contract.c > 2" class="d-flex flex-wrap justify-content-around justify-content-md-between mx-1 mx-md-2 pt-1 pt-md-2">
+                                                                                    <div class="fs-1 fw-bold align-items-start">SPK Network</div>
+                                                                                   <div class="input-group-text">
+                                                                                        <div class="form-check form-switch fs-5">
                                                                                             <input class="form-check-input" type="checkbox" checked="" role="switch" :id="contract.i + 'autoRenew'" v-model="newMeta[contract.i].contract.autoRenew">
                                                                                             <label class="form-check-label ms-auto" :for="contract.i + 'autoRenew'">Auto-Renew</label>
                                                                                         </div>
-                                                                                    </span>
+                                                                                    </div>
+                                                                                 
+                                                                                </div>
+
+                                                                                <!-- extension -->
+                                                                                <div v-if="contract.c == 3" >
+                                                                                            <extension-vue :node-view="nodeview"
+                                                                                            :contract="contract" :sstats="sstats"
+                                                                                            :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
+                                                                                            @tosign="toSign=$event"></extension-vue> 
                                                                                 </div>
                                                                             </div>
-
-                                                                            <!-- extension -->
-                                                                            <div v-if="contract.c == 3" class="mx-1 d-flex flex-grow-1">
-                                                                                        <extension-vue :node-view="nodeview"
-                                                                                        :contract="contract" :sstats="sstats"
-                                                                                        :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
-                                                                                        @tosign="toSign=$event"></extension-vue>
-                                                                                    
-                                                                                
-                                                                            </div>
                                                                         </div>
+
                                                                         <div class="mb-3 mx-1 mx-lg-5 p-sm-1 p-lg-2 rounded" style="background-color:rgba(0,0,0,0.3)">
                                                                             <div class="d-flex flex-column">
                                                                                 <div>
