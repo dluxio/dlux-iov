@@ -371,16 +371,16 @@ export default {
                         </div>
 
                         <div class="d-flex align-items-center justify-content-between">
-                            
+
                             <div class="me-1">
                                 <div class="d-flex align-items-center" style="margin-left: 15px">
                                         <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa" :style="'margin-left: ' + -15 +'px !important;'"></i>
                                 </div>
                             </div>
 
-                            <div class="mx-auto" v-for="label in labelsDecode(file.ll, 0)">
+                            <div class="mx-auto" v-for="(label, index) in labelsDecode(file.ll, 0)">
                                 <span class="d-flex align-items-center w-100">
-                                    <pop-vue :id="'popperL-' + file.i + file.index + label.l" title="Labels" trigger="hover">
+                                    <pop-vue :id="'popperL-' + file.i + index + label.l" title="Labels" trigger="hover">
                                         <i :class="label.fa"></i>
                                     </pop-vue>
                                 </span>
@@ -649,7 +649,7 @@ export default {
         },
         labelsDecode(flags = "", only = -1) {
             var arr = []
-            const len = only >= 0 ? 1 : flags.length
+            const len = only >= 0 ? 0 : flags.length
             for (var i = (only >= 0 ? only : 0); i < len; i++) {
                 arr.push(this.labels[flags[i]])
             }
@@ -779,7 +779,7 @@ export default {
                             labels: '',
                         }
 
-                        links += `![File ${i + 1}](https://ipfs.dlux.io/ipfs/${filesNames[i]})\n`
+                        //links += `![File ${i + 1}](https://ipfs.dlux.io/ipfs/${filesNames[i]})\n`
                     }
                 } else {
                     if (this.contract[id].m.indexOf('"') >= 0) this.contract[id].m = JSON.parse(this.contract[id].m)
