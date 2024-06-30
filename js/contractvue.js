@@ -399,6 +399,11 @@ export default {
                                                                                             :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
                                                                                             @tosign="toSign=$event"></extension-vue> 
                                                                                 </div>
+
+                                                                                <!-- save button -->
+                                                                                <div class="d-flex text-center">
+                                                                                    <button v-if="contract.c > 1 && metaMismatch(contract.i) && !newMeta[contract.i].contract.encrypted" class="btn btn-lg btn-outline-warning mx-auto my-2" type="button" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
+                                                                                </div>
                                                                             </div>
                                                                         </div>
 
@@ -504,6 +509,11 @@ export default {
                                                                                             </div>
 
                                                                                         </div>
+
+                                                                                        <!-- save button -->
+                                                                                        <div class="d-flex text-center">
+                                                                                            <button v-if="contract.c > 1 && metaMismatch(contract.i) && !newMeta[contract.i].contract.encrypted" class="btn btn-lg btn-outline-warning mx-auto my-2" type="button" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
+                                                                                        </div>
                                                                                     </div>
 
                                                                                         
@@ -562,11 +572,11 @@ export default {
                                                                                     
                                                                                 </div>
 
-                                                                                    <!-- save button -->
+                                                                                    <!-- save button 
                                                                                 <div class="d-flex text-center">
                                                                                     <button v-if="contract.c > 1 && metaMismatch(contract.i) && !newMeta[contract.i].contract.encrypted" class="btn btn-lg btn-outline-warning mx-auto my-2" type="button" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Changes</button>
                                                                                 </div>
-                                                                                
+                                                                                -->
                                                                             </div>
                                                                         </div>
                                                                     </div>
