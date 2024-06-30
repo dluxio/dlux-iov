@@ -221,10 +221,12 @@ export default {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="file in filesArray">
+                    <div  v-for="file in filesArray">
+                    <tr v-if="!(newMeta[file.i][file.f].flags & 2)">
                         <th scope="row" class="col-1">
-                            <div class="bg-light" style="width:50px;">    
-                                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                            <div class="bg-light" style="width:50px;">
+                                <img v-if="newMeta[file.i][file.f].thumb" class="mx-auto img-fluid rounded bg-light" :src="newMeta[file.i][file.f].thumb_data" width="50px" >
+                                <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                                         viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
                                     <g>
                                         <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10
@@ -239,13 +241,13 @@ export default {
                                         <path class="st0" d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
                                             c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
                                             c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z"/>
-                                        <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2" style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.index * 4 + 2]}}</text>
+                                        <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2" style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.f].type}}</text>
                                     </g>
                                 </svg>
                             </div>
                         </th>
                         <td class="col-2">
-                            <div class="text-break">{{newMeta[file.i][file.index * 4 + 1] || file.f}}</div>
+                            <div class="text-break">{{newMeta[file.i][file.f].name || file.f}}{{newMeta[file.i][file.f].thumb ? '.' + newMeta[file.i][file.f].type : ''}}</div>
                         </td>
                          <td class="col-2" v-if="owners.length > 1">
                             <div class="text-break">@{{contrat[file.i].t}}</div>
@@ -268,7 +270,7 @@ export default {
                                 </div>
 
                                 <div class="d-flex align-items-center">
-                                <div v-for="flag in flagsDecode(newMeta[file.i][file.index * 4 + 4], 0, 2)" >
+                                <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 2)" >
                                         <!-- title="Labels"  -->
                                         <pop-vue :id="'popper-' + file.i + file.index + flag.l" :title="flag.l" trigger="hover">
                                             <i :class="flag.fa"></i>
@@ -279,19 +281,19 @@ export default {
                         </td>
                         <td class="col-1">{{fancyBytes(file.s)}}</td>
                         <td class="col-1">{{blockToTime(file.c)}}</td>
-                        <td class="col-1">{{blockToTime(file.e)}}<i v-for="ar in flagsDecode(newMeta[file.i][file.index * 4 + 4], 2)" :class="ar.fa"></i></td>
+                        <td class="col-1">{{blockToTime(file.e)}}<i v-if="newMeta[file.i].contract.autoRenew" class="fa-solid fa-arrows-rotate text-success fa-fw fa-spin"></i></td>
                         <td class="col-1">
                             <div class="mt-1">
                                 <!-- link -->
-                                <div v-if="!flagDecode(newMeta[file.i][file.index * 4 + 4]).enc">
+                                <div v-if="!newMeta[file.i][file.f].encrypted">
                                     <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank" class="w-100 btn btn-sm btn-info mb-1 mx-auto"><span class="d-flex align-items-center">URL<i class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
                                 </div>
                                 <!-- decrypt  -->
-                                <div v-if="flagDecode(newMeta[file.i][file.index * 4 + 4]).enc && !decoded">
+                                <div v-if="newMeta[file.i][file.f].encrypted && !newMeta[file.i].contract.encryption.key">
                                     <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="decode(file.i)"><span class="d-flex align-items-center w-100">Decrypt<i class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
                                 </div>
                                 <!-- download enc -->
-                                <div v-if="flagDecode(newMeta[file.i][file.index * 4 + 4]).enc && decoded">
+                                <div v-if="newMeta[file.i][file.f].encrypted && newMeta[file.i].contract.encryption.key">
                                     <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="download(file.i, file)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
                                 </div>
                                 <!-- add to post -->
@@ -305,6 +307,7 @@ export default {
                             </div>
                         </td>
                     </tr>
+                    </div>
                 </tbody>
             </table>
         </div>
@@ -312,8 +315,8 @@ export default {
         <div class="d-flex flex-wrap" v-if="!viewOpts.list">
             <div class="file-grid" v-for="file in filesArray">
                 <div class="card bg-blur-darkg m-05 p-05 text-start">
-                    <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank" class="no-decoration"><div class="text-black text-truncate">{{newMeta[file.i][file.index * 4 + 1] || file.f}}</div></a>
-                    <h5 class="m-0 ms-auto align-self-end"><span class="d-none badge square rounded-top border border-bottom-0 bg-info border-light-50" :class="smartColor(newMeta[file.i][file.index * 4 + 4])"><i :class="smartIcon(newMeta[file.i][file.index * 4 + 4])"></i>{{ newMeta[file.i][file.index * 4 + 2] }}</span></h5>
+                    <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank" class="no-decoration"><div class="text-black text-truncate">{{newMeta[file.i][file.f].name || file.f}}</div></a>
+                    <h5 class="m-0 ms-auto align-self-end"><span class="d-none badge square rounded-top border border-bottom-0 bg-info border-light-50" :class="smartColor(file.lc)"><i :class="smartIcon(file.l)"></i>{{ newMeta[file.i][file.f].type }}</span></h5>
                     <div class="bg-light">    
                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                                 viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
@@ -330,7 +333,7 @@ export default {
                                 <path class="st0" d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
                                     c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
                                     c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z"/>
-                                <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2" style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.index * 4 + 2]}}</text>
+                                <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2" style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.f].type}}</text>
                             </g>
                         </svg>
                     </div>
@@ -339,15 +342,15 @@ export default {
 
                     <div class="mt-1">
                             <!-- link -->
-                            <div v-if="!flagDecode(newMeta[file.i][file.index * 4 + 4]).enc">
+                            <div v-if="!newMeta[file.i][file.f].encrypted">
                                 <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank" class="w-100 btn btn-sm btn-info mb-1 mx-auto"><span class="d-flex align-items-center">URL<i class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
                             </div>
                             <!-- decrypt  -->
-                            <div v-if="flagDecode(newMeta[file.i][file.index * 4 + 4]).enc && !decoded">
+                            <div v-if="newMeta[file.i][file.f].encrypted && !newMeta[file.i].contract.encryption.key">
                                 <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="decode(file.i)"><span class="d-flex align-items-center w-100">Decrypt<i class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
                             </div>
                             <!-- download enc -->
-                            <div v-if="flagDecode(newMeta[file.i][file.index * 4 + 4]).enc && decoded">
+                            <div v-if="newMeta[file.i][file.f].encrypted && newMeta[file.i].contract.encryption.key">
                                 <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="download(file.i, file)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
                             </div>
                             <!-- add to post -->
@@ -385,7 +388,7 @@ export default {
                             </div>
 
                             <div class="d-flex align-items-center ms-auto ms-1">
-                            <div v-for="flag in flagsDecode(newMeta[file.i][file.index * 4 + 4])" >
+                            <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags)" >
                                     <!-- title="Labels"  -->
                                     <pop-vue :id="'popper-' + file.i + file.index + flag.l" :title="flag.l" trigger="hover">
                                         <i :class="flag.fa"></i>
@@ -596,61 +599,12 @@ export default {
             else if (flag.enc) return 'bg-dark'
             else return 'bg-info'
         },
-        smartThumb(contract, index, cid) {
-            var thumb = this.newMeta[contract][index * 4 + 3] || ''
-            if (thumb.includes('Qm')) return `https://ipfs.dlux.io/ipfs/${thumb}`
-            if (thumb.includes('https')) return thumb
-            switch (this.newMeta[contract][index * 4 + 2]) {
-                case 'jpg':
-                case 'jpeg':
-                case 'png':
-                case 'gif':
-                case 'bmp':
-                case 'webp':
-                case 'tiff':
-                case 'tif':
-                case 'svg':
-                    return `https://ipfs.dlux.io/ipfs/${cid}`
-                case 'mp4':
-                case 'mov':
-                    return `/img/mov-file-type-svgrepo-com.svg`
-                case 'avi':
-                    return `/img/avi-file-type-svgrepo-com.svg`
-                case 'gltf':
-                case 'glb':
-                    return `/img/dluxdefault.png`
-                case 'html':
-                case 'htm':
-                    return `/img/html-file-type-svgrepo-com.svg`
-                case 'pdf':
-                    return `/img/pdf-file-type-svgrepo-com.svg`
-                case 'txt':
-                case 'json':
-                case 'md':
-                case 'xml':
-                case 'yaml':
-                case 'yml':
-                case 'js':
-                    return `/img/txt-file-type-svgrepo-com.svg`
-                case 'csv':
-                    return `/img/csv-file-type-svgrepo-com.svg`
-                case 'css':
-                case 'scss':
-                    return `/img/css-file-type-svgrepo-com.svg`
-                case 'mp3':
-                    return `/img/mp3-file-type-svgrepo-com.svg`
-                case 'wav':
-                    return `/img/wav-file-type-svgrepo-com.svg`
-                case 'rar':
-                    return `/img/rar-file-type-svgrepo-com.svg`
-                case 'zip':
-                    return `/img/zip-file-type-svgrepo-com.svg`
-                case '':
-                    return '/img/other-file-type-svgrepo-com.svg'
-                case 'enc': //encrypted
-                default:
-                    return '/img/other-file-type-svgrepo-com.svg'
-            }
+        smartThumb(contract, cid) {
+            if (this.newMeta[contract][cid].thumb.includes('https://')) {
+                return this.newMeta[contract][cid].thumb
+            } else if (this.newMeta[contract][cid].thumb.includes('Qm')) {
+                return `https://ipfs.dlux.io/ipfs/${this.newMeta[contract][cid].thumb}`
+            } else return false
         },
         blockToTime(block) {
             const now = new Date().getTime()
@@ -684,12 +638,12 @@ export default {
             return out
         },
         flagsDecode(flags = "", only = 0, omit = 0) {
-            var num = this.Base64toNumber(flags[0])
+            var num = typeof flags == "string" ? this.Base64toNumber(flags[0]) : flags
             var out = []
             if(only) num = num & only
             if(omit) num = num & ~omit
             if (num & 1) out.push({ fa: 'fa-solid fa-lock text-primary fa-fw', l: "Encrypted" })
-            if (num & 2) out.push({ fa: 'fa-solid fa-arrows-rotate text-success fa-fw fa-spin', l: "AutoRenew" })
+            if (num & 2) out.push({ fa: 'fa-solid fa-arrows-rotate text-success fa-fw fa-spin', l: "Thumbnail" })
             if (num & 4) out.push({ fa: 'fa-solid fa-radiation text-warning fa-fw', l: "NSFW" })
             if (num & 8) out.push({ fa: 'fa-regular fa-file-code text-info fa-fw', l: "Executable" })
             return out
@@ -697,8 +651,7 @@ export default {
         labelsDecode(flags = "", only = -1) {
             var arr = []
             const len = only >= 0 ? 1 : flags.length
-            if (flags.length < 2) return arr
-            else for (var i = (only >= 0 ? only : 0 ) ; i < len; i++) {
+            for (var i = (only >= 0 ? only : 0 ) ; i < len; i++) {
                 arr.push(this.labels[flags[i]])
             }
             arr = new Set(arr)
@@ -784,47 +737,165 @@ export default {
             })
 
         },
+        getImgData(id, cid) {
+            var string = this.smartThumb(id, cid)
+            fetch(string).then(response => response.text()).then(data => {
+                if(data.indexOf('data:image/') >= 0)this.newMeta[id][cid].thumb_data = data
+                else this.newMeta[id][cid].thumb_data = string
+            }).catch(e => {
+                this.newMeta[id][cid].thumb_data = string
+            })
+        },
         init() {
-
             for (var i in this.contracts) {
                 if (this.contracts[i].c == 1) continue
                 const id = this.contracts[i].i
                 this.contract[id] = this.contracts[i];
                 this.owners.push(this.contracts[i].t)
                 if (!this.contract[id].m) {
+                    this.contract[id].autoRenew = false
                     this.contract[id].m = ""
-                    const filesNum = this.contracts[i].df ? Object.keys(this.contracts[i].df).length : 0
-                    this.newMeta[id] = new Array(filesNum * 4 + 1).fill('')
-                } else {
-                    this.newMeta[id] = this.contract[id].m.split(",")
-                }
-                var keys = Object.keys(this.contract[id].df)
-                for (var j in keys) {
-                    var ll = "", lc = "", l = this.newMeta[id][j * 4 + 4] ? this.newMeta[id][j * 4 + 4].slice(1) || '' : ''
-                    for (var k = 0; k < l.length; k++) {
-                        if (this.labels[l[k]]) {
-                            if (this.labels[l[k]].c) lc += l[k]
-                            else ll += l[k]
+                    this.newMeta[id] = {
+                        contract: {
+                            autoRenew: false,
+                            encrypted: false,
+                            m: "",
                         }
                     }
-                    const f = {
-                        i: id,
-                        f: keys[j],
-                        c: this.contract[id].i.split(':')[2].split('-')[0],
-                        e: this.contract[id].e.split(':')[0],
-                        n: this.newMeta[id][j * 4 + 1] || keys[j],
-                        y: this.newMeta[id][j * 4 + 2] || keys[j],
-                        index: j,
-                        lf: parseInt(this.Base64toNumber(this.newMeta[id][j * 4 + 4][0]) || 0),
-                        l,
-                        lc,
-                        ll,
-                        t: this.newMeta[id][j * 4 + 3] || '',
-                        s: this.contract[id].df[keys[j]],
-                        p: false
+                    var filesNames = this.contract[id]?.df ? Object.keys(this.contract[id].df) : []
+                    filesNames = filesNames.sort((a, b) => {
+                        if (a > b) return 1
+                        else if (a < b) return -1
+                        else return 0
+                    })
+                    for(var i = 0; i < filesNames.length; i++){
+                        this.newMeta[id][filesNames[i]] = {
+                            name: '',
+                            type: '',
+                            thumb: '',
+                            flags: '',
+                            is_thumb: false,
+                            encrypted: false,
+                            license: '',
+                            labels: '',
+                        }
+                        
+                        links += `![File ${i + 1}](https://ipfs.dlux.io/ipfs/${filesNames[i]})\n`
                     }
-                    this.files[f.f] = f
+                } else {
+                    if (this.contract[id].m.indexOf('"') >= 0) this.contract[id].m = JSON.parse(this.contract[id].m)
+                    var encData = this.contract[id].m.split(',')[0] || ''
+                    var renew  = this.Base64toNumber(encData[0] || '0') & 1 ? true : false
+                    var encAccounts = []
+                    var encrypted = false
+                    if(encData){
+                        encData = encData.split('#')
+                        renew = this.Base64toNumber(encData.shift()) & 1 ? true : false
+                        if(encData.length){
+                            encData = '#' + encData.join('#') 
+                            encAccounts = encData.split(';')
+                            encrypted = true
+                        }
+                    }
+                    this.newMeta[id] = {
+                        contract: {
+                            autoRenew: renew,
+                            encrypted,
+                            encryption: {
+                                key: '',
+                            },
+                            m: this.contract[id].m,
+                        }
+                    }
+                    for (var i = 0; i < encAccounts.length; i++) {
+                        const encA = encAccounts[i].split('@')[1]
+                        this.contract[id].autoRenew = renew
+                        this.contract[id].encryption.accounts[encA] = {
+                            enc_key: `#${encAccounts[i].split('@')[0].split('#')[1]}`,
+                            key: '',
+                            done: true,
+                        }
+                    }
+                    
+                    var filesNames = this.contract[id]?.df ? Object.keys(this.contract[id].df) : []
+                    filesNames = filesNames.sort((a, b) => {
+                        if (a > b) return 1
+                        else if (a < b) return -1
+                        else return 0
+                    })
+                    const slots = this.contract[id].m.split(",")
+                    for(var i = 0; i < filesNames.length; i++){
+                        const flags = slots[i * 4 + 4]
+                        this.newMeta[id][filesNames[i]] = {
+                            name: slots[i * 4 + 1],
+                            type: slots[i * 4 + 2],
+                            thumb: slots[i * 4 + 3],
+                            thumb_data: slots[i * 4 + 3],
+                            flags: this.Base64toNumber(flags.indexOf('-') >= 0 ? flags.split('-')[0] : flags[0]),
+                            license: flags.indexOf('-') >= 0 ? flags.split('-')[1] : '',
+                            labels: flags.indexOf('-') >= 0 ? flags.split('-')[2] : flags.slice(1),
+                        }
+                        if(this.newMeta[id][filesNames[i]].thumb)this.getImgData(id, filesNames[i])
+                        if(this.Base64toNumber(this.newMeta[id][filesNames[i]].flags) & 1) this.newMeta[id][filesNames[i]].encrypted = true
+                        else this.newMeta[id][filesNames[i]].encrypted = false
+                        if(this.Base64toNumber(this.newMeta[id][filesNames[i]].flags) & 2) this.newMeta[id][filesNames[i]].is_thumb = true
+                        else this.newMeta[id][filesNames[i]].is_thumb = false
+                        if(this.Base64toNumber(this.newMeta[id][filesNames[i]].flags) & 4) this.newMeta[id][filesNames[i]].nsfw = true
+                        else this.newMeta[id][filesNames[i]].nsfw = false
+                        var ll = "", lc = "", l = this.newMeta[id][filesNames[i]].labels
+                        for (var k = 0; k < l.length; k++) {
+                            if (this.labels[l[k]]) {
+                                if (this.labels[l[k]].c) lc += l[k]
+                                else ll += l[k]
+                            }
+                        }
+                        const f = {
+                                    i: id,
+                                    f: filesNames[i],
+                                    c: id.split(':')[2].split('-')[0],
+                                    e: this.contract[id].e.split(':')[0],
+                                    n: this.newMeta[id][filesNames[i]].name || keys[j],
+                                    y: this.newMeta[id][filesNames[i]].type || keys[j],
+                                    index: i,
+                                    lf: this.newMeta[id][filesNames[i]].flags || 0,
+                                    l: this.newMeta[id][filesNames[i]].labels,
+                                    lc,
+                                    ll,
+                                    lic: this.newMeta[id][filesNames[i]].license,
+                                    t: this.newMeta[id][filesNames[i]].thumb || '',
+                                    s: this.contract[id].df[filesNames[i]],
+                                    p: false
+                                }
+                        this.files[f.f] = f
+                    }
                 }
+                // var keys = Object.keys(this.contract[id].df)
+                // for (var j in keys) {
+                //     var ll = "", lc = "", l = this.newMeta[id][j * 4 + 4] ? this.newMeta[id][j * 4 + 4].slice(1) || '' : ''
+                //     for (var k = 0; k < l.length; k++) {
+                //         if (this.labels[l[k]]) {
+                //             if (this.labels[l[k]].c) lc += l[k]
+                //             else ll += l[k]
+                //         }
+                //     }
+                //     const f = {
+                //         i: id,
+                //         f: keys[j],
+                //         c: this.contract[id].i.split(':')[2].split('-')[0],
+                //         e: this.contract[id].e.split(':')[0],
+                //         n: this.newMeta[id][j * 4 + 1] || keys[j],
+                //         y: this.newMeta[id][j * 4 + 2] || keys[j],
+                //         index: j,
+                //         lf: parseInt(this.Base64toNumber(this.newMeta[id][j * 4 + 4][0]) || 0),
+                //         l,
+                //         lc,
+                //         ll,
+                //         t: this.newMeta[id][j * 4 + 3] || '',
+                //         s: this.contract[id].df[keys[j]],
+                //         p: false
+                //     }
+                //     this.files[f.f] = f
+                // }
             }
             this.owners = [...new Set(this.owners)]
             this.render()
