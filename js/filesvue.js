@@ -87,7 +87,7 @@ export default {
         </div>
 
         <div class="d-flex align-items-center my-1 mx-1">
-            <h5 class="mb-0"> {{filesArray.length}} File{{filesArray.length > 1 ? 's' : ''}}</h5>
+            <h5 class="mb-0"> {{filesArray.length}} File{{filesArray.length == 1 ? 's' : ''}}</h5>
             <div class="ms-auto">
                 <div class="btn-group">
                     <input type="radio" class="btn-check" name="smView" id="setSingle" autocomplete="off" @click="viewOpts.list = true" :checked="viewOpts.list" />
