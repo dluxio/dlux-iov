@@ -221,8 +221,7 @@ export default {
                     </tr>
                 </thead>
                 <tbody>
-                    <div  v-for="file in filesArray">
-                    <tr v-if="!(newMeta[file.i][file.f].flags & 2)">
+                    <tr v-for="file in filesArray">
                         <th scope="row" class="col-1">
                             <div class="bg-light" style="width:50px;">
                                 <img v-if="newMeta[file.i][file.f].thumb" class="mx-auto img-fluid rounded bg-light" :src="newMeta[file.i][file.f].thumb_data" width="50px" >
@@ -307,7 +306,6 @@ export default {
                             </div>
                         </td>
                     </tr>
-                    </div>
                 </tbody>
             </table>
         </div>
@@ -436,7 +434,7 @@ export default {
             type: String,
             default: "",
         },
-        current:{
+        current: {
             type: Number,
             default: 85000000,
         }
@@ -461,70 +459,70 @@ export default {
             decoded: false,
             debounce: null,
             labels: {
-                ["0"]: { fa: "fa-solid fa-sink fa-fw", l: "Miscellaneous", c:0 },
-                ["1"]: { fa: "fa-solid fa-exclamation fa-fw", l: "Important", c:0 },
-                ["2"]: { fa: "fa-solid fa-star fa-fw", l: "Favorite", c:0 },
-                ["3"]: { fa: "fa-solid fa-dice fa-fw", l: "Random", c:0 },
-                ["4"]: { fa: "fa-solid fa-circle fa-fw text-red", l: "Red", c:1},
-                ["5"]: { fa: "fa-solid fa-circle fa-fw text-orange", l: "Orange", c:1 },
-                ["6"]: { fa: "fa-solid fa-circle fa-fw text-yellow", l: "Yellow", c:1 },
-                ["7"]: { fa: "fa-solid fa-circle fa-fw text-green", l: "Green", c:1 },
-                ["8"]: { fa: "fa-solid fa-circle fa-fw text-blue", l: "Blue", c:1 },
-                ["9"]: { fa: "fa-solid fa-circle fa-fw text-purple", l: "Purple", c:1 },
-                ["A"]: { fa: "fa-solid fa-circle fa-fw text-grey", l: "Grey", c:1 },
-                ["B"]: { fa: "fa-solid fa-briefcase fa-fw", l: "Work", c:0 },
-                ["C"]: { fa: "fa-solid fa-heart fa-fw", l: "Personal", c:0 },
-                ["D"]: { fa: "fa-solid fa-people-roof fa-fw", l: "Family", c:0 },
-                ["E"]: { fa: "fa-solid fa-people-group fa-fw", l: "Friends", c:0 },
-                ["F"]: { fa: "fa-solid fa-rocket fa-fw", l: "Projects", c:0 },
-                ["G"]: { fa: "fa-solid fa-piggy-bank fa-fw", l: "Finance", c:0 },
-                ["H"]: { fa: "fa-solid fa-kit-medical fa-fw", l: "Health", c:0 },
-                ["I"]: { fa: "fa-solid fa-graduation-cap fa-fw", l: "Education", c:0 },
-                ["J"]: { fa: "fa-solid fa-compass fa-fw", l: "Travel", c:0 },
-                ["K"]: { fa: "fa-regular fa-calendar-days fa-fw", l: "Events", c:0 },
-                ["L"]: { fa: "fa-solid fa-camera fa-fw", l: "Photography", c:0 },
-                ["M"]: { fa: "fa-solid fa-gamepad fa-fw", l: "Gaming", c:0 },
-                ["N"]: { fa: "fa-solid fa-volleyball fa-fw", l: "Sports", c:0 },
-                ["O"]: { fa: "fa-solid fa-feather fa-fw", l: "Blogging", c:0 },
-                ["P"]: { fa: "fa-solid fa-crown fa-fw", l: "Meme", c:0 },
-                ["Q"]: { fa: "fa-solid fa-music fa-fw", l: "Music", c:0 },
-                ["R"]: { fa: "fa-solid fa-video fa-fw", l: "Video", c:0 },
-                ["S"]: { fa: "fa-solid fa-microphone fa-fw", l: "Audio", c:0 },
-                ["T"]: { fa: "fa-solid fa-newspaper fa-fw", l: "News", c:0 },
-                ["U"]: { fa: "fa-solid fa-code fa-fw", l: "Development", c:0 },
-                ["V"]: { fa: "fa-solid fa-hat-cowboy fa-fw", l: "Fashion", c:0 },
-                ["W"]: { fa: "fa-solid fa-burger fa-fw", l: "Food", c:0 },
-                ["X"]: { fa: "fa-solid fa-utensils fa-fw", l: "Cooking", c:0 },
-                ["Y"]: { fa: "fa-solid fa-toolbox fa-fw", l: "DIY", c:0 },
-                ["Z"]: { fa: "fa-solid fa-paintbrush fa-fw", l: "Art", c:0 },
-                ["a"]: { fa: "fa-solid fa-swatchbook fa-fw", l: "Design", c:0 },
-                ["b"]: { fa: "fa-solid fa-microchip fa-fw", l: "Technology", c:0 },
-                ["c"]: { fa: "fa-solid fa-cross fa-fw", l: "Religion", c:0 },
-                ["d"]: { fa: "fa-solid fa-scale-balanced fa-fw", l: "Government", c:0 },
-                ["e"]: { fa: "fa-solid fa-landmark-dome fa-fw", l: "Politics", c:0 },
-                ["f"]: { fa: "fa-solid fa-vial fa-fw", l: "Science", c:0 },
-                ["g"]: { fa: "fa-solid fa-magnifying-glass fa-fw", l: "Research", c:0 },
-                ["h"]: { fa: "fa-solid fa-receipt fa-fw", l: "Receipts", c:0 },
-                ["i"]: { fa: "fa-solid fa-envelope-open-text fa-fw", l: "Correspondence", c:0 },
-                ["j"]: { fa: "fa-solid fa-copy fa-fw", l: "Templates", c:0 },
-                ["k"]: { fa: "fa-solid fa-file-lines fa-fw", l: "Resources", c:0 },
-                ["l"]: { fa: "fa-solid fa-book-bookmark fa-fw", l: "Reference", c:0 },
-                ["m"]: { fa: "fa-solid fa-floppy-disk fa-fw", l: "Backups", c:0 },
-                ["n"]: { fa: "fa-solid fa-box-archive fa-fw", l: "Archive", c:0 },
-                ["o"]: { fa: "fa-solid fa-compass-drafting fa-fw", l: "Drafts", c:0 },
-                ["p"]: { fa: "fa-solid fa-flag-checkered fa-fw", l: "Finished", c:0 },
-                ["q"]: { fa: "fa-solid fa-paper-plane fa-fw", l: "Sent", c:0 },
-                ["r"]: { fa: "fa-solid fa-clock fa-fw", l: "Pending", c:0 },
-                ["s"]: { fa: "fa-solid fa-thumbs-up fa-fw", l: "Approved", c:0 },
-                ["t"]: { fa: "fa-solid fa-thumbs-down fa-fw", l: "Rejected", c:0 },
-                ["u"]: { fa: "fa-solid fa-lightbulb fa-fw", l: "Ideas", c:0 },
-                ["v"]: { fa: "fa-solid fa-bullseye fa-fw", l: "Goals", c:0 },
-                ["w"]: { fa: "fa-solid fa-list-check fa-fw", l: "Tasks", c:0 },
-                ["x"]: { fa: "fa-solid fa-gavel fa-fw", l: "Legal", c:0 },
-                ["y"]: { fa: "fa-solid fa-handshake fa-fw", l: "Networking", c:0 },
-                ["z"]: { fa: "fa-solid fa-comments fa-fw", l: "Feedback", c:0 },
-                ["+"]: { fa: "fa-solid fa-square-poll-vertical fa-fw", l: "Surveys", c:0 },
-                ["="]: { fa: "fa-solid fa-user-secret fa-fw", l: "Classified", c:0 }
+                ["0"]: { fa: "fa-solid fa-sink fa-fw", l: "Miscellaneous", c: 0 },
+                ["1"]: { fa: "fa-solid fa-exclamation fa-fw", l: "Important", c: 0 },
+                ["2"]: { fa: "fa-solid fa-star fa-fw", l: "Favorite", c: 0 },
+                ["3"]: { fa: "fa-solid fa-dice fa-fw", l: "Random", c: 0 },
+                ["4"]: { fa: "fa-solid fa-circle fa-fw text-red", l: "Red", c: 1 },
+                ["5"]: { fa: "fa-solid fa-circle fa-fw text-orange", l: "Orange", c: 1 },
+                ["6"]: { fa: "fa-solid fa-circle fa-fw text-yellow", l: "Yellow", c: 1 },
+                ["7"]: { fa: "fa-solid fa-circle fa-fw text-green", l: "Green", c: 1 },
+                ["8"]: { fa: "fa-solid fa-circle fa-fw text-blue", l: "Blue", c: 1 },
+                ["9"]: { fa: "fa-solid fa-circle fa-fw text-purple", l: "Purple", c: 1 },
+                ["A"]: { fa: "fa-solid fa-circle fa-fw text-grey", l: "Grey", c: 1 },
+                ["B"]: { fa: "fa-solid fa-briefcase fa-fw", l: "Work", c: 0 },
+                ["C"]: { fa: "fa-solid fa-heart fa-fw", l: "Personal", c: 0 },
+                ["D"]: { fa: "fa-solid fa-people-roof fa-fw", l: "Family", c: 0 },
+                ["E"]: { fa: "fa-solid fa-people-group fa-fw", l: "Friends", c: 0 },
+                ["F"]: { fa: "fa-solid fa-rocket fa-fw", l: "Projects", c: 0 },
+                ["G"]: { fa: "fa-solid fa-piggy-bank fa-fw", l: "Finance", c: 0 },
+                ["H"]: { fa: "fa-solid fa-kit-medical fa-fw", l: "Health", c: 0 },
+                ["I"]: { fa: "fa-solid fa-graduation-cap fa-fw", l: "Education", c: 0 },
+                ["J"]: { fa: "fa-solid fa-compass fa-fw", l: "Travel", c: 0 },
+                ["K"]: { fa: "fa-regular fa-calendar-days fa-fw", l: "Events", c: 0 },
+                ["L"]: { fa: "fa-solid fa-camera fa-fw", l: "Photography", c: 0 },
+                ["M"]: { fa: "fa-solid fa-gamepad fa-fw", l: "Gaming", c: 0 },
+                ["N"]: { fa: "fa-solid fa-volleyball fa-fw", l: "Sports", c: 0 },
+                ["O"]: { fa: "fa-solid fa-feather fa-fw", l: "Blogging", c: 0 },
+                ["P"]: { fa: "fa-solid fa-crown fa-fw", l: "Meme", c: 0 },
+                ["Q"]: { fa: "fa-solid fa-music fa-fw", l: "Music", c: 0 },
+                ["R"]: { fa: "fa-solid fa-video fa-fw", l: "Video", c: 0 },
+                ["S"]: { fa: "fa-solid fa-microphone fa-fw", l: "Audio", c: 0 },
+                ["T"]: { fa: "fa-solid fa-newspaper fa-fw", l: "News", c: 0 },
+                ["U"]: { fa: "fa-solid fa-code fa-fw", l: "Development", c: 0 },
+                ["V"]: { fa: "fa-solid fa-hat-cowboy fa-fw", l: "Fashion", c: 0 },
+                ["W"]: { fa: "fa-solid fa-burger fa-fw", l: "Food", c: 0 },
+                ["X"]: { fa: "fa-solid fa-utensils fa-fw", l: "Cooking", c: 0 },
+                ["Y"]: { fa: "fa-solid fa-toolbox fa-fw", l: "DIY", c: 0 },
+                ["Z"]: { fa: "fa-solid fa-paintbrush fa-fw", l: "Art", c: 0 },
+                ["a"]: { fa: "fa-solid fa-swatchbook fa-fw", l: "Design", c: 0 },
+                ["b"]: { fa: "fa-solid fa-microchip fa-fw", l: "Technology", c: 0 },
+                ["c"]: { fa: "fa-solid fa-cross fa-fw", l: "Religion", c: 0 },
+                ["d"]: { fa: "fa-solid fa-scale-balanced fa-fw", l: "Government", c: 0 },
+                ["e"]: { fa: "fa-solid fa-landmark-dome fa-fw", l: "Politics", c: 0 },
+                ["f"]: { fa: "fa-solid fa-vial fa-fw", l: "Science", c: 0 },
+                ["g"]: { fa: "fa-solid fa-magnifying-glass fa-fw", l: "Research", c: 0 },
+                ["h"]: { fa: "fa-solid fa-receipt fa-fw", l: "Receipts", c: 0 },
+                ["i"]: { fa: "fa-solid fa-envelope-open-text fa-fw", l: "Correspondence", c: 0 },
+                ["j"]: { fa: "fa-solid fa-copy fa-fw", l: "Templates", c: 0 },
+                ["k"]: { fa: "fa-solid fa-file-lines fa-fw", l: "Resources", c: 0 },
+                ["l"]: { fa: "fa-solid fa-book-bookmark fa-fw", l: "Reference", c: 0 },
+                ["m"]: { fa: "fa-solid fa-floppy-disk fa-fw", l: "Backups", c: 0 },
+                ["n"]: { fa: "fa-solid fa-box-archive fa-fw", l: "Archive", c: 0 },
+                ["o"]: { fa: "fa-solid fa-compass-drafting fa-fw", l: "Drafts", c: 0 },
+                ["p"]: { fa: "fa-solid fa-flag-checkered fa-fw", l: "Finished", c: 0 },
+                ["q"]: { fa: "fa-solid fa-paper-plane fa-fw", l: "Sent", c: 0 },
+                ["r"]: { fa: "fa-solid fa-clock fa-fw", l: "Pending", c: 0 },
+                ["s"]: { fa: "fa-solid fa-thumbs-up fa-fw", l: "Approved", c: 0 },
+                ["t"]: { fa: "fa-solid fa-thumbs-down fa-fw", l: "Rejected", c: 0 },
+                ["u"]: { fa: "fa-solid fa-lightbulb fa-fw", l: "Ideas", c: 0 },
+                ["v"]: { fa: "fa-solid fa-bullseye fa-fw", l: "Goals", c: 0 },
+                ["w"]: { fa: "fa-solid fa-list-check fa-fw", l: "Tasks", c: 0 },
+                ["x"]: { fa: "fa-solid fa-gavel fa-fw", l: "Legal", c: 0 },
+                ["y"]: { fa: "fa-solid fa-handshake fa-fw", l: "Networking", c: 0 },
+                ["z"]: { fa: "fa-solid fa-comments fa-fw", l: "Feedback", c: 0 },
+                ["+"]: { fa: "fa-solid fa-square-poll-vertical fa-fw", l: "Surveys", c: 0 },
+                ["="]: { fa: "fa-solid fa-user-secret fa-fw", l: "Classified", c: 0 }
             }
 
         };
@@ -640,8 +638,8 @@ export default {
         flagsDecode(flags = "", only = 0, omit = 0) {
             var num = typeof flags == "string" ? this.Base64toNumber(flags[0]) : flags
             var out = []
-            if(only) num = num & only
-            if(omit) num = num & ~omit
+            if (only) num = num & only
+            if (omit) num = num & ~omit
             if (num & 1) out.push({ fa: 'fa-solid fa-lock text-primary fa-fw', l: "Encrypted" })
             if (num & 2) out.push({ fa: 'fa-solid fa-arrows-rotate text-success fa-fw fa-spin', l: "Thumbnail" })
             if (num & 4) out.push({ fa: 'fa-solid fa-radiation text-warning fa-fw', l: "NSFW" })
@@ -651,7 +649,7 @@ export default {
         labelsDecode(flags = "", only = -1) {
             var arr = []
             const len = only >= 0 ? 1 : flags.length
-            for (var i = (only >= 0 ? only : 0 ) ; i < len; i++) {
+            for (var i = (only >= 0 ? only : 0); i < len; i++) {
                 arr.push(this.labels[flags[i]])
             }
             arr = new Set(arr)
@@ -709,7 +707,7 @@ export default {
                     const arr = this.filterLabels.split('')
                     for (var j = 0; j < arr.length; j++) {
                         if (file.l.indexOf(arr[j]) == -1) return false
-                        
+
                     }
                 }
                 if (this.filesSelect.search && file.n.toLowerCase().indexOf(this.filesSelect.search.toLowerCase()) == -1) return false
@@ -740,7 +738,7 @@ export default {
         getImgData(id, cid) {
             var string = this.smartThumb(id, cid)
             fetch(string).then(response => response.text()).then(data => {
-                if(data.indexOf('data:image/') >= 0)this.newMeta[id][cid].thumb_data = data
+                if (data.indexOf('data:image/') >= 0) this.newMeta[id][cid].thumb_data = data
                 else this.newMeta[id][cid].thumb_data = string
             }).catch(e => {
                 this.newMeta[id][cid].thumb_data = string
@@ -768,7 +766,7 @@ export default {
                         else if (a < b) return -1
                         else return 0
                     })
-                    for(var i = 0; i < filesNames.length; i++){
+                    for (var i = 0; i < filesNames.length; i++) {
                         this.newMeta[id][filesNames[i]] = {
                             name: '',
                             type: '',
@@ -779,20 +777,20 @@ export default {
                             license: '',
                             labels: '',
                         }
-                        
+
                         links += `![File ${i + 1}](https://ipfs.dlux.io/ipfs/${filesNames[i]})\n`
                     }
                 } else {
                     if (this.contract[id].m.indexOf('"') >= 0) this.contract[id].m = JSON.parse(this.contract[id].m)
                     var encData = this.contract[id].m.split(',')[0] || ''
-                    var renew  = this.Base64toNumber(encData[0] || '0') & 1 ? true : false
+                    var renew = this.Base64toNumber(encData[0] || '0') & 1 ? true : false
                     var encAccounts = []
                     var encrypted = false
-                    if(encData){
+                    if (encData) {
                         encData = encData.split('#')
                         renew = this.Base64toNumber(encData.shift()) & 1 ? true : false
-                        if(encData.length){
-                            encData = '#' + encData.join('#') 
+                        if (encData.length) {
+                            encData = '#' + encData.join('#')
                             encAccounts = encData.split(';')
                             encrypted = true
                         }
@@ -816,7 +814,7 @@ export default {
                             done: true,
                         }
                     }
-                    
+
                     var filesNames = this.contract[id]?.df ? Object.keys(this.contract[id].df) : []
                     filesNames = filesNames.sort((a, b) => {
                         if (a > b) return 1
@@ -824,7 +822,7 @@ export default {
                         else return 0
                     })
                     const slots = this.contract[id].m.split(",")
-                    for(var i = 0; i < filesNames.length; i++){
+                    for (var i = 0; i < filesNames.length; i++) {
                         const flags = slots[i * 4 + 4]
                         this.newMeta[id][filesNames[i]] = {
                             name: slots[i * 4 + 1],
@@ -835,12 +833,12 @@ export default {
                             license: flags.indexOf('-') >= 0 ? flags.split('-')[1] : '',
                             labels: flags.indexOf('-') >= 0 ? flags.split('-')[2] : flags.slice(1),
                         }
-                        if(this.newMeta[id][filesNames[i]].thumb)this.getImgData(id, filesNames[i])
-                        if(this.Base64toNumber(this.newMeta[id][filesNames[i]].flags) & 1) this.newMeta[id][filesNames[i]].encrypted = true
+                        if (this.newMeta[id][filesNames[i]].thumb) this.getImgData(id, filesNames[i])
+                        if (this.Base64toNumber(this.newMeta[id][filesNames[i]].flags) & 1) this.newMeta[id][filesNames[i]].encrypted = true
                         else this.newMeta[id][filesNames[i]].encrypted = false
-                        if(this.Base64toNumber(this.newMeta[id][filesNames[i]].flags) & 2) this.newMeta[id][filesNames[i]].is_thumb = true
+                        if (this.Base64toNumber(this.newMeta[id][filesNames[i]].flags) & 2) this.newMeta[id][filesNames[i]].is_thumb = true
                         else this.newMeta[id][filesNames[i]].is_thumb = false
-                        if(this.Base64toNumber(this.newMeta[id][filesNames[i]].flags) & 4) this.newMeta[id][filesNames[i]].nsfw = true
+                        if (this.Base64toNumber(this.newMeta[id][filesNames[i]].flags) & 4) this.newMeta[id][filesNames[i]].nsfw = true
                         else this.newMeta[id][filesNames[i]].nsfw = false
                         var ll = "", lc = "", l = this.newMeta[id][filesNames[i]].labels
                         for (var k = 0; k < l.length; k++) {
@@ -849,24 +847,26 @@ export default {
                                 else ll += l[k]
                             }
                         }
-                        const f = {
-                                    i: id,
-                                    f: filesNames[i],
-                                    c: id.split(':')[2].split('-')[0],
-                                    e: this.contract[id].e.split(':')[0],
-                                    n: this.newMeta[id][filesNames[i]].name || keys[j],
-                                    y: this.newMeta[id][filesNames[i]].type || keys[j],
-                                    index: i,
-                                    lf: this.newMeta[id][filesNames[i]].flags || 0,
-                                    l: this.newMeta[id][filesNames[i]].labels,
-                                    lc,
-                                    ll,
-                                    lic: this.newMeta[id][filesNames[i]].license,
-                                    t: this.newMeta[id][filesNames[i]].thumb || '',
-                                    s: this.contract[id].df[filesNames[i]],
-                                    p: false
-                                }
-                        this.files[f.f] = f
+                        if (!this.newMeta[id][filesNames[i]].is_thumb) {
+                            const f = {
+                                i: id,
+                                f: filesNames[i],
+                                c: id.split(':')[2].split('-')[0],
+                                e: this.contract[id].e.split(':')[0],
+                                n: this.newMeta[id][filesNames[i]].name || keys[j],
+                                y: this.newMeta[id][filesNames[i]].type || keys[j],
+                                index: i,
+                                lf: this.newMeta[id][filesNames[i]].flags || 0,
+                                l: this.newMeta[id][filesNames[i]].labels,
+                                lc,
+                                ll,
+                                lic: this.newMeta[id][filesNames[i]].license,
+                                t: this.newMeta[id][filesNames[i]].thumb || '',
+                                s: this.contract[id].df[filesNames[i]],
+                                p: false
+                            }
+                            this.files[f.f] = f
+                        }
                     }
                 }
                 // var keys = Object.keys(this.contract[id].df)
