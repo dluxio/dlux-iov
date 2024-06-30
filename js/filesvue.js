@@ -649,7 +649,8 @@ export default {
         },
         labelsDecode(flags = "", only = -1) {
             var arr = []
-            const len = only >= 0 ? 0 : flags.length
+            if(flags.length == 0) return arr
+            const len = only >= 0 ? 1 : flags.length
             for (var i = (only >= 0 ? only : 0); i < len; i++) {
                 arr.push(this.labels[flags[i]])
             }
