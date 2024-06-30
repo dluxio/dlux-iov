@@ -518,7 +518,7 @@ export default {
                                                                                 </div>
                                                                                 <div v-for="(size, cid, index) in contract.df">
                                                                                     <div v-if="newMeta[contract.i][cid].is_thumb" class="mt-2 rounded bg-dark p-2">
-                                                                                        {{newMeta[contract.i][cid].name}}.{{newMeta[contract.i][cid].type}}:{{cid}}
+                                                                                        Thumb: {{getdelimed(newMeta[contract.i][cid].name, 'thumb', 1)}}.{{newMeta[contract.i][cid].type}} - {{cid}} - {{fancyBytes(size)}}
                                                                                     </div>
                                                                                 </div>
                                                                                 <!-- encrypted sharing  -->
