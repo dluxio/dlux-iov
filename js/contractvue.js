@@ -515,12 +515,12 @@ export default {
                                                                                             <button v-if="contract.c > 1 && metaMismatch(contract.i) && !newMeta[contract.i].contract.encrypted" class="btn btn-lg btn-outline-warning mx-auto my-2" type="button" @click="update_meta(contract.i)"><i class="fa-solid fa-floppy-disk fa-fw me-2"></i>Save Metadata</button>
                                                                                         </div>
                                                                                     </div>
-
-                                                                                        
-                                                                                
-                                                                                    
                                                                                 </div>
-
+                                                                                <div v-for="(size, cid, index) in contract.df">
+                                                                                    <div v-if="newMeta[contract.i][cid].is_thumb" class="mt-2 rounded bg-dark p-2">
+                                                                                        {{newMeta[contract.i][cid].name}}.{{newMeta[contract.i][cid].type}}:{{cid}}
+                                                                                    </div>
+                                                                                </div>
                                                                                 <!-- encrypted sharing  -->
                                                                                 <div v-if="contract.c > 1 && newMeta[contract.i].contract.encrypted" class="mt-3">
                                                                                     
