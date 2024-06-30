@@ -834,11 +834,11 @@ export default {
                             labels: flags.indexOf('-') >= 0 ? flags.split('-')[2] : flags.slice(1),
                         }
                         if (this.newMeta[id][filesNames[i]].thumb) this.getImgData(id, filesNames[i])
-                        if (this.Base64toNumber(this.newMeta[id][filesNames[i]].flags) & 1) this.newMeta[id][filesNames[i]].encrypted = true
+                        if (this.newMeta[id][filesNames[i]].flags & 1) this.newMeta[id][filesNames[i]].encrypted = true
                         else this.newMeta[id][filesNames[i]].encrypted = false
-                        if (this.Base64toNumber(this.newMeta[id][filesNames[i]].flags) & 2) this.newMeta[id][filesNames[i]].is_thumb = true
+                        if (this.newMeta[id][filesNames[i]].flags & 2) this.newMeta[id][filesNames[i]].is_thumb = true
                         else this.newMeta[id][filesNames[i]].is_thumb = false
-                        if (this.Base64toNumber(this.newMeta[id][filesNames[i]].flags) & 4) this.newMeta[id][filesNames[i]].nsfw = true
+                        if (this.newMeta[id][filesNames[i]].flags & 4) this.newMeta[id][filesNames[i]].nsfw = true
                         else this.newMeta[id][filesNames[i]].nsfw = false
                         var ll = "", lc = "", l = this.newMeta[id][filesNames[i]].labels
                         for (var k = 0; k < l.length; k++) {
