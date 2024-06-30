@@ -276,6 +276,9 @@ export default {
                                         </pop-vue>
                                     </div>
                                 </div>
+                                <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa" :id="'popper-Lic' + file.i + file.index + file.lic" :title="lic.l" trigger="hover">    
+                                    <i :class="lic.fa"></i>
+                                </pop-vue> 
                             </div>
                         </td>
                         <td class="col-1">{{fancyBytes(file.s)}}</td>
@@ -399,7 +402,9 @@ export default {
                     </div>
                     
                     <div class="d-flex align-items-center justify-content-center text-break small text-muted">
-                                {{fancyBytes(file.s)}}
+                                {{fancyBytes(file.s)}}<pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa" :id="'popper-Lic' + file.i + file.index + file.lic" :title="lic.l" trigger="hover">    
+                            <i :class="lic.fa"></i>
+                        </pop-vue>
                         </div>
                     
                 </div>
@@ -524,8 +529,37 @@ export default {
                 ["z"]: { fa: "fa-solid fa-comments fa-fw", l: "Feedback", c: 0 },
                 ["+"]: { fa: "fa-solid fa-square-poll-vertical fa-fw", l: "Surveys", c: 0 },
                 ["="]: { fa: "fa-solid fa-user-secret fa-fw", l: "Classified", c: 0 }
+            },
+            licenses: {
+                ["1"]: {
+                    fa: [{ fa: "fa-brands fa-creative-commons", l: "Creative Commons License"},{ fa: "fa-brands fa-creative-commons-by", l: "Attribution Required"}],
+                    name: "CC BY",
+                },
+                ["2"]: {
+                    fa: [{ fa: "fa-brands fa-creative-commons", l: "Creative Commons License"},{ fa: "fa-brands fa-creative-commons-by", l: "Attribution Required"},{ fa: "fa-brands fa-creative-commons-sa", l: "Share Alike"}],
+                    name: "CC BY-SA",
+                },
+                ["3"]: {
+                    fa: [{ fa: "fa-brands fa-creative-commons", l: "Creative Commons License"},{ fa: "fa-brands fa-creative-commons-by", l: "Attribution Required"},{ fa: "fa-brands fa-creative-commons-nd", l: "No Derivatives"}],
+                    name: "CC BY-ND",
+                },
+                ["4"]: {
+                    fa: [{ fa: "fa-brands fa-creative-commons", l: "Creative Commons License"},{ fa: "fa-brands fa-creative-commons-by", l: "Attribution Required"},{ fa: "fa-brands fa-creative-commons-nc", l: "Non-Commerical"},{ fa: "fa-brands fa-creative-commons-nd", l: "No Derivatives"}],
+                    name: "CC BY-NC-ND",
+                },
+                ["5"]: {
+                    fa: [{ fa: "fa-brands fa-creative-commons", l: "Creative Commons License"},{ fa: "fa-brands fa-creative-commons0-by", l: "Attribution Required"},{ fa: "fa-brands fa-creative-commons-nc", l: "Non-Commerical"}],
+                    name: "CC BY-NC",
+                },
+                ["6"]: {
+                    fa: [{ fa: "fa-brands fa-creative-commons", l: "Creative Commons License"},{ fa: "fa-brands fa-creative-commons-by", l: "Attribution Required"},{ fa: "fa-brands fa-creative-commons-nc", l: "Non-Commerical"},{ fa: "fa-brands fa-creative-commons-sa", l: "Share Alike"}],
+                    name: "CC BY-NC-SA",
+                },
+                ["7"]: {
+                    fa: [{ fa: "fa-brands fa-creative-commons-zero", l: "CC0", c: 1 }],
+                    name: "CC0",
+                },
             }
-
         };
     },
     emits: ["addassets"],
@@ -649,7 +683,7 @@ export default {
         },
         labelsDecode(flags = "", only = -1) {
             var arr = []
-            if(flags.length == 0) return arr
+            if (flags.length == 0) return arr
             const len = only >= 0 ? 1 : flags.length
             for (var i = (only >= 0 ? only : 0); i < len; i++) {
                 arr.push(this.labels[flags[i]])

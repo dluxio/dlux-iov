@@ -95,7 +95,7 @@ export default {
       license: [
       {
         value: "1",
-        label: 'CC BY',
+        label: '<i class="fa-brands fa-creative-commons"></i><i class="fa-brands fa-creative-commons-by"></i>CC BY',
         selected: false,
         disabled: false,
         customProperties: {
@@ -104,7 +104,7 @@ export default {
         },
       }, {
         value: "2",
-        label: 'CC BY-SA',
+        label: '<i class="fa-brands fa-creative-commons"></i><i class="fa-brands fa-creative-commons-by"></i><i class="fa-brands fa-creative-commons-sa"></i>CC BY-SA',
         selected: false,
         disabled: false,
         customProperties: {
@@ -113,7 +113,7 @@ export default {
         },
       }, {
         value: "3",
-        label: 'CC BY-ND',
+        label: '<i class="fa-brands fa-creative-commons"></i><i class="fa-brands fa-creative-commons-by"></i><i class="fa-brands fa-creative-commons-nd"></i>CC BY-ND',
         selected: false,
         disabled: false,
         customProperties: {
@@ -122,7 +122,7 @@ export default {
         },
       }, {
         value: "4",
-        label: 'CC BY-NC-ND',
+        label: '<i class="fa-brands fa-creative-commons"></i><i class="fa-brands fa-creative-commons-by"></i><i class="fa-brands fa-creative-commons-nc"></i><i class="fa-brands fa-creative-commons-nd"></i>CC BY-NC-ND',
         selected: false,
         disabled: false,
         customProperties: {
@@ -131,7 +131,7 @@ export default {
         }
       }, {
           value: "5",
-          label: 'CC BY-NC',
+          label: '<i class="fa-brands fa-creative-commons"></i><i class="fa-brands fa-creative-commons-by"></i><i class="fa-brands fa-creative-commons-nc"></i>CC BY-NC',
           selected: false,
           disabled: false,
           customProperties: {
@@ -140,7 +140,7 @@ export default {
           },
         }, {
           value: "6",
-          label: 'CC BY-NC-SA',
+          label: '<i class="fa-brands fa-creative-commons"></i><i class="fa-brands fa-creative-commons-by"></i><i class="fa-brands fa-creative-commons-nc"></i><i class="fa-brands fa-creative-commons-sa"></i>CC BY-NC-SA',
           selected: false,
           disabled: false,
           customProperties: {
@@ -149,11 +149,11 @@ export default {
           },
         },{
           value: "7",
-          label: 'CC0',
+          label: '<i class="fa-brands fa-creative-commons-zero"></i>CC0',
           selected: false,
           disabled: false,
           customProperties: {
-            description: 'CC0: Immediately enters public domain',
+            description: 'CC0: Public Domain Grant',
             link: 'https://creativecommons.org/publicdomain/zero/1.0/'
           },
         },
