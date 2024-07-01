@@ -1055,8 +1055,8 @@ export default {
                     if (this.contractIDs[contract].encryption.accounts[acc].enc_key) enc_string += `${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`
                 }
                 //remove last ;
-                enc_string = enc_string.slice(0, -1)
-                this.newMeta[contract].contract.enc_string = `${this.newMeta[contract].contract.autoRenew ? '1' : '0' }${enc_string}`
+                enc_string = `${this.newMeta[contract].contract.autoRenew ? '1' : '0' }${enc_string.slice(0, -1)}`
+                this.newMeta[contract].contract.enc_string = enc_string
                 var cids = Object.keys(this.newMeta[contract])
                 cids = cids.sort((a, b) => {
                     if (a > b) return 1
