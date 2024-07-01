@@ -84,7 +84,7 @@ export default {
                 <div class="pb-1 mb-2 border-bottom border-2 border-light">
                     <div class="mx-1 mx-lg-3 d-flex flex-wrap justify-content-center align-items-center">
                         <h2 class="my-1 fw-light text-start">{{title}}</h2>
-                        <h6 class="my-1 fw-light text-start">{{fancyBytes(usedBytes) / fancyBytes(availableBytes)}}</h6>
+                        <h6 class="my-1 fw-light text-start">{{fancyBytes(usedBytes)}}/{{fancyBytes(availableBytes)}}</h6>
                         <div class="d-flex flex-wrap flex-grow-1 ms-2">
                             <!-- tools 1 -->
                             <div class="d-flex mb-1 flex-wrap ms-auto order-lg-last">
@@ -1252,6 +1252,7 @@ export default {
                                 })
                                 const slots = data.file_contracts[node].m.split(",")
                                 for(var i = 0; i < filesNames.length; i++){
+                                    this.usedBytes += data.file_contracts[node].df[filesNames[i]]
                                     const flags = slots[i * 4 + 4]
                                     this.newMeta[data.file_contracts[node].i][filesNames[i]] = {
                                         name: slots[i * 4 + 1],
@@ -1296,7 +1297,7 @@ export default {
                     this.saccountapi.spk += this.reward_spk();
                     if (!this.saccountapi.granted.t) this.saccountapi.granted.t = 0;
                     if (!this.saccountapi.granting.t) this.saccountapi.granting.t = 0;
-                    this.availableBytes = data.spk_power * 1000 * 1024
+                    this.availableBytes = data.spk_power * 1000 * 1024 * 6
                     this.spkval =
                         (data.balance +
                             data.gov +
