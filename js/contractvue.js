@@ -352,7 +352,7 @@ export default {
                                                                     
 
                                                                     <!-- post -->
-                                                                    <div v-if="account == contract.t && !postpage && contract.c == 2" class="mb-3 mx-1 mx-lg-5 p-sm-1 p-lg-2 rounded" style="background-color:rgba(0,0,0,0.3)">
+                                                                    <div v-if="spkapi.name == contract.t && !postpage && contract.c == 2" class="mb-3 mx-1 mx-lg-5 p-sm-1 p-lg-2 rounded" style="background-color:rgba(0,0,0,0.3)">
                                                                         <div class="d-flex flex-column">
                                                                             <div>
                                                                                 <div class="mx-auto ms-md-1 mt-2 lead fs-2">Post Details</div>
