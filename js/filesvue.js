@@ -368,9 +368,9 @@ export default {
                     
 
                     <div class="d-flex flex-column rounded p-1" style="background-color: rgba(0, 0, 0, 0.6);">
-
+    <!-- Edit Button -->
                         <div v-if="!(file.l.length || file.lf)" class="ms-auto me-auto text-muted">
-                            Edit
+                            
                         </div>
 
                         <div class="d-flex align-items-center justify-content-between">

@@ -860,7 +860,7 @@ export default {
       }
       else for (var i = 0; i < names.length; i++) {
         if (this.FileInfo[names[i]].enc_hash) {
-          meta[this.FileInfo[names[i]].enc_hash] = `,${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},,${this.FileInfo[names[i]].meta.flag + 1}-${this.FileInfo[names[i]].meta.license}-${this.FileInfo[names[i]].meta.labels}`
+          meta[this.FileInfo[names[i]].enc_hash] = `,${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},,${this.FileInfo[names[i]].meta.flag + 1}--${this.FileInfo[names[i]].meta.labels}`
           body += `,${this.FileInfo[names[i]].enc_hash}`
           cids.push(this.FileInfo[names[i]].enc_hash)
         }
