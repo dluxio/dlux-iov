@@ -84,6 +84,7 @@ export default {
                 <div class="pb-1 mb-2 border-bottom border-2 border-light">
                     <div class="mx-1 mx-lg-3 d-flex flex-wrap justify-content-center align-items-center">
                         <h2 class="my-1 fw-light text-start">{{title}}</h2>
+                        <h6 class="my-1 fw-light text-start">{{fancyBytes(usedBytes) / fancyBytes(availableBytes)}}</h6>
                         <div class="d-flex flex-wrap flex-grow-1 ms-2">
                             <!-- tools 1 -->
                             <div class="d-flex mb-1 flex-wrap ms-auto order-lg-last">
@@ -737,6 +738,8 @@ export default {
             lbalance: 0,
             lbargov: 0,
             spkval: 0,
+            usedBytes: 0,
+            availableBytes: 0,
             sstats: {},
             links: {},
             contractIDs: {},
@@ -1204,8 +1207,9 @@ export default {
                                         encrypted: false,
                                         license: '',
                                         labels: '',
+                                        size: data.file_contracts[node].df[filesNames[i]]
                                     }
-                                    
+                                    this.usedBytes += data.file_contracts[node].df[filesNames[i]]
                                     links += `![File ${i + 1}](https://ipfs.dlux.io/ipfs/${filesNames[i]})\n`
                                 }
                             } else {
@@ -1292,10 +1296,12 @@ export default {
                     this.saccountapi.spk += this.reward_spk();
                     if (!this.saccountapi.granted.t) this.saccountapi.granted.t = 0;
                     if (!this.saccountapi.granting.t) this.saccountapi.granting.t = 0;
+                    this.availableBytes = data.spk_power * 1000 * 1024
                     this.spkval =
                         (data.balance +
                             data.gov +
                             data.poweredUp +
+                            data.spk_power + 
                             this.saccountapi.granting.t +
                             data.claim +
                             data.spk) /
