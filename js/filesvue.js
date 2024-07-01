@@ -291,12 +291,12 @@ export default {
                                     <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank" class="w-100 btn btn-sm btn-info mb-1 mx-auto"><span class="d-flex align-items-center">URL<i class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
                                 </div>
                                 <!-- decrypt  -->
-                                <div v-if="newMeta[file.i][file.f].encrypted && !newMeta[file.i].contract.encryption.key">
+                                <div v-if="newMeta[file.i][file.f].encrypted && !contract[file.i].encryption.key">
                                     <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="decode(file.i)"><span class="d-flex align-items-center w-100">Decrypt<i class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
                                 </div>
                                 <!-- download enc -->
-                                <div v-if="newMeta[file.i][file.f].encrypted && newMeta[file.i].contract.encryption.key">
-                                    <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="download(file.i, file)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
+                                <div v-if="newMeta[file.i][file.f].encrypted && contract[file.i].encryption.key">
+                                    <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="downloadFile(file.f, file.i)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
                                 </div>
                                 <!-- add to post -->
                                 <div v-if="assets">
@@ -348,12 +348,12 @@ export default {
                                 <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank" class="w-100 btn btn-sm btn-info mb-1 mx-auto"><span class="d-flex align-items-center">URL<i class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
                             </div>
                             <!-- decrypt  -->
-                            <div v-if="newMeta[file.i][file.f].encrypted && !newMeta[file.i].contract.encryption.key">
+                            <div v-if="newMeta[file.i][file.f].encrypted && !contract[file.i].encryption.key">
                                 <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="decode(file.i)"><span class="d-flex align-items-center w-100">Decrypt<i class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
                             </div>
                             <!-- download enc -->
-                            <div v-if="newMeta[file.i][file.f].encrypted && newMeta[file.i].contract.encryption.key">
-                                <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="download(file.i, file)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
+                            <div v-if="newMeta[file.i][file.f].encrypted && contract[file.i].encryption.key">
+                                <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="downloadFile(file.f, file.i)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
                             </div>
                             <!-- add to post -->
                             <div v-if="assets">
@@ -616,6 +616,43 @@ export default {
                     });
             }
         },
+        downloadFile(cid, id) {
+            fetch(`https://ipfs.dlux.io/ipfs/${cid}`)
+                .then((response) => response.text())
+                .then((blob) => {
+
+                    const name = this.newMeta[id][cid].name + '.' + this.newMeta[id][cid].type || 'file'
+                    if (this.contract[id].encryption.key) {
+                        blob = this.AESDecrypt(blob, this.contract[id].encryption.key);
+                        var byteString = atob(blob.split(',')[1])
+                        var mimeString = blob.split(',')[0].split(':')[1].split(';')[0];
+                        var ab = new ArrayBuffer(byteString.length);
+                        var ia = new Uint8Array(ab);
+                        for (var i = 0; i < byteString.length; i++) {
+                            ia[i] = byteString.charCodeAt(i);
+                        }
+                        blob = new Blob([ab], { type: mimeString });
+                    }
+                    try {
+                        var url = window.URL.createObjectURL(blob);
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = name;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    } catch (e) {
+                        var url = window.URL.createObjectURL(response);
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = name;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    }
+
+                });
+        },
         smartIcon(flags = "") {
             if (!flags[0]) return 'fa-solid fa-file'
             const flag = this.flagDecode(flags[0])
@@ -821,6 +858,7 @@ export default {
                     var encData = this.contract[id].m.split(',')[0] || ''
                     var renew = this.Base64toNumber(encData[0] || '0') & 1 ? true : false
                     var encAccounts = []
+                    var accounts = {}
                     var encrypted = false
                     if (encData) {
                         encData = encData.split('#')
@@ -847,7 +885,6 @@ export default {
                         this.contract[id].encryption.accounts[encA] = {
                             enc_key: `#${encAccounts[i].split('@')[0].split('#')[1]}`,
                             key: '',
-                            done: true,
                         }
                     }
 
