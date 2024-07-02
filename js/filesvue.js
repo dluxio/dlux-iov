@@ -685,7 +685,6 @@ export default {
                                     else this.newMeta[data.file_contracts[node].i][filesNames[i]].is_thumb = false
                                     if(this.Base64toNumber(this.newMeta[data.file_contracts[node].i][filesNames[i]].flags) & 4) this.newMeta[data.file_contracts[node].i][filesNames[i]].nsfw = true
                                     else this.newMeta[data.file_contracts[node].i][filesNames[i]].nsfw = false
-                                    links += `![${this.newMeta[data.file_contracts[node].i][filesNames[i]].name}](https://ipfs.dlux.io/ipfs/${filesNames[i]})\n`
                                 }
                             }
                             this.contractIDs[newUser] = {}
