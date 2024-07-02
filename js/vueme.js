@@ -2983,7 +2983,10 @@ function buyNFT(setname, uid, price, type, callback){
       )
         .then((response) => response.json())
         .then((data) => {
-          try {
+          if(data?.status?.error_code == 429){
+            const data = localStorage.getItem("hiveprice") || '{"hive": {"usd": 0}}';
+            this.hiveprice = JSON.parse(data);
+          } else try {
             this.hiveprice = data;
             console.log(JSON.stringify(data))
             localStorage.setItem("hiveprice", JSON.stringify(data));
@@ -3001,7 +3004,10 @@ function buyNFT(setname, uid, price, type, callback){
       )
         .then((response) => response.json())
         .then((data) => {
-          try {
+          if(data?.status?.error_code == 429){
+            const data = localStorage.getItem("hbdprice") || '{"hive_dollar": {"usd": 0}}';
+            this.hbdprice = JSON.parse(data);
+          } else try {
             this.hbdprice = data;
             localStorage.setItem("hbdprice", JSON.stringify(data));
           } catch (e) {
