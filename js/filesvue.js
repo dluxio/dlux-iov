@@ -470,6 +470,7 @@ export default {
             filesArray: [],
             filterFlags: 0,
             filterLabels: "",
+            postBodyAdder: {},
             filesSelect: {
                 sort: "time",
                 dir: "dec",
