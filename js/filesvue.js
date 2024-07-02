@@ -17,7 +17,7 @@ export default {
                             class="fa-solid fa-at fa-fw"></i></span>
                     <input 
                         class="ps-4 form-control border-white" type="search"
-                        placeholder="username" @appendUserFiles() v-model="newUser">
+                        placeholder="username" @enter="appendUserFiles()" v-model="newUser">
                 </div>
             </div>
 
