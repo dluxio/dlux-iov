@@ -15,9 +15,9 @@ export default {
                 <div class="position-relative flex-grow-1">
                     <span class="position-absolute top-50 translate-middle-y ps-2"><i
                             class="fa-solid fa-at fa-fw"></i></span>
-                    <input @keyup="render()" @change="render()" @search="render()"
+                    <input 
                         class="ps-4 form-control border-white" type="search"
-                        placeholder="username" v-model="filesSelect.search">
+                        placeholder="username" @appendUserFiles() v-model="newUser">
                 </div>
             </div>
 
@@ -465,6 +465,8 @@ export default {
         return {
             files: {},
             owners: [],
+            contractIDs: {},
+            newUser: '',
             filesArray: [],
             filterFlags: 0,
             filterLabels: "",
@@ -472,6 +474,7 @@ export default {
                 sort: "time",
                 dir: "dec",
                 search: "",
+                addusers: {},
             },
             contract: {},
             viewOpts: {
@@ -582,6 +585,128 @@ export default {
     methods: {
         addAsset(id, contract) {
             this.$emit("addassets", { id, contract });
+        },
+        appendUserFiles(){
+            const newUser = this.newUser
+            this.newUser = ''
+            this.filesSelect.addusers[newUser] = true
+            fetch(this.sapi + "/@" + user)
+                .then((response) => response.json())
+                .then((data) => {
+                        for (var node in data.file_contracts) {
+                            data.file_contracts[node].encryption = {
+                                input: "",
+                                key: "",
+                                accounts: {},
+                            }
+                            if (!data.file_contracts[node].m) {
+                                data.file_contracts[node].autoRenew = false
+                                data.file_contracts[node].m = ""
+                                this.newMeta[data.file_contracts[node].i] = {
+                                    contract: {
+                                        autoRenew: false,
+                                        encrypted: false,
+                                        m: "",
+                                    }
+                                }
+                                var filesNames = data.file_contracts[node]?.df ? Object.keys(data.file_contracts[node].df) : []
+                                filesNames = filesNames.sort((a, b) => {
+                                    if (a > b) return 1
+                                    else if (a < b) return -1
+                                    else return 0
+                                })
+                                for(var i = 0; i < filesNames.length; i++){
+                                    this.newMeta[data.file_contracts[node].i][filesNames[i]] = {
+                                        name: '',
+                                        type: '',
+                                        thumb: '',
+                                        flags: '',
+                                        is_thumb: false,
+                                        encrypted: false,
+                                        license: '',
+                                        labels: '',
+                                        size: data.file_contracts[node].df[filesNames[i]]
+                                    }
+                                }
+                            } else {
+                                if (data.file_contracts[node].m.indexOf('"') >= 0) data.file_contracts[node].m = JSON.parse(data.file_contracts[node].m)
+                                var encData = data.file_contracts[node].m.split(',')[0] || ''
+                                var renew  = this.Base64toNumber(encData[0] || '0') & 1 ? true : false
+                                var encAccounts = []
+                                var encrypted = false
+                                if(encData){
+                                    encData = encData.split('#')
+                                    renew = this.Base64toNumber(encData.shift()) & 1 ? true : false
+                                    if(encData.length){
+                                        encData = '#' + encData.join('#') 
+                                        encAccounts = encData.split(';')
+                                        encrypted = true
+                                    }
+                                }
+                                this.newMeta[data.file_contracts[node].i] = {
+                                    contract: {
+                                        autoRenew: renew,
+                                        encrypted,
+                                        m: data.file_contracts[node].m,
+                                    }
+                                }
+                                for (var i = 0; i < encAccounts.length; i++) {
+                                    const encA = encAccounts[i].split('@')[1]
+                                    data.file_contracts[node].autoRenew = renew
+                                    data.file_contracts[node].encryption.accounts[encA] = {
+                                        enc_key: `#${encAccounts[i].split('@')[0].split('#')[1]}`,
+                                        key: '',
+                                        done: true,
+                                    }
+                                }
+                                
+                                var filesNames = data.file_contracts[node]?.df ? Object.keys(data.file_contracts[node].df) : []
+                                filesNames = filesNames.sort((a, b) => {
+                                    if (a > b) return 1
+                                    else if (a < b) return -1
+                                    else return 0
+                                })
+                                const slots = data.file_contracts[node].m.split(",")
+                                for(var i = 0; i < filesNames.length; i++){
+                                    const flags = slots[i * 4 + 4]
+                                    this.newMeta[data.file_contracts[node].i][filesNames[i]] = {
+                                        name: slots[i * 4 + 1],
+                                        type: slots[i * 4 + 2],
+                                        thumb: slots[i * 4 + 3],
+                                        thumb_data: slots[i * 4 + 3],
+                                        flags: flags.indexOf('-') >= 0 ? flags.split('-')[0] : flags[0],
+                                        license: flags.indexOf('-') >= 0 ? flags.split('-')[1] : '',
+                                        labels: flags.indexOf('-') >= 0 ? flags.split('-')[2] : flags.slice(1),
+                                    }
+                                    if(this.newMeta[data.file_contracts[node].i][filesNames[i]].thumb)this.getImgData(data.file_contracts[node].i, filesNames[i])
+                                    if(this.Base64toNumber(this.newMeta[data.file_contracts[node].i][filesNames[i]].flags) & 1) this.newMeta[data.file_contracts[node].i][filesNames[i]].encrypted = true
+                                    else this.newMeta[data.file_contracts[node].i][filesNames[i]].encrypted = false
+                                    if(this.Base64toNumber(this.newMeta[data.file_contracts[node].i][filesNames[i]].flags) & 2) this.newMeta[data.file_contracts[node].i][filesNames[i]].is_thumb = true
+                                    else this.newMeta[data.file_contracts[node].i][filesNames[i]].is_thumb = false
+                                    if(this.Base64toNumber(this.newMeta[data.file_contracts[node].i][filesNames[i]].flags) & 4) this.newMeta[data.file_contracts[node].i][filesNames[i]].nsfw = true
+                                    else this.newMeta[data.file_contracts[node].i][filesNames[i]].nsfw = false
+                                    links += `![${this.newMeta[data.file_contracts[node].i][filesNames[i]].name}](https://ipfs.dlux.io/ipfs/${filesNames[i]})\n`
+                                }
+                            }
+                            this.contractIDs[newUser] = {}
+                            this.contractIDs[newUser][data.file_contracts[node].i] = data.file_contracts[node];
+
+                            this.contractIDs[newUser][data.file_contracts[node].i].index = this.contracts.length - 1;
+                            this.postBodyAdder[data.file_contracts[node].i] = {}
+
+                        }
+                        for (var user in data.channels) {
+                            for (var node in data.channels[user]) {
+                                if (this.contractIDs[newUser][data.channels[user][node].i]) continue
+                                else {
+                                    this.contractIDs[newUser][data.channels[user][node].i] = data.channels[user][node];
+                                    this.contractIDs[newUser][data.channels[user][node].i].index = this.contracts.length - 1;
+                                }
+                            }
+                        }
+                        this.init()
+                    
+                });
         },
         AESDecrypt(encryptedMessage, key) {
             const bytes = CryptoJS.AES.decrypt(encryptedMessage, key);
@@ -834,11 +959,17 @@ export default {
             })
         },
         init() {
-            for (var i in this.contracts) {
-                if (this.contracts[i].c == 1) continue
-                const id = this.contracts[i].i
-                this.contract[id] = this.contracts[i];
-                this.owners.push(this.contracts[i].t)
+            var contracts = this.contracts
+            for (var user in this.filesSelect.addusers) {
+                for (var id in this.contractIDs[user]) {
+                    contracts.push(this.contractIDs[user][id])
+                }
+            }
+            for (var i in contracts) {
+                if (contracts[i].c == 1) continue
+                const id = contracts[i].i
+                this.contract[id] = contracts[i];
+                this.owners.push(contracts[i].t)
                 if (!this.contract[id].m) {
                     this.contract[id].autoRenew = false
                     this.contract[id].m = ""

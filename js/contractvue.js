@@ -74,7 +74,7 @@ export default {
                 
                 <!-- has files -->
                 <div v-if="!hasFiles" class="d-flex flex-wrap justify-content-center">
-                        <files-vue :assets="assets" @addassets="addAssets($event)" :account="spkapi.name" :current="saccountapi.head_block"
+                        <files-vue :assets="assets" @addassets="addAssets($event)" :account="spkapi.name" :current="saccountapi.head_block" :cc="true"
                             :contracts="contracts"></files-vue>
                    
                 </div>
@@ -100,7 +100,7 @@ export default {
                 <!-- has files -->
                 <div v-if="!hasFiles" class="d-flex flex-wrap justify-content-center">
                     
-                        <files-vue :assets="assets && cc" @addassets="addAssets($event)" :account="spkapi.name" :current="saccountapi.head_block" :cc="true"
+                        <files-vue :assets="assets && cc" @addassets="addAssets($event)" :account="spkapi.name" :current="saccountapi.head_block"
                             :contracts="contracts"></files-vue>
                    
                 </div>
