@@ -9,15 +9,28 @@ export default {
     template: `
 <div class="d-flex flex-grow-1 flex-column p-05 rounded m-05" style="background-color: rgba(0, 0, 0, 0.7);">
     <div class="pt-1">
+        <!-- USER INPUT -->
+            <div class="d-flex flex-column flex-grow-1 mb-2 mx-1">
+               <label class="fs-3 fw-light mb-1">See another user's <i class="fa-brands fa-creative-commons fa-fw"></i> and <i class="fa-brands fa-creative-commons-zero fa-fw"></i> files</label>
+                <div class="position-relative flex-grow-1">
+                    <span class="position-absolute top-50 translate-middle-y ps-2"><i
+                            class="fa-solid fa-at fa-fw"></i></span>
+                    <input @keyup="render()" @change="render()" @search="render()"
+                        class="ps-4 form-control border-white" type="search"
+                        placeholder="username" v-model="filesSelect.search">
+                </div>
+            </div>
+
         <!-- ACTION BAR -->
         <div class="d-flex flex-wrap align-items-center justify-content-center mx-1">
+            
             <!-- Search -->
             <div class="position-relative flex-grow-1 mb-1 me-1">
                 <span class="position-absolute top-50 translate-middle-y ps-2"><i
                         class="fa-solid fa-magnifying-glass fa-fw"></i></span>
                 <input @keyup="render()" @change="render()" @search="render()"
                     class="ps-4 form-control border-white" type="search"
-                    placeholder="Search names" v-model="filesSelect.search">
+                    placeholder="Search filename" v-model="filesSelect.search">
             </div>
 
             <!-- choices-js-->
@@ -66,11 +79,11 @@ export default {
                     <li><hr class="dropdown-divider"></li>
                     <li>
                         <a @click="filesSelect.dir='dec';filesSelect.sort='name';render()"
-                            class="dropdown-item d-flex align-items-center" role="button"><i class="fa-solid fa-tag fa-fw me-1"></i>Name<i class="fa-solid fa-caret-up fa-fw ms-auto"></i></a>
+                            class="dropdown-item d-flex align-items-center" role="button"><i class="fa-solid fa-file fa-fw me-1"></i>Name<i class="fa-solid fa-caret-up fa-fw ms-auto"></i></a>
                     </li>
                     <li>
                         <a @click="filesSelect.dir='asc';filesSelect.sort='name';render()"
-                            class="dropdown-item d-flex align-items-center" role="button"><i class="fa-solid fa-tag fa-fw me-1"></i>Name<i class="fa-solid fa-caret-down fa-fw ms-auto"></i></a>
+                            class="dropdown-item d-flex align-items-center" role="button"><i class="fa-solid fa-file fa-fw me-1"></i>Name<i class="fa-solid fa-caret-down fa-fw ms-auto"></i></a>
                     </li>
                     <li><hr class="dropdown-divider"></li>
                     <li>

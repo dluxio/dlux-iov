@@ -46,12 +46,40 @@ export default {
                     aria-controls="contractstab" aria-expanded="true"><i class="fa-solid fa-list fa-fw"></i></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link " aria-current="page" href="#filesTab" role="tab" data-bs-toggle="tab"
+                <a class="nav-link" aria-current="page" href="#filesTab" role="tab" data-bs-toggle="tab"
                     aria-controls="filestab" aria-expanded="false"><i class="fa-solid fa-cloud fa-fw"></i></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="#ccTab" role="tab" data-bs-toggle="tab"
+                    aria-controls="cctab" aria-expanded="false"><i class="fa-brands fa-creative-commons fa-fw"></i></a>
             </li>
         </ul>
         <!-- tabs -->
         <div class="tab-content bg-color">
+
+            <!-- cc -->
+            <div role="tabpanel" class="tab-pane" id="ccTab" aria-labelledby="cctab">
+                 <!-- no files -->
+                <div v-if="hasFiles" class="ms-auto me-auto text-center">
+                    <div class="ms-auto me-auto card px-3 py-2 mt-3 mb-4 bg-darker" style="max-width: 600px">
+                        <h2 class="fw-light mt-1">No files found</h2>
+                        <p class="lead mb-1" v-if="!nodeview">
+                            Click <a class="btn btn-sm btn-primary no-decoration small" style="font-size: 0.6em;"
+                                role="button" data-bs-toggle="tab" href="#contractsTab"><i
+                                    class="fa-solid fa-list fa-fw me-1"></i>Contracts Tab
+                            </a> to upload files
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- has files -->
+                <div v-if="!hasFiles" class="d-flex flex-wrap justify-content-center">
+                        <files-vue :assets="assets" @addassets="addAssets($event)" :account="spkapi.name" :current="saccountapi.head_block"
+                            :contracts="contracts"></files-vue>
+                   
+                </div>
+            </div>
+        
             
             <!-- files -->
             <div role="tabpanel" class="tab-pane" id="filesTab" aria-labelledby="filestab">
