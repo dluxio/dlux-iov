@@ -590,7 +590,7 @@ export default {
             const newUser = this.newUser
             this.newUser = ''
             this.filesSelect.addusers[newUser] = true
-            fetch(this.sapi + "/@" + user)
+            fetch("https://spktest.dlux.io/@" + newUser)
                 .then((response) => response.json())
                 .then((data) => {
                         for (var node in data.file_contracts) {
