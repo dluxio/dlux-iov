@@ -39,7 +39,7 @@ export default {
     </div>
     <div class="d-flex flex-grow-1 p-1">
         <div class="d-flex flex-grow-1 flex-wrap align-items-stretch justify-content-around">
-            <div class="card mx-1" style="width: 18rem;">
+            <div class="card m-1" style="width: 18rem;">
                 <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-cloud me-1"></i><span>Display</span></div>
                 <div class="d-flex flex-column card-body px-2 py-1">
                     <ul class="nav nav-pills mx-auto my-2 fs-5 border border-light bg-dark rounded-pill">
@@ -58,7 +58,7 @@ export default {
                     </ul>
                 </div>
             </div>
-            <div class="card mx-1" style="width: 18rem;">
+            <div class="card m-1" style="width: 18rem;">
                 <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-chart-pie me-1"></i><span>Storage</span></div>
                 <div class="d-flex flex-column card-body px-2 py-1">
                     <div class="mb-1 fw-light text-center" style="font-size: 1.1rem !important;">{{fancyBytes(usedBytes)}} of {{fancyBytes(availableBytes)}} used</div>
@@ -68,7 +68,7 @@ export default {
                     <a href="#" class="text-center text-primary">Get more storage</a>
                 </div>
             </div>
-            <div class="card mx-1" style="width: 18rem;">
+            <div class="card m-1" style="width: 18rem;">
                 <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-atom me-1"></i><span>SPK</span></div>
                 <div class="card-body px-2 py-1">
                     <div class="d-flex flex-column">
@@ -85,7 +85,7 @@ export default {
                     </div>    
                 </div>
             </div>
-            <div class="card mx-1" style="width: 18rem;">
+            <div class="card m-1" style="width: 18rem;">
                 <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-file-circle-plus me-1"></i><span>Contracts</span></div>
                     <div class="card-body px-2 py-1">
                         <div class="d-flex flex-column">
