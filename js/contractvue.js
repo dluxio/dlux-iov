@@ -37,17 +37,30 @@ export default {
             </div>
         </div>
     </div>
-    <div class="p-1 d-flex align-items-center">
-        <div class="card" style="width: 18rem;">
-            <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-chart-pie me-1"></i><span>SPK Storage</span></div>
-            <div class="card-body px-2 py-1">
-                <div class="mb-1 fw-light text-center">{{fancyBytes(usedBytes)}} / {{fancyBytes(availableBytes)}}</div>
-                <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                    <div class="progress-bar" :style="'width:' + (usedBytes/availableBytes)*100 + '%;'"></div>
+    <div class="d-flex align-items-center p-1">
+        <div class="d-flex align-items-stretch">
+            <div class="card mx-1" style="width: 18rem;">
+                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-chart-pie me-1"></i><span>Storage</span></div>
+                <div class="d-flex flex-column card-body px-2 py-1">
+                    <div class="mb-1 fw-light text-center" style="font-size: 1.1rem !important;">{{fancyBytes(usedBytes)}} of {{fancyBytes(availableBytes)}} used</div>
+                    <div class="progress mb-1" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar" :style="'width:' + (usedBytes/availableBytes)*100 + '%;'"></div>
+                    </div>
+                    <a href="#" class="text-center text-primary">Get more storage</a>
+                </div>
+            </div>
+            <div class="card mx-1" style="width: 18rem;">
+                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-atom me-1"></i><span>SPK</span></div>
+                <div class="card-body px-2 py-1">
+                    <div class="d-flex flex-column">
+                        <div class="mb-1 fw-light d-flex" style="font-size: 1.1rem !important;">Balance: <span class="ms-auto">1 SPK</span></div>
+                        <div class="text-center"><button type="button" class="btn btn-sm btn-primary">Power Up</button></div>
+                        
+                    </div>    
                 </div>
             </div>
         </div>
-        <div class="">
+        <div class="ms-auto">
             <div class="d-flex flex-wrap flex-grow-1 ms-2">
                             <!-- tools 1 -->
                             <div class="d-flex mb-1 flex-wrap ms-auto order-lg-last">
