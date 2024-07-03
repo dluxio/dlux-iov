@@ -75,12 +75,12 @@ export default {
                         <div class="mb-1 fw-light d-flex" style="font-size: 1.1rem !important;">Balance: <span class="ms-auto">1 SPK</span></div>
                         <div class="d-flex justify-content-around mt-1">
                             <!-- spk wallet button -->
-                            <button v-if="!nodeview" type="button" class="btn btn-sm btn-dark border-warning text-warning d-flex" data-bs-toggle="modal" data-bs-target="#spkWalletModal">
+                            <button v-if="!nodeview" type="button" class="btn btn-sm btn-dark border-warning text-warning d-flex" data-bs-toggle="modal" data-bs-target="#spkWalletModal" style="width:110px;">
                                 <i class="fa-solid fa-wallet fa-fw me-1 my-auto"></i>
                                 <span class="my-auto">SPK</span>
                                 <span class="badge small text-bg-warning text-black ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
                             </button>
-                            <button type="button" class="btn btn-sm btn-dark border-success text-success"><i class="fa-solid fa-bolt fa-fw me-1"></i>Power Up</button> 
+                            <button type="button" class="btn btn-sm btn-dark border-success text-success" style="width:110px;"><i class="fa-solid fa-bolt fa-fw me-1"></i>Power Up</button> 
                         </div>
                     </div>    
                 </div>
@@ -93,7 +93,7 @@ export default {
                             <div class="d-flex justify-content-around mt-1">
                                 <!-- new contract button -->
                                 <button v-if="saccountapi.pubKey != 'NA' && saccountapi.spk_power" type="button"
-                                    class="btn btn-sm btn-dark border-primary text-primary">
+                                    class="btn btn-sm btn-dark border-primary text-primary" style="width:110px;">
                                     <modal-vue type="build" token="BROCA" :balance="broca_calc(saccountapi.broca)"
                                         :account="account" @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
                                         v-slot:trigger>
@@ -103,7 +103,7 @@ export default {
                                 </button>
                                 <!-- free button -->
                                 <button v-if="saccountapi.pubKey != 'NA'" type="button" class="btn btn-sm btn-dark border-danger text-danger"
-                                    data-bs-toggle="modal" data-bs-target="#sponsoredModal">
+                                    data-bs-toggle="modal" data-bs-target="#sponsoredModal" style="width:110px;">
                                     <span class=""></span><i class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE
                                 </button>  
                         </div>    
