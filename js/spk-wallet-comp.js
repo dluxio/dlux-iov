@@ -353,8 +353,8 @@ export default {
             </div>
             <!--claim larynx rewards-->
             <div class="d-flex align-items-center border-bottom border-secondary py-5"
-                id="larynxclaimrewards" v-if="saccountapi.claim > 0 && me">
-                <div>
+                id="larynxclaimrewards" v-if="(saccountapi.claim > 0 || saccountapi.claim_spk > 0  ) && me">
+                <div v-if="saccountapi.claim">
                     <div class="d-flex align-items-start">
                         <h4 class="m-0">LARYNX Rewards Claim
                         </h4>
@@ -364,8 +364,20 @@ export default {
                         SPK service
                         node.</p>
                 </div>
+                <div v-if="saccountapi.claim_spk">
+                    <div class="d-flex align-items-start">
+                        <h4 class="m-0">SPK Rewards Claim
+                        </h4>
+                    </div>
+                    <p class="text-white-50">Claimable rewards
+                        for running a
+                        SPK service
+                        node or delegating Larynx to them.</p>
+                </div>
                 <div id="claimlarynxrewardbtn" class="ms-auto text-end">
-                    <h5>{{formatNumber((saccountapi.claim)/1000, 3, '.', ',')}} LARYNX
+                    <h5 v-if="saccountapi.claim">{{formatNumber((saccountapi.claim)/1000, 3, '.', ',')}} LARYNX
+                    </h5>
+                    <h5 v-if="saccountapi.claim_spk">{{formatNumber((saccountapi.claim_spk)/1000, 3, '.', ',')}} SPK
                     </h5>
                     <div class="mb-2"> <span class="small" v-show="!spk2gov">50%
                             Liquid |
