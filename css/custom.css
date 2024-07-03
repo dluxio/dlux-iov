@@ -13242,6 +13242,10 @@ a-scene {
   color: #fb00ff;
 }
 
+.text-fusch:hover {
+  color: #fb00ff;
+}
+
 .border-fusch {
   border-color: #fb00ff !important;
 }

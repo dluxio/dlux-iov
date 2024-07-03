@@ -94,8 +94,25 @@ export default {
                 </div>
             </div>
             <div class="card m-1" style="width: 18rem;">
-                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-cloud me-1"></i><span>Display</span></div>
+                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-bolt me-1"></i><span>Power</span></div>
                 <div class="d-flex flex-column card-body px-2 py-1">
+                    <div class="mb-1 fw-light text-center" style="font-size: 1.1rem !important;">{{fancyBytes(usedBytes)}} of {{fancyBytes(availableBytes)}} used</div>
+                    <div class="progress mb-1" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar" :style="'width:' + (usedBytes/availableBytes)*100 + '%;'"></div>
+                    </div>
+                    <a href="#" class="text-center text-primary">Get more storage</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- tabs nav -->
+    <div v-if="saccountapi.pubKey != 'NA'" class="d-flex flex-column w-100">
+
+        <!-- top menu -->
+        <div class="pb-1 mb-2 border-bottom border-2 border-light">
+            <div class="mx-1 mx-lg-3 d-flex flex-wrap align-items-center">
+                <div class="mx-auto">
                     <ul class="nav nav-pills mx-auto my-2 fs-5 border border-light bg-dark rounded-pill">
                         <li class="nav-item">
                             <a class="nav-link active" href="#contractsTab" role="tab" data-bs-toggle="tab"
@@ -113,10 +130,6 @@ export default {
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- tabs nav -->
-    <div v-if="saccountapi.pubKey != 'NA'" class="d-flex flex-column w-100">
         
         <!-- tabs -->
         <div class="tab-content bg-color">
@@ -169,17 +182,12 @@ export default {
                    
                 </div>
             </div>
+
+            
             
             <!-- contracts -->
             <div role="tabpanel" class="tab-pane show active" id="contractsTab" aria-labelledby="contractstab">
-                <!-- top menu -->
-                <div class="pb-1 mb-2 border-bottom border-2 border-light">
-                    <div class="mx-1 mx-lg-3 d-flex flex-wrap align-items-center">
-                        <h2 class="my-1 fw-light text-start">Storage Contracts (#)</h2>
-                      
-                        
-                    </div>
-                </div>
+                
                 <div class="card-body p-0">
                     <!-- registered -->
                     <div v-if="saccountapi.pubKey != 'NA'">
