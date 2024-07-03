@@ -48,12 +48,12 @@ export default {
                         <div class="mb-1 fw-light d-flex" style="font-size: 1.1rem !important;">Balance: <span class="ms-auto">1 SPK</span></div>
                         <div class="d-flex justify-content-around mt-1">
                             <!-- spk wallet button -->
-                            <button v-if="!nodeview" type="button" class="btn btn-sm btn-dark border-warning text-warning d-flex" data-bs-toggle="modal" data-bs-target="#spkWalletModal" style="width:110px;">
+                            <button v-if="!nodeview" type="button" class="btn btn-sm btn-secondary d-flex justify-content-center" data-bs-toggle="modal" data-bs-target="#spkWalletModal" style="width:110px;">
                                 <i class="fa-solid fa-wallet fa-fw me-1 my-auto"></i>
                                 <span class="my-auto">SPK</span>
                                 <span class="badge small text-bg-warning text-black ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
                             </button>
-                            <button type="button" class="btn btn-sm btn-dark border-primary text-primary" style="width:110px;"><i class="fa-solid fa-bolt fa-fw me-1"></i>Power Up</button> 
+                            <button type="button" class="btn btn-sm btn-dark border-warning text-warning" style="width:110px;"><i class="fa-solid fa-bolt fa-fw me-1"></i>Power Up</button> 
                         </div>
                     </div>    
                 </div>
@@ -94,11 +94,12 @@ export default {
                 </div>
             </div>
             <div class="card m-1" style="width: 18rem;">
-                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-bolt me-1"></i><span>Power</span></div>
+                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-bolt me-1"></i>
+                <span class="d-flex align-items-center">Power</span></div>
                 <div class="d-flex flex-column card-body px-2 py-1">
-                    <div class="mb-1 fw-light text-center border rounded-pill border-light mx-auto px-1" style="font-size: 1rem !important;">{{saccountapi.spk_power/1000}}</div>
+                    <div class="mb-1 fw-light text-center " style="font-size: 1.1rem !important;">{{saccountapi.spk_power/1000}} SPK Power</div>
                     <div class="progress mb-1" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar" :style="'width:' + (broca_calc(saccountapi.broca)/broca_calc(saccountapi.broca))*100 + '%;'"></div>
+                        <div class="progress-bar" :style="'width:' + (broca_calc(saccountapi.broca)/(saccountapi.spk_power*1000))*100 + '%;'">{{ formatNumber((broca_calc(saccountapi.broca)/(saccountapi.spk_power*1000))*100,'2','.',',') }}%</div>
                     </div>
                     <a href="#" class="text-center text-primary">Get more storage</a>
                 </div>
@@ -113,7 +114,7 @@ export default {
         <div class="pb-1 mb-2 border-bottom border-2 border-light">
             <div class="mx-1 mx-lg-3 d-flex flex-wrap align-items-center">
                 <div class="mx-auto">
-                    <ul class="nav nav-pills mx-auto my-2 fs-5 border border-light bg-dark rounded-pill">
+                    <ul class="nav nav-pills mx-auto my-3 fs-5 border border-light bg-dark rounded-pill">
                         <li class="nav-item">
                             <a class="nav-link active" href="#contractsTab" role="tab" data-bs-toggle="tab"
                                 aria-controls="contractstab" aria-expanded="true">Contracts</a>
