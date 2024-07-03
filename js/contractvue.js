@@ -18,7 +18,7 @@ export default {
         "choices-vue": ChoicesVue
     },
     template: `
-    <div class="d-flex justify-content-center">
+    <div class="d-flex flex-column">
     <!-- register account -->
     <div v-if="saccountapi.pubKey == 'NA'" class="d-flex">
         <div class="d-flex justify-content-center p-3">
@@ -37,6 +37,15 @@ export default {
             </div>
         </div>
     </div>
+    <div class="p-1">
+        <div class="card" style="width: 18rem;">
+            <div class="my-1 fw-light text-center">{{fancyBytes(usedBytes)}}/{{fancyBytes(availableBytes)}}</div>
+            <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar" :style="'width:' + (usedBytes/availableBytes)*100 + '%;'"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- tabs nav -->
     <div v-if="saccountapi.pubKey != 'NA'" class="d-flex flex-column w-100">
         <ul class="nav nav-pills ms-auto me-auto mb-2">
@@ -112,7 +121,7 @@ export default {
                 <div class="pb-1 mb-2 border-bottom border-2 border-light">
                     <div class="mx-1 mx-lg-3 d-flex flex-wrap justify-content-center align-items-center">
                         <h2 class="my-1 fw-light text-start">{{title}}</h2>
-                        <h6 class="my-1 fw-light text-start">{{fancyBytes(usedBytes)}}/{{fancyBytes(availableBytes)}}</h6>
+                      
                         <div class="d-flex flex-wrap flex-grow-1 ms-2">
                             <!-- tools 1 -->
                             <div class="d-flex mb-1 flex-wrap ms-auto order-lg-last">
@@ -340,7 +349,7 @@ export default {
                                                         <!-- detail view -->
                                                         <tr class="collapse" :id="replace(contract.i)">
                                                             <td class="border-0 px-0 px-md-1" colspan="4">
-                                                                <div class="d-flex flex-column border border-white rounded text-start py-2" style="background-color:rgba(0,0,0,0.3);">
+                                                                <div class="d-flex flex-column border border-white rounded text-start py-2" style="background-color:rgba(255,255,255,0.2);">
 
                                                                     <!-- contract ID -->
                                                                     <div class="d-flex justify-content-center small text-white-50 mb-3">
