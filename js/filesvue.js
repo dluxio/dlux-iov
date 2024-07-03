@@ -103,10 +103,10 @@ export default {
             <h5 class="mb-0"> {{filesArray.length}} File{{filesArray.length == 1 ? '' : 's'}}</h5>
             <div class="ms-auto">
                 <div class="btn-group">
-                    <input type="radio" class="btn-check" name="smView" :id="'setSingle' + (cc ? 'cc' : '')" autocomplete="off" @click="viewOpts.list = true" :checked="viewOpts.list" />
+                    <input type="radio" class="btn-check" :name="'smView' + (cc ? 'cc' : '')" :id="'setSingle' + (cc ? 'cc' : '')" autocomplete="off" @click="viewOpts.list = true" :checked="viewOpts.list" />
                     <label class="btn btn-outline-warning" :for="'setSingle' + (cc ? 'cc' : '')"><i
                             class="fa-solid fa-table-list fa-fw"></i></label>
-                    <input type="radio" class="btn-check" name="smView" :id="'setDouble' + (cc ? 'cc' : '')" autocomplete="off" @click="viewOpts.list = false"
+                    <input type="radio" class="btn-check" :name="'smView' + (cc ? 'cc' : '')" :id="'setDouble' + (cc ? 'cc' : '')" autocomplete="off" @click="viewOpts.list = false"
                         :checked="!viewOpts.list" />
                     <label class="btn btn-outline-warning" :for="'setDouble' + (cc ? 'cc' : '')"><i
                             class="fa-solid fa-table-cells-large fa-fw"></i></label>
