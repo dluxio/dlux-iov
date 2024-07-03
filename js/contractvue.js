@@ -39,7 +39,7 @@ export default {
     </div>
     <div class="p-1">
         <div class="card" style="width: 18rem;">
-            <div class="my-1 fw-light text-center">{{fancyBytes(usedBytes)}}/{{fancyBytes(availableBytes)}}</div>
+            <div class="my-1 fw-light text-center">{{fancyBytes(usedBytes)}} / {{fancyBytes(availableBytes)}}</div>
             <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
                 <div class="progress-bar" :style="'width:' + (usedBytes/availableBytes)*100 + '%;'"></div>
             </div>
