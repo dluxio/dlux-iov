@@ -58,7 +58,7 @@ export default {
         <div class="tab-content bg-color">
 
             <!-- cc -->
-            <div role="tabpanel" class="tab-pane" id="ccTab" aria-labelledby="cctab">
+            <div v-if="cc" role="tabpanel" class="tab-pane" id="ccTab" aria-labelledby="cctab">
                  <!-- no files -->
                 <div v-if="hasFiles" class="ms-auto me-auto text-center">
                     <div class="ms-auto me-auto card px-3 py-2 mt-3 mb-4 bg-darker" style="max-width: 600px">
@@ -82,7 +82,7 @@ export default {
         
             
             <!-- files -->
-            <div role="tabpanel" class="tab-pane" id="filesTab" aria-labelledby="filestab">
+            <div v-else role="tabpanel" class="tab-pane" id="filesTab" aria-labelledby="filestab">
                 
                 <!-- no files -->
                 <div v-if="hasFiles" class="ms-auto me-auto text-center">
@@ -100,7 +100,7 @@ export default {
                 <!-- has files -->
                 <div v-if="!hasFiles" class="d-flex flex-wrap justify-content-center">
                     
-                        <files-vue :assets="assets && cc" @addassets="addAssets($event)" :account="spkapi.name" :current="saccountapi.head_block"
+                        <files-vue :assets="assets" @addassets="addAssets($event)" :account="spkapi.name" :current="saccountapi.head_block"
                             :contracts="contracts"></files-vue>
                    
                 </div>
