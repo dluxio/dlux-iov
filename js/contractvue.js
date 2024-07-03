@@ -37,19 +37,19 @@ export default {
             </div>
         </div>
     </div>
-    <div class="d-flex align-items-center p-1">
-        <div class="d-flex align-items-stretch">
+    <div class="d-flex flex-grow-1 p-1">
+        <div class="d-flex flex-grow-1 flex-wrap align-items-stretch justify-content-around">
             <div class="card mx-1" style="width: 18rem;">
                 <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-display me-1"></i><span>Display</span></div>
                 <div class="d-flex flex-column card-body px-2 py-1">
-                    <ul class="nav nav-pills mx-auto my-2 fs-3 border border-light bg-dark rounded-pill">
+                    <ul class="nav nav-pills mx-auto my-2 fs-5 border border-light bg-dark rounded-pill">
                         <li class="nav-item">
                             <a class="nav-link active" href="#contractsTab" role="tab" data-bs-toggle="tab"
-                                aria-controls="contractstab" aria-expanded="true"><i class="fa-solid fa-cloud-arrow-up fa-fw mx-2"></i></a>
+                                aria-controls="contractstab" aria-expanded="true">Contracts</a>
                         </li>
                         <li v-if="!cc" class="nav-item">
                             <a class="nav-link" aria-current="page" href="#filesTab" role="tab" data-bs-toggle="tab"
-                                aria-controls="filestab" aria-expanded="false"><i class="fa-solid fa-cloud fa-fw mx-2"></i></a>
+                                aria-controls="filestab" aria-expanded="false">Files</a>
                         </li>
                         <li v-if="cc" class="nav-item">
                             <a class="nav-link" aria-current="page" href="#ccTab" role="tab" data-bs-toggle="tab"
