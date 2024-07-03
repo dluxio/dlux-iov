@@ -40,7 +40,7 @@ export default {
     <div class="d-flex flex-grow-1 p-1">
         <div class="d-flex flex-grow-1 flex-wrap align-items-stretch justify-content-around">
             <div class="card mx-1" style="width: 18rem;">
-                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-display me-1"></i><span>Display</span></div>
+                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-cloud me-1"></i><span>Display</span></div>
                 <div class="d-flex flex-column card-body px-2 py-1">
                     <ul class="nav nav-pills mx-auto my-2 fs-5 border border-light bg-dark rounded-pill">
                         <li class="nav-item">
