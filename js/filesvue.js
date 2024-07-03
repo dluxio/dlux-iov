@@ -99,6 +99,19 @@ export default {
             </div>
         </div>
 
+        <div class="d-flex flex-wrap mt-2 d-xl-flex mx-1">
+                    <!-- Active Filters -->
+                    <div class="rounded bg-secondary text-black filter-bubble me-1 mb-1 d-flex align-items-center">
+                        <span></span>
+                        <button @click="clearFilters(item)" type="button"
+                            class="ms-1 btn-close btn-close-white"></button>
+                    </div>
+                    <button @click="clearFilters()" type="button"
+                        class="btn btn-secondary mb-1">
+                        Clear All
+                    </button>
+                </div>
+
         <div class="d-flex align-items-center my-1 mx-1">
             <h5 class="mb-0"> {{filesArray.length}} File{{filesArray.length == 1 ? '' : 's'}}</h5>
             <div class="ms-auto">
