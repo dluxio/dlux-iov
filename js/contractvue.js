@@ -80,7 +80,7 @@ export default {
                                 <span class="my-auto">SPK</span>
                                 <span class="badge small text-bg-warning text-black ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
                             </button>
-                            <button type="button" class="btn btn-sm btn-primary"><i class="fa-solid fa-bolt fa-fw me-1"></i>Power Up</button> 
+                            <button type="button" class="btn btn-sm btn-dark border-success text-success"><i class="fa-solid fa-bolt fa-fw me-1"></i>Power Up</button> 
                         </div>
                     </div>    
                 </div>
@@ -93,7 +93,7 @@ export default {
                             <div class="d-flex justify-content-around mt-1">
                                 <!-- new contract button -->
                                 <button v-if="saccountapi.pubKey != 'NA' && saccountapi.spk_power" type="button"
-                                    class="btn btn-sm btn-primary">
+                                    class="btn btn-sm btn-dark border-primary text-primary">
                                     <modal-vue type="build" token="BROCA" :balance="broca_calc(saccountapi.broca)"
                                         :account="account" @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
                                         v-slot:trigger>
@@ -102,7 +102,7 @@ export default {
                                     </modal-vue>
                                 </button>
                                 <!-- free button -->
-                                <button v-if="saccountapi.pubKey != 'NA'" type="button" class="btn btn-sm btn-danger"
+                                <button v-if="saccountapi.pubKey != 'NA'" type="button" class="btn btn-sm btn-dark border-danger text-danger"
                                     data-bs-toggle="modal" data-bs-target="#sponsoredModal">
                                     <span class=""></span><i class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE
                                 </button>  
