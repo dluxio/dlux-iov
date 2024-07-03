@@ -660,6 +660,7 @@ export default {
             if(newUser)fetch("https://spktest.dlux.io/@" + newUser)
                 .then((response) => response.json())
                 .then((data) => {
+                    this.contractIDs[newUser] = {}
                     for (var node in data.file_contracts) {
                         data.file_contracts[node].encryption = {
                             input: "",
@@ -754,9 +755,7 @@ export default {
                                 else this.newMeta[data.file_contracts[node].i][filesNames[i]].nsfw = false
                             }
                         }
-                        this.contractIDs[newUser] = {}
                         this.contractIDs[newUser][data.file_contracts[node].i] = data.file_contracts[node];
-
                         this.contractIDs[newUser][data.file_contracts[node].i].index = this.contracts.length - 1;
                         this.postBodyAdder[data.file_contracts[node].i] = {}
 
