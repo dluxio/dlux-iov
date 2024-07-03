@@ -39,25 +39,6 @@ export default {
     </div>
     <div class="d-flex flex-grow-1 p-1">
         <div class="d-flex flex-grow-1 flex-wrap align-items-stretch justify-content-around">
-            
-            
-            <div class="card m-1" style="width: 18rem;">
-                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-atom me-1"></i><span>SPK</span></div>
-                <div class="card-body px-2 py-1">
-                    <div class="d-flex flex-column">
-                        <div class="mb-1 fw-light d-flex" style="font-size: 1.1rem !important;">Balance: <span class="ms-auto">1 SPK</span></div>
-                        <div class="d-flex justify-content-around mt-1">
-                            <!-- spk wallet button -->
-                            <button v-if="!nodeview" type="button" class="btn btn-sm btn-secondary d-flex justify-content-center" data-bs-toggle="modal" data-bs-target="#spkWalletModal" style="width:110px;">
-                                <i class="fa-solid fa-wallet fa-fw me-1 my-auto"></i>
-                                <span class="my-auto">SPK</span>
-                                <span class="badge small text-bg-warning text-black ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
-                            </button>
-                            <button type="button" class="btn btn-sm btn-dark border-warning text-warning" style="width:110px;"><i class="fa-solid fa-bolt fa-fw me-1"></i>Power Up</button> 
-                        </div>
-                    </div>    
-                </div>
-            </div>
             <div class="card m-1" style="width: 18rem;">
                 <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-file-circle-plus me-1"></i><span>Contracts</span></div>
                     <div class="card-body px-2 py-1">
@@ -83,6 +64,38 @@ export default {
                     </div>    
                 </div>
             </div>
+            
+            <div class="card m-1" style="width: 18rem;">
+                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-atom me-1"></i><span>SPK</span></div>
+                <div class="card-body px-2 py-1">
+                    <div class="d-flex flex-column">
+                        <div class="mb-1 fw-light d-flex justify-content-center" style="font-size: 1.1rem !important;">{{formatNumber((saccountapi.spk/1000),'3','.',',')}} SPK</div>
+                        <div class="d-flex justify-content-around mt-1">
+                            <!-- spk wallet button -->
+                            <button v-if="!nodeview" type="button" class="btn btn-sm btn-dark border-info text-info d-flex justify-content-center" data-bs-toggle="modal" data-bs-target="#spkWalletModal" style="width:110px;">
+                                <i class="fa-solid fa-wallet fa-fw me-1 my-auto"></i>
+                                <span class="my-auto">SPK</span>
+                                <span class="badge small text-bg-info text-black ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-dark border-warning text-warning" style="width:110px;"><i class="fa-solid fa-bolt fa-fw me-1"></i>Power Up</button> 
+                        </div>
+                    </div>    
+                </div>
+            </div>
+            
+            
+            <div class="card m-1" style="width: 18rem;">
+                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-bolt me-1"></i>
+                <span class="d-flex align-items-center">Power</span></div>
+                <div class="d-flex flex-column card-body px-2 py-1">
+                    <div class="mb-1 fw-light text-center " style="font-size: 1.1rem !important;">{{saccountapi.spk_power/1000}} SPK Power</div>
+                    <div class="progress mb-1" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar" :style="'width:' + (broca_calc(saccountapi.broca)/(saccountapi.spk_power*1000))*100 + '%;'">{{ formatNumber((broca_calc(saccountapi.broca)/(saccountapi.spk_power*1000))*100,'2','.',',') }}%</div>
+                    </div>
+                    <a href="#" class="text-center text-primary">Get more power</a>
+                </div>
+            </div>
+
             <div class="card m-1" style="width: 18rem;">
                 <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-chart-pie me-1"></i><span>Storage</span></div>
                 <div class="d-flex flex-column card-body px-2 py-1">
@@ -93,17 +106,7 @@ export default {
                     <a href="#" class="text-center text-primary">Get more storage</a>
                 </div>
             </div>
-            <div class="card m-1" style="width: 18rem;">
-                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-bolt me-1"></i>
-                <span class="d-flex align-items-center">Power</span></div>
-                <div class="d-flex flex-column card-body px-2 py-1">
-                    <div class="mb-1 fw-light text-center " style="font-size: 1.1rem !important;">{{saccountapi.spk_power/1000}} SPK Power</div>
-                    <div class="progress mb-1" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar" :style="'width:' + (broca_calc(saccountapi.broca)/(saccountapi.spk_power*1000))*100 + '%;'">{{ formatNumber((broca_calc(saccountapi.broca)/(saccountapi.spk_power*1000))*100,'2','.',',') }}%</div>
-                    </div>
-                    <a href="#" class="text-center text-primary">Get more storage</a>
-                </div>
-            </div>
+
         </div>
     </div>
 
