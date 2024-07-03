@@ -133,7 +133,7 @@ export default {
                 </ul>
             </div>
 
-            <div class="form-check form-switch fs-4">
+            <div v-if="cc" class="form-check form-switch fs-4">
                 <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" :checked="filesSelect.cc_only" @click="filesSelect.cc_only = !filesSelect.cc_only;render()">
                 <label class="form-check-label" for="flexSwitchCheckChecked"><i class="fa-brands fa-creative-commons fa-fw"></i> and <i class="fa-brands fa-creative-commons-zero fa-fw"></i> license only</label>
             </div>
@@ -517,7 +517,7 @@ export default {
                 sort: "time",
                 dir: "dec",
                 search: "",
-                cc_only: true,
+                cc_only: false,
                 addusers: {},
             },
             contract: {},
@@ -1228,5 +1228,6 @@ export default {
     },
     mounted() { 
         this.filesSelect.addusers[this.account] = true
+        if(this.cc)this.filesSelect.cc_only = true
     },
 };
