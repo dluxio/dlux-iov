@@ -39,9 +39,12 @@ export default {
     </div>
     <div class="p-1">
         <div class="card" style="width: 18rem;">
-            <div class="my-1 fw-light text-center">{{fancyBytes(usedBytes)}} / {{fancyBytes(availableBytes)}}</div>
-            <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                <div class="progress-bar" :style="'width:' + (usedBytes/availableBytes)*100 + '%;'"></div>
+            <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-chart-pie me-1"></i><span>SPK Storage</span></div>
+            <div class="card-body px-2 py-1">
+                <div class="mb-1 fw-light text-center">{{fancyBytes(usedBytes)}} / {{fancyBytes(availableBytes)}}</div>
+                <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar" :style="'width:' + (usedBytes/availableBytes)*100 + '%;'"></div>
+                </div>
             </div>
         </div>
     </div>
