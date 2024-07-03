@@ -7,19 +7,47 @@ export default {
         "choices-vue": ChoicesVue
     },
     template: `
-<div class="d-flex flex-grow-1 flex-column p-05 rounded m-05" style="background-color: rgba(0, 0, 0, 0.7);">
+<div class="d-flex flex-grow-1 flex-column p-05 rounded m-05">
     <div class="pt-1">
         <!-- USER INPUT -->
-            <div v-if="cc" class="d-flex flex-column flex-grow-1 mb-2 mx-1">
-               <label class="fs-3 fw-light mb-1">See another user's <i class="fa-brands fa-creative-commons fa-fw"></i> and <i class="fa-brands fa-creative-commons-zero fa-fw"></i> files</label>
+            <div v-if="cc" class="d-flex flex-column flex-grow-1 mb-1 mx-1">
+                <div class="fs-3">dCloud</div>
+                <label class="fs-5 fw-light mb-1">View other users' files, use <i class="fa-brands fa-creative-commons fa-fw"></i> and <i class="fa-brands fa-creative-commons-zero fa-fw"></i> licensed files, and decrypt files that have been shared with you</label>
                 <div class="position-relative flex-grow-1">
                     <span class="position-absolute top-50 translate-middle-y ps-2"><i
                             class="fa-solid fa-at fa-fw"></i></span>
                     <input 
-                        class="ps-4 form-control border-white" type="search"
+                        class="ps-4 mb-1 form-control border-white" type="search"
                         placeholder="username" @blur="appendUserFiles()" v-model="newUser">
                 </div>
+                <div class="d-flex flex-wrap d-xl-flex mb-1">
+                <!-- Active Filters -->
+                <div class="btn-group btn-group me-1 mb-1" style="height:50px">
+                    <a href="/@" class="btn btn-light rounded-start align-content-center">
+                        <span>markegiles</span>
+                    </a>
+                    <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled>
+                    </button>
+                    <button type="button" class="btn btn-light px-2">
+                        <i class="fa-solid fa-eye fa-fw"></i>
+                        <i class="fa-solid fa-eye-slash fa-fw d-none"></i>
+                    </button>
+                    <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled>
+                    </button>
+                    <button @click="clearFilters(item)" type="button" class="btn btn-light px-2">
+                        <i class="fa-solid fa-xmark fa-fw"></i>
+                    </button>
+                </div>
+
+                <button @click="clearFilters()" type="button"
+                    class="btn btn-secondary mb-1 d-none">
+                    Clear All
+                </button>
+                
             </div>
+            </div>
+
+            
 
         <!-- ACTION BAR -->
         <div class="d-flex flex-wrap align-items-center justify-content-center mx-1">
@@ -99,31 +127,7 @@ export default {
             </div>
         </div>
 
-        <div class="d-flex flex-wrap mt-2 d-xl-flex mx-1">
-                    <!-- Active Filters -->
-                    <div class="btn-group btn-group me-1 mb-1" style="height:50px">
-                        <a href="/@" class="btn btn-light rounded-start align-content-center">
-                            <span>markegiles</span>
-                        </a>
-                        <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled>
-                        </button>
-                        <button type="button" class="btn btn-light px-2">
-                            <i class="fa-solid fa-eye fa-fw"></i>
-                            <i class="fa-solid fa-eye-slash fa-fw d-none"></i>
-                        </button>
-                        <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled>
-                        </button>
-                        <button @click="clearFilters(item)" type="button" class="btn btn-light px-2">
-                            <i class="fa-solid fa-xmark fa-fw"></i>
-                        </button>
-                    </div>
-
-                    <button @click="clearFilters()" type="button"
-                        class="btn btn-secondary mb-1">
-                        Clear All
-                    </button>
-                    
-                </div>
+        
 
         <div class="d-flex align-items-center my-1 mx-1">
             <h5 class="mb-0"> {{filesArray.length}} File{{filesArray.length == 1 ? '' : 's'}}</h5>

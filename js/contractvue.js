@@ -18,7 +18,7 @@ export default {
         "choices-vue": ChoicesVue
     },
     template: `
-    <div class="d-flex justify-content-center mt-2">
+    <div class="d-flex justify-content-center">
     <!-- register account -->
     <div v-if="saccountapi.pubKey == 'NA'" class="d-flex">
         <div class="d-flex justify-content-center p-3">
@@ -47,11 +47,11 @@ export default {
             </li>
             <li class="nav-item">
                 <a class="nav-link" aria-current="page" href="#filesTab" role="tab" data-bs-toggle="tab"
-                    aria-controls="filestab" aria-expanded="false"><i class="fa-solid fa-cloud fa-fw"></i></a>
+                    aria-controls="filestab" aria-expanded="false"><i class="fa-solid fa-hard-drive fa-fw"></i></a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" aria-current="page" href="#ccTab" role="tab" data-bs-toggle="tab"
-                    aria-controls="cctab" aria-expanded="false"><i class="fa-brands fa-creative-commons fa-fw"></i></a>
+                    aria-controls="cctab" aria-expanded="false"><i class="fa-solid fa-cloud fa-fw"></i></a>
             </li>
         </ul>
         <!-- tabs -->
