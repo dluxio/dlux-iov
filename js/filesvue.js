@@ -101,15 +101,28 @@ export default {
 
         <div class="d-flex flex-wrap mt-2 d-xl-flex mx-1">
                     <!-- Active Filters -->
-                    <div class="rounded bg-secondary text-black filter-bubble me-1 mb-1 d-flex align-items-center">
-                        <span></span>
-                        <button @click="clearFilters(item)" type="button"
-                            class="ms-1 btn-close btn-close-white"></button>
+                    <div class="btn-group btn-group me-1 mb-1" style="height:50px">
+                        <a href="/@" class="btn btn-light rounded-start align-content-center">
+                            <span>markegiles</span>
+                        </a>
+                        <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled>
+                        </button>
+                        <button type="button" class="btn btn-light px-2">
+                            <i class="fa-solid fa-eye fa-fw"></i>
+                            <i class="fa-solid fa-eye-slash fa-fw d-none"></i>
+                        </button>
+                        <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled>
+                        </button>
+                        <button @click="clearFilters(item)" type="button" class="btn btn-light px-2">
+                            <i class="fa-solid fa-xmark fa-fw"></i>
+                        </button>
                     </div>
+
                     <button @click="clearFilters()" type="button"
                         class="btn btn-secondary mb-1">
                         Clear All
                     </button>
+                    
                 </div>
 
         <div class="d-flex align-items-center my-1 mx-1">
