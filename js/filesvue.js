@@ -994,7 +994,7 @@ export default {
                     case false:
                         return false
                     case 'lock':
-                        if (!(file.lf & 1)) return false
+                        if (!(file.lf & 1) && this.contract[file.i].contract.encryption.accounts[this.spkapi.name]) return false
                         break
                     case 'cc':
                         if (!file.lic) return false
