@@ -28,7 +28,7 @@ export default {
                 <button type="button" class="btn btn-primary" @click="updatePubkey()">
                 <i class="fa-solid fa-user-plus fa-fw me-1"></i> Register Account
                 </button>
-                <button type="button" class="ms-2 btn btn-secondary d-flex" data-bs-toggle="modal" data-bs-target="#spkWalletModal">
+                <button type="button" class="ms-2 btn btn-dark border-warning text-warning d-flex" data-bs-toggle="modal" data-bs-target="#spkWalletModal">
                     <i class="fa-solid fa-wallet fa-fw me-1 my-auto"></i>
                     <span class="my-auto">SPK</span>
                     <span class="badge small text-bg-warning ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
@@ -39,6 +39,25 @@ export default {
     </div>
     <div class="d-flex align-items-center p-1">
         <div class="d-flex align-items-stretch">
+            <div class="card mx-1" style="width: 18rem;">
+                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-display me-1"></i><span>Display</span></div>
+                <div class="d-flex flex-column card-body px-2 py-1">
+                    <ul class="nav nav-pills mx-auto my-2 fs-3 border border-light bg-dark rounded-pill">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#contractsTab" role="tab" data-bs-toggle="tab"
+                                aria-controls="contractstab" aria-expanded="true"><i class="fa-solid fa-cloud-arrow-up fa-fw mx-2"></i></a>
+                        </li>
+                        <li v-if="!cc" class="nav-item">
+                            <a class="nav-link" aria-current="page" href="#filesTab" role="tab" data-bs-toggle="tab"
+                                aria-controls="filestab" aria-expanded="false"><i class="fa-solid fa-cloud fa-fw mx-2"></i></a>
+                        </li>
+                        <li v-if="cc" class="nav-item">
+                            <a class="nav-link" aria-current="page" href="#ccTab" role="tab" data-bs-toggle="tab"
+                                aria-controls="cctab" aria-expanded="false"><i class="fa-solid fa-cloud fa-fw mx-2"></i></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
             <div class="card mx-1" style="width: 18rem;">
                 <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-chart-pie me-1"></i><span>Storage</span></div>
                 <div class="d-flex flex-column card-body px-2 py-1">
@@ -54,84 +73,49 @@ export default {
                 <div class="card-body px-2 py-1">
                     <div class="d-flex flex-column">
                         <div class="mb-1 fw-light d-flex" style="font-size: 1.1rem !important;">Balance: <span class="ms-auto">1 SPK</span></div>
-                        <div class="text-center"><button type="button" class="btn btn-sm btn-primary">Power Up</button></div>
-                        
+                        <div class="d-flex justify-content-around mt-1">
+                            <!-- spk wallet button -->
+                            <button v-if="!nodeview" type="button" class="btn btn-sm btn-dark border-warning text-warning d-flex" data-bs-toggle="modal" data-bs-target="#spkWalletModal">
+                                <i class="fa-solid fa-wallet fa-fw me-1 my-auto"></i>
+                                <span class="my-auto">SPK</span>
+                                <span class="badge small text-bg-warning text-black ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary"><i class="fa-solid fa-bolt fa-fw me-1"></i>Power Up</button> 
+                        </div>
                     </div>    
                 </div>
             </div>
-        </div>
-        <div class="ms-auto">
-            <div class="d-flex flex-wrap flex-grow-1 ms-2">
-                            <!-- tools 1 -->
-                            <div class="d-flex mb-1 flex-wrap ms-auto order-lg-last">
-                                <div class="d-flex flex-wrap justify-content-center ms-auto me-auto">
-
-                                    <!-- new contract button -->
-                                    <button v-if="saccountapi.pubKey != 'NA' && saccountapi.spk_power" type="button"
-                                        class="btn btn-primary mt-1 me-1">
-                                        <modal-vue type="build" token="BROCA" :balance="broca_calc(saccountapi.broca)"
-                                            :account="account" @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
-                                            v-slot:trigger>
-                                            <span slot="trigger" class="trigger"><i
-                                                    class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
-                                        </modal-vue>
-                                    </button>
-
-                                    <!-- free button -->
-                                    <button v-if="saccountapi.pubKey != 'NA'" type="button" class="btn btn-danger mt-1 me-1"
-                                        data-bs-toggle="modal" data-bs-target="#sponsoredModal">
-                                        <span class=""></span><i class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE
-                                    </button>
-
-                                    <!-- spk wallet button -->
-                                    <button v-if="!nodeview" type="button" class="mt-1 btn btn-secondary d-flex" data-bs-toggle="modal" data-bs-target="#spkWalletModal">
-                                        <i class="fa-solid fa-wallet fa-fw me-1 my-auto"></i>
-                                        <span class="my-auto">SPK</span>
-                                        <span class="badge small text-bg-warning ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
-                                    </button>
-                                    
-                                </div>
-                            </div>
-                            <!-- tools 2 (hidden) -->
-                            <div>
-                                <div
-                                    class="d-none position-relative flex-grow-1 me-1 order-lg-first d-flex align-items-center">
-                                    <!-- search bar -->
-                                    <span class="flex-grow-1">
-                                        <span class="position-absolute ps-2 top-50 translate-middle-y">
-                                            <i class="fa-solid fa-magnifying-glass fa-fw"></i>
-                                        </span>
-                                        <input type="search" class="ps-4 form-control text-info border-light"
-                                            placeholder="Search" @keyup.enter="postSelect.entry = 'search';getPosts()"
-                                            @search="postSelect.entry = 'search';getPosts()">
-                                    </span>
-                                    <!-- filter button -->
-                                    <button type="button" class="btn btn-secondary ms-1">
-                                        <span class=""></span><i class="fa-solid fa-filter"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+            <div class="card mx-1" style="width: 18rem;">
+                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-file-circle-plus me-1"></i><span>Contracts</span></div>
+                    <div class="card-body px-2 py-1">
+                        <div class="d-flex flex-column">
+                            <div class="mb-1 fw-light text-center" style="font-size: 1.1rem !important;">Open a contract to upload files</div>
+                            <div class="d-flex justify-content-around mt-1">
+                                <!-- new contract button -->
+                                <button v-if="saccountapi.pubKey != 'NA' && saccountapi.spk_power" type="button"
+                                    class="btn btn-sm btn-primary">
+                                    <modal-vue type="build" token="BROCA" :balance="broca_calc(saccountapi.broca)"
+                                        :account="account" @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
+                                        v-slot:trigger>
+                                        <span slot="trigger" class="trigger"><i
+                                                class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
+                                    </modal-vue>
+                                </button>
+                                <!-- free button -->
+                                <button v-if="saccountapi.pubKey != 'NA'" type="button" class="btn btn-sm btn-danger"
+                                    data-bs-toggle="modal" data-bs-target="#sponsoredModal">
+                                    <span class=""></span><i class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE
+                                </button>  
+                        </div>    
+                    </div>    
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- tabs nav -->
     <div v-if="saccountapi.pubKey != 'NA'" class="d-flex flex-column w-100">
-        <ul class="nav nav-pills ms-auto me-auto mb-2 fs-3 border border-light rounded-pill">
-
-            <li class="nav-item">
-                <a class="nav-link active" href="#contractsTab" role="tab" data-bs-toggle="tab"
-                    aria-controls="contractstab" aria-expanded="true"><i class="fa-solid fa-cloud-arrow-up fa-fw mx-2"></i></a>
-            </li>
-            <li v-if="!cc" class="nav-item">
-                <a class="nav-link" aria-current="page" href="#filesTab" role="tab" data-bs-toggle="tab"
-                    aria-controls="filestab" aria-expanded="false"><i class="fa-solid fa-cloud fa-fw mx-2"></i></a>
-            </li>
-            <li v-if="cc" class="nav-item">
-                <a class="nav-link" aria-current="page" href="#ccTab" role="tab" data-bs-toggle="tab"
-                    aria-controls="cctab" aria-expanded="false"><i class="fa-solid fa-cloud fa-fw mx-2"></i></a>
-            </li>
-        </ul>
+        
         <!-- tabs -->
         <div class="tab-content bg-color">
 
