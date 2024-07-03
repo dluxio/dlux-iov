@@ -13,13 +13,20 @@ export default {
             <div v-if="cc" class="d-flex flex-column flex-grow-1 mb-1 mx-1">
                 <div class="fs-3">dCloud</div>
                 <label class="fs-5 fw-light mb-1">View other users' files, use <i class="fa-brands fa-creative-commons fa-fw"></i> and <i class="fa-brands fa-creative-commons-zero fa-fw"></i> licensed files, and decrypt files that have been shared with you</label>
-                <div class="position-relative flex-grow-1">
-                    <span class="position-absolute top-50 translate-middle-y ps-2"><i
-                            class="fa-solid fa-at fa-fw"></i></span>
-                    <input 
-                        class="ps-4 mb-1 form-control border-white" type="search"
-                        placeholder="username" @blur="appendUserFiles()" v-model="newUser">
+                <div class="d-flex">
+                    <div class="position-relative flex-grow-1">
+                        <span class="position-absolute top-50 translate-middle-y ps-2"><i
+                                class="fa-solid fa-at fa-fw"></i></span>
+                        <input 
+                            class="ps-4 mb-1 form-control border-white" type="search"
+                            placeholder="username" @blur="appendUserFiles()" v-model="newUser">
+                    </div>
+                    <div class="ms-1">
+                            <div class="btn btn-lg btn-light" @click="addUser()"><i class="fa-solid fa-fw fa-plus"></i>
+                            </div>
+                        </div>
                 </div>
+                
                 <div class="d-flex flex-wrap d-xl-flex mb-1">
                 <!-- Active Filters -->
                 <div class="btn-group btn-group me-1 mb-1" style="height:50px">
@@ -124,6 +131,11 @@ export default {
                     </li>
                     
                 </ul>
+            </div>
+
+            <div class="form-check form-switch fs-4">
+                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
+                <label class="form-check-label" for="flexSwitchCheckChecked"><i class="fa-brands fa-creative-commons fa-fw"></i> and <i class="fa-brands fa-creative-commons-zero fa-fw"></i> license only</label>
             </div>
         </div>
 
