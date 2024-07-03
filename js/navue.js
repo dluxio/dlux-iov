@@ -1024,7 +1024,7 @@ export default {
 			        <li class=""><a class="dropdown-item" :href="'/me#blog/'" @click="showTab('blog')"><i class="fas fa-user fa-fw me-2"></i>Profile</a></li>
 			        <li class=""><a class="dropdown-item" :href="'/me#wallet/'" @click="showTab('wallet')"><i class="fas fa-wallet fa-fw me-2"></i>Wallet</a></li>
 			        <li class=""><a class="dropdown-item" :href="'/me#inventory/'" @click="showTab('inventory')"><i class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
-              <li class=""><a class="dropdown-item" :href="'/me#files/'" @click="showTab('files')"><i class="fas fa-cloud fa-fw me-2"></i>Files</a></li>
+              <li class=""><a class="dropdown-item" :href="'/me#files/'" @click="showTab('files')"><i class="fas fa-cloud fa-fw me-2"></i>Cloud</a></li>
               <li class=""><hr class="dropdown-divider"></li>
               <li class=""><a class="dropdown-item" href="/new/"><i class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
               <li class=""><a class="dropdown-item" href="/docs/" target="_blank"><i class="fa-solid fa-book me-2 fa-fw"></i>Docs</a></li>
