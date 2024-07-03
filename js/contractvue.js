@@ -45,11 +45,11 @@ export default {
                 <a class="nav-link active" href="#contractsTab" role="tab" data-bs-toggle="tab"
                     aria-controls="contractstab" aria-expanded="true"><i class="fa-solid fa-list fa-fw"></i></a>
             </li>
-            <li class="nav-item">
+            <li v-if="!cc" class="nav-item">
                 <a class="nav-link" aria-current="page" href="#filesTab" role="tab" data-bs-toggle="tab"
                     aria-controls="filestab" aria-expanded="false"><i class="fa-solid fa-hard-drive fa-fw"></i></a>
             </li>
-            <li class="nav-item">
+            <li v-if="cc" class="nav-item">
                 <a class="nav-link" aria-current="page" href="#ccTab" role="tab" data-bs-toggle="tab"
                     aria-controls="cctab" aria-expanded="false"><i class="fa-solid fa-cloud fa-fw"></i></a>
             </li>
@@ -74,7 +74,7 @@ export default {
                 
                 <!-- has files -->
                 <div v-if="!hasFiles" class="d-flex flex-wrap justify-content-center">
-                        <files-vue :assets="assets" @addassets="addAssets($event)" :account="spkapi.name" :current="saccountapi.head_block" :cc="true"
+                        <files-vue :assets="assets" @addassets="addAssets($event)" :account="saccountapi.name" :current="saccountapi.head_block" :cc="true"
                             :contracts="contracts"></files-vue>
                    
                 </div>
@@ -100,7 +100,7 @@ export default {
                 <!-- has files -->
                 <div v-if="!hasFiles" class="d-flex flex-wrap justify-content-center">
                     
-                        <files-vue :assets="assets" @addassets="addAssets($event)" :account="spkapi.name" :current="saccountapi.head_block"
+                        <files-vue :assets="assets" @addassets="addAssets($event)" :account="saccountapi.name" :current="saccountapi.head_block"
                             :contracts="contracts"></files-vue>
                    
                 </div>

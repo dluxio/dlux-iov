@@ -994,7 +994,7 @@ export default {
                     case false:
                         return false
                     case 'lock':
-                        if (!(file.lf & 1) && this.contract[file.i].contract.encryption.accounts[this.spkapi.name]) return false
+                        if (!(file.lf & 1) && !this.contract[file.i].encryption.accounts[this.account]) return false
                         break
                     case 'cc':
                         if (!file.lic) return false
@@ -1003,7 +1003,7 @@ export default {
                     default:
                         return false
                 }
-                if(this.filesSelect.cc_only && !file.lic) return false
+                if(this.filesSelect.cc_only && (!file.lic && file.o != this.account)) return false
                 if (this.filesSelect.search && file.n.toLowerCase().indexOf(this.filesSelect.search.toLowerCase()) == -1) return false
                 return true
             })
@@ -1224,10 +1224,18 @@ export default {
                 this.debounce = new Date().getTime()
             },
             deep: true
-        }
+        },
+        'account': {
+            handler: function (newValue) {
+                if(this.account)this.filesSelect.addusers[this.account] = true
+                this.init()
+            },
+            deep: false
+        },
+        
     },
     mounted() { 
-        this.filesSelect.addusers[this.account] = true
+        if(this.account)this.filesSelect.addusers[this.account] = true
         if(this.cc)this.filesSelect.cc_only = true
     },
 };
