@@ -11,7 +11,6 @@ export default {
     <div class="pt-1">
         <!-- USER INPUT -->
             <div v-if="cc" class="d-flex flex-column flex-grow-1 mb-1 mx-1">
-                <div class="fs-3">dCloud</div>
                 <label class="fs-5 fw-light mb-1">View other users' files, use <i class="fa-brands fa-creative-commons fa-fw"></i> and <i class="fa-brands fa-creative-commons-zero fa-fw"></i> licensed files, and decrypt files that have been shared with you</label>
                 <div class="d-flex">
                     <div class="position-relative flex-grow-1">

@@ -39,6 +39,60 @@ export default {
     </div>
     <div class="d-flex flex-grow-1 p-1">
         <div class="d-flex flex-grow-1 flex-wrap align-items-stretch justify-content-around">
+            
+            
+            <div class="card m-1" style="width: 18rem;">
+                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-atom me-1"></i><span>SPK</span></div>
+                <div class="card-body px-2 py-1">
+                    <div class="d-flex flex-column">
+                        <div class="mb-1 fw-light d-flex" style="font-size: 1.1rem !important;">Balance: <span class="ms-auto">1 SPK</span></div>
+                        <div class="d-flex justify-content-around mt-1">
+                            <!-- spk wallet button -->
+                            <button v-if="!nodeview" type="button" class="btn btn-sm btn-dark border-warning text-warning d-flex" data-bs-toggle="modal" data-bs-target="#spkWalletModal" style="width:110px;">
+                                <i class="fa-solid fa-wallet fa-fw me-1 my-auto"></i>
+                                <span class="my-auto">SPK</span>
+                                <span class="badge small text-bg-warning text-black ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-dark border-primary text-primary" style="width:110px;"><i class="fa-solid fa-bolt fa-fw me-1"></i>Power Up</button> 
+                        </div>
+                    </div>    
+                </div>
+            </div>
+            <div class="card m-1" style="width: 18rem;">
+                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-file-circle-plus me-1"></i><span>Contracts</span></div>
+                    <div class="card-body px-2 py-1">
+                        <div class="d-flex flex-column">
+                            <div class="mb-1 fw-light text-center" style="font-size: 1.1rem !important;">Open a contract to upload files</div>
+                            <div class="d-flex justify-content-around mt-1">
+                                <!-- new contract button -->
+                                <button v-if="saccountapi.pubKey != 'NA' && saccountapi.spk_power" type="button"
+                                    class="btn btn-sm btn-dark border-success text-success" style="width:110px;">
+                                    <modal-vue type="build" token="BROCA" :balance="broca_calc(saccountapi.broca)"
+                                        :account="account" @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
+                                        v-slot:trigger>
+                                        <span slot="trigger" class="trigger"><i
+                                                class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
+                                    </modal-vue>
+                                </button>
+                                <!-- free button -->
+                                <button v-if="saccountapi.pubKey != 'NA'" type="button" class="btn btn-sm btn-dark border-fusch text-fusch"
+                                    data-bs-toggle="modal" data-bs-target="#sponsoredModal" style="width:110px;">
+                                    <span class=""></span><i class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE
+                                </button>  
+                        </div>    
+                    </div>    
+                </div>
+            </div>
+            <div class="card m-1" style="width: 18rem;">
+                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-chart-pie me-1"></i><span>Storage</span></div>
+                <div class="d-flex flex-column card-body px-2 py-1">
+                    <div class="mb-1 fw-light text-center" style="font-size: 1.1rem !important;">{{fancyBytes(usedBytes)}} of {{fancyBytes(availableBytes)}} used</div>
+                    <div class="progress mb-1" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar" :style="'width:' + (usedBytes/availableBytes)*100 + '%;'"></div>
+                    </div>
+                    <a href="#" class="text-center text-primary">Get more storage</a>
+                </div>
+            </div>
             <div class="card m-1" style="width: 18rem;">
                 <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-cloud me-1"></i><span>Display</span></div>
                 <div class="d-flex flex-column card-body px-2 py-1">
@@ -53,61 +107,9 @@ export default {
                         </li>
                         <li v-if="cc" class="nav-item">
                             <a class="nav-link" aria-current="page" href="#ccTab" role="tab" data-bs-toggle="tab"
-                                aria-controls="cctab" aria-expanded="false"><i class="fa-solid fa-cloud fa-fw mx-2"></i></a>
+                                aria-controls="cctab" aria-expanded="false">Files</a>
                         </li>
                     </ul>
-                </div>
-            </div>
-            <div class="card m-1" style="width: 18rem;">
-                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-chart-pie me-1"></i><span>Storage</span></div>
-                <div class="d-flex flex-column card-body px-2 py-1">
-                    <div class="mb-1 fw-light text-center" style="font-size: 1.1rem !important;">{{fancyBytes(usedBytes)}} of {{fancyBytes(availableBytes)}} used</div>
-                    <div class="progress mb-1" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar" :style="'width:' + (usedBytes/availableBytes)*100 + '%;'"></div>
-                    </div>
-                    <a href="#" class="text-center text-primary">Get more storage</a>
-                </div>
-            </div>
-            <div class="card m-1" style="width: 18rem;">
-                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-atom me-1"></i><span>SPK</span></div>
-                <div class="card-body px-2 py-1">
-                    <div class="d-flex flex-column">
-                        <div class="mb-1 fw-light d-flex" style="font-size: 1.1rem !important;">Balance: <span class="ms-auto">1 SPK</span></div>
-                        <div class="d-flex justify-content-around mt-1">
-                            <!-- spk wallet button -->
-                            <button v-if="!nodeview" type="button" class="btn btn-sm btn-dark border-warning text-warning d-flex" data-bs-toggle="modal" data-bs-target="#spkWalletModal" style="width:110px;">
-                                <i class="fa-solid fa-wallet fa-fw me-1 my-auto"></i>
-                                <span class="my-auto">SPK</span>
-                                <span class="badge small text-bg-warning text-black ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
-                            </button>
-                            <button type="button" class="btn btn-sm btn-dark border-success text-success" style="width:110px;"><i class="fa-solid fa-bolt fa-fw me-1"></i>Power Up</button> 
-                        </div>
-                    </div>    
-                </div>
-            </div>
-            <div class="card m-1" style="width: 18rem;">
-                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-file-circle-plus me-1"></i><span>Contracts</span></div>
-                    <div class="card-body px-2 py-1">
-                        <div class="d-flex flex-column">
-                            <div class="mb-1 fw-light text-center" style="font-size: 1.1rem !important;">Open a contract to upload files</div>
-                            <div class="d-flex justify-content-around mt-1">
-                                <!-- new contract button -->
-                                <button v-if="saccountapi.pubKey != 'NA' && saccountapi.spk_power" type="button"
-                                    class="btn btn-sm btn-dark border-primary text-primary" style="width:110px;">
-                                    <modal-vue type="build" token="BROCA" :balance="broca_calc(saccountapi.broca)"
-                                        :account="account" @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
-                                        v-slot:trigger>
-                                        <span slot="trigger" class="trigger"><i
-                                                class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
-                                    </modal-vue>
-                                </button>
-                                <!-- free button -->
-                                <button v-if="saccountapi.pubKey != 'NA'" type="button" class="btn btn-sm btn-dark border-danger text-danger"
-                                    data-bs-toggle="modal" data-bs-target="#sponsoredModal" style="width:110px;">
-                                    <span class=""></span><i class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE
-                                </button>  
-                        </div>    
-                    </div>    
                 </div>
             </div>
         </div>
@@ -173,7 +175,7 @@ export default {
                 <!-- top menu -->
                 <div class="pb-1 mb-2 border-bottom border-2 border-light">
                     <div class="mx-1 mx-lg-3 d-flex flex-wrap align-items-center">
-                        <h2 class="my-1 fw-light text-start">{{title}}</h2>
+                        <h2 class="my-1 fw-light text-start">Storage Contracts (#)</h2>
                       
                         
                     </div>
