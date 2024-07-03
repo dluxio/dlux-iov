@@ -96,9 +96,9 @@ export default {
             <div class="card m-1" style="width: 18rem;">
                 <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-bolt me-1"></i><span>Power</span></div>
                 <div class="d-flex flex-column card-body px-2 py-1">
-                    <div class="mb-1 fw-light text-center" style="font-size: 1.1rem !important;">{{fancyBytes(usedBytes)}} of {{fancyBytes(availableBytes)}} used</div>
+                    <div class="mb-1 fw-light text-center border rounded-pill border-light mx-auto px-1" style="font-size: 1rem !important;">{{saccountapi.spk_power/1000}}</div>
                     <div class="progress mb-1" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar" :style="'width:' + (usedBytes/availableBytes)*100 + '%;'"></div>
+                        <div class="progress-bar" :style="'width:' + (broca_calc(saccountapi.broca)/broca_calc(saccountapi.broca))*100 + '%;'"></div>
                     </div>
                     <a href="#" class="text-center text-primary">Get more storage</a>
                 </div>
