@@ -22,26 +22,26 @@ export default {
                             placeholder="username" @blur="appendUserFiles()" v-model="newUser">
                     </div>
                     <div class="ms-1">
-                            <div class="btn btn-lg btn-light" @click="addUser()"><i class="fa-solid fa-fw fa-plus"></i>
+                            <div class="btn btn-lg btn-light" @click="appendUserFiles()"><i class="fa-solid fa-fw fa-plus"></i>
                             </div>
                         </div>
                 </div>
                 
-                <div class="d-flex flex-wrap d-xl-flex mb-1">
+                <div class="d-flex flex-wrap d-xl-flex mb-1" v-if="owners.length > 1">
                 <!-- Active Filters -->
-                <div class="btn-group btn-group me-1 mb-1" style="height:50px">
-                    <a href="/@" class="btn btn-light rounded-start align-content-center">
-                        <span>markegiles</span>
+                <div v-for="owner in owners" class="btn-group btn-group me-1 mb-1" style="height:50px">
+                    <a :href="'/@' + owner" target="_blank" class="btn btn-light rounded-start align-content-center">
+                        <span>{{owner}}</span>
                     </a>
                     <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled>
                     </button>
-                    <button type="button" class="btn btn-light px-2">
-                        <i class="fa-solid fa-eye fa-fw"></i>
+                    <button type="button" @click="cycleView(owner)" class="btn btn-light px-2">
+                        <i class="fa-solid fa-fw" :class="{'fa-eye': filesSelect.addusers[owner] === true, 'fa-eye-slash': filesSelect.addusers[owner] === false, 'fa-lock': filesSelect.addusers[owner] == 'lock', 'fa-brands fa-creative-commons': filesSelect.addusers[owner] == 'cc'}"></i>
                         <i class="fa-solid fa-eye-slash fa-fw d-none"></i>
                     </button>
                     <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled>
                     </button>
-                    <button @click="clearFilters(item)" type="button" class="btn btn-light px-2">
+                    <button @click="purge(owner)" type="button" class="btn btn-light px-2">
                         <i class="fa-solid fa-xmark fa-fw"></i>
                     </button>
                 </div>
@@ -134,7 +134,7 @@ export default {
             </div>
 
             <div class="form-check form-switch fs-4">
-                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
+                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" :checked="filesSelect.cc_only" @click="filesSelect.cc_only = !filesSelect.cc_only;render()">
                 <label class="form-check-label" for="flexSwitchCheckChecked"><i class="fa-brands fa-creative-commons fa-fw"></i> and <i class="fa-brands fa-creative-commons-zero fa-fw"></i> license only</label>
             </div>
         </div>
@@ -517,6 +517,7 @@ export default {
                 sort: "time",
                 dir: "dec",
                 search: "",
+                cc_only: true,
                 addusers: {},
             },
             contract: {},
@@ -629,11 +630,34 @@ export default {
         addAsset(id, contract) {
             this.$emit("addassets", { id, contract });
         },
+        cycleView(user){
+            const view = this.filesSelect.addusers[user]
+            switch(view){
+                case true:
+                    this.filesSelect.addusers[user] = 'cc'
+                    break
+                case false:
+                    this.filesSelect.addusers[user] = true
+                    break
+                case 'lock':
+                    this.filesSelect.addusers[user] = false
+                    break
+                case 'cc':
+                    this.filesSelect.addusers[user] = 'lock'
+                    break
+            }
+            this.render()
+        },
+        purge(user){
+            delete this.filesSelect.addusers[user]
+            this.owners = this.owners.filter(o => o != user)
+            this.render()
+        },
         appendUserFiles() {
             const newUser = this.newUser
             this.newUser = ''
             this.filesSelect.addusers[newUser] = true
-            fetch("https://spktest.dlux.io/@" + newUser)
+            if(newUser)fetch("https://spktest.dlux.io/@" + newUser)
                 .then((response) => response.json())
                 .then((data) => {
                     for (var node in data.file_contracts) {
@@ -966,6 +990,20 @@ export default {
 
                     }
                 }
+                switch (this.filesSelect.addusers[file.o]){
+                    case false:
+                        return false
+                    case 'lock':
+                        if (!(file.lf & 1)) return false
+                        break
+                    case 'cc':
+                        if (!file.lic) return false
+                    case true:
+                        break
+                    default:
+                        return false
+                }
+                if(this.filesSelect.cc_only && !file.lic) return false
                 if (this.filesSelect.search && file.n.toLowerCase().indexOf(this.filesSelect.search.toLowerCase()) == -1) return false
                 return true
             })
@@ -1122,6 +1160,7 @@ export default {
                                 e: this.contract[id].e.split(':')[0],
                                 n: this.newMeta[id][filesNames[i]].name || keys[j],
                                 y: this.newMeta[id][filesNames[i]].type || keys[j],
+                                o: this.contract[id].t,
                                 index: i,
                                 lf: this.newMeta[id][filesNames[i]].flags || 0,
                                 l: this.newMeta[id][filesNames[i]].labels,
@@ -1187,5 +1226,7 @@ export default {
             deep: true
         }
     },
-    mounted() { },
+    mounted() { 
+        this.filesSelect.addusers[this.account] = true
+    },
 };
