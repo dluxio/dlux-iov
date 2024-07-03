@@ -74,7 +74,7 @@ export default {
                             <!-- spk wallet button -->
                             <button v-if="!nodeview" type="button" class="btn btn-sm btn-dark border-info text-info d-flex justify-content-center" data-bs-toggle="modal" data-bs-target="#spkWalletModal" style="width:110px;">
                                 <i class="fa-solid fa-wallet fa-fw me-1 my-auto"></i>
-                                <span class="my-auto">SPK</span>
+                                <span class="my-auto">Wallet</span>
                                 <span class="badge small text-bg-info text-black ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
                             </button>
                             <button type="button" class="btn btn-sm btn-dark border-warning text-warning" style="width:110px;"><i class="fa-solid fa-bolt fa-fw me-1"></i>Power Up</button> 
