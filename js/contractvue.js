@@ -36,7 +36,7 @@ export default {
                                 <span class="my-auto">Wallet</span>
                                 <span class="badge small text-bg-secondary text-black ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
                             </button>
-                            <modal-vue type="power" token="SPK" :test="test"
+                            <modal-vue type="power" token="SPK" test="test"
                                     func="Power Up" :balance="saccountapi.spk"
                                     :account="account"
                                     @modalsign="sendIt($event)" v-slot:trigger>

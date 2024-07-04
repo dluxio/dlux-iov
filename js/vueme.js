@@ -23,6 +23,7 @@ import FTTransfer from "/js/fttransfer.js";
 import NFTDetail from "/js/nftdetail.js";
 import SPKVue from "/js/spk-wallet-comp.js";
 import Assets from "/js/assets-min.js"
+import MFI from "/js/mfi-vue.js";
 
 
 let url = location.href.replace(/\/$/, "");
@@ -904,6 +905,7 @@ createApp({
     "nftdetail": NFTDetail,
     "tagify": Tagify,
     "choices-vue": ChoicesVue,
+    "mfi-vue": MFI,
   },
   methods: {
     getSetPhotos(s, c) {
