@@ -176,25 +176,26 @@ export default {
                     <div class="ms-auto me-auto d-flex justify-content-center">
                         <div class="card mx-1 px-3 py-2 mt-3 mb-4 bg-darker" style="max-width: 600px">
                             <h2 class="fw-light mt-1">No files found</h2>
-                            <p class="lead mb-1" v-show="saccountapi.spk_power">Click <a
-                                        class="btn btn-sm btn-dark border-info text-info no-decoration small" style="font-size: 0.6em; width: 72px;"
-                                        role="button" data-bs-toggle="modal" data-bs-target="#contractModal">
-                                        <modal-vue type="build" token="BROCA"
-                                            :balance="broca_calc(saccountapi.broca)" :account="account"
-                                            @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
-                                            v-slot:trigger>
-                                            <span slot="trigger" class="trigger"><i
-                                                    class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
-                                        </modal-vue></a>
+                            <p class="lead mb-1" v-show="saccountapi.spk_power">
+                            Click 
+                                <a class="btn btn-sm btn-dark border-info text-info no-decoration small" style="font-size: 0.6em; width: 72px;" role="button" data-bs-toggle="modal" data-bs-target="#contractModal">
+                                    <modal-vue type="build" token="BROCA"
+                                        :balance="broca_calc(saccountapi.broca)" :account="account"
+                                        @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
+                                        v-slot:trigger>
+                                        <span slot="trigger" class="trigger"><i
+                                                class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
+                                    </modal-vue>
+                                </a>
                                     to create a contract using SPK Power
-                                </span>
+                                
                             </p>
                             <p class="lead mb-1" v-if="!nodeview">
                                 Click <a class="btn btn-sm btn-dark border-success text-success no-decoration small" style="font-size: 0.6em; width:72px;"
                                     role="button" data-bs-toggle="modal" data-bs-target="#sponsoredModal"><i
                                         class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE</a>
                                 to select a sponsored contract</p>
-                                </p>
+                                
                                 
                         </div>
                     </div>
@@ -234,14 +235,12 @@ export default {
                                                             class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
                                                 </modal-vue></a>
                                             to create a contract using SPK Power
-                                        </span>
                                     </p>
                                     <p class="lead mb-1" v-if="!nodeview">
                                         Click <a class="btn btn-sm btn-dark border-success text-success no-decoration small" style="font-size: 0.6em; width:72px;"
                                             role="button" data-bs-toggle="modal" data-bs-target="#sponsoredModal"><i
                                                 class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE</a>
                                         to select a sponsored contract</p>
-                                        </p>
                                         
                                 </div>
                             </div>
