@@ -133,7 +133,7 @@ export default {
                                 aria-controls="filestab" aria-expanded="false">FILES</a>
                         </li>
                         <li v-if="cc" class="nav-item">
-                            <a class="nav-link" aria-current="page" href="#ccTab" role="tab" data-bs-toggle="tab"
+                            <a class="nav-link px-4" aria-current="page" href="#ccTab" role="tab" data-bs-toggle="tab"
                                 aria-controls="cctab" aria-expanded="false">Files</a>
                         </li>
                     </ul>
