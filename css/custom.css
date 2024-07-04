@@ -12794,6 +12794,53 @@ td {
   backdrop-filter: blur(10px);
 }
 
+.circle {
+  width: 50px;
+  height: 50px;
+  line-height: 50px;
+  border-radius: 50%;
+  font-size: 25px;
+  color: #fff;
+  text-align: center;
+  background: #000;
+}
+
+.circle2 {
+  width: 75px;
+  height: 75px;
+  line-height: 75px;
+  border-radius: 50%;
+  font-size: 50px;
+  color: crimson;
+  text-align: center;
+  background: #000;
+}
+
+.arrow {
+  position: absolute;
+  background: #ffc107;
+  border-radius: 50%;
+  border: black thick solid;
+  text-align: center;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 4rem;
+  height: 4rem;
+  z-index: 1;
+  color: crimson;
+}
+
+.arrow2 {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.card-ft {
+  width: 26em;
+}
+
 #imagesMain {
   padding: 0;
   margin-left: auto;

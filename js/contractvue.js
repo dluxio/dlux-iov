@@ -51,7 +51,7 @@ export default {
                     <div class="progress mb-1" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
                         <div class="progress-bar" :style="'width:' + (broca_calc(saccountapi.broca)/(saccountapi.spk_power*1000))*100 + '%;'">{{ formatNumber((broca_calc(saccountapi.broca)/(saccountapi.spk_power*1000))*100,'2','.',',') }}%</div>
                     </div>
-                    <a href="#" class="text-center text-primary">Get more power</a>
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#buyTokenModal" class="text-center text-primary">Get more power</a>
                 </div>
             </div>
 
@@ -62,7 +62,7 @@ export default {
                     <div class="progress mb-1" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
                         <div class="progress-bar" :style="'width:' + (usedBytes/availableBytes)*100 + '%;'"></div>
                     </div>
-                    <a href="#" class="text-center text-primary">Get more storage</a>
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#buyTokenModal" class="text-center text-primary">Get more storage</a>
                 </div>
             </div>
 
