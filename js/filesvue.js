@@ -7,7 +7,7 @@ export default {
         "choices-vue": ChoicesVue
     },
     template: `
-<div class="d-flex flex-grow-1 flex-column p-05 rounded m-05">
+<div class="d-flex flex-grow-1 flex-column rounded">
     <div class="pt-1">
         <!-- USER INPUT -->
             <div v-if="cc" class="d-flex flex-column flex-grow-1 mb-1 mx-1">
@@ -56,7 +56,8 @@ export default {
             
 
         <!-- ACTION BAR -->
-        <div class="d-flex flex-wrap align-items-center justify-content-center mx-1">
+        <div class="d-flex border-bottom border-white-50">
+        <div class="d-flex flex-wrap align-items-center justify-content-center mx-1 flex-grow-1">
             
             <!-- Search -->
             <div class="position-relative flex-grow-1 mb-1 me-1">
@@ -132,7 +133,7 @@ export default {
                 </ul>
             </div>
 
-        
+        </div>
         </div>
 
         
