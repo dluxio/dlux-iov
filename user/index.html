@@ -1519,6 +1519,148 @@
                 </div>
             </div>
 
+            <!-- Get Token Modal-->
+            <div class="modal fade" id="buyTokenModal" tabindex="-1" role="dialog" aria-labelledby="buyDluxModalTitle"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document" id="buy-modal">
+                    <div class="modal-content">
+                        <form class="needs-validation" novalidate id="marketorderform" @submit.prevent="dexBuy()">
+                            <input id="markethbd" value="0" class="d-none">
+                            <input id="marketqty" value="0" class="d-none">
+                            <input id="markettime" value="0" class="d-none">
+                            <div class="modal-header d-flex flex-fill justify-content-between align-items-center">
+                                <h5 class="modal-title">MARKET ORDER</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="small text-white-50">Market Orders utilize multisig to
+                                    complete partial fills of open orders on the <a
+                                        :href="'/dex#' + marketorder.name">DEX</a>,
+                                    starting
+                                    with the lowest rate to ensure you're getting the best
+                                    price.</p>
+                                <div class="d-flex flex-column">
+                                    <div class="d-flex flex-column flex-fill rounded-top p-3 bg-darker">
+                                        <div class="d-flex flex-row flex-fill align-items-center">
+                                            <p style="font-size: 18px;" class="p-0 m-0 font-weight-light">From
+                                            </p>
+                                            <div class="d-flex ms-auto align-items-baseline">
+                                                <div class="d-flex small justify-content-between">
+                                                    <p class="my-0 text-white-50">Available<i
+                                                            class="fab fa-hive mx-1"></i></p>
+                                                    <p @click="popOrder()" class="my-0 text-primary">
+                                                        {{ barhive }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex flex-row flex-fill mt-1">
+                                            <div class="d-flex align-items-center">
+                                                <div class="circle2"><i class="fab fa-hive"></i>
+                                                </div>
+                                                <h2 class="p-0 m-0 ms-2 font-weight-bold">HIVE
+                                                </h2>
+                                            </div>
+                                            <div class="d-flex ms-auto flex-column">
+                                                <p class="ms-auto my-0 text-white-50 font-weight-bolder"
+                                                    style="font-size: 30px;">
+                                                    <input class="form-control text-white" v-model="marketorder.hive"
+                                                        style="background-color: rgba(0,0,0,0.5); max-width: 150px"
+                                                        id="markethive" value="1" placeholder="0" type="number"
+                                                        min="0.001" step="0.001" required @change="marketValue()"
+                                                        @keyup="marketValue()" :max="parseFloat(barhive)">
+                                                </p>
+                                                <p class="ms-auto my-0 text-muted font-weight-bold"
+                                                    style="font-size: 16px;">
+                                                    &asymp;
+                                                    $ {{ marketorder.hive * hiveprice }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <div></div>
+                                            <div>
+                                                <button class="btn btn-outline-secondary btn-sm text-muted"
+                                                    type="button" data-bs-toggle="collapse"
+                                                    data-bs-target="#collapseExample" aria-expanded="false"
+                                                    aria-controls="collapseExample"><i
+                                                        class="fas fa-info-circle"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="collapse" id="collapseExample">
+                                            <div class="d-flex">
+                                                <p style="font-size: 18px;"
+                                                    class="p-0 m-0 text-white-50 font-weight-light">
+                                                    Rate</p>
+                                                <p style="font-size: 16px;" class="p-0 m-0 text-white-50 ms-auto">1
+                                                    HIVE
+                                                    &asymp; {{1 / chains[marketorder.name].account.tick }} DLUX
+                                                </p>
+                                            </div>
+                                            <div class="d-flex">
+                                                <p style="font-size: 12px;"
+                                                    class="p-0 m-0 text-muted ms-auto text-success">
+                                                    1 DLUX &asymp; {{chains[marketorder.name].account.tick}}
+                                                    HIVE</p>
+                                            </div>
+                                            <hr width="100%" style="border: #333 thin solid">
+                                            <div class="d-flex">
+                                                <p style="font-size: 18px;"
+                                                    class="p-0 m-0 text-white-50 font-weight-light">
+                                                    Swap Fee<small
+                                                        class="rounded-pill border border-secondary py-05 px-1 ms-1">0.1%</small>
+                                                </p>
+                                                <p style="font-size: 16px;" class="p-0 m-0 text-white-50 ms-auto">
+                                                    &asymp;
+                                                    <input id="marketfee" class="d-none"
+                                                        value="((markethive.value/dexview1.data[0].rate)*0.001).formatNumber(3,'.',',')">
+                                                    {{ (marketorder.hive * .999 ) *
+                                                    chains[marketorder.name].account.tick}} DLUX
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="p-0 m-0 bg-dark">
+                                        <div class="arrow2 rounded-circle border border-warning bg-darker text-warning">
+                                            <h1 class="m-2 px-2 py-1"><i class="fas fa-angle-double-down"></i>
+                                            </h1>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex flex-column flex-fill rounded-bottom p-3 border border-warning"
+                                        style="background: radial-gradient(#222,#111);">
+                                        <div class="d-flex flex-row flex-fill align-items-center">
+                                            <p style="font-size: 18px;" class="p-0 m-0 font-weight-light">To</p>
+                                        </div>
+                                        <div class="d-flex flex-row flex-fill mt-1 align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                <div class="circle2 d-flex align-items-center justify-content-around">
+                                                    <img src="/img/dlux-hive-logo-alpha.svg" width="70%">
+                                                </div>
+                                                <h2 class="p-0 m-0 ms-2 font-weight-bold">
+                                                    {{toUpperCase(marketorder.name)}}
+                                                </h2>
+                                            </div>
+                                            <div class="d-flex ms-auto">
+                                                <p class="ms-auto my-0 text-warning font-weight-bolder"
+                                                    style="font-size: 30px;">&asymp;
+                                                    {{ marketorder.value / 1000}}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="d-flex justify-content-around">
+                                    <button type="submit" class="btn btn-lg btn-primary">Convert</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
 
         </main>
         <!-- Footer -->
