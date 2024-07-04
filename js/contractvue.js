@@ -120,16 +120,16 @@ export default {
     <div v-if="saccountapi.pubKey != 'NA'" class="d-flex flex-column card p-0"  >
 
         <!-- top menu -->
-        <div class="pb-1 mb-2">
-            <div class="d-flex flex-wrap align-items-center border-bottom border-2 border-white">
+        <div class="pb-1 mb-3">
+            <div class="d-flex flex-wrap align-items-center ">
                 <div class="mx-auto ">
-                    <ul class="nav nav-underline mx-auto mt-3 fs-5 ">
+                    <ul class="nav nav-pills rounded-pill border border-light border-1 mx-auto mt-3 fs-5 ">
                         <li class="nav-item">
-                            <a class="nav-link active" href="#contractsTab" role="tab" data-bs-toggle="tab"
+                            <a class="nav-link active px-4" href="#contractsTab" role="tab" data-bs-toggle="tab"
                                 aria-controls="contractstab" aria-expanded="true">CONTRACTS</a>
                         </li>
                         <li v-if="!cc" class="nav-item">
-                            <a class="nav-link" aria-current="page" href="#filesTab" role="tab" data-bs-toggle="tab"
+                            <a class="nav-link px-4" aria-current="page" href="#filesTab" role="tab" data-bs-toggle="tab"
                                 aria-controls="filestab" aria-expanded="false">FILES</a>
                         </li>
                         <li v-if="cc" class="nav-item">
