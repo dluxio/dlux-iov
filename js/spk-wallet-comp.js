@@ -356,23 +356,10 @@ export default {
                 id="larynxclaimrewards" v-if="(saccountapi.claim > 0 || saccountapi.claim_spk > 0  ) && me">
                 <div v-if="saccountapi.claim">
                     <div class="d-flex align-items-start">
-                        <h4 class="m-0">LARYNX Rewards Claim
+                        <h4 class="m-0">Claims
                         </h4>
                     </div>
-                    <p class="text-white-50">Claimable rewards
-                        for running a
-                        SPK service
-                        node.</p>
-                </div>
-                <div v-if="saccountapi.claim_spk">
-                    <div class="d-flex align-items-start">
-                        <h4 class="m-0">SPK Rewards Claim
-                        </h4>
-                    </div>
-                    <p class="text-white-50">Claimable rewards
-                        for running a
-                        SPK service
-                        node or delegating Larynx to them.</p>
+                    <p class="text-white-50">New distrobutions from: Running a service, delegating to a service provider, participation in the Larynx auction...</p>
                 </div>
                 <div id="claimlarynxrewardbtn" class="ms-auto text-end">
                     <h5 v-if="saccountapi.claim">{{formatNumber((saccountapi.claim)/1000, 3, '.', ',')}} LARYNX
