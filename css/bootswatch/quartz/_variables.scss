@@ -135,6 +135,10 @@ $nav-pills-border-radius:           $border-radius-pill !default;
 $nav-pills-link-active-color:       $white !default;
 $nav-pills-link-active-bg:          $primary !default;
 
+$nav-underline-gap:                 2rem;
+$nav-underline-border-width:        .5rem;
+$nav-underline-link-active-color:   rgba($teal, 1);
+
 // Navbars
 
 $navbar-dark-color:                 rgba($white, .8) !default;

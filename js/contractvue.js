@@ -121,16 +121,16 @@ export default {
 
         <!-- top menu -->
         <div class="pb-1 mb-2">
-            <div class="mx-1 mx-lg-3 d-flex flex-wrap align-items-center">
-                <div class="mx-auto">
-                    <ul class="nav nav-tabs mx-auto mt-3 fs-5 ">
+            <div class="d-flex flex-wrap align-items-center border-bottom border-2 border-white">
+                <div class="mx-auto ">
+                    <ul class="nav nav-underline mx-auto mt-3 fs-5 ">
                         <li class="nav-item">
                             <a class="nav-link active" href="#contractsTab" role="tab" data-bs-toggle="tab"
-                                aria-controls="contractstab" aria-expanded="true">Contracts</a>
+                                aria-controls="contractstab" aria-expanded="true">CONTRACTS</a>
                         </li>
                         <li v-if="!cc" class="nav-item">
                             <a class="nav-link" aria-current="page" href="#filesTab" role="tab" data-bs-toggle="tab"
-                                aria-controls="filestab" aria-expanded="false">Files</a>
+                                aria-controls="filestab" aria-expanded="false">FILES</a>
                         </li>
                         <li v-if="cc" class="nav-item">
                             <a class="nav-link" aria-current="page" href="#ccTab" role="tab" data-bs-toggle="tab"
