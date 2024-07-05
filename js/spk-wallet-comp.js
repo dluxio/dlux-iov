@@ -359,7 +359,7 @@ export default {
                         <h4 class="m-0">Claims
                         </h4>
                     </div>
-                    <p class="text-white-50">New distrobutions from: Running a service, delegating to a service provider, participation in the Larynx auction...</p>
+                    <p class="text-white-50">New distributions from: Running a service, delegating to a service provider, participation in the Larynx auction...</p>
                 </div>
                 <div id="claimlarynxrewardbtn" class="ms-auto text-end">
                     <h5 v-if="saccountapi.claim">{{formatNumber((saccountapi.claim)/1000, 3, '.', ',')}} LARYNX
