@@ -1185,6 +1185,27 @@ a-scene {
 $scroll-count: 5;
 $scroll: 1 / $scroll-count;
 
+// Flex Table
+$table-header: #1976D2;
+$table-header-border: #1565C0;
+$table-border: rgba(0,0,0,1);
+$row-bg: #434343;
+$row-hover: #292846;
+
+.flex-table {
+  &:hover {
+    background: $row-hover;
+    transition: 500ms;
+  }
+  &:nth-child(odd) {
+    background: $row-bg;
+    &:hover {
+      background: $row-hover;
+      transition: 500ms;
+    }
+  } 
+}
+
 .box {
   height: 60px;
   overflow: hidden;

@@ -13587,6 +13587,18 @@ a-scene {
   --bs-btn-active-color: #000;
 }
 
+.flex-table:hover {
+  background: #292846;
+  transition: 500ms;
+}
+.flex-table:nth-child(odd) {
+  background: #434343;
+}
+.flex-table:nth-child(odd):hover {
+  background: #292846;
+  transition: 500ms;
+}
+
 .box {
   height: 60px;
   overflow: hidden;
