@@ -170,7 +170,12 @@ export default {
             <div class="flex-table d-flex flex-wrap align-items-center justify-content-end" role="rowgroup" v-for="file in filesArray">
                 <div class="" role="cell">
                     <div style="width: 70px;">
-                        <div class="bg-light rounded first m-1" style="width: 50px;">
+                        
+                            
+                        <div class="bg-light position-relative rounded first m-1" style="width: 50px;">
+                            <div class="position-absolute bottom-0 end-0 bg-dark rounded-circle small px-05">
+                                <i class="fa-solid fa-lock"></i>
+                            </div>
                             <img v-if="newMeta[file.i][file.f].thumb" class="img-fluid rounded" :src="newMeta[file.i][file.f].thumb_data"  >
                             <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                                     viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
@@ -191,6 +196,7 @@ export default {
                                 </g>
                             </svg>
                         </div>
+                     
                     </div>
                 </div>
                 <div class="flex-grow-1 first" role="cell">
