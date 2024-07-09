@@ -173,7 +173,7 @@ export default {
                         
                             
                         <div class="bg-light position-relative rounded first m-1" style="width: 50px;">
-                            <div v-if="flagsDecode(newMeta[file.i][file.f].flags, 1)" class="position-absolute bottom-0 end-0 bg-dark rounded-circle small px-05">
+                            <div v-if="flagsDecode(newMeta[file.i][file.f].flags, 1).length" class="position-absolute bottom-0 end-0 bg-dark rounded-circle small px-05">
                                 <i class="fa-solid fa-lock"></i>
                             </div>
                             <img v-if="newMeta[file.i][file.f].thumb" class="img-fluid rounded" :src="newMeta[file.i][file.f].thumb_data"  >
