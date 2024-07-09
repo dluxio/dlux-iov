@@ -173,7 +173,7 @@ export default {
                         
                             
                         <div class="bg-light position-relative rounded first m-1" style="width: 50px;">
-                            <div class="position-absolute bottom-0 end-0 bg-dark rounded-circle small px-05">
+                            <div v-if="flagsDecode(newMeta[file.i][file.f].flags, 1)" class="position-absolute bottom-0 end-0 bg-dark rounded-circle small px-05">
                                 <i class="fa-solid fa-lock"></i>
                             </div>
                             <img v-if="newMeta[file.i][file.f].thumb" class="img-fluid rounded" :src="newMeta[file.i][file.f].thumb_data"  >
@@ -223,7 +223,7 @@ export default {
                             </div>
                             <!-- flags -->
                             <div class="d-flex align-items-center">
-                            <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 2)" >
+                            <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)" >
                                     <!-- title="Labels"  -->
                                     <pop-vue :id="'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')" :title="flag.l" trigger="hover">
                                         <i :class="flag.fa"></i>
@@ -333,7 +333,7 @@ export default {
                         </div>
                         <!-- flags -->
                         <div class="d-flex align-items-center">
-                        <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 2)" >
+                        <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)" >
                                 <!-- title="Labels"  -->
                                 <pop-vue :id="'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')" :title="flag.l" trigger="hover">
                                     <i :class="flag.fa"></i>
@@ -544,7 +544,7 @@ export default {
                                 </div>
 
                                 <div class="d-flex align-items-center">
-                                <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 2)" >
+                                <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)" >
                                         <!-- title="Labels"  -->
                                         <pop-vue :id="'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')" :title="flag.l" trigger="hover">
                                             <i :class="flag.fa"></i>
