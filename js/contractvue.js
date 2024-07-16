@@ -54,8 +54,8 @@ export default {
                 <span class="d-flex align-items-center">Power</span></div>
                 <div class="d-flex flex-column card-body px-2 py-1">
                     <div class="mb-1 fw-light text-center " style="font-size: 1.1rem !important;">{{formatNumber(saccountapi.spk_power/1000,'3','.',',')}} SPK Power</div>
-                    <div class="progress mb-1" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar" :style="'width:' + (broca_calc(saccountapi.broca)/(saccountapi.spk_power*1000))*100 + '%;'">{{ formatNumber((broca_calc(saccountapi.broca)/(saccountapi.spk_power*1000))*100,'2','.',',') }}%</div>
+                    <div class="progress mb-1 is-danger" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar" :style="{'width':  saccountapi.spk_power ? (broca_calc(saccountapi.broca)/(saccountapi.spk_power*1000))*100 + '%' : '0%' }">{{ formatNumber((broca_calc(saccountapi.broca)/(saccountapi.spk_power*1000))*100,'2','.',',') }}%</div>
                     </div>
                     <a href="#" data-bs-toggle="modal" data-bs-target="#buyTokenModal" class="text-center text-primary">Get more power</a>
                 </div>
@@ -467,9 +467,9 @@ export default {
                                                                                 <div class="d-flex flex-wrap justify-content-around justify-content-md-between mx-1 mx-md-2 pt-1 pt-md-2">
                                                                                     <div class="fs-1 fw-bold align-items-start">SPK Network</div>
                                                                                    <div class="input-group-text">
-                                                                                        <div class="form-check form-switch fs-5">
+                                                                                        <div class="form-check form-switch fs-5" :class="{'is-danger': !saccountapi.spk}">
                                                                                             <input class="form-check-input" type="checkbox" checked="" role="switch" :id="contract.i + 'autoRenew'" v-model="newMeta[contract.i].contract.autoRenew">
-                                                                                            <label class="form-check-label ms-auto" :for="contract.i + 'autoRenew'">Auto-Renew</label>
+                                                                                            <label class="form-check-label ms-auto" :class="{'text-danger': !saccountapi.spk}" :for="contract.i + 'autoRenew'">Auto-Renew</label>
                                                                                         </div>
                                                                                     </div>
                                                                                  
@@ -942,6 +942,9 @@ export default {
     methods: {
         getdelimed(string, del = ',', index = 0) {
             return string.split(del)[index] ? string.split(del)[index] : ''
+        },
+        sendIt(event){
+            this.$emit('tosign', event)
         },
         getImgData(id, cid) {
             var string = this.smartThumb(id, cid)

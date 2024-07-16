@@ -55,7 +55,7 @@ export default {
                                                 <p class="ms-auto my-0 text-muted font-weight-bold"
                                                     style="font-size: 16px;">
                                                     &asymp;
-                                                    $ marketorder.hive * hiveprice
+                                                    $ {{ (markethive * hiveprice) }}
                                                 </p>
                                             </div>
                                         </div>
@@ -95,9 +95,9 @@ export default {
                                                 <p style="font-size: 16px;" class="p-0 m-0 text-white-50 ms-auto">
                                                     &asymp;
                                                     <input v-model="marketfee" class="d-none"
-                                                        value="((markethive.value/dexview1.data[0].rate)*0.001).formatNumber(3,'.',',')">
-                                                     (marketorder.hive * .999 ) *
-                                                    dex.hive.tick {{ TOKEN }}
+                                                        value="((markethive/dex.sellBook.split('_')[0])*0.001).formatNumber(3,'.',',')">
+                                                     {{(markethive * .999 ) *
+                                                    dex.tick}} {{ protocol.TOKEN }}
                                                 </p>
                                             </div>
                                         </div>
@@ -125,7 +125,7 @@ export default {
                                             <div class="d-flex ms-auto">
                                                 <p class="ms-auto my-0 text-warning font-weight-bolder"
                                                     style="font-size: 30px;">&asymp;
-                                                    marketorder.value / 1000
+                                                    {{(markethive/(dex.sellBook ? dex.sellBook.split('_')[0] : 0 ))}}
                                                 </p>
                                             </div>
                                         </div>
@@ -154,6 +154,7 @@ export default {
         prefix: "",
         multisig: "",
         jsontoken: "",
+        TOKEN: "SPK",
       },
       marketorder: {
         hive: 1,
@@ -161,6 +162,9 @@ export default {
         value: 1,
         dex: []
       },
+      dex:{
+
+      }
     }
   },
   props: {
@@ -191,7 +195,13 @@ export default {
           
         };
       },
-    }
+    },
+    hiveprice: {
+      type: Number,
+      required: false,
+      default: 0
+    },
+    
   },
   methods: {
     init(){
@@ -199,6 +209,7 @@ export default {
         fetch(this.api + "/api/protocol")
         .then((response) => response.json())
         .then((data) => {
+          console.log(data)
           this.protocol.prefix = data.prefix;
           this.protocol.multisig = data.multisig;
           this.protocol.jsontoken = data.jsontoken;
@@ -213,39 +224,40 @@ export default {
         fetch(this.api + "/dex")
         .then((response) => response.json())
         .then((data) => {
-          this.protocol.prefix = data.prefix;
-          this.protocol.multisig = data.multisig;
-          this.protocol.jsontoken = data.jsontoken;
-          this.marketorder.name = data.jsontoken;
-          this.protocol.TOKEN = data.jsontoken.toUpperCase();
-          this.protocol.node = data.node;
-          this.protocol.features = data.features ? data.features : this.features;
-          this.protocol.behind = data.behind;
-          this.protocol.behindTitle = data.behind + " Blocks Behind Hive";
-          this.protocol.volume = {}
+          this.dex = data.markets.hive
+          // this.protocol.multisig = data.multisig;
+          // this.protocol.jsontoken = data.jsontoken;
+          // this.marketorder.name = data.jsontoken;
+          // this.protocol.TOKEN = data.jsontoken.toUpperCase();
+          // this.protocol.node = data.node;
+          // this.protocol.features = data.features ? data.features : this.features;
+          // this.protocol.behind = data.behind;
+          // this.protocol.behindTitle = data.behind + " Blocks Behind Hive";
+          // this.protocol.volume = {}
         })
         fetch(this.api + "/@" + this.account )
         .then((response) => response.json())
         .then((data) => {
-          this.protocol.prefix = data.prefix;
-          this.protocol.multisig = data.multisig;
-          this.protocol.jsontoken = data.jsontoken;
-          this.marketorder.name = data.jsontoken;
-          this.protocol.TOKEN = data.jsontoken.toUpperCase();
-          this.protocol.node = data.node;
-          this.protocol.features = data.features ? data.features : this.features;
-          this.protocol.behind = data.behind;
-          this.protocol.behindTitle = data.behind + " Blocks Behind Hive";
-          this.protocol.volume = {}
+          // this.protocol.prefix = data.prefix;
+          // this.protocol.multisig = data.multisig;
+          // this.protocol.jsontoken = data.jsontoken;
+          // this.marketorder.name = data.jsontoken;
+          // this.protocol.TOKEN = data.jsontoken.toUpperCase();
+          // this.protocol.node = data.node;
+          // this.protocol.features = data.features ? data.features : this.features;
+          // this.protocol.behind = data.behind;
+          // this.protocol.behindTitle = data.behind + " Blocks Behind Hive";
+          // this.protocol.volume = {}
         })
       }
     },
     dexBuy(){
+      if(this.markethive)
       this.$emit('tosign', {
         type: "xfr",
         cj: {
           to: this.protocol.multisig,
-          hive: parseInt(this.marketorder.hive) * 1000,
+          hive: parseInt(this.markethive) * 1000,
           memo: ``,
         },
         txid: "sendhive",
@@ -263,6 +275,7 @@ export default {
       handler: function (newValue) {
         if (newValue) {
           this.account = this.accountinfo.name;
+          this.init();
         }
       },
       deep: true
@@ -270,5 +283,6 @@ export default {
   },
   mounted() {
     this.account = this.accountinfo.name;
+    this.init();
   }
 };
