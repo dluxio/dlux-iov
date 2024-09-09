@@ -1010,10 +1010,10 @@ export default {
           </li>
           <div class="btn-group dropdown">
 		      <a class="nav-link mt-auto mb-auto d-flex align-items-center dropdown-toggle dropdown-bs-toggle text-white-50" id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
-			    <div v-show="user" class="p-0 d-md-none me-1 nav-link d-flex align-items-center text-white-50">
-            <img :src="avatar" id="userImage" alt="" width="40" height="40" class="img-fluid rounded-circle bg-light cover"> 
-          </div>  
-          <span id="userName" class="mx-1 d-none d-md-flex">{{user}}</span>
+            <div v-show="user" class="p-0 d-md-none me-1 nav-link d-flex align-items-center text-white-50">
+              <img :src="avatar" id="userImage" alt="" width="40" height="40" class="img-fluid rounded-circle bg-light cover"> 
+            </div>  
+            <span id="userName" class="mx-1 d-none d-md-flex">{{user}}</span>
           </a>
           <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black mt-2" aria-labelledby="userDropdown" >
           <li class="">
@@ -1117,7 +1117,7 @@ export default {
       </div>
     </div>
 
-    <div v-if="PEN">
+    <div v-if="false">
     <!-- v-if no pin -->
       <div>
       <div>
