@@ -1117,8 +1117,7 @@ export default {
       </div>
     </div>
 
-    <div v-if="false">
-    <!-- v-if no pin -->
+   <!-- <div v-if="false">
       <div>
       <div>
       <div class="d-flex justify-content-center align-items-center">
@@ -1264,7 +1263,7 @@ export default {
     </div>
     </div>
 
-    
+    -->
       
     <div class="mb-3">
       <div>
