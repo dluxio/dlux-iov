@@ -4,13 +4,12 @@ export default {
     components: {
         "bennies": Bennies
     },
-    template: `
-    <div class="modal fade" id="transferModal" tabindex="-1" aria-labelledby="transferModalLabel" :aria-hidden="true">
+    template: `<div class="modal fade" id="transferModal" tabindex="-1" aria-labelledby="transferModalLabel" :aria-hidden="true">
    <div class="modal-dialog modal-full modal-xl modal-dialog-centered" role="document">
       <div class="modal-content rounded bg-img-none">
 
-         <!-- START HEAD -->
          <div class="card bg-img-none bg-blur-none">
+            <!-- START HEAD -->
             <div class="card-header border-0 d-flex align-items-center" :style="{'background': colors}">
                <div class="nft-header">
                   <div class="me-auto rounded px-2 py-1 shimmer border border-dark">
@@ -35,10 +34,8 @@ export default {
                      aria-label="Close"></button>
                </div>
             </div>
-
             <!-- START BODY -->
             <div class="card-body row d-flex ">
-
                <!-- Mint detail col 1 -->
                <div class="col-lg-6 px-0 px-sm-2">
                   <div class="col-12 px-0 px-sm-2">
@@ -62,24 +59,26 @@ export default {
                         </h3>
                         <!-- owner info -->
                         <div class="ms-auto" v-if="item.from">
-                                   <a title="Item From" :href="'/@' + item.from" role="button" class="btn btn-lg btn-outline-light" v-if="item.from != account">
-                                   <i class="fa-solid fa-truck-arrow-right fa-flip-horizontal fa-fw me-1"></i>  
-                                      {{item.from}}
-                                   </a>
-                                   <a title="Item To" :href="'/@' + item.to" role="button" class="btn btn-lg btn-outline-light" v-if="item.from == account">
-                                   <i class="fa-solid fa-truck-arrow-right fa-fw me-1"></i>
-                                      {{item.to}}
-                                   </a>
-                                </div>
-                                
+                           <a title="Item From" :href="'/@' + item.from" role="button"
+                              class="btn btn-lg btn-outline-light" v-if="item.from != account">
+                              <i class="fa-solid fa-truck-arrow-right fa-flip-horizontal fa-fw me-1"></i>
+                              {{item.from}}
+                           </a>
+                           <a title="Item To" :href="'/@' + item.to" role="button" class="btn btn-lg btn-outline-light"
+                              v-if="item.from == account">
+                              <i class="fa-solid fa-truck-arrow-right fa-fw me-1"></i>
+                              {{item.to}}
+                           </a>
+                        </div>
+
                         <!--Open-->
                         <div class="ms-auto" v-if="qty > 0 && !item.from">
                            <button type="button" class="btn btn-outline-success" title="Open Mint" @click="openFT()"><i
                                  class="fas fa-box-open fa-fw me-2"></i> Open</button>
                         </div>
                         <div class="ms-auto" v-if="qty == 0 && !item.from">
-                           <button disabled type="button" class="btn btn-outline-secondary disabled" title="Open Mint" @click="openFT()"><i
-                                 class="fas fa-box-open fa-fw me-2"></i> Open</button>
+                           <button disabled type="button" class="btn btn-outline-secondary disabled" title="Open Mint"
+                              @click="openFT()"><i class="fas fa-box-open fa-fw me-2"></i> Open</button>
                         </div>
 
                      </div>
@@ -89,7 +88,7 @@ export default {
                                  class="fas fa-caret-square-left"></i></a>
                         </h2>
                         <small class="ms-auto text-muted"><i>
-                                {{activeindex + 1}} of {{numitems}} set{{numitems > 1 ? 's' : ''}}</i></small>
+                              {{activeindex + 1}} of {{numitems}} set{{numitems > 1 ? 's' : ''}}</i></small>
                         <h2 class="ms-auto"><a class="text-muted p-3" role="button" @click="modalNext()"><i
                                  class="fas fa-caret-square-right"></i></a>
                         </h2>
@@ -97,8 +96,6 @@ export default {
                   </div>
 
                </div>
-
-
                <!-- Mint detail col 2 -->
                <div class="col-lg-6 px-0 px-sm-2">
                   <div class="accordion" id="ftAccordion">
@@ -125,8 +122,8 @@ export default {
                                  <div
                                     class="text-start small border border-secondary rounded text-white px-2 py-1 w-100">
                                     <div class="d-flex align-items-center justify-content-start flex-wrap">
-                                     <span class="mb-0" title="Royalties"><i class="fa-solid fa-crown fa-fw"></i>
-                                    {{setdetail.royalty / 100}}%</span>
+                                       <span class="mb-0" title="Royalties"><i class="fa-solid fa-crown fa-fw"></i>
+                                          {{setdetail.royalty / 100}}%</span>
                                        <span v-if="!inventory" class="mb-0 ms-2" title="Total Number of Owners"><i
                                              class="fa-solid fa-user-astronaut fa-fw"></i> {{setdetail.owners}}</span>
                                        <span v-if="!inventory" class="mb-0 ms-2" title="Total Number of Items"><i
@@ -144,7 +141,7 @@ export default {
                                        <span class="mb-0 me-2" title="Total Market Dividends Paid Out to Owners"><i
                                              class="fa-solid fa-money-bill-trend-up fa-fw"></i>{{naiString(setdetail.total_div)}}</span>
                                     </div>
-                                   
+
                                  </div>
                               </div>
 
@@ -156,13 +153,17 @@ export default {
                      <!-- Mint Transfer -->
                      <div class="accordion-item" v-if="qty > 0 && !item.from">
                         <h2 class="accordion-header">
-                           <button onclick="this.blur();" class="accordion-button" type="button" v-bind:class="{'collapsed' : setdetail.forSaleMint || setdetail.forAuctionMint}"
+                           <button onclick="this.blur();" class="accordion-button" type="button"
+                              v-bind:class="{'collapsed' : setdetail.forSaleMint || setdetail.forAuctionMint}"
                               data-bs-toggle="collapse" data-bs-target="#collapseftTransfer" aria-expanded="false"
                               aria-controls="collapseftTransfer">
-                              <i class="fas fa-exchange-alt me-3"></i>TRANSFER<span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em">{{formatNumber(qty,0,'.',',')}}</span>
+                              <i class="fas fa-exchange-alt me-3"></i>TRANSFER<span
+                                 class="ms-1 badge rounded-pill bg-danger"
+                                 style="font-size: .7em">{{formatNumber(qty,0,'.',',')}}</span>
                            </button>
                         </h2>
-                        <div id="collapseftTransfer" class="accordion-collapse collapse" v-bind:class="{'show' : !setdetail.forSaleMint && !setdetail.forAuctionMint}"
+                        <div id="collapseftTransfer" class="accordion-collapse collapse"
+                           v-bind:class="{'show' : !setdetail.forSaleMint && !setdetail.forAuctionMint}"
                            data-bs-parent="#ftAccordion">
                            <div class="accordion-body">
                               <div class="">
@@ -371,7 +372,8 @@ export default {
                                                 return immediately.</p>
                                           </div>
                                           <div class="text-center">
-                                             <button type="submit" id="sellFTbutton" class="btn btn-info my-2" @click="sellFT()">List
+                                             <button type="submit" id="sellFTbutton" class="btn btn-info my-2"
+                                                @click="sellFT()">List
                                                 Item</button>
                                           </div>
                                        </form>
@@ -379,8 +381,7 @@ export default {
                                     <div role="tabpanel" class="tab-pane fade show " id="auctionFTtab"
                                        aria-labelledby="auctionFT">
                                        <!-- AUCTION FORM -->
-                                       <form class="needs-validation mt-4" novalidate
-                                          @submit.prevent="auctionFT()">
+                                       <form class="needs-validation mt-4" novalidate @submit.prevent="auctionFT()">
                                           <!--:action="javascript:auctionFT('{{item.data.set}}','{{auctionFTprice.value}}','{{Date.now()}}','{{auctionFTdays.value}}'),'{{auctionFTpriceType.value}}'"-->
                                           <div class="">
                                              <div class="">
@@ -569,7 +570,8 @@ export default {
                                     <h5 class="small m-0">PRICE:</h5>
                                  </div>
                                  <div class="text-start mt-auto mb-auto" style="flex: 2">
-                                    <h5 class="lead m-0 text-uppercase">{{formatNumber(item.price/1000,3,'.',',')}} {{item.token}}</h5>
+                                    <h5 class="lead m-0 text-uppercase">{{formatNumber(item.price/1000,3,'.',',')}}
+                                       {{item.token}}</h5>
                                  </div>
                               </div>
                               <div class="d-flex align-items-center my-2">
@@ -582,144 +584,155 @@ export default {
                               </div>
                               </section>
                               <div class="mt-3 mb-1">
-                              <!-- ACCEPT / REJECT -->
-                              <div role="group" v-if="item.to == account">
-                                 <button type="button" class="btn btn-danger" title="Decline Trade"
-                                    @click="cancelXfr()"><i class="fa-solid fa-xmark fa-fw me-2"></i>Decline</button>
-                                 <button type="button" class="btn ps-05 pe-05 border-0" disabled></button>
-                                 <button type="button" class="btn btn-success" title="Accept Trade"
-                                    @click="acceptXfr()"><i class="fa-solid fa-check fa-fw me-2"></i> Accept</button>
+                                 <!-- ACCEPT / REJECT -->
+                                 <div role="group" v-if="item.to == account">
+                                    <button type="button" class="btn btn-danger" title="Decline Trade"
+                                       @click="cancelXfr()"><i class="fa-solid fa-xmark fa-fw me-2"></i>Decline</button>
+                                    <button type="button" class="btn ps-05 pe-05 border-0" disabled></button>
+                                    <button type="button" class="btn btn-success" title="Accept Trade"
+                                       @click="acceptXfr()"><i class="fa-solid fa-check fa-fw me-2"></i> Accept</button>
+                                 </div>
+                                 <!-- CANCEL -->
+                                 <div role="group" v-if="item.from == account">
+                                    <button type="button" class="btn btn-warning" title="Cancel Trade"
+                                       @click="cancelXfr()">
+                                       <i class="fa-solid fa-xmark fa-fw me-2"></i> Cancel</button>
+                                 </div>
                               </div>
-                              <!-- CANCEL -->
-                              <div role="group" v-if="item.from == account">
-                                 <button type="button" class="btn btn-warning" title="Cancel Trade"
-                                    @click="cancelXfr()">
-                                    <i class="fa-solid fa-xmark fa-fw me-2"></i> Cancel</button>
-                              </div>
-                              </div>
-                           </div>
-                        </div>
-                        </div>
-                     </div>
-
-                     <!-- Mint Sales -->
-                     <div class="accordion-item" v-if="setdetail.forSaleMint">
-                        <h2 class="accordion-header">
-                           <button onclick="this.blur();" v-bind:class="{'collapsed' : setdetail.forAuctionMint }"
-                              class="accordion-button" type="button" data-bs-toggle="collapse"
-                              data-bs-target="#collapseftBuy" aria-expanded="true" aria-controls="collapseftBuy">
-                              <i class="fas fa-money-bill-wave me-3"></i><span>BUY
-                                 NOW</span><span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em">{{formatNumber(setdetail.forSaleMint,0,'.',',')}}</span><span class="small ms-auto" v-if="setdetail?.mintSales?.length">{{formatNumber(setdetail.mintSales[0].pricenai.amount/1000,3,'.',',')}} {{setdetail.mintSales[0].pricenai.token}}</span>
-                           </button>
-                        </h2>
-                        <div id="collapseftBuy" class="accordion-collapse collapse" data-bs-parent="#ftAccordion" v-bind:class="{'show' : !setdetail.forAuctionMint }">
-                           <div class="accordion-body px-0">
-                           <table class="table table-sm">
-                           <thead>
-                              <tr>
-                                 <th scope="col" class="small">SUPPLY</th>
-                                 <th scope="col" class="small">PRICE</th>
-                                 <th scope="col" class="small">QTY</th>
-                                 <th scope="col" class="small"></th>
-                              </tr>
-                           </thead>
-                           <tbody>
-                              <div v-for="ad in setdetail.mintSales">
-                              <tr scope="row">
-                                 <td style="vertical-align: middle">
-                                    {{formatNumber(ad.qty,0,'.',',')}}</td>
-                                 <td style="vertical-align: middle">
-                                    {{naiString(ad.pricenai)}}</td>
-                                 <td>
-                                    <span v-show="true" class="text-center">
-                                       <form class="needs-validation" novalidate @submit.prevent="buyFT(ad)">
-                                          <input value="1" required type="number" min="1" step="1" :max="ad.qty"
-                                             class="form-control text-info" style="max-width: 100px"
-                                             v-model="ad.buyQty">
-                                          <button type="submit" class="btn btn-info d-none"
-                                             v-show="ad.by != account">
-                                             Buy</button>
-                                       </form>
-                                    </span>
-                                 </td>
-                                 <td>
-                                    <div>
-                                       <button type="button" class="btn btn-info" v-show="ad.by != account"
-                                          @click="buyFT(ad)">Buy</button>
-                                       <button class="btn btn-warning" v-show="ad.by == account" @click="cancelSaleFT(ad)">Cancel</button>
-                                    </div>
-                                 </td>
-                              </tr>
-                              <tr scope="row">
-                                 <th scope="row" colspan="4" class="bg-white-50 text-black text-end">
-                                    <span class="me-2">Total: {{formatNumber(toFixed(ad.buyQty *
-                                       ad.pricenai.amount/1000,0),3,'.',',')}}
-                                       {{ad.pricenai.token}}
-                                    </span>
-                                 </th>
-                              </tr>
-                           </div>
-                           </tbody>
-                        </table>
                            </div>
                         </div>
                      </div>
+                  </div>
 
-                     <!-- Mint Auctions -->
-                     <div class="accordion-item" v-if="setdetail.forAuctionMint">
-                        <h2 class="accordion-header">
-                           <button onclick="this.blur();" class="accordion-button" type="button"
-                              data-bs-toggle="collapse" data-bs-target="#collapseftBid" aria-expanded="true"
-                              aria-controls="collapseftBid">
-                              <i class="fas fa-comment-dollar me-3"></i><span>AUCTIONS
-                                 </span><span class="ms-1 badge rounded-pill bg-danger" style="font-size: .7em">{{formatNumber(setdetail.mintAuctions.length,0,'.',',')}}</span><span class="small ms-auto" v-if="setdetail.mintSales?.length">{{formatNumber(setdetail.mintAuctions[0].pricenai.amount/1000,3,'.',',')}} {{setdetail.mintAuctions[0].pricenai.token}}</span>
-                           </button>
-                        </h2>
-                        <div id="collapseftBid" class="accordion-collapse collapse show" data-bs-parent="#ftAccordion">
-                           <div class="accordion-body px-0">
+                  <!-- Mint Sales -->
+                  <div class="accordion-item" v-if="setdetail.forSaleMint">
+                     <h2 class="accordion-header">
+                        <button onclick="this.blur();" v-bind:class="{'collapsed' : setdetail.forAuctionMint }"
+                           class="accordion-button" type="button" data-bs-toggle="collapse"
+                           data-bs-target="#collapseftBuy" aria-expanded="true" aria-controls="collapseftBuy">
+                           <i class="fas fa-money-bill-wave me-3"></i><span>BUY
+                              NOW</span><span class="ms-1 badge rounded-pill bg-danger"
+                              style="font-size: .7em">{{formatNumber(setdetail.forSaleMint,0,'.',',')}}</span><span
+                              class="small ms-auto"
+                              v-if="setdetail?.mintSales?.length">{{formatNumber(setdetail.mintSales[0].pricenai.amount/1000,3,'.',',')}}
+                              {{setdetail.mintSales[0].pricenai.token}}</span>
+                        </button>
+                     </h2>
+                     <div id="collapseftBuy" class="accordion-collapse collapse" data-bs-parent="#ftAccordion"
+                        v-bind:class="{'show' : !setdetail.forAuctionMint }">
+                        <div class="accordion-body px-0">
                            <table class="table table-sm">
-                                 <thead>
-                                    <tr>
-                                       <th scope="col" class="small">QTY</th>
-                                       <th scope="col" class="small">MIN</th>
-                                       <th scope="col" class="small">BID</th>
-                                       <th scope="col" class="small"></th>
-                                    </tr>
-                                 </thead>
-                                 <tbody>
-                                    <div v-for="auc in setdetail.mintAuctions">
-                                    <tr scope="row">
-                                       <td style="vertical-align: middle">1</td>
+                              <thead>
+                                 <tr>
+                                    <th scope="col" class="small">SUPPLY</th>
+                                    <th scope="col" class="small">PRICE</th>
+                                    <th scope="col" class="small">QTY</th>
+                                    <th scope="col" class="small"></th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                 
+                                    <tr scope="row" v-for="ad in setdetail.mintSales">
                                        <td style="vertical-align: middle">
-                                       {{formatNumber(auc.price/1000,3,'.',',')}} {{auc.pricenai.token}}</td>
+                                          {{formatNumber(ad.qty,0,'.',',')}}</td>
+                                       <td style="vertical-align: middle">
+                                          {{naiString(ad.pricenai)}}</td>
                                        <td>
-                                       <input class="form-control " type="number" :step="0.001" :min="auc.price /1000" v-model="auc.bidAmount">
+                                          <span v-show="true" class="text-center">
+                                             <form class="needs-validation" novalidate @submit.prevent="buyFT(ad)">
+                                                <input value="1" required type="number" min="1" step="1" :max="ad.qty"
+                                                   class="form-control text-info" style="max-width: 100px"
+                                                   v-model="ad.buyQty">
+                                                <button type="submit" class="btn btn-info d-none"
+                                                   v-show="ad.by != account">
+                                                   Buy</button>
+                                             </form>
+                                          </span>
                                        </td>
                                        <td>
-                                       <button class="btn btn-primary" @click="bidFT(auc)">Bid</button>
+                                          <div>
+                                             <button type="button" class="btn btn-info" v-show="ad.by != account"
+                                                @click="buyFT(ad)">Buy</button>
+                                             <button class="btn btn-warning" v-show="ad.by == account"
+                                                @click="cancelSaleFT(ad)">Cancel</button>
+                                          </div>
                                        </td>
                                     </tr>
-                                    
                                     <tr scope="row">
-                                       <th scope="row" colspan="4" class="bg-danger-50 text-center">
-                                          <span>Ends in {{animateCountdown(auc.time)}}<span v-if="auc.bidder"> - {{auc.bidder}} is winning</span></span>
+                                       <th scope="row" colspan="4" class="bg-white-50 text-black text-end">
+                                          <span class="me-2">Total: {{formatNumber(toFixed(ad.buyQty *
+                                             ad.pricenai.amount/1000,0),3,'.',',')}}
+                                             {{ad.pricenai.token}}
+                                          </span>
                                        </th>
                                     </tr>
-                                    </div>
-                                 </tbody>
-                              </table>
-                           </div>
+                                 
+                              </tbody>
+                           </table>
                         </div>
                      </div>
+                  </div>
 
-                     
+                  <!-- Mint Auctions -->
+                  <div class="accordion-item" v-if="setdetail.forAuctionMint">
+                     <h2 class="accordion-header">
+                        <button onclick="this.blur();" class="accordion-button" type="button" data-bs-toggle="collapse"
+                           data-bs-target="#collapseftBid" aria-expanded="true" aria-controls="collapseftBid">
+                           <i class="fas fa-comment-dollar me-3"></i><span>AUCTIONS
+                           </span><span class="ms-1 badge rounded-pill bg-danger"
+                              style="font-size: .7em">{{formatNumber(setdetail.mintAuctions.length,0,'.',',')}}</span><span
+                              class="small ms-auto"
+                              v-if="setdetail.mintSales?.length">{{formatNumber(setdetail.mintAuctions[0].pricenai.amount/1000,3,'.',',')}}
+                              {{setdetail.mintAuctions[0].pricenai.token}}</span>
+                        </button>
+                     </h2>
+                     <div id="collapseftBid" class="accordion-collapse collapse show" data-bs-parent="#ftAccordion">
+                        <div class="accordion-body px-0">
+                           <table class="table table-sm">
+                              <thead>
+                                 <tr>
+                                    <th scope="col" class="small">QTY</th>
+                                    <th scope="col" class="small">MIN</th>
+                                    <th scope="col" class="small">BID</th>
+                                    <th scope="col" class="small"></th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                 
+                                    <tr scope="row" v-for="auc in setdetail.mintAuctions">
+                                       <td style="vertical-align: middle">1</td>
+                                       <td style="vertical-align: middle">
+                                          {{formatNumber(auc.price/1000,3,'.',',')}} {{auc.pricenai.token}}</td>
+                                       <td>
+                                          <input class="form-control " type="number" :step="0.001"
+                                             :min="auc.price /1000" v-model="auc.bidAmount">
+                                       </td>
+                                       <td>
+                                          <button class="btn btn-primary" @click="bidFT(auc)">Bid</button>
+                                       </td>
+                                    </tr>
+
+                                    <tr scope="row">
+                                       <th scope="row" colspan="4" class="bg-danger-50 text-center">
+                                          <span>Ends in {{animateCountdown(auc.time)}}<span v-if="auc.bidder"> -
+                                                {{auc.bidder}} is winning</span></span>
+                                       </th>
+                                    </tr>
+                                 
+                              </tbody>
+                           </table>
+                        </div>
+                     </div>
+                  </div>
+
+
 
                   </div>
                </div>
             </div>
          </div>
       </div>
-     
+
    </div>
 </div>`,
     // @click="modalIndex('itemModal', item.set + ':' + item.uid );hidden = false"
