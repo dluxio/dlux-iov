@@ -44,7 +44,7 @@ if (!lapi) {
 console.log(lapi);
 if (
   lapi == "https://token.dlux.io" ||
-  lapi == "https://spkinstant.hivehoneycomb.com" ||
+  lapi == "https://spkgiles.hivehoneycomb.com/" ||
   lapi == "https://duat.hivehoneycomb.com"
 ) {
   console.log("using defaults");
@@ -1853,7 +1853,7 @@ createApp({
     },
     apiFor(prefix) {
       if (prefix == "dlux_") return "https://token.dlux.io";
-      if (prefix == "spkcc_") return "https://spkinstant.hivehoneycomb.com";
+      if (prefix == "spkcc_") return "https://spkgiles.hivehoneycomb.com/";
       if (prefix == "duat_") return "https://duat.hivehoneycomb.com";
       else return "";
     },
