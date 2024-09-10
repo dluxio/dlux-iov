@@ -1,4 +1,4 @@
-this.version = "2024.09.10.3";
+this.version = "2024.09.10.4";
 
 console.log( "SW:" + this.version + " - online.");
 
@@ -202,7 +202,6 @@ function tryLocal(m) {
 function callScript (o,p){
     if (this.nftscripts[o.script] && this.nftscripts[o.script] != "Loading...") {
       const code = `(//${this.nftscripts[o.script]}\n)("${ o.uid ? o.uid : 0}")`;
-      console.log(code);
       var computed = eval(code);
       computed.uid = o.uid || "";
       computed.owner = o.owner || "";
