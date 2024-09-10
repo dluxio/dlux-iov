@@ -1,4 +1,4 @@
-this.version = "2024.09.10.6";
+this.version = "2024.09.10.7";
 
 console.log( "SW:" + this.version + " - online.");
 
@@ -98,7 +98,7 @@ var urlsToCache = [
   `/js/uuidv.js`,
   `/js/vote-min.js`,
   `/js/vrvue.js`,
-  `/js/vueme-min.js`,
+  // `/js/vueme-min.js`,
   `/js/vueqr.js`,
   `/new/360-gallery/index.html`,
   `/new/advanced/index.html`,
