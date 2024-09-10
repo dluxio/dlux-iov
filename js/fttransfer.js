@@ -658,14 +658,14 @@ export default {
                                           </div>
                                        </td>
                                     </tr>
-                                    <tr scope="row">
+                                    <!--<tr scope="row">
                                        <th scope="row" colspan="4" class="bg-white-50 text-black text-end">
                                           <span class="me-2">Total: {{formatNumber(toFixed(ad.buyQty *
                                              ad.pricenai.amount/1000,0),3,'.',',')}}
                                              {{ad.pricenai.token}}
                                           </span>
                                        </th>
-                                    </tr>
+                                    </tr>-->
                                  
                               </tbody>
                            </table>
