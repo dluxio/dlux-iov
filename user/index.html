@@ -64,7 +64,11 @@
                 .then(reg => {
                     console.log('Registration succeeded. Scope is ' + reg.scope);
                     activeWorker = reg.active;
+                    console.log('Service Worker Ready for VUE')
                 })
+                .catch(error => {
+                    console.log('Registration failed with ' + error);
+                });
         }
     </script>
     <script src="/js/purify.min.js"></script>
