@@ -64,7 +64,7 @@
                 .then(reg => {
                     console.log('Registration succeeded. Scope is ' + reg.scope);
                     activeWorker = reg.active;
-                    console.log('Service Worker Ready for VUE')
+                    console.log('Service Worker Ready for VUE', activeWorker)
                 })
                 .catch(error => {
                     console.log('Registration failed with ' + error);
