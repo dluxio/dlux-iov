@@ -819,7 +819,7 @@ export default {
           }
           let api =
             url ||
-            prompt("Please enter your API", "https://spkgiles.hivehoneycomb.com");
+            prompt("Please enter your API", "https://spkinstant.hivehoneycomb.com");
           if (url.indexOf("https://") == -1) {
             alert("https is required");
             return;

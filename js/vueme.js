@@ -28,7 +28,7 @@ import MFI from "/js/mfi-vue.js";
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "",
-  sapi = "https://spkgiles.hivehoneycomb.com";
+  sapi = "https://spkinstant.hivehoneycomb.com";
 if (location.search) {
   const string = location.search.replace("?", "");
   let params = string.split("&");
@@ -56,7 +56,7 @@ if (location.search) {
 //     if (hash[1].includes("dlux")) {
 //         lapi = "https://token.dlux.io";
 //     } else if (hash[1].includes("larynx")) {
-//         lapi = "https://spkgiles.hivehoneycomb.com";
+//         lapi = "https://spkinstant.hivehoneycomb.com";
 //     } else if (hash[1].includes("duat")) {
 //         lapi = "https://duat.hivehoneycomb.com";
 //     }
@@ -66,7 +66,7 @@ if (!lapi) {
 }
 if (
   lapi == "https://token.dlux.io" ||
-  lapi == "https://spkgiles.hivehoneycomb.com" ||
+  lapi == "https://spkinstant.hivehoneycomb.com" ||
   lapi == "https://inconceivable.hivehoneycomb.com"
 ) {
   console.log("using defaults");
@@ -1834,7 +1834,7 @@ function giveFT(setname, to, qty, callback){
     },
     apiFor(prefix) {
       if (prefix == "dlux_") return "https://token.dlux.io";
-      if (prefix == "spkcc_") return "https://spkgiles.hivehoneycomb.com";
+      if (prefix == "spkcc_") return "https://spkinstant.hivehoneycomb.com";
       if (prefix == "duat_") return "https://inconceivable.hivehoneycomb.com";
       else return "";
     },
@@ -2556,7 +2556,7 @@ function buyNFT(setname, uid, price, type, callback){
       }
       let api =
         url ||
-        prompt("Please enter your API", "https://spkgiles.hivehoneycomb.com");
+        prompt("Please enter your API", "https://spkinstant.hivehoneycomb.com");
       if (url.indexOf("https://") == -1) {
         alert("https is required");
         return;

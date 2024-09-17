@@ -387,7 +387,7 @@ export default {
         id: `${this.spkprefix}_val_vote`,
         msg: `Voting for Validators...`,
         ops: ["getSapi"],
-        api: "https://spkgiles.hivehoneycomb.com",
+        api: "https://spkinstant.hivehoneycomb.com",
         txid: "val_vote",
       };
       if (op) {
@@ -468,7 +468,7 @@ export default {
             id: `${this.d.spkprefix}${this.d.test ? 'T' : ''}_power_down`,
             msg: `Canceling Power Down...`,
             ops: ["getSapi"],
-            api: "https://spkgiles.hivehoneycomb.com",
+            api: "https://spkinstant.hivehoneycomb.com",
             txid: "cancel power down",
           };
       } else if (this.d.func == "powercancel") {
@@ -482,7 +482,7 @@ export default {
             id: `${this.d.spkprefix}${this.d.test ? 'T' : ''}_power_grant`,
             msg: `Canceling Power Down...`,
             ops: ["getSapi"],
-            api: "https://spkgiles.hivehoneycomb.com",
+            api: "https://spkinstant.hivehoneycomb.com",
             txid: "cancel power down",
           };
       }
@@ -544,7 +544,7 @@ export default {
           id: `${this.d.spkprefix}${this.d.test ? 'T' : ''}_spk_send`,
           msg: `Trying to send ${this.d.token}...`,
           ops: ["getSapi"],
-          api: "https://spkgiles.hivehoneycomb.com",
+          api: "https://spkinstant.hivehoneycomb.com",
           txid: "send",
         };
       else if (this.d.token == "LARYNX")
@@ -558,7 +558,7 @@ export default {
           id: `${this.d.spkprefix}${this.d.test ? 'T' : ''}_send`,
           msg: `Trying to send ${this.d.token}...`,
           ops: ["getSapi"],
-          api: "https://spkgiles.hivehoneycomb.com",
+          api: "https://spkinstant.hivehoneycomb.com",
           txid: "send",
         };
       else if (this.d.token == "HIVE")
@@ -614,7 +614,7 @@ export default {
           id: `${this.d.spkprefix}${this.d.test ? 'T' : ''}_power_grant`,
           msg: `Trying to delegate ${this.d.token}...`,
           ops: ["getSapi"],
-          api: "https://spkgiles.hivehoneycomb.com",
+          api: "https://spkinstant.hivehoneycomb.com",
           txid: "delegate",
         };
       if (op) {
@@ -713,7 +713,7 @@ export default {
           id: `spkcc${this.d.test ? 'T' : ''}_power_down`,
           msg: `Trying to power down ${this.d.token}...`,
           ops: ["getSapi"],
-          api: "https://spkgiles.hivehoneycomb.com",
+          api: "https://spkinstant.hivehoneycomb.com",
           txid: "send",
         };
       else if (this.d.token == "LARYNX" && this.d.func == "Register a Service")
@@ -803,7 +803,7 @@ export default {
           id: `${this.d.spkprefix}_power_up`,
           msg: `Trying to power up ${this.d.token}...`,
           ops: ["getSapi"],
-          api: "https://spkgiles.hivehoneycomb.com",
+          api: "https://spkinstant.hivehoneycomb.com",
           txid: "send",
         };
       else if (this.d.token == "LARYNX" && this.d.func == "Unlock")
@@ -815,7 +815,7 @@ export default {
           id: `${this.d.spkprefix}_gov_down`,
           msg: `Trying to unlock ${this.d.token}...`,
           ops: ["getSapi"],
-          api: "https://spkgiles.hivehoneycomb.com",
+          api: "https://spkinstant.hivehoneycomb.com",
           txid: "send",
         };
       else if (this.d.token == "LARYNX" && this.d.func == "Lock Liquidity")
@@ -827,7 +827,7 @@ export default {
           id: `${this.d.spkprefix}_gov_up`,
           msg: `Trying to lock ${this.d.token}...`,
           ops: ["getSapi"],
-          api: "https://spkgiles.hivehoneycomb.com",
+          api: "https://spkinstant.hivehoneycomb.com",
           txid: "send",
         };
       if (op) {
