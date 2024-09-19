@@ -15,7 +15,7 @@
 	<link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
 	<link href="/css/custom.css" rel="stylesheet" />
 	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-	<script type="module" src="/js/indexvue.js"></script>
+	<script type="module" src="/js/vueme.js"></script>
 	<script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
 	<script>
 		if ('serviceWorker' in navigator) {
@@ -98,17 +98,18 @@
 									class="form-control bg-dark border-0 text-info" id="tokenCap"
 									aria-describedby="tokenCapHelp" v-model="newToken.token">
 								<div id="tokenCapHelp" class="form-text">Normally All Caps</div>
+								<button v-if="newToken.token" @click="defaults()">Use Suggestions</button>
 							</div>
 							<div class="mb-3">
 								<label for="tokenTagName" class="lead form-label">Token Tag Name</label>
-								<input required="required" type="text" :placeholder="'ex: ' + lc(newToken.token)"
+								<input required="required" type="text" :placeholder="'ex: ' + toLowerCase(newToken.token)"
 									class="form-control bg-dark border-0 text-info" id="tokenTagName"
 									aria-describedby="tokenTagNameHelp"  v-model="newToken.tag">
-								<div id="tokenTagNameHelp" class="form-text">Enter the preferred tag for your community: /{{lc(newToken.token)}}/@author/permlink</div>
+								<div id="tokenTagNameHelp" class="form-text">Enter the preferred tag for your community: /{{toLowerCase(newToken.token)}}/@author/permlink</div>
 							</div>
 							<div class="mb-3">
 								<label for="tokenJson" class="lead form-label">Token JSON</label>
-								<input required="required" type="text" :placeholder="'ex: ' + lc(newToken.token)"
+								<input required="required" type="text" :placeholder="'ex: ' + toLowerCase(newToken.token)"
 									class="form-control bg-dark border-0 text-info" id="tokenJson"
 									aria-describedby="tokenJsonHelp" v-model="newToken.jsontoken">
 								<div id="tokenJsonHelp" class="form-text">Enter the JSON <i
@@ -117,7 +118,7 @@
 							<div class="mb-3">
 								<label for="tokenPrefix" class="lead form-label">Token Prefix
 								</label>
-								<input required="required" type="text" :placeholder="'ex: ' + lc(newToken.token) + '_'"
+								<input required="required" type="text" :placeholder="'ex: ' + toLowerCase(newToken.token) + '_'"
 									class="form-control bg-dark border-0 text-info" id="tokenPrefix"
 									aria-describedby="tokenPrefixHelp" v-model="newToken.prefix">
 								<div id="tokenPrefixHelp" class="form-text">Enter the prefix for your token</div>
@@ -148,8 +149,8 @@
 								<label for="tokenApi" class="lead form-label">Public API
 								</label>
 								<input required="required" type="text" class="form-control bg-dark border-0 text-info"
-									placeholder="token.dlux.io" id="tokenApi" aria-describedby="tokenApiHelp"  v-model="newToken.mainapi">
-								<div id="tokenApiHelp" class="form-text">Enter the API for your token</div>
+									:placeholder="'token.' + this.newToken.tag + '.io'" id="tokenApi" aria-describedby="tokenApiHelp"  v-model="newToken.mainapi">
+								<div id="tokenApiHelp" class="form-text">Enter the API for your token. The leader should maintain this.</div>
 							</div>
 							<!--5 Which account is the Multi-sig account / Make a multi-sig account-->
 							<div class="mb-3" v-show="newToken.decent">
@@ -160,7 +161,7 @@
 										<i class="fa-solid fa-at fa-fw"></i>
 									</span>
 									<input required="required" type="text" aria-describedby="tokenMultiSigHelp"
-										class="ps-4 form-control text-info bg-dark border-0" id="tokenMultiSig">
+										class="ps-4 form-control text-info bg-dark border-0" v-model="newToken.ms" id="tokenMultiSig">
 								</div>
 								<div id="tokenMultiSigHelp" class="form-text">Enter the multi-sig account for your token
 								</div>

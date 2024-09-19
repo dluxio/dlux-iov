@@ -105,6 +105,618 @@ createApp({
           multisig: "ragnarok-cc",
         }
       },
+      newToken: {
+        token: "",
+        longname: "",
+        icon: "",
+        des: "",
+        wp: "",
+        precision: 3,
+        tag: "",
+        jsontoken: "",
+        leader: "",
+        ben: "",
+        mainapi: "",
+        decent: true,
+        mainrender: "",
+        mainfe: "",
+        startingblock: 0,
+        prefix: "",
+        del: "",
+        delw: 0,
+        ms: "",
+        mspubmemo: "",
+        msprimemo: "",
+        adverts: [],
+        footer: "",
+        mainico: "",
+        mainipfs: "",
+        hiveServiceFee: 0,
+        featpob: false,
+        featdel: false,
+        featdaily: false,
+        featliq: false,
+        featico: false,
+        featinf: false,
+        featdex: false,
+        featnft: false,
+        featstate: false,
+        featdrop: false,
+        ipfsrate: 0,
+        budgetrate: 0,
+        curationrate: 0,
+        delegationrate: 0,
+        marketingrate: 0,
+        maxbudget: 0,
+        noderate: 0,
+        savingsrate: 0,
+        tokensupply: 0,
+        apyint: 0,
+        dist: {},
+        powDist: {},
+        govDist: {},
+        configJSON:{
+          LEADER: "",
+          PREFIX: "",
+          TOKEN: "",
+          PRECISION: 3,
+          TAG: "",
+          JSONTOKEN: "",
+          MS: "",
+          MSPUBMEMO: "",
+          MSPRIMEMO: "",
+          MAINAPI: "",
+          MAINRENDER: "",
+          MAINFE: "",
+          MAINIPFS: "",
+          MAINICO: "",
+          FOOTER: "",
+          HIVESERVICEFEE: 0,
+          FEATPOB: false,
+          FEATDEL: false,
+          FEATDAILY: false,
+          FEATLIQ: false,
+          FEATICO: false,
+          FEATINF: false,
+          FEATDEX: false,
+          FEATNFT: false,
+          FEATSTATE: false,
+          FEATDROP: false,
+          IPFSRATE: 0,
+          BUDGETRATE: 0,
+          CURRATIONRATE: 0,
+          DELEGATIONRATE: 0,
+          MARKETINGRATE: 0,
+          MAXBUDGET: 0,
+          NODERATE: 0,
+          SAVINGSRATE: 0,
+          TOKENSUPPLY: 0,
+          APYINT: 0,
+          DIST: {},
+          POWDIST: {},
+          GOVDIST: {},
+          BEN: "",
+          DEL: "",
+          DELW: 0,
+          STARTINGBLOCK: 0,
+          ADVERTS: [],
+          HIVEBAL: 0,
+          HBDBAL: 0,
+          LONGNAME: "",
+          ICON: "",
+          DES: "",
+          WP: "",
+
+        },
+        configText: `require("dotenv").config()
+        const { getPathObj, getPathNum } = require("./getPathObj")
+        const { store } = require("./index");
+        const { chronAssign } = require("./lil_ops")
+        const ENV = process.env;
+        const username = ENV.account || "$LEADER";
+        const active = ENV.active || "";
+        const follow = ENV.follow || "$LEADER";
+        const msowner = ENV.msowner || "";
+        const mspublic = ENV.mspublic || "";
+        const memoKey = ENV.memo || "";
+        const hookurl = ENV.discordwebhook || "";
+        const NODEDOMAIN = ENV.domain || "$MAINAPI"
+        const acm = ENV.account_creator || false 
+        const mirror = ENV.mirror || false
+        const port = ENV.PORT || 3001
+        const pintoken = ENV.pintoken || ""
+        const pinurl = ENV.pinurl || ""
+        const status = ENV.status || true
+        const dbcs = ENV.DATABASE_URL || ""
+        const dbmods = ENV.DATABASE_MODS || []
+        const typeDefs = ENV.APPTYPES || {}
+        const history = ENV.history || 3600
+        const stream = ENV.stream || "irreversible"
+        const mode = ENV.mode || "normal"
+        const timeoutStart = ENV.timeoutStart || 180000;
+        const timeoutContinuous = ENV.timeoutContinuous || 30000;
+        
+        // testing configs for replays
+        const override = ENV.override || 0 //69116600 //will use standard restarts after this blocknumber
+        const engineCrank = ENV.startingHash || "QmconUD3faVGbgC2jAXRiueEuLarjfaUiDz5SA74kptuvu" //but this state will be inserted before
+        
+        const ipfshost = ENV.ipfshost || "127.0.0.1" //IPFS upload/download provider provider
+        const ipfsport = ENV.ipfsport || "5001" //IPFS upload/download provider provider
+        const ipfsprotocol = ENV.ipfsprotocol || "http" //IPFS upload/download protocol
+        var ipfsLinks = ENV.ipfsLinks
+          ? ENV.ipfsLinks.split(" ")
+          : [
+              \`\${ipfsprotocol}://\${ipfshost}:\${ipfsport}/ipfs/\`,
+              "https://ipfs.dlux.io/ipfs/",
+              "https://ipfs.3speak.tv/ipfs/",
+              "https://infura-ipfs.io/ipfs/",
+              "https://ipfs.alloyxuast.co.uk/ipfs/",
+            ];
+        
+        const bidRate = ENV.BIDRATE || 2500 //
+        
+        //HIVE CONFIGS
+        var startURL = ENV.STARTURL || "https://hive-api.dlux.io/";
+        var clientURL = ENV.APIURL || "https://hive-api.dlux.io/";
+        const clients = ENV.clients
+          ? ENV.clients.split(" ")
+          : [
+              "https://api.deathwing.me/",
+              "https://hive-api.dlux.io/",
+              "https://rpc.ecency.com/",
+              "https://hived.emre.sh/",
+              "https://rpc.ausbit.dev/",
+              "https://hive-api.dlux.io/",
+            ];
+        
+        //!!!!!!! -- THESE ARE COMMUNITY CONSTANTS -- !!!!!!!!!//
+        //TOKEN CONFIGS -- ALL COMMUNITY RUNNERS NEED THESE SAME VALUES
+        const starting_block = $STARTINGBLOCK
+        const prefix = "$PREFIX"
+        const TOKEN = "$TOKEN"
+        const precision = $PRECISION
+        const tag = "$TAG"
+        const jsonTokenName = "$JSONTOKEN"
+        const leader = "$LEADER" 
+        const ben = "$BEN"
+        const delegation = "$DEL"
+        const delegationWeight = $DELW
+        const msaccount = "$MS"
+        const msPubMemo = "$MSPUBMEMO"
+        const msPriMemo = "$MSPRIMEMO"
+        const msmeta = ""
+        const mainAPI = "$MAINAPI"
+        const mainRender = "$MAINRENDER"
+        const mainFE = "$MAINFE"
+        const mainIPFS = "$MAINIPFS"
+        const mainICO = "$MAINICO"
+        const footer = "\n$FOOTER";
+        const hive_service_fee = $HIVESERVICEFEE
+        const features = {
+            pob: $FEATPOB,
+            delegate: $FEATDEL,
+            daily: $FEATDAILY,
+            liquidity: $FEATLIQ,
+            ico: $FEATICO,
+            inflation: $FEATINF,
+            dex: $FEATDEX,
+            nft: $FEATNFT,
+            state: $FEATSTATE,
+            claimdrop: $FEATDROP
+        }
+        
+        const CustomJsonProcessing = []
+        const CustomOperationsProcessing = []
+        const CustomAPI = []
+        const CustomChron = []
+        const stateStart = {
+          "balances": {
+              "ra": 0,
+              "rb": 0,
+              "rc": 0,
+              "rd": 0,
+              "re": 0,
+              "ri": 0,
+              "rm": 0,
+              "rn": 0,
+              "rr": 0
+          },
+          "delegations": {},
+          "dex": {
+              "hbd": {
+                  "tick": "0.012500",
+                  "buyBook": ""
+              },
+              "hive": {
+                  "tick": "0.100000",
+                  "buyBook": ""
+              }
+          },
+          "gov": {
+              ["$LEADER"]: 1,
+              "t": 1 
+          },
+          "markets": {
+              "node": {
+                  ["$LEADER"]: {
+                      "attempts": 0,
+                      "bidRate": 2000,
+                      "contracts": 0,
+                      "domain": $"MAINAPI",
+                      "escrow": true,
+                      "escrows": 0,
+                      "lastGood": $STARTINGBLOCK,
+                      "marketingRate": 0,
+                      "self": ["$LEADER"],
+                      "wins": 0,
+                      "yays": 0
+                  }
+              }
+          },
+          "pow": {
+              ["$LEADER"]: 0,
+              "t": 0
+          },
+          "queue": {
+              "0": ["$LEADER"]
+          },
+          "runners": {
+              ["$LEADER"]: {
+                  "g": 1,
+              }
+          },
+          "stats": {
+              "IPFSRate": $IPFSRATE,
+              "budgetRate": $BUDGETRATE,
+              "currationRate": $CURRATIONRATE,
+              "delegationRate": $DELEGATIONRATE,
+              "hashLastIBlock": "Genesis",
+              "icoPrice": 0, 
+              "interestRate": $APYINT,
+              "lastBlock": "",
+              "marketingRate": $MARKETINGRATE,
+              "maxBudget": $MAXBUDGET,
+              "MSHeld":{
+                  "HIVE": $HIVEBAL,
+                  "HBD": $HBDBAL
+              }, 
+              "nodeRate": $NODERATE,
+              "outOnBlock": 0,
+              "savingsRate": $SAVINGSRATE,
+              "tokenSupply": $TOKENSUPPLY
+          }
+        }
+        
+        const featuresModel = {
+          claim_id: "drop_claim",
+          claim_S: "Airdrop",
+          claim_B: false,
+          claim_json: "drop_claim",
+          rewards_id: "claim",
+          rewards_S: "Rewards",
+          rewards_B: true,
+          rewards_json: "claim",
+          rewardSel: false,
+          reward2Gov: true,
+          send_id: "send",
+          send_S: "Send",
+          send_B: true,
+          send_json: "send",
+          powup_id: "power_up",
+          powup_B: false,
+          pow_val: "",
+          powdn_id: "power_down",
+          powdn_B: false,
+          powsel_up: false,
+          govup_id: "gov_up",
+          govup_B: true,
+          gov_val: "",
+          govsel_up: true,
+          govdn_id: "gov_down",
+          govdn_B: true,
+          node: {
+            id: "node_add",
+            enabled: true,
+            opts: [
+              {
+                S: "Domain",
+                type: "text",
+                info: "https://no-trailing-slash.com",
+                json: "domain",
+                val: "",
+              },
+              {
+                S: "DEX Fee Vote",
+                type: "number",
+                info: "500 = .5%",
+                max: 1000,
+                min: 0,
+                json: "bidRate",
+                val: "",
+              },
+              {
+                S: "DEX Max Vote",
+                type: "number",
+                info: "10000 = 100%",
+                max: 10000,
+                min: 0,
+                json: "dm",
+                val: "",
+              },
+              {
+                S: "DEX Slope Vote",
+                type: "number",
+                info: "10000 = 100%",
+                max: 10000,
+                min: 0,
+                json: "ds",
+                val: "",
+              },
+            ],
+          },
+          nft: [
+            {
+              id: "ft_sell",
+              enabled: true,
+              props: [
+                {
+                  name: "set",
+                  type: "string",
+                  help: "Set the FT to buy",
+                },
+                {
+                  name: "uid",
+                  type: "string",
+                  help: "UID of the FT to buy",
+                },
+                {
+                  name: "bid_amount",
+                  type: "number",
+                  help: \`milli$TOKEN\`,
+                },
+              ],
+            },
+            {
+              id: "ft_buy",
+              enabled: true,
+              props: [
+                {
+                  name: "set",
+                  type: "string",
+                  help: "Set the FT to buy",
+                },
+                {
+                  name: "uid",
+                  type: "string",
+                  help: "UID of the FT to buy",
+                },
+              ],
+            },
+            {
+              id: "nft_sell_cancel",
+              enabled: true,
+              props: [
+                {
+                  name: "set",
+                  type: "string",
+                  help: "Set the FT to cancel sell",
+                },
+                {
+                  name: "uid",
+                  type: "string",
+                  help: "UID of the FT to cancel sell",
+                },
+              ],
+            },
+            {
+              id: "ft_sell_cancel",
+              enabled: true,
+              props: [
+                {
+                  name: "set",
+                  type: "string",
+                  help: "Set the FT to cancel sell",
+                },
+                {
+                  name: "uid",
+                  type: "string",
+                  help: "UID of the FT to cancel sell",
+                },
+              ],
+            },
+            {
+              id: "ft_auction",
+              enabled: true,
+              props: [
+                {
+                  name: "set",
+                  type: "string",
+                  help: "Set the NFT to be auctioned",
+                },
+                {
+                  name: "uid",
+                  type: "string",
+                  help: "UID of the NFT to be auctioned",
+                },
+                {
+                  name: "price",
+                  type: "number",
+                  help: "milliTYPE",
+                },
+                {
+                  name: "type",
+                  type: "string",
+                  help: "HIVE or HBD",
+                },
+                {
+                  name: "time",
+                  type: "number",
+                  help: "Number of Days, 7 Max.",
+                },
+              ],
+            },
+            {
+              id: "ft_bid",
+              enabled: true,
+              props: [
+                {
+                  name: "set",
+                  type: "string",
+                  help: "Set the NFT to be bid on",
+                },
+                {
+                  name: "uid",
+                  type: "string",
+                  help: "UID of the NFT to be bid on",
+                },
+                {
+                  name: "bid_amount",
+                  type: "number",
+                  help: \`milli$TOKEN\`,
+                },
+              ],
+            },
+            {
+              id: "nft_hauction",
+              enabled: false,
+              props: [
+                {
+                  name: "set",
+                  type: "string",
+                  help: "Set the NFT to be auctioned",
+                },
+                {
+                  name: "uid",
+                  type: "string",
+                  help: "UID of the NFT to be auctioned",
+                },
+                {
+                  name: "price",
+                  type: "number",
+                  help: "milliTYPE",
+                },
+                {
+                  name: "type",
+                  type: "string",
+                  help: "HIVE or HBD",
+                },
+                {
+                  name: "time",
+                  type: "number",
+                  help: "Number of Days, 7 Max.",
+                },
+              ],
+            },
+            {
+              id: "fth_buy",
+              enabled: true,
+              props: [
+                {
+                  name: "amount",
+                  type: "number",
+                  help: \`milli$TOKEN\`,
+                },
+                {
+                  name: "qty",
+                  type: "number",
+                  help: "Purchase Quantity",
+                },
+                {
+                  name: "set",
+                  type: "string",
+                  help: "Set Name",
+                },
+                {
+                  name: "item",
+                  type: "string",
+                  help: "contract name",
+                },
+              ],
+            },
+          ]
+        }
+        const adverts = [
+            $ADVERTS
+        ]     
+        const detail = {
+                        name: "$LONGNAME",
+                        symbol: $TOKEN,
+                        icon: "$ICON",
+                        supply:"$TOKENSUPPLY",
+                        wp:"$WP",
+                        ws:"$MAINFE",
+                        be:"https://hiveblockexplorer.com/",
+                        text: "$DES"
+                    }
+        
+        let config = {
+          username,
+            active,
+            msowner,
+            mspublic,
+            memoKey,
+            timeoutContinuous,
+            timeoutStart,
+            follow,
+            NODEDOMAIN,
+            hookurl,
+            status,
+            history,
+            dbcs,
+            dbmods,
+            typeDefs,
+            mirror,
+            bidRate,
+            engineCrank,
+            port,
+            pintoken,
+            pinurl,
+            clientURL,
+            startURL,
+            clients,
+            acm,
+            override,
+            ipfshost,
+            ipfsprotocol,
+            ipfsport,
+            ipfsLinks,
+            starting_block,
+            prefix,
+            leader,
+            msaccount,
+            msPubMemo,
+            msPriMemo,
+            msmeta,
+            ben,
+            adverts,
+            delegation,
+            delegationWeight,
+            TOKEN,
+            precision,
+            tag,
+            mainAPI,
+            jsonTokenName,
+            mainFE,
+            mainRender,
+            mainIPFS,
+            mainICO,
+            detail,
+            footer,
+            hive_service_fee,
+            features,
+            stream,
+            mode,
+            featuresModel,
+            CustomJsonProcessing,
+            CustomOperationsProcessing,
+            CustomAPI,
+            CustomChron,
+            stateStart
+        };
+        
+        module.exports = config;
+        `,
+      },
       disablePost: true,
       inventory: true,
       File: [],
@@ -2423,7 +3035,7 @@ function buyNFT(setname, uid, price, type, callback){
         });
     },
     checkAccount(name, key) {
-      fetch("https://hive-api.dlux.io", {
+      if(this[name])fetch("https://hive-api.dlux.io", {
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${this[name]}\"]], \"id\":1}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -2571,6 +3183,9 @@ function buyNFT(setname, uid, price, type, callback){
     },
     toLowerCase(v) {
       return typeof v == "string" ? v.toLowerCase() : v;
+    },
+    toUpperCase(v) {
+      return typeof v == "string" ? v.toUpperCase() : v;
     },
     suggestValue(key, value) {
       if (key.split(".").length > 1) {
@@ -3332,7 +3947,7 @@ function buyNFT(setname, uid, price, type, callback){
     },
     async getSapi(user = this.account, fu) {
       this.reloaded = false
-      fetch(this.sapi + "/@" + user)
+      if(user)fetch(this.sapi + "/@" + user)
         .then((response) => response.json())
         .then((data) => {
           this.reloaded = true
@@ -3362,6 +3977,14 @@ function buyNFT(setname, uid, price, type, callback){
             this.focussaccountapi = data;
           }
         });
+    },
+    defaults() {
+      this.newToken.token = this.newToken.token.toUpperCase()
+      this.newToken.tag = this.newToken.token.toLowerCase()
+      this.newToken.jsontoken = this.newToken.tag
+      this.newToken.prefix = this.newToken.tag + '_'
+      this.newToken.leader = this.account
+      this.newToken.ms = this.newToken.tag + "-cc"
     },
     when(arr) {
       if (!arr.length) return "";
@@ -3757,6 +4380,7 @@ function buyNFT(setname, uid, price, type, callback){
       }
     } else if (location.pathname.split("/new/")[1]) {
       this.builder = true
+      this.pageAccount = this.account;
     } else {
       this.pageAccount = this.account;
       this.me = true;
