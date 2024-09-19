@@ -153,8 +153,6 @@ createApp({
         tokensupply: 0,
         apyint: 0,
         dist: {},
-        powDist: {},
-        govDist: {},
         configJSON:{
           LEADER: "",
           PREFIX: "",
@@ -3985,6 +3983,13 @@ function buyNFT(setname, uid, price, type, callback){
       this.newToken.prefix = this.newToken.tag + '_'
       this.newToken.leader = this.account
       this.newToken.ms = this.newToken.tag + "-cc"
+      if(!this.newToken.dist[this.newToken.leader])this.newToken.dist = {
+        [this.newToken.leader]: {
+          l: 0,
+          p: 0,
+          g: 1
+        }
+      }
     },
     when(arr) {
       if (!arr.length) return "";
