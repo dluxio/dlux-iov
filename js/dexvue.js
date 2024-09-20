@@ -1427,9 +1427,10 @@ var app = new Vue({
               if (
                 data.result[0].proposal.proposal_id == 322 &&
                 data.result[0].voter == user
-              )
+              ) {
                 this.hidePrompt = true;
-              else this.hidePrompt = false;
+                localStorage.setItem(`hhp:${user}`, new Date().getTime())
+               } else this.hidePrompt = false;
             });
     },
     popDEX() {
