@@ -201,9 +201,14 @@
 									</span>
 									<input required="required" type="text" aria-describedby="tokenMultiSigHelp"
 										class="ps-4 form-control text-info bg-dark border-0" v-model="newToken.ms"
-										id="tokenMultiSig">
+										id="tokenMultiSig" @blur="newAccountDeets = true; checkAccount('newToken.ms', 'newAccountDeets')">
 								</div>
 								<div id="tokenMultiSigHelp" class="form-text">Enter the multi-sig account for your token
+								</div>
+								<div v-if="newToken.ms && !newAccountDeets">
+									{{newAccount.msg}}
+									<button v-if="!newAccountDeets" @click="makePassword()">Build Account</button>
+									<button v-if="newAccount.password" @click="createAccount()">Create Account</button>
 								</div>
 							</div>
 							<!--Which features do you want?-->

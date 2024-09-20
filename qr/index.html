@@ -25,6 +25,17 @@
   <!-- Script required for account creation (key generation) -->
   <script src="https://unpkg.com/@hiveio/dhive@latest/dist/dhive.js"></script>
   <script>
+    var client = new dhive.Client(["https://hive-api.dlux.io", "https://api.hive.blog", "https://anyx.io", "https://api.openhive.network"]);
+    client.database
+      .getDiscussions("trending", { tag: "writing", limit: 1 })
+      .then(function(discussions) {
+        document.body.innerHTML += "<h1>" + discussions[0].title + "</h1>";
+        document.body.innerHTML += "<h2>by " + discussions[0].author + "</h2>";
+        document.body.innerHTML +=
+          '<pre style="white-space: pre-wrap">' + discussions[0].body + "</pre>";
+      });
+  </script>
+  <script>
     if ('serviceWorker' in navigator) {
       navigator
         .serviceWorker

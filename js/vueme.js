@@ -105,6 +105,14 @@ createApp({
           multisig: "ragnarok-cc",
         }
       },
+      nameIP: "",
+      newAccountDeets: true,
+      newAccount: {
+        name: "",
+        password: "",
+        auths: {},
+        msg: "Checking Account...",
+      },
       newToken: {
         token: "",
         longname: "",
@@ -2015,6 +2023,15 @@ createApp({
         }
       });
     },
+    makePassword(){
+      this.validateHeaders(this.account + this.newAccount.name).then(res => {
+        this.newAccount.password = res
+        this.newAccount.msg = 'Password Generated'
+      })
+    },
+    createAccount(){
+
+    },
     broca_calc(last = '0,0') {
       const last_calc = this.Base64toNumber(last.split(',')[1])
       const accured = parseInt((144000 * (this.sstats.head_block - last_calc)) / (this.spkapi.spk_power * 1000)) //broca refill
@@ -3033,8 +3050,8 @@ function buyNFT(setname, uid, price, type, callback){
         });
     },
     checkAccount(name, key) {
-      if(this[name])fetch("https://hive-api.dlux.io", {
-        body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${this[name]}\"]], \"id\":1}`,
+      fetch("https://hive-api.dlux.io", {
+        body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${this[name] ? this[name] : name}\"]], \"id\":1}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
@@ -3044,7 +3061,7 @@ function buyNFT(setname, uid, price, type, callback){
           return r.json();
         })
         .then((re) => {
-          var rez = re.result[0];
+          var rez = re.result[0] || {}
           try {
             rez.posting_json_metadata = JSON.parse(rez.posting_json_metadata);
           } catch (e) {
@@ -3057,9 +3074,16 @@ function buyNFT(setname, uid, price, type, callback){
           if (!rez.posting_json_metadata.profile) {
             rez.posting_json_metadata.profile = { about: "" };
           }
-          if (re.result.length) this[key] = rez;
-          else this[key] = false;
-        });
+          if (re.result.length) {
+            this[key] = rez;
+            if(key == "newAccountDeets") this.newAccount.msg = "Account Found"
+          } else {
+            this[key] = false;
+            if(key == "newAccountDeets") this.newAccount.msg = "Account Claimable"
+          }
+
+          })
+        
     },
     tokenSend() {
       if (!this.sendFormValid) return;
@@ -3983,6 +4007,9 @@ function buyNFT(setname, uid, price, type, callback){
       this.newToken.prefix = this.newToken.tag + '_'
       this.newToken.leader = this.account
       this.newToken.ms = this.newToken.tag + "-cc"
+      this.newAccount.name = this.newToken.ms
+      this.newAccountDeets = true
+      this.checkAccount('newToken.ms', "newAccountDeets")
       if(!this.newToken.dist[this.newToken.leader])this.newToken.dist = {
         [this.newToken.leader]: {
           l: 0,
