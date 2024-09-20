@@ -509,7 +509,7 @@
           </div>
         </div>
         <div class="container text-white pt-3">
-          <div v-if="!hidePrompt && !hasHiddenPrompt" class="alert alert-info p-2 mb-3" role="alert">
+          <div v-if="!hidePrompt || !hasHiddenPrompt" class="alert alert-info p-2 mb-3" role="alert">
             <div class="d-flex align-items-center justify-content-around flex-wrap">
               <div class="text-center">Help contribute to further development by supporting the <a href="https://peakd.com/proposals/322"
                   target="_blank">HoneyComb Improvement Proposal</a></div>
