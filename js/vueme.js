@@ -112,7 +112,17 @@ createApp({
         password: "",
         auths: {},
         msg: "Checking Account...",
+        fee: 0,
+        ACTcost: 0,
       },
+      dotEnv: "",
+      dotEnvTemplate: `domain=$DOMAIN
+account=$ACCOUNT
+active=
+msowner=$OWNER
+mspublic=$PUBOWNER
+PORT=3000
+`,
       newToken: {
         token: "",
         longname: "",
@@ -161,7 +171,7 @@ createApp({
         tokensupply: 0,
         apyint: 0,
         dist: {},
-        configJSON:{
+        configJSON: {
           LEADER: "",
           PREFIX: "",
           TOKEN: "",
@@ -2023,14 +2033,72 @@ createApp({
         }
       });
     },
-    makePassword(){
+    makePassword() {
+      fetch("https://hive-api.dlux.io", {
+        body: `{"jsonrpc":"2.0", "method":"condenser_api.get_chain_properties", "params":[], "id":1}`,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        method: "POST",
+      }).then((response) => response.json())
+      .then((data) => {
+        this.newAccount.fee = data.result.account_creation_fee
+      })
       this.validateHeaders(this.account + this.newAccount.name).then(res => {
         this.newAccount.password = res
         this.newAccount.msg = 'Password Generated'
+        const ownerKey = dhive.PrivateKey.fromLogin(this.newAccount.name, res, 'owner');
+        const memoKey = dhive.PrivateKey.fromLogin(this.newAccount.name, res, 'memo').createPublic(opts.addressPrefix);
+        this.newAccount.ownerAuth = {
+          weight_threshold: 1,
+          account_auths: [],
+          key_auths: [[ownerKey.createPublic(opts.addressPrefix), 1]],
+        };
+        this.newAccount.activeAuth = {
+          weight_threshold: 1,
+          account_auths: [[this.account, 1]],
+          key_auths: [],
+        };
+        this.newAccount.postingAuth = {
+          weight_threshold: 1,
+          account_auths: [[this.account, 1]],
+          key_auths: [],
+        };
       })
     },
-    createAccount(){
-
+    createAccount(claimed = false) {
+      const op = claimed ? [
+        'create_claimed_account',
+        {
+          creator: this.account,
+          new_account_name: this.newAccount.name,
+          owner: this.newAccount.ownerAuth,
+          active: this.newAccount.activeAuth,
+          posting: this.newAccount.postingAuth,
+          memo_key: this.newAccount.memoKey,
+          json_metadata: '',
+          extensions: []
+        },
+      ] : [
+        'account_create',
+        {
+          fee: this.newAccount.fee,
+          creator: this.account,
+          new_account_name: this.newAccount.name,
+          owner: this.newAccount.ownerAuth,
+          active: this.newAccount.activeAuth,
+          posting: this.newAccount.postingAuth,
+          memo_key: this.newAccount.memoKey,
+          json_metadata: '',
+        },
+      ]
+      this.toSign = {
+        type: "raw",
+        key: "active",
+        op,
+        callbacks: [],
+        txid: "Create Account",
+      }
     },
     broca_calc(last = '0,0') {
       const last_calc = this.Base64toNumber(last.split(',')[1])
@@ -3076,14 +3144,14 @@ function buyNFT(setname, uid, price, type, callback){
           }
           if (re.result.length) {
             this[key] = rez;
-            if(key == "newAccountDeets") this.newAccount.msg = "Account Found"
+            if (key == "newAccountDeets") this.newAccount.msg = "Account Found"
           } else {
             this[key] = false;
-            if(key == "newAccountDeets") this.newAccount.msg = "Account Claimable"
+            if (key == "newAccountDeets") this.newAccount.msg = "Account Claimable"
           }
 
-          })
-        
+        })
+
     },
     tokenSend() {
       if (!this.sendFormValid) return;
@@ -3622,7 +3690,7 @@ function buyNFT(setname, uid, price, type, callback){
       )
         .then((response) => response.json())
         .then((data) => {
-          if(data?.status?.error_code == 429){
+          if (data?.status?.error_code == 429) {
             const data = localStorage.getItem("hiveprice") || '{"hive": {"usd": 0}}';
             this.hiveprice = JSON.parse(data);
           } else try {
@@ -3643,7 +3711,7 @@ function buyNFT(setname, uid, price, type, callback){
       )
         .then((response) => response.json())
         .then((data) => {
-          if(data?.status?.error_code == 429){
+          if (data?.status?.error_code == 429) {
             const data = localStorage.getItem("hbdprice") || '{"hive_dollar": {"usd": 0}}';
             this.hbdprice = JSON.parse(data);
           } else try {
@@ -3969,7 +4037,7 @@ function buyNFT(setname, uid, price, type, callback){
     },
     async getSapi(user = this.account, fu) {
       this.reloaded = false
-      if(user)fetch(this.sapi + "/@" + user)
+      if (user) fetch(this.sapi + "/@" + user)
         .then((response) => response.json())
         .then((data) => {
           this.reloaded = true
@@ -4010,7 +4078,7 @@ function buyNFT(setname, uid, price, type, callback){
       this.newAccount.name = this.newToken.ms
       this.newAccountDeets = true
       this.checkAccount('newToken.ms', "newAccountDeets")
-      if(!this.newToken.dist[this.newToken.leader])this.newToken.dist = {
+      if (!this.newToken.dist[this.newToken.leader]) this.newToken.dist = {
         [this.newToken.leader]: {
           l: 0,
           p: 0,
