@@ -350,7 +350,8 @@
 											<input required="required" type="text" aria-describedby="tokenMultiSigHelp"
 												class="ps-4 form-control text-info bg-dark border-0"
 												v-model="newToken.ms" id="tokenMultiSig"
-												@blur="newAccountDeets = true; checkAccount('newToken.ms', 'newAccountDeets')" disabled="newAccount.fee">>
+												@blur="newAccountDeets = true; checkAccount('newToken.ms', 'newAccountDeets')"
+												disabled="newAccount.fee">
 										</div>
 										<div id="tokenMultiSigHelp" class="form-text">Enter the multi-sig account
 											for
@@ -359,9 +360,14 @@
 										</div>
 										<div v-if="newToken.ms && !newAccountDeets">
 											{{newAccount.msg}}
-											<button v-if="!newAccount.password" @click="makePassword()">Build Account</button>
-											<button v-if="newAccount.password && newAccount.fee" @click="createAccount(false)">Create Account ({{newAccount.fee}})</button>
-											<button v-if="newAccount.password && accountinfo.pending_claimed_accounts" @click="createAccount(true)">Create Claimed Account ({{accountinfo.pending_claimed_accounts}} ACTs)</button>
+											<button v-if="!newAccount.password" @click="makePassword()">Build
+												Account</button>
+											<button v-if="newAccount.password && newAccount.fee"
+												@click="createAccount(false)">Create Account
+												({{newAccount.fee}})</button>
+											<button v-if="newAccount.password && accountinfo.pending_claimed_accounts"
+												@click="createAccount(true)">Create Claimed Account
+												({{accountinfo.pending_claimed_accounts}} ACTs)</button>
 										</div>
 									</div>
 									<!--Which features do you want?-->
