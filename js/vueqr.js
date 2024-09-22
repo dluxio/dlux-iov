@@ -165,6 +165,7 @@ var app = new Vue({
       },
       accountinfo: {},
       rcCost: {
+        time: 0,
         claim_account_operation: {"operation":"claim_account_operation","rc_needed":"11789110900859","hp_needed":6713.599180835442}
       },
     };
@@ -179,15 +180,22 @@ var app = new Vue({
       var qrcode = new QRCode(this.$refs[ref], opts);
       qrcode.makeCode(link);
     },
-    rcCosts(name, key) {
-      fetch("https://beacon.peakd.com/api/rc/costs")
+    rcCosts() {
+      this.rcCost = JSON.parse(localStorage.getItem("rcCosts")) || {
+        time: 0,
+        claim_account_operation: {"operation":"claim_account_operation","rc_needed":"11789110900859","hp_needed":6713.599180835442}
+      };
+      if(this.rcCost.time < new Date().getTime() - 86400000)fetch("https://beacon.peakd.com/api/rc/costs")
         .then((r) => {
           return r.json();
         })
         .then((re) => {
+          console.log(re.costs)
           for(var i = 0; i < re.costs.length; i++){
-            this.rcCost[re.costs[i].operation] = re.costs[i]
+            this.rcCost[re.costs[i].operation] = re.costs[i].rc_needed
           }
+          this.rcCost.time = new Date().getTime();
+          localStorage.setItem("rcCost", JSON.stringify(this.rcCost));
         });
     },
     checkAccount(name, key) {
@@ -577,6 +585,7 @@ var app = new Vue({
     //this.getNodes();
     //get query params
     var follow = this.account ? `https://dlux.io/@${this.account}?follow=true` : 'https://dlux.io'
+    this.rcCosts()
     this.makeQr('qrcode', follow)
     this.getProtocol();
     this.getHiveStats();
@@ -586,7 +595,7 @@ var app = new Vue({
   computed: {
     canClaim: {
       get() {
-        return this.account?.rcs > this.rcCosts["claim_account_operation"] ? true : false
+        return this.account?.rcs > this.rcCost["claim_account_operation"] ? true : false
       },
     }
   },

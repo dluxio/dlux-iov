@@ -27,6 +27,11 @@
 	<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
 	<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
 	<link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
+	<!-- Script required for account creation (key generation) -->
+	<script src="https://unpkg.com/@hiveio/dhive@latest/dist/dhive.js"></script>
+	<script>
+	  var client = new dhive.Client(["https://hive-api.dlux.io", "https://api.hive.blog", "https://anyx.io", "https://api.openhive.network"]);
+	</script>
 	<script type="module" src="/js/vueme.js"></script>
 	<script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
 	<script>
@@ -129,35 +134,13 @@
 									<hr class="my-2">
 									<div class="d-flex flex-wrap">
 										<div class="btn m-1"
-											:class="'btn-outline-danger disabled', newToken.featdex == false"
-											:class="'btn-success', newToken.featdex == true">DEX</div>
+											:class="{'btn-outline-danger disabled': !newToken.featdex, 'btn-success': newToken.featdex}">DEX</div>
 										<div class="btn m-1"
-											:class="'btn-outline-danger disabled', newToken.featnft == false"
-											:class="'btn-success', newToken.featnft == true">NFT</div>
+											:class="{'btn-outline-danger disabled': !newToken.featnft, 'btn-success': newToken.featnft}">NFT</div>
 										<div class="btn m-1"
-											:class="'btn-outline-danger disabled', newToken.featstate == false"
-											:class="'btn-success', newToken.featstate == true">State</div>
+											:class="{'btn-outline-danger disabled': !newToken.featpob, 'btn-success': newToken.featpob}">PoB</div>
 										<div class="btn m-1"
-											:class="'btn-outline-danger disabled', newToken.featdrop == false"
-											:class="'btn-success', newToken.featdrop == true">Claim Drop</div>
-										<div class="btn m-1"
-											:class="'btn-outline-danger disabled', newToken.featpob == false"
-											:class="'btn-success', newToken.featpob == true">PoB</div>
-										<div class="btn m-1"
-											:class="'btn-outline-danger disabled', newToken.featdel == false"
-											:class="'btn-success', newToken.featdel == true">Delegate</div>
-										<div class="btn m-1"
-											:class="'btn-outline-danger disabled', newToken.featdaily == false"
-											:class="'btn-success', newToken.featdaily == true">Daily</div>
-										<div class="btn m-1"
-											:class="'btn-outline-danger disabled', newToken.featliq == false"
-											:class="'btn-success', newToken.featliq == true">Liquidity</div>
-										<div class="btn m-1"
-											:class="'btn-outline-danger disabled', newToken.featico == false"
-											:class="'btn-success', newToken.featico == true">ICO</div>
-										<div class="btn m-1"
-											:class="'btn-outline-danger disabled', newToken.featinf == false"
-											:class="'btn-success', newToken.featinf == true">Inflation</div>
+											:class="{'btn-outline-danger disabled': !newToken.featinf, 'btn-success': newToken.featinf}">Inflation</div>
 									</div>
 								</div>
 
@@ -365,6 +348,9 @@
 											<button v-if="newAccount.password && newAccount.fee"
 												@click="createAccount(false)">Create Account
 												({{newAccount.fee}})</button>
+											<button v-if="canClaim"
+												@click="claimACT()">Claim Account
+												({{sigFig((rcCost.claim_account_operation/rcinfo.current) * 100, 2)}}% Availible RCs)</button>
 											<button v-if="newAccount.password && accountinfo.pending_claimed_accounts"
 												@click="createAccount(true)">Create Claimed Account
 												({{accountinfo.pending_claimed_accounts}} ACTs)</button>
@@ -391,11 +377,11 @@
 														<div>
 															<div class="btn-group bg-dark">
 																<input type="radio" name="tokenFeaturesDex"
-																	id="setYesDex" autocomplete="off" checked
+																	id="setYesDex" autocomplete="off" :checked="newToken.featdex" @click="newToken.featdex = true"
 																	class="btn-check">
 																<label for="setYesDex"
 																	class="btn btn-outline-primary">YES</label>
-																<input type="radio" name="tokenFeaturesDex"
+																<input type="radio" name="tokenFeaturesDex" :checked="!newToken.featdex" @click="newToken.featdex = false"
 																	id="setNoDex" autocomplete="off" class="btn-check">
 																<label for="setNoDex"
 																	class="btn btn-outline-primary">NO</label>
@@ -412,11 +398,11 @@
 														<div>
 															<div class="btn-group bg-dark">
 																<input type="radio" name="tokenFeaturesNft"
-																	id="setYesNft" autocomplete="off" checked="checked"
+																	id="setYesNft" autocomplete="off" :checked="newToken.featnft" @click="newToken.featnft = true"
 																	class="btn-check">
 																<label for="setYesNft"
 																	class="btn btn-outline-primary">YES</label>
-																<input type="radio" name="tokenFeaturesNft"
+																<input type="radio" name="tokenFeaturesNft" :checked="!newToken.featnft" @click="newToken.featnft = !true"
 																	id="setNoNft" autocomplete="off" class="btn-check">
 																<label for="setNoNft"
 																	class="btn btn-outline-primary">NO</label>
@@ -426,65 +412,19 @@
 															Non-Fungible
 															Tokens</div>
 													</div>
-													<div class="mb-3">
-														<label for="tokenFeaturesState" class="lead form-label">State
-														</label>
-														<div>
-															<div class="btn-group bg-dark">
-																<input type="radio" name="tokenFeaturesState"
-																	id="setYesState" autocomplete="off"
-																	checked="checked" class="btn-check">
-																<label for="setYesState"
-																	class="btn btn-outline-primary">YES</label>
-																<input type="radio" name="tokenFeaturesState"
-																	id="setNoState" autocomplete="off"
-																	class="btn-check">
-																<label for="setNoState"
-																	class="btn btn-outline-primary">NO</label>
-															</div>
-														</div>
-														<div id="tokenFeaturesStateHelp" class="form-text">Do you
-															want
-															state
-														</div>
-													</div>
-													<div class="mb-3">
-														<label for="tokenFeaturesClaimdrop"
-															class="lead form-label">Claim
-															Drop
-														</label>
-														<div>
-															<div class="btn-group bg-dark">
-																<input type="radio" name="tokenFeaturesClaimdrop"
-																	id="setYesClaimdrop" autocomplete="off"
-																	checked="checked" class="btn-check">
-																<label for="setYesClaimdrop"
-																	class="btn btn-outline-primary">YES</label>
-																<input type="radio" name="tokenFeaturesClaimdrop"
-																	id="setNoClaimdrop" autocomplete="off"
-																	class="btn-check">
-																<label for="setNoClaimdrop"
-																	class="btn btn-outline-primary">NO</label>
-															</div>
-														</div>
-														<div id="tokenFeaturesClaimdropHelp" class="form-text">Do
-															you
-															want
-															Claim
-															Drop</div>
-													</div>
+													
 													<div class="mb-3">
 														<label for="tokenFeaturesPoB"
 															class="lead form-label">Proof-of-Brain
 														</label>
 														<div>
 															<div class="btn-group bg-dark">
-																<input type="radio" name="tokenFeaturesPoB"
+																<input type="radio" name="tokenFeaturesPoB" :checked="newToken.featpob" @click="newToken.featpob = true; newToken.featinf = true"
 																	id="setYesPob" autocomplete="off" class="btn-check">
 																<label for="setYesPob"
 																	class="btn btn-outline-primary">YES</label>
 																<input type="radio" name="tokenFeaturesPoB"
-																	id="setNoPob" autocomplete="off" checked
+																	id="setNoPob" autocomplete="off" :checked="!newToken.featpob" @click="newToken.featpob = false"
 																	class="btn-check">
 																<label for="setNoPob"
 																	class="btn btn-outline-primary">NO</label>
@@ -493,6 +433,7 @@
 														<div id="tokenFeaturesPoBHelp" class="form-text">Do you want
 															proof-of-brain</div>
 													</div>
+													<!--
 													<div class="mb-3">
 														<label for="tokenFeaturesDelegate"
 															class="lead form-label">Delegate
@@ -581,19 +522,20 @@
 															ICO
 														</div>
 													</div>
+												-->
 													<div class="mb-3">
 														<label for="tokenFeaturesInflation"
 															class="lead form-label">Inflation
 														</label>
 														<div>
 															<div class="btn-group bg-dark">
-																<input type="radio" name="tokenFeaturesInflation"
+																<input type="radio" name="tokenFeaturesInflation" :checked="newToken.featinf" @click="newToken.featinf = true"
 																	id="setYesInflation" autocomplete="off"
 																	class="btn-check">
 																<label for="setYesInflation"
 																	class="btn btn-outline-primary">YES</label>
 																<input type="radio" name="tokenFeaturesInflation"
-																	id="setNoInflation" autocomplete="off" checked
+																	id="setNoInflation" autocomplete="off" :checked="!newToken.featinf" @click="newToken.featinf = false; newToken.featpob = false"
 																	class="btn-check">
 																<label for="setNoInflation"
 																	class="btn btn-outline-primary">NO</label>

@@ -87,6 +87,10 @@ createApp({
       fileRequests: {},
       showLine: true,
       debounceScroll: 0,
+      rcCost: {
+        time: 0,
+        claim_account_operation: {"operation":"claim_account_operation","rc_needed":"11789110900859","hp_needed":6713.599180835442}
+      },
       lastScroll: 0,
       activeTab: "blog",
       relations: { "follows": false, "ignores": false, "blacklists": false, "follows_blacklists": false, "follows_muted": false },
@@ -150,13 +154,13 @@ PORT=3000
         mainico: "",
         mainipfs: "",
         hiveServiceFee: 0,
-        featpob: false,
+        featpob: true,
         featdel: false,
         featdaily: false,
         featliq: false,
         featico: false,
-        featinf: false,
-        featdex: false,
+        featinf: true,
+        featdex: true,
         featnft: false,
         featstate: false,
         featdrop: false,
@@ -1280,6 +1284,10 @@ PORT=3000
         },
       },
       accountinfo: {},
+      rcinfo: {
+        current: 0,
+        max: 0
+      },
       serviceWorker: false,
       filterusers: {
         checked: true,
@@ -1787,6 +1795,24 @@ PORT=3000
       this.frameURL = ''
       this.dluxMock()
     },
+    rcCosts() {
+      this.rcCost = JSON.parse(localStorage.getItem("rcCosts")) || {
+        time: 0,
+        claim_account_operation: {"operation":"claim_account_operation","rc_needed":"11789110900859","hp_needed":6713.599180835442}
+      };
+      if(this.rcCost.time < new Date().getTime() - 86400000)fetch("https://beacon.peakd.com/api/rc/costs")
+        .then((r) => {
+          return r.json();
+        })
+        .then((re) => {
+          console.log(re.costs)
+          for(var i = 0; i < re.costs.length; i++){
+            this.rcCost[re.costs[i].operation] = re.costs[i].rc_needed
+          }
+          this.rcCost.time = new Date().getTime();
+          localStorage.setItem("rcCost", JSON.stringify(this.rcCost));
+        });
+    },
     addApp(cid, contract) {
       var found = -1
       if (!cid) return false
@@ -2041,18 +2067,24 @@ PORT=3000
         },
         method: "POST",
       }).then((response) => response.json())
-      .then((data) => {
-        this.newAccount.fee = data.result.account_creation_fee
-      })
+        .then((data) => {
+          this.newAccount.fee = data.result.account_creation_fee
+        })
       this.validateHeaders(this.account + this.newAccount.name).then(res => {
         this.newAccount.password = res
         this.newAccount.msg = 'Password Generated'
         const ownerKey = dhive.PrivateKey.fromLogin(this.newAccount.name, res, 'owner');
-        const memoKey = dhive.PrivateKey.fromLogin(this.newAccount.name, res, 'memo').createPublic(opts.addressPrefix);
+        this.newAccount.memoKey = dhive.PrivateKey.fromLogin(this.newAccount.name, res, 'memo').createPublic('STM');
+        this.newAccount.auths = {
+          ownerPub: ownerKey.createPublic('STM'),
+          owner: ownerKey.toString(),
+          memo: dhive.PrivateKey.fromLogin(this.newAccount.name, res, 'memo').toString(),
+          memoPub: this.newAccount.memoKey
+        }
         this.newAccount.ownerAuth = {
           weight_threshold: 1,
           account_auths: [],
-          key_auths: [[ownerKey.createPublic(opts.addressPrefix), 1]],
+          key_auths: [[ownerKey.createPublic('STM'), 1]],
         };
         this.newAccount.activeAuth = {
           weight_threshold: 1,
@@ -2095,10 +2127,28 @@ PORT=3000
       this.toSign = {
         type: "raw",
         key: "active",
-        op,
+        op: [op],
         callbacks: [],
         txid: "Create Account",
       }
+    },
+    claimACT() {
+      this.toSign = {
+        type: "raw",
+        key: "active",
+        op: [[
+          "claim_account",
+          {
+            creator: this.account,
+            fee: "0.000 HIVE",
+            extensions: [],
+          },
+        ]],
+        txid: "claimACT",
+        msg: ``,
+        ops: ["getHiveUser"],
+      }
+      console.log('OK')
     },
     broca_calc(last = '0,0') {
       const last_calc = this.Base64toNumber(last.split(',')[1])
@@ -4133,6 +4183,20 @@ function buyNFT(setname, uid, price, type, callback){
             (parseInt(this.accountinfo.voting_power) * 10000) / 10000 / 50;
           this.accountinfo.rshares = (power * final_vest) / 10000;
         });
+        fetch(hapi, {
+          body: `{"jsonrpc":"2.0", "method":"condenser_api.find_rc_accounts", "params":[["${user}"]], "id":1}`,
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          method: "POST",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            this.rcinfo = {
+              current: data.result[0].rc_manabar.current_mana,
+              max: data.result[0].max_rc
+            }
+          });
     },
     getHiveStats() {
       fetch(this.hapi, {
@@ -4491,6 +4555,7 @@ function buyNFT(setname, uid, price, type, callback){
     } else {
       this.init()
     }
+    this.rcCosts()
   },
   beforeDestroy() {
     this.observer.disconnect();
@@ -4510,6 +4575,11 @@ function buyNFT(setname, uid, price, type, callback){
 
   },
   computed: {
+    canClaim: {
+      get() {
+        return this.rcinfo.current > this.rcCost["claim_account_operation"] ? true : false
+      },
+    },
     location: {
       get() {
         return location;
