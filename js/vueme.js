@@ -2062,19 +2062,19 @@ PORT=3000
       });
     },
     makePassword() {
-      fetch("https://hive-api.dlux.io", {
-        body: `{"jsonrpc":"2.0", "method":"condenser_api.get_chain_properties", "params":[], "id":1}`,
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        method: "POST",
-      }).then((response) => response.json())
-        .then((data) => {
-          this.newAccount.fee = data.result.account_creation_fee
-        })
       this.validateHeaders(this.account + this.newAccount.name).then(res => {
         this.newAccount.password = res
         this.newAccount.msg = 'Password Generated'
+        fetch("https://hive-api.dlux.io", {
+          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_chain_properties", "params":[], "id":1}`,
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          method: "POST",
+        }).then((response) => response.json())
+          .then((data) => {
+            this.newAccount.fee = data.result.account_creation_fee
+          })
         const ownerKey = dhive.PrivateKey.fromLogin(this.newAccount.name, res, 'owner');
         this.newAccount.memoKey = dhive.PrivateKey.fromLogin(this.newAccount.name, res, 'memo').createPublic('STM');
         this.newAccount.auths = {
