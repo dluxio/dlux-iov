@@ -173,7 +173,7 @@ PORT=3000
         noderate: 0,
         savingsrate: 0,
         tokensupply: 0,
-        apyint: 0,
+        apyint: 39563,
         apy: "5.0",
         dist: {},
         configJSON: {
@@ -3169,8 +3169,9 @@ function buyNFT(setname, uid, price, type, callback){
         });
     },
     checkAccount(name, key) {
+      console.log('Checking:', name)
       fetch("https://hive-api.dlux.io", {
-        body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${this[name] ? this[name] : name}\"]], \"id\":1}`,
+        body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${key == 'newAccountDeets' ? name : this[name]}\"]], \"id\":1}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
@@ -3193,12 +3194,15 @@ function buyNFT(setname, uid, price, type, callback){
           if (!rez.posting_json_metadata.profile) {
             rez.posting_json_metadata.profile = { about: "" };
           }
+          console.log(re.result)
           if (re.result.length) {
             this[key] = rez;
             if (key == "newAccountDeets") this.newAccount.msg = "Account Found"
           } else {
             this[key] = false;
-            if (key == "newAccountDeets") this.newAccount.msg = "Account Claimable"
+            if (key == "newAccountDeets") {
+              this.newAccount.msg = "Account Claimable"
+            }
           }
 
         })
@@ -4128,7 +4132,7 @@ function buyNFT(setname, uid, price, type, callback){
       this.newToken.ms = this.newToken.tag + "-cc"
       this.newAccount.name = this.newToken.ms
       this.newAccountDeets = true
-      this.checkAccount('newToken.ms', "newAccountDeets")
+      this.checkAccount(this.newToken.ms, "newAccountDeets")
       if (!this.newToken.dist[this.newToken.leader]) this.newToken.dist = {
         [this.newToken.leader]: {
           l: 0,

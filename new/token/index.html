@@ -338,7 +338,7 @@
 											<input required="required" type="text" aria-describedby="tokenMultiSigHelp"
 												class="ps-4 form-control text-info bg-dark border-0"
 												v-model="newToken.ms" id="tokenMultiSig"
-												@blur="newAccountDeets = true; checkAccount('newToken.ms', 'newAccountDeets')"
+												@blur="newAccountDeets = true; checkAccount(newToken.ms, 'newAccountDeets')"
 												disabled="newAccount.fee">
 										</div>
 										<div id="tokenMultiSigHelp" class="form-text">Enter the multi-sig account
