@@ -30,7 +30,7 @@
 	<!-- Script required for account creation (key generation) -->
 	<script src="https://unpkg.com/@hiveio/dhive@latest/dist/dhive.js"></script>
 	<script>
-	  var client = new dhive.Client(["https://hive-api.dlux.io", "https://api.hive.blog", "https://anyx.io", "https://api.openhive.network"]);
+		var client = new dhive.Client(["https://hive-api.dlux.io", "https://api.hive.blog", "https://anyx.io", "https://api.openhive.network"]);
 	</script>
 	<script type="module" src="/js/vueme.js"></script>
 	<script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
@@ -134,13 +134,18 @@
 									<hr class="my-2">
 									<div class="d-flex flex-wrap">
 										<div class="btn m-1"
-											:class="{'btn-outline-danger disabled': !newToken.featdex, 'btn-success': newToken.featdex}">DEX</div>
+											:class="{'btn-outline-danger disabled': !newToken.featdex, 'btn-success': newToken.featdex}">
+											DEX</div>
 										<div class="btn m-1"
-											:class="{'btn-outline-danger disabled': !newToken.featnft, 'btn-success': newToken.featnft}">NFT</div>
+											:class="{'btn-outline-danger disabled': !newToken.featnft, 'btn-success': newToken.featnft}">
+											NFT</div>
 										<div class="btn m-1"
-											:class="{'btn-outline-danger disabled': !newToken.featpob, 'btn-success': newToken.featpob}">PoB</div>
+											:class="{'btn-outline-danger disabled': !newToken.featpob, 'btn-success': newToken.featpob}">
+											PoB</div>
 										<div class="btn m-1"
-											:class="{'btn-outline-danger disabled': !newToken.featinf, 'btn-success': newToken.featinf}">Inflation</div>
+											:class="{'btn-outline-danger disabled': !newToken.featinf, 'btn-success': newToken.featinf}">
+											Inflation</div>
+
 									</div>
 								</div>
 
@@ -348,9 +353,9 @@
 											<button v-if="newAccount.password && newAccount.fee"
 												@click="createAccount(false)">Create Account
 												({{newAccount.fee}})</button>
-											<button v-if="canClaim"
-												@click="claimACT()">Claim Account
-												({{sigFig((rcCost.claim_account_operation/rcinfo.current) * 100, 2)}}% Availible RCs)</button>
+											<button v-if="canClaim" @click="claimACT()">Claim Account
+												({{sigFig((rcCost.claim_account_operation/rcinfo.current) * 100, 2)}}%
+												Availible RCs)</button>
 											<button v-if="newAccount.password && accountinfo.pending_claimed_accounts"
 												@click="createAccount(true)">Create Claimed Account
 												({{accountinfo.pending_claimed_accounts}} ACTs)</button>
@@ -377,12 +382,15 @@
 														<div>
 															<div class="btn-group bg-dark">
 																<input type="radio" name="tokenFeaturesDex"
-																	id="setYesDex" autocomplete="off" :checked="newToken.featdex" @click="newToken.featdex = true"
-																	class="btn-check">
+																	id="setYesDex" autocomplete="off"
+																	:checked="newToken.featdex"
+																	@click="newToken.featdex = true" class="btn-check">
 																<label for="setYesDex"
 																	class="btn btn-outline-primary">YES</label>
-																<input type="radio" name="tokenFeaturesDex" :checked="!newToken.featdex" @click="newToken.featdex = false"
-																	id="setNoDex" autocomplete="off" class="btn-check">
+																<input type="radio" name="tokenFeaturesDex"
+																	:checked="!newToken.featdex"
+																	@click="newToken.featdex = false" id="setNoDex"
+																	autocomplete="off" class="btn-check">
 																<label for="setNoDex"
 																	class="btn btn-outline-primary">NO</label>
 															</div>
@@ -398,12 +406,15 @@
 														<div>
 															<div class="btn-group bg-dark">
 																<input type="radio" name="tokenFeaturesNft"
-																	id="setYesNft" autocomplete="off" :checked="newToken.featnft" @click="newToken.featnft = true"
-																	class="btn-check">
+																	id="setYesNft" autocomplete="off"
+																	:checked="newToken.featnft"
+																	@click="newToken.featnft = true" class="btn-check">
 																<label for="setYesNft"
 																	class="btn btn-outline-primary">YES</label>
-																<input type="radio" name="tokenFeaturesNft" :checked="!newToken.featnft" @click="newToken.featnft = !true"
-																	id="setNoNft" autocomplete="off" class="btn-check">
+																<input type="radio" name="tokenFeaturesNft"
+																	:checked="!newToken.featnft"
+																	@click="newToken.featnft = !true" id="setNoNft"
+																	autocomplete="off" class="btn-check">
 																<label for="setNoNft"
 																	class="btn btn-outline-primary">NO</label>
 															</div>
@@ -412,20 +423,23 @@
 															Non-Fungible
 															Tokens</div>
 													</div>
-													
+
 													<div class="mb-3">
 														<label for="tokenFeaturesPoB"
 															class="lead form-label">Proof-of-Brain
 														</label>
 														<div>
 															<div class="btn-group bg-dark">
-																<input type="radio" name="tokenFeaturesPoB" :checked="newToken.featpob" @click="newToken.featpob = true; newToken.featinf = true"
+																<input type="radio" name="tokenFeaturesPoB"
+																	:checked="newToken.featpob"
+																	@click="newToken.featpob = true; newToken.featinf = true"
 																	id="setYesPob" autocomplete="off" class="btn-check">
 																<label for="setYesPob"
 																	class="btn btn-outline-primary">YES</label>
 																<input type="radio" name="tokenFeaturesPoB"
-																	id="setNoPob" autocomplete="off" :checked="!newToken.featpob" @click="newToken.featpob = false"
-																	class="btn-check">
+																	id="setNoPob" autocomplete="off"
+																	:checked="!newToken.featpob"
+																	@click="newToken.featpob = false" class="btn-check">
 																<label for="setNoPob"
 																	class="btn btn-outline-primary">NO</label>
 															</div>
@@ -529,13 +543,17 @@
 														</label>
 														<div>
 															<div class="btn-group bg-dark">
-																<input type="radio" name="tokenFeaturesInflation" :checked="newToken.featinf" @click="newToken.featinf = true"
+																<input type="radio" name="tokenFeaturesInflation"
+																	:checked="newToken.featinf"
+																	@click="newToken.featinf = true"
 																	id="setYesInflation" autocomplete="off"
 																	class="btn-check">
 																<label for="setYesInflation"
 																	class="btn btn-outline-primary">YES</label>
 																<input type="radio" name="tokenFeaturesInflation"
-																	id="setNoInflation" autocomplete="off" :checked="!newToken.featinf" @click="newToken.featinf = false; newToken.featpob = false"
+																	id="setNoInflation" autocomplete="off"
+																	:checked="!newToken.featinf"
+																	@click="newToken.featinf = false; newToken.featpob = false"
 																	class="btn-check">
 																<label for="setNoInflation"
 																	class="btn btn-outline-primary">NO</label>
@@ -545,6 +563,11 @@
 															you
 															want
 															inflation</div>
+														<input type="number" name="tokenFeaturesInflationAPY"
+															id="tokenFeaturesInflationAPY" min="0.1" max="200.0"
+															step="0.1" v-model="newToken.apy" @click="calculateAPR()">
+														<label for="tokenFeaturesInflationAPY"
+															class="btn btn-outline-primary">NO</label>
 													</div>
 												</div>
 											</div>

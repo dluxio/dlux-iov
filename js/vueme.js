@@ -174,6 +174,7 @@ PORT=3000
         savingsrate: 0,
         tokensupply: 0,
         apyint: 0,
+        apy: "5.0",
         dist: {},
         configJSON: {
           LEADER: "",
@@ -4443,6 +4444,46 @@ function buyNFT(setname, uid, price, type, callback){
           this.activeIndex = parseInt(dir)
       }
       this.focusItem = this[this.focusItem.source][this.activeIndex]
+    },
+    calculateAPR(){
+      var binSearch = 105120
+      var lastFit = 0
+      var lastDown = 0
+      var lastUp = 0
+      const INT = 1000000
+      const WPY = (1 + (this.newToken.apy / 201600)) ** 2016 - 1
+      const SAT = INT + parseInt(INT * WPY)
+      var oneOff = false
+      var j = 0
+      while(binSearch != lastFit){
+        j++
+        console.log(binSearch, lastFit, WPY, SAT)
+        lastFit = binSearch
+        var int = INT
+        for(var i = 0; i < 2016; i++){
+          int += parseInt(int / binSearch)
+        }
+        if(int > SAT){
+          lastDown = binSearch
+          binSearch = lastUp ? parseInt((lastUp + binSearch) / 2) : parseInt(binSearch * 2)
+          if(binSearch == lastFit) {
+            if(oneOff)break
+            binSearch = binSearch - 1
+            oneOff = true
+          }
+        } else {
+          lastUp = binSearch
+          binSearch = lastDown ? parseInt((lastDown + binSearch) / 2) : parseInt(binSearch / 2)
+          if(binSearch == lastFit) {
+            if(oneOff)break
+            binSearch = binSearch + 1
+            oneOff = true
+          }
+        }
+        if(isNaN(binSearch) || j > 100)break
+      }
+      this.newToken.apyint = binSearch
+      console.log('Iterations',j)
     },
     activeIndexUp() {
       console.log(this.activeIndex, this[this.focusItem.source].length, this.focusItem)
