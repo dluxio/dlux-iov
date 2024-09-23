@@ -96,14 +96,14 @@
 									<li><hr class="dropdown-divider mt-0 mb-1"></li>
 									<li class="text-center lead" v-if="!pendingTokens.length">Empty</li>
 									<li class="d-flex align-items-center justify-content-between" v-for="pend of pendingTokens">
-										<a @click="loadNewToken(pend)" class="mx-1 dropdown-item rounded" role="button">TOKEN</a>
-										<a @click="removeFavorite(acc)" class="mx-1 btn btn-sm btn-outline-danger" role="button"><i class="fa-solid fa-trash-can fa-fw"></i></a>
+										<a @click="loadNewToken(pend)" class="mx-1 dropdown-item rounded" role="button">{{pend}}</a>
+										<a @click="deleteNewToken(pend)" class="mx-1 btn btn-sm btn-outline-danger" role="button"><i class="fa-solid fa-trash-can fa-fw"></i></a>
 									</li>
 								</ul>
 							</div>
-							<button type="button" class="btn btn-outline-info mx-1"><i
+							<button type="button" class="btn btn-outline-info mx-1" @click="saveNewToken()"><i
 									class="fa-solid fa-fw fa-floppy-disk me-2" aria-hidden="true"
-									@click="saveNewToken()"></i>Save</button>
+									></i>Save</button>
 							<button type="button" class="btn btn-outline-success mx-1"><i
 									class="fa-solid fa-fw fa-flag-checkered me-2"
 									aria-hidden="true"></i>Publish</button>

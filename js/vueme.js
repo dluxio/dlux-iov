@@ -4142,10 +4142,12 @@ function buyNFT(setname, uid, price, type, callback){
       }
     },
     saveNewToken(){
+      console.log("Saving...")
       var pendingTokens = JSON.parse(localStorage.getItem(`pendingTokens`)) || []
-      if(pendingTokens.indexOf(newToken.token) == -1) pendingTokens.push(newToken.token)
-      localStorage.setItem(`newToken${newToken.token}`, JSON.stringify(this.newToken))
+      if(pendingTokens.indexOf(this.newToken.token) == -1) pendingTokens.push(this.newToken.token)
+      localStorage.setItem(`newToken${this.newToken.token}`, JSON.stringify(this.newToken))
       localStorage.setItem(`pendingTokens`, JSON.stringify(pendingTokens))
+      this.pendingTokens = pendingTokens
     },
     loadNewToken(token){
       this.newToken = JSON.parse(localStorage.getItem(`newToken${token}`))
@@ -4155,6 +4157,7 @@ function buyNFT(setname, uid, price, type, callback){
       var pendingTokens = JSON.parse(localStorage.getItem(`pendingTokens`)) || []
       pendingTokens = pendingTokens.filter(t => t != token)
       localStorage.setItem(`pendingTokens`, JSON.stringify(pendingTokens))
+      this.pendingTokens = pendingTokens
     },
     when(arr) {
       if (!arr.length) return "";
