@@ -344,10 +344,9 @@
 										<div id="tokenMultiSigHelp" class="form-text">Enter the multi-sig account
 											for
 											your
-											token
+											token: {{newAccount.msg}}
 										</div>
 										<div v-if="newToken.ms && !newAccountDeets">
-											{{newAccount.msg}}
 											<button v-if="!newAccount.password" @click="makePassword()">Build
 												Account</button>
 											<button v-if="newAccount.password && newAccount.fee"
