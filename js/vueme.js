@@ -110,6 +110,7 @@ createApp({
         }
       },
       nameIP: "",
+      pendingTokens: [],
       newAccountDeets: true,
       newAccount: {
         name: "",
@@ -3194,7 +3195,6 @@ function buyNFT(setname, uid, price, type, callback){
           if (!rez.posting_json_metadata.profile) {
             rez.posting_json_metadata.profile = { about: "" };
           }
-          console.log(re.result)
           if (re.result.length) {
             this[key] = rez;
             if (key == "newAccountDeets") this.newAccount.msg = "Account Found"
@@ -4141,6 +4141,21 @@ function buyNFT(setname, uid, price, type, callback){
         }
       }
     },
+    saveNewToken(){
+      var pendingTokens = JSON.parse(localStorage.getItem(`pendingTokens`)) || []
+      if(pendingTokens.indexOf(newToken.token) == -1) pendingTokens.push(newToken.token)
+      localStorage.setItem(`newToken${newToken.token}`, JSON.stringify(this.newToken))
+      localStorage.setItem(`pendingTokens`, JSON.stringify(pendingTokens))
+    },
+    loadNewToken(token){
+      this.newToken = JSON.parse(localStorage.getItem(`newToken${token}`))
+    },
+    deleteNewToken(token){
+      localStorage.removeItem(`newToken${token}`)
+      var pendingTokens = JSON.parse(localStorage.getItem(`pendingTokens`)) || []
+      pendingTokens = pendingTokens.filter(t => t != token)
+      localStorage.setItem(`pendingTokens`, JSON.stringify(pendingTokens))
+    },
     when(arr) {
       if (!arr.length) return "";
       var seconds =
@@ -4580,6 +4595,7 @@ function buyNFT(setname, uid, price, type, callback){
         this.serviceWorker = false;
       }
     }
+    this.pendingTokens = JSON.parse(localStorage.getItem(`pendingTokens`)) || []
     window.addEventListener('scroll', this.handleScroll);
     if (location.pathname.split("/@")[1]) {
       this.pageAccount = location.pathname.split("/@")[1]

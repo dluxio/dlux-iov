@@ -86,8 +86,11 @@
 							<div class="display-6 fw-light text-white-50">HIVE LAYER 2</div>
 						</div>
 						<div class="d-flex flex-wrap align-items-center ms-auto me-4 justify-content-center">
+							<button v-for="pend of pendingTokens"type="button" class="btn btn-outline-primary mx-1"><i
+								class="fa-solid fa-fw fa-floppy-disk me-2" aria-hidden="true" @click="loadNewToken(pend)"></i>Load {{pend}}</button>
+						<button type="button" class="btn btn-outline-success mx-1">
 							<button type="button" class="btn btn-outline-primary mx-1"><i
-									class="fa-solid fa-fw fa-floppy-disk me-2" aria-hidden="true"></i>Save</button>
+									class="fa-solid fa-fw fa-floppy-disk me-2" aria-hidden="true" @click="saveNewToken()"></i>Save</button>
 							<button type="button" class="btn btn-outline-success mx-1"><i
 									class="fa-solid fa-fw fa-flag-checkered me-2"
 									aria-hidden="true"></i>Publish</button>
