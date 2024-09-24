@@ -4473,7 +4473,7 @@ function buyNFT(setname, uid, price, type, callback){
       var lastDown = 0
       var lastUp = 0
       const INT = 1000000
-      const WPY = (1 + (this.newToken.apy / 201600)) ** 2016 - 1
+      const WPY = ((1 + (this.newToken.apy / 201600)) ** (2016 * 52) - 1)/52 //how to normalize APY to WPY
       const SAT = INT + parseInt(INT * WPY)
       var oneOff = false
       var j = 0
