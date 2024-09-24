@@ -232,8 +232,7 @@
 
 							<form>
 								<div class="mx-2">
-
-									<!--4 Is this token decentralized?-->
+									<!-- Decentralized? -->
 									<div class="mb-3">
 										<label for="tokenDecentralized" class="lead form-label">Decentralized
 										</label>
@@ -260,7 +259,7 @@
 											chain
 											actions is cool... but this form will only get you so far.</h4>
 									</div>
-									<!--1 Token Name: DLUX-->
+									<!-- Token Name -->
 									<div class="mb-3">
 										<label for="tokenCap" class="lead form-label">Token Name</label>
 										<input required="required" type="text" placeholder="ex: DLUX"
@@ -271,6 +270,7 @@
 											@click="defaults()"><i class="fa-solid fa-wand-magic-sparkles me-2"></i>
 											Autofill</button>
 									</div>
+									<!-- Long Name -->
 									<div class="mb-3">
 										<label for="tokenLongName" class="lead form-label">Community Name</label>
 										<input required="required" type="text"
@@ -282,34 +282,98 @@
 										</div>
 									</div>
 
-									<div class="mb-3">
-										<label for="tokenTagName" class="lead form-label">Token Tag Name</label>
-										<input required="required" type="text"
-											:placeholder="'ex: ' + toLowerCase(newToken.token)"
-											class="form-control bg-dark border-0 text-info" id="tokenTagName"
-											aria-describedby="tokenTagNameHelp" v-model="newToken.tag">
-										<div id="tokenTagNameHelp" class="form-text">Enter the preferred tag for
-											your
-											community:
-											/{{toLowerCase(newToken.token)}}/@author/permlink</div>
-									</div>
-									<div class="mb-3">
-										<label for="tokenJson" class="lead form-label">Token JSON</label>
-										<input required="required" type="text"
-											:placeholder="'ex: ' + toLowerCase(newToken.token)"
-											class="form-control bg-dark border-0 text-info" id="tokenJson"
-											aria-describedby="tokenJsonHelp" v-model="newToken.jsontoken">
-										<div id="tokenJsonHelp" class="form-text">Enter the JSON <i
-												class="fa-solid fa-chain mx-1"></i> name for your token</div>
-									</div>
-									<div class="mb-3">
-										<label for="tokenPrefix" class="lead form-label">Token Prefix
-										</label>
-										<input required="required" type="text"
-											:placeholder="'ex: ' + toLowerCase(newToken.token) + '_'"
-											class="form-control bg-dark border-0 text-info" id="tokenPrefix"
-											aria-describedby="tokenPrefixHelp" v-model="newToken.prefix">
-										<div id="tokenPrefixHelp" class="form-text">Enter the prefix for your token
+									<!-- Options -->
+									<div>
+										<!-- DEX -->
+										<div class="mb-3">
+											<label for="tokenFeaturesDex" class="lead form-label">DEX
+											</label>
+											<div>
+												<div class="btn-group bg-dark">
+													<input type="radio" name="tokenFeaturesDex" id="setYesDex"
+														autocomplete="off" :checked="newToken.featdex"
+														@click="newToken.featdex = true" class="btn-check">
+													<label for="setYesDex" class="btn btn-outline-primary">YES</label>
+													<input type="radio" name="tokenFeaturesDex"
+														:checked="!newToken.featdex" @click="newToken.featdex = false"
+														id="setNoDex" autocomplete="off" class="btn-check">
+													<label for="setNoDex" class="btn btn-outline-primary">NO</label>
+												</div>
+											</div>
+											<div id="tokenFeaturesDexHelp" class="form-text">Do you want
+												a
+												Decentralized Exchange
+											</div>
+										</div>
+										<!-- NFT -->
+										<div class="mb-3">
+											<label for="tokenFeaturesNft" class="lead form-label">NFT
+											</label>
+											<div>
+												<div class="btn-group bg-dark">
+													<input type="radio" name="tokenFeaturesNft" id="setYesNft"
+														autocomplete="off" :checked="newToken.featnft"
+														@click="newToken.featnft = true" class="btn-check">
+													<label for="setYesNft" class="btn btn-outline-primary">YES</label>
+													<input type="radio" name="tokenFeaturesNft"
+														:checked="!newToken.featnft" @click="newToken.featnft = !true"
+														id="setNoNft" autocomplete="off" class="btn-check">
+													<label for="setNoNft" class="btn btn-outline-primary">NO</label>
+												</div>
+											</div>
+											<div id="tokenFeaturesNftHelp" class="form-text">Do you want
+												Non-Fungible
+												Tokens</div>
+										</div>
+										<!-- PoB -->
+										<div class="mb-3">
+											<label for="tokenFeaturesPoB" class="lead form-label">Proof-of-Brain
+											</label>
+											<div>
+												<div class="btn-group bg-dark">
+													<input type="radio" name="tokenFeaturesPoB"
+														:checked="newToken.featpob"
+														@click="newToken.featpob = true; newToken.featinf = true"
+														id="setYesPob" autocomplete="off" class="btn-check">
+													<label for="setYesPob" class="btn btn-outline-primary">YES</label>
+													<input type="radio" name="tokenFeaturesPoB" id="setNoPob"
+														autocomplete="off" :checked="!newToken.featpob"
+														@click="newToken.featpob = false" class="btn-check">
+													<label for="setNoPob" class="btn btn-outline-primary">NO</label>
+												</div>
+											</div>
+											<div id="tokenFeaturesPoBHelp" class="form-text">Do you want
+												proof-of-brain</div>
+										</div>
+										<!-- inflation -->
+										<div class="mb-3">
+											<label for="tokenFeaturesInflation" class="lead form-label">Inflation
+											</label>
+											<div>
+												<div class="btn-group bg-dark">
+													<input type="radio" name="tokenFeaturesInflation"
+														:checked="newToken.featinf" @click="newToken.featinf = true"
+														id="setYesInflation" autocomplete="off" class="btn-check">
+													<label for="setYesInflation"
+														class="btn btn-outline-primary">YES</label>
+													<input type="radio" name="tokenFeaturesInflation"
+														id="setNoInflation" autocomplete="off"
+														:checked="!newToken.featinf"
+														@click="newToken.featinf = false; newToken.featpob = false"
+														class="btn-check">
+													<label for="setNoInflation"
+														class="btn btn-outline-primary">NO</label>
+												</div>
+											</div>
+											<div id="tokenFeaturesInflationHelp" class="form-text">Do
+												you
+												want
+												inflation</div>
+											<input type="number" name="tokenFeaturesInflationAPY"
+												id="tokenFeaturesInflationAPY" min="0.1" max="200.0" step="0.1"
+												v-model="newToken.apy" @click="calculateAPR()">
+											<label for="tokenFeaturesInflationAPY"
+												class="btn btn-outline-primary">NO</label>
 										</div>
 									</div>
 									<!--2 Precision (default 3)-->
@@ -378,42 +442,37 @@
 											<div v-if="!newAccount.password"
 												class="d-flex flex-column text-center mb-3">
 												<div>
-													<button role="button" href="#/" @click="makePassword()" class="btn btn-primary">
+													<button role="button" href="#/" @click="makePassword()"
+														class="btn btn-primary">
 														Generate Password
 													</button>
 												</div>
 											</div>
 											<!-- step 2 : pay for account -->
 											<div v-if="newAccount.password">
-												<!-- pay HIVE -->
-												<div
+												<!-- use ACT -->
+												<div v-if="accountinfo.pending_claimed_accounts"
 													class="d-flex p-2 border border-3 rounded border-white-50 mb-3">
 													<div>
-														<div class="lead">New Account Fee</div>
-														<div>The current cost to create a new account is {{newAccount.fee}}</div>
+														<div class="lead">Use ACT</div>
+														<div>Redeem one ACT to create the new account</div>
 													</div>
 													<div class="ms-auto">
-														<button role="button" class="btn btn-outline-danger"
-															@click="createAccount(false)"><!--v-if="newAccount.password && newAccount.fee"-->
-															Pay HIVE
-														</button>
+														<button role="button" class="btn btn-outline-success"
+															@click="createAccount(true)">Use ACT</button>
 													</div>
 												</div>
+												
 												<!-- claim ACT -->
 												<div v-if="rcinfo.max >= rcCost.claim_account_operation"
 													class="d-flex flex-column p-2 border border-3 rounded border-white-50 mb-3">
 													<div class="lead">Claim ACT</div>
-													<p>Use an Account Creation Token (ACT) to cover the cost. Claiming ACTs requires Resource Credits (RC) generated by HIVE Power. RCs regenerate every 5 days, ACTs do not expire.
-														</p>
-														<div class="d-none">HP: {{rcinfo.max}}</div>
+													<p>Use an Account Creation Token (ACT) to cover the cost. Claiming
+														ACTs requires Resource Credits (RC) generated by HIVE Power. RCs
+														regenerate every 5 days, ACTs do not expire.
+													</p>
+													<div class="d-none">HP: {{rcinfo.max}}</div>
 													<div class="progress-stacked bg-darkg mb-2">
-														<div class="progress" role="progressbar"
-															aria-label="Segment one"
-															:aria-valuenow="sigFig((rcCost.claim_account_operation/rcinfo.max) * 100, 2)"
-															aria-valuemin="0" aria-valuemax="100"
-															:style="'width: ' + sigFig((rcCost.claim_account_operation/rcinfo.max) * 100, 2) + '%'">
-															<div class="progress-bar progress-bar-striped progress-bar-animated bg-danger"></div>
-														</div>
 														<div class="progress" role="progressbar"
 															aria-label="Segment two"
 															:aria-valuenow="sigFig(((rcinfo.current-rcCost.claim_account_operation)/rcinfo.max) * 100, 2)"
@@ -421,18 +480,29 @@
 															:style="'width: ' + sigFig(((rcinfo.current-rcCost.claim_account_operation)/rcinfo.max) * 100, 2) + '%'">
 															<div class="progress-bar bg-primary"></div>
 														</div>
+														<div class="progress" role="progressbar"
+															aria-label="Segment one"
+															:aria-valuenow="sigFig((rcCost.claim_account_operation/rcinfo.max) * 100, 2)"
+															aria-valuemin="0" aria-valuemax="100"
+															:style="'width: ' + sigFig((rcCost.claim_account_operation/rcinfo.max) * 100, 2) + '%'">
+															<div
+																class="progress-bar progress-bar-striped progress-bar-animated bg-danger">
+															</div>
+														</div>
+														
 													</div>
 													<div class="d-flex align-items-center mb-2">
 
 														<div class="">
-															<div class="d-flex align-items-center"><i
-																	class="fa-solid fa-square fa-fw fs-6 me-1 text-danger"></i>Required:
-																{{sigFig((rcCost.claim_account_operation/rcinfo.max) *
-																100, 2)}}%</div>
+															
 															<div class="d-flex align-items-center"><i
 																	class="fa-solid fa-square fa-fw fs-6 me-1 text-primary"></i>Available:
 																{{sigFig((rcinfo.current/rcinfo.max) * 100, 2)}}%
 															</div>
+															<div class="d-flex align-items-center"><i
+																class="fa-solid fa-square fa-fw fs-6 me-1 text-danger"></i>Required:
+															{{sigFig((rcCost.claim_account_operation/rcinfo.max) *
+															100, 2)}}%</div>
 														</div>
 														<div class="ms-auto">
 															<span class="p-1 fs-5">You have
@@ -448,21 +518,25 @@
 													</div>
 
 												</div>
-												<!-- use ACT -->
-												<div v-if="accountinfo.pending_claimed_accounts"
-													class="d-flex p-2 border border-3 rounded border-white-50 mb-3">
+												<!-- pay HIVE -->
+												<div class="d-flex p-2 border border-3 rounded border-white-50 mb-3">
 													<div>
-														<div class="lead">Use ACT</div>
-														<div>Redeem one ACT to create the new account</div>
+														<div class="lead">New Account Fee</div>
+														<div>The current cost to create a new account is
+															{{newAccount.fee}}</div>
 													</div>
 													<div class="ms-auto">
-														<button role="button" class="btn btn-outline-success"
-															@click="createAccount(true)">Use ACT</button>
+														<button role="button" class="btn btn-outline-danger"
+															@click="createAccount(false)"><!--v-if="newAccount.password && newAccount.fee"-->
+															Pay HIVE
+														</button>
 													</div>
 												</div>
 												
+
 												<div class="d-flex justify-content-center mb-3">
-													<button role="button" class="btn btn-outline-warning">Cancel</button>
+													<button role="button"
+														class="btn btn-outline-warning">Cancel</button>
 												</div>
 											</div>
 										</div>
@@ -482,81 +556,50 @@
 													data-bs-parent="#optionsAccordion">
 													<div class="accordion-body">
 
+														<!-- tag -->
 														<div class="mb-3">
-															<label for="tokenFeaturesDex" class="lead form-label">DEX
-															</label>
-															<div>
-																<div class="btn-group bg-dark">
-																	<input type="radio" name="tokenFeaturesDex"
-																		id="setYesDex" autocomplete="off"
-																		:checked="newToken.featdex"
-																		@click="newToken.featdex = true"
-																		class="btn-check">
-																	<label for="setYesDex"
-																		class="btn btn-outline-primary">YES</label>
-																	<input type="radio" name="tokenFeaturesDex"
-																		:checked="!newToken.featdex"
-																		@click="newToken.featdex = false" id="setNoDex"
-																		autocomplete="off" class="btn-check">
-																	<label for="setNoDex"
-																		class="btn btn-outline-primary">NO</label>
-																</div>
-															</div>
-															<div id="tokenFeaturesDexHelp" class="form-text">Do you want
-																a
-																Decentralized Exchange
-															</div>
+															<label for="tokenTagName" class="lead form-label">Token Tag
+																Name</label>
+															<input required="required" type="text"
+																:placeholder="'ex: ' + toLowerCase(newToken.token)"
+																class="form-control bg-dark border-0 text-info"
+																id="tokenTagName" aria-describedby="tokenTagNameHelp"
+																v-model="newToken.tag">
+															<div id="tokenTagNameHelp" class="form-text">Enter the
+																preferred tag for
+																your
+																community:
+																/{{toLowerCase(newToken.token)}}/@author/permlink</div>
 														</div>
+														<!-- JSON -->
 														<div class="mb-3">
-															<label for="tokenFeaturesNft" class="lead form-label">NFT
+															<label for="tokenJson" class="lead form-label">Token
+																JSON</label>
+															<input required="required" type="text"
+																:placeholder="'ex: ' + toLowerCase(newToken.token)"
+																class="form-control bg-dark border-0 text-info"
+																id="tokenJson" aria-describedby="tokenJsonHelp"
+																v-model="newToken.jsontoken">
+															<div id="tokenJsonHelp" class="form-text">Enter the JSON <i
+																	class="fa-solid fa-chain mx-1"></i> name for your
+																token</div>
+														</div>
+														<!-- prefix -->
+														<div class="mb-3">
+															<label for="tokenPrefix" class="lead form-label">Token
+																Prefix
 															</label>
-															<div>
-																<div class="btn-group bg-dark">
-																	<input type="radio" name="tokenFeaturesNft"
-																		id="setYesNft" autocomplete="off"
-																		:checked="newToken.featnft"
-																		@click="newToken.featnft = true"
-																		class="btn-check">
-																	<label for="setYesNft"
-																		class="btn btn-outline-primary">YES</label>
-																	<input type="radio" name="tokenFeaturesNft"
-																		:checked="!newToken.featnft"
-																		@click="newToken.featnft = !true" id="setNoNft"
-																		autocomplete="off" class="btn-check">
-																	<label for="setNoNft"
-																		class="btn btn-outline-primary">NO</label>
-																</div>
+															<input required="required" type="text"
+																:placeholder="'ex: ' + toLowerCase(newToken.token) + '_'"
+																class="form-control bg-dark border-0 text-info"
+																id="tokenPrefix" aria-describedby="tokenPrefixHelp"
+																v-model="newToken.prefix">
+															<div id="tokenPrefixHelp" class="form-text">Enter the prefix
+																for your token
 															</div>
-															<div id="tokenFeaturesNftHelp" class="form-text">Do you want
-																Non-Fungible
-																Tokens</div>
 														</div>
 
-														<div class="mb-3">
-															<label for="tokenFeaturesPoB"
-																class="lead form-label">Proof-of-Brain
-															</label>
-															<div>
-																<div class="btn-group bg-dark">
-																	<input type="radio" name="tokenFeaturesPoB"
-																		:checked="newToken.featpob"
-																		@click="newToken.featpob = true; newToken.featinf = true"
-																		id="setYesPob" autocomplete="off"
-																		class="btn-check">
-																	<label for="setYesPob"
-																		class="btn btn-outline-primary">YES</label>
-																	<input type="radio" name="tokenFeaturesPoB"
-																		id="setNoPob" autocomplete="off"
-																		:checked="!newToken.featpob"
-																		@click="newToken.featpob = false"
-																		class="btn-check">
-																	<label for="setNoPob"
-																		class="btn btn-outline-primary">NO</label>
-																</div>
-															</div>
-															<div id="tokenFeaturesPoBHelp" class="form-text">Do you want
-																proof-of-brain</div>
-														</div>
+
 														<!--
 													<div class="mb-3">
 														<label for="tokenFeaturesDelegate"
@@ -647,39 +690,7 @@
 														</div>
 													</div>
 												-->
-														<div class="mb-3">
-															<label for="tokenFeaturesInflation"
-																class="lead form-label">Inflation
-															</label>
-															<div>
-																<div class="btn-group bg-dark">
-																	<input type="radio" name="tokenFeaturesInflation"
-																		:checked="newToken.featinf"
-																		@click="newToken.featinf = true"
-																		id="setYesInflation" autocomplete="off"
-																		class="btn-check">
-																	<label for="setYesInflation"
-																		class="btn btn-outline-primary">YES</label>
-																	<input type="radio" name="tokenFeaturesInflation"
-																		id="setNoInflation" autocomplete="off"
-																		:checked="!newToken.featinf"
-																		@click="newToken.featinf = false; newToken.featpob = false"
-																		class="btn-check">
-																	<label for="setNoInflation"
-																		class="btn btn-outline-primary">NO</label>
-																</div>
-															</div>
-															<div id="tokenFeaturesInflationHelp" class="form-text">Do
-																you
-																want
-																inflation</div>
-															<input type="number" name="tokenFeaturesInflationAPY"
-																id="tokenFeaturesInflationAPY" min="0.1" max="200.0"
-																step="0.1" v-model="newToken.apy"
-																@click="calculateAPR()">
-															<label for="tokenFeaturesInflationAPY"
-																class="btn btn-outline-primary">NO</label>
-														</div>
+
 													</div>
 												</div>
 											</div>
