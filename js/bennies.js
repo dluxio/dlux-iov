@@ -29,8 +29,9 @@ export default {
 <input type="text" placeholder="username" class="ps-4 pe-5 text-info form-control" v-model="addAccount">
 <button class="position-absolute end-0 top-50 translate-middle-y btn btn-outline-secondary border-0 dropdown-toggle square rounded-end" :disabled="!favorites.length" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-star me-1 fa-fw"></i></button>
 <ul class="dropdown-menu bg-black dropdown-menu-dark">
+
 <li v-for="acc in favorites" class="d-flex align-items-center justify-content-between">
-<a class="dropdown-item rounded-end" role="button" @click="addAccount = acc">@{{acc}}</a>
+<a class="mx-1 dropdown-item rounded" role="button" @click="addAccount = acc">@{{acc}}</a>
 <a @click="removeFavorite(acc)" class="mx-1 btn btn-sm btn-secondary" role="button">
 <i class="fa-solid fa-xmark fa-fw"></i>
 </a>
