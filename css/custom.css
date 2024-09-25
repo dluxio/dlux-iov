@@ -12867,6 +12867,10 @@ td {
   width: 32px;
 }
 
+.w-125 {
+  width: 140px;
+}
+
 .caption {
   top: 50%;
   left: 50%;

@@ -233,33 +233,39 @@
 							<form>
 								<div class="mx-2 ">
 									<!-- Decentralized? -->
-									<div class="mb-3">
-										<label for="tokenDecentralized" class="lead form-label">Decentralized
-										</label>
-										<div>
-											<div class="btn-group bg-dark">
-												<input type="radio" name="tokenDecentralized" id="setYesDecentralized"
-													autocomplete="off" v-model="newToken.decent" class="btn-check"
-													:value="true">
-												<label for="setYesDecentralized"
-													class="btn btn-outline-primary">YES</label>
-												<input type="radio" name="tokenDecentralized" id="setNoDecentralized"
-													autocomplete="off" v-model="newToken.decent" :value="false"
-													class="btn-check">
-												<label for="setNoDecentralized"
-													class="btn btn-outline-primary">NO</label>
+									<div class="d-flex flex-column border-3 border-white-50 border-bottom pb-2 my-2">
+										<div
+											class="d-flex align-items-center ">
+											<div>
+												<label for="tokenDecentralized" class="lead form-label">Decentralized
+												</label>
+												<div id="tokenDecentralizedHelp" class="form-text">Choose whether your
+													token
+													is
+													decentralized</div>
 											</div>
-										</div>
-										<div id="tokenDecentralizedHelp" class="form-text">Choose whether your token
-											is
-											decentralized</div>
-									</div>
-									<div class="mb-3" v-show="!newToken.decent">
-										<h4 class="accordion-header text-white">Using HoneyComb as a database for on
-											chain
-											actions is cool... but this form will only get you so far.</h4>
-									</div>
+											<div class="ms-auto">
+												<div class="btn-group bg-dark">
+													<input type="radio" name="tokenDecentralized"
+														id="setYesDecentralized" autocomplete="off"
+														v-model="newToken.decent" class="btn-check" :value="true">
+													<label for="setYesDecentralized"
+														class="btn btn-outline-primary">YES</label>
+													<input type="radio" name="tokenDecentralized"
+														id="setNoDecentralized" autocomplete="off"
+														v-model="newToken.decent" :value="false" class="btn-check">
+													<label for="setNoDecentralized"
+														class="btn btn-outline-primary">NO</label>
+												</div>
+											</div>
 
+										</div>
+										<div v-show="!newToken.decent">
+											<h4 class="accordion-header text-white">Using HoneyComb as a database for on
+												chain
+												actions is cool... but this form will only get you so far.</h4>
+										</div>
+									</div>
 									<div class="accordion accordion-flush card square" id="accordionNewToken">
 										<!-- token name -->
 										<div class="accordion-item bg-blur-darkg-50 bg-img-none">
@@ -566,7 +572,7 @@
 																</div>
 															</div>
 														</div>
-														<div class="position-relative">
+														<div class="position-relative mb-3">
 															<input type="number" name="tokenFeaturesInflationAPY"
 																class="pe-5 form-control text-white border-dark bg-dark"
 																id="tokenFeaturesInflationAPY" min="0.1" max="200.0"
@@ -636,26 +642,25 @@
 																<!-- Cancel Register -->
 																<div class="d-flex bg-darkg p-2 rounded mb-2">
 																	<div>
-																		<div class="lead">New Account</div>
+																		<div class="lead">Create New Account</div>
 																		<div>{{newAccount.msg}} for {{newToken.ms}}
 																		</div>
 																	</div>
 																	<div class="ms-auto">
 																		<button type="button"
-																			class="btn btn-outline-warning">Cancel</button>
+																			class=" w-125 btn btn-outline-warning">Cancel</button>
 																	</div>
 																</div>
 																<!-- use ACT -->
 																<div v-if="accountinfo.pending_claimed_accounts"
 																	class="d-flex bg-darkg p-2 rounded mb-2">
 																	<div>
-																		<div class="lead">Use ACT</div>
-																		<div>Redeem one ACT to create the new
-																			account</div>
+																		<div class="lead">You have {{accountinfo.pending_claimed_accounts}} ACTs</div>
+																		<div>Redeem one ACT to create the new account</div>
 																	</div>
 																	<div class="ms-auto">
 																		<button type="button"
-																			class="btn btn-outline-success"
+																			class="w-125 btn btn-outline-success"
 																			@click="createAccount(true)">Use
 																			ACT</button>
 																	</div>
@@ -665,7 +670,8 @@
 																<div v-if="rcinfo.max >= rcCost.claim_account_operation"
 																	class="d-flex bg-darkg flex-column p-2 rounded mb-2">
 																	<div class="lead">Claim ACT</div>
-																	<p>Account Creation Tokens (ACTs) cover the cost
+																	<p class="mb-2">Account Creation Tokens (ACTs) cover
+																		the cost
 																		of creating new
 																		accounts. Claiming
 																		ACTs requires Resource Credits (RCs)
@@ -674,7 +680,7 @@
 																		RCs
 																		regenerate every 5 days, ACTs do not expire.
 																	</p>
-																	<div class="d-none">HP: {{rcinfo.max}}</div>
+																	
 																	<div class="progress-stacked mb-2"
 																		v-if="rcinfo.current >= rcCost.claim_account_operation">
 																		<div class="progress" role="progressbar"
@@ -736,19 +742,14 @@
 																			</div>
 																		</div>
 																		<div class="ms-auto">
-																			<span class="p-1 fs-5">You have
-																				{{accountinfo.pending_claimed_accounts}}
-																				unused ACTs</span>
+																			<button class="w-125 btn btn-outline-info"
+																				type="button" @click="claimACT()"
+																				:disabled="rcinfo.current < rcCost.claim_account_operation"
+																				:class="{'disabled': rcinfo.current < rcCost.claim_account_operation}">Claim
+																				ACT</button>
 																		</div>
 																	</div>
-																	<div class="d-flex align-items-center">
 
-																		<button class="ms-auto btn btn-outline-info"
-																			type="button" @click="claimACT()"
-																			:disabled="rcinfo.current < rcCost.claim_account_operation"
-																			:class="{'disabled': rcinfo.current < rcCost.claim_account_operation}">Claim
-																			ACT</button>
-																	</div>
 
 																</div>
 																<!-- pay HIVE -->
@@ -761,7 +762,7 @@
 																	</div>
 																	<div class="ms-auto">
 																		<button type="button"
-																			class="btn btn-outline-danger"
+																			class="w-125 btn btn-outline-danger"
 																			@click="createAccount(false)"><!--v-if="newAccount.password && newAccount.fee"-->
 																			Pay HIVE
 																		</button>
