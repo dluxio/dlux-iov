@@ -26,7 +26,7 @@ export default {
 <span class="position-absolute start-0 top-50 translate-middle-y ps-2">
 <i class="fa-solid fa-at fa-fw"></i>
 </span>
-<input type="text" placeholder="username" class="ps-4 pe-5 text-info form-control" v-model="addAccount">
+<input type="text" placeholder="username" class="ps-4 pe-5 text-info bg-dark border-0 form-control" v-model="addAccount">
 <button class="position-absolute end-0 top-50 translate-middle-y btn btn-outline-secondary border-0 dropdown-toggle square rounded-end" :disabled="!favorites.length" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-star me-1 fa-fw"></i></button>
 <ul class="dropdown-menu bg-black dropdown-menu-dark">
 
@@ -41,7 +41,7 @@ export default {
 </td>
 <td class="text-center">
 <div class="position-relative">
-<input type="number" step="0.01" min="0.01" :max="100 - (total/100)" placeholder="amount" class="pe-4 form-control text-center" v-model="addWeight">
+<input type="number" step="0.01" min="0.01" :max="100 - (total/100)" placeholder="amount" class="pe-4 form-control bg-dark border-0 text-center" v-model="addWeight">
 <span class="position-absolute end-0 top-50 translate-middle-y pe-2">
 <i class="fa-solid fa-percent fa-fw"></i>
 </span>

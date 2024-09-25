@@ -17,7 +17,7 @@
 	<!-- Markdown -->
 	<script src="https://unpkg.com/showdown@1.x/dist/showdown.min.js"></script>
 	<link rel="stylesheet"
-		href="https://cdn.rawgit.com/CoffeePerry/simplemde-theme-bootstrap-dark/master/dist/simplemde-theme-bootstrap-dark.min.css">
+		href="/css/simplemde-bs-dark.css">
 	<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
 	<!-- Marked -->
 	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -26,7 +26,7 @@
 	<!-- Tagify -->
 	<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
 	<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
-	<link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
+	<link href="/css/tagify.css" rel="stylesheet" type="text/css" />
 	<!-- Script required for account creation (key generation) -->
 	<script src="https://unpkg.com/@hiveio/dhive@latest/dist/dhive.js"></script>
 	<script>
@@ -234,8 +234,7 @@
 								<div class="mx-2 ">
 									<!-- Decentralized? -->
 									<div class="d-flex flex-column border-3 border-white-50 border-bottom pb-2 my-2">
-										<div
-											class="d-flex align-items-center ">
+										<div class="d-flex align-items-center ">
 											<div>
 												<label for="tokenDecentralized" class="lead form-label">Decentralized
 												</label>
@@ -640,25 +639,28 @@
 															<!-- step 2 : pay for account -->
 															<div v-if="newAccount.password">
 																<!-- Cancel Register -->
-																<div class="d-flex bg-darkg p-2 rounded mb-2">
-																	<div>
+																<div class="d-flex flex-wrap bg-darkg px-2 py-1 rounded mb-2">
+																	<div class="me-1 my-1">
 																		<div class="lead">Create New Account</div>
 																		<div>{{newAccount.msg}} for {{newToken.ms}}
 																		</div>
 																	</div>
-																	<div class="ms-auto">
+																	<div class="ms-auto my-1">
 																		<button type="button"
 																			class=" w-125 btn btn-outline-warning">Cancel</button>
 																	</div>
 																</div>
 																<!-- use ACT -->
 																<div v-if="accountinfo.pending_claimed_accounts"
-																	class="d-flex bg-darkg p-2 rounded mb-2">
-																	<div>
-																		<div class="lead">You have {{accountinfo.pending_claimed_accounts}} ACTs</div>
-																		<div>Redeem one ACT to create the new account</div>
+																	class="d-flex flex-wrap bg-darkg px-2 py-1 rounded mb-2">
+																	<div class="me-1 my-1">
+																		<div class="lead">You have
+																			{{accountinfo.pending_claimed_accounts}}
+																			ACTs</div>
+																		<div>Redeem one ACT to create the new account
+																		</div>
 																	</div>
-																	<div class="ms-auto">
+																	<div class="ms-auto my-1">
 																		<button type="button"
 																			class="w-125 btn btn-outline-success"
 																			@click="createAccount(true)">Use
@@ -668,7 +670,7 @@
 
 																<!-- claim ACT -->
 																<div v-if="rcinfo.max >= rcCost.claim_account_operation"
-																	class="d-flex bg-darkg flex-column p-2 rounded mb-2">
+																	class="d-flex bg-darkg flex-column px-2 py-1 rounded mb-2">
 																	<div class="lead">Claim ACT</div>
 																	<p class="mb-2">Account Creation Tokens (ACTs) cover
 																		the cost
@@ -680,7 +682,7 @@
 																		RCs
 																		regenerate every 5 days, ACTs do not expire.
 																	</p>
-																	
+
 																	<div class="progress-stacked mb-2"
 																		v-if="rcinfo.current >= rcCost.claim_account_operation">
 																		<div class="progress" role="progressbar"
@@ -723,10 +725,8 @@
 																		</div>
 
 																	</div>
-																	<div class="d-flex align-items-center mb-2">
-
-																		<div class="">
-
+																	<div class="d-flex flex-wrap align-items-center mb-2">
+																		<div class="me-1 my-1">
 																			<div class="d-flex align-items-center">
 																				<i class="fa-solid fa-square fa-fw fs-6 me-1"
 																					:class="{'text-warning': rcinfo.current < rcCost.claim_account_operation, 'text-primary': rcinfo.current >= rcCost.claim_account_operation}"></i>Available:
@@ -741,7 +741,7 @@
 																				100, 2)}}%
 																			</div>
 																		</div>
-																		<div class="ms-auto">
+																		<div class="ms-auto my-1">
 																			<button class="w-125 btn btn-outline-info"
 																				type="button" @click="claimACT()"
 																				:disabled="rcinfo.current < rcCost.claim_account_operation"
@@ -749,18 +749,16 @@
 																				ACT</button>
 																		</div>
 																	</div>
-
-
 																</div>
 																<!-- pay HIVE -->
-																<div class="d-flex bg-darkg p-2 rounded mb-2">
-																	<div>
+																<div class="d-flex flex-wrap bg-darkg px-2 py-1 rounded mb-2">
+																	<div class="me-1 my-1">
 																		<div class="lead">New Account Fee</div>
 																		<div>The current cost to create a new
 																			account is
 																			{{newAccount.fee}}</div>
 																	</div>
-																	<div class="ms-auto">
+																	<div class="ms-auto my-1">
 																		<button type="button"
 																			class="w-125 btn btn-outline-danger"
 																			@click="createAccount(false)"><!--v-if="newAccount.password && newAccount.fee"-->
@@ -851,14 +849,7 @@
 											</div>
 										</div>
 									</div>
-
-
-
-
-
-
-
-
+								</div>
 							</form>
 						</div>
 					</div>
