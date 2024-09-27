@@ -73,14 +73,14 @@ let HP
 //          //document.getElementById('userImage').src = 'https://images.hive.blog/u/' + user + '/avatar
 //          var urls = [`https://token.dlux.io/@${user}`, 'https://token.dlux.io/dex', 'https://token.dlux.io/stats', 'https://api.coingecko.com/api/v3/simple/price?ids=hive&vs_currencies=usd', `https://token.dlux.io/api/pfp/${user}`] //datasources
 //          let promises = urls.map(u => fetch(u))
-//          promises.push(fetch("https://hive-api.dlux.io", {
+//          promises.push(fetch("https://api.hive.blog", {
 //              body: "{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_dynamic_global_properties\", \"params\":[], \"id\":1}",
 //              headers: {
 //                  "Content-Type": "application/x-www-form-urlencoded"
 //              },
 //              method: "POST"
 //          }))
-//          promises.push(fetch("https://hive-api.dlux.io", {
+//          promises.push(fetch("https://api.hive.blog", {
 //              body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${user}\"]], \"id\":1}`,
 //              headers: {
 //                  "Content-Type": "application/x-www-form-urlencoded"
@@ -110,7 +110,7 @@ let HP
 //                     const blogger = window.location.pathname.split('/')[1].split('@')[1]
 //                     var urls = [`https://token.dlux.io/@${blogger}`]
 //                     let promises = urls.map(u => fetch(u))
-//                     promises.push(fetch("https://hive-api.dlux.io", {
+//                     promises.push(fetch("https://api.hive.blog", {
 //                         body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${blogger}\"]], \"id\":1}`,
 //                         headers: {
 //                             "Content-Type": "application/x-www-form-urlencoded"
@@ -253,7 +253,7 @@ let HP
     //     })
     //     .catch(e => { console.log(e) })
 
-//     fetch("https://hive-api.dlux.io", {
+//     fetch("https://api.hive.blog", {
 //             body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_account_history\", \"params\":[\"${user}\", -1, 100], \"id\":1}`,
 //             headers: {
 //                 "Content-Type": "application/x-www-form-urlencoded"
@@ -690,7 +690,7 @@ let HP
 //  }
 
 // function setPFP(setname, uid, callback){
-//     fetch("https://hive-api.dlux.io", {
+//     fetch("https://api.hive.blog", {
 //         body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[["${user}"]], "id":1}`,
 //         headers: {
 //             "Content-Type": "application/x-www-form-urlencoded"
@@ -1074,7 +1074,7 @@ function downPowerMagic(up, down, block_num) {
 
 function propCheck(user){
     return new Promise((resolve, reject)=>{
-    var url171 = fetch("https://hive-api.dlux.io", {
+    var url171 = fetch("https://api.hive.blog", {
         body: "{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.list_proposal_votes\", \"params\":[[171], 1000, \"by_proposal_voter\", \"ascending\", \"active\"], \"id\":1}",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"

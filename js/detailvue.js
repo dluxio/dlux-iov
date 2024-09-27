@@ -484,7 +484,7 @@ methods: {
             key: `posting`,
             msg: `Updating...`,
             ops: ["checkAccount"],
-            api: "https://hive-api.dlux.io",
+            api: "https://api.hive.blog",
             txid: `Updating @${post.author}/${post.permlink}`,
           }
           this.$emit('tosign', toSign)

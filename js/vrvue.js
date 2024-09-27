@@ -37,7 +37,7 @@ if (
     //window.history.replaceState(null, null, "dex");
 }
 let user = localStorage.getItem("user") || "GUEST";
-let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
+let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
 // Vue.config.ignoredElements = [
 //   'a-scene',
 //   'a-assets',
@@ -644,7 +644,7 @@ createApp({
     },
     getReplies(a,p,k){
       return new Promise((resolve, reject) => {
-        fetch('https://hive-api.dlux.io', {
+        fetch('https://api.hive.blog', {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content_replies", "params":["${a}","${p}"], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -692,7 +692,7 @@ createApp({
       }
     },
     checkAccount(name, key) {
-      fetch("https://hive-api.dlux.io", {
+      fetch("https://api.hive.blog", {
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${this[name]}\"]], \"id\":1}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -967,7 +967,7 @@ createApp({
     },
     getContent(a, p, modal) {
       if (a && p) {
-        fetch('https://hive-api.dlux.io', {
+        fetch('https://api.hive.blog', {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content", "params":["${a}", "${p}"], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
