@@ -149,7 +149,10 @@
 								<p>Precision: {{newToken.precision}}</p>
 								<p>Leader: <a class="no-decoration"
 										:href="'/@' + newToken.leader">@{{newToken.leader}}</a></p>
-								<p>API: {{newToken.mainapi}}</p>
+										<p>Front End: {{newToken.mainfe}}</p>
+										<p>API: {{newToken.mainapi}}</p>
+										<p>IPFS: {{newToken.mainipfs}}</p>
+										<p v-if="newToken.featnft">Rendering API: {{newToken.mainrender}}</p>
 								<p>Multi-Sig: {{newToken.ms}}</p>
 
 								<div class="mb-3">
@@ -427,15 +430,46 @@
 													</div>
 													<!--What will be this accounts public API?-->
 													<div class="mb-3">
-														<label for="tokenApi" class="lead form-label">Public API
+														<label for="fe" class="lead form-label">Public Front-End
 														</label>
 														<input required="required" type="text"
 															class="form-control bg-dark border-0 text-info"
-															:placeholder="'token.' + this.newToken.tag + '.io'"
+															:placeholder="this.newToken.tag + '.com'"
+															id="fe" aria-describedby="tokenApiHelp"
+															v-model="newToken.fe" @blur="siteDefaults()">
+														<div id="feHelp" class="form-text">Enter the website the leader will serve content from.</div>
+														<label for="mainfe" class="lead form-label">Public Front-End - Full
+														</label>
+														<input required="required" type="text"
+															class="form-control bg-dark border-0 text-info"
+															:placeholder="'https://' + this.newToken.tag + '.com'"
+															id="mainfe" aria-describedby="tokenApiHelp"
+															v-model="newToken.mainfe">
+														<div id="mainfeHelp" class="form-text">Enter the full domain the leader will serve content from.</div>
+														<label for="tokenApi" class="lead form-label">Public Token API
+														</label>
+														<input required="required" type="text"
+															class="form-control bg-dark border-0 text-info"
+															:placeholder="'https://api.' + this.newToken.tag + '.com'"
 															id="tokenApi" aria-describedby="tokenApiHelp"
 															v-model="newToken.mainapi">
-														<div id="tokenApiHelp" class="form-text">Enter the address this
-															account will broadcast your token API from</div>
+														<div id="tokenApiHelp" class="form-text">Enter the full domain the leader will serve token API from.</div>
+														<label for="ipfsApi" class="lead form-label">Public IPFS
+														</label>
+														<input required="required" type="text"
+															class="form-control bg-dark border-0 text-info"
+															:placeholder="'https://ipfs.' + this.newToken.tag + '.com'"
+															id="ipfsApi" aria-describedby="tokenApiHelp"
+															v-model="newToken.mainipfs">
+														<div id="ipfsApiHelp" class="form-text">Enter the full domain the leader will serve IPFS.</div>
+														<label for="renderApi" class="lead form-label">Public NFT / Content Renderer
+														</label>
+														<input required="required" type="text"
+															class="form-control bg-dark border-0 text-info"
+															:placeholder="'https://data.' + this.newToken.tag + '.com'"
+															id="renderApi" aria-describedby="tokenApiHelp"
+															v-model="newToken.mainrender">
+														<div id="renderApiHelp" class="form-text">Enter the domain the leader will render PoB & NFTs from.</div>
 													</div>
 													<!-- Precision (default 3)-->
 													<div class="mb-3">
@@ -507,7 +541,18 @@
 																	class="btn btn-outline-primary">NO</label>
 															</div>
 														</div>
-
+														<div class="position-relative mb-3"></div>
+													        <label for="hsf" class="lead form-label">Hive Fee for NFT Transactions</label>
+															<input type="number" name="hsf"
+																class="pe-5 form-control text-white border-dark bg-dark"
+																id="hsf" min="0.0" max="10.0"
+																step="0.01" v-model="newToken.preHiveServiceFee" @blur="calHSF()">
+															<span
+																class="position-absolute end-0 top-50 translate-middle-y px-2"><i
+																	class="fa-solid fa-percent fa-fw"
+																	aria-hidden="true"></i></span>
+														</div>
+														<!-- hiveServiceFee -->
 													</div>
 													<!-- PoB -->
 													<div
@@ -576,7 +621,7 @@
 																class="pe-5 form-control text-white border-dark bg-dark"
 																id="tokenFeaturesInflationAPY" min="0.1" max="200.0"
 																step="0.1" v-model="newToken.apy"
-																@click="calculateAPR()">
+																@blur="calculateAPR()">
 															<span
 																class="position-absolute end-0 top-50 translate-middle-y px-2"><i
 																	class="fa-solid fa-percent fa-fw"

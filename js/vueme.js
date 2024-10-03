@@ -154,7 +154,8 @@ PORT=3000
         footer: "",
         mainico: "",
         mainipfs: "",
-        hiveServiceFee: 0,
+        preHiveServiceFee: "0.5",
+        hiveServiceFee: 50,
         featpob: true,
         featdel: false,
         featdaily: false,
@@ -3005,6 +3006,9 @@ function buyNFT(setname, uid, price, type, callback){
         true
       )
     },
+    calHSF(){
+      newToken.hiveServiceFee = parseInt(newToken.preHiveServiceFee * 100)
+    },
     getRewardFund() {
       fetch(this.hapi, {
         body: `{"jsonrpc":"2.0", "method":"condenser_api.get_reward_fund", "params":["post"], "id":1}`,
@@ -4140,6 +4144,13 @@ function buyNFT(setname, uid, price, type, callback){
           g: 1
         }
       }
+    },
+    siteDefaults(){
+      if(this.newToken.fe.indexOf('https://') > -1) this.newToken.fe = 'https://' + this.newToken.fe
+      this.newToken.mainfe = 'https://' + this.newToken.fe
+      this.newToken.mainapi = 'https://api.' + this.newToken.fe
+      this.newToken.mainipfs = 'https://ipfs.' + this.newToken.fe
+      this.newToken.mainrender = 'https://data.' + this.newToken.fe
     },
     saveNewToken(){
       console.log("Saving...")
