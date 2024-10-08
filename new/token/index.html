@@ -562,7 +562,7 @@
 															Fee</label>
 														<div class="position-relative mb-3">
 															<input type="number" name="hsf"
-																class="pe-5 form-control text-white border-dark bg-dark"
+																class="pe-5 form-control text-info border-dark bg-dark"
 																id="hsf" min="0.0" max="10.0" step="0.01"
 																v-model="newToken.preHiveServiceFee" @blur="calHSF()">
 															<span
@@ -612,7 +612,7 @@
 																	Do
 																	you
 																	want
-																	inflation / set inflation percentage</div>
+																	inflation</div>
 															</div>
 															<div class="ms-auto">
 																<div class="btn-group bg-dark">
@@ -633,16 +633,21 @@
 																</div>
 															</div>
 														</div>
-														<div class="position-relative mb-3">
-															<input type="number" name="tokenFeaturesInflationAPY"
-																class="pe-5 form-control text-white border-dark bg-dark"
-																id="tokenFeaturesInflationAPY" min="0.1" max="200.0"
-																step="0.1" v-model="newToken.apy"
-																@blur="calculateAPR()">
-															<span
-																class="position-absolute end-0 top-50 translate-middle-y px-2"><i
-																	class="fa-solid fa-percent fa-fw"
-																	aria-hidden="true"></i></span>
+														<div>
+															<label for="tokenFeaturesInflation"
+																class="lead form-label">Rate
+															</label>
+															<div class="position-relative mb-3">
+																<input type="number" name="tokenFeaturesInflationAPY"
+																	class="pe-5 form-control text-info border-dark bg-dark"
+																	id="tokenFeaturesInflationAPY" min="0.1" max="200.0"
+																	step="0.1" v-model="newToken.apy"
+																	@blur="calculateAPR()">
+																<span
+																	class="position-absolute end-0 top-50 translate-middle-y px-2"><i
+																		class="fa-solid fa-percent fa-fw"
+																		aria-hidden="true"></i></span>
+															</div>
 														</div>
 													</div>
 												</div>
