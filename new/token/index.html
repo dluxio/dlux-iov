@@ -528,49 +528,7 @@
 														</div>
 
 													</div>
-													<!-- NFT -->
-													<div
-														class="d-flex align-items-center border-3 border-white-50 border-top pt-3 mb-3">
-														<div>
-															<label for="tokenFeaturesNft" class="lead form-label">NFT
-															</label>
-															<div id="tokenFeaturesNftHelp" class="form-text">Do you
-																want
-																Non-Fungible
-																Tokens</div>
-														</div>
-														<div class="ms-auto">
-															<div class="btn-group bg-dark">
-																<input type="radio" name="tokenFeaturesNft"
-																	id="setYesNft" autocomplete="off"
-																	:checked="newToken.featnft"
-																	@click="newToken.featnft = true" class="btn-check">
-																<label for="setYesNft"
-																	class="btn btn-outline-primary">YES</label>
-																<input type="radio" name="tokenFeaturesNft"
-																	:checked="!newToken.featnft"
-																	@click="newToken.featnft = !true" id="setNoNft"
-																	autocomplete="off" class="btn-check">
-																<label for="setNoNft"
-																	class="btn btn-outline-primary">NO</label>
-															</div>
-														</div>
-													</div>
-													<!-- hiveServiceFee -->
-													<div class="mb-3">
-														<label for="hsf" class="lead form-label">Hive Transaction
-															Fee</label>
-														<div class="position-relative mb-3">
-															<input type="number" name="hsf"
-																class="pe-5 form-control text-info border-dark bg-dark"
-																id="hsf" min="0.0" max="10.0" step="0.01"
-																v-model="newToken.preHiveServiceFee" @blur="calHSF()">
-															<span
-																class="position-absolute end-0 top-50 translate-middle-y px-2"><i
-																	class="fa-solid fa-percent fa-fw"
-																	aria-hidden="true"></i></span>
-														</div>
-													</div>
+													
 													<!-- PoB -->
 													<div
 														class="d-flex align-items-center border-3 border-white-50 border-top pt-3 mb-3">
@@ -648,6 +606,49 @@
 																		class="fa-solid fa-percent fa-fw"
 																		aria-hidden="true"></i></span>
 															</div>
+														</div>
+													</div>
+													<!-- NFT -->
+													<div
+														class="d-flex align-items-center border-3 border-white-50 border-top pt-3 mb-3">
+														<div>
+															<label for="tokenFeaturesNft" class="lead form-label">NFT
+															</label>
+															<div id="tokenFeaturesNftHelp" class="form-text">Do you
+																want
+																Non-Fungible
+																Tokens</div>
+														</div>
+														<div class="ms-auto">
+															<div class="btn-group bg-dark">
+																<input type="radio" name="tokenFeaturesNft"
+																	id="setYesNft" autocomplete="off"
+																	:checked="newToken.featnft"
+																	@click="newToken.featnft = true" class="btn-check">
+																<label for="setYesNft"
+																	class="btn btn-outline-primary">YES</label>
+																<input type="radio" name="tokenFeaturesNft"
+																	:checked="!newToken.featnft"
+																	@click="newToken.featnft = !true" id="setNoNft"
+																	autocomplete="off" class="btn-check">
+																<label for="setNoNft"
+																	class="btn btn-outline-primary">NO</label>
+															</div>
+														</div>
+													</div>
+													<!-- hiveServiceFee -->
+													<div class="mb-3">
+														<label for="hsf" class="lead form-label">Hive Transaction
+															Fee</label>
+														<div class="position-relative mb-3">
+															<input type="number" name="hsf"
+																class="pe-5 form-control text-info border-dark bg-dark"
+																id="hsf" min="0.0" max="10.0" step="0.01"
+																v-model="newToken.preHiveServiceFee" @blur="calHSF()">
+															<span
+																class="position-absolute end-0 top-50 translate-middle-y px-2"><i
+																	class="fa-solid fa-percent fa-fw"
+																	aria-hidden="true"></i></span>
 														</div>
 													</div>
 												</div>
