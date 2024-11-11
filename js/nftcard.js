@@ -84,7 +84,7 @@ export default {
   <div class="card-footer px-1 pb-1 pt-0 border-0">
 
     <!-- TRADE -->
-    <a href="#itemModal" class="no-decoration" data-bs-toggle="modal" @click="modalIndex('details')">
+    <a href="#transferModal" class="no-decoration" data-bs-toggle="modal" @click="modalIndex('details')">
       <div class="text-white text-center" v-if="trade">
         <div class="bg-dark rounded">
           <div class="mt-1 text-center rounded-top bg-info-50">
