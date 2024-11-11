@@ -48,7 +48,7 @@ export default {
                         </div>
 
                      </div>
-                     <div class="d-flex px-2 pb-2 mb-2 align-items-center" :alt="item.set + '-' + item.uid">
+                     <div class="d-flex pb-2 mb-2 align-items-center" :alt="item.set + '-' + item.uid">
                         <h3 class="m-0" :style="{'background-image': colors}" style="-webkit-background-clip: text;
                                        -webkit-text-fill-color: transparent; 
                                        -moz-background-clip: text;
@@ -58,7 +58,7 @@ export default {
                         <!-- owner info -->
                         <div class="ms-auto" v-if="item.from">
                            <a title="Item From" :href="'/@' + item.from" role="button"
-                              class="btn btn-lg btn-outline-light" v-if="item.from != account">
+                              class="btn btn-sm btn-outline-light" v-if="item.from != account">
                               <i class="fa-solid fa-truck-arrow-right fa-flip-horizontal fa-fw me-1"></i>
                               {{item.from}}
                            </a>
@@ -67,11 +67,6 @@ export default {
                               <i class="fa-solid fa-truck-arrow-right fa-fw me-1"></i>
                               {{item.to}}
                            </a>
-                           <button title="Cancel" @click="cancelXfr()" role="button"
-                              class="btn btn-lg btn-outline-light">Cancel</button>
-                           <button title="Accept" @click="acceptXfr()" role="button"
-                              class="btn btn-lg btn-outline-light"
-                              v-if="item.from != account">{{item.priceString}}</button>
                         </div>
 
                         <!--Open-->
@@ -539,7 +534,7 @@ export default {
                      </div>
 
                      <!-- Mint Trade -->
-                     <div class="accordion-item" v-if="item.from == account || item.to == account">
+                     <div class="accordion-item" v-if="item.from">
                         <h2 class="accordion-header">
                            <button onclick="this.blur();" class="accordion-button" type="button"
                               data-bs-toggle="collapse" data-bs-target="#collapseftTrade" aria-expanded="false"
@@ -550,7 +545,7 @@ export default {
                         <div id="collapseftTrade" class="accordion-collapse collapse show"
                            data-bs-parent="#ftAccordion">
                            <div class="accordion-body">
-                              <div class="p-2 text-white text-center rounded">
+                              <div class="text-white text-center rounded">
                                  <section>
                                     <div class=" d-flex align-items-center">
                                        <div class="text-end mt-auto mb-auto me-1" style="flex: 1">
@@ -591,13 +586,13 @@ export default {
                                  <div class="mt-3 mb-1">
                                     <!-- ACCEPT / REJECT -->
                                     <div role="group" v-if="item.to == account">
-                                       <button type="button" class="btn btn-danger" title="Decline Trade"
+                                       <button type="button" class="btn btn-sm mx-1 btn-success" title="Accept Trade"
+                                          @click="acceptXfr()"><i class="fa-solid fa-check fa-fw me-2"></i>
+                                          Accept</button>
+                                          <button type="button" class="btn btn-sm mx-1 btn-danger" title="Decline Trade"
                                           @click="cancelXfr()"><i
                                              class="fa-solid fa-xmark fa-fw me-2"></i>Decline</button>
                                        <button type="button" class="btn ps-05 pe-05 border-0" disabled></button>
-                                       <button type="button" class="btn btn-success" title="Accept Trade"
-                                          @click="acceptXfr()"><i class="fa-solid fa-check fa-fw me-2"></i>
-                                          Accept</button>
                                     </div>
                                     <!-- CANCEL -->
                                     <div role="group" v-if="item.from == account">
