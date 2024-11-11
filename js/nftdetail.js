@@ -295,7 +295,7 @@ export default {
                                                     </small>
                                                  </label>
                                                  <div class="position-relative mb-3">
-                                                    <input v-model="trade.price" type="number"
+                                                    <input v-model="trade.amount" type="number"
                                                        class="pe-5 form-control bg-dark border-dark text-info"
                                                        id="tradeNFTamount" placeholder="0.000" step="0.001" min="0.001"
                                                        required>
