@@ -596,7 +596,7 @@ export default {
                                     </div>
                                     <!-- CANCEL -->
                                     <div role="group" v-if="item.from == account">
-                                       <button type="button" class="btn btn-warning" title="Cancel Trade"
+                                       <button type="button" class="btn btn-sm btn-warning" title="Cancel Trade"
                                           @click="cancelXfr()">
                                           <i class="fa-solid fa-xmark fa-fw me-2"></i> Cancel</button>
                                     </div>
