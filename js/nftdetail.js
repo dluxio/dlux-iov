@@ -50,24 +50,24 @@ export default {
                             <!-- owner info -->
                             <div class="ms-auto" v-if="itemmodal.item.owner != account">
                                <a title="Item Seller" :href="'/@' + itemmodal.item.by" role="button"
-                                  class="btn btn-lg btn-outline-light" v-if="itemmodal.item.by">
+                                  class="btn btn-sm btn-outline-light" v-if="itemmodal.item.by">
                                   <i class="fa-solid fa-user-astronaut fa-fw me-1"></i>
                                   {{itemmodal.item.by}}
                                </a>
                                <a title="Item Owner" :href="'/@' + itemmodal.item.owner" role="button"
-                                  class="btn btn-lg btn-outline-light" v-if="itemmodal.item.owner">
+                                  class="btn btn-sm btn-outline-light" v-if="itemmodal.item.owner">
                                   <i class="fa-solid fa-user-astronaut fa-fw me-1"></i>
                                   {{itemmodal.item.owner}}
                                </a>
                             </div>
                             <div class="ms-auto" v-if="itemmodal.item.from">
                                <a title="Item From" :href="'/@' + itemmodal.item.from" role="button"
-                                  class="btn btn-lg btn-outline-light" v-if="itemmodal.item.from">
+                                  class="btn btn-sm btn-outline-light" v-if="itemmodal.item.from">
                                   <i class="fa-solid fa-truck-arrow-right fa-flip-horizontal fa-fw me-1"></i>
                                   {{itemmodal.item.from}}
                                </a>
                                <a title="Item To" :href="'/@' + itemmodal.item.to" role="button"
-                                  class="btn btn-lg btn-outline-light" v-if="!itemmodal.item.from">
+                                  class="btn btn-sm btn-outline-light" v-if="!itemmodal.item.from">
                                   <i class="fa-solid fa-truck-arrow-right fa-fw me-1"></i>
                                   {{itemmodal.item.to}}
                                </a>
@@ -610,17 +610,17 @@ export default {
                                   <div class="mb-1">
                                      <!-- ACCEPT / REJECT  -->
                                      <div role="group" v-if="itemmodal.item.to == account">
-                                        <button type="button" class="btn btn-danger" title="Decline Trade"
+                                        <button type="button" class="btn btn-sm btn-danger mx-1" title="Decline Trade"
                                            @click="cancelXfr()"><i
                                               class="fa-solid fa-xmark fa-fw me-2"></i>Decline</button>
-                                        <button type="button" class="btn ps-05 pe-05 border-0" disabled></button>
-                                        <button type="button" class="btn btn-success" title="Accept Trade"
+                                       
+                                        <button type="button" class="mx-1 btn btn-sm btn-success" title="Accept Trade"
                                            @click="acceptXfr()"><i class="fa-solid fa-check fa-fw me-2"></i>
                                            Accept</button>
                                      </div>
                                      <!-- CANCEL  -->
                                      <div role="group" v-if="itemmodal.item.from == account">
-                                        <button type="button" class="btn btn-warning" title="Cancel Trade"
+                                        <button type="button" class="btn btn-sm btn-warning" title="Cancel Trade"
                                            @click="cancelXfr()">
                                            <i class="fa-solid fa-xmark fa-fw me-2"></i> Cancel</button>
                                      </div>
