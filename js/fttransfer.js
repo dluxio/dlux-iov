@@ -69,6 +69,8 @@ export default {
                               <i class="fa-solid fa-truck-arrow-right fa-fw me-1"></i>
                               {{item.to}}
                            </a>
+                           <button title="Cancel" @click="cancelXfr()" role="button" class="btn btn-lg btn-outline-light">Cancel</button>
+                           <button title="Accept" @click="acceptXfr()" role="button" class="btn btn-lg btn-outline-light" v-if="item.from != account">{{item.priceString}}</button>
                         </div>
 
                         <!--Open-->
@@ -1114,7 +1116,7 @@ export default {
             msg: `Canceling trade of ${this.item.set} mint token...`,
             ops: ["getTokenUser"],
             api: this.api,
-            txid: `${this.item.token}_ft_bid`,
+            txid: `${this.item.token}_ft_cancel`,
           }
           this.$emit('tosign', toSign)
         },
