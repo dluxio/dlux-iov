@@ -4,13 +4,13 @@ export default {
 
      <!-- node banner -->
             <div v-if="hasStorage && !nodeview" :class="{'alert-success' : isStored, 'alert-danger' : !isStored}" class="alert d-flex align-items-center py-1 ps-2 pe-1 mx-2 mt-2 mb-1">
-                <div class="me-1 lead">{{isStored ? 'Your node is storing this contract' : 'Your node is not storing this contract'}}</div>
+                <div class="me-1">{{isStored ? 'Your node is storing this contract' : 'Your node is not storing this contract'}}</div>
                 <div class="ms-auto d-flex flex-wrap align-items-center justify-content-center mb-1">
                     <button style="max-width:100px;" type="button" class="flex-grow-1 btn btn-sm btn-warning ms-1 mt-1"
                         @click="">
                         <i class="fa-solid fa-flag fa-fw me-1"></i>Flag
                     </button>
-                    <button style="max-width:100px;" type="button" @click="store(contract.i, isStored, hasStorage)"
+                    <button style="max-width:100px;" type="button" @click="store(contract.i, isStored)"
                         class="flex-grow-1 ms-1 mt-1 btn btn-sm text-nowrap"
                         :class="{'btn-success': !isStored, 'btn-danger': isStored}">
                         <span v-if="!isStored"><i class="fa-solid fa-square-plus fa-fw me-1"></i>Add</span>
@@ -64,7 +64,7 @@ export default {
                             <div class="text-lead text-uppercase text-white-50 text-center pb-05 mt-2 border-bottom">Storage Nodes</div>
                             <ol type="1" class="my-1">
                                 <div v-for="(acc, prop, index) in contract.n">
-                                    <li><a :href="'https://dlux.io/@' + acc " class="no-decoration text-info" target="_blank">@{{acc}}</a></li>
+                                    <li><a :href="'/@' + acc " class="no-decoration text-info">@{{acc}}</a></li>
                                     <div v-if="index == Object.keys(contract.n).length - 1 && index + 1 < contract.p"
                                         v-for="i in (contract.p - (index + 1))">
                                         <li>Open</li>
@@ -77,7 +77,7 @@ export default {
                         </div>
                         <div v-if="hasStorage" class="mx-auto mt-auto d-flex flex-wrap align-items-center justify-content-center mb-1">
 
-                            <button style="max-width:100px;" @click="store(contract.i, isStored, hasStorage)" type="button"
+                            <button style="max-width:100px;" @click="store(contract.i, isStored)" type="button"
                                 class="d-none flex-grow-1 ms-1 mt-1 btn btn-sm text-nowrap"
                                 :class="{'btn-success': !isStored, 'btn-danger': isStored}">
                                 <span v-if="!isStored"><i class="fa-solid fa-square-plus fa-fw me-1"></i>Store</span>
@@ -235,7 +235,7 @@ export default {
     },
     emits: ['tosign'],
     methods: {
-        store(contract, remove = false, acc = this.spkapi.name){
+        store(contract, remove = false){
             // have a storage node?
             const toSign = {
                 type: "cja",
@@ -354,7 +354,7 @@ export default {
           get() {
             var found = false
             for (var i in this.contract.n) {
-                if (this.contract.n[i] == this.spkapi.name || this.contract.n[i] == this.saccountapi.name) {
+                if (this.contract.n[i] == this.spkapi.name) {
                     found = true
                     break
                 }
@@ -365,9 +365,7 @@ export default {
         hasStorage: {
             get() {
                 if (typeof this.spkapi.storage == "string"){
-                    return this.spkapi.name
-                } else if (typeof this.saccountapi.storage == "string"){
-                    return this.saccountapi.name
+                    return true
                 } else return false
             },
         },

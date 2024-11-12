@@ -19,7 +19,8 @@ export default {
     },
     template: `
     <div class="d-flex flex-column">
-    <div class="d-flex flex-grow-1 p-1" v-if="!nodeview">
+    
+    <div class="d-flex flex-grow-1 p-1">
         <div class="d-flex flex-grow-1 flex-wrap align-items-stretch justify-content-around">
             
             
@@ -122,56 +123,19 @@ export default {
     </div>
 
     <!-- tabs nav -->
-    <div v-if="saccountapi.pubKey != 'NA'" class="d-flex flex-column card p-0">
-        
+    <div v-if="saccountapi.pubKey != 'NA'" class="d-flex flex-column card p-0"  >
 
         <!-- top menu -->
-        <div class="pb-1">
-            <div class="d-flex flex-wrap align-items-center my-3">
-                <!--fake invisible button -->
-                <div class="btn-group m-2 d-none d-lg-block invisible" role="group" aria-label="Storage Actions" v-if="title == 'new'">
-                    <button @click="storeAll()" role="button" class="btn btn-primary"><i class="fa-solid fa-download fa-fw me-2"></i>Store Selected</button>
-                        <button type="button"
-                            class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                            disabled></button>
-                    <div class="btn-group" role="group">
-                        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa-solid fa-filter fa-fw"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-dark bg-dark">
-                            <div class="p-2" style="max-width: 200px">
-                                <div class="d-flex flex-column">
-                                    <div class="text-center mb-3">
-                                        <label for="fileSize" class="lead form-label">File Size</label>
-                                        <input required="required" type="range" @change="filterSize()" class="form-range" :min="filter.min" :max="filter.max" :step="filter.step" v-model="filter.size" id="fileSize">
-                                        <span>{{fancyBytes(filter.size)}}</span>
-                                    </div>
-                                    <div class="form-check form-switch d-none">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
-                                        <label class="form-check-label" for="flexSwitchCheckChecked">NSFW</label>
-                                    </div>
-                                    <div class="form-check form-switch d-none">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
-                                        <label class="form-check-label" for="flexSwitchCheckChecked">Encrypted</label>
-                                    </div>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" @change="filterSlots()" type="checkbox" role="switch" id="flexSwitchCheckChecked" :checked="filter.slots" v-model="filter.slots">
-                                        <label class="form-check-label" for="flexSwitchCheckChecked">Open Slots</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </ul>
-                    </div>
-                </div>
-               
+        <div class="pb-1 mb-3">
+            <div class="d-flex flex-wrap align-items-center ">
                 <div class="mx-auto ">
-                    <ul class="nav nav-tabs rounded mx-auto my-2 fs-5 " style="background-color: rgb(0,0,0,0.3)">
+                    <ul class="nav nav-tabs rounded mx-auto mt-3 fs-5 " style="background-color: rgb(0,0,0,0.3)">
                         <li class="nav-item">
-                            <a class="nav-link active px-4" :href="'#contractsTab' + title" role="tab" data-bs-toggle="tab"
+                            <a class="nav-link active px-4" href="#contractsTab" role="tab" data-bs-toggle="tab"
                                 aria-controls="contractstab" aria-expanded="true">CONTRACTS</a>
                         </li>
                         <li v-if="!cc" class="nav-item">
-                            <a class="nav-link px-4" aria-current="page" :href="'#filesTab' + title" role="tab" data-bs-toggle="tab"
+                            <a class="nav-link px-4" aria-current="page" href="#filesTab" role="tab" data-bs-toggle="tab"
                                 aria-controls="filestab" aria-expanded="false">FILES</a>
                         </li>
                         <li v-if="cc" class="nav-item">
@@ -180,44 +144,9 @@ export default {
                         </li>
                     </ul>
                 </div>
-                
-                <div class="btn-group m-2" role="group" aria-label="Storage Actions" v-if="title == 'new'">
-                <!-- real visible button -->
-                    <button @click="storeAll()" role="button" class="btn btn-danger" :disabled="!contracts.length" :class="{'disabled': !contracts.length}"><i class="fa-solid fa-download fa-fw me-2"></i>Store Selected</button>
-                      <button type="button"
-                            class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                            disabled></button>
-                    <div class="btn-group" role="group">
-                        <button class="btn btn-danger dropdown-toggle" type="button" :disabled="!contracts.length" :class="{'disabled': !contracts.length}" data-bs-toggle="dropdown" aria-expanded="false">
-                          <i class="fa-solid fa-filter fa-fw"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-dark bg-dark">
-                            <div class="p-2" style="max-width: 200px">
-                                <div class="d-flex flex-column">
-                                    <div class="text-center mb-3">
-                                        <label for="fileSize" class="lead form-label">File Size</label>
-                                        <input required="required" type="range" @change="filterSize()" class="form-range" :min="filter.min" :max="filter.max" :step="filter.step" v-model="filter.size" id="fileSize">
-                                        <span>{{fancyBytes(filter.size)}}</span>
-                                    </div>
-                                    <div class="form-check form-switch d-none">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
-                                        <label class="form-check-label" for="flexSwitchCheckChecked">NSFW</label>
-                                    </div>
-                                    <div class="form-check form-switch d-none">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
-                                        <label class="form-check-label" for="flexSwitchCheckChecked">Encrypted</label>
-                                    </div>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" @change="filterSlots()" type="checkbox" role="switch" id="flexSwitchCheckChecked" :checked="filter.slots" v-model="filter.slots">
-                                        <label class="form-check-label" for="flexSwitchCheckChecked">Open Slots</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </ul>
-                    </div>
-                </div>
             </div>
         </div>
+        
         <!-- tabs -->
         <div class="tab-content">
 
@@ -239,22 +168,21 @@ export default {
                 <!-- has files -->
                 <div v-if="!hasFiles" class="d-flex flex-wrap justify-content-center">
                         <files-vue :assets="assets" @addassets="addAssets($event)" :account="saccountapi.name" :current="saccountapi.head_block" :cc="true"
-                            :contracts="contracts" :nodeview="nodeview" :bid="title"></files-vue>
+                            :contracts="contracts"></files-vue>
                    
                 </div>
             </div>
         
             
             <!-- files -->
-            <div v-else role="tabpanel" class="tab-pane" :id="'filesTab' + title" aria-labelledby="filestab">
+            <div v-else role="tabpanel" class="tab-pane" id="filesTab" aria-labelledby="filestab">
                 
                 <!-- no files -->
                 <div v-show="!contracts.length"> 
                     <div class="ms-auto me-auto d-flex justify-content-center">
                         <div class="card mx-1 px-3 py-2 mt-3 mb-4 bg-darker" style="max-width: 600px">
                             <h2 class="fw-light mt-1">No files found</h2>
-                            <p class="lead mb-1" v-if="nodeview && title == 'stored'">The TROLE API service can take up to 10 minutes to update data</p>
-                            <p class="lead mb-1" v-if="!nodeview || title == 'new'" v-show="saccountapi.spk_power">
+                            <p class="lead mb-1" v-show="saccountapi.spk_power">
                             Click 
                                 <a class="btn btn-sm btn-dark border-info text-info no-decoration small" style="font-size: 0.6em; width: 72px;" role="button" data-bs-toggle="modal" data-bs-target="#contractModal">
                                     <modal-vue type="build" token="BROCA"
@@ -283,7 +211,7 @@ export default {
                 <div v-if="contracts.length" class="d-flex flex-wrap justify-content-center">
                     
                         <files-vue :assets="assets" @addassets="addAssets($event)" :account="saccountapi.name" :current="saccountapi.head_block"
-                            :contracts="contracts" :nodeview="nodeview" :bid="title + 2"></files-vue>
+                            :contracts="contracts"></files-vue>
                    
                 </div>
             </div>
@@ -291,7 +219,7 @@ export default {
             
             
             <!-- contracts -->
-            <div role="tabpanel" class="tab-pane show active" :id="'contractsTab' + title" aria-labelledby="contractstab">
+            <div role="tabpanel" class="tab-pane show active" id="contractsTab" aria-labelledby="contractstab">
                 
                 <div class="card-body p-0">
                     <!-- registered -->
@@ -302,8 +230,7 @@ export default {
                             <div class="ms-auto me-auto d-flex justify-content-center">
                                 <div class="card mx-1 px-3 py-2 mt-3 mb-4 bg-darker" style="max-width: 600px">
                                     <h2 class="fw-light mt-1">No contracts found</h2>
-                                    <p class="lead mb-1" v-if="nodeview && title == 'stored'">The TROLE API service can take up to 10 minutes to update data</p>
-                                    <p class="lead mb-1" v-show="saccountapi.spk_power" v-if="!nodeview || title == 'new'">Click <a
+                                    <p class="lead mb-1" v-show="saccountapi.spk_power">Click <a
                                                 class="btn btn-sm btn-dark border-info text-info no-decoration small" style="font-size: 0.6em; width: 72px;"
                                                 role="button" data-bs-toggle="modal" data-bs-target="#contractModal">
                                                 <modal-vue type="build" token="BROCA"
@@ -326,7 +253,7 @@ export default {
                         </div>
 
                         <!-- contracts -->
-                        <div v-show="contracts.length" class="table-responsive">
+                        <div v-show="contracts.length">
                             <table class="table table-hover text-center align-middle mb-0" id="files-table">
                                 <thead>
                                     <tr>
@@ -393,44 +320,22 @@ export default {
                                             <div class="table-responsive">
                                                 <table class="table text-white align-middle mb-0">
                                                     <tbody class="border-0">
-
-                                                        <tr class="border-0">
+                                                        <tr class="border-0 click-me" data-bs-toggle="collapse" :href="'#' + replace(contract.i)" aria-expanded="false" aria-controls="collapseExample">
 
                                                             <!-- storage -->
-                                                            <th class="border-0 p-0">
-                                                     
+                                                            <th class="border-0">
                                                                 <div class="d-flex align-items-center">
-
-                                                                    <!-- new available contracts -->
-                                                                    <div v-if="nodeview && title == 'new'" >
-                                                                        <button type="button" @click="contract.sm = !contract.sm" class="btn btn-sm d-flex align-items-center ms-2 fs-6 fw-bold py-2" :class="{'btn-outline-light': !contract.sm, 'btn-primary': contract.sm}">
-                                                                            <i class="fa-solid fa-file fa-fw"></i>
-                                                                            <span v-if="!contract.sm" class="ms-1 d-none d-lg-block">Available</span> 
-                                                                            <span v-if="contract.sm" class="ms-1 d-none d-lg-block">Selected</span>
-                                                                        </button>
+                                                                    <div class="border border-1 border-light text-light rounded p-05 me-2">
+                                                                        <i class="fa-solid fa-file fa-fw"></i>
                                                                     </div>
-
-                                                                    <div class="d-flex align-items-center flex-grow-1 click-me p-2" data-bs-toggle="collapse" :href="'#' + replace(contract.i)" aria-expanded="false" aria-controls="collapseExample">
-
-                                                                        <!-- stored contracts -->
-                                                                        <div v-if="nodeview && title == 'stored'" class="d-flex align-items-center border border-1 border-success text-success rounded p-05 me-2">
-                                                                                <i class="fa-solid fa-file fa-fw"></i><span class="mx-1 d-none d-lg-block">Stored</span>
-                                                                        </div>    
-
-                                                                        <!-- my contracts -->
-                                                                        <div v-if="!nodeview" class="border border-1 border-light text-light rounded p-05 me-2">
-                                                                                <i class="fa-solid fa-file fa-fw"></i>
-                                                                        </div>
-
+                                                                    <div>
                                                                         {{contract.c > 1 ? fancyBytes(contract.u) : fancyBytes(contract.a)}}
-
                                                                     </div>
                                                                 </div>
-                                                                   
                                                             </th>
 
                                                             <!-- status -->
-                                                            <td class="border-0 click-me" data-bs-toggle="collapse" :href="'#' + replace(contract.i)" aria-expanded="false" aria-controls="collapseExample">
+                                                            <td class="border-0">
                                                                 <div class="d-flex align-items-center">
 
                                                                     <!-- upload btn -->
@@ -456,15 +361,10 @@ export default {
                                                                             <span class="d-none d-lg-flex">Ready for
                                                                                 upload</span>
                                                                     </div>
-                                                                    <div v-if="contract.c == 2 && !nodeview">
+                                                                    <div v-if="contract.c == 2">
                                                                             <span class="d-lg-none">Post</span>
                                                                             <span class="d-none d-lg-flex">Post
                                                                                 {{split(contract.s, ',', 1)/100}}% to @{{split(contract.s, ',', 0)}}</span>
-                                                                    </div>
-                                                                    <div v-if="contract.c == 2 && nodeview">
-                                                                            <span class="d-lg-none">Extend</span>
-                                                                            <span class="d-none d-lg-flex align-items-center"> {{contract.nt}} /
-                                                                                {{contract.p}}  <i class="fa-solid fa-tower-broadcast mx-1 fa-fw"></i> nodes </span>
                                                                     </div>
                                                                     <div v-if="contract.c == 3">
                                                                             <span class="d-lg-none">Extend</span>
@@ -475,7 +375,7 @@ export default {
                                                             </td>
 
                                                             <!-- expires -->
-                                                            <td class="border-0 click-me" data-bs-toggle="collapse" :href="'#' + replace(contract.i)" aria-expanded="false" aria-controls="collapseExample">
+                                                            <td class="border-0">
                                                                 <div class="d-flex align-items-center">
                                                                     <div class="border border-1 border-light text-light rounded p-05 me-2">
                                                                         <i class="fa-solid fa-circle-info fa-fw"></i>
@@ -501,37 +401,10 @@ export default {
                                                                         <div class="text-center"> Contract ID <i class="fa-solid fa-file-contract fa-fw mx-1" aria-hidden="true"></i><span class="text-break">{{contract.i}}</span>
                                                                         </div>
                                                                     </div>
-
-                                                                    <!-- node storage -->
-                                                                    <div class="mx-1 mx-lg-5 mb-3" v-if="contract.c == 2">
-                                                                        <div class="alert alert-warning d-flex align-items-center">
-                                                                            <div class="d-flex flex-grow-1 flex-wrap me-1 align-items-center mx-1">
-                                                                                <div class="fs-3 fw-lighter">
-                                                                                    <i class="d-none fa-solid fa-triangle-exclamation fa-fw"></i>
-                                                                                    <span class="mx-1">Pending contract</span>
-                                                                                    <span v-if="contract.i.isStored">is being stored</span>
-                                                                                    <span v-if="!contract.i.isStored">is available to store</span>
-                                                                                </div>
-                                                                                <div class="ms-auto d-flex flex-wrap align-items-center justify-content-center mb-1">
-                                                                                    <button type="button" class="flex-grow-1 btn btn-warning ms-1 mt-1"
-                                                                                        @click="">
-                                                                                        <i class="fa-solid fa-flag fa-fw me-1"></i>Flag
-                                                                                    </button>
-                                                                                    <button type="button" @click="store(contract.i, isStored, hasStorage)"
-                                                                                        class="flex-grow-1 ms-1 mt-1 btn text-nowrap"
-                                                                                        :class="{'btn-success': !contract.i.isStored, 'btn-danger': contract.i.isStored}">
-                                                                                        <span v-if="!contract.i.isStored"><i class="fa-solid fa-square-plus fa-fw me-1"></i>Add</span>
-                                                                                        <span v-if="contract.i.isStored"><i class="fa-solid fa-trash-can fa-fw me-1"></i>Remove</span>
-                                                                                    </button>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    
                                                                
 
                                                                     <!-- upload time banner -->
-                                                                    <div v-if="contract.c == 1" class="mx-1 mx-lg-5 mb-3">
+                                                                    <div v-if="contract.c == 1" class="mx-1 mb-3">
                                                                         <div class="alert alert-warning d-flex align-items-center mx-lg-5">
                                                                             <div class="d-flex flex-grow-1 flex-wrap me-1 align-items-center">
                                                                                 <div class="mx-1">
@@ -546,12 +419,14 @@ export default {
 
                                                                     <!-- post time banner -->
                                                                     <div v-if="contract.c == 2" class="mx-1 mx-lg-5 mb-3">
-                                                                        <div v-if="!nodeview" class="alert alert-warning d-flex align-items-center">
-                                                                            <div class="d-flex flex-grow-1 flex-wrap me-1 align-items-center mx-1">
-                                                                                <div class="fs-3 fw-lighter">You have {{exp_to_time(contract.e)}} to publish this contract</div>
-                                                                                <div class="ms-auto d-flex flex-wrap align-items-center fs-1 text-warning justify-content-center me-2 mx-1">
-                                                                                    <i class="fa-solid fa-bell fa-fw ms-2"></i>
+                                                                        <div class="alert alert-warning d-flex align-items-center ">
+                                                                            <div class="d-flex flex-grow-1 flex-wrap me-1 align-items-center">
+                                                                                <div class="mx-1">
+                                                                                    <div class="fs-3 fw-lighter">You have {{exp_to_time(contract.e)}} to publish this contract</div>
                                                                                 </div>
+                                                                            </div>
+                                                                            <div class="ms-auto d-flex flex-wrap align-items-center fs-1 text-warning justify-content-center me-2 mx-1">
+                                                                                <i class="fa-solid fa-bell fa-fw ms-2"></i>
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -593,7 +468,7 @@ export default {
                                                                                     <div class="fs-1 fw-bold align-items-start">SPK Network</div>
                                                                                    <div class="input-group-text">
                                                                                         <div class="form-check form-switch fs-5" :class="{'is-danger': !saccountapi.spk}">
-                                                                                            <input class="form-check-input" type="checkbox" checked="" role="switch" :id="contract.i + 'autoRenew'" v-model="newMeta[contract.i].contract.autoRenew" :class="{'disabled': contract.t != account}" :disabled="contract.t != account">
+                                                                                            <input class="form-check-input" type="checkbox" checked="" role="switch" :id="contract.i + 'autoRenew'" v-model="newMeta[contract.i].contract.autoRenew">
                                                                                             <label class="form-check-label ms-auto" :class="{'text-danger': !saccountapi.spk}" :for="contract.i + 'autoRenew'">Auto-Renew</label>
                                                                                         </div>
                                                                                     </div>
@@ -623,7 +498,7 @@ export default {
                                                                                 
                                                                                 
                                                                                 <div v-for="(size, cid, index) in contract.df">
-                                                                                    <div v-if="!newMeta[contract.i][cid].is_thumb" class="mt-2 rounded card p-2">
+                                                                                    <div v-if="!newMeta[contract.i][cid].is_thumb" class="mt-2 rounded bg-dark p-2">
 
                                                                                         <div class="row align-items-center"> 
 
@@ -673,7 +548,7 @@ export default {
                                                                                                         <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto" @click="downloadFile(cid, contract.i, index)"><span class="d-flex align-items-center w-100">Download<i class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
                                                                                                     </div>
                                                                                                         <!-- add to post -->
-                                                                                                    <div v-if="contract.c == 2 && !nodeview">
+                                                                                                    <div v-if="contract.c == 2">
                                                                                                         <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto" @click="addToPost(cid, contract.i)"><span class="d-flex align-items-center w-100">Add to Post<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
                                                                                                     </div>
 
@@ -684,34 +559,34 @@ export default {
                                                                                             </div>
 
                                                                                             <div class="col-md-8"> 
-
+                                                                        
                                                                                                 <div class="mb-1">    
                                                                                                     <label class="mb-1">File Name</label>
                                                                                                     <div class="input-group">
-                                                                                                        <input autocapitalize="off" v-model="newMeta[contract.i][cid].name" placeholder="File Name" pattern="[a-zA-Z0-9]{3,25}" class="form-control bg-dark border-0" :class="{'text-info': contract.t == account, 'text-white': contract.t != account}" :disabled="contract.t != account">
-                                                                                                        <span class="input-group-text bg-dark border-0">.</span>
-                                                                                                        <input autocapitalize="off" v-model="newMeta[contract.i][cid].type" placeholder="File Type" pattern="[a-zA-Z0-9]{1,4}" class="form-control bg-dark border-0" :class="{'text-info': contract.t == account, 'text-white': contract.t != account}" :disabled="contract.t != account">
+                                                                                                        <input autocapitalize="off" v-model="newMeta[contract.i][cid].name" placeholder="File Name" pattern="[a-zA-Z0-9]{3,25}" class="form-control">
+                                                                                                        <span class="input-group-text">.</span>
+                                                                                                        <input autocapitalize="off" v-model="newMeta[contract.i][cid].type" placeholder="File Type" pattern="[a-zA-Z0-9]{1,4}" class="form-control">
                                                                                                     </div>
                                                                                                 </div>
                                                                                                 <div class="mb-1">
                                                                                                     <label class="mb-1">Thumbnail</label>
                                                                                                     <div class="position-relative has-validation">
-                                                                                                        <input autocapitalize="off" v-model="newMeta[contract.i][cid].thumb" @change="getImgData(contract.i, cid)" placeholder="https://your-thumbnail-image.png" pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+" class="form-control bg-dark border-0" :class="{'text-info': contract.t == account, 'text-white': contract.t != account}" :disabled="contract.t != account">
+                                                                                                        <input autocapitalize="off" v-model="newMeta[contract.i][cid].thumb" @change="getImgData(contract.i, cid)" placeholder="https://your-thumbnail-image.png" pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+" class="form-control">
                                                                                                     </div>
                                                                                                 </div>
 
                                                                                                 <!-- choices-js-->
                                                                                                 <div class="mb-1">
                                                                                                     <label class="mb-1">Tags</label>
-                                                                                                    <choices-vue ref="select-tag" :prop_selections="newMeta[contract.i][cid].flags" prop_type="tags" @data="handleTag(contract.i, cid, $event)" :class="{'text-info': contract.t == account, 'text-white disabled': contract.t != account}" :disabled="contract.t != account"></choices-vue>
+                                                                                                    <choices-vue ref="select-tag" :prop_selections="newMeta[contract.i][cid].flags" prop_type="tags" @data="handleTag(contract.i, cid, $event)"></choices-vue>
                                                                                                 </div>
                                                                                                 <div class="mb-1">
                                                                                                     <label class="mb-1">License</label>
-                                                                                                    <choices-vue ref="select-tag" :prop_selections="newMeta[contract.i][cid].license" prop_type="license" @data="handleLicense(contract.i, cid, $event)" :class="{'text-info': contract.t == account, 'text-white': contract.t != account}" :disabled="contract.t != account"></choices-vue>
+                                                                                                    <choices-vue ref="select-tag" :prop_selections="newMeta[contract.i][cid].license" prop_type="license" @data="handleLicense(contract.i, cid, $event)"></choices-vue>
                                                                                                 </div>
                                                                                                 <div class="mb-1">
                                                                                                     <label class="mb-1">Labels</label>
-                                                                                                    <choices-vue ref="select-label" :prop_selections="newMeta[contract.i][cid].labels" prop_type="labels" @data="handleLabel(contract.i, cid, $event)" :class="{'text-info': contract.t == account, 'text-white': contract.t != account}" :disabled="contract.t != account"></choices-vue>
+                                                                                                    <choices-vue ref="select-label" :prop_selections="newMeta[contract.i][cid].labels" prop_type="labels" @data="handleLabel(contract.i, cid, $event)"></choices-vue>
                                                                                                 </div> 
                                                                                                 
                                                                                             </div>
@@ -856,18 +731,11 @@ export default {
                                                                             <i class="fa-solid fa-fw mx-1" :class="{'fa-lock-open': !newMeta[contract.i].contract.encrypted, 'fa-lock': newMeta[contract.i].contract.encrypted}" aria-hidden="true"></i>
                                                                             <div>{{newMeta[contract.i].contract.encrypted ? 'Private' : 'Public'}}</div>
                                                                         </div>
-                                                                         <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
-                                                                            <div> Nodes </div>
-                                                                            <i class="fa-solid fa-tower-broadcast mx-1 fa-fw"></i>
-                                                                            <div>{{contract.nt}} /
-                                                                                {{contract.p}} </div>
-                                                                        </div>
-
-                                                                  
+                            
                                                                     </div>
 
-                                                                    <div class="d-flex" >
-                                                                        <button type="button" class="btn btn-sm btn-danger my-2 mx-auto" :class="{'invisible': contract.t != account}" :disabled="contract.t != account" @click="cancel_contract(contract)">
+                                                                    <div class="d-flex">
+                                                                        <button type="button" class="btn btn-sm btn-danger my-2 mx-auto" @click="cancel_contract(contract)">
                                                                         <i class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>End Contract</button>
                                                                     </div>
                                                                 </div>
@@ -946,13 +814,6 @@ export default {
     data() {
         return {
             contracts: [],
-            filter: {
-                slots: true,
-                size: 0,
-                max: 0,
-                min: 999999999999,
-                step: 1,
-            },
             postBodyAdder: {},
             newMeta: {},
             state2contracts: [],
@@ -1082,13 +943,13 @@ export default {
         getdelimed(string, del = ',', index = 0) {
             return string.split(del)[index] ? string.split(del)[index] : ''
         },
-        sendIt(event) {
+        sendIt(event){
             this.$emit('tosign', event)
         },
         getImgData(id, cid) {
             var string = this.smartThumb(id, cid)
             fetch(string).then(response => response.text()).then(data => {
-                if (data.indexOf('data:image/') >= 0) this.newMeta[id][cid].thumb_data = data
+                if(data.indexOf('data:image/') >= 0)this.newMeta[id][cid].thumb_data = data
                 else this.newMeta[id][cid].thumb_data = string
             }).catch(e => {
                 this.newMeta[id][cid].thumb_data = string
@@ -1255,23 +1116,23 @@ export default {
         },
         metaMismatch(contract) {
             var enc_string = ''
-            for (var acc in this.contractIDs[contract].encryption.accounts) {
-                if (this.contractIDs[contract].encryption.accounts[acc].enc_key) enc_string += `${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`
-            }
-            //remove last ;
-            enc_string = `${this.newMeta[contract].contract.autoRenew ? '1' : ''}${enc_string.slice(0, -1)}`
-            this.newMeta[contract].contract.enc_string = enc_string
-            var cids = Object.keys(this.newMeta[contract])
-            cids = cids.sort((a, b) => {
-                if (a > b) return 1
-                else if (a < b) return -1
-                else return 0
-            })
-            for (var i = 0; i < cids.length; i++) {
-                if (cids[i] != 'contract') {
-                    enc_string += `,${this.newMeta[contract][cids[i]].name},${this.newMeta[contract][cids[i]].type},${this.newMeta[contract][cids[i]].thumb},${this.newMeta[contract][cids[i]].flags}-${this.newMeta[contract][cids[i]].license}-${this.newMeta[contract][cids[i]].labels}`
+                for (var acc in this.contractIDs[contract].encryption.accounts) {
+                    if (this.contractIDs[contract].encryption.accounts[acc].enc_key) enc_string += `${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`
                 }
-            }
+                //remove last ;
+                enc_string = `${this.newMeta[contract].contract.autoRenew ? '1' : ''}${enc_string.slice(0, -1)}`
+                this.newMeta[contract].contract.enc_string = enc_string
+                var cids = Object.keys(this.newMeta[contract])
+                cids = cids.sort((a, b) => {
+                    if (a > b) return 1
+                    else if (a < b) return -1
+                    else return 0
+                })
+                for (var i = 0; i < cids.length; i++) {
+                    if (cids[i] != 'contract') {
+                        enc_string += `,${this.newMeta[contract][cids[i]].name},${this.newMeta[contract][cids[i]].type},${this.newMeta[contract][cids[i]].thumb},${this.newMeta[contract][cids[i]].flags}-${this.newMeta[contract][cids[i]].license}-${this.newMeta[contract][cids[i]].labels}`
+                    }
+                }
             if (this.newMeta[contract].contract.m != enc_string) return true
         },
         update_meta(contract) {
@@ -1282,7 +1143,7 @@ export default {
                     if (this.contractIDs[contract].encryption.accounts[acc].enc_key) enc_string += `${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`
                 }
                 //remove last ;
-                enc_string = `${this.newMeta[contract].contract.autoRenew ? '1' : '0'}${enc_string.slice(0, -1)}`
+                enc_string = `${this.newMeta[contract].contract.autoRenew ? '1' : '0' }${enc_string.slice(0, -1)}`
                 this.newMeta[contract].contract.enc_string = enc_string
                 var cids = Object.keys(this.newMeta[contract])
                 cids = cids.sort((a, b) => {
@@ -1335,7 +1196,7 @@ export default {
                 cj: cja,
                 id: `spkccT_register_authority`,
                 msg: `Registering: ${this.account}:${this.accountinfo.posting.key_auths[0][0]}`,
-                ops: ["getSapi", "refreshComponents"],
+                ops: ["getSapi"],
                 api: this.sapi,
                 txid: `spkccT_register_authority`,
             };
@@ -1345,8 +1206,6 @@ export default {
             else this.$emit('addasset', { id, contract });
         },
         sortContracts(on = 'c', dir = 'asc') {
-            //filter duplicates
-            this.contracts = this.contracts.filter((v, i, a) => a.findIndex(t => (t.i === v.i)) === i)
             this.contracts.sort((a, b) => {
                 if (a[on] > b[on]) {
                     return dir == 'asc' ? 1 : -1
@@ -1426,7 +1285,7 @@ export default {
                                     else if (a < b) return -1
                                     else return 0
                                 })
-                                for (var i = 0; i < filesNames.length; i++) {
+                                for(var i = 0; i < filesNames.length; i++){
                                     this.newMeta[data.file_contracts[node].i][filesNames[i]] = {
                                         name: '',
                                         type: '',
@@ -1444,14 +1303,14 @@ export default {
                             } else {
                                 if (data.file_contracts[node].m.indexOf('"') >= 0) data.file_contracts[node].m = JSON.parse(data.file_contracts[node].m)
                                 var encData = data.file_contracts[node].m.split(',')[0] || ''
-                                var renew = this.Base64toNumber(encData[0] || '0') & 1 ? true : false
+                                var renew  = this.Base64toNumber(encData[0] || '0') & 1 ? true : false
                                 var encAccounts = []
                                 var encrypted = false
-                                if (encData) {
+                                if(encData){
                                     encData = encData.split('#')
                                     renew = this.Base64toNumber(encData.shift()) & 1 ? true : false
-                                    if (encData.length) {
-                                        encData = '#' + encData.join('#')
+                                    if(encData.length){
+                                        encData = '#' + encData.join('#') 
                                         encAccounts = encData.split(';')
                                         encrypted = true
                                     }
@@ -1472,7 +1331,7 @@ export default {
                                         done: true,
                                     }
                                 }
-
+                                
                                 var filesNames = data.file_contracts[node]?.df ? Object.keys(data.file_contracts[node].df) : []
                                 filesNames = filesNames.sort((a, b) => {
                                     if (a > b) return 1
@@ -1480,7 +1339,7 @@ export default {
                                     else return 0
                                 })
                                 const slots = data.file_contracts[node].m.split(",")
-                                for (var i = 0; i < filesNames.length; i++) {
+                                for(var i = 0; i < filesNames.length; i++){
                                     this.usedBytes += data.file_contracts[node].df[filesNames[i]]
                                     const flags = slots[i * 4 + 4]
                                     this.newMeta[data.file_contracts[node].i][filesNames[i]] = {
@@ -1492,12 +1351,12 @@ export default {
                                         license: flags.indexOf('-') >= 0 ? flags.split('-')[1] : '',
                                         labels: flags.indexOf('-') >= 0 ? flags.split('-')[2] : flags.slice(1),
                                     }
-                                    if (this.newMeta[data.file_contracts[node].i][filesNames[i]].thumb) this.getImgData(data.file_contracts[node].i, filesNames[i])
-                                    if (this.Base64toNumber(this.newMeta[data.file_contracts[node].i][filesNames[i]].flags) & 1) this.newMeta[data.file_contracts[node].i][filesNames[i]].encrypted = true
+                                    if(this.newMeta[data.file_contracts[node].i][filesNames[i]].thumb)this.getImgData(data.file_contracts[node].i, filesNames[i])
+                                    if(this.Base64toNumber(this.newMeta[data.file_contracts[node].i][filesNames[i]].flags) & 1) this.newMeta[data.file_contracts[node].i][filesNames[i]].encrypted = true
                                     else this.newMeta[data.file_contracts[node].i][filesNames[i]].encrypted = false
-                                    if (this.Base64toNumber(this.newMeta[data.file_contracts[node].i][filesNames[i]].flags) & 2) this.newMeta[data.file_contracts[node].i][filesNames[i]].is_thumb = true
+                                    if(this.Base64toNumber(this.newMeta[data.file_contracts[node].i][filesNames[i]].flags) & 2) this.newMeta[data.file_contracts[node].i][filesNames[i]].is_thumb = true
                                     else this.newMeta[data.file_contracts[node].i][filesNames[i]].is_thumb = false
-                                    if (this.Base64toNumber(this.newMeta[data.file_contracts[node].i][filesNames[i]].flags) & 4) this.newMeta[data.file_contracts[node].i][filesNames[i]].nsfw = true
+                                    if(this.Base64toNumber(this.newMeta[data.file_contracts[node].i][filesNames[i]].flags) & 4) this.newMeta[data.file_contracts[node].i][filesNames[i]].nsfw = true
                                     else this.newMeta[data.file_contracts[node].i][filesNames[i]].nsfw = false
                                     links += `![${this.newMeta[data.file_contracts[node].i][filesNames[i]].name}](https://ipfs.dlux.io/ipfs/${filesNames[i]})\n`
                                 }
@@ -1531,7 +1390,7 @@ export default {
                         (data.balance +
                             data.gov +
                             data.poweredUp +
-                            data.spk_power +
+                            data.spk_power + 
                             this.saccountapi.granting.t +
                             data.claim +
                             data.spk) /
@@ -1556,152 +1415,9 @@ export default {
         },
         handleLabel(id, cid, m) {
             if (m.action == 'added') {
-                if (this.newMeta[id][cid].labels.indexOf(m.item) == -1) this.newMeta[id][cid].labels += m.item
+                if (this.newMeta[id][cid].labels.indexOf(m.item) == -1 ) this.newMeta[id][cid].labels += m.item
             } else {
                 this.newMeta[id][cid].labels = this.newMeta[id][cid].labels.replace(m.item, '')
-            }
-        },
-        handlePropContracts(contract) {
-            if (this.larynxbehind == 999999) {
-                setTimeout(() => {
-                    this.handlePropContracts(contract)
-                }, 1000)
-            } else {
-                const data = {
-                    file_contracts: [contract]
-                }
-                file: for (var node in data.file_contracts) {
-                    if(this.title == 'new')for (var i in data.file_contracts[node].n) {
-                        if (data.file_contracts[node].n[i] == this.account)continue file
-                    }
-                    if (data.file_contracts[node].u > this.filter.size) {
-                        this.filter.size = data.file_contracts[node].u
-                        this.filter.max = data.file_contracts[node].u
-                    } 
-                    if (data.file_contracts[node].u < this.filter.min) {
-                        this.filter.min = data.file_contracts[node].u
-                    }
-
-                    data.file_contracts[node].sm = 1
-                    data.file_contracts[node].encryption = {
-                        input: "",
-                        key: "",
-                        accounts: {},
-                    }
-                    this.links[data.file_contracts[node].i] = ""
-                    var links = ""
-                    if (!data.file_contracts[node].m) {
-                        data.file_contracts[node].autoRenew = false
-                        data.file_contracts[node].m = ""
-                        this.newMeta[data.file_contracts[node].i] = {
-                            contract: {
-                                autoRenew: false,
-                                encrypted: false,
-                                m: "",
-                            }
-                        }
-                        var filesNames = data.file_contracts[node]?.df ? Object.keys(data.file_contracts[node].df) : []
-                        filesNames = filesNames.sort((a, b) => {
-                            if (a > b) return 1
-                            else if (a < b) return -1
-                            else return 0
-                        })
-                        for (var i = 0; i < filesNames.length; i++) {
-                            this.newMeta[data.file_contracts[node].i][filesNames[i]] = {
-                                name: '',
-                                type: '',
-                                thumb: '',
-                                flags: '',
-                                is_thumb: false,
-                                encrypted: false,
-                                license: '',
-                                labels: '',
-                                size: data.file_contracts[node].df[filesNames[i]]
-                            }
-                            this.usedBytes += data.file_contracts[node].df[filesNames[i]]
-                            links += `![File ${i + 1}](https://ipfs.dlux.io/ipfs/${filesNames[i]})\n`
-                        }
-                    } else {
-                        if (data.file_contracts[node].m.indexOf('"') >= 0) data.file_contracts[node].m = JSON.parse(data.file_contracts[node].m)
-                        var encData = data.file_contracts[node].m.split(',')[0] || ''
-                        var renew = this.Base64toNumber(encData[0] || '0') & 1 ? true : false
-                        var encAccounts = []
-                        var encrypted = false
-                        if (encData) {
-                            encData = encData.split('#')
-                            renew = this.Base64toNumber(encData.shift()) & 1 ? true : false
-                            if (encData.length) {
-                                encData = '#' + encData.join('#')
-                                encAccounts = encData.split(';')
-                                encrypted = true
-                            }
-                        }
-                        this.newMeta[data.file_contracts[node].i] = {
-                            contract: {
-                                autoRenew: renew,
-                                encrypted,
-                                m: data.file_contracts[node].m,
-                            }
-                        }
-                        for (var i = 0; i < encAccounts.length; i++) {
-                            const encA = encAccounts[i].split('@')[1]
-                            data.file_contracts[node].autoRenew = renew
-                            data.file_contracts[node].encryption.accounts[encA] = {
-                                enc_key: `#${encAccounts[i].split('@')[0].split('#')[1]}`,
-                                key: '',
-                                done: true,
-                            }
-                        }
-
-                        var filesNames = data.file_contracts[node]?.df ? Object.keys(data.file_contracts[node].df) : []
-                        filesNames = filesNames.sort((a, b) => {
-                            if (a > b) return 1
-                            else if (a < b) return -1
-                            else return 0
-                        })
-                        const slots = data.file_contracts[node].m.split(",")
-                        for (var i = 0; i < filesNames.length; i++) {
-                            this.usedBytes += data.file_contracts[node].df[filesNames[i]]
-                            const flags = slots[i * 4 + 4]
-                            this.newMeta[data.file_contracts[node].i][filesNames[i]] = {
-                                name: slots[i * 4 + 1],
-                                type: slots[i * 4 + 2],
-                                thumb: slots[i * 4 + 3],
-                                thumb_data: slots[i * 4 + 3],
-                                flags: flags.indexOf('-') >= 0 ? flags.split('-')[0] : flags[0],
-                                license: flags.indexOf('-') >= 0 ? flags.split('-')[1] : '',
-                                labels: flags.indexOf('-') >= 0 ? flags.split('-')[2] : flags.slice(1),
-                            }
-                            if (this.newMeta[data.file_contracts[node].i][filesNames[i]].thumb) this.getImgData(data.file_contracts[node].i, filesNames[i])
-                            if (this.Base64toNumber(this.newMeta[data.file_contracts[node].i][filesNames[i]].flags) & 1) this.newMeta[data.file_contracts[node].i][filesNames[i]].encrypted = true
-                            else this.newMeta[data.file_contracts[node].i][filesNames[i]].encrypted = false
-                            if (this.Base64toNumber(this.newMeta[data.file_contracts[node].i][filesNames[i]].flags) & 2) this.newMeta[data.file_contracts[node].i][filesNames[i]].is_thumb = true
-                            else this.newMeta[data.file_contracts[node].i][filesNames[i]].is_thumb = false
-                            if (this.Base64toNumber(this.newMeta[data.file_contracts[node].i][filesNames[i]].flags) & 4) this.newMeta[data.file_contracts[node].i][filesNames[i]].nsfw = true
-                            else this.newMeta[data.file_contracts[node].i][filesNames[i]].nsfw = false
-                            links += `![${this.newMeta[data.file_contracts[node].i][filesNames[i]].name}](https://ipfs.dlux.io/ipfs/${filesNames[i]})\n`
-                        }
-                    }
-                    this.links[data.file_contracts[node].i] = links
-                    this.contractIDs[data.file_contracts[node].i] = data.file_contracts[node];
-
-                    this.contracts.push(data.file_contracts[node]);
-                    this.contractIDs[data.file_contracts[node].i].index = this.contracts.length - 1;
-                    this.postBodyAdder[data.file_contracts[node].i] = {}
-
-                }
-                this.filter.step = (this.filter.max - this.filter.min) / 100
-                for (var user in data.channels) {
-                    for (var node in data.channels[user]) {
-                        if (this.contractIDs[data.channels[user][node].i]) continue
-                        else {
-                            this.contractIDs[data.channels[user][node].i] = data.channels[user][node];
-                            this.contracts.push(data.channels[user][node]);
-                            this.contractIDs[data.channels[user][node].i].index = this.contracts.length - 1;
-                        }
-                    }
-                }
-                this.sortContracts()
             }
         },
         handleLicense(id, cid, m) {
@@ -1717,7 +1433,7 @@ export default {
                 if (num & m.item) { }
                 else num += m.item
                 this.newMeta[id][cid].flags = (this.NumberToBase64(num) || "0")
-                switch (m.item) {
+                switch (m.item){
                     case 1:
                         this.newMeta[id][cid].encrypted = true
                         break
@@ -1732,7 +1448,7 @@ export default {
             } else {
                 if (num & m.item) num -= m.item
                 this.newMeta[id][cid].flags = (this.NumberToBase64(num) || "0")
-                switch (m.item) {
+                switch (m.item){
                     case 1:
                         this.newMeta[id][cid].encrypted = false
                         break
@@ -1834,52 +1550,26 @@ export default {
                 },
                 id: `spkccT_extend`,
                 msg: `Extending ${contract.i}...`,
-                ops: ["getTokenUser", "refreshComponents"],
+                ops: ["getTokenUser"],
                 api: "https://spktest.dlux.io",
                 txid: "extend",
             }
             this.$emit('tosign', toSign)
         },
-        store(contracts, remove = false) {
+        store(contract, remove = false) {
             // have a storage node?
-            if (typeof contracts == "string") contracts = [contracts]
             const toSign = {
                 type: "cja",
                 cj: {
-                    items: contracts
+                    items: [contract]
                 },
                 id: `spkccT_${!remove ? 'store' : 'remove'}`,
                 msg: `Storing ${contract}...`,
-                ops: ["getTokenUser", "refreshComponents"],
+                ops: ["getTokenUser"],
                 api: "https://spktest.dlux.io",
                 txid: `${contract}_${!remove ? 'store' : 'remove'}`,
             }
-            console.log(toSign)
             this.$emit('tosign', toSign)
-        },
-        storeAll() {
-            console.log("store all")
-            var contracts = []
-            for (var i = 0; i < this.contracts.length; i++) {
-                if (this.contracts[i].sm == 1) contracts.push(this.contracts[i].i)
-            }
-            console.log(contracts)
-            this.store(contracts)
-        },
-        filterSize() {
-            for (var i = 0; i < this.contracts.length; i++) {
-                if (this.isStored(this.contracts[i].i)) this.contracts[i].sm = 0
-                if (this.contracts[i].u <= this.filter.size) this.contracts[i].sm = 1
-                else this.contracts[i].sm = 0
-            }
-            this.filterSlots
-        },
-        filterSlots() {
-            if (this.filterSize.slot) for (var i = 0; i < this.contracts.length; i++) {
-                if (this.isStored(this.contracts[i].i)) this.contracts[i].sm = 0
-                if (!Object.keys(this.contracts[i].n).length < this.contracts[i].p && this.contracts[i].sm == 1) this.contracts[i].sm = 1
-                else this.contracts[i].sm = 0
-            }
         },
         getContracts() {
             var contracts = [],
@@ -2085,22 +1775,12 @@ export default {
                 },
                 id: `spkccT_contract_close`,
                 msg: `Canceling ${contract.i}...`,
-                ops: ["getTokenUser", "getSapi", "refreshComponents"],
+                ops: ["getTokenUser", "getSapi"],
                 api: "https://spktest.dlux.io",
                 txid: "cancel_contract",
             }
             this.$emit('tosign', toSign)
-        },
-        isStored(cid) {
-            var found = false
-            for (var i in this.contractIDs[cid].n) {
-                if (this.contractIDs[cid].n[i] == this.account) {
-                    found = true
-                    break
-                }
-            }
-            return found
-        },
+        }
     },
     watch: {
         'account'(newValue) {
@@ -2141,18 +1821,17 @@ export default {
                         .then((res) => {
                             res.result.extend = "7"
                             if (res.result) {
-                                this.handlePropContracts(res.result)
-                                //this.pcontracts.splice(this.contractIDs[id].index, 1, res.result)
+                                this.contracts.splice(this.contractIDs[id].index, 1, res.result)
                                 //this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
                             }
                         });
                 }
                 var i = 0
                 for (var node in this.prop_contracts) {
-                    // this.pcontracts.push(this.prop_contracts[node]);
-                    // this.pcontractIDs[this.prop_contracts[node].i] = this.prop_contracts[node];
-                    // this.pcontractIDs[this.prop_contracts[node].i].index = i
-                    // i++
+                    this.contracts.push(this.prop_contracts[node]);
+                    this.contractIDs[this.prop_contracts[node].i] = this.prop_contracts[node];
+                    this.contractIDs[this.prop_contracts[node].i].index = i
+                    i++
                     getContract(this.prop_contracts[node].i)
                 }
             }
@@ -2161,32 +1840,19 @@ export default {
     computed: {
         hasFiles() {
             return Object.keys(this.files).length > 0;
-        },
+        }
     },
     mounted() {
         this.getSpkStats()
         this.getIPFSproviders()
-        this.contracts = []
-        this.contractIDs = {}
-        const getContract = (id) => {
-            fetch('https://spktest.dlux.io/api/fileContract/' + id)
-                .then((r) => r.json())
-                .then((res) => {
-                    res.result.extend = "7"
-                    if (res.result) {
-                        this.handlePropContracts(res.result)
-                        //this.pcontracts.splice(this.contractIDs[id].index, 1, res.result)
-                        //this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
-                    }
-                });
+        if (this.nodeview) {
+            for (var node in this.prop_contracts) {
+                this.contracts.push(this.prop_contracts[node]);
+                this.contractIDs[this.prop_contracts[node].i] = this.prop_contracts[node];
+                this.contractIDs[this.prop_contracts[node].i].index = this.prop_contracts.length - 1;
+            }
         }
-        //var i = 0
-        for (var node in this.prop_contracts) {
-            // this.pcontracts.push(this.prop_contracts[node]);
-            // this.pcontractIDs[this.prop_contracts[node].i] = this.prop_contracts[node];
-            // this.pcontractIDs[this.prop_contracts[node].i].index = i
-            // i++
-            getContract(this.prop_contracts[node].i)
-        }
+
     },
 };
+

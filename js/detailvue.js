@@ -1,10 +1,10 @@
 import Marker from "/js/marker.js";
-import Ratings from "/js/ratings-min.js";
-import MDE from "/js/mde-min.js";
-import Vote from "/js/vote-min.js";
-import Pop from "/js/pop-min.js";
-import Replies from "/js/replies-min.js";
-import Bennies from "/js/bennies-min.js";
+import Ratings from "/js/ratings.js";
+import MDE from "/js/mde.js";
+import Vote from "/js/vote.js";
+import Pop from "/js/pop.js";
+import Replies from "/js/replies.js";
+import Bennies from "/js/bennies.js";
 
 export default {
     components: {

@@ -4,7 +4,6 @@ export default {
   name: "ModalVue",
   data() {
     return {
-      valCodeDict: {},
       spkprefix: "spkcc",
       valid: false,
       d: {
@@ -245,33 +244,32 @@ export default {
                     <div v-if="func == 'Election'">
                       <div class="modal-body">
                         <h3 class="mb-2">Chosen Validators ({{d.valWorkable.length}}/30)</h3>
-                        <div class="d-flex justify-content-between align-items-center border-bottom border-secondary py-2 mb-3">
+                        <div class="d-flex mx-5 justify-content-between align-items-center border-bottom border-secondary py-2 mb-3">
                           <button class="btn btn-success invisible" type="button">Save</button>
                           <h5 class="m-0"> Node (Weight)</h5>
                           <button :class="{'invisible': !difVote}" class="btn btn-success" type="button" @click="valVote()">Save</button>
                         </div>
                         <div class="mb-5">
-                          <div class="d-flex justify-content-center" v-if="!d.valWorkable.length">
-                            No Validators Added
+                          <div v-if="!d.valWorkable.length">
+                            <p>No Validators Added</p>
                           </div>
-                          <ul class=" p-0">
+                          <ul class="mx-5 p-0">
                             <div v-for="(node, index) in d.valWorkable">
-                              <li @dragstart="pick($event, node, index)" @dragover.prevent @dragenter.prevent @drop="move($event, node, index)" class="hover border border-secondary rounded d-flex align-items-center justify-content-between my-2 drop-zone" draggable="true" style="cursor: move;">
-                                <i class="fa-solid fa-grip-lines m-1 ms-3"></i>  
-                                <div class="lead m-1">@{{node.self}} ({{formatNumber(((30 - index )/ 30)* 100, 1,  '.', ',')}}%)</div>
-                                <button class="btn btn-danger m-1" @click="sub(node)" type="button"><i class="fa-solid fa-minus"></i></button>
+                              <li @dragstart="pick($event, node, index)" @dragover.prevent @dragenter.prevent @drop="move($event, node, index)" class="border border-secondary rounded d-flex align-items-center justify-content-between p-2 my-2 drop-zone" draggable="true" style="cursor: move;">
+                                <i class="fa-solid fa-grip-lines ms-3"></i>  
+                                <h5 class="m-0">@{{node.self}} ({{formatNumber(((30 - index )/ 30)* 100, 1,  '.', ',')}}%)</h5>
+                                <button class="btn btn-primary" @click="sub(node)" type="button"><i class="fa-solid fa-minus"></i></button>
                               </li>
                             </div>
                           </ul>
                         </div>
                         <h3 class="mb-3">Validators</h3>
-                        <ul class="p-0">
+                        <ul class="mx-5 p-0">
                           <div v-for="node in smarkets">
-                            <li v-if="isVal(node) && !isSelected(node.self)" class="border border-secondary rounded d-flex align-items-center justify-content-between my-2">
-                              <button class="btn btn-primary invisible" type="button">
-                              <i class="fa-solid fa-plus"></i></button>
-                              <div class="lead m-1">@{{node.self}}</div>
-                              <button :disable="d.valWorkable.length == 30" class="btn btn-primary m-1" @click="add(node)" type="button"><i class="fa-solid fa-plus"></i></button>
+                            <li v-if="isVal(node)" class="border border-secondary rounded d-flex align-items-center justify-content-between p-2 my-2">
+                              <button class="btn btn-primary invisible" type="button"><i class="fa-solid fa-plus"></i></button>
+                              <h5 class="m-0">@{{node.self}}</h5>
+                              <button :disable="d.valWorkable.length == 30" class="btn btn-primary" @click="add(node)" type="button"><i class="fa-solid fa-plus"></i></button>
                             </li>
                           </div>
                         </ul>
@@ -365,28 +363,28 @@ export default {
 
 </div>`,
   methods: {
-    log(event, item) {
+    log(event, item){
       console.log(event, item)
     },
-    fancyBytes(bytes) {
+    fancyBytes(bytes){
       var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
-      while (bytes > 1024) {
+      while (bytes > 1024){
         bytes = bytes / 1024
-        counter++
+        counter ++
       }
       return `${this.toFixed(bytes, 2)} ${p[counter]}B`
     },
-    toFixed(num, dig) {
+    toFixed(num, dig){
       return parseFloat(num).toFixed(dig);
     },
-    valVote() {
-      var op
-      if (this.difVote) op = {
+    valVote(){
+      var op 
+      if(this.difVote)op = {
         type: "cja",
         cj: {
           votes: this.voteString,
         },
-        id: `${this.spkprefix}T_val_vote`,
+        id: `${this.spkprefix}_val_vote`,
         msg: `Voting for Validators...`,
         ops: ["getSapi"],
         api: "https://spkinstant.hivehoneycomb.com",
@@ -412,42 +410,35 @@ export default {
           else this.d.valid = false;
         });
     },
-    isVal(node) {
-      if (!node.self) return false
+    isVal(node){
       return typeof node.val_code == 'string' ? true : false
     },
-    isSelected(node) {
-      for (var i = 0; i < this.d.valWorkable.length; i++) {
-        if (this.d.valWorkable[i].self == node) return true
-      }
-      return false
+    add(node){
+      if (this.d.valWorkable.indexOf(node) == -1)this.d.valWorkable.push(node)
     },
-    add(node) {
-      if (this.d.valWorkable.indexOf(node) == -1) this.d.valWorkable.push(node)
-    },
-    sub(node) {
-      for (var i = 0; i < this.d.valWorkable.length; i++) {
-        if (this.d.valWorkable[i].self == node.self) {
+    sub(node){
+      for(var i = 0; i < this.d.valWorkable.length; i++){
+        if(this.d.valWorkable[i].self == node.self){
           this.d.valWorkable.splice(i, 1)
         }
       }
     },
-    pick(evt, node, index) {
+    pick(evt, node, index){
       evt.dataTransfer.dropEffect = 'move'
       evt.dataTransfer.effectAllowed = 'move'
       evt.dataTransfer.setData('itemID', index)
     },
-    move(evt, node, index) {
+    move(evt, node, index){
       this.d.valWorkable.splice(index, 0, this.d.valWorkable.splice(evt.dataTransfer.getData('itemID'), 1)[0])
     },
-    buildWorkVotes() {
+    buildWorkVotes(){
       const arr = this.d.valvotes.split('')
-      for (var i = 0; i < arr.length; i++) {
-        this.d.workVotes.push(`${arr[i]}${arr[i + 1]}`)
+      for(var i = 0; i < arr.length; i++){
+        this.d.workVotes.push(`${arr[i]}${arr[i+1]}`)
         i++
       }
     },
-    packageWorkVotes() {
+    packageWorkVotes(){
       this.d.valvotes = this.d.workVotes.join('')
     },
     formatNumber(t, n, r, e) {
@@ -461,7 +452,7 @@ export default {
         i = a[0],
         o = 1 < a.length ? r + a[1] : "";
       if (e)
-        for (var c = /(\d+)(\d{3})/; c.test(i);)
+        for (var c = /(\d+)(\d{3})/; c.test(i); )
           i = i.replace(c, "$1" + e + "$2");
       return (u ? "-" : "") + i + o;
     },
@@ -501,27 +492,27 @@ export default {
     },
     build() {
       var op;
-      if (this.d.ben_amount) {
+        if (this.d.ben_amount){
 
-      }
-      op = {
-        type: "cja",
-        cj: {
-          broca: this.d.amount,
-          broker: this.d.broker,
-          to: this.d.to,
-          contract: "0",
-        },
-        id: `spkccT_channel_open`,
-        msg: `Building Contract...`,
-        ops: ["getSapi", "refreshComponents"],
-        api: "https://spktest.dlux.io",
-        txid: "build_contract",
-      };
-      if (this.d.ben_amount > 0 && this.d.ben_to) {
-        op.cj.contract = "1"
-        op.cj.slots = `${this.d.ben_to},${parseInt(this.d.ben_amount * 100)}`
-      }
+        }
+        op = {
+          type: "cja",
+          cj: {
+            broca: this.d.amount,
+            broker: this.d.broker,
+            to: this.d.to,
+            contract: "0",
+          },
+          id: `spkccT_channel_open`,
+          msg: `Building Contract...`,
+          ops: ["getSapi"],
+          api: "https://spktest.dlux.io",
+          txid: "build_contract",
+        };
+        if (this.d.ben_amount > 0 && this.d.ben_to){
+          op.cj.contract = "1"
+          op.cj.slots = `${this.d.ben_to},${parseInt(this.d.ben_amount * 100)}`
+        }
       if (op) {
         this.$emit("modalsign", op);
       }
@@ -630,7 +621,7 @@ export default {
         this.$emit("modalsign", op);
       }
     },
-    elect() {
+    elect(){
       var op
       if (this.d.token == "SPK" && this.d.func == "Election")
         op = {
@@ -648,7 +639,7 @@ export default {
         this.$emit("modalsign", op);
       }
     },
-    vote() {
+    vote(){
       var op
       if (this.d.token == "SPK" && this.d.func == "Election")
         op = {
@@ -666,7 +657,7 @@ export default {
         this.$emit("modalsign", op);
       }
     },
-    extend() {
+    extend(){
       var op
       if (this.d.token == "BROCA")
         op = {
@@ -741,7 +732,7 @@ export default {
           api: "https://spktest.dlux.io",
           txid: "register_service",
         }
-      else if (this.d.token == "LARYNX" && this.d.func == "Register a Service Type")
+        else if (this.d.token == "LARYNX" && this.d.func == "Register a Service Type")
         op = {
           type: "cja",
           cj: {
@@ -755,7 +746,7 @@ export default {
           api: "https://spktest.dlux.io",
           txid: "register_service_type",
         }
-      else if (this.d.token == "LARYNX" && this.d.func == "Register a Validator")
+        else if (this.d.token == "LARYNX" && this.d.func == "Register a Validator")
         op = {
           type: "cja",
           cj: {
@@ -767,7 +758,7 @@ export default {
           api: "https://spktest.dlux.io",
           txid: "validator_burn",
         }
-      else if (this.d.token == "DLUX" && this.d.func == "Unlock")
+        else if (this.d.token == "DLUX" && this.d.func == "Unlock")
         op = {
           type: "cja",
           cj: {
@@ -868,7 +859,7 @@ export default {
     valvotes: {
       default: ''
     },
-    valWorkable: {
+    valWorkable:{
       default: function () {
         return [];
       }
@@ -917,7 +908,7 @@ export default {
       default: "Not Logged In",
     },
     current: {
-      default: '',
+      default: 'bad',
     },
     token: {
       default: "Dlux",
@@ -952,7 +943,7 @@ export default {
     api: {
       default: 'https://ipfs.example.com',
     },
-    test: {
+    test:{
       default: false,
     },
     customClass: {
@@ -962,56 +953,7 @@ export default {
       default: true,
     },
   },
-  watch: {
-    current: {
-      handler: function (val, oldVal) {
-        console.log('current')
-        if (val != oldVal) {
-          if (typeof this.current != 'string') return
-          var smart = false
-          for (var node in this.smarkets) {
-            if (this.smarkets[node]?.val_code) {
-              this.valCodeDict[this.smarkets[node].val_code] = this.smarkets[node]
-              smart = true
-            }
-          }
-          smart = (smart && this.current.indexOf(',') > -1) ? true : false
-          const current = this.current.split(',')[1]
-          if (smart) for (var i = 0; i < current.length; i++) {
-            console.log(i, current.substr(i, 2), this.valCodeDict[current.substr(i, 2)])
-            this.add(this.valCodeDict[current.substr(i, 2)])
-            i++
-          }
-        }
-      },
-      deep: true,
-    },
-  },
-  smarkets: {
-    handler: function (val, oldVal) {
-      console.log('smarkets')
-      if (val != oldVal) {
-        if (typeof this.current != 'string') return
-        var smart = false
-        for (var node in this.smarkets) {
-          if (this.smarkets[node]?.val_code) {
-            this.valCodeDict[this.smarkets[node].val_code] = this.smarkets[node]
-            smart = true
-          }
-        }
-        smart = (smart && this.current.indexOf(',') > -1) ? true : false
-        console.log(this.current)
-        const current = this.current.split(',')[1]
-        if (smart) for (var i = 0; i < current.length; i++) {
-          console.log(i, current.substr(i, 2), this.valCodeDict[current.substr(i, 2)])
-          this.add(this.valCodeDict[current.substr(i, 2)])
-          i++
-        }
-      }
-    },
-    deep: true,
-  },
-  computed: {
+  computed:{
     difVote: {
       get() {
         return ((typeof this.current == 'string' ? this.current.split(',')[1] : '') == this.voteString) ? false : true
@@ -1030,23 +972,7 @@ export default {
       this.d[props[i]] = options[props[i]];
     }
     this.d.to = this.account
-    if (typeof this.current == 'string') {
-      var smart = false
-      for (var node in this.smarkets) {
-        if (this.smarkets[node]?.val_code) {
-          this.valCodeDict[this.smarkets[node].val_code] = this.smarkets[node]
-          smart = true
-        }
-      }
-      smart = (smart && this.current.indexOf(',') > -1) ? true : false
-      const current = this.current.split(',')[1]
-      if (smart) for (var i = 0; i < current.length; i++) {
-        console.log(i, current.substr(i, 2), this.valCodeDict[current.substr(i, 2)])
-        this.add(this.valCodeDict[current.substr(i, 2)])
-        i++
-      }
-    }
-    if (!this.$slots["trigger"]) {
+    if(!this.$slots["trigger"]){
       //console.log(options)
     } else {
       //sellect the trigger class
@@ -1054,7 +980,7 @@ export default {
       var target = this.$el.children[options.type];
       document.getElementById("app").appendChild(target);
       trigger.addEventListener("click", () => {
-        var theModal = new Modal(target, () => { });
+        var theModal = new Modal(target, () => {});
         theModal.show();
       });
     }

@@ -64,7 +64,7 @@ export default {
                     <span class="position-absolute top-50 translate-middle-y ps-2"><i
                             class="fa-solid fa-magnifying-glass fa-fw"></i></span>
                     <input @keyup="render()" @change="render()" @search="render()"
-                        class="ps-4 form-control border-0 bg-dark text-info" type="search"
+                        class="ps-4 form-control border-white" type="search"
                         placeholder="Search filename" v-model="filesSelect.search">
                 </div>
 
@@ -79,12 +79,12 @@ export default {
                 </div> 
 
                 <!-- Sort -->
-                <div class="dropdown ms-1 mb-1">
-                    <button class="btn btn-dark w-100" style="padding-top: 11px !important; padding-bottom: 11px !important;" type="button" data-bs-toggle="dropdown"
+                <div class="dropdown mb-1">
+                    <button class="btn btn-outline-light w-100" type="button" data-bs-toggle="dropdown"
                         aria-expanded="false"><i class="fa-solid fa-sort fa-fw ms-1"></i>
                         {{filesSelect.sort.charAt(0).toUpperCase() + filesSelect.sort.slice(1)}} {{filesSelect.dir == 'asc' ? 'Ascending' : 'Descending'}}
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black">
+                    <ul class="dropdown-menu dropdown-menu-end bg-black">
                         <li>
                             <a @click="filesSelect.dir='asc';filesSelect.sort='time';render()"
                                 class="dropdown-item d-flex align-items-center" role="button"><i class="fa-solid fa-calendar-days fa-fw me-1"></i>Created<i class="fa-solid fa-caret-up fa-fw ms-auto"></i></a>
@@ -135,16 +135,20 @@ export default {
 
             </div>
         </div>
+
         
-        <!-- change view list / grid -->
+
         <div class="d-flex align-items-center my-1 mx-1">
             <h5 class="mb-0"> {{filesArray.length}} File{{filesArray.length == 1 ? '' : 's'}}</h5>
             <div class="ms-auto">
-                <div class="btn-group"> 
-                    <input type="radio" class="btn-check" :name=" bid + 'smView' + (cc ? 'cc' : '')" :id=" bid + 'setSingle' + (cc ? 'cc' : '')" autocomplete="off" @click="viewOpts.list = true" :checked="viewOpts.list" />
-                    <label class="btn btn-outline-warning" :for=" bid + 'setSingle' + (cc ? 'cc' : '')"><i class="fa-solid fa-table-list fa-fw"></i></label>
-                    <input type="radio" class="btn-check" :name=" bid + 'smView' + (cc ? 'cc' : '')" :id=" bid + 'setDouble' + (cc ? 'cc' : '')" autocomplete="off" @click="viewOpts.list = false" :checked="!viewOpts.list" />
-                    <label class="btn btn-outline-warning" :for=" bid + 'setDouble' + (cc ? 'cc' : '')"><i class="fa-solid fa-table-cells-large fa-fw"></i></label>
+                <div class="btn-group">
+                    <input type="radio" class="btn-check" :name="'smView' + (cc ? 'cc' : '')" :id="'setSingle' + (cc ? 'cc' : '')" autocomplete="off" @click="viewOpts.list = true" :checked="viewOpts.list" />
+                    <label class="btn btn-outline-warning" :for="'setSingle' + (cc ? 'cc' : '')"><i
+                            class="fa-solid fa-table-list fa-fw"></i></label>
+                    <input type="radio" class="btn-check" :name="'smView' + (cc ? 'cc' : '')" :id="'setDouble' + (cc ? 'cc' : '')" autocomplete="off" @click="viewOpts.list = false"
+                        :checked="!viewOpts.list" />
+                    <label class="btn btn-outline-warning" :for="'setDouble' + (cc ? 'cc' : '')"><i
+                            class="fa-solid fa-table-cells-large fa-fw"></i></label>
                 </div>
             </div>
         </div>
@@ -168,7 +172,7 @@ export default {
                     <div style="width: 70px;">
                         
                             
-                        <div class="d-flex bg-light position-relative rounded first m-1" style="width: 50px;">
+                        <div class="bg-light position-relative rounded first m-1" style="width: 50px;">
                             <div v-if="flagsDecode(newMeta[file.i][file.f].flags, 1).length" class="position-absolute bottom-0 end-0 bg-dark rounded-circle small px-05">
                                 <i class="fa-solid fa-lock"></i>
                             </div>
@@ -212,7 +216,7 @@ export default {
                             <!-- labels -->
                             <div class="me-1" v-for="label in labelsDecode(file.ll)">
                                 <span class="d-flex align-items-center">
-                                    <pop-vue :id=" bid + 'popperL-' + file.i + file.index + label.l + (cc ? 'cc' : '')" :title="label.l" trigger="hover">
+                                    <pop-vue :id="'popperL-' + file.i + file.index + label.l + (cc ? 'cc' : '')" :title="label.l" trigger="hover">
                                         <i :class="label.fa"></i>
                                     </pop-vue>
                                 </span>
@@ -221,13 +225,13 @@ export default {
                             <div class="d-flex align-items-center">
                             <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)" >
                                     <!-- title="Labels"  -->
-                                    <pop-vue :id=" bid + 'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')" :title="flag.l" trigger="hover">
+                                    <pop-vue :id="'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')" :title="flag.l" trigger="hover">
                                         <i :class="flag.fa"></i>
                                     </pop-vue>
                                 </div>
                             </div>
                             <div>
-                                <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa" :id=" bid + 'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic" :title="lic.l" trigger="hover">    
+                                <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa" :id="'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic" :title="lic.l" trigger="hover">    
                                     <i :class="lic.fa"></i>
                                 </pop-vue>
                             </div>
@@ -322,7 +326,7 @@ export default {
                         <!-- labels -->
                         <div class="me-1" v-for="label in labelsDecode(file.ll)">
                             <span class="d-flex align-items-center">
-                                <pop-vue :id=" bid + 'popperL-' + file.i + file.index + label.l + (cc ? 'cc' : '')" :title="label.l" trigger="hover">
+                                <pop-vue :id="'popperL-' + file.i + file.index + label.l + (cc ? 'cc' : '')" :title="label.l" trigger="hover">
                                     <i :class="label.fa"></i>
                                 </pop-vue>
                             </span>
@@ -331,13 +335,13 @@ export default {
                         <div class="d-flex align-items-center">
                         <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)" >
                                 <!-- title="Labels"  -->
-                                <pop-vue :id=" bid + 'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')" :title="flag.l" trigger="hover">
+                                <pop-vue :id="'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')" :title="flag.l" trigger="hover">
                                     <i :class="flag.fa"></i>
                                 </pop-vue>
                             </div>
                         </div>
                         <div>
-                            <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa" :id=" bid + 'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic" :title="lic.l" trigger="hover">    
+                            <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa" :id="'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic" :title="lic.l" trigger="hover">    
                                 <i :class="lic.fa"></i>
                             </pop-vue>
                         </div>
@@ -533,7 +537,7 @@ export default {
 
                                 <div class="me-1" v-for="label in labelsDecode(file.ll)">
                                     <span class="d-flex align-items-center">
-                                        <pop-vue :id=" bid + 'popperL-' + file.i + file.index + label.l + (cc ? 'cc' : '')" :title="label.l" trigger="hover">
+                                        <pop-vue :id="'popperL-' + file.i + file.index + label.l + (cc ? 'cc' : '')" :title="label.l" trigger="hover">
                                             <i :class="label.fa"></i>
                                         </pop-vue>
                                     </span>
@@ -542,12 +546,12 @@ export default {
                                 <div class="d-flex align-items-center">
                                 <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)" >
                                         <!-- title="Labels"  -->
-                                        <pop-vue :id=" bid + 'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')" :title="flag.l" trigger="hover">
+                                        <pop-vue :id="'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')" :title="flag.l" trigger="hover">
                                             <i :class="flag.fa"></i>
                                         </pop-vue>
                                     </div>
                                 </div>
-                                <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa" :id=" bid + 'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic" :title="lic.l" trigger="hover">    
+                                <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa" :id="'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic" :title="lic.l" trigger="hover">    
                                     <i :class="lic.fa"></i>
                                 </pop-vue> 
                             </div>
@@ -583,14 +587,13 @@ export default {
                 </tbody>
             </table>
         </div>
-
         <!-- item grid -->
         <div class="d-flex flex-wrap" v-if="!viewOpts.list">
             <div class="file-grid" v-for="file in filesArray">
                 <div class="card bg-blur-darkg m-05 p-05 text-start">
                     <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank" class="no-decoration"><div class="text-black text-truncate">{{newMeta[file.i][file.f].name || file.f}}</div></a>
                     <h5 class="m-0 ms-auto align-self-end"><span class="d-none badge square rounded-top border border-bottom-0 bg-info border-light-50" :class="smartColor(file.lc)"><i :class="smartIcon(file.l)"></i>{{ newMeta[file.i][file.f].type }}</span></h5>
-                    <div class="bg-light d-flex ratio ratio-1x1 rounded">
+                    <div class="bg-light">
                         <img v-if="newMeta[file.i][file.f].thumb" class="mx-auto img-fluid rounded bg-light" :src="newMeta[file.i][file.f].thumb_data" width="128px" >    
                         <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                                 viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
@@ -640,13 +643,13 @@ export default {
                     
 
                     <div class="d-flex flex-column rounded p-1" style="background-color: rgba(0, 0, 0, 0.6);">
-                        <!-- Edit Button -->
+    <!-- Edit Button -->
                         <div v-if="!(file.l.length || file.lf)" class="ms-auto me-auto text-muted">
                             
                         </div>
 
                         <div class="d-flex align-items-center justify-content-between">
-                            &nbsp;
+
                             <div class="me-1">
                                 <div class="d-flex align-items-center" style="margin-left: 15px">
                                         <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa" :style="'margin-left: ' + -15 +'px !important;'"></i>
@@ -655,21 +658,18 @@ export default {
 
                             <div class="mx-auto" v-for="(label, index) in labelsDecode(file.ll, 0)">
                                 <span class="d-flex align-items-center w-100">
-                                    <pop-vue :id=" bid + 'popperL-' + (cc ? 'cc' : '') + file.i + index + label.l" title="Labels" trigger="hover">
+                                    <pop-vue :id="'popperL-' + (cc ? 'cc' : '') + file.i + index + label.l" title="Labels" trigger="hover">
                                         <i :class="label.fa"></i>
                                     </pop-vue>
                                 </span>
                             </div>
 
                             <div class="d-flex align-items-center ms-auto ms-1">
-                                <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa" :id=" bid + 'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic" :title="lic.l" trigger="hover">    
-                                    <i :class="lic.fa"></i>
-                                </pop-vue>
-                                <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags)" >
-                                        <!-- title="Labels"  -->
-                                        <pop-vue :id=" bid + 'popper-' + (cc ? 'cc' : '') + file.i + file.index + flag.l" :title="flag.l" trigger="hover">
-                                            <i :class="flag.fa"></i>
-                                        </pop-vue>
+                            <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags)" >
+                                    <!-- title="Labels"  -->
+                                    <pop-vue :id="'popper-' + (cc ? 'cc' : '') + file.i + file.index + flag.l" :title="flag.l" trigger="hover">
+                                        <i :class="flag.fa"></i>
+                                    </pop-vue>
                                 </div>
                             </div>
                         </div>
@@ -677,7 +677,9 @@ export default {
                     </div>
                     
                     <div class="d-flex align-items-center justify-content-center text-break small text-muted">
-                                {{fancyBytes(file.s)}}
+                                {{fancyBytes(file.s)}}<pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa" :id="'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic" :title="lic.l" trigger="hover">    
+                            <i :class="lic.fa"></i>
+                        </pop-vue>
                         </div>
                     
                 </div>
@@ -690,10 +692,6 @@ export default {
         assets: {
             type: Boolean,
             default: false,
-        },
-        bid: {
-            type: String,
-            default: "",
         },
         contracts: {
             type: Object,
@@ -722,10 +720,6 @@ export default {
             default: 85000000,
         },
         cc: {
-            default: false,
-        },
-        nodeview: {
-            type: Boolean,
             default: false,
         }
     },
@@ -1265,12 +1259,11 @@ export default {
         },
         init() {
             var contracts = []
-            //for (var user in this.contracts) {
+            for (var user in this.contracts) {
                 for (var id in this.contracts) {
                     contracts.push(this.contracts[id])
-                    if(this.nodeview)this.filesSelect.addusers[this.contracts[id].t] = true
                 }
-            //}
+            }
             for (var user in this.filesSelect.addusers) {
                 for (var id in this.contractIDs[user]) {
                     contracts.push(this.contractIDs[user][id])
@@ -1444,9 +1437,6 @@ export default {
         'contracts': {
             handler: function (newValue) {
                 if (this.debounce && new Date().getTime() - this.debounce < 1000) {
-                    setTimeout(() => {
-                        this.init()
-                    },1000)
                     return
                 }
                 this.init()
@@ -1465,6 +1455,5 @@ export default {
     },
     mounted() { 
         if(this.account)this.filesSelect.addusers[this.account] = true
-        if(!this.nodeview)this.filesSelect.cc_only = false
     },
 };

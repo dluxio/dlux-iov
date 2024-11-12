@@ -37,15 +37,19 @@ export default {
 
             <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key,index) in FileInfo"
                 class="rounded px-1 p-lg-2">
-                <div class="my-2 card " v-if="!FileInfo[file.name].is_thumb">
+
+
+
+                <div class="my-2 bg-dark rounded" v-if="!FileInfo[file.name].is_thumb">
+
                     <div class="d-flex flex-wrap align-items-center px-2 py-1">
                         <div>
                             <div class="fs-4 fw-light m-0 text-break"><span
                                     class="px-2 py-1 me-2 border border-light text-white rounded-pill"><i
                                         class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}}</div>
                         </div>
-                        <div class="flex-grow-1 mx-5" >
-                         <!--v-if="File[FileInfo[file.name].index].actions.cancel"-->
+
+                        <div class="flex-grow-1 mx-5" v-if="File[FileInfo[file.name].index].actions.cancel">
                             <div class="progress" role="progressbar" aria-label="Upload progress" aria-valuenow="25"
                                 aria-valuemin="0" aria-valuemax="100">
                                 <div class="progress-bar"
@@ -145,11 +149,11 @@ export default {
                                         <label class="mb-1">File Name</label>
                                         <div class="input-group">
                                             <input autocapitalize="off" placeholder="File Name"
-                                                pattern="[a-zA-Z0-9]{3,25}" class="form-control bg-dark border-0 text-info"
+                                                pattern="[a-zA-Z0-9]{3,25}" class="form-control"
                                                 v-model="FileInfo[file.name].meta.name">
                                             <span class="input-group-text">.</span>
                                             <input autocapitalize="off" placeholder="File Type"
-                                                pattern="[a-zA-Z0-9]{1,4}" class="form-control bg-dark border-0 text-info"
+                                                pattern="[a-zA-Z0-9]{1,4}" class="form-control"
                                                 v-model="FileInfo[file.name].meta.ext">
                                         </div>
                                     </div>
@@ -161,7 +165,7 @@ export default {
                                                 :disabled="FileInfo['thumb' + file.name].use_thumb"
                                                 placeholder="https://your-thumbnail-image.png"
                                                 pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+"
-                                                class="form-control disabled bg-dark border-0" v-model="FileInfo[file.name].meta.thumb">
+                                                class="form-control disabled" v-model="FileInfo[file.name].meta.thumb">
                                         </div>
                                         <div v-if="!FileInfo['thumb' + file.name]"
                                             class="position-relative has-validation">
@@ -209,9 +213,9 @@ export default {
 
 
 
-            <div id="listOfEncs" v-if="encryption.encrypted" v-for="(file, key,index) in FileInfo" class="rounded px-1 p-lg-2">
-                <div class="my-2 card card-body" v-if="!FileInfo[file.name].is_thumb">
-                    <div class="d-flex flex-wrap align-items-center px-2 py-1">
+            <div id="listOfEncs" v-if="encryption.encrypted" v-for="(file, key,index) in FileInfo">
+                <div class="p-3 mb-2 bg-dark" v-if="!FileInfo[file.name].is_thumb">
+                    <div class="d-flex flex-wrap align-items-center pb-2 mb-2">
                         <div>
                             <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i
                                         class="fa-solid fa-lock fa-fw"></i></span>{{file.name}}</h6>
@@ -242,15 +246,15 @@ export default {
                                     class="fas fa-fw fa-trash-alt"></i></button>
                         </div>
                     </div>
-                    <div class="d-flex flex-column justify-content-center w-100" v-if="FileInfo[file.name]">
+                    <div class="d-flex flex-column w-100" v-if="FileInfo[file.name]">
 
                         <div class="">Bytes: {{fancyBytes(FileInfo[file.name].enc_size)}}</div>
-                        <div class="text-break">CID:
+                        <div class="">CID:
                             {{FileInfo[file.name].enc_hash}}</div>
                         <div class="">Status:
                             {{FileInfo[file.name].status}}
                         </div>
-                        <div class="my-2"><a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].enc_hash"
+                        <div class=""><a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].enc_hash"
                                 target="_blank" class="btn btn-primary">Copy URL<i
                                     class="fa-solid fa-up-right-from-square fa-fw ms-1"></i></a>
                         </div>
