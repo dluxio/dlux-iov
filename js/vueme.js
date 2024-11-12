@@ -21,7 +21,7 @@ import DetailVue from "/js/detailvue-min.js";
 import NFTCard from "/js/nftcard.js";
 import FTTransfer from "/js/fttransfer.js";
 import NFTDetail from "/js/nftdetail.js";
-import SPKVue from "/js/spk-wallet-comp.js";
+import SPKVue from "/js/spk-wallet.js";
 import Assets from "/js/assets.js"
 import MFI from "/js/mfi-vue.js";
 

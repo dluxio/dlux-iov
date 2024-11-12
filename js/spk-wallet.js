@@ -7,7 +7,7 @@ export default {
     template: `
     <div class="container">
         <div class="mt-3">
-            <div class="alert alert-danger text-start" role="alert">
+            <div class="alert alert-danger text-start bg-dark" role="alert">
                 <h3 class="text-center"><i
                         class="fa-solid fa-triangle-exclamation me-2"></i>Mirror
                     Network
@@ -55,13 +55,13 @@ export default {
             </div>
             <!--spk token-->
             <div
-                class="d-flex align-items-center border-bottom border-secondary py-5">
+                class="d-flex flex-wrap align-items-center border-bottom border-secondary py-5">
                 <div>
-                    <div class="d-flex align-items-start">
-                        <h4 class="m-0">SPK Token</h4><small
-                            v-if="sapi == 'https://spktest.dlux.io'"><span
-                                class="badge ms-1 me-2 bg-warning">TEST</span></small>
-                    </div>
+                    <div class="d-flex align-items-start fs-4 fw-bold">SPK Token
+                            <div v-if="sapi == 'https://spktest.dlux.io'" class="badge rounded-pill text-bg-warning text-black ms-1"
+                                style="font-size: xx-small;">TEST
+                            </div>
+                        </div>
                     <p class="text-white-50 m-0">The governance
                         token for
                         the SPK network.
@@ -103,8 +103,8 @@ export default {
                                 </modal-vue>
                                 <div class="dropdown-divider">
                                 </div>
-                                <a class="dropdown-item" href="/dex/?api=https://spktest.dlux.io/spk#spk"
-                                    id="buylink"><i
+                                <a class="dropdown-item" href="https://www.dlux.io/dex/?api=https://spktest.dlux.io/spk#spk"
+                                    id="buylink" target="_blank"><i
                                         class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
                             </ul>
                         </div>
@@ -112,61 +112,88 @@ export default {
                 </div>
             </div>
             <!-- SPK Power -->
-            <div
-                class="d-flex align-items-center border-bottom border-secondary py-5">
-                <div class="text-start">
-                    <div class="d-flex align-items-start">
-                        <h4 class="m-0">SPK Power</h4><small
-                            v-if="sapi == 'https://spktest.dlux.io'"><span
-                                class="badge ms-1 me-2 bg-warning">TEST</span></small>
+            <div class="d-flex flex-column border-bottom border-secondary py-5">
+                <div class="d-flex flex-wrap align-items-center">
+                    <div class="text-start">
+                        <div class="d-flex align-items-start fs-4 fw-bold">SPK Power
+                            <div v-if="sapi == 'https://spktest.dlux.io'" class="badge rounded-pill text-bg-warning text-black ms-1"
+                                style="font-size: xx-small;">TEST
+                            </div>
+                        </div>
+                       
+                        <p class="text-white-50">Powered SPK for
+                            Voting.</p>
+                        <p class="text-white-50">Benefits of SPK
+                            Power:</p>
+                        <ul class="text-white-50">
+                            <li>Enables voting</li>
+                            <li>Instant Power Up | 4 Week Power Down
+                            </li>
+                            <li>Grants BROCA at 1:1,000,000</li>
+                            <li>Your max BROCA:
+                                {{formatNumber((saccountapi.spk_power * 1000 ), 0, '', ',')}}</li>
+                        </ul>
                     </div>
-                    <p class="text-white-50">Powered SPK for
-                        Voting.</p>
-                    <p class="text-white-50">Benefits of SPK
-                        Power:</p>
-                    <ul class="text-white-50">
-                        <li>Enables voting</li>
-                        <li>Instant Power Up | 4 Week Power Down
-                        </li>
-                        <li>Grants BROCA at 1:1,000,000</li>
-                        <li>Your max BROCA:
-                            {{formatNumber((saccountapi.spk_power * 1000 ), 0, '', ',')}}</li>
-                    </ul>
+                    <div class="ms-auto text-end">
+                        <h5>
+                            {{formatNumber((saccountapi.spk_power)/1000, 3, '.', ',')}}
+                            SPK
+                        </h5>
+                        <div class="btn-group" role="group"
+                            aria-label="Power Actions">
+                            <!-- vote btn -->
+                            <button class="dropdown btn btn-primary p-2" href="#" role="button" id="settingsDropdownBtn" data-bs-toggle="collapse" data-bs-target="#collapseVote" aria-expanded="false" aria-controls="collapseVote">
+                                <i class="me-2 fa-solid fa-person-booth"></i>Vote</button>
+                            <button type="button"
+                                class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                disabled></button>
+                            <div class="btn-group" role="group" v-if="me">
+                                <button type="button"
+                                    class="btn btn-primary dropdown-toggle"
+                                    data-bs-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="false"></button>
+                                <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
+                                    aria-labelledby="btnGroupDrop1">
+                                    <modal-vue type="power" token="SPK" 
+                                        func="Power Down"
+                                        :balance="saccountapi.spk_power"
+                                        :account="account"
+                                        :test="test"
+                                        @modalsign="sendIt($event)" v-slot:trigger>
+                                        <button class="dropdown-item trigger"
+                                            type="button"><i
+                                                class="fas fa-angle-double-down fa-fw me-2"></i>Power
+                                            Down</button>
+                                    </modal-vue>
+                                    <div class="dropdown-divider"></div>
+                                    <modal-vue type="power" token="SPK" 
+                                        func="Election"
+                                        :test="test"
+                                        :balance="saccountapi.spk_power"
+                                        :account="account" :smarkets="smarkets.node"
+                                        :current="saccountapi.spk_vote"
+                                        @modalsign="sendIt($event)" v-slot:trigger>
+                                        <button class="dropdown-item trigger"
+                                            type="button"><i
+                                                class="fa-solid fa-plug fa-fw me-2"></i>Elect
+                                            Validators</button>
+                                    </modal-vue>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="ms-auto text-end">
-                    <h5>
-                        {{formatNumber((saccountapi.spk_power)/1000, 3, '.', ',')}}
-                        SPK
-                    </h5>
-                    <div class="btn-group" role="group"
-                        aria-label="Power Actions">
-                        <button class="dropdown btn btn-primary p-2"
-                            data-bs-auto-close="outside" href="#" role="button"
-                            id="settingsDropdownBtn" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <i
-                                class="me-2 fa-solid fa-person-booth"></i>Vote</button>
-                        <ul class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black dropdown-menu-end"
-                            aria-labelledby="settingsDropdownBtn"
-                            style="width: 300px">
-                            <li>
-                                <h6 class="dropdown-header text-center">
-                                    {{tokenGov.title}}
-                                </h6>
-                            </li>
-                            <li>
-                                <h4 class="text-center text-white-50">
-                                    @{{account}}</h4>
-                            </li>
-                            <li>
-                                <form name="nodeSettings"
-                                    class="needs-validation" novalidate>
-                                    <div class="row mb-3"
-                                        v-for="opt in tokenGov.options">
-                                        <label :for="opt.json"
-                                            class="form-label d-flex">{{opt.title}}:
-                                            {{opt.val}}
-                                            {{opt.unit}}
+                <div class="collapse mt-3 bg-dark rounded" id="collapseVote">
+                    <div class="card card-body">
+                        <div class="col col-lg-6 mx-auto">
+                        <div class="fs-4 text-center">{{tokenGov.title}}</div>
+                        <div class="lead text-center text-white-50 mb-3">  @{{account}}</div>
+                        <form name="nodeSettings" class="needs-validation" novalidate>
+                            <div class="row mb-3" v-for="opt in tokenGov.options">
+                                <label :for="opt.json" class="form-label d-flex">
+                                    {{opt.title}}: 
+                                    {{opt.val}} 
+                                    {{opt.unit}}
                                             <div
                                                 class="dropdown show d-flex align-items-center p-0 m-0">
                                                 <a class="text-white" href="#"
@@ -180,22 +207,26 @@ export default {
                                                     </h5>
                                                 </a>
                                                 <div
-                                                    class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end p-4 text-white-50 text-left bg-black">
+                                                    class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white-50 text-left bg-black">
                                                     <p>{{opt.info}}
                                                     </p>
                                                 </div>
                                             </div>
                                         </label>
-                                        <div class="input-group">
+                                        
+                     
+                        
+       
+                                        <div class="position-relative mb-3">
                                             <input type="range"
                                                 v-model="opt.val"
-                                                class="slider form-control bg-darkg border-secondary text-info"
+                                                class="slider form-range"
                                                 :id="opt.id"
                                                 :max="opt.range_high"
                                                 :min="opt.range_low"
                                                 :step="opt.step" />
-                                            <span v-if="opt.unit"
-                                                class="input-group-text bg-darkg border-secondary text-secondary">{{opt.unit}}</span>
+                                                <span v-if="opt.unit" class="d-none position-absolute end-0 top-50 translate-middle-y px-3 fw-bold">{{opt.unit}}</span>  
+                                            
                                         </div>
                                     </div>
                                     <div class="text-center mt-3">
@@ -210,9 +241,9 @@ export default {
                                             vote cannot be
                                             changed or
                                             cancelled once
-                                            submitted.</p>
+                                            submitted. Your vote power will recharge after 14 days</p>
                                     </div>
-                                    <div class="text-start">
+                                    <div class="text-start d-none">
                                         <p class="lead mb-1 text-center">
                                             VOTE POWER (VP)</p>
                                         <div class="progress mb-2"
@@ -237,56 +268,21 @@ export default {
                                         </ul>
                                     </div>
                                 </form>
-                            </li>
+                          
                         </ul>
-                        <button type="button"
-                            class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                            disabled></button>
-                        <div class="btn-group" role="group" v-if="me">
-                            <button type="button"
-                                class="btn btn-primary dropdown-toggle"
-                                data-bs-toggle="dropdown" aria-haspopup="true"
-                                aria-expanded="false"></button>
-                            <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
-                                aria-labelledby="btnGroupDrop1">
-                                <modal-vue type="power" token="SPK" 
-                                    func="Power Down"
-                                    :balance="saccountapi.spk_power"
-                                    :account="account"
-                                    :test="test"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
-                                    <button class="dropdown-item trigger"
-                                        type="button"><i
-                                            class="fas fa-angle-double-down fa-fw me-2"></i>Power
-                                        Down</button>
-                                </modal-vue>
-                                <div class="dropdown-divider"></div>
-                                <modal-vue type="power" token="SPK" 
-                                    func="Election"
-                                    :test="test"
-                                    :balance="saccountapi.spk_power"
-                                    :account="account" :smarkets="smarkets.node"
-                                    :current="saccountapi.spk_vote"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
-                                    <button class="dropdown-item trigger"
-                                        type="button"><i
-                                            class="fa-solid fa-plug fa-fw me-2"></i>Elect
-                                        Validators</button>
-                                </modal-vue>
-                            </ul>
-                        </div>
+                    </div>
                     </div>
                 </div>
             </div>
             <!-- Broca -->
             <div v-if="saccountapi.spk_power"
-                class="d-flex align-items-center border-bottom border-secondary py-5">
+                class="d-flex flex-wrap align-items-center border-bottom border-secondary py-5">
                 <div class="text-start">
-                    <div class="d-flex align-items-start">
-                        <h4 class="m-0">BROCA</h4><small
-                            v-if="sapi == 'https://spktest.dlux.io'"><span
-                                class="badge ms-1 me-2 bg-warning">TEST</span></small>
-                    </div>
+                    <div class="d-flex align-items-start fs-4 fw-bold">BROCA
+                            <div v-if="sapi == 'https://spktest.dlux.io'" class="badge rounded-pill text-bg-warning text-black ms-1"
+                                style="font-size: xx-small;">TEST
+                            </div>
+                        </div>
                     <p class="text-white-50">Resource Credits
                         for the SPK
                         network.</p>
@@ -352,19 +348,20 @@ export default {
                 </div>
             </div>
             <!--claim larynx rewards-->
-            <div class="d-flex align-items-center border-bottom border-secondary py-5"
-                id="larynxclaimrewards" v-if="(saccountapi.claim > 0 || saccountapi.claim_spk > 0  ) && me">
-                <div v-if="saccountapi.claim">
+            <div class="d-flex flex-wrap align-items-center border-bottom border-secondary py-5"
+                id="larynxclaimrewards" v-if="saccountapi.claim > 0 && me">
+                <div>
                     <div class="d-flex align-items-start">
-                        <h4 class="m-0">Claims
+                        <h4 class="m-0">LARYNX Rewards Claim
                         </h4>
                     </div>
-                    <p class="text-white-50">New distributions from: Running a service, delegating to a service provider, participation in the Larynx auction...</p>
+                    <p class="text-white-50">Claimable rewards
+                        for running a
+                        SPK service
+                        node.</p>
                 </div>
                 <div id="claimlarynxrewardbtn" class="ms-auto text-end">
-                    <h5 v-if="saccountapi.claim">{{formatNumber((saccountapi.claim)/1000, 3, '.', ',')}} LARYNX
-                    </h5>
-                    <h5 v-if="saccountapi.claim_spk">{{formatNumber((saccountapi.claim_spk)/1000, 3, '.', ',')}} SPK
+                    <h5>{{formatNumber((saccountapi.claim)/1000, 3, '.', ',')}} LARYNX
                     </h5>
                     <div class="mb-2"> <span class="small" v-show="!spk2gov">50%
                             Liquid |
@@ -375,7 +372,7 @@ export default {
                     <div v-show="saccountapi.gov > 0" class="text-white">
                         <div class="input-group my-3">
                             <span
-                                class="input-group-text border-info text-info">
+                                class="input-group-text bg-dark border-info text-info">
                                 <div class="form-check form-switch ">
                                     <input class="form-check-input"
                                         type="checkbox" role="switch"
@@ -400,13 +397,13 @@ export default {
             </div>
             <!--larynx token-->
             <div
-                class="d-flex align-items-center border-bottom border-secondary py-5">
+                class="d-flex flex-wrap align-items-center border-bottom border-secondary py-5">
                 <div>
-                    <div class="d-flex align-items-start">
-                        <h4 class="m-0">LARYNX Token</h4><small
-                            v-if="sapi == 'https://spktest.dlux.io'"><span
-                                class="badge ms-1 me-2 bg-warning">TEST</span></small>
-                    </div>
+                    <div class="d-flex align-items-start fs-4 fw-bold">LARYNX Token
+                            <div v-if="sapi == 'https://spktest.dlux.io'" class="badge rounded-pill text-bg-warning text-black ms-1"
+                                style="font-size: xx-small;">TEST
+                            </div>
+                        </div>
                     <p class="text-white-50">The mining token
                         for the SPK
                         network.</p>
@@ -495,8 +492,8 @@ export default {
                                 </modal-vue>
                                 <div class="dropdown-divider">
                                 </div>
-                                <a class="dropdown-item" href="/dex/larynx"
-                                    id="buylink"><i
+                                <a class="dropdown-item" href="https://www.dlux.io/dex/#larynx"
+                                    id="buylink" target="_blank"><i
                                         class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
                             </ul>
                         </div>
@@ -504,7 +501,7 @@ export default {
                 </div>
             </div>
             <!--locked larynx-->
-            <div class="d-flex text-start align-items-center border-bottom border-secondary py-5"
+            <div class="d-flex text-start flex-wrap align-items-center border-bottom border-secondary py-5"
                 v-if="saccountapi.gov">
                 <div>
                     <div class="d-flex align-items-start">
@@ -525,7 +522,7 @@ export default {
                     </ul>
                 </div>
                 <div id="larynxgactions" class="ms-auto text-end" v-show="me">
-                    <div class="d-flex align-items-center mb-2">
+                    <div class="d-flex flex-wrap align-items-center mb-2">
                         <small class="ms-auto"><span
                                 class="badge me-2 bg-success">{{toFixed(pFloat(spkStats.spk_rate_lgov) * 100,3)}}%</span></small>
                         <h5 id="govbalance" class="m-0">
@@ -534,7 +531,7 @@ export default {
                     </div>
                     <div class="btn-group" role="group"
                         aria-label="LARYNX Actions">
-                        <button onclick="location.href='/dex/#larynx'"
+                        <button onclick="window.open('https://www.dlux.io/dex/#larynx', '_blank')"
                             type="button" class="btn btn-primary p-0">
                             <span class="p-2"><i
                                     class="fa-solid fa-gear fa-fw me-2"></i>Options</span>
@@ -567,13 +564,12 @@ export default {
             </div>
             <!--larynx power-->
             <div class="border-bottom border-secondary py-5">
-                <div class="d-flex text-start align-items-center">
+                <div class="d-flex flex-wrap text-start align-items-center">
                     <div>
-                        <div class="d-flex align-items-start">
-                            <h4 class="m-0">LARYNX Power</h4>
-                            <small
-                                v-if="sapi == 'https://spktest.dlux.io'"><span
-                                    class="badge ms-1 me-2 bg-warning">TEST</span></small>
+                       <div class="d-flex align-items-start fs-4 fw-bold">LARYNX Power
+                            <div v-if="sapi == 'https://spktest.dlux.io'" class="badge rounded-pill text-bg-warning text-black ms-1"
+                                style="font-size: xx-small;">TEST
+                            </div>
                         </div>
                         <p class="text-white-50">Powered tokens used to mine SPK</p>
                         <p class="text-white-50">Benefits of LARYNX Power:
@@ -596,7 +592,7 @@ export default {
                         </ul>
                     </div>
                     <div id="larynxgactions" class="ms-auto text-end">
-                        <div class="d-flex align-items-center mb-2">
+                        <div class="d-flex flex-wrap align-items-center mb-2">
                             <small class="ms-auto"><span
                                     class="badge me-2 bg-success">{{toFixed(pFloat(spkStats.spk_rate_lpow) * 100,3)}}%</span></small>
                             <h5 class="m-0"> {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}} LP</h5>
@@ -700,46 +696,50 @@ export default {
                     </small>
                 </div>
                 <div class="collapse" id="delegationsspk">
-                    <div class="d-flex flex-column text-start border border-secondary rounded p-4 my-4">
-                        <h4 class="border-bottom border-secondary py-2">
-                            Delegated: {{formatNumber((saccountapi.granting.t)/1000, 3, '.', ',')}} LP</h4>
-                        <div v-for="(a,b,c) in saccountapi.granting">
-                            <div class="d-flex align-items-center border-bottom border-secondary pb-2 my-1"
-                                v-if="b != 't'">
-                                <p class="my-0">@{{b}}: {{formatNumber((a)/1000, 3, '.', ',')}} LP</p>
-                                <div class="d-flex ms-auto ">
-                                    <modal-vue type="delegate" 
-                                        :smarkets="smarkets.node" token="LARYNX"
-                                        :to="b" :amount="a" :stats="spkStats"
-                                        :balance="saccountapi.poweredUp"
-                                        :account="account"
-                                        @modalsign="sendIt($event)"
-                                        :test="test" v-slot:trigger>
-                                        <button type="button"
-                                            class="ms-1 btn btn-secondary trigger"><i
-                                                class="fas fa-fw fa-user-edit"></i></button>
-                                    </modal-vue>
-                                    <modal-vue type="delegate" 
-                                        :smarkets="smarkets.node" token="LARYNX"
-                                        :to="b" amount="0" :stats="spkStats"
-                                        :balance="saccountapi.poweredUp"
-                                        :account="account"
-                                        :test="test"
-                                        @modalsign="sendIt($event)" v-slot:trigger>
-                                        <button class="ms-1 btn btn-danger ms-1 trigger"
-                                            type="button"><i
-                                                class="fas fa-fw fa-trash-alt"></i></button>
-                                    </modal-vue>
+                    <div class="d-flex flex-column text-start border border-secondary rounded px-2 py-1 p-lg-4 my-4" style="background-color: rgba(0, 0, 0, 0.5);">
+                        <div class="mb-3">    
+                            <h4 class="py-2 m-0">
+                                Delegated: {{formatNumber((saccountapi.granting.t)/1000, 3, '.', ',')}} LP</h4>
+                            <div v-for="(a,b,c) in saccountapi.granting">
+                                <div class="d-flex align-items-center border-top border-secondary py-2"
+                                    v-if="b != 't'">
+                                    <p class="my-0"><a :href="'https://www.dlux.io/@' + b " target="_blank" class="text-info no-decoration">@{{b}}</a>: {{formatNumber((a)/1000, 3, '.', ',')}} LP</p>
+                                    <div class="d-flex ms-auto ">
+                                        <modal-vue type="delegate" 
+                                            :smarkets="smarkets.node" token="LARYNX"
+                                            :to="b" :amount="a" :stats="spkStats"
+                                            :balance="saccountapi.poweredUp"
+                                            :account="account"
+                                            @modalsign="sendIt($event)"
+                                            :test="test" v-slot:trigger>
+                                            <button type="button"
+                                                class="ms-1 btn btn-sm btn-secondary trigger"><i
+                                                    class="fas fa-fw fa-user-edit"></i></button>
+                                        </modal-vue>
+                                        <modal-vue type="delegate" 
+                                            :smarkets="smarkets.node" token="LARYNX"
+                                            :to="b" amount="0" :stats="spkStats"
+                                            :balance="saccountapi.poweredUp"
+                                            :account="account"
+                                            :test="test"
+                                            @modalsign="sendIt($event)" v-slot:trigger>
+                                            <button class="ms-1 btn btn-sm btn-danger ms-1 trigger"
+                                                type="button"><i
+                                                    class="fas fa-fw fa-trash-alt"></i></button>
+                                        </modal-vue>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <h4 class="border-bottom border-secondary py-2 mt-5">
-                            Received: {{formatNumber((saccountapi.granted.t)/1000, 3,'.', ',')}} LP</h4>
-                        <div v-for="(a,b,c) in saccountapi.granted">
-                            <div class="d-flex align-items-center border-bottom border-secondary pb-2 my-1"
-                                v-if="b != 't'">
-                                <p class="my-0">@{{b}}: {{formatNumber((a)/1000, 3, '.', ',')}} LP</p>
+                        <div class="mb-1">
+                            <h4 class="py-2 m-0">
+                                Received: {{formatNumber((saccountapi.granted.t)/1000, 3,'.', ',')}} LP</h4>
+                            <div v-for="(a,b,c) in saccountapi.granted" >
+                                <div class="d-flex align-items-center border-top border-secondary py-2"
+                                    v-if="b != 't'">
+                                    <p class="my-0"><a :href="'https://www.dlux.io/@' + b " target="_blank" class="text-info no-decoration">@{{b}}</a>: {{formatNumber((a)/1000, 3, '.', ',')}} LP</p>
 
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -747,7 +747,7 @@ export default {
             </div>
             <!--account value-->
             <div
-                class="d-flex text-start align-items-center border-secondary py-5">
+                class="d-flex flex-wrap text-start align-items-center border-secondary py-5">
                 <div class="">
                     <h4>Estimated Account Value</h4>
                     <p class="text-white-50">The approximate US Dollar value for all SPK assets in your account</p>
