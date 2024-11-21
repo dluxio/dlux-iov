@@ -12945,13 +12945,13 @@ td {
 }
 
 .choices__inner {
-  background-color: rgba(255, 255, 255, 0) !important;
-  border-color: rgb(255, 255, 255) !important;
+  background-color: #212529 !important;
+  border-color: rgba(255, 255, 255, 0) !important;
   border-radius: 0.5rem !important;
 }
 
 .choices__input {
-  background-color: rgba(255, 255, 255, 0) !important;
+  background-color: #212529 !important;
 }
 
 .choices__list {
@@ -13663,4 +13663,9 @@ ul.scroll li.scroll {
 
 .click-me:hover {
   cursor: pointer;
+}
+
+.hover:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  border: #033efd;
 }/*# sourceMappingURL=custom.css.map */
