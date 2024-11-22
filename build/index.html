@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en" class="h-100">
+
+<head>
+	<title>DLUX - Build</title>
+	<meta charset="UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="manifest" href="/manifest.webmanifest">
+	<link rel="apple-touch-icon" href="/img/dlux-icon-192.png">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="default">
+	<meta name="apple-mobile-web-app-title" content="DLUX">
+	<meta name="theme-color" content="#111222" />
+	<link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
+	<!-- Bootstrap -->
+	<!--<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" />-->
+	<link href="/css/custom.css" rel="stylesheet" />
+	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+	<script type="module" src="/js/indexvue.js"></script>
+	<script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
+	<script>
+		if ('serviceWorker' in navigator) {
+			navigator
+				.serviceWorker
+				.register(
+					// path to the service worker file
+					'/sw.js'
+				)
+				// the registration is async and it returns a promise
+				.then(function (reg) {
+					console.log('Registration Successful');
+				});
+		}
+	</script>
+</head>
+
+<body class="d-flex h-100 align-items-stretch">
+	<div id="app" class="d-flex w-100 flex-column w-100">
+		<!-- navbar -->
+		<div>
+			<nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event)"
+				@logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
+				:lapi="lapi" />
+		</div>
+		<main role="main" class="mb-auto" style="margin-top: 94px;">
+			<div class="container">
+				<h1 class="mt-3 mb-3 text-center display-4"><i class="fa-solid fa-shapes me-2"></i>Build</h1>
+				<div class="row mt-4 mb-lg-5">
+					<div class="col-md-8">
+						<div class="border-turq border-bottom border-3">
+							<h2>DLUX POST</h2>
+						</div>
+						<p class="lead mt-2">Try our new publisher with SPK network integration</p>
+						<div class="my-3 ">
+							<div class="card border-turq border bg-blur-darkg-50 bg-img-none">
+								<div class="card-header">
+									<div class="d-flex justify-content-center">
+										<h5 class="m-0 card-title text-center">DLUX Publisher</h5>
+										<span class="badge small text-bg-danger ms-1 mb-auto">New</span>
+									</div>
+								</div>
+								<div class="card-body">
+									<ul class="text-left">
+										<li>Supports SPK Network file hosting on IPFS</li>
+										<li>360 Image Gallery Builder with drag and drop upload</li>
+										<li>Video transcode, upload, and 3Speak integration (coming soon)</li>
+										<li>dApp publishing of any HTML5 single page app</li>
+										<li>Publishes to HUB as:<br>
+											<span class="badge text-bg-info small text-black">
+												<i class="fa-solid fa-globe fa-fw me-1"></i>360</span>
+											<span class="badge text-bg-info small text-black">
+												<i class="fa-solid fa-film fa-fw me-1"></i>VIDEO</span>
+											<span class="badge text-bg-info small text-black">
+												<i class="fa-solid fa-mobile-screen-button fa-fw me-1"></i>APP</span>
+										</li>
+									</ul>
+								</div>
+								<div class="card-footer text-center">
+									<a href="/new/advanced" class="btn btn-outline-turq"><i
+											class="fa-solid fa-mountain-sun me-2"></i> Get Started</a>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-4">
+						<div class="border-fusch border-bottom border-3">
+							<h2>GLITCH VR</h2>
+						</div>
+						<p class="lead mt-2">Fully immersive player movement</p>
+
+						<div class="my-3">
+							<div class="card border-fusch border bg-blur-darkg-50 bg-img-none">
+								<div class="card-header">
+									<h5 class="m-0 card-title text-center">Remixable Glitch Boilerplate</5>
+								</div>
+								<div class="card-body">
+									<ul class="text-left">
+										<li>App Type: VR</li>
+										<li>Builder: 2D drag-and-drop asset upload, code panel, and publishing form</li>
+										<li>Preview: 3D A-Frame</li>
+										<li>Publishes to HUB as:<br>
+											<span class="badge text-bg-info small text-black"><i
+													class="fa-solid fa-vr-cardboard me-1"></i>VR</span>
+										</li>
+
+									</ul>
+								</div>
+								<div class="card-footer text-center">
+									<a href="https://dlux-vr.glitch.me/build.html" target="_blank"
+										class="btn btn-outline-fusch"><i class="fa-solid fa-mountain-sun me-2"></i>Get
+										Started</a>
+								</div>
+							</div>
+						</div>
+					</div>
+
+				</div>
+
+				<div class="row mb-5">
+					<div class="col-md-4">
+						<div class="border-orange border-bottom border-3">
+							<h2>DLUX NFT</h2>
+						</div>
+						<p class="lead mt-2">Smart NFTs with no gas fees</p>
+						<div class="my-3">
+							<div class="card border-orange border bg-blur-darkg-50 bg-img-none">
+								<div class="card-header">
+									<h5 class="m-0 card-title text-center">Generative NFT</h5>
+								</div>
+								<div class="card-body">
+									<ul class="text-left">
+										<li>Asset Type: Layered SVG</li>
+										<li>Builder: Drag-and-drop file</li>
+										<li>Publishes to NFT as <span class="badge text-bg-info small text-black"><i
+													class="fa-solid fa-book-open me-1"></i>SET</span></li>
+									</ul>
+								</div>
+								<div class="card-footer text-center">
+									<a href="/nfts/create" class="btn btn-outline-orange disabled" disabled><i
+											class="fa-solid fa-store me-2"></i> Coming Soon</a>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-8">
+						<div class="border-honey border-bottom border-3">
+							<h2>HONEYCOMB DEX</h2>
+						</div>
+						<p class="lead mt-2">Launch your own decentralized Hive Layer 2 community</p>
+
+						<div class="row">
+							<div class="col-md-6 my-2">
+								<div class="card border-honey border bg-blur-darkg-50 bg-img-none">
+									<div class="card-header">
+										<h5 class="m-0 card-title text-center">Token Ecoysystem</h5>
+									</div>
+									<div class="card-body">
+										<ul class="text-left">
+											<li>App Type: Node.js</li>
+											<li>Builder: Form</li>
+											<li>Creates the seed for a new <span
+													class="badge text-bg-info small text-black"><i
+														class="fa-solid fa-link me-1"></i>CHAIN</span></li>
+										</ul>
+									</div>
+									<div class="card-footer text-center">
+										<a href="/new/token" class="btn btn-outline-honey"><i
+												class="fa-solid fa-building-columns me-2"></i>Get Started</a>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-6 my-2">
+								<div class="card border-honey border bg-blur-darkg-50 bg-img-none">
+									<div class="card-header">
+										<h5 class="m-0 card-title text-center">Node Validator</h5>
+									</div>
+									<div class="card-body">
+										<ul class="text-left">
+											<li>App Type: Node.js</li>
+											<li>Builder: DIY</li>
+											<li>Uses a seed to publish <span
+													class="badge text-bg-info small text-black"><i
+														class="fa-solid fa-code-branch me-1"></i>API</span></li>
+										</ul>
+									</div>
+									<div class="card-footer text-center">
+										<a href="/docs/honeycomb/new-node" target="_blank" class="btn btn-outline-honey"><i
+												class="fa-solid fa-robot me-2"></i>Get Started</a>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+		<div>
+			<foot-vue />
+		</div>
+	</div>
+	<!-- Bootstrap -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+		crossorigin="anonymous"></script>
+</body>
+
+</html>
