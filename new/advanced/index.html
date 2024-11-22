@@ -287,14 +287,13 @@
             <div v-if="postCustom_json.vrHash == 'video'" class="text-center">
                 <div class="container">
                     <!-- register account v-if="saccountapi.pubKey == 'NA'" -->
-                    <div class="card mx-auto mb-3 mt-5" style="max-width: 600px;">
+                    <div v-if="spkapi.pubKey == 'NA'" class="card mx-auto mb-3 mt-5" style="max-width: 600px;">
                         <div class="card-header text-start" style="background-color: #813c73 ;">
                             <div><i class="fa-solid fa-user-gear fa-fw me-1"></i>WELCOME NEW USER</div>
                         </div>
                         <div class="card-body">
                             <img class="mb-2" src="/img/spknetwork.png" width="48px">
-                            <p class="fs-4 lead">Register your account on SPK Network for free<br>to start storing
-                                files on IPFS</p>
+                            <p class="fs-4 lead">Register your account to store files on SPK Network </p>
                             <button type="button" class="btn btn-primary" @click="updatePubkey()">
                                 <i class="fa-solid fa-user-plus fa-fw me-1"></i> Register Account
                             </button>
