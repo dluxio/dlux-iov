@@ -4542,7 +4542,7 @@ function buyNFT(setname, uid, price, type, callback){
             this.pagePermlink = this.pageAccount.split('/')[1]
             this.pageAccount = this.pageAccount.split('/')[0]
           }
-        } else if (location.pathname.split("/new/")[1]) {
+        } else if (location.pathname.split("/new")[1]) {
           this.builder = true
         } else {
           this.pageAccount = this.account;
