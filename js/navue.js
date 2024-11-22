@@ -1016,7 +1016,7 @@ export default {
                 style="position: absolute;">
                 <li v-if="!node" class=""><a class="dropdown-item" href="/qr/"><i
                       class="fa-solid fa-qrcode fa-fw me-2"></i>Invite</a></li>
-                <li v-if="!node" class=""><a class="dropdown-item" href="/new/"><i
+                <li v-if="!node" class=""><a class="dropdown-item" href="/build/"><i
                       class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
                 <li class=""><a class="dropdown-item" href="https://www.dlux.io/docs/" target="_blank"><i
                       class="fa-solid fa-book fa-fw me-2"></i>Docs</a></li>
@@ -1031,7 +1031,7 @@ export default {
 
         <!-- USER MENU -->
         <ul class="navbar-nav" v-if="user" id="userMenu">
-          <li v-if="!node" class="nav-item d-flex align-items-center"><a class="nav-link" href="/new/advanced"><i
+          <li v-if="!node" class="nav-item d-flex align-items-center"><a class="nav-link" href="/new/"><i
                 class="fa-solid fa-plus fa-fw me-1"></i></a></li>
           <li class="nav-item d-flex align-items-center d-none">
             <a class="nav-link" role="button" @click="toggleChat" data-bs-toggle="offcanvas"
@@ -1077,7 +1077,7 @@ export default {
               <li class="" v-if="!node">
                 <hr class="dropdown-divider">
               </li>
-              <li v-if="!node" class=""><a class="dropdown-item" href="/new/"><i
+              <li v-if="!node" class=""><a class="dropdown-item" href="/build/"><i
                     class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
               <li class=""><a class="dropdown-item" href="/docs/" target="_blank"><i
                     class="fa-solid fa-book me-2 fa-fw"></i>Docs</a></li>
