@@ -85,6 +85,9 @@ createApp({
   data() {
     return {
       fileRequests: {},
+      videosrc: null,
+      videoMsg: "Drop a video file to transcode",
+      ffmpeg: "Loading...",
       showLine: true,
       debounceScroll: 0,
       rcCost: {
@@ -4518,6 +4521,33 @@ function buyNFT(setname, uid, price, type, callback){
       this.newToken.apyint = binSearch
       console.log('Iterations',j)
     },
+    async transcode(x) {
+      console.log(x)
+      const message = document.getElementById('message');
+      if (this.ffmpeg === "Loading...") {
+          this.ffmpeg = new this.FFmpeg();
+          this.ffmpeg.on("log", ({ message }) => {
+            this.videoMsg = message;
+              console.log(message);
+          })
+          this.ffmpeg.on("progress", ({ progress, time }) => {
+            this.videoMsg = `${progress * 100} %, time: ${time / 1000000} s`;
+          });
+          await this.ffmpeg.load({
+              coreURL: "/packages/core/package/dist/umd/ffmpeg-core.js",
+          });
+      }
+      const { name } = this.videoInput[0];
+      await this.ffmpeg.writeFile(name, await fetchFile(this.videoInput[0]));
+      this.videoMsg = 'Start transcoding';
+      console.time('exec');
+      await this.ffmpeg.exec(['-i', name, 'output.mp4']);
+      console.timeEnd('exec');
+      this.videoMsg = 'Complete transcoding';
+      const data = await this.ffmpeg.readFile('output.mp4');
+
+      this.videosrc = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+  },
     activeIndexUp() {
       console.log(this.activeIndex, this[this.focusItem.source].length, this.focusItem)
       if (this.activeIndex < this[this.focusItem.source].length - 1) this.activeIndex++
@@ -4608,6 +4638,15 @@ function buyNFT(setname, uid, price, type, callback){
       } else {
         this.serviceWorker = false;
       }
+    }
+    if(video_page){
+      console.log("video page")
+      this.ffmpeg_page = true
+      const { fetchFile } = FFmpegUtil;
+      this.fetchFile = fetchFile;
+      const { FFmpeg } = FFmpegWASM;
+      this.FFmpeg = FFmpeg;
+        
     }
     this.pendingTokens = JSON.parse(localStorage.getItem(`pendingTokens`)) || []
     window.addEventListener('scroll', this.handleScroll);
