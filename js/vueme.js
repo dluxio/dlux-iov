@@ -4628,7 +4628,7 @@ function buyNFT(setname, uid, price, type, callback){
     if (this.pagePermlink) {
       this.getContent(this.pageAccount, this.pagePermlink, true)
     } else {
-      this.init()
+      this.init(true)
     }
     this.rcCosts()
   },
