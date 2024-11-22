@@ -1,4 +1,4 @@
-this.version = "2024.11.22.3";
+this.version = "2024.11.22.4";
 
 console.log( "SW:" + this.version + " - online.");
 
@@ -18,17 +18,6 @@ var urlsToCache = [
   `/css/smde-comment.css`,
   `/css/scss/custom.scss`,
   `/dex/index.html`,
-  // `/docs/index.html`,
-  // `/docs/_sidebar.md`,
-  // `/docs/dex.md`,
-  // `/docs/dlux.md`,
-  // `/docs/new-node.md`,
-  // `/docs/new-token.md`,
-  // `/docs/node-voting.md`,
-  // `/docs/README.md`,
-  // `/docs/release.md`,
-  // `/docs/spk.md`,
-  // `/docs/token-actions.md`,
   `/hub/index.html`,
   `/img/aframe.png`,
   `/img/ar-vr-icon.svg`,
