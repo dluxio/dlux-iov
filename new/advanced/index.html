@@ -286,7 +286,7 @@
             <!-- video -->
             <div v-if="postCustom_json.vrHash == 'video'" class="text-center">
                 <div class="container">
-                    <!-- register account v-if="saccountapi.pubKey == 'NA'" -->
+                    <!-- register account -->
                     <div v-if="spkapi.pubKey == 'NA'" class="card mx-auto mb-3 mt-5" style="max-width: 600px;">
                         <div class="card-header text-start" style="background-color: #813c73 ;">
                             <div><i class="fa-solid fa-user-gear fa-fw me-1"></i>WELCOME NEW USER</div>
@@ -300,8 +300,8 @@
                         </div>
                     </div>
 
-                    <div v-if="spkapi.pubKey != 'NA'"><!--v-if="saccountapi.pubKey != 'NA'" hide until registered -->
-                        <!-- install ffmpeg -->
+                    <div v-if="spkapi.pubKey != 'NA'">
+                        <!-- install ffmpeg hide until registered -->
                         <div class="card mx-auto mb-3 mt-5" style="max-width: 600px;">
                             <div class="card-header text-start" style="background-color: #813c73 ;">
                                 <div><i class="fa-solid fa-gears fa-fw me-1"></i>MISSING COMPONENT</div>
