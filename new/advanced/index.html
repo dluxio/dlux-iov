@@ -312,25 +312,27 @@
                                 </p>
                                 <button class="btn btn-primary"><i class="fa-solid fa-download fa-fw me-1"></i>Download
                                     FFmpeg</button>
-                                    <button class="btn btn-secondary d-none"><i class="fa-solid fa-arrow-right fa-fw me-1"></i>Skip</button>
+                                <button class="btn btn-secondary d-none"><i
+                                        class="fa-solid fa-arrow-right fa-fw me-1"></i>Skip</button>
                             </div>
                         </div>
-                    </div>
-                    <div><!-- hide when missing dependencies -->
-                        <div class="card m-3">
-                            <div class="card-header">
-                                <div class="d-flex align-items-center">
-                                    <div class="fs-1"><i class="fa-regular fa-circle-check"></i></div>
-                                    <div class="fs-4 ms-2 me-auto">Step 1: Transcode Your Video</div>
-                                    <div><button class="btn btn-lg btn-primary">Transcode</button></div>
+
+                        <div><!-- hide when missing dependencies -->
+                            <div class="card m-3">
+                                <div class="card-header">
+                                    <div class="d-flex align-items-center">
+                                        <div class="fs-1"><i class="fa-regular fa-circle-check"></i></div>
+                                        <div class="fs-4 ms-2 me-auto">Step 1: Transcode Your Video</div>
+                                        <div><button class="btn btn-lg btn-primary">Transcode</button></div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="ratio ratio-16x9 bg-primary rounded">
-                                    <div class="mx-auto mt-5 lead">Drop your video here</div>
+                                <div class="card-body">
+                                    <div class="ratio ratio-16x9 bg-primary rounded">
+                                        <div class="mx-auto mt-5 lead">Drop your video here</div>
+                                    </div>
+                                    <upload-vue :user="saccountapi" :propcontract="contract" @tosign="toSign=$event"
+                                        @done="done()" />
                                 </div>
-                                <upload-vue :user="saccountapi" :propcontract="contract" @tosign="toSign=$event"
-                                    @done="done()" />
                             </div>
                         </div>
                     </div>
