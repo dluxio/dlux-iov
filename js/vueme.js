@@ -4542,7 +4542,7 @@ function buyNFT(setname, uid, price, type, callback){
             this.pagePermlink = this.pageAccount.split('/')[1]
             this.pageAccount = this.pageAccount.split('/')[0]
           }
-        } else if (location.pathname.split("/new")[1]) {
+        } else if (location.pathname.indexOf("new") > -1) {
           this.builder = true
         } else {
           this.pageAccount = this.account;
@@ -4572,7 +4572,7 @@ function buyNFT(setname, uid, price, type, callback){
       }
       if (!this.builder) {
         deepLink();
-        if(hash)this.activeTab = hash?.[1] || 'blog'
+        this.activeTab = hash?.[1] || 'blog'
         else this.activeTab = 'blog'
         this.observer = new MutationObserver(mutations => {
           for (const m of mutations) {
