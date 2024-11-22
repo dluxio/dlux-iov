@@ -4572,7 +4572,8 @@ function buyNFT(setname, uid, price, type, callback){
       }
       if (!this.builder) {
         deepLink();
-        this.activeTab = hash?.[1] || 'blog'
+        if(hash)this.activeTab = hash?.[1] || 'blog'
+        else this.activeTab = 'blog'
         this.observer = new MutationObserver(mutations => {
           for (const m of mutations) {
             const newValue = m.target.getAttribute(m.attributeName);
