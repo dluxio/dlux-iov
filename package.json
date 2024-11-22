@@ -1,12 +1,6 @@
 {
-  "devDependencies": {
-    "vitepress": "^5.3.6"
-  },
   "scripts": {
-    "download": "node download.js",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "download": "node download.js"
   },
   "dependencies": {
     "tar": "^6.1.15"
