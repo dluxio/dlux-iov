@@ -286,49 +286,52 @@
             <!-- video -->
             <div v-if="postCustom_json.vrHash == 'video'" class="text-center">
                 <div class="container">
-                    <!-- register account -->
-                    <div v-if="saccountapi.pubKey == 'NA'" class="d-flex justify-content-center">
-                        <div class="d-flex p-3 mt-3">
-                            <div class="text-center" style="max-width: 600px;">
-                                <p class="fs-4 lead">Register your account on SPK Network for free<br>to start storing
-                                    your files on IPFS</p>
-                                <div class="d-flex justify-content-center">
-                                    <button type="button" class="btn btn-primary my-3" @click="updatePubkey()">
-                                        <i class="fa-solid fa-user-plus fa-fw me-1"></i> Register Account
-                                    </button>
+                    <!-- register account v-if="saccountapi.pubKey == 'NA'" -->
+                    <div class="card mx-auto mb-3 mt-5" style="max-width: 600px;">
+                        <div class="card-header text-start" style="background-color: #813c73 ;">
+                            <div><i class="fa-solid fa-user-gear fa-fw me-1"></i>WELCOME NEW USER</div>
+                        </div>
+                        <div class="card-body">
+                            <img class="mb-2" src="/img/spknetwork.png" width="48px">
+                            <p class="fs-4 lead">Register your account on SPK Network for free<br>to start storing
+                                files on IPFS</p>
+                            <button type="button" class="btn btn-primary" @click="updatePubkey()">
+                                <i class="fa-solid fa-user-plus fa-fw me-1"></i> Register Account
+                            </button>
+                        </div>
+                    </div>
 
-                                </div>
+                    <div><!--v-if="saccountapi.pubKey != 'NA'" hide until registered -->
+                        <!-- install ffmpeg -->
+                        <div class="card mx-auto mb-3 mt-5" style="max-width: 600px;">
+                            <div class="card-header text-start" style="background-color: #813c73 ;">
+                                <div><i class="fa-solid fa-gears fa-fw me-1"></i>MISSING COMPONENT</div>
+                            </div>
+                            <div class="card-body">
+                                <img class="mb-2" src="/img/FFmpeg_logo.svg" height="48px">
+                                <p class="fs-4 lead">FFmpeg is required to transcode<br>videos before upload
+                                </p>
+                                <button class="btn btn-primary"><i class="fa-solid fa-download fa-fw me-1"></i>Install
+                                    FFmpeg</button>
                             </div>
                         </div>
                     </div>
-                    <!-- install ffmpeg -->
-                    <div class="card m-3">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="fs-1"><i class="fa-regular fa-circle-check"></i></div>
-                                <div class="ms-2 me-auto text-start">
-                                    <div class="fs-4">Step 1: Download & Install ffmpeg</div>
-                                    <div class="lead">ffmpeg will be used to locally transcode your video before upload
-                                    </div>
+                    <div><!-- hide when missing dependencies -->
+                        <div class="card m-3">
+                            <div class="card-header">
+                                <div class="d-flex align-items-center">
+                                    <div class="fs-1"><i class="fa-regular fa-circle-check"></i></div>
+                                    <div class="fs-4 ms-2 me-auto">Step 1: Transcode Your Video</div>
+                                    <div><button class="btn btn-lg btn-primary">Transcode</button></div>
                                 </div>
-                                <div><button class="btn btn-lg btn-primary">Install</button></div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="card m-3">
-                        <div class="card-header">
-                            <div class="d-flex align-items-center">
-                                <div class="fs-1"><i class="fa-regular fa-circle-check"></i></div>
-                                <div class="fs-4 ms-2 me-auto">Step 2: Transcode Your Video</div>
-                                <div><button class="btn btn-lg btn-primary">Transcode</button></div>
+                            <div class="card-body">
+                                <div class="ratio ratio-16x9 bg-primary rounded">
+                                    <div class="mx-auto mt-5 lead">Drop your video here</div>
+                                </div>
+                                <upload-vue :user="saccountapi" :propcontract="contract" @tosign="toSign=$event"
+                                    @done="done()" />
                             </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="ratio ratio-16x9 bg-primary rounded">
-                                <div class="mx-auto mt-5 lead">Drop your video here</div>
-                            </div>
-                            <upload-vue :user="saccountapi" :propcontract="contract" @tosign="toSign=$event"
-                                @done="done()" />
                         </div>
                     </div>
                 </div>
