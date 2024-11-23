@@ -1482,7 +1482,7 @@ export default {
                                 const slots = data.file_contracts[node].m.split(",")
                                 for (var i = 0; i < filesNames.length; i++) {
                                     this.usedBytes += data.file_contracts[node].df[filesNames[i]]
-                                    const flags = slots[i * 4 + 4]
+                                    const flags = slots[i * 4 + 4] || ''
                                     this.newMeta[data.file_contracts[node].i][filesNames[i]] = {
                                         name: slots[i * 4 + 1],
                                         type: slots[i * 4 + 2],
