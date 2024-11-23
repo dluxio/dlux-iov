@@ -303,8 +303,8 @@
                     </div>
 
                     <div v-if="spkapi.pubKey != 'NA'">
-                        <!-- install ffmpeg hide until registered -->
-                        <div class="card mx-auto mb-3 mt-5" style="max-width: 600px;">
+                        <!-- install ffmpeg not required atm
+                        <div class="card mx-auto mb-3 mt-5 d-none" style="max-width: 600px;">
                             <div class="card-header text-start" style="background-color: #813c73 ;">
                                 <div><i class="fa-solid fa-gears fa-fw me-1"></i>MISSING COMPONENT</div>
                             </div>
@@ -317,22 +317,25 @@
                                 <button class="btn btn-secondary d-none"><i
                                         class="fa-solid fa-arrow-right fa-fw me-1"></i>Skip</button>
                             </div>
-                        </div>
-
-                        <div><!-- hide when missing dependencies -->
+                        </div> -->
+                        <div>
                             <div class="card m-3">
                                 <div class="card-header">
                                     <div class="d-flex align-items-center">
-                                        <div class="fs-1"><i class="fa-regular fa-circle-check"></i></div>
-                                        <div class="fs-4 ms-2 me-auto">Step 1: Transcode Your Video</div>
-                                        <div><button class="btn btn-lg btn-primary">Transcode</button></div>
+                                        <div class="fs-1 d-none"><i class="fa-regular fa-circle-check"></i></div>
+                                        <div class="fs-4 ms-2 me-auto">New Video</div>
                                     </div>
                                 </div>
                                 <div class="card-body">
+                                    <video :src="videosrc" controls class="bg-darkg w-100 mb-2"></video><br />
+                                    <p class="mb-2">{{videoMsg}}</p>
+                                    <input type="file" @change="transcode"
+                                        class="btn btn-secondary p-4 mb-2 border border-3 border-black">
                                     
-                                    <video :src="videosrc" controls class="bg-darkg"></video><br />
-                                    <input type="file" @change="transcode">
-                                    <p >{{videoMsg}}</p>
+                                    <div class="rounded bg-blur-darkg text-start p-2">
+                                        <post-vue :account="account" :prop_json="postCustom_json" :prop_bens="postBens"
+                                            @tosign="toSign=$event" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
