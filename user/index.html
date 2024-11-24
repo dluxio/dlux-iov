@@ -1631,24 +1631,26 @@
                     console.log("Activating parent tab:", parentTab);
                     parentTabInstance.show(); // Show the parent tab
 
-                    // Wait for the parent tab to be fully activated, then activate the child tab
-                    parentTab.addEventListener('shown.bs.tab', function () {
-                        // Deactivate the currently active sub-tab before activating the new one
-                        const currentActiveChildTab = document.querySelector('#wallettabs .nav-link.active');
-                        if (currentActiveChildTab) {
-                            console.log("Deactivating current active child tab:", currentActiveChildTab);
-                            currentActiveChildTab.classList.remove('active');
-                        }
-
-                        // Activate the child tab (e.g., #spk)
+                    // Check if the parent tab is already active, trigger the event manually if needed
+                    if (parentTab.classList.contains('active')) {
+                        // If the parent tab is already active, trigger the child tab activation
+                        console.log("Parent tab already active, directly activating child tab.");
                         if (childTab) {
-                            console.log("Parent tab activated. Now activating child tab:", childTab);
-                            const childTabInstance = new bootstrap.Tab(childTab); // Bootstrap tab instance for child tab
+                            const childTabInstance = new bootstrap.Tab(childTab);
                             childTabInstance.show(); // Show the child tab
-                        } else {
-                            console.log("Child Tab is null.");
                         }
-                    });
+                    } else {
+                        // Wait for the parent tab to be fully activated and then activate the child tab
+                        parentTab.addEventListener('shown.bs.tab', function () {
+                            console.log("Parent tab activated. Now activating child tab.");
+                            if (childTab) {
+                                const childTabInstance = new bootstrap.Tab(childTab); // Bootstrap tab instance for child tab
+                                childTabInstance.show(); // Show the child tab
+                            } else {
+                                console.log("Child Tab is null.");
+                            }
+                        });
+                    }
                 } else {
                     console.log("Parent Tab is null.");
                 }
