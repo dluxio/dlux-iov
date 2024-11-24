@@ -1600,40 +1600,64 @@
     </script>
     <script>
         function deepLink(link) {
-            if (link) location.hash = link
-            let url = location.href.replace(/\/$/, '');
+            if (link) location.hash = link;
+    
+            let url = location.href.replace(/\/$/, ''); // Remove trailing slash
+    
             if (location.hash) {
-                hash = url.split('#');
-                const currentTab = hash[1] == 'dlux' || hash[1] == 'hive' || hash[1] == 'spk' ? document.querySelector('#wallettab a[href="#' + hash[1] + '"]') : document.querySelector('#usertabs a[href="#' + hash[1] + '"]')
-                console.log(currentTab)
-                const curTab = new bootstrap.Tab(currentTab);
-                curTab.show();
+                let hash = url.split('#')[1]; // Extract hash portion
+                let parentTab = null;
+                let childTab = null;
+    
+                // Check for nested format, e.g., #wallettab/spk
+                if (hash.includes('/')) {
+                    const parts = hash.split('/');
+                    parentTab = document.querySelector(`#usertabs a[href="#${parts[0]}"]`);
+                    childTab = document.querySelector(`#wallettab a[href="#${parts[1]}"]`);
+                } else {
+                    parentTab = document.querySelector(`#usertabs a[href="#${hash}"]`);
+                }
+    
+                // Activate parent tab
+                if (parentTab) {
+                    const parentTabInstance = new bootstrap.Tab(parentTab);
+                    parentTabInstance.show();
+                }
+    
+                // Activate child tab if applicable
+                if (childTab) {
+                    const childTabInstance = new bootstrap.Tab(childTab);
+                    childTabInstance.show();
+                }
+    
+                // Clean up the URL to avoid duplicating hashes
                 url = location.href.replace(/\/#/, '#');
                 history.replaceState(null, null, url);
-                // setTimeout(() => {
-                //     window.scrollTop = 0;
-                // }, 400);
             }
-            // change url based on selected tab
+    
+            // Update URL based on tab selection
             const selectableTabList = [].slice.call(document.querySelectorAll('a[data-bs-toggle="tab"]'));
             selectableTabList.forEach((selectableTab) => {
-                const selTab = new bootstrap.Tab(selectableTab);
                 selectableTab.addEventListener('click', function () {
-                    var newUrl;
                     const hash = selectableTab.getAttribute('href');
-                    if (hash == '#blog') {
-                        newUrl = url.split('#')[0];
-                        history.replaceState(null, null, newUrl);
-                    } else if (hash == '#b/') {
-
-                    } else {
+                    const parentTab = selectableTab.closest('#usertabs') ? '#usertabs' : '#wallettab';
+                    let newUrl;
+    
+                    if (parentTab === '#usertabs') {
+                        // If parent tab, set hash directly
                         newUrl = url.split('#')[0] + hash;
-                        history.replaceState(null, null, newUrl);
+                    } else if (parentTab === '#wallettab') {
+                        // If subtab, combine parent and subtab
+                        const parentActiveTab = document.querySelector('#usertabs .active').getAttribute('href');
+                        newUrl = url.split('#')[0] + parentActiveTab + '/' + hash.substring(1);
                     }
+    
+                    history.replaceState(null, null, newUrl);
                 });
             });
         }
     </script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
         integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
