@@ -951,14 +951,17 @@ export default {
     document.head.appendChild(script);
     // add sting chat
     this.addStingChat();
+    // Ensure that the DOM is fully updated before adding event listeners
     this.$nextTick(() => {
-      // Ensure the DOM is updated
+      // Log the links to ensure the selector is correct
       const links = document.querySelectorAll('a.no-scroll');
       console.log('Links found:', links);
-
+      
       links.forEach((link) => {
         link.addEventListener('click', (event) => {
           event.preventDefault();  // Prevent default anchor behavior
+          event.stopImmediatePropagation();  // Stop other event listeners from triggering
+
           console.log('Navigation link clicked, but page will not scroll.');
         });
       });
