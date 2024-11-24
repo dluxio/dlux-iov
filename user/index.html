@@ -1599,83 +1599,87 @@
         };
     </script>
     <script>
-        function deepLink(link) {
-            if (link) location.hash = link;
+        document.addEventListener('DOMContentLoaded', function () {
+            function deepLink(link) {
+                if (link) location.hash = link;
     
-            let url = location.href.replace(/\/$/, ''); // Remove trailing slash
+                let url = location.href.replace(/\/$/, ''); // Remove trailing slash
     
-            if (location.hash) {
-                let hash = url.split('#')[1]; // Extract hash portion
-                let parentTab = null;
-                let childTab = null;
+                if (location.hash) {
+                    let hash = url.split('#')[1]; // Extract hash portion
+                    let parentTab = null;
+                    let childTab = null;
     
-                // Check for nested format, e.g., #wallet/spk
-                if (hash.includes('/')) {
-                    const parts = hash.split('/');
-                    console.log("Hash parts:", parts);
-                    parentTab = document.querySelector(`#usertabs a[href="#${parts[0]}"]`);
-                    childTab = document.querySelector(`#wallettab a[href="#${parts[1]}"]`);
-                    console.log("Parent Tab:", parentTab);
-                    console.log("Child Tab:", childTab);
-                } else {
-                    parentTab = document.querySelector(`#usertabs a[href="#${hash}"]`);
-                    console.log("Single-level hash, Parent Tab:", parentTab);
-                }
+                    // Check for nested format, e.g., #wallet/spk
+                    if (hash.includes('/')) {
+                        const parts = hash.split('/');
+                        console.log("Hash parts:", parts);
+                        parentTab = document.querySelector(`#usertabs a[href="#${parts[0]}"]`);
+                        console.log("Parent Tab:", parentTab);
     
-                // Activate parent tab
-                if (parentTab) {
-                    console.log("Activating parent tab:", parentTab);
-                    const parentTabInstance = new bootstrap.Tab(parentTab);
-                    parentTabInstance.show();
-    
-                    // Delay activation of child tab until parent tab is fully activated
-                    if (childTab) {
-                        parentTab.addEventListener('shown.bs.tab', function () {
-                            console.log("Parent tab activated. Now activating child tab:", childTab);
-                            const childTabInstance = new bootstrap.Tab(childTab);
-                            childTabInstance.show();
-    
-                            // Log the instance to ensure it initialized correctly
-                            const spkTabInstance = bootstrap.Tab.getInstance(childTab);
-                            console.log("SPK Tab Instance:", spkTabInstance);
-                        });
+                        // Add logging for child tab selector
+                        console.log(`Trying to find childTab with selector: #wallettab a[href="#${parts[1]}"]`);
+                        childTab = document.querySelector(`#wallettab a[href="#${parts[1]}"]`);
+                        console.log("Child Tab:", childTab);
+                    } else {
+                        parentTab = document.querySelector(`#usertabs a[href="#${hash}"]`);
+                        console.log("Single-level hash, Parent Tab:", parentTab);
                     }
-                } else if (childTab) {
-                    // If only child tab is specified (unlikely), activate it directly
-                    console.log("Activating child tab directly:", childTab);
-                    const childTabInstance = new bootstrap.Tab(childTab);
-                    childTabInstance.show();
-                } else {
-                    console.log("Neither parent nor child tab found. Check the hash and DOM structure.");
+    
+                    // Activate parent tab
+                    if (parentTab) {
+                        console.log("Activating parent tab:", parentTab);
+                        const parentTabInstance = new bootstrap.Tab(parentTab);
+                        parentTabInstance.show();
+    
+                        // Delay activation of child tab until parent tab is fully activated
+                        if (childTab) {
+                            parentTab.addEventListener('shown.bs.tab', function () {
+                                console.log("Parent tab activated. Now activating child tab:", childTab);
+                                const childTabInstance = new bootstrap.Tab(childTab);
+                                childTabInstance.show();
+    
+                                // Log the instance to ensure it initialized correctly
+                                const spkTabInstance = bootstrap.Tab.getInstance(childTab);
+                                console.log("SPK Tab Instance:", spkTabInstance);
+                            });
+                        } else {
+                            console.log("Child Tab is null. Check DOM structure or timing.");
+                        }
+                    } else {
+                        console.log("Parent Tab is null. Check DOM structure or hash value.");
+                    }
+    
+                    // Clean up the URL to avoid duplicating hashes
+                    url = location.href.replace(/\/#/, '#');
+                    history.replaceState(null, null, url);
                 }
     
-                // Clean up the URL to avoid duplicating hashes
-                url = location.href.replace(/\/#/, '#');
-                history.replaceState(null, null, url);
+                // Update URL based on tab selection
+                const selectableTabList = [].slice.call(document.querySelectorAll('a[data-bs-toggle="tab"]'));
+                selectableTabList.forEach((selectableTab) => {
+                    selectableTab.addEventListener('click', function () {
+                        const hash = selectableTab.getAttribute('href');
+                        const parentTab = selectableTab.closest('#usertabs') ? '#usertabs' : '#wallettab';
+                        let newUrl;
+    
+                        if (parentTab === '#usertabs') {
+                            // If parent tab, set hash directly
+                            newUrl = url.split('#')[0] + hash;
+                        } else if (parentTab === '#wallettab') {
+                            // If subtab, combine parent and subtab
+                            const parentActiveTab = document.querySelector('#usertabs .active').getAttribute('href');
+                            newUrl = url.split('#')[0] + parentActiveTab + '/' + hash.substring(1);
+                        }
+    
+                        console.log("Updating URL to:", newUrl);
+                        history.replaceState(null, null, newUrl);
+                    });
+                });
             }
     
-            // Update URL based on tab selection
-            const selectableTabList = [].slice.call(document.querySelectorAll('a[data-bs-toggle="tab"]'));
-            selectableTabList.forEach((selectableTab) => {
-                selectableTab.addEventListener('click', function () {
-                    const hash = selectableTab.getAttribute('href');
-                    const parentTab = selectableTab.closest('#usertabs') ? '#usertabs' : '#wallettab';
-                    let newUrl;
-    
-                    if (parentTab === '#usertabs') {
-                        // If parent tab, set hash directly
-                        newUrl = url.split('#')[0] + hash;
-                    } else if (parentTab === '#wallettab') {
-                        // If subtab, combine parent and subtab
-                        const parentActiveTab = document.querySelector('#usertabs .active').getAttribute('href');
-                        newUrl = url.split('#')[0] + parentActiveTab + '/' + hash.substring(1);
-                    }
-    
-                    console.log("Updating URL to:", newUrl);
-                    history.replaceState(null, null, newUrl);
-                });
-            });
-        }
+            deepLink(location.hash); // Call the function on page load
+        });
     </script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
