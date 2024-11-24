@@ -1609,7 +1609,7 @@
                 let parentTab = null;
                 let childTab = null;
     
-                // Check for nested format, e.g., #wallettab/spk
+                // Check for nested format, e.g., #wallet/spk
                 if (hash.includes('/')) {
                     const parts = hash.split('/');
                     parentTab = document.querySelector(`#usertabs a[href="#${parts[0]}"]`);
@@ -1622,10 +1622,16 @@
                 if (parentTab) {
                     const parentTabInstance = new bootstrap.Tab(parentTab);
                     parentTabInstance.show();
-                }
     
-                // Activate child tab if applicable
-                if (childTab) {
+                    // Delay activation of child tab until parent tab is fully activated
+                    if (childTab) {
+                        parentTab.addEventListener('shown.bs.tab', function () {
+                            const childTabInstance = new bootstrap.Tab(childTab);
+                            childTabInstance.show();
+                        });
+                    }
+                } else if (childTab) {
+                    // If only child tab is specified (unlikely), activate it directly
                     const childTabInstance = new bootstrap.Tab(childTab);
                     childTabInstance.show();
                 }
