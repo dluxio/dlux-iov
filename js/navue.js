@@ -951,7 +951,7 @@ export default {
     document.head.appendChild(script);
     // add sting chat
     this.addStingChat();
-    this.$nextTick(() => {
+    this.$nextTick() => {
       // Ensure the DOM is updated
       const links = document.querySelectorAll('a.no-scroll');
       console.log('Links found:', links);
