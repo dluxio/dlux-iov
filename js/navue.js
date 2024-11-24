@@ -951,15 +951,15 @@ export default {
     document.head.appendChild(script);
     // add sting chat
     this.addStingChat();
-     // Log the links to make sure the selector is correct
-     const links = document.querySelectorAll('a.no-scroll');
-     console.log('Links found:', links);
-     
-     // Add the event listeners
-     links.forEach((link) => {
-       link.addEventListener('click', (event) => {
-         event.preventDefault();  // Prevent default anchor behavior
-         console.log('Navigation link clicked, but page will not scroll.');
+    this.$nextTick(() => {
+      // Ensure the DOM is updated
+      const links = document.querySelectorAll('a.no-scroll');
+      console.log('Links found:', links);
+
+      links.forEach((link) => {
+        link.addEventListener('click', (event) => {
+          event.preventDefault();  // Prevent default anchor behavior
+          console.log('Navigation link clicked, but page will not scroll.');
        });
      });
    },
