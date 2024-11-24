@@ -176,9 +176,6 @@
                                     <li class="nav-item"> <a class="nav-link" id="filestab" role="tab"
                                             data-bs-toggle="tab" @click="activeTab = 'files'" aria-controls="files"
                                             aria-expanded="true" href="#files">Cloud</a></li>
-                                    <!--<li class="nav-item d-none" v-show="me"> <a class="nav-link" id="settingstab" role="tab"
-                                    data-bs-toggle="tab" aria-controls="settings" aria-expanded="true"
-                                    href="#settings">Settings</a></li>-->
                                 </ul>
                             </div>
                         </div>
@@ -523,7 +520,8 @@
                                 <div role="tabpanel" class="tab-pane fade show " id="spk" aria-labelledby="spktab">
                                     <div class="container">
                                         <div>
-                                            <div class="alert alert-warning d-flex align-items-center flex-wrap" role="alert">
+                                            <div class="alert alert-warning d-flex align-items-center flex-wrap"
+                                                role="alert">
                                                 <div class="d-flex flex-column flex-grow-1 py-1">
                                                     <div class="fs-3 fw-light">The SPK Files Testnet is live</div>
                                                     <div class="fw-6">Use the SPK Test button here and on the Files tab
@@ -531,7 +529,8 @@
                                                         storage</div>
                                                 </div>
                                                 <div class="mx-auto py-1">
-                                                    <button type="button" class="btn btn-dark text-warning border border-warning d-flex"
+                                                    <button type="button"
+                                                        class="btn btn-dark text-warning border border-warning d-flex"
                                                         data-bs-toggle="modal" data-bs-target="#spkWalletModal">
                                                         <i class="fa-solid fa-wallet fa-fw me-1 my-auto"
                                                             aria-hidden="true"></i><span class="my-auto">SPK</span><span
@@ -664,13 +663,16 @@
                                                     <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                                                         disabled></button>
                                                     <div class="btn-group" role="group">
-                                                        <button type="button" class="btn btn-primary disabled dropdown-toggle"
+                                                        <button type="button"
+                                                            class="btn btn-primary disabled dropdown-toggle"
                                                             data-bs-toggle="dropdown" aria-haspopup="true"
                                                             aria-expanded="false"></button>
                                                         <ul class="dropdown-menu bg-black dropdown-menu-end text-white"
                                                             aria-labelledby="btnGroupDrop1">
-                                                            <a class="dropdown-item disabled" href="/dex/?api=https://spktest.dlux.io/spk#spk" id="buylink"><i
-                                                                    class="fas fa-coins fa-fw me-2"></i>Buy /
+                                                            <a class="dropdown-item disabled"
+                                                                href="/dex/?api=https://spktest.dlux.io/spk#spk"
+                                                                id="buylink"><i class="fas fa-coins fa-fw me-2"></i>Buy
+                                                                /
                                                                 Sell</a>
                                                         </ul>
                                                     </div>
@@ -1377,7 +1379,7 @@
                         <!-- files tab -->
                         <div role="tabpanel" ref="filesTab" class="tab-pane fade" id="files" aria-labelledby="filestab">
                             <div class="container">
-                                <div class="rounded my-3 pt-1"  style="background-color: rgba(0, 0, 0, 0.5);">
+                                <div class="rounded my-3 pt-1" style="background-color: rgba(0, 0, 0, 0.5);">
                                     <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount"
                                         @tosign="toSign=$event" :prop_contracts="contracts" :accountinfo="accountinfo"
                                         :spkapi="spkapi" @done="getSapi"></contract-vue>
@@ -1524,8 +1526,9 @@
                 </div>
             </div>
 
-            <mfi-vue api="https://spktest.dlux.io/spk" :accountinfo="accountinfo" bsid="buyTokenModal" @tosign="toSign=$event" :hiveprice="hiveprice.hive.usd"></mfi-vue>
-        
+            <mfi-vue api="https://spktest.dlux.io/spk" :accountinfo="accountinfo" bsid="buyTokenModal"
+                @tosign="toSign=$event" :hiveprice="hiveprice.hive.usd"></mfi-vue>
+
 
         </main>
         <!-- Footer -->
@@ -1602,34 +1605,35 @@
         // Function to handle deep linking logic
         function deepLink(link) {
             if (link) location.hash = link; // Update the hash in the URL
-    
+
             let url = location.href.replace(/\/$/, ''); // Remove trailing slash from URL
-    
+
             if (location.hash) {
                 let hash = url.split('#')[1]; // Extract hash from URL
                 let parentTab = null;
                 let childTab = null;
-    
+
                 // Check if hash includes nested tabs (e.g., #wallet/spk)
                 if (hash.includes('/')) {
                     const parts = hash.split('/'); // Split into parent and sub-tab parts
                     console.log("Hash parts:", parts);
-    
+
                     // Select the parent tab (e.g., #wallet) from the #usertabs group
                     parentTab = document.querySelector(`#usertabs a[href="#${parts[0]}"]`);
                     console.log("Parent Tab:", parentTab);
-    
+
                     // Select the sub-tab (e.g., #spk) inside the #wallettabs group
                     childTab = document.querySelector(`#wallettabs a[href="#${parts[1]}"]`);
                     console.log("Child Tab:", childTab);
-    
+
                     if (parentTab) {
                         const parentTabInstance = new bootstrap.Tab(parentTab); // Bootstrap tab instance for parent tab
                         console.log("Activating parent tab:", parentTab);
                         parentTabInstance.show(); // Show the parent tab
-    
+
                         // Wait for the parent tab to be fully activated, then activate the child tab
                         parentTab.addEventListener('shown.bs.tab', function () {
+                            // Ensure that sub-tab is activated after parent tab is shown
                             if (childTab) {
                                 console.log("Parent tab activated. Now activating child tab:", childTab);
                                 const childTabInstance = new bootstrap.Tab(childTab); // Bootstrap tab instance for child tab
@@ -1645,7 +1649,7 @@
                     // Handle the case where only a parent tab is specified (single-level hash)
                     parentTab = document.querySelector(`#usertabs a[href="#${hash}"]`);
                     console.log("Single-level hash, Parent Tab:", parentTab);
-    
+
                     if (parentTab) {
                         const parentTabInstance = new bootstrap.Tab(parentTab);
                         parentTabInstance.show();
@@ -1653,12 +1657,12 @@
                         console.log("Parent Tab is null.");
                     }
                 }
-    
+
                 // Update the URL without adding duplicate hashes
                 url = location.href.replace(/\/#/, '#');
                 history.replaceState(null, null, url); // Replace the history state with the updated URL
             }
-    
+
             // Update URL based on selected tab
             const selectableTabList = [].slice.call(document.querySelectorAll('a[data-bs-toggle="tab"]'));
             selectableTabList.forEach((selectableTab) => {
@@ -1666,7 +1670,7 @@
                     const hash = selectableTab.getAttribute('href');
                     const parentTab = selectableTab.closest('#usertabs') ? '#usertabs' : '#wallettabs';
                     let newUrl;
-    
+
                     // Update URL based on selected tab
                     if (parentTab === '#usertabs') {
                         newUrl = url.split('#')[0] + hash;
@@ -1674,19 +1678,20 @@
                         const parentActiveTab = document.querySelector('#usertabs .active').getAttribute('href');
                         newUrl = url.split('#')[0] + parentActiveTab + '/' + hash.substring(1); // Append sub-tab hash
                     }
-    
+
                     console.log("Updating URL to:", newUrl);
                     history.replaceState(null, null, newUrl); // Replace the state in history
                 });
             });
         }
-    
+
         // Ensure that deepLink runs after the DOM is loaded
         document.addEventListener('DOMContentLoaded', function () {
             deepLink(location.hash); // Call deepLink on page load to handle any deep linking in the URL
         });
     </script>
-        
+
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
         integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
