@@ -1612,28 +1612,41 @@
                 // Check for nested format, e.g., #wallet/spk
                 if (hash.includes('/')) {
                     const parts = hash.split('/');
+                    console.log("Hash parts:", parts);
                     parentTab = document.querySelector(`#usertabs a[href="#${parts[0]}"]`);
                     childTab = document.querySelector(`#wallettab a[href="#${parts[1]}"]`);
+                    console.log("Parent Tab:", parentTab);
+                    console.log("Child Tab:", childTab);
                 } else {
                     parentTab = document.querySelector(`#usertabs a[href="#${hash}"]`);
+                    console.log("Single-level hash, Parent Tab:", parentTab);
                 }
     
                 // Activate parent tab
                 if (parentTab) {
+                    console.log("Activating parent tab:", parentTab);
                     const parentTabInstance = new bootstrap.Tab(parentTab);
                     parentTabInstance.show();
     
                     // Delay activation of child tab until parent tab is fully activated
                     if (childTab) {
                         parentTab.addEventListener('shown.bs.tab', function () {
+                            console.log("Parent tab activated. Now activating child tab:", childTab);
                             const childTabInstance = new bootstrap.Tab(childTab);
                             childTabInstance.show();
+    
+                            // Log the instance to ensure it initialized correctly
+                            const spkTabInstance = bootstrap.Tab.getInstance(childTab);
+                            console.log("SPK Tab Instance:", spkTabInstance);
                         });
                     }
                 } else if (childTab) {
                     // If only child tab is specified (unlikely), activate it directly
+                    console.log("Activating child tab directly:", childTab);
                     const childTabInstance = new bootstrap.Tab(childTab);
                     childTabInstance.show();
+                } else {
+                    console.log("Neither parent nor child tab found. Check the hash and DOM structure.");
                 }
     
                 // Clean up the URL to avoid duplicating hashes
@@ -1658,6 +1671,7 @@
                         newUrl = url.split('#')[0] + parentActiveTab + '/' + hash.substring(1);
                     }
     
+                    console.log("Updating URL to:", newUrl);
                     history.replaceState(null, null, newUrl);
                 });
             });
