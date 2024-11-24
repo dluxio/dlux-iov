@@ -1611,13 +1611,14 @@
     
                 // Check for nested format, e.g., #wallet/spk
                 if (hash.includes('/')) {
-                    const parts = hash.split('/');
+                    const parts = hash.split('/'); // Split into parent and child tabs
                     console.log("Hash parts:", parts);
     
-                    // Find parent and child tabs
+                    // Find parent tab (e.g., #wallet)
                     parentTab = document.querySelector(`#usertabs a[href="#${parts[0]}"]`);
                     console.log("Parent Tab:", parentTab);
     
+                    // Find child tab (e.g., #spk or #hive) inside the #wallettabs group
                     console.log(`Trying to find childTab with selector: #wallettabs a[href="#${parts[1]}"]`);
                     childTab = document.querySelector(`#wallettabs a[href="#${parts[1]}"]`);
                     console.log("Child Tab:", childTab);
@@ -1626,11 +1627,12 @@
                         const parentTabInstance = new bootstrap.Tab(parentTab);
                         console.log("Activating parent tab:", parentTab);
     
-                        // Activate parent tab
+                        // Activate parent tab first
                         parentTabInstance.show();
     
                         // Ensure child tab is activated after parent is fully shown
                         parentTab.addEventListener('shown.bs.tab', function () {
+                            // Check if child tab is available
                             if (childTab) {
                                 console.log("Parent tab activated. Now activating child tab:", childTab);
                                 const childTabInstance = new bootstrap.Tab(childTab);
