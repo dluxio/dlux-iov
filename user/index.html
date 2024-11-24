@@ -1618,8 +1618,8 @@
                     parentTab = document.querySelector(`#usertabs a[href="#${parts[0]}"]`);
                     console.log("Parent Tab:", parentTab);
     
-                    console.log(`Trying to find childTab with selector: #wallettab a[href="#${parts[1]}"]`);
-                    childTab = document.querySelector(`#wallettab a[href="#${parts[1]}"]`);
+                    console.log(`Trying to find childTab with selector: #wallettabs a[href="#${parts[1]}"]`);
+                    childTab = document.querySelector(`#wallettabs a[href="#${parts[1]}"]`);
                     console.log("Child Tab:", childTab);
     
                     if (parentTab) {
@@ -1665,13 +1665,13 @@
             selectableTabList.forEach((selectableTab) => {
                 selectableTab.addEventListener('click', function () {
                     const hash = selectableTab.getAttribute('href');
-                    const parentTab = selectableTab.closest('#usertabs') ? '#usertabs' : '#wallettab';
+                    const parentTab = selectableTab.closest('#usertabs') ? '#usertabs' : '#wallettabs';
                     let newUrl;
     
                     if (parentTab === '#usertabs') {
                         // If parent tab, set hash directly
                         newUrl = url.split('#')[0] + hash;
-                    } else if (parentTab === '#wallettab') {
+                    } else if (parentTab === '#wallettabs') {
                         // If subtab, combine parent and subtab
                         const parentActiveTab = document.querySelector('#usertabs .active').getAttribute('href');
                         newUrl = url.split('#')[0] + parentActiveTab + '/' + hash.substring(1);
