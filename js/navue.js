@@ -956,7 +956,7 @@ export default {
       // Log the links to ensure the selector is correct
       const links = document.querySelectorAll('a.no-scroll');
       console.log('Links found:', links);
-      
+
       links.forEach((link) => {
         link.addEventListener('click', (event) => {
           event.preventDefault();  // Prevent default anchor behavior
@@ -1077,43 +1077,74 @@ export default {
               <span id="userName" class="mx-1 d-none d-md-flex">{{user}}</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black mt-2" aria-labelledby="userDropdown">
-              <li class="">
-                <a class="dropdown-item" role="button" @click="toggleChat" data-bs-toggle="offcanvas"
-                  data-bs-target="#offcanvasSting" aria-controls="offcanvasSting">
-                  <img src="/img/sting_white.svg" alt="" width="20" height="20" class="img-fluid me-2">Chat
-                </a>
-              </li>
-              <li v-if="!node" class=""><a class="dropdown-item no-scroll" :href="'/me#blog/'" @click="showTab('blog')"><i
-                    class="fas fa-user fa-fw me-2"></i>Profile</a></li>
-              <li v-if="!node" class=""><a class="dropdown-item no-scroll" :href="'/me#wallet/'" @click="showTab('wallet')"><i
-                    class="fas fa-wallet fa-fw me-2"></i>Wallet</a></li>
-              <li v-if="!node" class=""><a class="dropdown-item no-scroll" :href="'/me#inventory/'"
-                  @click="showTab('inventory')"><i class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
-              <li v-if="!node" class=""><a class="dropdown-item no-scroll" :href="'/me#files/'" @click="showTab('files')"><i
-                    class="fas fa-cloud fa-fw me-2"></i>Cloud</a></li>
-              <li class="" v-if="!node">
-                <hr class="dropdown-divider">
-              </li>
-              <li v-if="!node" class=""><a class="dropdown-item" href="/build/"><i
-                    class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
-              <li class=""><a class="dropdown-item" href="/docs/" target="_blank"><i
-                    class="fa-solid fa-book me-2 fa-fw"></i>Docs</a></li>
-              <li v-if="!node" class=""><a class="dropdown-item" href="/about/"><i
-                    class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
-              <li class="">
-                <hr class="dropdown-divider">
-              </li>
-              <li v-if="!node" class=""><a class="dropdown-item" href="/qr/"><i
-                    class="fa-solid fa-qrcode me-2 fa-fw"></i>Invite</a></li>
-              <li><a class="dropdown-item" role="button" type="button" data-bs-toggle="offcanvas"
-                  data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers"><i
-                    class="fas fa-user-friends me-2 position-relative"><span
-                      class="small position-absolute top-100 start-100 translate-middle text-white bg-darkg rounded-circle"
-                      style="font-size: .9em;"><i class="small fa-solid fa-arrows-rotate"></i><span
-                        class="visually-hidden">change user</span></span></i>Users</a></li>
-              <li><a class="dropdown-item" role="button" @click="logout()"><i
-                    class="fas fa-power-off fa-fw me-2"></i>Logout</a></li>
-            </ul>
+  <li class="">
+    <a class="dropdown-item" role="button" @click="toggleChat" data-bs-toggle="offcanvas"
+      data-bs-target="#offcanvasSting" aria-controls="offcanvasSting">
+      <img src="/img/sting_white.svg" alt="" width="20" height="20" class="img-fluid me-2">Chat
+    </a>
+  </li>
+  <li v-if="!node" class="">
+    <a class="dropdown-item no-scroll" :href="'/me#blog/'" @click="handleNavigation($event, 'blog')">
+      <i class="fas fa-user fa-fw me-2"></i>Profile
+    </a>
+  </li>
+  <li v-if="!node" class="">
+    <a class="dropdown-item no-scroll" :href="'/me#wallet/'" @click="handleNavigation($event, 'wallet')">
+      <i class="fas fa-wallet fa-fw me-2"></i>Wallet
+    </a>
+  </li>
+  <li v-if="!node" class="">
+    <a class="dropdown-item no-scroll" :href="'/me#inventory/'" @click="handleNavigation($event, 'inventory')">
+      <i class="fas fa-boxes fa-fw me-2"></i>Inventory
+    </a>
+  </li>
+  <li v-if="!node" class="">
+    <a class="dropdown-item no-scroll" :href="'/me#files/'" @click="handleNavigation($event, 'files')">
+      <i class="fas fa-cloud fa-fw me-2"></i>Cloud
+    </a>
+  </li>
+  <li class="" v-if="!node">
+    <hr class="dropdown-divider">
+  </li>
+  <li v-if="!node" class="">
+    <a class="dropdown-item" href="/build/">
+      <i class="fa-solid fa-shapes fa-fw me-2"></i>Build
+    </a>
+  </li>
+  <li class="">
+    <a class="dropdown-item" href="/docs/" target="_blank">
+      <i class="fa-solid fa-book me-2 fa-fw"></i>Docs
+    </a>
+  </li>
+  <li v-if="!node" class="">
+    <a class="dropdown-item" href="/about/">
+      <i class="fas fa-info-circle fa-fw me-2"></i>About
+    </a>
+  </li>
+  <li>
+    <hr class="dropdown-divider">
+  </li>
+  <li v-if="!node" class="">
+    <a class="dropdown-item" href="/qr/">
+      <i class="fa-solid fa-qrcode me-2 fa-fw"></i>Invite
+    </a>
+  </li>
+  <li>
+    <a class="dropdown-item" role="button" type="button" data-bs-toggle="offcanvas"
+      data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
+      <i class="fas fa-user-friends me-2 position-relative"><span
+          class="small position-absolute top-100 start-100 translate-middle text-white bg-darkg rounded-circle"
+          style="font-size: .9em;"><i class="small fa-solid fa-arrows-rotate"></i><span
+          class="visually-hidden">change user</span></span></i>Users
+    </a>
+  </li>
+  <li>
+    <a class="dropdown-item" role="button" @click="logout()">
+      <i class="fas fa-power-off fa-fw me-2"></i>Logout
+    </a>
+  </li>
+</ul>
+
           </div>
         </ul>
 
