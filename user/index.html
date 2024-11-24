@@ -1613,14 +1613,13 @@
                 // Check if hash includes nested tabs (e.g., #wallet/spk)
                 if (hash.includes('/')) {
                     const parts = hash.split('/'); // Split into parent and sub-tab parts
-    
                     console.log("Hash parts:", parts);
     
-                    // Select the parent tab (e.g., #wallet)
+                    // Select the parent tab (e.g., #wallet) from the #usertabs group
                     parentTab = document.querySelector(`#usertabs a[href="#${parts[0]}"]`);
                     console.log("Parent Tab:", parentTab);
     
-                    // Select the sub-tab (e.g., #spk inside #wallettabs)
+                    // Select the sub-tab (e.g., #spk) inside the #wallettabs group
                     childTab = document.querySelector(`#wallettabs a[href="#${parts[1]}"]`);
                     console.log("Child Tab:", childTab);
     
