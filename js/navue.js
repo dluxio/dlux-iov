@@ -951,7 +951,7 @@ export default {
     document.head.appendChild(script);
     // add sting chat
     this.addStingChat();
-    this.$nextTick() => {
+    this.$nextTick(() => {
       // Ensure the DOM is updated
       const links = document.querySelectorAll('a.no-scroll');
       console.log('Links found:', links);
@@ -960,14 +960,15 @@ export default {
         link.addEventListener('click', (event) => {
           event.preventDefault();  // Prevent default anchor behavior
           console.log('Navigation link clicked, but page will not scroll.');
-       });
-     });
-   },
-   beforeDestroy() {
-     // Cleanup event listeners
-     document.querySelectorAll('a.no-scroll').forEach((link) => {
-       link.removeEventListener('click', this.preventScroll);
-     });
+        });
+      });
+    });
+  },
+  beforeDestroy() {
+    // Cleanup event listeners
+    document.querySelectorAll('a.no-scroll').forEach((link) => {
+      link.removeEventListener('click', this.preventScroll);
+    });
   },
   computed: {
     avatar: {
