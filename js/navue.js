@@ -951,22 +951,23 @@ export default {
     document.head.appendChild(script);
     // add sting chat
     this.addStingChat();
-    // Prevent scrolling when clicking on specific links (with class 'no-scroll')
-    document.querySelectorAll('a.no-scroll').forEach((link) => {
-      link.addEventListener('click', (event) => {
-        event.preventDefault();  // Prevent the default anchor behavior
-        console.log('Navigation link clicked, but page will not scroll.');
-
-        // You can add your own navigation logic here, for example:
-        // this.$router.push('someRoute'); // If you are using Vue Router
-      });
-    });
-  },
-  beforeDestroy() {
-    // Clean up the event listeners when the component is destroyed (optional, but good practice)
-    document.querySelectorAll('a.no-scroll').forEach((link) => {
-      link.removeEventListener('click', this.preventScroll);
-    });
+     // Log the links to make sure the selector is correct
+     const links = document.querySelectorAll('a.no-scroll');
+     console.log('Links found:', links);
+     
+     // Add the event listeners
+     links.forEach((link) => {
+       link.addEventListener('click', (event) => {
+         event.preventDefault();  // Prevent default anchor behavior
+         console.log('Navigation link clicked, but page will not scroll.');
+       });
+     });
+   },
+   beforeDestroy() {
+     // Cleanup event listeners
+     document.querySelectorAll('a.no-scroll').forEach((link) => {
+       link.removeEventListener('click', this.preventScroll);
+     });
   },
   computed: {
     avatar: {
