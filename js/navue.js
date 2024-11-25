@@ -735,9 +735,37 @@ export default {
           this.statusPinger(txid, api, r + 1);
         });
     },
-    showTab(link) {
-      if (!deepLink) return;
-      deepLink(link);
+    handleNavigation(tabName) {
+      // Get the current URL
+      const currentUrl = window.location.href;
+      const targetUrl = `/user#${tabName}/`; // Adjust the base URL to match your page
+  
+      // Check if the user is already on the target page
+      if (!currentUrl.startsWith('/user')) {
+        console.log(`Redirecting to ${targetUrl}`);
+        // Redirect to the target page
+        window.location.href = targetUrl;
+        return; // Stop further execution as the page will reload
+      }
+  
+      // If already on the page, navigate to the tab
+      console.log("Already on the correct page, navigating to tab...");
+      const dropdownMenu = this.$el.querySelector('.dropdown-menu');
+      if (dropdownMenu) {
+        dropdownMenu.classList.remove('show'); // Close the dropdown
+      }
+  
+      // Show the tab using the existing logic
+      this.showTab(tabName);
+    },
+    showTab(tabName) {
+      // Activate the corresponding tab
+      if (typeof deepLink === 'function') {
+        deepLink(tabName);
+        console.log(`Tab ${tabName} activated.`);
+      } else {
+        console.warn("deepLink function is not defined.");
+      }
     },
     searchRecents() {
       this.filterRecents = this.recentUsers.reduce((a, b) => {
