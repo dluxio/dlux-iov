@@ -734,7 +734,7 @@ export default {
     showTab(link) {
       // Restore scroll position
       const scrollPos = window.scrollY;
-      history.pushState(null, '', `#${tabName}/`);
+      history.pushState(null, '', `#${link}/`);
       window.scrollTo(0, scrollPos); // Ensure no scroll happens
       if (!deepLink) return;
       deepLink(link);
