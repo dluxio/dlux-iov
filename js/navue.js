@@ -731,10 +731,6 @@ export default {
           this.statusPinger(txid, api, r + 1);
         });
     },
-    showTab(link) {
-      if (!deepLink) return;
-      deepLink(link);
-    },
     handleNavigation(tabName) {
       // Get the closest dropdown to hide it
       const dropdownMenu = this.$el.querySelector('.dropdown-menu');
@@ -748,6 +744,8 @@ export default {
     },
     showTab(tabName) {
       // Logic to activate the corresponding tab, based on your setup
+      if (!deepLink) return;
+      deepLink(link);
       console.log(`Tab ${tabName} activated.`);
     },
     searchRecents() {
