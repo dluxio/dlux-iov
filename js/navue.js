@@ -735,46 +735,9 @@ export default {
           this.statusPinger(txid, api, r + 1);
         });
     },
-    handleNavigation(tabName, event) {
-      // Prevent the default scroll behavior
-      if (event) {
-        event.preventDefault();
-      }
-  
-      // Get the current URL and the base page
-      const currentUrl = window.location.href.split('#')[0];
-      const targetUrl = `/user#${tabName}/`;
-  
-      // If not already on the correct page, redirect
-      if (!currentUrl.endsWith('/user')) {
-        console.log(`Redirecting to ${targetUrl}`);
-        window.location.href = targetUrl;
-        return;
-      }
-  
-      // If already on the correct page, handle the tab navigation
-      console.log("Already on /user, navigating to tab...");
-  
-      // Update the URL hash without reloading the page
-      history.pushState(null, '', `#${tabName}/`);
-  
-      // Close the dropdown
-      const dropdownMenu = this.$el.querySelector('.dropdown-menu');
-      if (dropdownMenu) {
-        dropdownMenu.classList.remove('show');
-      }
-  
-      // Activate the correct tab
-      this.showTab(tabName);
-    },
-    showTab(tabName) {
-      // Ensure the deepLink function is called to activate the tab
-      if (typeof deepLink === 'function') {
-        deepLink(tabName);
-        console.log(`Tab ${tabName} activated.`);
-      } else {
-        console.warn("deepLink function is not defined.");
-      }
+    showTab(link) {
+      if (!deepLink) return;
+      deepLink(link);
     },
     searchRecents() {
       this.filterRecents = this.recentUsers.reduce((a, b) => {
@@ -1088,89 +1051,53 @@ export default {
             </a>
           </li>
           <div class="btn-group dropdown">
-  <!-- Removed href="#" and added role="button" for the dropdown toggle -->
-  <a class="nav-link mt-auto mb-auto d-flex align-items-center dropdown-toggle dropdown-bs-toggle text-white-50"
-     id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown">
-    <div v-show="user" class="p-0 d-md-none me-1 nav-link d-flex align-items-center text-white-50">
-      <img :src="avatar" id="userImage" alt="" width="40" height="40"
-           class="img-fluid rounded-circle bg-light cover">
-    </div>
-    <span id="userName" class="mx-1 d-none d-md-flex">{{user}}</span>
-  </a>
-  <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black mt-2" aria-labelledby="userDropdown">
-    <li>
-      <a class="dropdown-item" role="button" @click="toggleChat" data-bs-toggle="offcanvas"
-         data-bs-target="#offcanvasSting" aria-controls="offcanvasSting">
-        <img src="/img/sting_white.svg" alt="" width="20" height="20" class="img-fluid me-2">Chat
-      </a>
-    </li>
-    <!-- Changed href="#" to javascript:void(0) to prevent default scrolling -->
-    <li v-if="!node">
-      <a href="javascript:void(0)" class="dropdown-item" role="button" @click="handleNavigation('blog', $event)">
-        <i class="fas fa-user fa-fw me-2"></i>Profile
-      </a>
-    </li>
-    <li v-if="!node">
-      <a href="javascript:void(0)" class="dropdown-item" role="button" @click="handleNavigation('wallet', $event)">
-        <i class="fas fa-wallet fa-fw me-2"></i>Wallet
-      </a>
-    </li>
-    <li v-if="!node">
-      <a href="javascript:void(0)" class="dropdown-item" role="button" @click="handleNavigation('inventory', $event)">
-        <i class="fas fa-boxes fa-fw me-2"></i>Inventory
-      </a>
-    </li>
-    <li v-if="!node">
-      <a href="javascript:void(0)" class="dropdown-item" role="button" @click="handleNavigation('files', $event)">
-        <i class="fas fa-cloud fa-fw me-2"></i>Cloud
-      </a>
-    </li>
-    <li v-if="!node">
-      <hr class="dropdown-divider">
-    </li>
-    <li v-if="!node">
-      <a class="dropdown-item" href="/build/">
-        <i class="fa-solid fa-shapes fa-fw me-2"></i>Build
-      </a>
-    </li>
-    <li>
-      <a class="dropdown-item" href="/docs/" target="_blank">
-        <i class="fa-solid fa-book me-2 fa-fw"></i>Docs
-      </a>
-    </li>
-    <li v-if="!node">
-      <a class="dropdown-item" href="/about/">
-        <i class="fas fa-info-circle fa-fw me-2"></i>About
-      </a>
-    </li>
-    <li>
-      <hr class="dropdown-divider">
-    </li>
-    <li v-if="!node">
-      <a class="dropdown-item" href="/qr/">
-        <i class="fa-solid fa-qrcode me-2 fa-fw"></i>Invite
-      </a>
-    </li>
-    <li>
-      <a class="dropdown-item" role="button" type="button" data-bs-toggle="offcanvas"
-         data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">
-        <i class="fas fa-user-friends me-2 position-relative">
-          <span class="small position-absolute top-100 start-100 translate-middle text-white bg-darkg rounded-circle"
-                style="font-size: .9em;">
-            <i class="small fa-solid fa-arrows-rotate"></i>
-            <span class="visually-hidden">change user</span>
-          </span>
-        </i>Users
-      </a>
-    </li>
-    <li>
-      <a class="dropdown-item" role="button" @click="logout()">
-        <i class="fas fa-power-off fa-fw me-2"></i>Logout
-      </a>
-    </li>
-  </ul>
-</div>
-
+            <a class="nav-link mt-auto mb-auto d-flex align-items-center dropdown-toggle dropdown-bs-toggle text-white-50"
+              id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
+              <div v-show="user" class="p-0 d-md-none me-1 nav-link d-flex align-items-center text-white-50">
+                <img :src="avatar" id="userImage" alt="" width="40" height="40"
+                  class="img-fluid rounded-circle bg-light cover">
+              </div>
+              <span id="userName" class="mx-1 d-none d-md-flex">{{user}}</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black mt-2" aria-labelledby="userDropdown">
+              <li class="">
+                <a class="dropdown-item" role="button" @click="toggleChat" data-bs-toggle="offcanvas"
+                  data-bs-target="#offcanvasSting" aria-controls="offcanvasSting">
+                  <img src="/img/sting_white.svg" alt="" width="20" height="20" class="img-fluid me-2">Chat
+                </a>
+              </li>
+              <li v-if="!node" class=""><a class="dropdown-item" :href="'/me#blog/'" @click="showTab('blog')"><i
+                    class="fas fa-user fa-fw me-2"></i>Profile</a></li>
+              <li v-if="!node" class=""><a class="dropdown-item" :href="'/me#wallet/'" @click="showTab('wallet')"><i
+                    class="fas fa-wallet fa-fw me-2"></i>Wallet</a></li>
+              <li v-if="!node" class=""><a class="dropdown-item" :href="'/me#inventory/'"
+                  @click="showTab('inventory')"><i class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
+              <li v-if="!node" class=""><a class="dropdown-item" :href="'/me#files/'" @click="showTab('files')"><i
+                    class="fas fa-cloud fa-fw me-2"></i>Cloud</a></li>
+              <li class="" v-if="!node">
+                <hr class="dropdown-divider">
+              </li>
+              <li v-if="!node" class=""><a class="dropdown-item" href="/build/"><i
+                    class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
+              <li class=""><a class="dropdown-item" href="/docs/" target="_blank"><i
+                    class="fa-solid fa-book me-2 fa-fw"></i>Docs</a></li>
+              <li v-if="!node" class=""><a class="dropdown-item" href="/about/"><i
+                    class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
+              <li class="">
+                <hr class="dropdown-divider">
+              </li>
+              <li v-if="!node" class=""><a class="dropdown-item" href="/qr/"><i
+                    class="fa-solid fa-qrcode me-2 fa-fw"></i>Invite</a></li>
+              <li><a class="dropdown-item" role="button" type="button" data-bs-toggle="offcanvas"
+                  data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers"><i
+                    class="fas fa-user-friends me-2 position-relative"><span
+                      class="small position-absolute top-100 start-100 translate-middle text-white bg-darkg rounded-circle"
+                      style="font-size: .9em;"><i class="small fa-solid fa-arrows-rotate"></i><span
+                        class="visually-hidden">change user</span></span></i>Users</a></li>
+              <li><a class="dropdown-item" role="button" @click="logout()"><i
+                    class="fas fa-power-off fa-fw me-2"></i>Logout</a></li>
+            </ul>
+          </div>
         </ul>
 
       </div>
