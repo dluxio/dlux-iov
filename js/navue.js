@@ -735,7 +735,12 @@ export default {
           this.statusPinger(txid, api, r + 1);
         });
     },
-    handleNavigation(tabName) {
+    handleNavigation(tabName, event) {
+      // Prevent the default scroll behavior
+      if (event) {
+        event.preventDefault();
+      }
+  
       // Get the current URL and the base page
       const currentUrl = window.location.href.split('#')[0];
       const targetUrl = `/user#${tabName}/`;
@@ -1098,13 +1103,13 @@ export default {
                   <img src="/img/sting_white.svg" alt="" width="20" height="20" class="img-fluid me-2">Chat
                 </a>
               </li>
-              <li v-if="!node" class=""><a class="dropdown-item" @click="handleNavigation('blog')"><i
+              <li v-if="!node" class=""><a class="dropdown-item" @click="handleNavigation('blog', $event)"><i
                     class="fas fa-user fa-fw me-2"></i>Profile</a></li>
-              <li v-if="!node" class=""><a class="dropdown-item" @click="handleNavigation('wallet')"><i
+              <li v-if="!node" class=""><a class="dropdown-item" @click="handleNavigation('wallet', $event)"><i
                     class="fas fa-wallet fa-fw me-2"></i>Wallet</a></li>
-              <li v-if="!node" class=""><a class="dropdown-item" @click="handleNavigation('inventory')"><i 
+              <li v-if="!node" class=""><a class="dropdown-item" @click="handleNavigation('inventory', $event)"><i 
                     class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
-              <li v-if="!node" class=""><a class="dropdown-item" @click="handleNavigation('files')"><i
+              <li v-if="!node" class=""><a class="dropdown-item" @click="handleNavigation('files', $event)"><i
                     class="fas fa-cloud fa-fw me-2"></i>Cloud</a></li>
               <li class="" v-if="!node">
                 <hr class="dropdown-divider">
