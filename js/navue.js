@@ -1094,13 +1094,13 @@ export default {
                   <img src="/img/sting_white.svg" alt="" width="20" height="20" class="img-fluid me-2">Chat
                 </a>
               </li>
-              <li v-if="!node" class=""><a class="dropdown-item" :href="'/me#blog/'" @click="showTab('blog')"><i
+              <li v-if="!node" class=""><a class="dropdown-item" @click="handleNavigation('blog')"><i
                     class="fas fa-user fa-fw me-2"></i>Profile</a></li>
-              <li v-if="!node" class=""><a class="dropdown-item" :href="'/me#wallet/'" @click="showTab('wallet')"><i
+              <li v-if="!node" class=""><a class="dropdown-item" @click="handleNavigation('wallet')"><i
                     class="fas fa-wallet fa-fw me-2"></i>Wallet</a></li>
-              <li v-if="!node" class=""><a class="dropdown-item" :href="'/me#inventory/'"
-                  @click="showTab('inventory')"><i class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
-              <li v-if="!node" class=""><a class="dropdown-item" :href="'/me#files/'" @click="showTab('files')"><i
+              <li v-if="!node" class=""><a class="dropdown-item" @click="handleNavigation('inventory')"><i 
+                    class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
+              <li v-if="!node" class=""><a class="dropdown-item" @click="handleNavigation('files')"><i
                     class="fas fa-cloud fa-fw me-2"></i>Cloud</a></li>
               <li class="" v-if="!node">
                 <hr class="dropdown-divider">
