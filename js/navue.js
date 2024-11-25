@@ -1062,7 +1062,7 @@ export default {
                   <img src="/img/sting_white.svg" alt="" width="20" height="20" class="img-fluid me-2">Chat
                 </a>
               </li>
-              <li v-if="!node" class=""><a class="dropdown-item" :href="'/me#blog/'" @click.prevent="showTab('blog')"><i
+              <li v-if="!node" class=""><a class="dropdown-item" :href="'/me#blog/'" @click="showTab('blog')"><i
                     class="fas fa-user fa-fw me-2"></i>Profile</a></li>
               <li v-if="!node" class=""><a class="dropdown-item" :href="'/me#wallet/'" @click="showTab('wallet')"><i
                     class="fas fa-wallet fa-fw me-2"></i>Wallet</a></li>
