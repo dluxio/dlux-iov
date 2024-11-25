@@ -61,21 +61,21 @@ export default {
   emits: ["login", "logout", "refresh", "ack"],
   props: {
     op: {
-        type: Object,
-        required: true,
-        default: function () {
-            return {}
-        }
+      type: Object,
+      required: true,
+      default: function () {
+        return {}
+      }
     },
     node: {
-        type: Boolean,
-        required: false,
-        default: false
+      type: Boolean,
+      required: false,
+      default: false
     },
     lapi: {
-        type: String,
-        required: false,
-        default: ""
+      type: String,
+      required: false,
+      default: ""
     },
   },
   watch: {
@@ -109,7 +109,7 @@ export default {
     toggleChat() {
       this.chatVisible = !this.chatVisible;
     },
-    storeKey(level, key){
+    storeKey(level, key) {
       //get hive user
       fetch("https://api.hive.blog", {
         method: "POST",
@@ -118,7 +118,7 @@ export default {
           [[this.account]],
         ]),
 
-      }).then(r=>{
+      }).then(r => {
         var PublicKey = hiveTx.PublicKey.from(
           r[0][level].key_auths[0][0]
         );
@@ -129,7 +129,7 @@ export default {
         );
         if (success) {
           if (!this.decrypted.accounts[this.account]) this.decrypted[this.account] = {};
-            this.decrypted[this.account][level] = key;
+          this.decrypted[this.account][level] = key;
           var encrypted = CryptoJS.AES.encrypt(
             JSON.stringify(this.decrypted),
             this.PIN
@@ -140,9 +140,9 @@ export default {
         }
       })
     },
-    decryptPEN(user = this.account){
+    decryptPEN(user = this.account) {
       var PEN = localStorage.getItem("PEN");
-      if(PEN){
+      if (PEN) {
         var decrypted = CryptoJS.AES.decrypt(encrypted, this.PIN);
         this.decrypt = JSON.parse(decrypted);
         sessionStorage.setItem('pen', decrypted)
@@ -199,7 +199,7 @@ export default {
           this.statusFinder(r, obj);
           try {
             obj.callbacks[0](`${obj.challenge}:${r}`, console.log("callback?"));
-          } catch (e) {}
+          } catch (e) { }
         })
         .catch((e) => {
           console.log(e);
@@ -228,7 +228,7 @@ export default {
           this.statusFinder(r, obj);
           try {
             obj.callbacks[0](`${obj.challenge}:${r}`, console.log("callback?"));
-          } catch (e) {}
+          } catch (e) { }
         })
         .catch((e) => {
           console.log(e);
@@ -241,7 +241,7 @@ export default {
           if (obj.id) this.statusFinder(r, obj);
           try {
             obj.callbacks[0](`${obj.challenge}:${r}`, console.log("callback?"));
-          } catch (e) {}
+          } catch (e) { }
         })
         .catch((e) => {
           console.log(e);
@@ -407,10 +407,10 @@ export default {
         if (!key) {
           key = prompt(
             "Please enter your private " +
-              op[2] +
-              " key for @" +
-              this.user +
-              ":",
+            op[2] +
+            " key for @" +
+            this.user +
+            ":",
             ""
           );
           localStorage.setItem(this.user + ":" + op[2], key);
@@ -419,28 +419,24 @@ export default {
         tx.create(op[0]).then(() => console.log(tx.transaction));
         const privateKey = hiveTx.PrivateKey.from(key);
         tx.sign(privateKey);
-        if (!tx.signedTransaction)reject('Failed to Sign')
-          resolve(tx.signedTransaction)
+        if (!tx.signedTransaction) reject('Failed to Sign')
+        resolve(tx.signedTransaction)
       });
     },
     HSRsign(op) {
       if (op[1][0][0] == "custom_json") {
         if (window.confirm("Open Hive Signer in a new tab?")) {
           window.open(
-            `https://hivesigner.com/sign/custom-json?authority=active&required_auths=%5B%22${
-              this.user
-            }%22%5D&required_posting_auths=%5B%5D&id=${
-              op[1][0][1].id
+            `https://hivesigner.com/sign/custom-json?authority=active&required_auths=%5B%22${this.user
+            }%22%5D&required_posting_auths=%5B%5D&id=${op[1][0][1].id
             }&json=${encodeURIComponent(op[1][0][1].json)}`,
             "_blank"
           );
         }
       } else if (op[1][0][0] == "transfer") {
         window.open(
-          `https://hivesigner.com/sign/transfer?authority=active&from=${
-            op[1][0][1].from
-          }&to=${op[1][0][1].to}&amount=${
-            op[1][0][1].amount
+          `https://hivesigner.com/sign/transfer?authority=active&from=${op[1][0][1].from
+          }&to=${op[1][0][1].to}&amount=${op[1][0][1].amount
           }&memo=${encodeURIComponent(op[1][0][1].memo)}`,
           "_blank"
         );
@@ -651,10 +647,10 @@ export default {
         if (!key) {
           key = prompt(
             "Please enter your private " +
-              op[2] +
-              " key for @" +
-              this.user +
-              ":",
+            op[2] +
+            " key for @" +
+            this.user +
+            ":",
             ""
           );
           localStorage.setItem(this.user + ":" + op[2], key);
@@ -736,6 +732,10 @@ export default {
         });
     },
     showTab(link) {
+      // Restore scroll position
+      const scrollPos = window.scrollY;
+      history.pushState(null, '', `#${tabName}/`);
+      window.scrollTo(0, scrollPos); // Ensure no scroll happens
       if (!deepLink) return;
       deepLink(link);
     },
@@ -834,8 +834,8 @@ export default {
           [[this.userField]],
         ]),
 
-      }).then(r=>{
-        if(r[0].active.key_auths[0][0]){
+      }).then(r => {
+        if (r[0].active.key_auths[0][0]) {
           this.userPinFeedback = "Valid User";
           this.pinSetup = {
             account: this.userField,
@@ -857,7 +857,7 @@ export default {
         );
         if (success) {
           if (!this.decrypted.accounts[this.account]) this.decrypted[this.account] = {};
-            this.decrypted[this.account][level] = key;
+          this.decrypted[this.account][level] = key;
           var encrypted = CryptoJS.AES.encrypt(
             JSON.stringify(this.decrypted),
             this.PIN
@@ -873,7 +873,7 @@ export default {
         memo: "",
         owner: "",
         master: "",
-        };
+      };
     },
     cleanOps(txid) {
       const ops = this.ops;
@@ -923,18 +923,18 @@ export default {
       //optionally add style/positioning
       stwidget.setStyle({
         direction: "ltr",
-       
+
         position: "fixed",
       });
       //Add the element to webpage
-   
+
       document.getElementById("stingChat").appendChild(element);
     },
   },
   mounted() {
     const signer = localStorage.getItem("signer");
     const decrypted = sessionStorage.getItem('pen')
-    if(decrypted)this.decrypted = JSON.parse(decrypted)
+    if (decrypted) this.decrypted = JSON.parse(decrypted)
     if (signer == "HSR") this.useHS();
     else if (signer == "HAS") this.useHAS();
     else if (signer == "PEN" && this.decrypted) this.usePEN();
@@ -1052,7 +1052,7 @@ export default {
           </li>
           <div class="btn-group dropdown">
             <a class="nav-link mt-auto mb-auto d-flex align-items-center dropdown-toggle dropdown-bs-toggle text-white-50"
-              id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="#">
+              id="userDropdown" role="button" aria-expanded="false" data-bs-toggle="dropdown" href="">
               <div v-show="user" class="p-0 d-md-none me-1 nav-link d-flex align-items-center text-white-50">
                 <img :src="avatar" id="userImage" alt="" width="40" height="40"
                   class="img-fluid rounded-circle bg-light cover">
