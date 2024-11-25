@@ -4526,7 +4526,6 @@ function buyNFT(setname, uid, price, type, callback){
       const { fetchFile } = FFmpegUtil;
       const { FFmpeg } = FFmpegWASM;
       let ffmpeg = null;
-
       if (ffmpeg === null) {
           ffmpeg = new FFmpeg();
           ffmpeg.on("log", ({ message }) => {
@@ -4551,6 +4550,135 @@ function buyNFT(setname, uid, price, type, callback){
 
       this.videosrc = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
   },
+  async transcodeBS(event) {//buffer stream
+    this.ffmpeg_page = true
+    const { fetchFile } = FFmpegUtil;
+    const { FFmpeg } = FFmpegWASM;
+    const { Observable, fromEvent, partition, combineLatest, zip } = rxjs;
+    const { map, mergeMap, take, skip } = rxjs.operators;
+    console.log('1', Observable)
+    let ffmpeg = null;
+    const { name } = event.target.files[0];
+    //await ffmpeg.writeFile("input.mp4", await fetchFile(event.target.files[0]));
+    const bufferStream = name =>
+      new Observable(async subscriber => {
+        if (ffmpeg === null) {
+          ffmpeg = new FFmpeg();
+          ffmpeg.on("log", ({ message }) => {
+            this.videoMsg = message;
+              console.log(message);
+          })
+          ffmpeg.on("progress", ({ progress, time }) => {
+            this.videoMsg = `${progress * 100} %, time: ${time / 1000000} s`;
+          });
+          await ffmpeg.load({
+              coreURL: "/packages/core/package/dist/umd/ffmpeg-core.js",
+          });
+      }
+        //const fileExists = file => ffmpeg.listDir("/").then(r=>r.includes(file))
+        const readFile = file => ffmpeg.readFile(file);
+        function fileExists (fn){
+          return new Promise((resolve, reject) => {
+            ffmpeg.listDir("/").then(r=>{
+              for (const file of r) {
+                if(file.name == fn) resolve(true)
+              }
+              resolve(false)
+            })
+          })
+        }
+        //await ffmpeg.load();
+        await ffmpeg.writeFile("input.mp4", await fetchFile(event.target.files[0]))
+        // ffmpeg.writeFile("input.mp4",
+        //   new Uint8Array(sourceBuffer, 0, sourceBuffer.byteLength)
+        // );
+    
+        let index = 0;
+        
+        function whileExists() {
+          fileExists(`${index}.mp4`).then(exists => {
+            if (exists) {
+              subscriber.next(readFile(`${index}.mp4`));
+              index++;
+            } else {
+              ffmpeg.listDir("/").then(r=>{
+                for (const file of r) {
+                  console.log(file);
+                }
+              })
+              if(index > 0)subscriber.complete()
+            }
+          })
+        }
+
+        await ffmpeg
+          .exec(
+            "-i", "input.mp4",
+            // Encode for MediaStream
+            "-segment_format_options", "movflags=frag_keyframe+empty_moov+default_base_moof",
+            // encode 5 second segments
+            "-segment_time", "5",
+            // write to files by index
+            "-f", "segment", "%d.mp4"
+          )
+          ffmpeg.listDir("/").then(r=>{
+            for (const file of r) {
+              console.log(file);
+            }
+          })
+    
+        setInterval(() => {
+          // periodically check for files that have been written
+          fileExists(`${index + 1}.mp4`).then(exists => {
+            if (exists) {
+              subscriber.next(readFile(`${index}.mp4`));
+              index++;
+            }
+          })
+          // if (fileExists(`${index + 1}.mp4`)) {
+          //   subscriber.next(readFile(`${index}.mp4`));
+          //   index++;
+          // }
+        }, 100);
+      });
+      const mediaSource = new MediaSource();
+      this.videosrc = URL.createObjectURL(mediaSource);
+      const mediaSourceOpen = fromEvent(mediaSource, "sourceopen");
+      const bufferStreamReady = combineLatest(
+        mediaSourceOpen,
+        bufferStream(name)
+      ).pipe(map(([, a]) => a));
+      const sourceBufferUpdateEnd = bufferStreamReady.pipe(
+        take(1),
+        map(buffer => {
+          // create a buffer using the correct mime type
+          const mime = `video/mp4; codecs="${muxjs.mp4.probe
+            .tracks(buffer)
+            .map(t => t.codec)
+            .join(",")}"`;
+          const sourceBuf = mediaSource.addSourceBuffer(mime);
+      
+          // append the buffer
+          mediaSource.duration = 5;
+          sourceBuf.timestampOffset = 0;
+          sourceBuf.appendBuffer(buffer);
+      
+          // create a new event stream 
+          return fromEvent(sourceBuf, "updateend").pipe(map(() => sourceBuf));
+        }),
+        mergeMap(value => value)
+      );
+      zip(sourceBufferUpdateEnd, bufferStreamReady.pipe(skip(1)))
+  .pipe(
+    map(([sourceBuf, buffer], index) => {
+      mediaSource.duration = 10 + index * 5;
+      sourceBuf.timestampOffset = 5 + index * 5;
+      sourceBuf.appendBuffer(buffer.buffer);
+    })
+  )
+  .subscribe();
+
+},
     activeIndexUp() {
       console.log(this.activeIndex, this[this.focusItem.source].length, this.focusItem)
       if (this.activeIndex < this[this.focusItem.source].length - 1) this.activeIndex++

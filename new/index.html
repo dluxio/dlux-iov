@@ -75,6 +75,8 @@
     </script>
     <script src="/packages/ffmpeg/package/dist/umd/ffmpeg.js"></script>
     <script src="/packages/util/package/dist/umd/index.js"></script>
+    <script src="https://unpkg.com/rxjs@^7/dist/bundles/rxjs.umd.min.js"></script>
+    <script src="https://github.com/videojs/mux.js/releases/latest/download/mux.js"></script>
     <!-- Vue Controller -->
     <script type="module" src="/js/vueme.js"></script>
     <link href="/css/custom.css" rel="stylesheet" />
@@ -329,7 +331,7 @@
                                 <div class="card-body">
                                     <video :src="videosrc" controls class="bg-darkg w-100 mb-2"></video><br />
                                     <p class="mb-2">{{videoMsg}}</p>
-                                    <input type="file" @change="transcode"
+                                    <input type="file" @change="transcodeBS"
                                         class="btn btn-secondary p-4 mb-2 border border-3 border-black">
                                     
                                     <div class="rounded bg-blur-darkg text-start p-2">
