@@ -736,30 +736,34 @@ export default {
         });
     },
     handleNavigation(tabName) {
-      // Get the current URL
-      const currentUrl = window.location.href;
-      const targetUrl = `/user#${tabName}/`; // Adjust the base URL to match your page
+      // Get the current URL and the base page
+      const currentUrl = window.location.href.split('#')[0];
+      const targetUrl = `/user#${tabName}/`;
   
-      // Check if the user is already on the target page
-      if (!currentUrl.startsWith('/user')) {
+      // If not already on the correct page, redirect
+      if (!currentUrl.endsWith('/user')) {
         console.log(`Redirecting to ${targetUrl}`);
-        // Redirect to the target page
         window.location.href = targetUrl;
-        return; // Stop further execution as the page will reload
+        return;
       }
   
-      // If already on the page, navigate to the tab
-      console.log("Already on the correct page, navigating to tab...");
+      // If already on the correct page, handle the tab navigation
+      console.log("Already on /user, navigating to tab...");
+  
+      // Update the URL hash without reloading the page
+      history.pushState(null, '', `#${tabName}/`);
+  
+      // Close the dropdown
       const dropdownMenu = this.$el.querySelector('.dropdown-menu');
       if (dropdownMenu) {
-        dropdownMenu.classList.remove('show'); // Close the dropdown
+        dropdownMenu.classList.remove('show');
       }
   
-      // Show the tab using the existing logic
+      // Activate the correct tab
       this.showTab(tabName);
     },
     showTab(tabName) {
-      // Activate the corresponding tab
+      // Ensure the deepLink function is called to activate the tab
       if (typeof deepLink === 'function') {
         deepLink(tabName);
         console.log(`Tab ${tabName} activated.`);
