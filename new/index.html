@@ -334,7 +334,7 @@
                                     <input type="file" @change="transcode"
                                         class="btn btn-secondary p-4 mb-2 border border-3 border-black">
                                     <div>
-                                        <upload-vue v-if="videoUploadContract" :user="spkapi" :propcontract="videoUploadContract" @tosign="toSign=$event"
+                                        <upload-vue v-if="videoUploadContract" :user="spkapi" :propcontract="videoUploadContract" @tosign="toSign=$event" type="video"
                                         @done="done()" /></div>
                                     <div class="rounded bg-blur-darkg text-start p-2">
                                         <post-vue :account="account" :prop_json="postCustom_json" :prop_bens="postBens"

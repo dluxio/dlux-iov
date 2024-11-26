@@ -352,6 +352,9 @@ export default {
     </Transition>
    `,
   props: {
+    type: {
+      default: 'files'
+    },
     user: {
       type: Object,
       default: function () {
