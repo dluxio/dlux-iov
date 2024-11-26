@@ -4615,7 +4615,7 @@ function buyNFT(setname, uid, price, type, callback){
         commands.push('-crf', '26', '-preset', 'fast', "-c", codec)
       }
       for(var i = 0; i < bitrates.length; i++){
-        commands.push('-vf', `scale=-1:${parseInt(bitrates[i])}`)
+        commands.push('-vf', `scale=-1:${parseInt(bitrates[i].split('x')[1])}`)
         commands.push(`output/${bitrates[i].split('x')[1]}p_%03d.ts`)
       }
       this.videoMsg = 'Start transcoding';
