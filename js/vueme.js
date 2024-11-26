@@ -4616,10 +4616,10 @@ function buyNFT(setname, uid, price, type, callback){
         commands.push('-crf', '26', '-preset', 'fast', "-c", codec)
       }
       for(var i = 0; i < bitrates.length; i++){
-        commands.push('-vf', `scale=-1:${parseInt(bitrates[i].split('x')[1])}`)
         commands.push("-f", "segment", `${bitrates[i].split('x')[1]}p_%03d.ts`,`-segment_format`, 'mpegts',
         // m3u8 playlist
         "-segment_list_type", "m3u8", "-segment_list", `${bitrates[i].split('x')[1]}p_index.m3u8`)
+        commands.push('-vf', `scale=-1:${parseInt(bitrates[i].split('x')[1])}`)
       }
       this.videoMsg = 'Start transcoding';
       console.time('exec');
