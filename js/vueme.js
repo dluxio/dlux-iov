@@ -4557,7 +4557,7 @@ function buyNFT(setname, uid, price, type, callback){
         // profile
         '-profile:v', 'main',
         // audio codec and bitrate
-        "-acodec", "aac", "-b:a", "256k"
+        "-acodec", "aac", "-b:a", "256k",
         // write to files by index
         "-f", "segment", "output%03d.mp4",
         // m3u8 playlist
