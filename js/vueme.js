@@ -4616,7 +4616,7 @@ function buyNFT(setname, uid, price, type, callback){
       }
       for(var i = 0; i < bitrates.length; i++){
         commands.push('-vf', `scale=-1:${parseInt(bitrates[i].split('x')[1])}`)
-        commands.push(`output/${bitrates[i].split('x')[1]}p_%03d.ts`)
+        commands.push("-f", "segment", `output/${bitrates[i].split('x')[1]}p/${bitrates[i].split('x')[1]}p_%03d.ts`)
       }
       this.videoMsg = 'Start transcoding';
       console.time('exec');
@@ -4633,8 +4633,8 @@ function buyNFT(setname, uid, price, type, callback){
           console.log(file);
         }
       })
-      const data = await ffmpeg.readFile("index.m3u8")
-      console.log(data)
+      const data = await ffmpeg.readFile("output/index.m3u8")
+      //console.log(data)
       this.videosrc = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
   },
     activeIndexUp() {
