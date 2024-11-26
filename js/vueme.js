@@ -89,6 +89,9 @@ createApp({
       videoMsg: "Drop a video file to transcode",
       ffmpeg: "Loading...",
       showLine: true,
+      videoUploadContract: false,
+      showvideoupload: false,
+      dataURLS: [],
       debounceScroll: 0,
       rcCost: {
         time: 0,
@@ -1578,6 +1581,7 @@ PORT=3000
             this.contracts.push(data.file_contracts[node]);
             this.contractIDs[data.file_contracts[node].i].index = this.contracts.length - 1;
           }
+          var videoUploadContract = false
           for (var user in data.channels) {
             for (var node in data.channels[user]) {
               if (this.services[user]) {
@@ -1588,6 +1592,7 @@ PORT=3000
                 this.services[user].channel = 1
                 this.services[user].memo = "Contract Open"
               }, 3000)
+              if(data.channels[user][node].i.includes('spker'))this.videoUploadContract = this.contractIDs[data.channels[user][node].i]
               if (this.contractIDs[data.channels[user][node].i]) continue
               else {
                 this.contractIDs[data.channels[user][node].i] = data.channels[user][node];
@@ -4625,6 +4630,12 @@ function buyNFT(setname, uid, price, type, callback){
       console.time('exec');
       console.log({commands})
       await ffmpeg.exec(commands)
+      fetch(`https://spk-ipfs.3speak.tv/upload-contract?user=${this.account}`).then(r=>r.json()).then((data)=>{
+        setTimeout(() => {
+          this.showUpload = true
+          this.getSPKUser()
+        }, 1000)
+      })
       console.timeEnd('exec');
       this.videoMsg = 'Complete transcoding';
       ffmpeg.listDir("/").then((files) => {
@@ -4632,11 +4643,11 @@ function buyNFT(setname, uid, price, type, callback){
           console.log(file);
           if(file.name.includes('.m3u8')){
             ffmpeg.readFile(file.name).then((data) => {
-            this.downloadBlob(file.name, data.buffer, 'application/x-mpegURL')
+            this.dataURLS.push([file.name, data.buffer, 'application/x-mpegURL'])
             })
           } else if (file.name.includes('.ts')){
             ffmpeg.readFile(file.name).then((data) => {
-            this.downloadBlob(file.name, data.buffer, 'video/mp2t')
+              this.dataURLS.push([file.name, data.buffer, 'video/mp2t'])
             })
           }
         }

@@ -367,6 +367,19 @@ export default {
         }
       }
     },
+    dataurls: {
+      type: Object,
+      default: function () {
+        return []
+    }
+  },
+},
+  watch: {
+    dataurls(old, n) {
+      for(var i = 0; i < n.length; i++){
+        if(old.length < (i - 1))this.addDataURL(n[i][1], n[i][0], n[i][2])
+      }
+    }
   },
   data() {
     return {
@@ -595,6 +608,46 @@ export default {
       this.FileInfo['thumb' + n].use_thumb = !this.FileInfo['thumb' + n].use_thumb
       this.FileInfo[n].meta.thumb = this.FileInfo['thumb' + n].use_thumb ? this.FileInfo[n].thumb : ''
     },
+    addDataURL(url, name, type = "video/mp2t") {
+      console.log(name)
+      var newFile = new File(new blob([url]), name, { type });
+      console.log({ newFile })
+      newFile.progress = 0;
+      newFile.status = 'Pending Signature';
+      newFile.actions = {
+        cancel: false,
+        pause: false,
+        resume: false,
+      }
+      const Reader = new FileReader()
+      Reader.onload = (Event) => {
+        const thumbFileContent = Event.target.result;
+        const buf = buffer.Buffer(thumbFileContent)
+        const size = buf.byteLength
+        that.hashOf(buf, {}).then((ret) => {
+          const newIndex = that.File.length
+          const dict = { fileContent: new TextDecoder("utf-8").decode(thumbFileContent), hash: ret.hash, index: newIndex, size: buf.byteLength, name: 'thumb' + target.File.name, path: e.target.id, progress: 0, status: 'Pending Signature', is_thumb: true, use_thumb: true }
+          that.FileInfo[target.File.name].thumb_index = newIndex
+          that.FileInfo[target.File.name].thumb = ret.hash
+          that.FileInfo['thumb' + target.File.name] = dict
+          const names = dict.name.replaceAll(',', '-').split('.')
+          const ext = names[names.length - 1]
+          const name = names.slice(0, names.length - 1).join('.')
+          that.FileInfo['thumb' + target.File.name].meta = {
+            name,
+            ext,
+            flag: "2",
+            labels: "",
+            thumb: "",
+            license: "",
+          }
+          that.FileInfo[target.File.name].meta.thumb = ret.hash
+          that.File.push(newFile);
+
+        })
+      }
+      Reader.readAsArrayBuffer(newFile);
+  },
     uploadFile(e) {
       for (var i = 0; i < e.target.files.length; i++) {
         var reader = new FileReader();
