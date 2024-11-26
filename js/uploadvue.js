@@ -13,15 +13,15 @@ export default {
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="ms-auto me-auto my-3">
                         <label for="formFile" class="btn btn-lg btn-light"><i
-                                class="fa-solid fa-file-circle-plus fa-fw me-2"></i>Select Files</label>
-                        <input class="d-none" id="formFile" type="file" multiple @change="uploadFile">
+                                class="fa-solid fa-file-circle-plus fa-fw me-2"></i><span v-if="type == 'files'">Select Files</span><span v-if="type == 'video'">Select Thumbnail</span></label>
+                        <input class="d-none" id="formFile" type="file" :multiple="type != 'video'" @change="uploadFile">
                     </div>
                 </div>
                 <div class="pb-2">
                     <div class="mx-lg-5 py-5 text-center lead rounded"
                         style="border-width: 2px; border-style: dashed; background-color:rgba(0,0,0,0.3);" id="img-well"
                         @drop="dragFile($event)" @dragenter.prevent @dragover.prevent>
-                        Or drag file(s) here
+                        Or drag and drop <span v-if="type == 'files'">file(s)</span><span v-if="type == 'video'">thumbnail</span> here
                     </div>
                 </div>
             </form>
@@ -268,7 +268,7 @@ export default {
 
 
         <!-- encryption banner -->
-        <div class="card card-body d-flex align-items-center mx-lg-5 my-3">
+        <div v-if="type != 'video'" class="card card-body d-flex align-items-center mx-lg-5 my-3">
             <div class="d-flex flex-column w-100 flex-grow-1 mx-1 px-md-2 px-lg-5">
 
                 <!-- bubble preview -->
