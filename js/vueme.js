@@ -4598,9 +4598,10 @@ function buyNFT(setname, uid, price, type, callback){
         "-acodec", "aac", "-b:a", "256k",
         // write to files by index
         //"-f", "segment", "output%03d.mp4", 
-        `-segment_format`, 'mpegts',
+        //`-segment_format`, 'mpegts',
         // m3u8 playlist
-        "-segment_list_type", "m3u8", "-segment_list", "output/index.m3u8"]
+        //"-segment_list_type", "m3u8", "-segment_list", "output/index.m3u8"
+        ]
       await ffmpeg.exec([
         "-encoders"]
       )
@@ -4616,14 +4617,12 @@ function buyNFT(setname, uid, price, type, callback){
       }
       for(var i = 0; i < bitrates.length; i++){
         commands.push('-vf', `scale=-1:${parseInt(bitrates[i].split('x')[1])}`)
-        commands.push("-f", "segment", `output/${bitrates[i].split('x')[1]}p/${bitrates[i].split('x')[1]}p_%03d.ts`)
+        commands.push("-f", "segment", `${bitrates[i].split('x')[1]}p_%03d.ts`,`-segment_format`, 'mpegts',
+        // m3u8 playlist
+        "-segment_list_type", "m3u8", "-segment_list", "output/index.m3u8")
       }
       this.videoMsg = 'Start transcoding';
       console.time('exec');
-      await ffmpeg.createDir(`output`)
-      for(var i = 0; i < bitrates.length; i++){
-        await ffmpeg.createDir(`output/${bitrates[i].split('x')[1]}p`)
-      }
       console.log({commands})
       await ffmpeg.exec(commands)
       console.timeEnd('exec');
@@ -4634,8 +4633,8 @@ function buyNFT(setname, uid, price, type, callback){
         }
       })
       const data = await ffmpeg.readFile("output/index.m3u8")
-      //console.log(data)
-      this.videosrc = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+      console.log(data)
+      this.videosrc = URL.createObjectURL(new Blob([data.buffer], { type: 'application/x-mpegurl' }));
   },
     activeIndexUp() {
       console.log(this.activeIndex, this[this.focusItem.source].length, this.focusItem)
