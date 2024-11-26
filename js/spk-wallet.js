@@ -186,16 +186,15 @@ export default {
                 <div class="collapse mt-3 bg-dark rounded" id="collapseVote">
                     <div class="card card-body">
                         <div class="col col-lg-6 mx-auto">
-                        <div class="fs-4 text-center">{{tokenGov.title}}</div>
-                        <div class="lead text-center text-white-50 mb-3">  @{{account}}</div>
-                        <form name="nodeSettings" class="needs-validation" novalidate>
-                            <div class="row mb-3" v-for="opt in tokenGov.options">
-                                <label :for="opt.json" class="form-label d-flex">
-                                    {{opt.title}}: 
-                                    {{opt.val}} 
-                                    {{opt.unit}}
-                                            <div
-                                                class="dropdown show d-flex align-items-center p-0 m-0">
+                            <div class="fs-4 text-center">{{tokenGov.title}}</div>
+                                <div class="lead text-center text-white-50 mb-3">  @{{account}}</div>
+                                <form name="nodeSettings" class="needs-validation" novalidate>
+                                    <div class="row mb-3" v-for="opt in tokenGov.options">
+                                        <label :for="opt.json" class="form-label d-flex">
+                                            {{opt.title}}: 
+                                            {{opt.val}} 
+                                            {{opt.unit}}
+                                            <div class="dropdown show d-flex align-items-center p-0 m-0">
                                                 <a class="text-white" href="#"
                                                     role="button"
                                                     data-bs-toggle="dropdown"
@@ -213,10 +212,6 @@ export default {
                                                 </div>
                                             </div>
                                         </label>
-                                        
-                     
-                        
-       
                                         <div class="position-relative mb-3">
                                             <input type="range"
                                                 v-model="opt.val"
@@ -226,7 +221,6 @@ export default {
                                                 :min="opt.range_low"
                                                 :step="opt.step" />
                                                 <span v-if="opt.unit" class="d-none position-absolute end-0 top-50 translate-middle-y px-3 fw-bold">{{opt.unit}}</span>  
-                                            
                                         </div>
                                     </div>
                                     <div class="text-center mt-3">
@@ -268,9 +262,7 @@ export default {
                                         </ul>
                                     </div>
                                 </form>
-                          
-                        </ul>
-                    </div>
+                        </div>
                     </div>
                 </div>
             </div>
