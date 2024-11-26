@@ -4521,16 +4521,53 @@ function buyNFT(setname, uid, price, type, callback){
       this.newToken.apyint = binSearch
       console.log('Iterations',j)
     },
+    getPossibleBitrates (height) {
+      if (!height) {
+        return null
+      }
+  
+      if (height < 144) {
+        // very small bitrate, use the original format.
+        return ['?x' + height]
+      } else if (height < 240) {
+        return ['?x144']
+      } else if (height < 360) {
+        return ['?x240', '?x144']
+      } else if (height < 480) {
+        return ['?x360', '?x240', '?x144']
+      } else if (height < 720) {
+        return ['?x480', '?x360', '?x240', '?x144']
+      } else if (height < 1080) {
+        return ['?x720', '?x480', '?x360', '?x240', '?x144']
+      } else if (height < 1440) {
+        return ['?x1080', '?x720', '?x480', '?x360', '?x240', '?x144']
+      } else if (height < 2160) {
+        return ['?x1440', '?x1080', '?x720', '?x480', '?x360', '?x240', '?x144']
+      } else {
+        return ['?x2160', '?x1440', '?x1080', '?x720', '?x480', '?x360', '?x240', '?x144']
+      }
+    },
     async transcode(event) {
       this.ffmpeg_page = true
       const { fetchFile } = FFmpegUtil;
       const { FFmpeg } = FFmpegWASM;
       let ffmpeg = null;
+      var qsv = false
+      var height = 0
+      var run = 0
+      var bitrates = []
+      const patt = /\d{3,5}x\d{3,5}/
       if (ffmpeg === null) {
           ffmpeg = new FFmpeg();
           ffmpeg.on("log", ({ message }) => {
             this.videoMsg = message;
             if(message.indexOf('h264_qsv') > -1)qsv = true
+            if(!height && patt.test(message)){
+              const parts = patt.exec(message);
+              console.log(parts)
+              height = parts[0].split('x')[1]
+              bitrates = this.getPossibleBitrates(height)
+            }
               console.log(message);
           })
           ffmpeg.on("progress", ({ progress, time }) => {
@@ -4542,7 +4579,6 @@ function buyNFT(setname, uid, price, type, callback){
       }
       const { name } = event.target.files[0];
       await ffmpeg.writeFile(name, await fetchFile(event.target.files[0]));
-      var qsv = false
       var codec = "libx264"
       var commands = [
         // input filename
@@ -4559,12 +4595,15 @@ function buyNFT(setname, uid, price, type, callback){
         // audio codec and bitrate
         "-acodec", "aac", "-b:a", "256k",
         // write to files by index
-        "-f", "segment", "output%03d.mp4",
+        "-f", "segment", "output%03d.mp4", 
+        `-segment_format`, 'mpegts',
         // m3u8 playlist
-        "-segment_list_type", "m3u8", "-segment_list", "index.m3u8",]
+        "-segment_list_type", "m3u8", "-segment_list", "output/index.m3u8"]
       await ffmpeg.exec([
-        "-i", name,
-        "-encoders", "-formats"]
+        "-encoders"]
+      )
+      await ffmpeg.exec([
+        "-i", name]
       )
       // add options based on availible encoders
       if(qsv){
@@ -4573,13 +4612,20 @@ function buyNFT(setname, uid, price, type, callback){
       } else {
         commands.push('-crf', '26', '-preset', 'fast', "-c", codec)
       }
+      for(var i = 0; i < bitrates.length; i++){
+        commands.push('-vf', `scale=-2${bitrates[i]}`)
+        commands.push(`output/${String(bitrates[i].split('x')[1])}p_%03d.ts`)
+      }
       this.videoMsg = 'Start transcoding';
       console.time('exec');
-      //await ffmpeg.createDir("output")
+      await ffmpeg.createDir(`output`)
+      for(var i = 0; i < bitrates.length; i++){
+        await ffmpeg.createDir(`output/${String(bitrates[i].split('x')[1])}p`)
+      }
       await ffmpeg.exec(commands)
       console.timeEnd('exec');
       this.videoMsg = 'Complete transcoding';
-      ffmpeg.listDir("/").then((files) => {
+      ffmpeg.listDir("output").then((files) => {
         for (const file of files) {
           console.log(file);
         }
