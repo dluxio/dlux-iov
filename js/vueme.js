@@ -4554,6 +4554,7 @@ function buyNFT(setname, uid, price, type, callback){
       let ffmpeg = null;
       var qsv = false
       var height = 0
+      var width = 0
       var run = 0
       var bitrates = []
       const patt = /\d{3,5}x\d{3,5}/
@@ -4566,6 +4567,7 @@ function buyNFT(setname, uid, price, type, callback){
               const parts = patt.exec(message);
               console.log(parts)
               height = parts[0].split('x')[1]
+              width = parts[0].split('x')[0]
               bitrates = this.getPossibleBitrates(height)
             }
               console.log(message);
@@ -4595,7 +4597,7 @@ function buyNFT(setname, uid, price, type, callback){
         // audio codec and bitrate
         "-acodec", "aac", "-b:a", "256k",
         // write to files by index
-        "-f", "segment", "output%03d.mp4", 
+        //"-f", "segment", "output%03d.mp4", 
         `-segment_format`, 'mpegts',
         // m3u8 playlist
         "-segment_list_type", "m3u8", "-segment_list", "output/index.m3u8"]
@@ -4613,15 +4615,16 @@ function buyNFT(setname, uid, price, type, callback){
         commands.push('-crf', '26', '-preset', 'fast', "-c", codec)
       }
       for(var i = 0; i < bitrates.length; i++){
-        commands.push('-vf', `scale=-2${bitrates[i]}`)
-        commands.push(`output/${String(bitrates[i].split('x')[1])}p_%03d.ts`)
+        commands.push('-vf', `scale=-1:${parseInt(bitrates[i])}`)
+        commands.push(`output/${bitrates[i].split('x')[1]}p_%03d.ts`)
       }
       this.videoMsg = 'Start transcoding';
       console.time('exec');
       await ffmpeg.createDir(`output`)
       for(var i = 0; i < bitrates.length; i++){
-        await ffmpeg.createDir(`output/${String(bitrates[i].split('x')[1])}p`)
+        await ffmpeg.createDir(`output/${bitrates[i].split('x')[1]}p`)
       }
+      console.log({commands})
       await ffmpeg.exec(commands)
       console.timeEnd('exec');
       this.videoMsg = 'Complete transcoding';
