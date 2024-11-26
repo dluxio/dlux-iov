@@ -4600,7 +4600,7 @@ function buyNFT(setname, uid, price, type, callback){
         //"-f", "segment", "output%03d.mp4", 
         //`-segment_format`, 'mpegts',
         // m3u8 playlist
-        //"-segment_list_type", "m3u8", "-segment_list", "output/index.m3u8"
+        //"-segment_list_type", "m3u8", "-segment_list", "index.m3u8"
         ]
       await ffmpeg.exec([
         "-encoders"]
@@ -4619,7 +4619,7 @@ function buyNFT(setname, uid, price, type, callback){
         commands.push('-vf', `scale=-1:${parseInt(bitrates[i].split('x')[1])}`)
         commands.push("-f", "segment", `${bitrates[i].split('x')[1]}p_%03d.ts`,`-segment_format`, 'mpegts',
         // m3u8 playlist
-        "-segment_list_type", "m3u8", "-segment_list", "output/index.m3u8")
+        "-segment_list_type", "m3u8", "-segment_list", "index.m3u8")
       }
       this.videoMsg = 'Start transcoding';
       console.time('exec');
@@ -4627,7 +4627,7 @@ function buyNFT(setname, uid, price, type, callback){
       await ffmpeg.exec(commands)
       console.timeEnd('exec');
       this.videoMsg = 'Complete transcoding';
-      ffmpeg.listDir("output").then((files) => {
+      ffmpeg.listDir("/").then((files) => {
         for (const file of files) {
           console.log(file);
         }
