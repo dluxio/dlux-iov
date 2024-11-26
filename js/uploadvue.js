@@ -14,7 +14,7 @@ export default {
                     <div class="ms-auto me-auto my-3">
                         <label for="formFile" class="btn btn-lg btn-light"><i
                                 class="fa-solid fa-file-circle-plus fa-fw me-2"></i><span v-if="type == 'files'">Select Files</span><span v-if="type == 'video'">Select Thumbnail</span></label>
-                        <input class="d-none" id="formFile" type="file" :multiple="type != 'video'" @change="uploadFile">
+                        <input class="d-none" id="formFile" type="file" :multiple="type != 'video'" :accept="type === 'video' ? 'image/*' : ''" @change="uploadFile">
                     </div>
                 </div>
                 <div class="pb-2">
