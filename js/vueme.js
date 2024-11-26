@@ -4619,7 +4619,7 @@ function buyNFT(setname, uid, price, type, callback){
         commands.push('-vf', `scale=-1:${parseInt(bitrates[i].split('x')[1])}`)
         commands.push("-f", "segment", `${bitrates[i].split('x')[1]}p_%03d.ts`,`-segment_format`, 'mpegts',
         // m3u8 playlist
-        "-segment_list_type", "m3u8", "-segment_list", "index.m3u8")
+        "-segment_list_type", "m3u8", "-segment_list", `${bitrates[i].split('x')[1]}p_index.m3u8`)
       }
       this.videoMsg = 'Start transcoding';
       console.time('exec');
@@ -4630,12 +4630,42 @@ function buyNFT(setname, uid, price, type, callback){
       ffmpeg.listDir("/").then((files) => {
         for (const file of files) {
           console.log(file);
+          if(file.name.includes('.m3u8')){
+            ffmpeg.readFile(file.name).then((data) => {
+            this.downloadBlob(file.name, data.buffer, 'application/x-mpegURL')
+            })
+          } else if (file.name.includes('.ts')){
+            ffmpeg.readFile(file.name).then((data) => {
+            this.downloadBlob(file.name, data.buffer, 'video/mp2t')
+            })
+          }
         }
       })
-      const data = await ffmpeg.readFile("144p_000.ts")
-      console.log(data)
-      this.videosrc = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp2t' }));
+      //const data = await ffmpeg.readFile("144p_000.ts")
+      //console.log(data)
+      //this.videosrc = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp2t' }));
   },
+  downloadBlob(name, buf, mimeString) {
+
+    const blob = new Blob([buf], { type: mimeString });
+            try {
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = name;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } catch (e) {
+                var url = window.URL.createObjectURL(response);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = name;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            }
+},
     activeIndexUp() {
       console.log(this.activeIndex, this[this.focusItem.source].length, this.focusItem)
       if (this.activeIndex < this[this.focusItem.source].length - 1) this.activeIndex++
