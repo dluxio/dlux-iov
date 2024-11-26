@@ -4556,13 +4556,15 @@ function buyNFT(setname, uid, price, type, callback){
         '-hls_list_size', "0",
         // profile
         '-profile:v', 'main',
+        // audio codec and bitrate
+        "-acodec", "aac", "-b:a", "256k"
         // write to files by index
         "-f", "segment", "output%03d.mp4",
         // m3u8 playlist
         "-segment_list_type", "m3u8", "-segment_list", "index.m3u8",]
       await ffmpeg.exec([
         "-i", name,
-        "-encoders"]
+        "-encoders", "-formats"]
       )
       // add options based on availible encoders
       if(qsv){
