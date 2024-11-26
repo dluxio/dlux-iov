@@ -4632,9 +4632,9 @@ function buyNFT(setname, uid, price, type, callback){
           console.log(file);
         }
       })
-      const data = await ffmpeg.readFile("index.m3u8")
+      const data = await ffmpeg.readFile("144p_000.ts")
       console.log(data)
-      this.videosrc = URL.createObjectURL(new Blob([data.buffer], { type: 'application/x-mpegurl' }));
+      this.videosrc = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp2t' }));
   },
     activeIndexUp() {
       console.log(this.activeIndex, this[this.focusItem.source].length, this.focusItem)
