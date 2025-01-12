@@ -95,7 +95,7 @@ createApp({
       debounceScroll: 0,
       rcCost: {
         time: 0,
-        claim_account_operation: {"operation":"claim_account_operation","rc_needed":"11789110900859","hp_needed":6713.599180835442}
+        claim_account_operation: { "operation": "claim_account_operation", "rc_needed": "11789110900859", "hp_needed": 6713.599180835442 }
       },
       lastScroll: 0,
       activeTab: "blog",
@@ -1592,7 +1592,7 @@ PORT=3000
                 this.services[user].channel = 1
                 this.services[user].memo = "Contract Open"
               }, 3000)
-              if(data.channels[user][node].i.includes('spker'))this.videoUploadContract = this.contractIDs[data.channels[user][node].i]
+              if (data.channels[user][node].i.includes('spker')) this.videoUploadContract = this.contractIDs[data.channels[user][node].i]
               if (this.contractIDs[data.channels[user][node].i]) continue
               else {
                 this.contractIDs[data.channels[user][node].i] = data.channels[user][node];
@@ -1809,15 +1809,15 @@ PORT=3000
     rcCosts() {
       this.rcCost = JSON.parse(localStorage.getItem("rcCosts")) || {
         time: 0,
-        claim_account_operation: {"operation":"claim_account_operation","rc_needed":"11789110900859","hp_needed":6713.599180835442}
+        claim_account_operation: { "operation": "claim_account_operation", "rc_needed": "11789110900859", "hp_needed": 6713.599180835442 }
       };
-      if(this.rcCost.time < new Date().getTime() - 86400000)fetch("https://beacon.peakd.com/api/rc/costs")
+      if (this.rcCost.time < new Date().getTime() - 86400000) fetch("https://beacon.peakd.com/api/rc/costs")
         .then((r) => {
           return r.json();
         })
         .then((re) => {
           console.log(re.costs)
-          for(var i = 0; i < re.costs.length; i++){
+          for (var i = 0; i < re.costs.length; i++) {
             this.rcCost[re.costs[i].operation] = re.costs[i].rc_needed
           }
           this.rcCost.time = new Date().getTime();
@@ -2959,16 +2959,18 @@ function buyNFT(setname, uid, price, type, callback){
       return parseFloat(num).toFixed(dig);
     },
     handleScroll() {
-      const now = Date.now();
-      if (now - this.lastScroll > 2000) {
-        this.lastScroll = now;
-        if (
-          document.documentElement.clientHeight + window.scrollY >
-          document.documentElement.scrollHeight -
-          document.documentElement.clientHeight * 2
-        ) {
-          if (this.activeTab == 'blog') this.getPosts();
-          else if (this.activeTab == 'nfts') this.getNFTs()
+      if (this.activeTab == 'blog' || this.activeTab == 'inventory') {
+        const now = Date.now();
+        if (now - this.lastScroll > 2000) {
+          this.lastScroll = now;
+          if (
+            document.documentElement.clientHeight + window.scrollY >
+            document.documentElement.scrollHeight -
+            document.documentElement.clientHeight * 2
+          ) {
+            if (this.activeTab == 'blog') this.getPosts();
+            else if (this.activeTab == 'inventory') this.getNFTs()
+          }
         }
       }
     },
@@ -3014,7 +3016,7 @@ function buyNFT(setname, uid, price, type, callback){
         true
       )
     },
-    calHSF(){
+    calHSF() {
       newToken.hiveServiceFee = parseInt(newToken.preHiveServiceFee * 100)
     },
     getRewardFund() {
@@ -4153,25 +4155,25 @@ function buyNFT(setname, uid, price, type, callback){
         }
       }
     },
-    siteDefaults(){
-      if(this.newToken.fe.indexOf('https://') > -1) this.newToken.fe = 'https://' + this.newToken.fe
+    siteDefaults() {
+      if (this.newToken.fe.indexOf('https://') > -1) this.newToken.fe = 'https://' + this.newToken.fe
       this.newToken.mainfe = 'https://' + this.newToken.fe
       this.newToken.mainapi = 'https://api.' + this.newToken.fe
       this.newToken.mainipfs = 'https://ipfs.' + this.newToken.fe
       this.newToken.mainrender = 'https://data.' + this.newToken.fe
     },
-    saveNewToken(){
+    saveNewToken() {
       console.log("Saving...")
       var pendingTokens = JSON.parse(localStorage.getItem(`pendingTokens`)) || []
-      if(pendingTokens.indexOf(this.newToken.token) == -1) pendingTokens.push(this.newToken.token)
+      if (pendingTokens.indexOf(this.newToken.token) == -1) pendingTokens.push(this.newToken.token)
       localStorage.setItem(`newToken${this.newToken.token}`, JSON.stringify(this.newToken))
       localStorage.setItem(`pendingTokens`, JSON.stringify(pendingTokens))
       this.pendingTokens = pendingTokens
     },
-    loadNewToken(token){
+    loadNewToken(token) {
       this.newToken = JSON.parse(localStorage.getItem(`newToken${token}`))
     },
-    deleteNewToken(token){
+    deleteNewToken(token) {
       localStorage.removeItem(`newToken${token}`)
       var pendingTokens = JSON.parse(localStorage.getItem(`pendingTokens`)) || []
       pendingTokens = pendingTokens.filter(t => t != token)
@@ -4225,20 +4227,20 @@ function buyNFT(setname, uid, price, type, callback){
             (parseInt(this.accountinfo.voting_power) * 10000) / 10000 / 50;
           this.accountinfo.rshares = (power * final_vest) / 10000;
         });
-        fetch(hapi, {
-          body: `{"jsonrpc":"2.0", "method":"condenser_api.find_rc_accounts", "params":[["${user}"]], "id":1}`,
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          method: "POST",
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            this.rcinfo = {
-              current: data.result[0].rc_manabar.current_mana,
-              max: data.result[0].max_rc
-            }
-          });
+      fetch(hapi, {
+        body: `{"jsonrpc":"2.0", "method":"condenser_api.find_rc_accounts", "params":[["${user}"]], "id":1}`,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        method: "POST",
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          this.rcinfo = {
+            current: data.result[0].rc_manabar.current_mana,
+            max: data.result[0].max_rc
+          }
+        });
     },
     getHiveStats() {
       fetch(this.hapi, {
@@ -4486,51 +4488,51 @@ function buyNFT(setname, uid, price, type, callback){
       }
       this.focusItem = this[this.focusItem.source][this.activeIndex]
     },
-    calculateAPR(){
+    calculateAPR() {
       var binSearch = 105120
       var lastFit = 0
       var lastDown = 0
       var lastUp = 0
       const INT = 1000000
-      const WPY = ((1 + (this.newToken.apy / 201600)) ** (2016 * 52) - 1)/52 //how to normalize APY to WPY
+      const WPY = ((1 + (this.newToken.apy / 201600)) ** (2016 * 52) - 1) / 52 //how to normalize APY to WPY
       const SAT = INT + parseInt(INT * WPY)
       var oneOff = false
       var j = 0
-      while(binSearch != lastFit){
+      while (binSearch != lastFit) {
         j++
         console.log(binSearch, lastFit, WPY, SAT)
         lastFit = binSearch
         var int = INT
-        for(var i = 0; i < 2016; i++){
+        for (var i = 0; i < 2016; i++) {
           int += parseInt(int / binSearch)
         }
-        if(int > SAT){
+        if (int > SAT) {
           lastDown = binSearch
           binSearch = lastUp ? parseInt((lastUp + binSearch) / 2) : parseInt(binSearch * 2)
-          if(binSearch == lastFit) {
-            if(oneOff)break
+          if (binSearch == lastFit) {
+            if (oneOff) break
             binSearch = binSearch - 1
             oneOff = true
           }
         } else {
           lastUp = binSearch
           binSearch = lastDown ? parseInt((lastDown + binSearch) / 2) : parseInt(binSearch / 2)
-          if(binSearch == lastFit) {
-            if(oneOff)break
+          if (binSearch == lastFit) {
+            if (oneOff) break
             binSearch = binSearch + 1
             oneOff = true
           }
         }
-        if(isNaN(binSearch) || j > 100)break
+        if (isNaN(binSearch) || j > 100) break
       }
       this.newToken.apyint = binSearch
-      console.log('Iterations',j)
+      console.log('Iterations', j)
     },
-    getPossibleBitrates (height) {
+    getPossibleBitrates(height) {
       if (!height) {
         return null
       }
-  
+
       if (height < 144) {
         // very small bitrate, use the original format.
         return ['?x' + height]
@@ -4564,25 +4566,25 @@ function buyNFT(setname, uid, price, type, callback){
       var bitrates = []
       const patt = /\d{3,5}x\d{3,5}/
       if (ffmpeg === null) {
-          ffmpeg = new FFmpeg();
-          ffmpeg.on("log", ({ message }) => {
-            this.videoMsg = message;
-            if(message.indexOf('h264_qsv') > -1)qsv = true
-            if(!height && patt.test(message)){
-              const parts = patt.exec(message);
-              console.log(parts)
-              height = parts[0].split('x')[1]
-              width = parts[0].split('x')[0]
-              bitrates = this.getPossibleBitrates(height)
-            }
-              console.log(message);
-          })
-          ffmpeg.on("progress", ({ progress, time }) => {
-            this.videoMsg = `${progress * 100} %, time: ${time / 1000000} s`;
-          });
-          await ffmpeg.load({
-              coreURL: "/packages/core/package/dist/umd/ffmpeg-core.js",
-          });
+        ffmpeg = new FFmpeg();
+        ffmpeg.on("log", ({ message }) => {
+          this.videoMsg = message;
+          if (message.indexOf('h264_qsv') > -1) qsv = true
+          if (!height && patt.test(message)) {
+            const parts = patt.exec(message);
+            console.log(parts)
+            height = parts[0].split('x')[1]
+            width = parts[0].split('x')[0]
+            bitrates = this.getPossibleBitrates(height)
+          }
+          console.log(message);
+        })
+        ffmpeg.on("progress", ({ progress, time }) => {
+          this.videoMsg = `${progress * 100} %, time: ${time / 1000000} s`;
+        });
+        await ffmpeg.load({
+          coreURL: "/packages/core/package/dist/umd/ffmpeg-core.js",
+        });
       }
       const { name } = event.target.files[0];
       await ffmpeg.writeFile(name, await fetchFile(event.target.files[0]));
@@ -4606,7 +4608,7 @@ function buyNFT(setname, uid, price, type, callback){
         //`-segment_format`, 'mpegts',
         // m3u8 playlist
         //"-segment_list_type", "m3u8", "-segment_list", "index.m3u8"
-        ]
+      ]
       await ffmpeg.exec([
         "-encoders"]
       )
@@ -4614,23 +4616,23 @@ function buyNFT(setname, uid, price, type, callback){
         "-i", name]
       )
       // add options based on availible encoders
-      if(qsv){
+      if (qsv) {
         codec = "h264_qsv"
-        commands.push('-preset', 'slow','-look_ahead', '1','-global_quality', '36', "-c", codec)
+        commands.push('-preset', 'slow', '-look_ahead', '1', '-global_quality', '36', "-c", codec)
       } else {
         commands.push('-crf', '26', '-preset', 'fast', "-c", codec)
       }
-      for(var i = 0; i < bitrates.length; i++){
-        commands.push("-f", "segment", `${bitrates[i].split('x')[1]}p_%03d.ts`,`-segment_format`, 'mpegts',
-        // m3u8 playlist
-        "-segment_list_type", "m3u8", "-segment_list", `${bitrates[i].split('x')[1]}p_index.m3u8`)
+      for (var i = 0; i < bitrates.length; i++) {
+        commands.push("-f", "segment", `${bitrates[i].split('x')[1]}p_%03d.ts`, `-segment_format`, 'mpegts',
+          // m3u8 playlist
+          "-segment_list_type", "m3u8", "-segment_list", `${bitrates[i].split('x')[1]}p_index.m3u8`)
         commands.push('-vf', `scale=-1:${parseInt(bitrates[i].split('x')[1])}`)
       }
       this.videoMsg = 'Start transcoding';
       console.time('exec');
-      console.log({commands})
+      console.log({ commands })
       await ffmpeg.exec(commands)
-      fetch(`https://spk-ipfs.3speak.tv/upload-contract?user=${this.account}`).then(r=>r.json()).then((data)=>{
+      fetch(`https://spk-ipfs.3speak.tv/upload-contract?user=${this.account}`).then(r => r.json()).then((data) => {
         setTimeout(() => {
           this.showUpload = true
           this.getSPKUser()
@@ -4641,11 +4643,11 @@ function buyNFT(setname, uid, price, type, callback){
       ffmpeg.listDir("/").then((files) => {
         for (const file of files) {
           console.log(file);
-          if(file.name.includes('.m3u8')){
+          if (file.name.includes('.m3u8')) {
             ffmpeg.readFile(file.name).then((data) => {
-            this.dataURLS.push([file.name, data.buffer, 'application/x-mpegURL'])
+              this.dataURLS.push([file.name, data.buffer, 'application/x-mpegURL'])
             })
-          } else if (file.name.includes('.ts')){
+          } else if (file.name.includes('.ts')) {
             ffmpeg.readFile(file.name).then((data) => {
               this.dataURLS.push([file.name, data.buffer, 'video/mp2t'])
             })
@@ -4655,28 +4657,28 @@ function buyNFT(setname, uid, price, type, callback){
       //const data = await ffmpeg.readFile("144p_000.ts")
       //console.log(data)
       //this.videosrc = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp2t' }));
-  },
-  downloadBlob(name, buf, mimeString) {
+    },
+    downloadBlob(name, buf, mimeString) {
 
-    const blob = new Blob([buf], { type: mimeString });
-            try {
-                var url = window.URL.createObjectURL(blob);
-                var a = document.createElement('a');
-                a.href = url;
-                a.download = name;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-            } catch (e) {
-                var url = window.URL.createObjectURL(response);
-                var a = document.createElement('a');
-                a.href = url;
-                a.download = name;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-            }
-},
+      const blob = new Blob([buf], { type: mimeString });
+      try {
+        var url = window.URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+      } catch (e) {
+        var url = window.URL.createObjectURL(response);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+    },
     activeIndexUp() {
       console.log(this.activeIndex, this[this.focusItem.source].length, this.focusItem)
       if (this.activeIndex < this[this.focusItem.source].length - 1) this.activeIndex++
@@ -4770,6 +4772,19 @@ function buyNFT(setname, uid, price, type, callback){
     }
     this.pendingTokens = JSON.parse(localStorage.getItem(`pendingTokens`)) || []
     window.addEventListener('scroll', this.handleScroll);
+    //check hash
+    if (location.hash) {
+      if (location.hash == "#blog") {
+        this.activeTab = "blog";
+      } else if (location.hash == "#wallet") {
+        this.activeTab = "wallet";
+      } else if (location.hash == "#inventory") {
+        this.activeTab = "inventory";
+      } else if (location.hash == "#files") {
+        this.activeTab = "files";
+      }
+
+    }
     if (location.pathname.split("/@")[1]) {
       this.pageAccount = location.pathname.split("/@")[1]
       if (this.pageAccount.indexOf('/') > -1) {
