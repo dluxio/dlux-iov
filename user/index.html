@@ -173,9 +173,9 @@
                                             @click="activeTab = 'inventory'" data-bs-toggle="tab"
                                             aria-controls="inventory" aria-expanded="true"
                                             href="#inventory">Inventory</a></li>
-                                    <li class="nav-item"> <a class="nav-link" id="filestab" role="tab"
-                                            data-bs-toggle="tab" @click="activeTab = 'files'" aria-controls="files"
-                                            aria-expanded="true" href="#files">Cloud</a></li>
+                                    <li class="nav-item"> <a class="nav-link" id="cloudtab" role="tab"
+                                            data-bs-toggle="tab" @click="activeTab = 'cloud'" aria-controls="cloud"
+                                            aria-expanded="true" href="#cloud">Cloud</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -1376,8 +1376,8 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- files tab -->
-                        <div role="tabpanel" ref="filesTab" class="tab-pane fade" id="files" aria-labelledby="filestab">
+                        <!-- cloud tab -->
+                        <div role="tabpanel" ref="cloudTab" class="tab-pane fade" id="cloud" aria-labelledby="cloudtab">
                             <div class="container">
                                 <div class="rounded my-3 pt-1" style="background-color: rgba(0, 0, 0, 0.5);">
                                     <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount"
@@ -1601,8 +1601,7 @@
             },
         };
     </script>
-   <script>
-    // Function to handle deep linking logic
+<script>
     function deepLink(link) {
         if (link) location.hash = link; // Update the hash in the URL
 
@@ -1613,17 +1612,21 @@
             let parentTab = null;
             let childTab = null;
 
-            // Check if hash includes nested tabs (e.g., #wallet/spk)
+            // Check if hash includes nested tabs (e.g., #wallet/spk or #cloud/contracts)
             if (hash.includes('/')) {
                 const parts = hash.split('/'); // Split into parent and sub-tab parts
                 console.log("Hash parts:", parts);
 
-                // Select the parent tab (e.g., #wallet) from the #usertabs group
-                parentTab = document.querySelector(`#usertabs a[href="#${parts[0]}"]`);
+                // Determine parent tab group (e.g., #usertabs) and child tab group (e.g., #wallettabs or #cloudtabs)
+                const parentGroup = parts[0] === 'wallet' ? '#usertabs' : parts[0] === 'cloud' ? '#usertabs' : null;
+                const childGroup = parts[0] === 'wallet' ? '#wallettabs' : parts[0] === 'cloud' ? '#cloudtabs' : null;
+
+                // Select the parent tab from the parent group
+                parentTab = parentGroup ? document.querySelector(`${parentGroup} a[href="#${parts[0]}"]`) : null;
                 console.log("Parent Tab:", parentTab);
 
-                // Select the sub-tab (e.g., #spk) inside the #wallettabs group
-                childTab = document.querySelector(`#wallettabs a[href="#${parts[1]}"]`);
+                // Select the child tab from the child group
+                childTab = childGroup ? document.querySelector(`${childGroup} a[href="#${parts[1]}"]`) : null;
                 console.log("Child Tab:", childTab);
 
                 if (parentTab) {
@@ -1633,7 +1636,6 @@
 
                     // Check if the parent tab is already active, trigger the event manually if needed
                     if (parentTab.classList.contains('active')) {
-                        // If the parent tab is already active, trigger the child tab activation
                         console.log("Parent tab already active, directly activating child tab.");
                         if (childTab) {
                             const childTabInstance = new bootstrap.Tab(childTab);
@@ -1677,13 +1679,13 @@
         selectableTabList.forEach((selectableTab) => {
             selectableTab.addEventListener('click', function () {
                 const hash = selectableTab.getAttribute('href');
-                const parentTab = selectableTab.closest('#usertabs') ? '#usertabs' : '#wallettabs';
+                const parentTab = selectableTab.closest('#usertabs') ? '#usertabs' : selectableTab.closest('#wallettabs') ? '#wallettabs' : selectableTab.closest('#cloudtabs') ? '#cloudtabs' : null;
                 let newUrl;
 
                 // Update URL based on selected tab
                 if (parentTab === '#usertabs') {
                     newUrl = url.split('#')[0] + hash;
-                } else if (parentTab === '#wallettabs') {
+                } else if (parentTab === '#wallettabs' || parentTab === '#cloudtabs') {
                     const parentActiveTab = document.querySelector('#usertabs .active').getAttribute('href');
                     newUrl = url.split('#')[0] + parentActiveTab + '/' + hash.substring(1); // Append sub-tab hash
                 }
@@ -1699,6 +1701,8 @@
         deepLink(location.hash); // Call deepLink on page load to handle any deep linking in the URL
     });
 </script>
+
+
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
         integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="

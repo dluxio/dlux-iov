@@ -165,18 +165,18 @@ export default {
                 </div>
                
                 <div class="mx-auto ">
-                    <ul class="nav nav-tabs rounded mx-auto my-2 fs-5 " style="background-color: rgb(0,0,0,0.3)">
+                    <ul id="cloudtabs" class="nav nav-tabs rounded mx-auto my-2 fs-5 " role="tablist" style="background-color: rgb(0,0,0,0.3)">
                         <li class="nav-item">
-                            <a class="nav-link active px-4" :href="'#contractsTab' + title" role="tab" data-bs-toggle="tab"
+                            <a class="nav-link active px-4" href="#contracts" id="contractstab" @click="activeTab = 'cloud'" role="tab" data-bs-toggle="tab"
                                 aria-controls="contractstab" aria-expanded="true">CONTRACTS</a>
                         </li>
                         <li v-if="!cc" class="nav-item">
-                            <a class="nav-link px-4" aria-current="page" :href="'#filesTab' + title" role="tab" data-bs-toggle="tab"
+                            <a class="nav-link px-4" aria-current="page" href="#files" id="filestab" @click="activeTab = 'cloud'" role="tab" data-bs-toggle="tab"
                                 aria-controls="filestab" aria-expanded="false">FILES</a>
                         </li>
                         <li v-if="cc" class="nav-item">
                             <a class="nav-link px-4" aria-current="page" href="#ccTab" role="tab" data-bs-toggle="tab"
-                                aria-controls="cctab" aria-expanded="false">Files</a>
+                                aria-controls="cctab" aria-expanded="false">FILES</a>
                         </li>
                     </ul>
                 </div>
@@ -246,7 +246,7 @@ export default {
         
             
             <!-- files -->
-            <div v-else role="tabpanel" class="tab-pane" :id="'filesTab' + title" aria-labelledby="filestab">
+            <div v-else role="tabpanel" class="tab-pane" id="files" aria-labelledby="filestab">
                 
                 <!-- no files -->
                 <div v-show="!contracts.length"> 
@@ -291,7 +291,7 @@ export default {
             
             
             <!-- contracts -->
-            <div role="tabpanel" class="tab-pane show active" :id="'contractsTab' + title" aria-labelledby="contractstab">
+            <div role="tabpanel" class="tab-pane show active" id="contracts" aria-labelledby="contractstab">
                 
                 <div class="card-body p-0">
                     <!-- registered -->
@@ -945,6 +945,7 @@ export default {
     },
     data() {
         return {
+            activeTab: '',
             contracts: [],
             filter: {
                 slots: true,
@@ -1079,6 +1080,71 @@ export default {
     },
     emits: ['tosign', 'addasset', 'bens', 'done'],
     methods: {
+        deepLink(link) {
+            if (link) location.hash = link;
+
+            let url = location.href.replace(/\/$/, '');
+            if (location.hash) {
+                let hash = url.split('#')[1];
+                let parentTab = null;
+                let childTab = null;
+
+                if (hash.includes('/')) {
+                    const parts = hash.split('/');
+                    console.log('Hash parts:', parts);
+
+                    const parentGroup = parts[0] === 'wallet' ? '#usertabs' : parts[0] === 'cloud' ? '#usertabs' : null;
+                    const childGroup = parts[0] === 'wallet' ? '#wallettabs' : parts[0] === 'cloud' ? '#cloudtabs' : null;
+
+                    parentTab = parentGroup ? document.querySelector(`${parentGroup} a[href="#${parts[0]}"]`) : null;
+                    console.log('Parent Tab:', parentTab);
+
+                    childTab = childGroup ? document.querySelector(`${childGroup} a[href="#${parts[1]}"]`) : null;
+                    console.log('Child Tab:', childTab);
+
+                    if (parentTab) {
+                        const parentTabInstance = new bootstrap.Tab(parentTab);
+                        console.log('Activating parent tab:', parentTab);
+                        parentTabInstance.show();
+
+                        if (parentTab.classList.contains('active')) {
+                            console.log('Parent tab already active, directly activating child tab.');
+                            if (childTab) {
+                                const childTabInstance = new bootstrap.Tab(childTab);
+                                childTabInstance.show();
+                            }
+                        } else {
+                            parentTab.addEventListener('shown.bs.tab', () => {
+                                console.log('Parent tab activated. Now activating child tab.');
+                                if (childTab) {
+                                    const childTabInstance = new bootstrap.Tab(childTab);
+                                    childTabInstance.show();
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+
+            const selectableTabList = [].slice.call(document.querySelectorAll('a[data-bs-toggle="tab"]'));
+            selectableTabList.forEach((selectableTab) => {
+                selectableTab.addEventListener('click', function () {
+                    const hash = selectableTab.getAttribute('href');
+                    const parentTab = selectableTab.closest('#usertabs') ? '#usertabs' : selectableTab.closest('#wallettabs') ? '#wallettabs' : selectableTab.closest('#cloudtabs') ? '#cloudtabs' : null;
+                    let newUrl;
+
+                    if (parentTab === '#usertabs') {
+                        newUrl = url.split('#')[0] + hash;
+                    } else if (parentTab === '#wallettabs' || parentTab === '#cloudtabs') {
+                        const parentActiveTab = document.querySelector('#usertabs .active').getAttribute('href');
+                        newUrl = url.split('#')[0] + parentActiveTab + '/' + hash.substring(1);
+                    }
+
+                    console.log('Updating URL to:', newUrl);
+                    history.replaceState(null, null, newUrl);
+                });
+            });
+        },
         getdelimed(string, del = ',', index = 0) {
             return string.split(del)[index] ? string.split(del)[index] : ''
         },
@@ -1571,13 +1637,13 @@ export default {
                     file_contracts: [contract]
                 }
                 file: for (var node in data.file_contracts) {
-                    if(this.title == 'new')for (var i in data.file_contracts[node].n) {
-                        if (data.file_contracts[node].n[i] == this.account)continue file
+                    if (this.title == 'new') for (var i in data.file_contracts[node].n) {
+                        if (data.file_contracts[node].n[i] == this.account) continue file
                     }
                     if (data.file_contracts[node].u > this.filter.size) {
                         this.filter.size = data.file_contracts[node].u
                         this.filter.max = data.file_contracts[node].u
-                    } 
+                    }
                     if (data.file_contracts[node].u < this.filter.min) {
                         this.filter.min = data.file_contracts[node].u
                     }
@@ -2188,5 +2254,13 @@ export default {
             // i++
             getContract(this.prop_contracts[node].i)
         }
+        // Call deepLink when the component is mounted
+        this.deepLink(location.hash);
+
+        // Watch for hash changes and re-apply deep linking
+        window.addEventListener('hashchange', () => {
+            this.deepLink(location.hash);
+        });
+
     },
 };

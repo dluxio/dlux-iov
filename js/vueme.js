@@ -4744,7 +4744,7 @@ function buyNFT(setname, uid, price, type, callback){
           }
         });
 
-        this.observer.observe(this.$refs.filesTab, {
+        this.observer.observe(this.$refs.cloudTab, {
           attributes: true,
           attributeOldValue: true,
           attributeFilter: ['class'],
