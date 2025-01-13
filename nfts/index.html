@@ -28,7 +28,7 @@
                     console.log('Registration Successful');
                 });
         }
-      </script>
+    </script>
     <style>
         .circle {
             width: 50px;
@@ -86,7 +86,7 @@
         }
 
         .wallet-accordion-item {
-             /* width: 350px; */
+            /* width: 350px; */
         }
 
         .wallet-accordion {
@@ -899,16 +899,16 @@
             })
             // DUAT Balance
             var duatCollapse = document.getElementById('collapseduat');
-            try{
+            try {
                 duatCollapse.addEventListener('show.bs.collapse', event => {
-                var duatBal = document.getElementById('duatBal');
-                duatBal.classList.add('d-none');
-            })
-        } catch (e) {}
-            duatCollapse.addEventListener('hide.bs.collapse', event => {
+                    var duatBal = document.getElementById('duatBal');
+                    duatBal.classList.add('d-none');
+                })
+                duatCollapse.addEventListener('hide.bs.collapse', event => {
                 var duatBal = document.getElementById('duatBal');
                 duatBal.classList.remove('d-none');
             })
+            } catch (e) { }
             // DLUX Balance
             var dluxCollapse = document.getElementById('collapsedlux');
             dluxCollapse.addEventListener('show.bs.collapse', event => {
