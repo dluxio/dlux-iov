@@ -1438,8 +1438,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       fetch(this.chains[name].api + "/dex")
       .then(r => r.json())
       .then(r => {
-        console.log(r.markets.hive.sells.sort((a,b) => this.parseFloat(a.rate) - this.parseFloat(b.rate)))
-        this.marketorder.dex = r.markets.hive.sells.sort((a,b) => this.parseFloat(a.rate) - this.parseFloat(b.rate))
+        console.log(r.markets.hive.sells.sort((a,b) => this.ParseFloat(a.rate) - this.ParseFloat(b.rate)))
+        this.marketorder.dex = r.markets.hive.sells.sort((a,b) => this.ParseFloat(a.rate) - this.ParseFloat(b.rate))
         this.marketorder.value = parseInt(1 / this.marketorder.dex[0].rate) * 1000
       })
     },
@@ -1534,7 +1534,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     toFixed(value, decimals) {
       return Number(value).toFixed(decimals);
     },
-    parseFloat(value) {
+    ParseFloat(value) {
       return parseFloat(value);
     },
     toUpperCase(value) {
@@ -1890,7 +1890,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                   hbdPrice = data.result[0].sales[i].pricenai.amount
                   break;
                 default:
-                  hbdPrice = parseInt(data.result[0].sales[i].pricenai.amount * this.hiveprice * this.parseFloat(this.chains[data.result[0].sales[i].pricenai.token.toLowerCase()].account.tick))
+                  hbdPrice = parseInt(data.result[0].sales[i].pricenai.amount * this.hiveprice * this.ParseFloat(this.chains[data.result[0].sales[i].pricenai.token.toLowerCase()].account.tick))
               }
               data.result[0].sales[i].hbdPrice = hbdPrice
             }
@@ -1905,7 +1905,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                   hbdPrice = data.result[0].auctions[i].pricenai.amount
                   break;
                 default:
-                  hbdPrice = parseInt(data.result[0].auctions[i].pricenai.amount * this.hiveprice * this.parseFloat(this.chains[data.result[0].auctions[i].pricenai.token.toLowerCase()].account.tick))
+                  hbdPrice = parseInt(data.result[0].auctions[i].pricenai.amount * this.hiveprice * this.ParseFloat(this.chains[data.result[0].auctions[i].pricenai.token.toLowerCase()].account.tick))
               }
               data.result[0].auctions[i].hbdPrice = hbdPrice
             }
@@ -2021,7 +2021,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                         hbdPrice = this.chains[chain].sets[set].auctions[i].price.amount
                         break;
                       default:
-                        hbdPrice = parseInt(this.chains[chain].sets[set].auctions[i].price.amount * this.hiveprice * this.parseFloat(this.chains[chain].account.tick))
+                        hbdPrice = parseInt(this.chains[chain].sets[set].auctions[i].price.amount * this.hiveprice * this.ParseFloat(this.chains[chain].account.tick))
                     }
                     if (
                       this.chains[chain].sets[set].auctions[i].price.amount < this.chains[chain].sets[set].af[token] ||
@@ -2083,7 +2083,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                           hbdPrice = presales[index].price.amount
                           break;
                         default:
-                          hbdPrice = parseInt(presales[index].price.amount * this.hiveprice * this.parseFloat(this.chains[chain].account.tick))
+                          hbdPrice = parseInt(presales[index].price.amount * this.hiveprice * this.ParseFloat(this.chains[chain].account.tick))
                       }
                       presales[index] = {
                         ...presales[index],
@@ -2124,7 +2124,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                               hbdPrice = mintSales[i].pricenai.amount
                               break;
                             default:
-                              hbdPrice = parseInt(mintSales[i].pricenai.amount * this.hiveprice * this.parseFloat(this.chains[mintSales[i].pricenai.token.toLowerCase()].account.tick))
+                              hbdPrice = parseInt(mintSales[i].pricenai.amount * this.hiveprice * this.ParseFloat(this.chains[mintSales[i].pricenai.token.toLowerCase()].account.tick))
                           }
                           mintSales[i].hbdPrice = hbdPrice
                     mintSales[i].buyQty = 1;
@@ -2155,7 +2155,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                           hbdPrice = mintAuctions[i].pricenai.amount
                           break;
                         default:
-                          hbdPrice = parseInt(mintAuctions[i].pricenai.amount * this.hiveprice * this.parseFloat(this.chains[mintAuctions[i].pricenai.token.toLowerCase()].account.tick))
+                          hbdPrice = parseInt(mintAuctions[i].pricenai.amount * this.hiveprice * this.ParseFloat(this.chains[mintAuctions[i].pricenai.token.toLowerCase()].account.tick))
                       }
                       mintAuctions[i].hbdPrice = hbdPrice
                     mintAuctions[i].bidAmount =
