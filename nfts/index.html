@@ -130,7 +130,7 @@
 </head>
 
 <body class="d-flex flex-column h-100 text-white" style="padding-top: 150px;" id="index">
-    <div id="app">
+    <div id="app" v-cloak>
         <div>
             <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event);getUserNFTs()"
                 @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" @refresh="run($event)"
