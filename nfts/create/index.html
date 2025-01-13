@@ -201,17 +201,80 @@
                                 <div class="form-group row">
                                     <label for="testname" class="col-sm-2 col-form-label">Set</label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="testset" value="Hive Folks">
+                                        <input @change="buildTestItem()" type="text" class="form-control" v-model="testset">
                                     </div>
                                 </div>
                                 <!-- script -->
                                 <div class="form-group row">
                                     <label for="testscript" class="col-sm-2 col-form-label">Script</label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="testscript"
-                                            value="QmSPm13knazJsN4C8b7mWqT8tG2CeFCRvbW1PifYZV9dVN">
+                                        <input  @change="buildTestItem()" type="text" class="form-control" v-model="testscript">
                                     </div>
                                 </div>
+                                <!-- Test UID-->
+                                <div class="form-group row">
+                                    <label for="testname" class="col-sm-2 col-form-label">UID</label>
+                                    <div class="col-sm-10">
+                                        <input @change="buildTestItem()" type="text" class="form-control" v-model="testuid">
+                                    </div>
+                                </div>
+                                <div :id="`${testscript}banner`" class="my-3">
+                                    {{ getSetPhotos(testscript, 'banner', 'rounded') }}
+                                  </div>
+                                  <div>
+                                    <div :id="`${testscript}featured`">
+                                      {{ getSetPhotos(testscript, 'featured') }}
+                                    </div>
+                                    <div class="center-circle rounded-circle bg-darker" style="border: solid black 3px;">
+                                      <div :id="`${testscript}logo`" class="rounded-circle" style="width: 100px;">
+                                        {{ getSetPhotos(testscript, 'logo', 'rounded-circle') }}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div class="row">
+                                    <div class="col-md-6">
+                                      <div :id="`${testscript}wrapped`">
+                                        {{ getSetPhotos(testscript, 'wrapped') }}
+                                      </div>
+                                      <p :id="`${testscript}descriptionp`">
+                                        {{ getSetDetailsInfo(testscript) }}
+                                      </p>
+                                      <input id="testuid" v-model="testuid" @change="buildTestItem()"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                      <div class="cc-3 pt-5" id="testftcards">
+                                        <div :id="`${testscript}testcard`" class="card text-white" style="border: none;">
+                                          <div class="card-header d-flex align-items-center justify-content-between">
+                                            <div class="rounded-pill d-flex align-items-center p-2" style="background-color: black;">
+                                              <h2 class="m-0 px-2">{{ testuid }}</h2>
+                                            </div>
+                                            <h3 class="card-title lead shimmer rounded p-2 m-0 ml-auto" style="color: black;">
+                                              <b>{{ testset }} NFT</b>
+                                            </h3>
+                                          </div>
+                                          <div>
+                                            <div
+                                              class="card-img-top"
+                                              :id="`image-${testset}-${testuid}`"
+                                              :alt="testscript"
+                                            >
+                                              <nftcard v-if="debounceTestScript"
+                                                :item="testitem"
+                                                :ocolors="getSetDetailsColors(testitem)"
+                                                :oicon="getIcon(testscript)"
+                                                :uid="Base64toNumber(testuid)"
+                                                :inventory="true"
+                                                :account="account"
+                                                ></nftcard>
+                                            </div>
+                                          </div>
+                                          <div class="card-body text-center d-flex flex-column lead">
+                                            
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
                                 <!--
                                 <div dmx-bind:id="{{testscript.value}}banner" class="my-3">
                                     {{testscript.value.getSetPhotos('','banner','rounded')}}</div>

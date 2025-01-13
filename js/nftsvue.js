@@ -62,6 +62,11 @@ createApp({ // vue 3
     return {
       ready: false,
       debounceScroll: 0,
+      debounceTestScript: 0,
+      testscript: "QmSPm13knazJsN4C8b7mWqT8tG2CeFCRvbW1PifYZV9dVN",
+      testset: "Hive Folks",
+      testuid: "00",
+      testitem: {},
       lastScroll: 0,
       lastLoad: 0,
       ohlcv: [],
@@ -1808,6 +1813,60 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             this.pfp.uid = json.result[0].pfp.split(":")[1];
           });
       }
+    },
+    buildTestItem(){
+      this.debounceTestScript = 0
+      var data = {set: {}}
+      this.callScript({
+        'script': this.testscript,
+        'uid': this.testuid,
+        'setname': this.testset,
+        'owner': this.Base64toNumberaccount,
+      }).then((d) => {
+        data.set.computed = d;
+              data.setname = this.testset;
+              const init = {
+                owners: 0,
+                deleted: 0,
+                enabled: false,
+                mintSales: [],
+                sales: [],
+                mintAuctions: [],
+                auctions: [],
+                loaded: {},
+                af: {
+                  HIVE: 0,
+                  HBD: 0,
+                  TOKEN: 0,
+                },
+                sf: {
+                  HIVE: 0,
+                  HBD: 0,
+                  TOKEN: 0,
+                },
+                forSale: 0,
+                forAuction: 0,
+                forSaleMint: 0,
+                forAuctionMint: 0,
+                attributeKeys: [],
+                attributes: {},
+                attributesC: {},
+                amf: {
+                  HIVE: 0,
+                  HBD: 0,
+                  TOKEN: 0,
+                },
+                smf: {
+                  HIVE: 0,
+                  HBD: 0,
+                  TOKEN: 0,
+                },
+              }
+              // spread init over data.result[i]
+              d.set = { ...init, ...data.set }
+        this.testitem = d
+        this.debounceTestScript = 1
+      })
     },
     getNFTsets() {
       const getSets = (chain) => {
