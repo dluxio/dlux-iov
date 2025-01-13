@@ -899,10 +899,12 @@
             })
             // DUAT Balance
             var duatCollapse = document.getElementById('collapseduat');
-            duatCollapse.addEventListener('show.bs.collapse', event => {
+            try{
+                duatCollapse.addEventListener('show.bs.collapse', event => {
                 var duatBal = document.getElementById('duatBal');
                 duatBal.classList.add('d-none');
             })
+        } catch (e) {}
             duatCollapse.addEventListener('hide.bs.collapse', event => {
                 var duatBal = document.getElementById('duatBal');
                 duatBal.classList.remove('d-none');
