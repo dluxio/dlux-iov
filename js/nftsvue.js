@@ -2696,4 +2696,4 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       },
     },
   },
-});
+}).mount('#app')
