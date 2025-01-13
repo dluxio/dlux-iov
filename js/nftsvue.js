@@ -3,9 +3,9 @@ import { createApp, toRaw } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.j
 import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
-import NFTCard from "./nftcard.js";
-import FTTransfer from "./fttransfer.js";
-import NFTDetail from "./nftdetail.js";
+import NFTCard from "/js/nftcard.js";
+import FTTransfer from "/js/fttransfer.js";
+import NFTDetail from "/js/nftdetail.js";
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "";
