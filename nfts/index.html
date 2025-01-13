@@ -908,10 +908,11 @@
                 var duatBal = document.getElementById('duatBal');
                 duatBal.classList.remove('d-none');
             })
-            } catch (e) { }
+            } catch (e) {console.log(e)}
             // DLUX Balance
             var dluxCollapse = document.getElementById('collapsedlux');
-            dluxCollapse.addEventListener('show.bs.collapse', event => {
+            try {
+                dluxCollapse.addEventListener('show.bs.collapse', event => {
                 var dluxBal = document.getElementById('dluxBal');
                 dluxBal.classList.add('d-none');
             })
@@ -919,6 +920,8 @@
                 var dluxBal = document.getElementById('dluxBal');
                 dluxBal.classList.remove('d-none');
             })
+            } catch (e){console.log(e)}
+            
         });
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
