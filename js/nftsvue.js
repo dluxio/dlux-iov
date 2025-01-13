@@ -1747,7 +1747,8 @@ function bidNFT(setname, uid, bid_amount, type, callback){
                 );
               }) || 0
             });
-        });
+        })
+        .catch(e=>console.log(e))
       })
     },
     injectIndex(dir){
@@ -2494,6 +2495,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
               balance: `${this.formatNumber((data.balance / 1000).toFixed(3), 3, '.', ',')} ${chain.toUpperCase()}`,
               checked: this.denoms[chain.toUpperCase()] ? this.denoms[chain.toUpperCase()].checked : false
             }
+          })
+          .catch((e) => {
+            console.log(e);
           })
       }
       for(var token in this.chains){
