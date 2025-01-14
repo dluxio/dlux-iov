@@ -912,6 +912,9 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           }
         }
       }
+      if(this.displayNFTs.length < this.wantedNum && !!this.lastScroll){
+        this.handleScroll()
+      }
     },
     mintsQty(item) {
       return this.getMint(this.chains[item.token]?.sets[item.set]?.set, 'qty')
