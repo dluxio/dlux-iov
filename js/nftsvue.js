@@ -735,6 +735,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
       return name.split(del)[i]
     },
     displaynfts() {
+      console.log('ya?')
       this.displayNFTs = []
       chainlabel: for (var chain in this.chains) {
         if (this.NFTselect.keys.find(a => a.indexOf('Chain') >= 0) && !this.chains[chain].enabled) continue chainlabel;
