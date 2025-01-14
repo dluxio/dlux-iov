@@ -237,18 +237,18 @@
                                         <div class="form-group row mb-2">
                                             <label for="testname" class="col-sm-2 col-form-label">Min</label>
                                             <div class="col-sm-10">
-                                                <input @change="buildTestItem()" type="text" class="form-control"
+                                                <input v-model="testmin" type="text" class="form-control"
                                                     v-model="testuid">
                                             </div>
                                             <label for="testname" class="col-sm-2 col-form-label">Max</label>
                                             <div class="col-sm-10">
-                                                <input @change="buildTestItem()" type="text" class="form-control"
+                                                <input v-model="testmax" type="text" class="form-control"
                                                     v-model="testuid">
                                             </div>
                                             <div class="mb-3">
                                                 <label for="slider" class="form-label">Slider</label>
-                                                <input type="range" class="form-range" id="slider" min="0" max="100" value="0">
-                                                <div id="sliderValue">Value: 0</div>
+                                                <input type="range" class="form-range" id="slider" :min="testmin" :max="testmax" step="1" value="0" @change="buildTestItem()" v-model="testnum">
+                                                <div id="sliderValue">Value: {{ testnum }} / {{ testuid }}</div>
                                             </div>
                                         </div>
                                         <div class="my-auto">

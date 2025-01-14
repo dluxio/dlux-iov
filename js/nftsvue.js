@@ -69,6 +69,9 @@ createApp({ // vue 3
       testset: {},
       testuid: "00",
       testitem: {},
+      testmin: 0,
+      testmax: 100,
+      testnum: 0,
       lastScroll: 0,
       lastLoad: 0,
       ohlcv: [],
@@ -1832,6 +1835,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
     buildTestItem() {
       this.debounceTestScript = 0
+      this.testuid = this.Base64(this.testnum)
       var data = { set: {} }
       this.callScript({
         'script': this.testscript,
@@ -2509,6 +2513,16 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       chars = chars.split("");
       for (var e = 0; e < chars.length; e++) {
         result = result * 64 + glyphs.indexOf(chars[e]);
+      }
+      return result;
+    },
+    Base64(num){
+      const glyphs =
+        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
+      var result = "";
+      while(num > 0){
+        result = glyphs[num % 64] + result;
+        num = Math.floor(num / 64);
       }
       return result;
     },
