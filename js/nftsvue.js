@@ -912,7 +912,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           }
         }
       }
-      if(this.displayNFTs.length < this.wantedNum && !!this.lastScroll){
+      if(this.displayNFTs.length < this.wantedNum && !!this.lastLoad){
         this.handleScroll()
       }
     },
