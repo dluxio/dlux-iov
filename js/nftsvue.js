@@ -1834,7 +1834,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       }
     },
     buildTestItem() {
-      this.debounceTestScript = 0
+      //this.debounceTestScript = 0
       this.testuid = this.Base64(this.testnum)
       var data = { set: {} }
       this.callScript({
@@ -2524,7 +2524,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         result = glyphs[num % 64] + result;
         num = Math.floor(num / 64);
       }
-      return result;
+      return result || "0";
     },
     callScript(o, i = 0) {
       return new Promise((resolve, reject) => {
