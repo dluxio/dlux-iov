@@ -53,7 +53,7 @@
                     console.log('Registration Successful');
                 });
         }
-      </script>
+    </script>
 </head>
 
 <body class="d-flex h-100 align-items-stretch" id="explore">
@@ -70,9 +70,11 @@
                         <div class="col-6 col-md-3 me-auto mb-3 order-md-1">
                             <h1 class="mb-0">Explore</h1>
                         </div>
-                        
+
                         <div class="col-6 col-md-3 ms-auto mb-3 order-md-3">
-                            <h1 class="mb-0 d-none"><a href="/nfts/create" class="float-end no-decoration d-flex align-items-top">Create<i style="font-size: .7em;" class="fa-solid fa-circle-plus ms-2"></i></a></h1>
+                            <h1 class="mb-0 d-none"><a href="/nfts/create"
+                                    class="float-end no-decoration d-flex align-items-top">Create<i
+                                        style="font-size: .7em;" class="fa-solid fa-circle-plus ms-2"></i></a></h1>
                         </div>
 
                         <div class="col-12 col-md-6 order-md-2 text-center">
@@ -81,8 +83,7 @@
                                 <div v-for="(item, key, index) in showTokens" class="me-2">
                                     <input type="checkbox" class="btn-check" :id="'btncheck'+key" autocomplete="off"
                                         :checked="showTokens[key]" @click="showToken(key)">
-                                    <label class="btn btn-outline-primary" :for="'btncheck'+key"
-                                        >{{key}}</label>
+                                    <label class="btn btn-outline-primary" :for="'btncheck'+key">{{key}}</label>
                                 </div>
                             </div>
                         </div>
@@ -92,7 +93,8 @@
                         <div class="col mb-4" v-for="set in nftsetsf" :key="set.script">
                             <a :href="makeLink('/nfts/set/', set.set, ['#', toLowerCase(set.token)])"
                                 style="text-decoration: none">
-                                <div class="card text-white rounded-5">
+                                <setcard :set="set"/>
+                                <!--<div class="card text-white rounded-5">
                                     <div>
                                         <img class="img-fluid featured-img rounded-top-5 border-3 border-bottom border-black"
                                             :src="makeLink('https://ipfs.dlux.io/ipfs/', set.computed.set.featured)"></img>
@@ -104,21 +106,16 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="card-footer p-0 border-3 border-top border-black rounded-bottom-5" style="border: none"
+                                    <div class="card-footer p-0 border-3 border-top border-black rounded-bottom-5"
+                                        style="border: none"
                                         :style="{'background': getSetDetailsColors(set.computed, 'body')}">
                                         <div class="m-3 p-3 rounded-5" style="background-color: rgba(0, 0, 0, 0.7)">
                                             <h2 class="card-title mt-4 pt-2 mb-2 mx-3 text-center">{{set.name_long ?
                                                 set.name_long : set.set}}</h2>
                                             <div class="my-2 mx-3 d-flex align-items-center">
                                                 <div class="p-2">
-                                                    <p class="text-white-50 mb-0" style="
-                              overflow: hidden;
-                              text-overflow: ellipsis;
-                              display: -webkit-box;
-                              -webkit-line-clamp: 2; /* number of lines to show */
-                              line-clamp: 2;
-                              -webkit-box-orient: vertical;
-                            ">
+                                                    <p class="text-white-50 mb-0"
+                                                        style="overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; /* number of lines to show */ line-clamp: 2;  -webkit-box-orient: vertical;">
                                                         {{set.computed.set ? set.computed.set.Description : '...'}}
                                                     </p>
                                                 </div>
@@ -127,7 +124,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </div>-->
                             </a>
                         </div>
                     </div>

@@ -258,6 +258,8 @@
                                               :id="`image-${testset}-${testuid}`"
                                               :alt="testscript"
                                             >
+                                            <setcard :set="testset" v-if="debounceTestScript"/>
+
                                               <nftcard v-if="debounceTestScript"
                                                 :item="testitem"
                                                 :ocolors="getSetDetailsColors(testitem)"

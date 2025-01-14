@@ -4,6 +4,7 @@ import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
 import NFTCard from "/js/nftcard.js";
+import SetCard from "/js/setcard.js";
 import FTTransfer from "/js/fttransfer.js";
 import NFTDetail from "/js/nftdetail.js";
 
@@ -586,6 +587,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
     "foot-vue": FootVue,
     "cycle-text": Cycler,
     "nftcard": NFTCard,
+    "setcard": SetCard,
     "fttransfer": FTTransfer,
     "nftdetail": NFTDetail,
   },
