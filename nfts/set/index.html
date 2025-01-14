@@ -78,8 +78,12 @@
 <body class="d-flex flex-column h-100 text-white" style="margin-top: 94px;" id="explore">
   <div id="app" v-cloak>
     <div v-scroll="handleScroll">
-      <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event);getUserNFTs()"
-        @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
+      <nav-vue 
+        @login="setValue('account', $event);getTokenUser($event);getHiveUser($event);getUserNFTs()"
+        @logout="setValue('account', '');removeUser()" 
+        @ack="removeOp($event)" 
+        @refresh="run($event)" 
+        :op="toSign"
         :lapi="lapi" />
     </div>
     <main role="main" class="flex-shrink-0">

@@ -1332,7 +1332,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       out = out.replace(/\.?0+$/, "");
       return out + post;
     },
-    handleScroll: function () {
+    handleScroll() {
       if ( this.setPage &&
         Date.now() - this.lastLoad > 2000 &&
         document.documentElement.clientHeight + window.scrollY >
