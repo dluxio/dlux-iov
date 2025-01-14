@@ -735,7 +735,6 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
       return name.split(del)[i]
     },
     displaynfts() {
-      console.log('ya?')
       this.displayNFTs = []
       chainlabel: for (var chain in this.chains) {
         if (this.NFTselect.keys.find(a => a.indexOf('Chain') >= 0) && !this.chains[chain].enabled) continue chainlabel;
@@ -912,10 +911,6 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
             this.displayNFTs[i] = temp[i]
           }
         }
-      }
-      console.log('Yo')
-      if(this.displayNFTs.length < this.wantedNum && !!this.lastLoad){
-        this.handleScroll()
       }
     },
     mintsQty(item) {
@@ -2480,6 +2475,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
             }
           });
         }
+      }
+      if(this.displayNFTs.length < this.wantedNum && !!this.lastLoad){
+        this.handleScroll()
       }
     },
     pm(a, b) {
