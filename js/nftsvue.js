@@ -912,6 +912,7 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           }
         }
       }
+      console.log('Yo')
       if(this.displayNFTs.length < this.wantedNum && !!this.lastLoad){
         this.handleScroll()
       }
