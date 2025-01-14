@@ -72,6 +72,7 @@ createApp({ // vue 3
       testmin: 0,
       testmax: 100,
       testnum: 0,
+      preScroll: [0,0],
       lastScroll: 0,
       lastLoad: 0,
       ohlcv: [],
@@ -1835,6 +1836,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
     buildTestItem() {
       //this.debounceTestScript = 0
+      this.preScroll = [window.scrollX, window.scrollY]
       this.testuid = this.Base64(this.testnum)
       var data = { set: {} }
       this.callScript({
@@ -1890,6 +1892,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         this.testset.computed = d.set
         this.testset.setname = this.testsetname
         this.debounceTestScript = 1
+        setTimeout(() => {
+          window.scrollTo(this.preScroll[0], this.preScroll[1])
+        }, 10)
       })
     },
     getNFTsets() {
@@ -2759,6 +2764,14 @@ function bidNFT(setname, uid, bid_amount, type, callback){
   },
   unmounted() {
     window.removeEventListener('scroll', this.handleScroll);
+  },
+  watch: {
+    testnum: {
+      handler(n, o) {
+        console.log(n, o)
+        this.buildTestItem()
+      }
+    }
   },
   computed: {
     location: {
