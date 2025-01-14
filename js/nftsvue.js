@@ -2729,6 +2729,10 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     //this.getNodes();
     if (user != "GUEST") this.getTokenUser();
     if (user != "GUEST") this.getHiveUser();
+    window.addEventListener('scroll', this.handleScroll);
+  },
+  unmounted() {
+    window.removeEventListener('scroll', this.handleScroll);
   },
   computed: {
     location: {
