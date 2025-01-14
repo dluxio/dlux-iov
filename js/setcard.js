@@ -18,7 +18,7 @@ export default {
                                         :style="{'background': colors}">
                                         <div class="m-3 p-3 rounded-5" style="background-color: rgba(0, 0, 0, 0.7)">
                                             <h2 class="card-title mt-4 pt-2 mb-2 mx-3 text-center">{{set.name_long ?
-                                                set.name_long : set.set}}</h2>
+                                                set.name_long : set.setname}}</h2>
                                             <div class="my-2 mx-3 d-flex align-items-center">
                                                 <div class="p-2">
                                                     <p class="text-white-50 mb-0"

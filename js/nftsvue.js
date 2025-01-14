@@ -65,7 +65,8 @@ createApp({ // vue 3
       debounceScroll: 0,
       debounceTestScript: 0,
       testscript: "QmSPm13knazJsN4C8b7mWqT8tG2CeFCRvbW1PifYZV9dVN",
-      testset: "Hive Folks",
+      testsetname: "Hive Folks",
+      testset: {},
       testuid: "00",
       testitem: {},
       lastScroll: 0,
@@ -1835,11 +1836,11 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       this.callScript({
         'script': this.testscript,
         'uid': this.testuid,
-        'setname': this.testset,
+        'setname': this.testsetname,
         'owner': this.Base64toNumberaccount,
       }).then((d) => {
         data.set.computed = d;
-        data.setname = this.testset;
+        data.setname = this.testsetname;
         const init = {
           owners: 0,
           deleted: 0,
@@ -1878,8 +1879,12 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           },
         }
         // spread init over data.result[i]
-        d.set = { ...init, ...data.set }
+        d.set = { ...init, ...data.set.computed }
         this.testitem = d
+        this.testitem.setname = this.testsetname
+        this.testset = d.set
+        this.testset.computed = d.set
+        this.testset.setname = this.testsetname
         this.debounceTestScript = 1
       })
     },

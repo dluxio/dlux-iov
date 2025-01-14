@@ -201,7 +201,7 @@
                                 <div class="form-group row">
                                     <label for="testname" class="col-sm-2 col-form-label">Set</label>
                                     <div class="col-sm-10">
-                                        <input @change="buildTestItem()" type="text" class="form-control" v-model="testset">
+                                        <input @change="buildTestItem()" type="text" class="form-control" v-model="testsetname">
                                     </div>
                                 </div>
                                 <!-- script -->
@@ -249,25 +249,33 @@
                                               <h2 class="m-0 px-2">{{ testuid }}</h2>
                                             </div>
                                             <h3 class="card-title lead shimmer rounded p-2 m-0 ml-auto" style="color: black;">
-                                              <b>{{ testset }} NFT</b>
+                                              <b>{{ testsetname }} NFT</b>
                                             </h3>
                                           </div>
                                           <div>
-                                            <div
+                                            <div v-if="debounceTestScript"
                                               class="card-img-top"
-                                              :id="`image-${testset}-${testuid}`"
+                                              :id="`image-${testsetname}-${testuid}`"
                                               :alt="testscript"
                                             >
-                                            <setcard :set="testset" v-if="debounceTestScript"/>
+                                            <div>
+                                            <setcard 
+                                                v-if="debounceTestScript" 
+                                                :set="testset"
+                                                :colors="'linear-gradient(' + testset.set.Color1 + ',' + testset.set.Color2 + ')'"
 
+                                            />
+                                        </div>
+                                        <div>
                                               <nftcard v-if="debounceTestScript"
                                                 :item="testitem"
-                                                :ocolors="getSetDetailsColors(testitem)"
-                                                :oicon="getIcon(testscript)"
+                                                :ocolors="'linear-gradient(' + testset.set.Color1 + ',' + testset.set.Color2 + ')'"
+                                                :oicon="testset.set.faicon"
                                                 :uid="Base64toNumber(testuid)"
                                                 :inventory="true"
                                                 :account="account"
                                                 ></nftcard>
+                                            </div>
                                             </div>
                                           </div>
                                           <div class="card-body text-center d-flex flex-column lead">
