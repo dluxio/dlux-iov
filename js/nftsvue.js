@@ -2768,7 +2768,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
   watch: {
     testnum: {
       handler(n, o) {
-        console.log(n, o)
         this.buildTestItem()
       }
     }
