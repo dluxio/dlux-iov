@@ -15,7 +15,7 @@ export default {
                                     </div>
                                     <div class="card-footer p-0 border-3 border-top border-black rounded-bottom-5"
                                         style="border: none"
-                                        :style="{'background': getSetDetailsColors(set.computed, 'body')}">
+                                        :style="{'background': colors}">
                                         <div class="m-3 p-3 rounded-5" style="background-color: rgba(0, 0, 0, 0.7)">
                                             <h2 class="card-title mt-4 pt-2 mb-2 mx-3 text-center">{{set.name_long ?
                                                 set.name_long : set.set}}</h2>
@@ -38,13 +38,14 @@ export default {
       type: Object,
       required: true,
     },
+    colors: {
+      type: String,
+      required: true,
+    },
   },
   methods: {
     makeLink(base, path) {
       return `${base}${path}`;
-    },
-    getSetDetailsColors(computedSet, property) {
-      return computedSet[property] || "#000000";
     },
   },
 };

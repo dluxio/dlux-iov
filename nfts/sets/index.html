@@ -93,7 +93,7 @@
                         <div class="col mb-4" v-for="set in nftsetsf" :key="set.script">
                             <a :href="makeLink('/nfts/set/', set.set, ['#', toLowerCase(set.token)])"
                                 style="text-decoration: none">
-                                <setcard :set="set"/>
+                                <setcard :set="set" :colors="getSetDetailsColors(set.computed, 'body')"/>
                                 <!--<div class="card text-white rounded-5">
                                     <div>
                                         <img class="img-fluid featured-img rounded-top-5 border-3 border-bottom border-black"
