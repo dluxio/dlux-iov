@@ -912,7 +912,13 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           }
         }
       }
-      this.displayNFTs = tempDisplayNFTs
+      for (var i = 0; i < tempDisplayNFTs.length; i++) {
+        // add tempdisplaynft to displaynfts if it doesn't exisit
+        if (!this.displayNFTs.find(nft => nft.uid === tempDisplayNFTs[i].uid && nft.setname === tempDisplayNFTs[i].setname)) {
+          this.displayNFTs.push(tempDisplayNFTs[i]);
+        }
+
+      }
     },
     mintsQty(item) {
       return this.getMint(this.chains[item.token]?.sets[item.set]?.set, 'qty')
