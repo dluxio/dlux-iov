@@ -1835,8 +1835,9 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       }
     },
     buildTestItem() {
+      const scrollPos = window.scrollY
       //this.debounceTestScript = 0
-      this.preScroll = [window.scrollX, window.scrollY]
+      //this.preScroll = [window.scrollX, window.scrollY]
       this.testuid = this.Base64(this.testnum)
       var data = { set: {} }
       this.callScript({
@@ -1892,9 +1893,13 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         this.testset.computed = d.set
         this.testset.setname = this.testsetname
         this.debounceTestScript = 1
-        setTimeout(() => {
-          window.scrollTo(this.preScroll[0], this.preScroll[1])
-        }, 10)
+        //setTimeout(() => {
+        //  window.scrollTo(this.preScroll[0], this.preScroll[1])
+        //}, 10)
+        //event.preventDefault()
+        this.$nextTick(() => {
+          window.scrollTo(0, scrollPos)
+        })
       })
     },
     getNFTsets() {
