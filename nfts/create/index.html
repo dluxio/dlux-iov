@@ -46,7 +46,7 @@
                 :op="toSign" :lapi="lapi" />
         </div>
         <main role="main" class="flex-shrink-0">
-            <div class="container" style="max-width: 1600px;">
+            <div class="container">
                 <div class="alert alert-danger" role="alert">
                     This page does not yet work. Take a look around, but seriously, it doesn't work.
                 </div>
@@ -195,12 +195,12 @@
                         </div>
                     </div>
                     <div class="tab-pane fade" id="nav-proof" role="tabpanel" aria-labelledby="nav-proof-tab">
-                        <div class="container-fluid bg-dark rounded my-5 py-3">
+                        <div class="container-fluid bg-dark rounded my-5 p-3">
                             <h1>PROOF NFT SET</h1>
                             <h4>ALPHA v0.2</h4>
                             <p class="lead">Proof your set before publishing</p>
                             <div id="preview">
-                                <div class="mb-3">
+                                <div class="">
                                     <!-- name -->
                                     <div class="form-group row mb-2">
                                         <label for="testname" class="col-sm-2 col-form-label">Set</label>
@@ -217,15 +217,33 @@
                                                 v-model="testscript">
                                         </div>
                                     </div>
-
+                                    <!-- min -->
+                                    <div class="form-group row mb-2">
+                                        <label for="testname" class="col-sm-2 col-form-label">Min</label>
+                                        <div class="col-sm-10">
+                                            <input v-model="testmin" type="text" class="form-control" v-model="testuid">
+                                        </div>
+                                    </div>
+                                    <!-- max -->
+                                    <div class="form-group row mb-2">
+                                        <label for="testname" class="col-sm-2 col-form-label">Max</label>
+                                        <div class="col-sm-10">
+                                            <input v-model="testmax" type="text" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="d-flex">
+                                        <button class="ms-auto me-auto btn btn-primary" type="button"
+                                            @click="buildTestItem()">Preview</button>
+                                    </div>
                                 </div>
-                                <div class="row mb-3">
+                                <div class="row my-3" v-if="debounceTestScript">
                                     <!-- banner img -->
-                                    <img class="banner-img w-100 img-fluid" v-if="debounceTestScript" :src="'https://ipfs.dlux.io/ipfs/' + testset.set.banner">
+                                    <img class="banner-img w-100 img-fluid" v-if="debounceTestScript"
+                                        :src="'https://ipfs.dlux.io/ipfs/' + testset.set.banner">
                                 </div>
 
 
-                                <div class="row">
+                                <div class="row" v-if="debounceTestScript">
                                     <!-- Set Card -->
                                     <div class="col-md-6 mb-3 mx-auto" style="max-width: 600px;">
                                         <setcard key="1" v-if="debounceTestScript" :set="testset"
@@ -233,32 +251,35 @@
                                     </div>
                                     <!-- NFT Card -->
                                     <div class="col-md-6 mb-3 mx-auto" style="max-width: 512px;">
-                                        <!-- Test UID range -->
-                                         <form action="javascript:void(0);">
-                                        <div class="form-group row mb-2">
-                                            <label for="testname" class="col-sm-2 col-form-label">Min</label>
-                                            <div class="col-sm-10">
-                                                <input v-model="testmin" type="text" class="form-control"
-                                                    v-model="testuid">
-                                            </div>
-                                            <label for="testname" class="col-sm-2 col-form-label">Max</label>
-                                            <div class="col-sm-10">
-                                                <input v-model="testmax" type="text" class="form-control" >
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="slider" class="form-label">Slider</label>
-                                                <input type="range" class="form-range" id="slider" :min="testmin" :max="testmax" step="1" value="0" 
-                                                 v-model="testnum">
-                                                <div id="sliderValue">Value: {{ testnum }} / {{ testuid }}</div>
-                                            </div>
-                                        </div>
-                                        <div class="my-auto">
+
+                                        <div class="d-flex flex-column h-100">
+                                            <div class="flex-shrink-0">
                                             <nftcard key="0" v-if="debounceTestScript" :item="testitem"
                                                 :ocolors="'linear-gradient(' + testset.set.Color1 + ',' + testset.set.Color2 + ')'"
                                                 :oicon="testset.set.faicon" :uid="Base64toNumber(testuid)"
                                                 :inventory="true" :account="account"></nftcard>
+                                            </div>
+                                            <div class="d-flex flex-grow-1 rounded mt-2 p-3 bg-darkg">
+                                                <input type="range" class="form-range my-auto" id="slider" :min="testmin"
+                                                    :max="testmax" step="1" value="0" v-model="testnum">
+                                            </div>
                                         </div>
-                                    </form>
+                                        <!-- Test UID slider -->
+                                        <div class="rounded bg-darkg p-2 d-none" v-if="debounceTestScript">
+                                            <div class="form-group row mb-auto">
+                                                <div class="d-flex mb-2">
+                                                    <label for="slider" class="lead">UID Selector</label>
+                                                    <label for="slider" class="ms-auto lead">{{ testnum }} / {{
+                                                        testuid }}</label>
+                                                </div>
+                                                <input type="range" class="form-range mb-2" id="slider" :min="testmin"
+                                                    :max="testmax" step="1" value="0" v-model="testnum">
+                                                <div id="sliderValue" class="form-label text-center">Scroll the slider
+                                                    to preview
+                                                    differeint UIDs</div>
+
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
