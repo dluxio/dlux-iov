@@ -6,6 +6,9 @@
 body {
   background-color: #001a33;
 }
+#app {
+  overflow: visible;
+}
 [v-cloak] {
   display: none !important;
 }
