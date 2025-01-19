@@ -63,8 +63,8 @@
                                     role="tab" aria-controls="nav-proof" aria-selected="false">2. Preview</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" id="nav-mint-tab" data-bs-toggle="tab" href="#nav-mint"
-                                    role="tab" aria-controls="nav-mint" aria-selected="false">3.
+                                <a class="nav-link" id="nav-mint-tab" data-bs-toggle="tab" href="#nav-mint" role="tab"
+                                    aria-controls="nav-mint" aria-selected="false">3.
                                     Mint</a>
                             </li>
                         </ul>
@@ -120,7 +120,9 @@
                                                 recommended.</div>
                                         </div>
                                         <div class="ms-auto my-1">
-                                            <div class="btn btn-outline-primary text-nowrap">Select Image</div>
+                                            <button type="button" class="btn btn-outline-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#spkModal">
+                                                Select Image
+                                            </button>
                                         </div>
                                     </div>
                                     <!-- Featured Image-->
@@ -253,11 +255,14 @@
                                         <div class="form-group col-lg-4 mb-3">
                                             <div class="d-flex align-items-center mb-1">
                                                 <label class="form-label lead mb-0">Font Awesome Icon</label>
-                                                <div class="ms-auto rainbow-text" style="background-image: linear-gradient(rgb(194, 255, 182), rgb(255, 163, 182), rgb(221, 169, 255), rgb(162, 209, 255)); background-clip: text; -webkit-text-fill-color: transparent;">
+                                                <div class="ms-auto rainbow-text"
+                                                    style="background-image: linear-gradient(rgb(194, 255, 182), rgb(255, 163, 182), rgb(221, 169, 255), rgb(162, 209, 255)); background-clip: text; -webkit-text-fill-color: transparent;">
                                                     <i :class="SA.faicon + ' fa-fw fs-3'"></i>
                                                 </div>
                                             </div>
-                                            <p class="form-text text-muted">Enter your fa icon (free only, <a href="https://fontawesome.com/search?ic=free" target="_blank" class="text-info no-decoration">list here</a>)</p>
+                                            <p class="form-text text-muted">Enter your fa icon (free only, <a
+                                                    href="https://fontawesome.com/search?ic=free" target="_blank"
+                                                    class="text-info no-decoration">list here</a>)</p>
                                             <input type="text" class="form-control bg-darkg border-0" id=""
                                                 placeholder="fa fa-gem" v-model="SA.faicon">
                                         </div>
@@ -638,6 +643,23 @@
                                         </div>
                                     </div>
                             </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- SPK MODAL -->
+            <div class="modal fade modal-xl" id="spkModal" tabindex="-1" aria-labelledby="spkModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="spkModalLabel">SPK Network</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <contract-vue :nodeview="false" :account="pageAccount"
+                            @tosign="toSign=$event" :prop_contracts="contracts" :accountinfo="accountinfo"
+                            :spkapi="spkapi" @done="getSapi"></contract-vue>
                         </div>
                     </div>
                 </div>
