@@ -495,6 +495,8 @@ export default {
                                                         <tr class="collapse" :id="replace(contract.i)">
                                                             <td class="border-0 px-0 px-md-1" colspan="4">
                                                                 <div class="d-flex flex-column border border-white rounded text-start py-2" style="background-color:rgba(0,0,0,0.3);">
+                                                                    <div class="mx-1 mx-xl-5 p-sm-1 p-lg-2">
+                                                                        <div class="mx-lg-3">
 
                                                                     <!-- contract ID -->
                                                                     <div class="d-flex justify-content-center small text-white-50 mb-3">
@@ -503,7 +505,7 @@ export default {
                                                                     </div>
 
                                                                     <!-- node storage -->
-                                                                    <div class="mx-1 mx-lg-5 mb-3" v-if="contract.c == 2">
+                                                                    <div class="mb-3" v-if="contract.c == 2">
                                                                         <div class="alert alert-warning d-flex align-items-center">
                                                                             <div class="d-flex flex-grow-1 flex-wrap me-1 align-items-center mx-1">
                                                                                 <div class="fs-3 fw-lighter">
@@ -531,8 +533,8 @@ export default {
                                                                
 
                                                                     <!-- upload time banner -->
-                                                                    <div v-if="contract.c == 1" class="mx-1 mx-lg-5 mb-3">
-                                                                        <div class="alert alert-warning d-flex align-items-center mx-lg-5">
+                                                                    <div v-if="contract.c == 1" class="mb-3">
+                                                                        <div class="alert alert-warning d-flex align-items-center">
                                                                             <div class="d-flex flex-grow-1 flex-wrap me-1 align-items-center">
                                                                                 <div class="mx-1">
                                                                                     <div class="fs-3 fw-lighter">You have {{exp_to_time(contract.e)}} to start this contract</div>
@@ -545,7 +547,7 @@ export default {
                                                                     </div>
 
                                                                     <!-- post time banner -->
-                                                                    <div v-if="contract.c == 2" class="mx-1 mx-lg-5 mb-3">
+                                                                    <div v-if="contract.c == 2" class="mb-3">
                                                                         <div v-if="!nodeview" class="alert alert-warning d-flex align-items-center">
                                                                             <div class="d-flex flex-grow-1 flex-wrap me-1 align-items-center mx-1">
                                                                                 <div class="fs-3 fw-lighter">You have {{exp_to_time(contract.e)}} to publish this contract</div>
@@ -559,7 +561,7 @@ export default {
                                                                     
 
                                                                     <!-- post -->
-                                                                    <div v-if="spkapi.name == contract.t && !postpage && contract.c == 2" class="mb-3 mx-1 mx-lg-5 p-sm-1 p-lg-2 rounded" style="background-color:rgba(0,0,0,0.3)">
+                                                                    <div v-if="spkapi.name == contract.t && !postpage && contract.c == 2" class="mb-3 rounded" style="background-color:rgba(0,0,0,0.3)">
                                                                         <div class="d-flex flex-column">
                                                                             <div>
                                                                                 <div class="mx-auto ms-md-1 mt-2 lead fs-2">Post Details</div>
@@ -588,7 +590,7 @@ export default {
                                                                     <div v-if="contract.c > 1">
 
                                                                         <div class="mx-1" v-if="contract.c > 2"> 
-                                                                            <div class="gradient-border bg-dark mb-3 mx-1 mx-lg-5 p-sm-1 p-lg-2"> 
+                                                                            <div class="gradient-border bg-dark mb-3 p-sm-1 p-lg-2"> 
                                                                                 <div class="d-flex flex-wrap justify-content-around justify-content-md-between mx-1 mx-md-2 pt-1 pt-md-2">
                                                                                     <div class="fs-1 fw-bold align-items-start">SPK Network</div>
                                                                                    <div class="input-group-text">
@@ -615,7 +617,7 @@ export default {
                                                                             </div>
                                                                         </div>
 
-                                                                        <div class="mb-3 mx-1 mx-lg-5 p-sm-1 p-lg-2 rounded" style="background-color:rgba(0,0,0,0.3)">
+                                                                        <div class="mb-3 p-sm-1 p-lg-2 rounded" style="background-color:rgba(0,0,0,0.3)">
                                                                             <div class="d-flex flex-column">
                                                                                 <div>
                                                                                     <div class="mx-auto ms-md-1 mt-2 lead fs-2">{{pluralFiles(contract.i)}} File{{pluralFiles(contract.i) > 1 ? 's' : ''}}</div>
@@ -798,7 +800,7 @@ export default {
                                                                     
 
                                                                     <!-- contract details -->
-                                                                    <div class="d-flex flex-wrap justify-content-center my-3 small mx-lg-5">
+                                                                    <div class="d-flex flex-wrap justify-content-center my-3 small">
 
                                                                         
                                                                         <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
@@ -870,9 +872,12 @@ export default {
                                                                         <button type="button" class="btn btn-sm btn-danger my-2 mx-auto" :class="{'invisible': contract.t != account}" :disabled="contract.t != account" @click="cancel_contract(contract)">
                                                                         <i class="fa-solid fa-file-circle-xmark fa-fw me-1"></i>End Contract</button>
                                                                     </div>
-                                                                </div>
 
-   
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+
                                                                
 
                                                                 

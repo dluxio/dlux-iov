@@ -7,7 +7,7 @@ export default {
   template: `
  <!--file uploader-->
     <Transition>
-       <div v-if="contract.i">
+       <div v-if="contract.i" class="">
         <div>
             <form onsubmit="return false;">
                 <div class="d-flex justify-content-between align-items-center">
@@ -29,7 +29,7 @@ export default {
 
 
 
-        <div v-if="File.length" class="mx-lg-5 rounded px-1 p-lg-2" style="background-color:rgba(0,0,0,0.3)">
+        <div v-if="File.length" class="rounded" style="background-color:rgba(0,0,0,0.3)">
 
             <div class="d-flex mx-1">
                 <div class="mx-auto mt-2 lead fs-2">{{ fileCount }} | {{fancyBytes(totalSize)}}</div>
@@ -268,7 +268,7 @@ export default {
 
 
         <!-- encryption banner -->
-        <div v-if="type != 'video'" class="card card-body d-flex align-items-center mx-lg-5 my-3">
+        <div v-if="type != 'video'" class="card card-body d-flex align-items-center my-3">
             <div class="d-flex flex-column w-100 flex-grow-1 mx-1 px-md-2 px-lg-5">
 
                 <!-- bubble preview -->
