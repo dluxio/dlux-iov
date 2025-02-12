@@ -80,7 +80,7 @@ let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
 // el: "#app", // vue 2
 createApp({
   directives: {
-    scroll
+    //scroll
   },
   data() {
     return {
