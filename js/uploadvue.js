@@ -29,13 +29,13 @@ export default {
 
 
 
-        <div v-if="File.length" class="mx-lg-5 rounded" style="background-color:rgba(0,0,0,0.3)">
+        <div v-if="File.length && !encryption.encrypted" class="mx-lg-5 rounded" style="background-color:rgba(0,0,0,0.3)">
 
             <div class="d-flex mx-1">
                 <div class="mx-auto ms-md-1 mt-2 lead fs-2">{{ fileCount }} | {{fancyBytes(totalSize)}}</div>
             </div>
 
-            <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key,index) in FileInfo"
+            <div id="listOfImgs" v-for="(file, key,index) in FileInfo"
                 class="rounded px-1 p-lg-2">
                 <div class="my-2 card " v-if="!FileInfo[file.name].is_thumb">
                     <div class="d-flex flex-wrap align-items-center px-2 py-1">
