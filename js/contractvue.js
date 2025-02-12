@@ -33,7 +33,7 @@ export default {
                             <button v-if="!nodeview" type="button" class="btn btn-sm btn-dark border-secondary text-secondary d-flex justify-content-center" data-bs-toggle="modal" data-bs-target="#spkWalletModal" style="width:110px;">
                                 <i class="fa-solid fa-wallet fa-fw me-1 my-auto"></i>
                                 <span class="my-auto">Wallet</span>
-                                <span class="badge small text-bg-secondary text-black ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
+                                <span class="badge small text-bg-light text-black ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
                             </button>
                             <modal-vue type="power" token="SPK" test="test"
                                     func="Power Up" :balance="saccountapi.spk"
