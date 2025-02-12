@@ -2,3 +2,7 @@
 /docs/.vitepress/dist
 /packages
 node_modules
+.vscode/settings.json
+css/bootstrap/.DS_Store
+css/bootstrap/tests/.DS_Store
+js/.DS_Store
