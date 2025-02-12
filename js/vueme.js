@@ -4771,7 +4771,7 @@ function buyNFT(setname, uid, price, type, callback){
       }
     }
     this.pendingTokens = JSON.parse(localStorage.getItem(`pendingTokens`)) || []
-    window.addEventListener('scroll', this.handleScroll);
+    //window.addEventListener('scroll', this.handleScroll);
     //check hash
     if (location.hash) {
       if (location.hash == "#blog") {
@@ -4810,7 +4810,7 @@ function buyNFT(setname, uid, price, type, callback){
     this.observer.disconnect();
   },
   unmounted() {
-    window.removeEventListener('scroll', this.handleScroll);
+    //window.removeEventListener('scroll', this.handleScroll);
   },
   watch: {
     postSelect(a, b) {
