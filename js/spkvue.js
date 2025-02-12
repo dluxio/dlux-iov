@@ -58,7 +58,7 @@ console.log({
 
 createApp({
   directives:{
-    scroll
+    //scroll
   },
   data() {
     return {
