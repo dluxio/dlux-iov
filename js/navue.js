@@ -1068,7 +1068,7 @@ export default {
                     class="fas fa-wallet fa-fw me-2"></i>Wallet</a></li>
               <li v-if="!node" class=""><a class="dropdown-item" :href="'/me#inventory/'"
                   @click="showTab('inventory')"><i class="fas fa-boxes fa-fw me-2"></i>Inventory</a></li>
-              <li v-if="!node" class=""><a class="dropdown-item" :href="'/me#cloud/'" @click="showTab('files')"><i
+              <li v-if="!node" class=""><a class="dropdown-item" :href="'/me#cloud/'" @click="showTab('cloud')"><i
                     class="fas fa-cloud fa-fw me-2"></i>Cloud</a></li>
               <li class="" v-if="!node">
                 <hr class="dropdown-divider">
