@@ -35,9 +35,9 @@ export default {
                 <div class="mx-auto ms-md-1 mt-2 lead fs-2">{{ fileCount }} | {{fancyBytes(totalSize)}}</div>
             </div>
 
-            <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key,index) in FileInfo"
+            <div id="listOfImgs" v-if="!encryption.encrypted && !FileInfo[file.name].is_thumb" v-for="(file, key, index) in FileInfo"
                 class="rounded px-1 p-lg-2">
-                <div class="my-2 card " v-if="!FileInfo[file.name].is_thumb">
+                <div class="my-2 card">
                     <div class="d-flex flex-wrap align-items-center px-2 py-1">
                         <div>
                             <div class="fs-4 fw-light m-0 text-break"><span
