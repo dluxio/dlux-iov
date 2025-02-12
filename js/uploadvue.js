@@ -29,15 +29,15 @@ export default {
 
 
 
-        <div v-if="File.length" class="mx-lg-5 rounded" style="background-color:rgba(0,0,0,0.3)">
+        <div v-if="File.length" class="mx-lg-5 rounded px-1 p-lg-2" style="background-color:rgba(0,0,0,0.3)">
 
             <div class="d-flex mx-1">
                 <div class="mx-auto ms-md-1 mt-2 mb-1 lead fs-2">{{ fileCount }} | {{fancyBytes(totalSize)}}</div>
             </div>
 
             <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key, index) in Object.values(FileInfo).filter(file => !file.is_thumb)"
-                class="rounded px-1 p-lg-2">
-                <div class="card">
+                class="rounded">
+                <div class="card mb-2">
                     <div class="d-flex flex-wrap align-items-center px-2 py-1">
                         <div>
                             <div class="fs-4 fw-light m-0 text-break"><span
@@ -209,8 +209,8 @@ export default {
 
 
 
-            <div id="listOfEncs" v-if="encryption.encrypted" v-for="(file, key, index) in Object.values(FileInfo).filter(file => !file.is_thumb)" class="rounded px-1 p-lg-2">
-                <div class="card card-body">
+            <div id="listOfEncs" v-if="encryption.encrypted" v-for="(file, key, index) in Object.values(FileInfo).filter(file => !file.is_thumb)" class="rounded">
+                <div class="card mb-2">
                     <div class="d-flex flex-wrap align-items-center px-2 py-1">
                         <div>
                             <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i
