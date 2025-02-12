@@ -209,8 +209,8 @@ export default {
 
 
 
-            <div id="listOfEncs" v-if="encryption.encrypted" v-for="(file, key,index) in FileInfo" class="rounded px-1 p-lg-2">
-                <div class="my-2 card card-body" v-if="!FileInfo[file.name].is_thumb">
+            <div id="listOfEncs" v-if="encryption.encrypted" v-for="(file, key, index) in Object.values(FileInfo).filter(file => !file.is_thumb)" class="rounded px-1 p-lg-2">
+                <div class="card card-body">
                     <div class="d-flex flex-wrap align-items-center px-2 py-1">
                         <div>
                             <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i
