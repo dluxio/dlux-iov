@@ -18,7 +18,7 @@ export default {
                     </div>
                 </div>
                 <div class="pb-2">
-                    <div class="mx-lg-5 py-5 text-center lead rounded"
+                    <div class="py-5 text-center lead rounded"
                         style="border-width: 2px; border-style: dashed; background-color:rgba(0,0,0,0.3);" id="img-well"
                         @drop="dragFile($event)" @dragenter.prevent @dragover.prevent>
                         Or drag and drop <span v-if="type == 'files'">file(s)</span><span v-if="type == 'video'">thumbnail</span> here
