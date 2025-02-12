@@ -37,7 +37,7 @@ export default {
 
             <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key, index) in Object.values(FileInfo).filter(file => !file.is_thumb)"
                 class="rounded">
-                <div class="card mt-2">
+                <div class="card mt-3">
                     <div class="d-flex flex-wrap align-items-center px-2 py-1">
                         <div>
                             <div class="fs-4 fw-light m-0 text-break"><span
@@ -72,7 +72,7 @@ export default {
                         </div>
                     </div>
 
-                    <div class="d-flex flex-wrap align-items-center  px-2 py-2 mb-1 rounded-bottom">
+                    <div class="d-flex flex-wrap align-items-center px-2 py-2 mb-1 rounded-bottom">
                         <div class="flex-grow-1">
 
                             <div class="d-flex flex-wrap justify-content-around">
@@ -210,7 +210,7 @@ export default {
 
 
             <div id="listOfEncs" v-if="encryption.encrypted" v-for="(file, key, index) in Object.values(FileInfo).filter(file => !file.is_thumb)" class="rounded">
-                <div class="card mt-2">
+                <div class="card mt-3">
                     <div class="d-flex flex-wrap align-items-center px-2 py-1">
                         <div>
                             <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i
@@ -242,7 +242,7 @@ export default {
                                     class="fas fa-fw fa-trash-alt"></i></button>
                         </div>
                     </div>
-                    <div class="d-flex flex-column justify-content-center w-100" v-if="FileInfo[file.name]">
+                    <div class="d-flex flex-column justify-content-center w-100 px-2 py-1" v-if="FileInfo[file.name]">
 
                         <div class="">Bytes: {{fancyBytes(FileInfo[file.name].enc_size)}}</div>
                         <div class="text-break">CID:
