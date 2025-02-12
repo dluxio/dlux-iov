@@ -13611,27 +13611,28 @@ a-scene {
   margin-right: 0px;
 }
 
-/* ul.scroll {
+ul.scroll {
   margin: 0;
   padding: 0;
   animation: scrollUp 4s 1s infinite forwards;
-  li.scroll {
-    opacity: 1;
-    height: 80px;
-    padding-left: 0px;
-    padding-right: 0px;
-    list-style: none;
-    text-align: right;
-  }
-} */
-/* @keyframes scrollUp {
+}
+ul.scroll li.scroll {
+  opacity: 1;
+  height: 80px;
+  padding-left: 0px;
+  padding-right: 0px;
+  list-style: none;
+  text-align: right;
+}
+
+@keyframes scrollUp {
   from {
     transform: translateY(0);
   }
   to {
-    transform: translateY((-100% / $scroll-count) * ($scroll-count - 1));
+    transform: translateY(-80%);
   }
-} */
+}
 .dropdown-menu {
   overflow: hidden;
   overflow-y: auto;
