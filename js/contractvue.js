@@ -859,7 +859,7 @@ export default {
                                                                          <div class="d-flex align-items-center px-3 py-1 m-1 rounded-pill border border-white">
                                                                             <div> Nodes </div>
                                                                             <i class="fa-solid fa-tower-broadcast mx-1 fa-fw"></i>
-                                                                            <div>{{contract.nt}} /
+                                                                            <div>{{contract.nt ?? 0}} /
                                                                                 {{contract.p}} </div>
                                                                         </div>
 
