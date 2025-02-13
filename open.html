@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Card Pack Opening</title>
+    
+    <!-- Custom Bootstrap CSS -->
+    <link href="/css/custom.css" rel="stylesheet" />
+
+    <style>
+        body {
+            background-color: #111;
+        }
+
+        .card-container {
+            position: relative;
+            width: 500px;
+            height: 638px;
+            perspective: 1000px;
+            cursor: pointer;
+            border-radius: 20px; /* Match the corner radius of the gold border */
+        }
+
+        /* Artwork is fully visible but covered by sealed pack */
+        .artwork-container {
+            width: 100%; /* Fill the width of the card */
+            height: 100%; /* Fill the height of the card */
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: url('https://ipfs.dlux.io/ipfs/QmYLzhBj3HAHjUHZRN8GdwprSm4Qd9BNTEe7MNfMMTF7Jd') no-repeat center/cover;
+            border: 24px solid gold; /* Doubled the gold border width */
+            border-radius: 20px; /* Rounded corners for the border */
+            box-shadow: 12px 12px 30px rgba(0, 0, 0, 0.6); /* Black drop shadow falling down and to the right */
+            z-index: 1;
+        }
+
+        /* The artwork itself will remain with square corners */
+        .artwork {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            background: url('https://ipfs.dlux.io/ipfs/QmYLzhBj3HAHjUHZRN8GdwprSm4Qd9BNTEe7MNfMMTF7Jd') no-repeat center/cover;
+            z-index: 2;
+        }
+
+        /* Sealed pack split into two perfect halves */
+        .sealed-top, .sealed-bottom {
+            position: absolute;
+            width: 100%;
+            height: 50%;
+            background: url('/img/ragnarok_sealed.png') no-repeat center/cover;
+            z-index: 3;
+            transition: transform 0.8s ease-in-out, opacity 0.3s ease-in-out;
+            clip-path: inset(0 0 0 0); /* Remove clipping for perfect rectangles */
+        }
+
+        /* Add rounded top corners to the sealed top */
+        .sealed-top {
+            top: 0;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+
+        /* Add rounded top corners to the sealed bottom */
+        .sealed-bottom {
+            bottom: 0;
+            border-top-left-radius: 20px; /* Now rounded top corners for bottom */
+            border-top-right-radius: 20px; /* Now rounded top corners for bottom */
+            transform: rotate(180deg); /* Rotate the bottom sealed pack by 180 degrees */
+        }
+
+        /* Tearing animation */
+        .tear-top {
+            transform: translateY(-120%) rotateX(10deg);
+            opacity: 0;
+        }
+
+        .tear-bottom {
+            transform: translateY(120%) rotateX(-10deg);
+            opacity: 0;
+        }
+
+        /* Lightning effect */
+        .lightning {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .flash {
+            animation: lightningFlash 0.3s ease-out 2 alternate;
+        }
+
+        @keyframes lightningFlash {
+            0% { opacity: 0.8; }
+            50% { opacity: 0.4; }
+            100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body class="d-flex justify-content-center align-items-center vh-100 bg-dark">
+
+    <!-- Lightning Effect -->
+    <div class="lightning"></div>
+
+    <div class="card-container" onclick="openCard(this)">
+        <!-- Artwork Container with Gold Border and Rounded Corners -->
+        <div class="artwork-container">
+            <!-- The artwork itself stays with square corners -->
+            <div class="artwork"></div>
+        </div>
+
+        <!-- Sealed Pack -->
+        <div class="sealed-top"></div>
+        <div class="sealed-bottom"></div>
+    </div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function openCard(container) {
+            let sealedTop = container.querySelector('.sealed-top');
+            let sealedBottom = container.querySelector('.sealed-bottom');
+            let lightning = document.querySelector('.lightning');
+
+            // Trigger lightning flash effect
+            lightning.classList.add('flash');
+
+            setTimeout(() => {
+                // Apply tearing effect
+                sealedTop.classList.add('tear-top');
+                sealedBottom.classList.add('tear-bottom');
+
+                setTimeout(() => {
+                    sealedTop.style.display = 'none';
+                    sealedBottom.style.display = 'none';
+                }, 800); // After tearing animation completes
+            }, 300); // Lightning happens before the tear starts
+
+            // Remove lightning effect after animation
+            setTimeout(() => {
+                lightning.classList.remove('flash');
+            }, 600);
+        }
+    </script>
+
+</body>
+</html>
