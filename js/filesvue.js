@@ -1451,9 +1451,14 @@ export default {
         'contracts': {
             handler(newValue, oldValue) {
                 //find the difference in this object
-                console.log(newValue, oldValue)
-                const diff = Object.keys(newValue).filter(k => newValue[k] !== oldValue[k])
-                if (diff.length) {
+                var diff = false
+                for(var i = 0; i < newValue.length; i++){
+                    if (!this.newMeta[newValue[i].i]) {
+                        diff = true
+                        break
+                    }
+                }
+                if (diff) {
                     if (this.debounce && new Date().getTime() - this.debounce < 1000) {
                         setTimeout(() => {
                             this.init()
