@@ -1459,12 +1459,7 @@ export default {
                     }
                 }
                 if (diff) {
-                    if (this.debounce && new Date().getTime() - this.debounce < 1000) {
-                        setTimeout(() => {
-                            this.init()
-                        }, 1000)
-                        return
-                    }
+                    if (this.debounce && new Date().getTime() - this.debounce < 1000)return
                     this.init()
                     this.debounce = new Date().getTime()
                 }
