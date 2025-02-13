@@ -11,13 +11,19 @@
     <style>
         body {
             background-color: #111;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
 
         .card-container {
             position: relative;
-            width: 500px;
-            height: 638px;
-            perspective: 1000px;
+            width: 80vw; /* Width relative to viewport size */
+            max-width: 500px; /* Maximum width to keep it within 500px */
+            aspect-ratio: 5 / 6; /* Keep the 500x638 ratio */
             cursor: pointer;
             border-radius: 20px; /* Match the corner radius of the gold border */
         }
@@ -106,7 +112,7 @@
         }
     </style>
 </head>
-<body class="d-flex justify-content-center align-items-center vh-100 bg-dark">
+<body>
 
     <!-- Lightning Effect -->
     <div class="lightning"></div>
