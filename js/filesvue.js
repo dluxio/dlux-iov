@@ -855,8 +855,10 @@ export default {
     methods: {
         isValidThumb(string) {
             console.log('valIMG',string)
-            if (string.indexOf(":") == -1) return false
-            else return true
+            if (string.indexOf(":") == -1) {
+                console.log('valIMG',string)
+                return false
+            } else return true
         },
         addAsset(id, contract) {
             this.$emit("addassets", { id, contract });
