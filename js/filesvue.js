@@ -854,7 +854,6 @@ export default {
     emits: ["addassets"],
     methods: {
         isValidThumb(string) {
-            console.log('valIMG',string)
             if (string.indexOf(":") == -1) {
                 console.log('valIMG',string)
                 return false
