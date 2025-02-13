@@ -860,9 +860,9 @@ export default {
         addAsset(id, contract) {
             this.$emit("addassets", { id, contract });
         },
-        cycleView(user){
+        cycleView(user) {
             const view = this.filesSelect.addusers[user]
-            switch(view){
+            switch (view) {
                 case true:
                     this.filesSelect.addusers[user] = 'cc'
                     break
@@ -878,7 +878,7 @@ export default {
             }
             this.render()
         },
-        purge(user){
+        purge(user) {
             delete this.filesSelect.addusers[user]
             this.owners = this.owners.filter(o => o != user)
             this.render()
@@ -887,7 +887,7 @@ export default {
             const newUser = this.newUser
             this.newUser = ''
             this.filesSelect.addusers[newUser] = true
-            if(newUser)fetch("https://spktest.dlux.io/@" + newUser)
+            if (newUser) fetch("https://spktest.dlux.io/@" + newUser)
                 .then((response) => response.json())
                 .then((data) => {
                     this.contractIDs[newUser] = {}
@@ -1219,7 +1219,7 @@ export default {
 
                     }
                 }
-                switch (this.filesSelect.addusers[file.o]){
+                switch (this.filesSelect.addusers[file.o]) {
                     case false:
                         return false
                     case 'lock':
@@ -1232,7 +1232,7 @@ export default {
                     default:
                         return false
                 }
-                if(this.filesSelect.cc_only && (!file.lic && file.o != this.account)) return false
+                if (this.filesSelect.cc_only && (!file.lic && file.o != this.account)) return false
                 if (this.filesSelect.search && file.n.toLowerCase().indexOf(this.filesSelect.search.toLowerCase()) == -1) return false
                 return true
             })
@@ -1260,7 +1260,7 @@ export default {
         },
         getImgData(id, cid) {
             var string = this.smartThumb(id, cid)
-            if(string.includes("https://"))fetch(string).then(response => response.text()).then(data => {
+            if (string.includes("https://")) fetch(string).then(response => response.text()).then(data => {
                 console.log("includes https", string)
                 if (data.indexOf('data:image/') >= 0) this.newMeta[id][cid].thumb_data = data
                 else this.newMeta[id][cid].thumb_data = string
@@ -1272,10 +1272,10 @@ export default {
         init() {
             var contracts = []
             //for (var user in this.contracts) {
-                for (var id in this.contracts) {
-                    contracts.push(this.contracts[id])
-                    if(this.nodeview)this.filesSelect.addusers[this.contracts[id].t] = true
-                }
+            for (var id in this.contracts) {
+                contracts.push(this.contracts[id])
+                if (this.nodeview) this.filesSelect.addusers[this.contracts[id].t] = true
+            }
             //}
             for (var user in this.filesSelect.addusers) {
                 for (var id in this.contractIDs[user]) {
@@ -1451,28 +1451,30 @@ export default {
             handler: function (newValue, oldValue) {
                 //find the difference in this object
                 const diff = Object.keys(newValue).filter(k => newValue[k] !== oldValue[k])
-                if (diff.length && this.debounce && new Date().getTime() - this.debounce < 1000) {
-                    setTimeout(() => {
-                        this.init()
-                    },1000)
-                    return
+                if (diff.length) {
+                    if (this.debounce && new Date().getTime() - this.debounce < 1000) {
+                        setTimeout(() => {
+                            this.init()
+                        }, 1000)
+                        return
+                    }
+                    this.init()
+                    this.debounce = new Date().getTime()
                 }
-                this.init()
-                this.debounce = new Date().getTime()
             },
             deep: true
         },
         'account': {
             handler: function (newValue) {
-                if(this.account)this.filesSelect.addusers[this.account] = true
+                if (this.account) this.filesSelect.addusers[this.account] = true
                 this.init()
             },
             deep: false
         },
-        
+
     },
-    mounted() { 
-        if(this.account)this.filesSelect.addusers[this.account] = true
-        if(!this.nodeview)this.filesSelect.cc_only = false
+    mounted() {
+        if (this.account) this.filesSelect.addusers[this.account] = true
+        if (!this.nodeview) this.filesSelect.cc_only = false
     },
 };
