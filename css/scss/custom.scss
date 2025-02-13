@@ -1242,14 +1242,14 @@ ul.scroll {
   }
 }
 
-@keyframes scrollUp {
+/* @keyframes scrollUp {
   from {
     transform: translateY(0);
   }
   to {
     transform: translateY((-100% / $scroll-count) * ($scroll-count - 1));
   }
-}
+} */
 
 .dropdown-menu {
   overflow: hidden;

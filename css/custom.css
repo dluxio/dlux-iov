@@ -13591,6 +13591,8 @@ a-scene {
   --bs-btn-active-color: #000;
 }
 
+/* $scroll-count: 5;
+$scroll: 1 / $scroll-count; */
 .flex-table:hover {
   background: #292846;
   transition: 500ms;
@@ -13625,14 +13627,14 @@ ul.scroll li.scroll {
   text-align: right;
 }
 
-@keyframes scrollUp {
+/* @keyframes scrollUp {
   from {
     transform: translateY(0);
   }
   to {
-    transform: translateY(-80%);
+    transform: translateY((-100% / $scroll-count) * ($scroll-count - 1));
   }
-}
+} */
 .dropdown-menu {
   overflow: hidden;
   overflow-y: auto;

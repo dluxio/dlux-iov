@@ -1379,7 +1379,7 @@
                         <!-- cloud tab -->
                         <div role="tabpanel" ref="cloudTab" class="tab-pane fade" id="cloud" aria-labelledby="cloudtab">
                             <div class="container">
-                                <div class="rounded my-3 pt-1" style="background-color: rgba(0, 0, 0, 0.5);">
+                                <div class="rounded my-3 pt-1" >
                                     <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount"
                                         @tosign="toSign=$event" :prop_contracts="contracts" :accountinfo="accountinfo"
                                         :spkapi="spkapi" @done="getSapi"></contract-vue>

@@ -18,91 +18,94 @@ export default {
         "choices-vue": ChoicesVue
     },
     template: `
-    <div class="d-flex flex-column">
-    <div class="d-flex flex-grow-1 p-1" v-if="!nodeview">
-        <div class="d-flex flex-grow-1 flex-wrap align-items-stretch justify-content-around">
-            
-            
-            <div class="card m-1" style="width: 18rem;">
-                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-atom me-1"></i><span>SPK</span></div>
-                <div class="card-body px-2 py-1">
-                    <div class="d-flex flex-column">
-                        <div class="mb-1 fw-light d-flex justify-content-center" style="font-size: 1.1rem !important;">{{formatNumber((saccountapi.spk/1000),'3','.',',')}} SPK</div>
-                        <div class="d-flex justify-content-around mt-1">
-                            <!-- spk wallet button -->
-                            <button v-if="!nodeview" type="button" class="btn btn-sm btn-dark border-secondary text-secondary d-flex justify-content-center" data-bs-toggle="modal" data-bs-target="#spkWalletModal" style="width:110px;">
-                                <i class="fa-solid fa-wallet fa-fw me-1 my-auto"></i>
-                                <span class="my-auto">Wallet</span>
-                                <span class="badge small text-bg-light text-black ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
-                            </button>
-                            <modal-vue type="power" token="SPK" test="test"
-                                    func="Power Up" :balance="saccountapi.spk"
-                                    :account="account"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
-                                    <button class="btn btn-sm btn-dark border-warning text-warning trigger"
-                                        type="button" style="width:110px;"><i class="fa-solid fa-bolt fa-fw me-1"></i>Power Up</button>
-                                </modal-vue>
-                        </div>
-                    </div>    
-                </div>
-            </div>
-            
-            
-            <div class="card m-1" style="width: 18rem;">
-                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-bolt me-1"></i>
-                <span class="d-flex align-items-center">Power</span></div>
-                <div class="d-flex flex-column card-body px-2 py-1">
-                    <div class="mb-1 fw-light text-center " style="font-size: 1.1rem !important;">{{formatNumber(saccountapi.spk_power/1000,'3','.',',')}} SPK Power</div>
-                    <div class="progress mb-1 is-danger" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar" :style="{'width':  saccountapi.spk_power ? (broca_calc(saccountapi.broca)/(saccountapi.spk_power*1000))*100 + '%' : '0%' }">{{ formatNumber((broca_calc(saccountapi.broca)/(saccountapi.spk_power*1000))*100,'2','.',',') }}%</div>
-                    </div>
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#buyTokenModal" class="text-center text-primary">Get more power</a>
-                </div>
-            </div>
+    <div class="d-flex flex-column rounded">
+        <div class="rounded-top border-bottom-0" v-if="!nodeview"  style="background-color: rgba(146, 146, 146, 0.3);">
+          <div class="container pt-1">
+            <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-4">
 
-            <div class="card m-1" style="width: 18rem;">
-                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-chart-pie me-1"></i><span>Storage</span></div>
-                <div class="d-flex flex-column card-body px-2 py-1">
-                    <div class="mb-1 fw-light text-center" style="font-size: 1.1rem !important;">{{fancyBytes(usedBytes)}} of {{fancyBytes(availableBytes)}} used</div>
-                    <div class="progress mb-1" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar" :style="'width:' + (usedBytes/availableBytes)*100 + '%;'">{{formatNumber((usedBytes/availableBytes)*100,'2','.',',')}}%</div>
-                    </div>
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#buyTokenModal" class="text-center text-primary">Get more storage</a>
-                </div>
-            </div>
-
-            <div class="card m-1" style="width: 18rem;">
-                <div class="card-header d-flex align-items-center justify-content-between px-2 py-1 fs-4"><i class="fa-solid fa-cloud-arrow-up me-1"></i><span>Upload</span></div>
+                <!-- spk token widget -->
+                <div class="order-lg-3 order-xl-0 mb-3 col spk-widg">
+                    <div class="card-header d-flex align-items-center border-bottom border-1 px-2 py-1 fs-4"><i class="fa-solid fa-atom me-1"></i><span>SPK Token</span></div>
                     <div class="card-body px-2 py-1">
                         <div class="d-flex flex-column">
-                            <div class="mb-1 fw-light text-center" style="font-size: 1.1rem !important;">Open a contract to store files</div>
-                            <div class="d-flex justify-content-around mt-1">
-                                <!-- new contract button -->
-                                <button v-if="saccountapi.pubKey != 'NA' && saccountapi.spk_power" type="button"
-                                    class="btn btn-sm btn-dark border-info text-info" style="width:110px;">
-                                    <modal-vue type="build" token="BROCA" :balance="broca_calc(saccountapi.broca)"
-                                        :account="account" @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
-                                        v-slot:trigger>
-                                        <span slot="trigger" class="trigger"><i
-                                                class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
+                            <div class="mb-1 fw-light d-flex justify-content-center" style="font-size: 1.1rem !important;">{{formatNumber((saccountapi.spk/1000),'3','.',',')}} SPK</div>
+                            <div class="d-flex justify-content-center mt-1">
+                                <!-- spk wallet button -->
+                                <button v-if="!nodeview" type="button" class="btn btn-sm btn-dark border-secondary text-secondary d-flex justify-content-center me-1" data-bs-toggle="modal" data-bs-target="#spkWalletModal" style="width:110px;">
+                                    <i class="fa-solid fa-wallet fa-fw me-1 my-auto"></i>
+                                    <span class="my-auto">Wallet</span>
+                                    <span class="badge small text-bg-light text-black ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
+                                </button>
+                                <modal-vue type="power" token="SPK" test="test"
+                                        func="Power Up" :balance="saccountapi.spk"
+                                        :account="account"
+                                        @modalsign="sendIt($event)" v-slot:trigger>
+                                        <button class="btn btn-sm btn-dark border-warning text-warning trigger ms-1"
+                                            type="button" style="width:110px;"><i class="fa-solid fa-bolt fa-fw me-1"></i>Power Up</button>
                                     </modal-vue>
-                                </button>
-                                <!-- free button -->
-                                <button v-if="saccountapi.pubKey != 'NA'" type="button" class="btn btn-sm btn-dark border-success text-success"
-                                    data-bs-toggle="modal" data-bs-target="#sponsoredModal" style="width:110px;">
-                                    <span class=""></span><i class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE
-                                </button>
-                                <!-- register -->
-                                <button v-if="saccountapi.pubKey == 'NA'" type="button" class="btn btn-sm btn-dark border-info text-info"
-                                    @click="updatePubkey()" style="width:110px;">
-                                    <span class=""></span><i class="fa-solid fa-user-plus fa-fw me-1"></i>Register
-                                </button>
-                                  
+                            </div>
                         </div>    
-                    </div>    
+                    </div>
+                </div>           
+            
+                <!-- spk power widget -->
+                <div class="order-lg-0 order-xl-1 mb-3 col spk-widg">
+                    <div class="card-header d-flex align-items-center border-bottom border-1 px-2 py-1 fs-4"><i class="fa-solid fa-bolt me-1"></i>
+                    <span class="d-flex align-items-center">SPK Power</span></div>
+                    <div class="d-flex flex-column card-body px-2 py-1">
+                        <div class="mb-1 fw-light text-center " style="font-size: 1.1rem !important;">{{formatNumber(saccountapi.spk_power/1000,'3','.',',')}} SPK Power</div>
+                        <div class="progress mb-1 is-danger" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar" :style="{'width':  saccountapi.spk_power ? (broca_calc(saccountapi.broca)/(saccountapi.spk_power*1000))*100 + '%' : '0%' }">{{ formatNumber((broca_calc(saccountapi.broca)/(saccountapi.spk_power*1000))*100,'2','.',',') }}%</div>
+                        </div>
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#buyTokenModal" class="text-center text-primary">Get more power</a>
+                    </div>
                 </div>
-            </div>
+           
+                <!-- storage widget -->
+                <div class="order-lg-1 order-xl-3 mb-3 col spk-widg">
+                    <div class="card-header d-flex align-items-center border-bottom border-1 px-2 py-1 fs-4"><i class="fa-solid fa-chart-pie me-1"></i><span>Storage</span></div>
+                    <div class="d-flex flex-column card-body px-2 py-1">
+                        <div class="mb-1 fw-light text-center" style="font-size: 1.1rem !important;">{{fancyBytes(usedBytes)}} of {{fancyBytes(availableBytes)}} used</div>
+                        <div class="progress mb-1" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar" :style="'width:' + (usedBytes/availableBytes)*100 + '%;'">{{formatNumber((usedBytes/availableBytes)*100,'2','.',',')}}%</div>
+                        </div>
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#buyTokenModal" class="text-center text-primary">Get more storage</a>
+                    </div>
+                </div>
 
+                <!-- contract widget -->
+                <div class="order-lg-3 order-xl-4 mb-3 col spk-widg">
+                    <div class="card-header d-flex align-items-center border-bottom border-1 px-2 py-1 fs-4"><i class="fa-solid fa-cloud-arrow-up me-1"></i><span>Contract</span></div>
+                        <div class="card-body px-2 py-1">
+                            <div class="d-flex flex-column">
+                                <div class="mb-1 fw-light text-center" style="font-size: 1.1rem !important;">Contracts store files</div>
+                                <div class="d-flex justify-content-center mt-1">
+                                    <!-- new contract button -->
+                                    <button v-if="saccountapi.pubKey != 'NA' && saccountapi.spk_power" type="button"
+                                        class="btn btn-sm btn-dark border-info text-info me-1" style="width:110px;">
+                                        <modal-vue type="build" token="BROCA" :balance="broca_calc(saccountapi.broca)"
+                                            :account="account" @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
+                                            v-slot:trigger>
+                                            <span slot="trigger" class="trigger"><i
+                                                    class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
+                                        </modal-vue>
+                                    </button>
+                                    <!-- free button -->
+                                    <button v-if="saccountapi.pubKey != 'NA'" type="button" class="btn btn-sm btn-dark border-success text-success ms-1"
+                                        data-bs-toggle="modal" data-bs-target="#sponsoredModal" style="width:110px;">
+                                        <span class=""></span><i class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE
+                                    </button>
+                                    <!-- register -->
+                                    <button v-if="saccountapi.pubKey == 'NA'" type="button" class="btn btn-sm btn-dark border-info text-info"
+                                        @click="updatePubkey()" style="width:110px;">
+                                        <span class=""></span><i class="fa-solid fa-user-plus fa-fw me-1"></i>Register
+                                    </button>
+                            </div>    
+                        </div>    
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 
@@ -122,7 +125,7 @@ export default {
     </div>
 
     <!-- tabs nav -->
-    <div v-if="saccountapi.pubKey != 'NA'" class="d-flex flex-column card p-0">
+    <div v-if="saccountapi.pubKey != 'NA'" class="d-flex flex-column card square rounded-bottom p-0" style="background-color: rgba(0, 0, 0, 0.3);">
         
 
         <!-- top menu -->
