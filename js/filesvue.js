@@ -172,7 +172,7 @@ export default {
                             <div v-if="flagsDecode(newMeta[file.i][file.f].flags, 1).length" class="position-absolute bottom-0 end-0 bg-dark rounded-circle small px-05">
                                 <i class="fa-solid fa-lock"></i>
                             </div>
-                            <img v-if="newMeta[file.i][file.f].thumb && processed[file.f]" class="img-fluid rounded" :src="newMeta[file.i][file.f].thumb_data"  >
+                            <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid rounded" :src="newMeta[file.i][file.f].thumb_data"  >
                             <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                                     viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
                                 <g>
@@ -290,7 +290,7 @@ export default {
             <div class="flex-table row" role="rowgroup" v-for="file in filesArray">
                 <div class="flex-row order-md-first" role="cell">
                     <div class="bg-light mx-auto" style="width:50px;">
-                        <img v-if="newMeta[file.i][file.f].thumb && processed[file.f]" class="mx-auto img-fluid rounded bg-light" :src="newMeta[file.i][file.f].thumb_data" width="50px" >
+                        <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" class="mx-auto img-fluid rounded bg-light" :src="newMeta[file.i][file.f].thumb_data" width="50px" >
                         <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                                 viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
                             <g>
@@ -495,7 +495,7 @@ export default {
                     <tr v-for="file in filesArray">
                         <th scope="row" class="col-1">
                             <div class="bg-light" style="width:50px;">
-                                <img v-if="newMeta[file.i][file.f].thumb && processed[file.f]" class="mx-auto img-fluid rounded bg-light" :src="newMeta[file.i][file.f].thumb_data" width="50px" >
+                                <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" class="mx-auto img-fluid rounded bg-light" :src="newMeta[file.i][file.f].thumb_data" width="50px" >
                                 <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                                         viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
                                     <g>
@@ -591,7 +591,7 @@ export default {
                     <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank" class="no-decoration"><div class="text-black text-truncate">{{newMeta[file.i][file.f].name || file.f}}</div></a>
                     <h5 class="m-0 ms-auto align-self-end"><span class="d-none badge square rounded-top border border-bottom-0 bg-info border-light-50" :class="smartColor(file.lc)"><i :class="smartIcon(file.l)"></i>{{ newMeta[file.i][file.f].type }}</span></h5>
                     <div class="bg-light d-flex ratio ratio-1x1 rounded">
-                        <img v-if="newMeta[file.i][file.f].thumb && processed[file.f]" class="mx-auto img-fluid rounded bg-light" :src="newMeta[file.i][file.f].thumb_data" width="128px" >    
+                        <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" class="mx-auto img-fluid rounded bg-light" :src="newMeta[file.i][file.f].thumb_data" width="128px" >    
                         <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                                 viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
                             <g>
@@ -753,7 +753,6 @@ export default {
             newMeta: {},
             decoded: false,
             debounce: null,
-            processed: {},
             labels: {
                 ["0"]: { fa: "fa-solid fa-sink fa-fw", l: "Miscellaneous", c: 0 },
                 ["1"]: { fa: "fa-solid fa-exclamation fa-fw", l: "Important", c: 0 },
@@ -854,6 +853,10 @@ export default {
     },
     emits: ["addassets"],
     methods: {
+        isValidThumb(string) {
+            if (string.indexOf(":") == -1) return false
+            else return true
+        },
         addAsset(id, contract) {
             this.$emit("addassets", { id, contract });
         },
@@ -1256,18 +1259,14 @@ export default {
 
         },
         getImgData(id, cid) {
-            if (this.processed[cid]) return
-
             var string = this.smartThumb(id, cid)
             if(string.includes("https://"))fetch(string).then(response => response.text()).then(data => {
                 console.log("includes https", string)
                 if (data.indexOf('data:image/') >= 0) this.newMeta[id][cid].thumb_data = data
                 else this.newMeta[id][cid].thumb_data = string
-                this.processed[cid] = true
             }).catch(e => {
                 console.log("caught", e)
                 this.newMeta[id][cid].thumb_data = string
-                this.processed[cid] = true
             })
         },
         init() {
@@ -1452,8 +1451,7 @@ export default {
             handler: function (newValue, oldValue) {
                 //find the difference in this object
                 const diff = Object.keys(newValue).filter(k => newValue[k] !== oldValue[k])
-                console.log(diff)
-                if (this.debounce && new Date().getTime() - this.debounce < 1000) {
+                if (diff.length && this.debounce && new Date().getTime() - this.debounce < 1000) {
                     setTimeout(() => {
                         this.init()
                     },1000)
