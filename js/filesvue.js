@@ -1255,15 +1255,40 @@ export default {
 
         },
         getImgData(id, cid) {
-            var string = this.smartThumb(id, cid)
-            if(string.includes("https://"))fetch(string).then(response => response.text()).then(data => {
-                console.log("includes https", string)
-                if (data.indexOf('data:image/') >= 0) this.newMeta[id][cid].thumb_data = data
-                else this.newMeta[id][cid].thumb_data = string
-            }).catch(e => {
-                console.log("caught", e)
-                this.newMeta[id][cid].thumb_data = string
-            })
+            console.log(`getImgData called with id: ${id}, cid: ${cid}`);
+        
+            var string = this.smartThumb(id, cid);
+            console.log(`smartThumb returned: ${string}`);
+        
+            if (!string) {
+                console.warn(`smartThumb returned an invalid value, skipping fetch.`);
+                return;
+            }
+        
+            if (string.includes("https://")) {
+                console.log(`Fetching image from: ${string}`);
+        
+                fetch(string)
+                    .then(response => response.text())
+                    .then(data => {
+                        console.log(`Fetch response received for ${string}, response length: ${data.length}`);
+        
+                        if (data.indexOf('data:image/') >= 0) {
+                            console.log(`Valid image data found, updating newMeta[${id}][${cid}].thumb_data`);
+                            this.newMeta[id][cid].thumb_data = data;
+                        } else {
+                            console.log(`No valid image data found, using original URL.`);
+                            this.newMeta[id][cid].thumb_data = string;
+                        }
+                    })
+                    .catch(e => {
+                        console.error(`Fetch error for ${string}:`, e);
+                        console.log(`Using original string as thumb_data.`);
+                        this.newMeta[id][cid].thumb_data = string;
+                    });
+            } else {
+                console.warn(`String does not contain "https://", skipping fetch.`);
+            }
         },
         init() {
             var contracts = []
