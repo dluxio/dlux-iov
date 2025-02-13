@@ -1449,7 +1449,10 @@ export default {
     },
     watch: {
         'contracts': {
-            handler: function (newValue) {
+            handler: function (newValue, oldValue) {
+                //find the difference in this object
+                const diff = Object.keys(newValue).filter(k => newValue[k] !== oldValue[k])
+                console.log(diff)
                 if (this.debounce && new Date().getTime() - this.debounce < 1000) {
                     setTimeout(() => {
                         this.init()
