@@ -855,7 +855,6 @@ export default {
     methods: {
         isValidThumb(string) {
             if (string.indexOf(":") == -1) {
-                console.log('valIMG',string)
                 return false
             } else return true
         },
@@ -1263,7 +1262,6 @@ export default {
         getImgData(id, cid) {
             var string = this.smartThumb(id, cid)
             if (string.includes("https://")) fetch(string).then(response => response.text()).then(data => {
-                console.log("includes https", string)
                 if (data.indexOf('data:image/') >= 0) this.newMeta[id][cid].thumb_data = data
                 else this.newMeta[id][cid].thumb_data = string
             }).catch(e => {

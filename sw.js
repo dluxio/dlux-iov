@@ -1,4 +1,4 @@
-this.version = "2025.02.13.11";
+this.version = "2025.02.13.12";
 
 console.log( "SW:" + this.version + " - online.");
 
