@@ -24,13 +24,17 @@
             overflow-x: hidden;
         }
 
+        .text-mint {
+            color: rgb(235, 245, 236);
+        }
+
         .navbar-floating {
             position: fixed;
-
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.7);
+            background: rgb(235, 245, 236);
+            /* background: rgba(255, 255, 255, 0.7); */
             border-radius: 10px;
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
@@ -56,9 +60,10 @@
             justify-content: center;
             padding-left: 1rem;
             border-right: 1px solid black;
+            position: relative;
         }
 
-        .navbar-nav .nav-item:hover {
+        .navbar-nav .nav-highlight:hover {
             background: black;
         }
 
@@ -66,9 +71,11 @@
             flex: 0 0 72px;
             height: 72px;
             border-right: none;
-            position: relative;
-            align-items: center;
             padding-left: 0;
+        }
+
+        /* .navbar-nav .nav-item:hover {
+            background: black;
         }
 
         .navbar-nav .nav-item:first-child:hover {
@@ -81,43 +88,34 @@
             border-bottom-right-radius: 8px;
         }
 
-        .navbar-nav .nav-item:hover .nav-link,
-        .navbar-nav .nav-item:hover .nav-subtitle {
-            color: white !important;
-        }
-
-        .nav-brand {
-            font-size: 2.5em;
-            font-weight: 400;
-            font-family: "Audiowide", serif;
-        }
-
         .navbar-nav .nav-item:hover svg,
         .navbar-nav .nav-item:hover .nav-link span {
             color: white;
             fill: white;
         }
 
+        .nav-item:hover .bar {
+            background-color: white !important;
+        } */
+
+        .navbar-nav .nav-highlight:hover .nav-title {
+            color: white !important;
+        }
+
+        .navbar-nav .nav-highlight:hover .nav-subtitle {
+            color: white !important;
+        }
+
+        .navbar-nav .nav-brand {
+            font-size: 2.5em;
+            font-weight: 400;
+            font-family: "Audiowide", serif;
+        }
+
         .nav-title {
             font-family: 'Space Grotesk', serif;
             font-size: 1.25rem;
             font-weight: 600;
-        }
-
-        .nav-more {
-            font-size: 1.75em;
-            font-weight: 500;
-        }
-
-        .nav-logo {
-            width: 40px;
-        }
-
-        .nav-link {
-            text-align: start;
-            color: black;
-            text-decoration: none;
-            line-height: 1.2;
         }
 
         .nav-subtitle {
@@ -128,17 +126,178 @@
             display: block;
         }
 
-        .dropdown-menu {
+        .nav-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            font-size: 1.75em;
+            font-weight: 500;
+        }
+
+        .nav-logo {
+            width: 40px;
+        }
+
+        .nav-item .nav-link {
+            text-align: start;
+            color: black;
+            text-decoration: none;
+            line-height: 1.2;
+            display: block;
+            width: 100%;
+            height: 100%;
+            padding: 1rem;
+        }
+
+        .nav-toggle i {
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .nav-toggle.toggled i {
+            /* Pinch effect */
+            transform: scaleX(1.2) scaleY(0.6);
+            opacity: 0;
+        }
+
+        .navbar-nav .nav-more .dropdown-menu {
+            position: absolute;
+            background: rgb(235, 245, 236);
             border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
             border: 1px solid black;
             right: 0;
             top: 100%;
             z-index: 1050;
+            width: 484px;
+            height: calc(100vh - 140px);
+            margin-top: 6px;
+            color: black;
+            padding: 0;
+
+            flex-direction: column;
+            overflow-y: auto;
         }
 
-        .dropdown-toggle.caret-off::after {
+        .navbar-nav .nav-more .dropdown-menu.show {
+            display: flex !important;
+        }
+
+        .navbar-nav .nav-more .dropdown-footer {
+            margin-top: auto;
+            height: 72px;
+            padding: 10px;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+            border-top: 1px solid black;
+        }
+
+        .navbar-nav .nav-more .dropdown-menu li {
+            color: black;
+        }
+
+        .subnav-blog {
+            margin-top: 20px;
+            margin-bottom: 14px;
+        }
+
+        .subnav-pk {
+            margin-top: 14px;
+            margin-bottom: 20px;
+        }
+
+        .dropdown-extra {
+            font-family: 'Space Grotesk', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            line-height: 1;
+            color: black !important;
+            text-decoration: none;
+            width: 100%;
+            display: block;
+            padding-left: 32px;
+            padding-right: 32px;
+        }
+
+        .dropdown-extra:hover {
+            color: #0ed18c !important;
+        }
+
+        .navbar-nav .nav-more .dropdown-menu li .dropdown-item {
+            height: 72px;
+            color: black;
+            border-bottom: 1px solid black;
+        }
+
+        .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover {
+            height: 72px;
+            color: white !important;
+            background-color: black;
+        }
+
+        .subnav-title {
+            font-family: 'Space Grotesk', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .subnav-subtitle {
+            font-size: 0.75rem;
+            font-weight: 400;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            color: black;
+            display: block;
+        }
+
+        .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover .subnav-subtitle {
+            color: white !important;
+        }
+
+        .nav-show {
             display: none;
         }
+
+        .footer-marquee {
+            width: 100%;
+            height: 72px;
+            overflow: hidden;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            white-space: nowrap;
+        }
+
+        .marquee-wrapper {
+            display: flex;
+            width: 200%;
+            animation: marquee 8s linear infinite;
+        }
+
+        .marquee-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            width: 100%;
+            font-size: 2.55em;
+            font-weight: 400;
+            font-family: "Audiowide", serif;
+        }
+
+        @keyframes marquee {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(-50%);
+            }
+        }
+
 
         @media (max-width: 1440px) {
             .navbar-nav .nav-item {
@@ -149,6 +308,10 @@
 
             .navbar-nav .nav-link {
                 text-align: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
             }
 
             .navbar-nav .nav-brand {
@@ -168,11 +331,16 @@
             .navbar-nav {
                 flex-direction: unset;
             }
+
         }
 
         @media (max-width: 768px) {
             .nav-hide {
                 display: none !important;
+            }
+
+            .nav-show {
+                display: block !important;
             }
 
             .navbar-nav {
@@ -196,9 +364,15 @@
                 transform: translateX(-50%);
                 width: 90%;
             }
+
+            .navbar-nav .nav-more .dropdown-menu {
+                width: calc(100vw - 40px) !important;
+                margin-left: 20px !important;
+            }
         }
 
         @media (max-width: 576px) {
+
             .hero-header {
                 font-size: 5em !important;
             }
@@ -265,6 +439,47 @@
             align-items: center;
             justify-content: center;
         }
+
+        .nav-bars {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 22px;
+            width: 22px;
+        }
+
+        .nav-bars .bar {
+            height: 3px;
+            width: 100%;
+            background-color: black;
+            transition: all 100ms ease-in-out;
+        }
+
+        .nav-bars:hover {
+            cursor: pointer;
+        }
+
+        .x:nth-of-type(1) {
+            transition: all 100ms ease-in-out;
+            transform: rotate(45deg);
+            transform-origin: top left;
+            width: 28px;
+
+        }
+
+        .x:nth-of-type(2) {
+            transition: all 100ms ease-in-out;
+            transform-origin: center;
+            width: 0;
+        }
+
+        .x:nth-of-type(3) {
+            transition: all 100ms ease-in-out;
+            transform: rotate(-45deg);
+            transform-origin: bottom left;
+            width: 28px;
+
+        }
     </style>
 </head>
 
@@ -321,36 +536,61 @@
                     <span class="nav-brand ms-1">DLUX</span></a>
 
             </li>
-            <li class="nav-item nav-hide">
-                <a class="nav-link nav-title" href="#">HUB<span class="nav-subtitle">Community Posts</span></a>
+            <li class="nav-item nav-highlight nav-hide">
+                <a class="nav-link nav-title" href="/hub">HUB<span class="nav-subtitle">Community Posts</span></a>
             </li>
-            <li class="nav-item nav-hide">
-                <a class="nav-link nav-title" href="#">NFTs<span class="nav-subtitle">Mint, Bid, Buy</span></a>
+            <li class="nav-item nav-highlight nav-hide">
+                <a class="nav-link nav-title" href="/nfts">NFTs<span class="nav-subtitle">Mint, Bid, Buy</span></a>
             </li>
-
-            <li class="nav-item nav-hide">
-                <a class="nav-link nav-title" href="#">DEX<span class="nav-subtitle">Honeycomb Tokens</span></a>
+            <li class="nav-item nav-highlight nav-hide">
+                <a class="nav-link nav-title" href="/dex">DEX<span class="nav-subtitle">Honeycomb Tokens</span></a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item nav-highlight">
                 <a class="nav-link nav-title" href="#">Login<span class="nav-subtitle">Using HIVE Keychain</span></a>
             </li>
-            <li class="nav-item dropdown text-center">
-                <a class="nav-link nav-more" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fa-solid fa-bars"></i>
+            <li class="nav-item nav-more dropdown text-center">
+                <a class="nav-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="nav-bars">
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                    </span>
                 </a>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="#">Action</a></li>
-                    <li><a class="dropdown-item" href="#">Another action</a></li>
-                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                <ul class="dropdown-menu dropdown-menu-end container">
+                    <li class="nav-show"><a class="dropdown-item subnav-title" href="/hub">HUB<span
+                                class="subnav-subtitle">Community Posts</span></a></li>
+                    <li class="nav-show"><a class="dropdown-item subnav-title" href="/nfts">NFTs<span
+                                class="subnav-subtitle">Mint, Bid, Buy</span></a></li>
+                    <li class="nav-show"><a class="dropdown-item subnav-title" href="/dex">DEX<span
+                                class="subnav-subtitle">Honeycomb Tokens</span></a></li>
+                    <li><a class="dropdown-item subnav-title" href="/dex">DePIN<span class="subnav-subtitle">DLUX
+                                Rewards</span></a></li>
+                    <li><a class="dropdown-item subnav-title" href="/about">Ecosystem<span
+                                class="subnav-subtitle">Discover the DLUX Network Ecosystem</span></a></li>
+                    <li><a class="dropdown-item subnav-title" href="/docs">Docs<span class="subnav-subtitle">Explore
+                                DLUX Documentation</span></a></li>
+                    <li><a class="dropdown-item subnav-title" href="/build">Developers<span
+                                class="subnav-subtitle">Build With DLUX</span></a></li>
+                    <li class="subnav-blog"><a class="dropdown-extra" href="/dex">Blog</a></li>
+                    <li class="subnav-pk"><a class="dropdown-extra" href="/dex">Press Kit</a></li>
+                    <li class="dropdown-footer">
+                        <footer class="footer-marquee">
+                            <div class="marquee-wrapper">
+                                <div class="marquee-content"><span class="me-2">DLUX</span><span class="mx-2">DLUX</span><span class="mx-2">DLUX</span><span class="mx-2">DLUX</span><span class="mx-2">DLUX</span><span class="ms-2">DLUX</span></div>
+                                <div class="marquee-content"><span class="me-2">DLUX</span><span class="mx-2">DLUX</span><span class="mx-2">DLUX</span><span class="mx-2">DLUX</span><span class="mx-2">DLUX</span><span class="ms-2">DLUX</span></div>
+                            </div>
+                        </footer>
+                    </li>
                 </ul>
             </li>
         </ul>
     </nav>
     <section class="hero-section container-fluid d-flex">
         <div class="hero-text container">
-            <h1 class="hero-header">DLUX</h1>
-            <p class="hero-sub mb-3">DePIN for HIVE<br><span class="text-turq">dApps • Storage • Tokens</span></p>
-            <p class="hero-lead mb-4">Empowering Users With<br> Web3 Solutions</p>
+            <h1 class="hero-header text-mint">DLUX</h1>
+            <p class="hero-sub mb-3 text-mint">DePIN for HIVE<br><span class="text-turq">dApps • Storage • Tokens</span>
+            </p>
+            <p class="hero-lead mb-4 text-mint">Empowering Users With<br> Web3 Solutions</p>
             <div>
                 <button type="button" class="btn hero-btn btn-turq btn-lg py-2 px-4 me-md-2 mb-2 rounded-pill">Our
                     Vision</button>
@@ -369,7 +609,7 @@
                     <a-entity light="type: directional; color: #21FFB5; intensity: 0.6;" position="10 -10 0"></a-entity>
                 </a-entity>
 
-                <a-entity id="hypercube" position="0 0 -3" scale="0.4 0.4 0.4" rotation="-3.18 -53.6 50.9">
+                <a-entity id="hypercube" position="0 0 0" scale="0.4 0.4 0.4" rotation="-3.18 -53.6 50.9">
                     <a-entity
                         animation="property: rotation; from:0 0 0; to: 360 360 720; dur: 20000; easing: linear; loop: true">
                         <a-entity class="opp_sides" position="" rotation="">
@@ -439,22 +679,36 @@
         <h2>Next Section Content2</h2>
     </section>
     <script>
-        /* document.getElementById('menu-toggle').addEventListener('click', function () {
-            let icon = document.getElementById('menu-icon');
-            if (icon.classList.contains('fa-bars')) {
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-times');
-            } else {
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            }
-        }); */
+        // Change More icon
+        document.addEventListener("DOMContentLoaded", function () {
+            const menuToggle = document.querySelector(".nav-toggle");
+            const dropdownMenu = document.querySelector(".dropdown-menu");
+            const bars = document.querySelectorAll(".nav-bars .bar");
+
+            menuToggle.addEventListener("click", function (event) {
+                event.preventDefault();
+                bars.forEach(bar => bar.classList.toggle("x"));
+                dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+            });
+
+            document.addEventListener("click", function (event) {
+                if (!menuToggle.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                    bars.forEach(bar => bar.classList.remove("x"));
+                    dropdownMenu.style.display = "none";
+                }
+            });
+        });
+
+
+        // Change Aframe position
         function updateAFramePosition() {
             const entity = document.querySelector("#hypercube"); // Replace with your entity ID
             if (window.matchMedia("(max-width: 768px)").matches) {
                 entity.setAttribute("position", "0 2 -3"); // Adjust for smaller screens
+            } else if (window.matchMedia("(max-width: 992px)").matches) {
+                entity.setAttribute("position", "2 0 -3"); // Adjust for smaller screens
             } else {
-                entity.setAttribute("position", "2 0 -3"); // Default for larger screens
+                entity.setAttribute("position", "2 0 -2.6"); // Default for larger screens
             }
         }
 
