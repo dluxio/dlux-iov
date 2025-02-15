@@ -849,12 +849,12 @@ a-scene {
 }
 
 .btn-turq {
-  color: #fff;
+  color: #000000;
   background: #0ed18c;
 }
 .btn-turq:hover {
-  color: #fff;
-  background: #0ed18d59;
+  color: #0ed18c;
+  background: #000;
 }
 
 .btn-outline-turq {
@@ -1273,4 +1273,9 @@ ul.scroll {
 .hover:hover {
   background-color: rgba(0, 0, 0, 0.1);
   border: #033efd;
+}
+body {
+  background-image: $body-bg-image;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
