@@ -14,7 +14,8 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Space+Grotesk&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Space+Grotesk:wght@300..700&display=swap"
+        rel="stylesheet">
 
     <style>
         body,
@@ -30,7 +31,7 @@
 
         .navbar-floating {
             position: fixed;
-            top: 20px;
+            top: 8px;
             left: 50%;
             transform: translateX(-50%);
             background: rgb(235, 245, 236);
@@ -115,12 +116,14 @@
         .nav-title {
             font-family: 'Space Grotesk', serif;
             font-size: 1.25rem;
-            font-weight: 600;
+            font-weight: 700;
+            line-height: 1;
         }
 
         .nav-subtitle {
-            font-size: 0.75rem;
-            font-weight: 400;
+            font-size: .85rem;
+            line-height: 1.25;
+            font-weight: 300;
             font-family: Verdana, Geneva, Tahoma, sans-serif;
             color: black;
             display: block;
@@ -171,11 +174,10 @@
             top: 100%;
             z-index: 1050;
             width: 484px;
-            height: calc(100vh - 140px);
+            /* height: calc(100vh - 140px); */
             margin-top: 6px;
             color: black;
             padding: 0;
-
             flex-direction: column;
             overflow-y: auto;
         }
@@ -187,7 +189,6 @@
         .navbar-nav .nav-more .dropdown-footer {
             margin-top: auto;
             height: 72px;
-            padding: 10px;
             text-align: center;
             align-items: center;
             justify-content: center;
@@ -200,18 +201,18 @@
 
         .subnav-blog {
             margin-top: 20px;
-            margin-bottom: 14px;
+            margin-bottom: 8px;
         }
 
         .subnav-pk {
-            margin-top: 14px;
+            margin-top: 8px;
             margin-bottom: 20px;
         }
 
         .dropdown-extra {
             font-family: 'Space Grotesk', serif;
             font-size: 1.25rem;
-            font-weight: 600;
+            font-weight: 700;
             line-height: 1;
             color: black !important;
             text-decoration: none;
@@ -229,6 +230,10 @@
             height: 72px;
             color: black;
             border-bottom: 1px solid black;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
         }
 
         .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover {
@@ -240,15 +245,17 @@
         .subnav-title {
             font-family: 'Space Grotesk', serif;
             font-size: 1.25rem;
-            font-weight: 600;
+            font-weight: 700;
+            line-height: 1;
         }
 
         .subnav-subtitle {
-            font-size: 0.75rem;
-            font-weight: 400;
+            font-size: 0.85rem;
+            font-weight: 300;
             font-family: Verdana, Geneva, Tahoma, sans-serif;
             color: black;
             display: block;
+            line-height: 1.25;
         }
 
         .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover .subnav-subtitle {
@@ -263,8 +270,6 @@
             width: 100%;
             height: 72px;
             overflow: hidden;
-            padding: 10px 0;
-            position: fixed;
             bottom: 0;
             left: 0;
             display: flex;
@@ -537,13 +542,13 @@
 
             </li>
             <li class="nav-item nav-highlight nav-hide">
-                <a class="nav-link nav-title" href="/hub">HUB<span class="nav-subtitle">Community Posts</span></a>
+                <a class="nav-link nav-title" href="/hub">HUB<span class="nav-subtitle">Social Network</span></a>
             </li>
             <li class="nav-item nav-highlight nav-hide">
                 <a class="nav-link nav-title" href="/nfts">NFTs<span class="nav-subtitle">Mint, Bid, Buy</span></a>
             </li>
             <li class="nav-item nav-highlight nav-hide">
-                <a class="nav-link nav-title" href="/dex">DEX<span class="nav-subtitle">Honeycomb Tokens</span></a>
+                <a class="nav-link nav-title" href="/dex">DEX<span class="nav-subtitle">Trade Tokens</span></a>
             </li>
             <li class="nav-item nav-highlight">
                 <a class="nav-link nav-title" href="#">Login<span class="nav-subtitle">Using HIVE Keychain</span></a>
@@ -558,26 +563,33 @@
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end container">
                     <li class="nav-show"><a class="dropdown-item subnav-title" href="/hub">HUB<span
-                                class="subnav-subtitle">Community Posts</span></a></li>
+                                class="subnav-subtitle">Social Network</span></a></li>
                     <li class="nav-show"><a class="dropdown-item subnav-title" href="/nfts">NFTs<span
                                 class="subnav-subtitle">Mint, Bid, Buy</span></a></li>
                     <li class="nav-show"><a class="dropdown-item subnav-title" href="/dex">DEX<span
-                                class="subnav-subtitle">Honeycomb Tokens</span></a></li>
-                    <li><a class="dropdown-item subnav-title" href="/dex">DePIN<span class="subnav-subtitle">DLUX
+                                class="subnav-subtitle">Trade Tokens</span></a></li>
+                    <li><a class="dropdown-item subnav-title" href="/dex">DePIN<span class="subnav-subtitle">Run Nodes,
+                                Earn
                                 Rewards</span></a></li>
-                    <li><a class="dropdown-item subnav-title" href="/about">Ecosystem<span
-                                class="subnav-subtitle">Discover the DLUX Network Ecosystem</span></a></li>
-                    <li><a class="dropdown-item subnav-title" href="/docs">Docs<span class="subnav-subtitle">Explore
+                    <li><a class="dropdown-item subnav-title" href="/build">Creators<span class="subnav-subtitle">Upload
+                                & Publish With DLUX</span></a></li>
+                    <li><a class="dropdown-item subnav-title" href="/new/token">Ecosystem<span
+                                class="subnav-subtitle">Discover Honeycomb Projects</span></a></li>
+                    <li><a class="dropdown-item subnav-title" href="/docs" target="_blank">Docs<span class="subnav-subtitle">Explore
                                 DLUX Documentation</span></a></li>
-                    <li><a class="dropdown-item subnav-title" href="/build">Developers<span
-                                class="subnav-subtitle">Build With DLUX</span></a></li>
-                    <li class="subnav-blog"><a class="dropdown-extra" href="/dex">Blog</a></li>
-                    <li class="subnav-pk"><a class="dropdown-extra" href="/dex">Press Kit</a></li>
-                    <li class="dropdown-footer">
+                    <li class="subnav-blog"><a class="dropdown-extra" href="/@disregardfiat">Blog</a></li>
+                    <li class="subnav-pk"><a class="dropdown-extra" href="/about">Press Kit</a></li>
+                    <li class="dropdown-footer d-none">
                         <footer class="footer-marquee">
                             <div class="marquee-wrapper">
-                                <div class="marquee-content"><span class="me-2">DLUX</span><span class="mx-2">DLUX</span><span class="mx-2">DLUX</span><span class="mx-2">DLUX</span><span class="mx-2">DLUX</span><span class="ms-2">DLUX</span></div>
-                                <div class="marquee-content"><span class="me-2">DLUX</span><span class="mx-2">DLUX</span><span class="mx-2">DLUX</span><span class="mx-2">DLUX</span><span class="mx-2">DLUX</span><span class="ms-2">DLUX</span></div>
+                                <div class="marquee-content"><span class="me-2">DLUX</span><span
+                                        class="mx-2">DLUX</span><span class="mx-2">DLUX</span><span
+                                        class="mx-2">DLUX</span><span class="mx-2">DLUX</span><span
+                                        class="ms-2">DLUX</span></div>
+                                <div class="marquee-content"><span class="me-2">DLUX</span><span
+                                        class="mx-2">DLUX</span><span class="mx-2">DLUX</span><span
+                                        class="mx-2">DLUX</span><span class="mx-2">DLUX</span><span
+                                        class="ms-2">DLUX</span></div>
                             </div>
                         </footer>
                     </li>
@@ -590,9 +602,9 @@
             <h1 class="hero-header text-mint">DLUX</h1>
             <p class="hero-sub mb-3 text-mint">DePIN for HIVE<br><span class="text-turq">dApps • Storage • Tokens</span>
             </p>
-            <p class="hero-lead mb-4 text-mint">Empowering Users With<br> Web3 Solutions</p>
+            <p class="hero-lead mb-4 text-mint">Empowering Users With<br>Web3 Solutions</p>
             <div>
-                <button type="button" class="btn hero-btn btn-turq btn-lg py-2 px-4 me-md-2 mb-2 rounded-pill">Our
+                <button type="button" class="btn hero-btn btn-turq btn-lg py-2 px-4 me-sm-2 mb-2 rounded-pill">Our
                     Vision</button>
                 <button type="button" class="btn hero-btn btn-outline-light btn-lg py-2 px-4 mb-2 rounded-pill">Node
                     Rewards</button>
