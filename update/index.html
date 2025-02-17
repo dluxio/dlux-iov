@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hero Landing Page</title>
+    <title>DLUX - HIVE DePIN</title>
     <!-- Bootstrap -->
     <link href="/css/custom.css" rel="stylesheet" />
     <!-- A-Frame -->
@@ -26,7 +26,11 @@
         }
 
         .text-mint {
-            color: rgb(235, 245, 236);
+            color: rgb(235, 245, 236) !important;
+        }
+
+        .bg-mint {
+            background-color: rgb(235, 245, 236) !important;
         }
 
         .navbar-floating {
@@ -113,6 +117,20 @@
             font-family: "Audiowide", serif;
         }
 
+        .card-title {
+            font-family: 'Space Grotesk', serif;
+            font-size: 2rem;
+            font-weight: 500;
+            line-height: 1;
+        }
+
+        .card-text {
+            font-size: 1rem;
+            line-height: 1.25;
+            font-weight: 300;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+
         .nav-title {
             font-family: 'Space Grotesk', serif;
             font-size: 1.25rem;
@@ -152,16 +170,6 @@
             width: 100%;
             height: 100%;
             padding: 1rem;
-        }
-
-        .nav-toggle i {
-            transition: transform 0.2s ease, opacity 0.2s ease;
-        }
-
-        .nav-toggle.toggled i {
-            /* Pinch effect */
-            transform: scaleX(1.2) scaleY(0.6);
-            opacity: 0;
         }
 
         .navbar-nav .nav-more .dropdown-menu {
@@ -374,6 +382,18 @@
                 width: calc(100vw - 40px) !important;
                 margin-left: 20px !important;
             }
+
+
+            .how-grid {
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+            }
+
+            .how-grid .how-box {
+                width: 100%;
+                max-width: 400px;
+            }
         }
 
         @media (max-width: 576px) {
@@ -386,7 +406,7 @@
                 font-size: 2em !important;
             }
 
-            .hero-btn {
+            .btn-hero {
                 min-width: calc(100% - 10px) !important;
             }
         }
@@ -423,7 +443,7 @@
             font-family: Verdana, Geneva, Tahoma, sans-serif;
         }
 
-        .hero-btn {
+        .btn-hero {
             font-family: 'Space Grotesk';
             font-size: 1.3em;
             font-weight: 700;
@@ -437,12 +457,12 @@
             width: 60vw;
         }
 
-        .next-section {
-            height: 100vh;
-            background-color: #f8f9fa;
+        .node-section {
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-direction: column;
         }
 
         .nav-bars {
@@ -483,7 +503,199 @@
             transform: rotate(-45deg);
             transform-origin: bottom left;
             width: 28px;
+        }
 
+        .how-section {
+            padding: 50px 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .section-title {
+            margin-bottom: 20px;
+            font-family: 'Space Grotesk', serif;
+            font-size: 2rem;
+            font-weight: 500;
+            line-height: 1;
+            color: black;
+        }
+
+        .how-grid {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            max-width: 1200px;
+            margin: 10px;
+            flex-wrap: wrap;
+        }
+
+        .how-box {
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgb(235, 245, 236);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: start;
+            flex: 1;
+            min-width: 250px;
+            max-width: 500px;
+            color: rgb(235, 245, 236);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .how-box a {
+            color: rgb(235, 245, 236);
+            text-decoration: none;
+            font-family: 'Space Grotesk', serif;
+            font-size: 1.2rem;
+            font-weight: 500;
+            line-height: 1;
+            margin-top: 40px
+        }
+
+        .how-box a:hover {
+            color: #0ed18c !important;
+        }
+
+        .content-box {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            text-align: center;
+            color: black;
+        }
+
+        @media (max-width: 1440px) {
+            .node-container {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .node-container .text-box {
+                position: relative;
+            }
+        }
+
+        .node-container {
+            position: relative;
+            width: 100%;
+            margin: auto;
+            justify-content: center;
+            align-items: center;
+            padding-bottom: 20px;
+        }
+
+        .node-container .image {
+            max-width: 500px;
+            animation: bounce 3s infinite ease-in-out;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            justify-self: center;
+        }
+
+        .node-container .text-box {
+            width: 320px;
+            background-color: #1a2129;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            text-align: start;
+            /* border: 1px solid white; */
+            color: rgb(235, 245, 236);
+        }
+
+        @media (max-width: 1400px) {
+            .node-container .node-header {
+                cursor: pointer;
+            }
+            .node-container .bottom-right {
+                margin-bottom: auto;
+            }
+
+            .node-container .image {
+                margin: 50px;
+            }
+        }
+
+        @media (min-width: 1400px) {
+            .node-container {
+                min-height: 960px;
+            }
+
+            .node-container .image {
+                margin-top: unset;
+                position: absolute;
+                top: 15%;
+                left: calc(50% - 250px);
+                max-width: 500px;
+                max-height: 500px;
+            }
+
+            .node-container .text-box {
+                position: absolute;
+                height: 268px;
+                width: 360px;
+            }
+
+            .top-left {
+                top: 181px;
+                right: calc(50% + 280px);
+            }
+
+            .top-right {
+                top: 181px;
+                left: calc(50% + 280px);
+            }
+
+            .bottom-left {
+                bottom: 145px;
+                right: calc(50% + 216px);
+            }
+
+            .bottom-right {
+                bottom: 145px;
+                left: calc(50% + 216px);
+            }
+        }
+
+        #vision {
+            background-color: #101419;
+        }
+
+        #how {
+            background-color: #1a2129;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .video-section {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .video-section video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
     </style>
 </head>
@@ -542,10 +754,10 @@
 
             </li>
             <li class="nav-item nav-highlight nav-hide">
-                <a class="nav-link nav-title" href="/hub">HUB<span class="nav-subtitle">Social Network</span></a>
+                <a class="nav-link nav-title" href="/hub">HUB<span class="nav-subtitle">Social dApps</span></a>
             </li>
             <li class="nav-item nav-highlight nav-hide">
-                <a class="nav-link nav-title" href="/nfts">NFTs<span class="nav-subtitle">Mint, Bid, Buy</span></a>
+                <a class="nav-link nav-title" href="/nfts">NFTs<span class="nav-subtitle">Bid, Buy, and Mint</span></a>
             </li>
             <li class="nav-item nav-highlight nav-hide">
                 <a class="nav-link nav-title" href="/dex">DEX<span class="nav-subtitle">Trade Tokens</span></a>
@@ -563,19 +775,22 @@
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end container">
                     <li class="nav-show"><a class="dropdown-item subnav-title" href="/hub">HUB<span
-                                class="subnav-subtitle">Social Network</span></a></li>
+                                class="subnav-subtitle">Social dApps</span></a></li>
                     <li class="nav-show"><a class="dropdown-item subnav-title" href="/nfts">NFTs<span
-                                class="subnav-subtitle">Mint, Bid, Buy</span></a></li>
+                                class="subnav-subtitle">Bid, Buy, and Mint</span></a></li>
                     <li class="nav-show"><a class="dropdown-item subnav-title" href="/dex">DEX<span
                                 class="subnav-subtitle">Trade Tokens</span></a></li>
-                    <li><a class="dropdown-item subnav-title" href="/dex">DePIN<span class="subnav-subtitle">Run Nodes,
-                                Earn
-                                Rewards</span></a></li>
-                    <li><a class="dropdown-item subnav-title" href="/build">Creators<span class="subnav-subtitle">Upload
-                                & Publish With DLUX</span></a></li>
-                    <li><a class="dropdown-item subnav-title" href="/new/token">Ecosystem<span
-                                class="subnav-subtitle">Discover Honeycomb Projects</span></a></li>
-                    <li><a class="dropdown-item subnav-title" href="/docs" target="_blank">Docs<span class="subnav-subtitle">Explore
+                    <li><a class="dropdown-item subnav-title" href="/dex">Rewards<span class="subnav-subtitle">Run
+                                a DePIN Service Node</span></a></li>
+                    <li><a class="dropdown-item subnav-title" href="/build">Publishing<span
+                                class="subnav-subtitle">Build
+                                and Post With DLUX</span></a></li>
+                    <li><a class="dropdown-item subnav-title" href="/build">Storage<span class="subnav-subtitle">Web3
+                                IPFS Pinning</span></a></li>
+                    <li><a class="dropdown-item subnav-title" href="/new/token">Honeycomb<span
+                                class="subnav-subtitle">Launch Your DeFi Project</span></a></li>
+                    <li><a class="dropdown-item subnav-title" href="/docs" target="_blank">Docs<span
+                                class="subnav-subtitle">Explore
                                 DLUX Documentation</span></a></li>
                     <li class="subnav-blog"><a class="dropdown-extra" href="/@disregardfiat">Blog</a></li>
                     <li class="subnav-pk"><a class="dropdown-extra" href="/about">Press Kit</a></li>
@@ -604,9 +819,9 @@
             </p>
             <p class="hero-lead mb-4 text-mint">Empowering Users With<br>Web3 Solutions</p>
             <div>
-                <button type="button" class="btn hero-btn btn-turq btn-lg py-2 px-4 me-sm-2 mb-2 rounded-pill">Our
-                    Vision</button>
-                <button type="button" class="btn hero-btn btn-outline-light btn-lg py-2 px-4 mb-2 rounded-pill">Node
+                <a class="btn btn-hero btn-turq btn-lg py-2 px-4 me-sm-2 mb-2 rounded-pill" href="#vision">Our
+                    Vision</a>
+                <button type="button" class="btn btn-hero btn-outline-light btn-lg py-2 px-4 mb-2 rounded-pill">Node
                     Rewards</button>
             </div>
         </div>
@@ -684,11 +899,103 @@
             </a-scene>
         </div>
     </section>
-    <section class="next-section bg-dark">
-        <h2>Next Section Content</h2>
+    <section class="video-section d-flex align-items-center py-5" id="vision">
+        <video autoplay muted loop>
+            <source src="/vid/blue_dust.m4v" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="node-container">
+            <div class="image"><img src="/img/hypercube.png" class="img-fluid rounded-circle"
+                    alt="DLUX Node Network"></div>
+            <div class="text-box top-left">
+                <div class="d-flex flex-column">
+                    <div class="d-flex node-header py-3 px-2 mb-xxl-2 pb-xxl-0 px-xxl-3" data-bs-target="#honeycomb">
+                        <h3 class="card-title fs-3 fw-semibold d-flex flex-grow-1"><i
+                                class="fa-fw fa-solid fa-atom me-2"></i><span class="me-auto">Honeycomb</span><i
+                                class="ms-auto fw-light d-xxl-none fa-fw fa-solid fa-plus"></i></h3>
+                    </div>
+                    <div class="collapse d-xxl-flex flex-column flex-grow-1" id="honeycomb">
+                        <p class="card-text px-2 px-xxl-3">Node based token architecture with customizable logic, smart
+                            contracts,
+                            and NFTs.
+                        </p>
+                        <button class="mx-2 mt-3 mb-2 mb-xxl-1 mx-xxl-3 align-self-baseline btn btn-turq rounded-pill btn-hero">Learn More</button>
+                    </div>
+                </div>
+            </div>
+            <div class="text-box top-right">
+                <div class="d-flex flex-column">
+                    <div class="d-flex node-header py-3 px-2 mb-xxl-2 pb-xxl-0 px-xxl-3" data-bs-target="#storage">
+                        <h3 class="card-title fs-3 fw-semibold d-flex flex-grow-1"><i
+                                class="fa-fw fa-solid fa-hard-drive me-2"></i><span class="me-auto">Storage</span><i
+                                class="ms-auto fw-light d-xxl-none fa-fw fa-solid fa-plus"></i></h3>
+                    </div>
+                    <div class="collapse d-xxl-flex flex-column flex-grow-1" id="storage">
+                        <p class="card-text px-2 px-xxl-3">Secure, personal, and encrypted IPFS cloud distributed across
+                            redundant edge nodes.
+                        </p>
+                        <button class="mx-2 mt-3 mb-2 mb-xxl-1 mx-xxl-3 align-self-baseline btn btn-turq rounded-pill btn-hero">Learn More</button>
+                    </div>
+                </div>
+            </div>
+            <div class="text-box bottom-left">
+                <div class="d-flex flex-column">
+                    <div class="d-flex node-header py-3 px-2 mb-xxl-2 pb-xxl-0 px-xxl-3" data-bs-target="#rewards">
+                        <h3 class="card-title fs-3 fw-semibold d-flex flex-grow-1"><i
+                                class="fa-fw fa-solid fa-circle-nodes me-2"></i><span class="me-auto">Rewards</span><i
+                                class="ms-auto fw-light d-xxl-none fa-fw fa-solid fa-plus"></i></h3>
+                    </div>
+                    <div class="collapse d-xxl-flex flex-column flex-grow-1" id="rewards">
+                        <p class="card-text px-2 px-xxl-3">Turn your existing hardware into a DePIN (Decentralized Physical
+                            Infrastructure
+                            Network) node.
+                        </p>
+                        <button class="mx-2 mt-3 mb-2 mb-xxl-1 mx-xxl-3 align-self-baseline btn btn-turq rounded-pill btn-hero">Learn More</button>
+                    </div>
+                </div>
+            </div>
+            <div class="text-box bottom-right">
+                <div class="d-flex flex-column">
+                    <div class="d-flex node-header py-3 px-2 mb-xxl-2 pb-xxl-0 px-xxl-3" data-bs-target="#publishing">
+                        <h3 class="card-title fs-3 fw-semibold d-flex flex-grow-1"><i
+                                class="fa-fw fa-solid fa-mountain-sun me-2 fs-4"></i><span
+                                class="me-auto">Publishing</span><i
+                                class="ms-auto fw-light d-xxl-none fa-fw fa-solid fa-plus"></i></h3>
+                    </div>
+                    <div class="collapse d-xxl-flex flex-column flex-grow-1" id="publishing">
+                        <p class="card-text px-2 px-xxl-3">Our HUB supports HTML5 dApps, WebXR, photo, audio, video, and
+                            anything else you can
+                            imagine.
+                        </p>
+                        <button class="mx-2 mt-3 mb-2 mb-xxl-1 mx-xxl-3 align-self-baseline btn btn-turq rounded-pill btn-hero">Learn More</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
-    <section class="next-section bg-darkg">
-        <h2>Next Section Content2</h2>
+    <section class="how-section py-5" id="how">
+        <h2 class="section-title text-mint mt-5 fs-1">How it Works</h2>
+        <div class="how-grid flex-wrap mb-5">
+            <div class="how-box">
+                <h3 class="card-title">Blockchain</h3>
+                <p class="card-text mb-auto">Three second transaction times and social network
+                    features make HIVE the most developer friendly blockchain in the world. DLUX Layer 2 brings new
+                    features to its thousands of Montly Active Users.</p>
+                <a href="#">HIVE Blockchain Explorer</a>
+            </div>
+            <div class="how-box">
+                <h3 class="card-title">Nodes</h3>
+                <p class="card-text mb-auto">The global network of Honeycomb nodes utilize spare compute resources to
+                    power decentralized storage, token exchange, video transcoding, streaming, and turn servers. </p>
+                <a href="#" class="">Run a DLUX Node</a>
+            </div>
+            <div class="how-box">
+                <h3 class="card-title">Infra</h3>
+                <p class="card-text mb-auto">HIVE scalability, Honeycomb token architecture, IPFS data storage, and
+                    censorship resistant publishing empower Web3 dApps to do more, bringing new options to users.</p>
+                <a href="#">Build on DLUX</a>
+            </div>
+        </div>
     </section>
     <script>
         // Change More icon
@@ -723,6 +1030,19 @@
                 entity.setAttribute("position", "2 0 -2.6"); // Default for larger screens
             }
         }
+        // Node Headers clickable
+        function updateCollapseAttributes() {
+            document.querySelectorAll(".node-header").forEach(box => {
+                if (window.innerWidth <= 1400) {
+                    box.setAttribute("data-bs-toggle", "collapse");
+                } else {
+                    box.removeAttribute("data-bs-toggle");
+                }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", updateCollapseAttributes);
+        window.addEventListener("resize", updateCollapseAttributes);
 
         // Run on load and on resize
         window.addEventListener("load", updateAFramePosition);
