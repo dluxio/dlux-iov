@@ -906,7 +906,7 @@
         </div>
     </section>
     <section class="video-section d-flex align-items-center py-5" id="vision">
-        <video autoplay muted loop playsinline>
+        <video autoplay muted loop playsinline preload="auto" onloadeddata="this.play();">
             <source src="/vid/blue_dust.m4v" type="video/mp4">
             Your browser does not support the video tag.
         </video>
