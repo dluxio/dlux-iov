@@ -104,7 +104,7 @@
             padding-left: 0;
         }
 
-        .navbar-nav .nav-item:last-child .nav-link{
+        .navbar-nav .nav-item:last-child .nav-link {
             border-right: none !important;
         }
 
@@ -127,10 +127,10 @@
             color: white;
             fill: white;
         }
-
-        .nav-item:hover .bar {
+*/
+        .nav-more .nav-link:hover .bar {
             background-color: white !important;
-        } */
+        }
 
         .nav-highlight:hover .nav-title {
             color: white !important;
@@ -176,15 +176,7 @@
             display: block;
         }
 
-        .nav-toggle {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
-            font-size: 1.75em;
-            font-weight: 500;
-        }
+
 
         .nav-logo {
             width: 40px;
@@ -212,6 +204,8 @@
             position: relative;
         }
 
+
+
         .navbar-nav .nav-more .dropdown-menu {
             position: absolute;
             background-color: rgb(235, 245, 236);
@@ -230,18 +224,19 @@
             overflow-y: auto;
         }
 
+        /* 
         .navbar-nav .nav-more .dropdown-menu.show {
             display: flex !important;
-        }
+        } */
 
-        .navbar-nav .nav-more .dropdown-footer {
+        /*  .navbar-nav .nav-more .dropdown-footer {
             margin-top: auto;
             height: 72px;
             text-align: center;
             align-items: center;
             justify-content: center;
             border-top: 1px solid black;
-        }
+        } */
 
         .navbar-nav .nav-more .dropdown-menu li {
             color: black;
@@ -399,6 +394,7 @@
             .navbar-username {
                 display: flex !important;
             }
+
             .nav-show {
                 display: block !important;
             }
@@ -430,9 +426,9 @@
                 width: 90%;
             }
 
-            .navbar-nav .nav-more .dropdown-menu {
+            .dropdown-menu {
                 width: calc(100vw - 40px) !important;
-                margin-left: 20px !important;
+
             }
 
 
@@ -460,6 +456,16 @@
 
             .btn-hero {
                 min-width: calc(100% - 10px) !important;
+            }
+
+            .nav-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100%;
+                font-size: 1.75em;
+                font-weight: 500;
             }
         }
 
@@ -664,6 +670,7 @@
             }
         }
 
+
         @media (min-width: 1400px) {
             .node-container {
                 min-height: 960px;
@@ -761,23 +768,21 @@
             border: 1px solid black;
             left: 0;
             top: 100%;
-            z-index: 1050;
-            width: 100%;
-            /* height: calc(100vh - 140px); */
-            /* margin-top: 6px; */
+
+
             color: black !important;
             padding: 0;
             flex-direction: column;
             overflow-y: auto;
             margin-top: 6px;
-            /* Creates the visible gap */
-            display: none;/
+
+            z-index: 1100;
+            align-items: flex-start;
+
+
         }
 
-        .dropdown-hover {
-            position: relative;
-            display: inline-block;
-        }
+
 
         .hover-gap {
             position: absolute;
@@ -791,10 +796,26 @@
             /* Ensures gap is hoverable */
         }
 
-        .dropdown-hover.show .dropdown-menu {
-            display: block;
-            /* Show dropdown */
+        /* .dropdown-hover {
+            position: relative;
+            display: inline-block;
+        } */
+
+        @media (min-width: 768px) {
+            .dropdown:hover .dropdown-menu {
+                display: block;
+            }
         }
+
+        .dropdown-toggle::after {
+            display: none;
+            /* Hides the default caret on hover */
+        }
+
+        /*  .dropdown-hover.show .dropdown-menu {
+            display: block;
+        
+        } */
 
         .nav-link .pfp {
             max-height: 100%;
@@ -871,7 +892,7 @@
                 <a class="nav-link nav-highlight nav-title" href="/hub">HUB<span class="nav-subtitle">Social
                         dApps</span></a>
             </li>
-            <li class="nav-item nav-hide nav-nfts dropdown dropdown-hover">
+            <li class="nav-item nav-hide dropdown">
                 <a class="nav-link nav-highlight nav-title" href="#" role="button" data-bs-toggle="dropdown"
                     aria-expanded="false">NFTs<span class="nav-subtitle">Collectible PFPs & TCGs</span></a>
                 <div class="hover-gap"></div>
@@ -892,11 +913,10 @@
                 <a class="nav-link nav-highlight nav-title" href="/dex">DEX<span class="nav-subtitle">Exchange
                         Tokens</span></a>
             </li>
-
-            <li class="nav-item dropdown dropdown-hover">
-                <a class="nav-link nav-highlight nav-title d-flex align-items-center" href="#" role="button"
-                    data-bs-toggle="dropdown" aria-expanded="false"><img src="/img/no-user.png"
-                        class="pfp rounded-circle img-fluid bg-mint"><span
+            <li class="nav-item dropdown">
+                <a class="nav-link nav-highlight nav-title dropdown-toggle d-flex align-items-center" href="#"
+                    role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="/img/no-user.png" class="pfp rounded-circle img-fluid bg-mint"><span
                         class="navbar-username ms-2">username</span></a>
                 <div class="hover-gap"></div>
                 <ul class="dropdown-menu">
@@ -924,8 +944,9 @@
         <a class="nav-link nav-highlight nav-title d-none" href="#">Login<span class="nav-subtitle">HIVE
                 Keychain</span></a>
         </li>
-        <li class="nav-more dropdown dropdown-hover">
-            <a class="nav-link nav-highlight nav-title" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <li class="nav-more dropdown">
+            <a class="nav-link nav-highlight nav-title dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
                 <span class="nav-bars">
                     <span class="bar"></span>
                     <span class="bar"></span>
@@ -1167,59 +1188,172 @@
         </div>
     </section>
     <script>
+        /* document.addEventListener("DOMContentLoaded", function () {
+            let dropdowns = document.querySelectorAll(".dropdown-hover");
+
+            function setupHoverDropdowns() {
+                dropdowns.forEach(dropdown => {
+                    let button = dropdown.querySelector(".nav-link");
+                    let menu = dropdown.querySelector(".dropdown-menu");
+                    let gap = dropdown.querySelector(".hover-gap");
+
+                    function showDropdown() {
+                        dropdown.classList.add("show");
+                    }
+
+                    function hideDropdown() {
+                        dropdown.classList.remove("show");
+                    }
+
+                    // Keep dropdown open when hovering over button, gap, or menu
+                    [button, gap, menu].forEach(element => {
+                        element.addEventListener("mouseenter", showDropdown);
+                    });
+
+                    // Close dropdown only if leaving button, gap, and menu
+                    dropdown.addEventListener("mouseleave", function (e) {
+                        if (!button.contains(e.relatedTarget) &&
+                            !gap.contains(e.relatedTarget) &&
+                            !menu.contains(e.relatedTarget)) {
+                            hideDropdown();
+                        }
+                    });
+                });
+            }
+
+            function setupClickDropdowns() {
+                dropdowns.forEach(dropdown => {
+                    let button = dropdown.querySelector(".nav-more");
+                    let menu = dropdown.querySelector(".nav-more .dropdown-menu");
+                    let bars = dropdown.querySelectorAll(".nav-bars .bar");
+
+                    button.addEventListener("click", function (event) {
+                        event.preventDefault();
+                        bars.forEach(bar => bar.classList.toggle("x"));
+                        menu.style.display = menu.style.display === "block" ? "none" : "block";
+                    });
+
+                    document.addEventListener("click", function (event) {
+                        if (!button.contains(event.target) && !menu.contains(event.target)) {
+                            bars.forEach(bar => bar.classList.remove("x"));
+                            menu.style.display = "none";
+                        }
+                    });
+                });
+            }
+
+            function applyDropdownBehavior() {
+                if (window.innerWidth > 576) {
+                    setupHoverDropdowns();
+                } else {
+                    setupClickDropdowns();
+                }
+            }
+
+            applyDropdownBehavior(); // Apply on load
+
+            // Reapply behavior when resizing
+            window.addEventListener("resize", function () {
+                location.reload(); // Refresh page to reset listeners and behavior
+            });
+        }); */
+
+
+
         // More button
         document.addEventListener("DOMContentLoaded", function () {
-            const menuToggle = document.querySelector(".nav-toggle");
+            const menuToggle = document.querySelector(".nav-more .nav-link");
             const dropdownMenu = document.querySelector(".nav-more .dropdown-menu");
             const bars = document.querySelectorAll(".nav-bars .bar");
 
-            menuToggle.addEventListener("mouseover", function (event) {
+            menuToggle.addEventListener("click", function (event) {
                 event.preventDefault();
                 bars.forEach(bar => bar.classList.toggle("x"));
-                dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+                /* dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block"; */
             });
 
-            document.addEventListener("mouseover", function (event) {
+            document.addEventListener("click", function (event) {
                 if (!menuToggle.contains(event.target) && !dropdownMenu.contains(event.target)) {
                     bars.forEach(bar => bar.classList.remove("x"));
-                    dropdownMenu.style.display = "none";
+                    /*  dropdownMenu.style.display = "none"; */
                 }
             });
         });
 
-        // Nav dropdown
         document.addEventListener("DOMContentLoaded", function () {
-            let dropdowns = document.querySelectorAll(".dropdown-hover");
+            const navMoreDropdown = document.querySelector(".nav-more .dropdown");
+            const navMoreToggle = document.querySelector(".nav-more .dropdown-toggle");
+            const otherDropdowns = document.querySelectorAll(".nav-item.dropdown");
+            const bars = document.querySelectorAll(".nav-bars .bar");
 
-            dropdowns.forEach(dropdown => {
-                let button = dropdown.querySelector(".nav-link");
-                let menu = dropdown.querySelector(".dropdown-menu");
-                let gap = dropdown.querySelector(".hover-gap");
-
-                function showDropdown() {
-                    dropdown.classList.add("show");
-                    
-                }
-
-                function hideDropdown() {
-                    dropdown.classList.remove("show");
-                }
-
-                // Keep dropdown open when hovering over button, gap, or menu
-                [button, gap, menu].forEach(element => {
-                    element.addEventListener("mouseenter", showDropdown);
-                });
-
-                // Close dropdown only if leaving button, gap, and menu
-                dropdown.addEventListener("mouseleave", function (e) {
-                    if (!button.contains(e.relatedTarget) &&
-                        !gap.contains(e.relatedTarget) &&
-                        !menu.contains(e.relatedTarget)) {
-                        hideDropdown();
+            otherDropdowns.forEach(dropdown => {
+                dropdown.addEventListener("mouseover", function () {
+                    const dropdownInstance = bootstrap.Dropdown.getInstance(navMoreToggle);
+                    if (dropdownInstance) {
+                        dropdownInstance.hide();
+                        bars.forEach(bar => bar.classList.remove("x")); // Hide the dropdown using Bootstrap's API
                     }
                 });
             });
         });
+
+
+
+
+        /*  // Nav dropdown
+         document.addEventListener("DOMContentLoaded", function () {
+ 
+             let dropdowns = document.querySelectorAll(".dropdown-hover");
+ 
+             dropdowns.forEach(dropdown => {
+                 let button = dropdown.querySelector(".nav-link");
+                 let menu = dropdown.querySelector(".dropdown-menu");
+                 let gap = dropdown.querySelector(".hover-gap");
+ 
+                 function showDropdown() {
+                     dropdown.classList.add("show");
+ 
+                 }
+ 
+                 function hideDropdown() {
+                     dropdown.classList.remove("show");
+                 }
+ 
+                 // Keep dropdown open when hovering over button, gap, or menu
+                 [button, gap, menu].forEach(element => {
+                     element.addEventListener("mouseenter", showDropdown);
+                 });
+ 
+                 // Close dropdown only if leaving button, gap, and menu
+                 dropdown.addEventListener("mouseleave", function (e) {
+                     if (!button.contains(e.relatedTarget) &&
+                         !gap.contains(e.relatedTarget) &&
+                         !menu.contains(e.relatedTarget)) {
+                         hideDropdown();
+                     }
+                 });
+             });
+ 
+ 
+         }); */
+
+        /*  document.addEventListener("DOMContentLoaded", function () {
+             let navMore = document.getElementById("nav-more");
+ 
+             function updateNavMoreClass() {
+                 if (window.innerWidth >= 768) {
+                     navMore.classList.add("dropdown-hover");
+                 } else {
+                     navMore.classList.remove("dropdown-hover");
+                 }
+             }
+ 
+             updateNavMoreClass(); // Apply on page load
+ 
+             window.addEventListener("resize", function () {
+                 updateNavMoreClass();
+             });
+         }); */
 
 
         // Change Aframe position
@@ -1233,6 +1367,10 @@
                 entity.setAttribute("position", "2 0 -2.6"); // Default for larger screens
             }
         }
+        // Run on load and on resize
+        window.addEventListener("load", updateAFramePosition);
+        window.addEventListener("resize", updateAFramePosition);
+
         // Node Headers clickable
         function updateCollapseAttributes() {
             document.querySelectorAll(".node-header").forEach(box => {
@@ -1243,17 +1381,16 @@
                 }
             });
         }
-
         document.addEventListener("DOMContentLoaded", updateCollapseAttributes);
         window.addEventListener("resize", updateCollapseAttributes);
 
-        // Run on load and on resize
-        window.addEventListener("load", updateAFramePosition);
-        window.addEventListener("resize", updateAFramePosition);
+
+
 
     </script>
     <!-- Bootstrap -->
     <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 </body>
 
 </html>
