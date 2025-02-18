@@ -77,6 +77,16 @@
             position: relative;
         }
 
+        .nav-icon {
+            flex: 1;
+            height: 72px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            position: relative;
+        }
+
         .nav-highlight:hover {
             background-color: black;
             color: white !important;
@@ -87,6 +97,10 @@
             height: 72px;
             border-right: none;
             padding-left: 0;
+        }
+
+        .navbar-nav .nav-item:last-child .nav-link{
+            border-right: none !important;
         }
 
         /* .navbar-nav .nav-item:hover {
@@ -180,6 +194,17 @@
             width: 100%;
             height: 100%;
             padding: 1rem;
+        }
+
+        .navbar-nav .nav-more {
+
+            height: 72px;
+            width: 72px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            position: relative;
         }
 
         .navbar-nav .nav-more .dropdown-menu {
@@ -355,6 +380,10 @@
                 flex-direction: unset;
             }
 
+            .navbar-username {
+                display: none;
+            }
+
         }
 
         @media (max-width: 768px) {
@@ -362,8 +391,16 @@
                 display: none !important;
             }
 
+            .navbar-username {
+                display: flex !important;
+            }
             .nav-show {
                 display: block !important;
+            }
+
+            .navbar-nav .nav-more {
+                height: 64px;
+                width: 64px;
             }
 
             .navbar-nav {
@@ -710,7 +747,7 @@
             margin-top: 0px;
         } */
 
-        .navbar-nav .nav-nfts .dropdown-menu {
+        .navbar-nav .nav-item .dropdown-menu {
             position: absolute;
             background: rgb(235, 245, 236);
             border-bottom-left-radius: 10px;
@@ -752,6 +789,10 @@
         .dropdown-hover.show .dropdown-menu {
             display: block;
             /* Show dropdown */
+        }
+
+        .nav-link .pfp {
+            max-height: 100%;
         }
     </style>
 </head>
@@ -807,7 +848,6 @@
                             points="186.56 292.91 186.62 292.91 203.93 292.76 176.49 245.76 185.75 229.62 231.79 307.99 140.56 308.18 149.16 293.24 186.56 292.91" />
                     </svg>
                     <span class="nav-brand ms-1">DLUX</span></a>
-
             </li>
             <li class="nav-item nav-hide">
                 <a class="nav-link nav-highlight nav-title" href="/hub">HUB<span class="nav-subtitle">Social
@@ -831,43 +871,73 @@
                 </ul>
             </li>
             <li class="nav-item nav-hide">
-                <a class="nav-link nav-highlight nav-title" href="/dex">DEX<span class="nav-subtitle">Exchange Tokens</span></a>
+                <a class="nav-link nav-highlight nav-title" href="/dex">DEX<span class="nav-subtitle">Exchange
+                        Tokens</span></a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link nav-highlight nav-title" href="#">Login<span class="nav-subtitle">HIVE Keychain</span></a>
+
+            <li class="nav-item nav-more dropdown dropdown-hover">
+                <a class="nav-link nav-highlight nav-title d-flex align-items-center" href="#" role="button"
+                    data-bs-toggle="dropdown" aria-expanded="false"><img src="/img/no-user.png"
+                        class="pfp rounded-circle img-fluid bg-mint"><span
+                        class="navbar-username ms-2">username</span></a>
+                <div class="hover-gap"></div>
+                <ul class="dropdown-menu">
+                    <li class="nav-item nav-highlight">
+                        <a class="nav-link nav-highlight nav-title" href="#">Messages<span class="nav-subtitle">Sting
+                                Chat</span></a>
+                    </li>
+                    <li class="nav-item nav-highlight">
+                        <a class="nav-link nav-highlight nav-title" href="/user/">Profile<span class="nav-subtitle">HIVE
+                                Blog</span></a>
+                    </li>
+                    <li class="nav-item nav-highlight">
+                        <a class="nav-link nav-highlight nav-title" href="/user#wallet/">Wallet<span
+                                class="nav-subtitle">Honeycomb Tokens</span></a>
+                    <li class="nav-item nav-highlight">
+                        <a class="nav-link nav-highlight nav-title" href="/user#inventory/">Inventory<span
+                                class="nav-subtitle">NFT Collection</span></a>
+                    <li class="nav-item nav-highlight">
+                        <a class="nav-link nav-highlight nav-title" href="/user#cloud/">Cloud<span
+                                class="nav-subtitle">SPK Network</span></a>
+                    </li>
             </li>
-            <li class="nav-item nav-more dropdown text-center">
-                <a class="nav-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <span class="nav-bars">
-                        <span class="bar"></span>
-                        <span class="bar"></span>
-                        <span class="bar"></span>
-                    </span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end container">
-                    <li class="nav-show"><a class="dropdown-item subnav-title" href="/hub">HUB<span
-                                class="subnav-subtitle">Social dApps</span></a></li>
-                    <li class="nav-show"><a class="dropdown-item subnav-title" href="/dex">DEX<span
-                                class="subnav-subtitle">Exchange Tokens</span></a></li>
-                    <li class="nav-show"><a class="dropdown-item subnav-title" href="/nfts">NFT Market<span
-                                class="subnav-subtitle">Browse, Bid, Buy</span></a></li>
-                    <li class="nav-show"><a class="dropdown-item subnav-title" href="/nfts/sets">NFT Collections<span
-                                class="subnav-subtitle">Explore Community Sets</span></a></li>
-                    <li><a class="dropdown-item subnav-title" href="/dex">Rewards<span class="subnav-subtitle">Run
-                                a DePIN Service Node</span></a></li>
-                    <li><a class="dropdown-item subnav-title" href="/build">Publishing<span
-                                class="subnav-subtitle">Build
-                                and Post With DLUX</span></a></li>
-                    <li><a class="dropdown-item subnav-title" href="/build">Storage<span class="subnav-subtitle">Web3
-                                IPFS Pinning</span></a></li>
-                    <li><a class="dropdown-item subnav-title" href="/new/token">Honeycomb<span
-                                class="subnav-subtitle">Launch Your DeFi Project</span></a></li>
-                    <li><a class="dropdown-item subnav-title" href="/docs" target="_blank">Docs<span
-                                class="subnav-subtitle">Explore
-                                DLUX Documentation</span></a></li>
-                    <li class="subnav-blog"><a class="dropdown-extra" href="/@disregardfiat">Blog</a></li>
-                    <li class="subnav-pk"><a class="dropdown-extra" href="/about">Press Kit</a></li>
-                    <li class="dropdown-footer d-none">
+            </li>
+        </ul>
+        <a class="nav-link nav-highlight nav-title d-none" href="#">Login<span class="nav-subtitle">HIVE
+                Keychain</span></a>
+        </li>
+        <li class="nav-item dropdown dropdown-hover">
+            <a class="nav-link nav-highlight nav-title" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="nav-bars">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </span>
+            </a>
+            <div class="hover-gap"></div>
+            <ul class="dropdown-menu dropdown-menu-end container">
+                <li class="nav-show"><a class="dropdown-item subnav-title" href="/hub">HUB<span
+                            class="subnav-subtitle">Social dApps</span></a></li>
+                <li class="nav-show"><a class="dropdown-item subnav-title" href="/dex">DEX<span
+                            class="subnav-subtitle">Exchange Tokens</span></a></li>
+                <li class="nav-show"><a class="dropdown-item subnav-title" href="/nfts">NFT Market<span
+                            class="subnav-subtitle">Browse, Bid, Buy</span></a></li>
+                <li class="nav-show"><a class="dropdown-item subnav-title" href="/nfts/sets">NFT Collections<span
+                            class="subnav-subtitle">Explore Community Sets</span></a></li>
+                <li><a class="dropdown-item subnav-title" href="/dex">Rewards<span class="subnav-subtitle">Run
+                            a DePIN Service Node</span></a></li>
+                <li><a class="dropdown-item subnav-title" href="/build">Publishing<span class="subnav-subtitle">Build
+                            and Post With DLUX</span></a></li>
+                <li><a class="dropdown-item subnav-title" href="/build">Storage<span class="subnav-subtitle">Web3
+                            IPFS Pinning</span></a></li>
+                <li><a class="dropdown-item subnav-title" href="/new/token">Honeycomb<span
+                            class="subnav-subtitle">Launch Your DeFi Project</span></a></li>
+                <li><a class="dropdown-item subnav-title" href="/docs" target="_blank">Docs<span
+                            class="subnav-subtitle">Explore
+                            DLUX Documentation</span></a></li>
+                <li class="subnav-blog"><a class="dropdown-extra" href="/@disregardfiat">Blog</a></li>
+                <li class="subnav-pk"><a class="dropdown-extra" href="/about">Press Kit</a></li>
+                <!-- <li class="dropdown-footer">
                         <footer class="footer-marquee">
                             <div class="marquee-wrapper">
                                 <div class="marquee-content"><span class="me-2">DLUX</span><span
@@ -880,9 +950,9 @@
                                         class="ms-2">DLUX</span></div>
                             </div>
                         </footer>
-                    </li>
-                </ul>
-            </li>
+                    </li> -->
+            </ul>
+        </li>
         </ul>
     </nav>
     <section class="hero-section container-fluid d-flex">
@@ -1079,19 +1149,19 @@
         </div>
     </section>
     <script>
-        // Change More icon
+        // More button
         document.addEventListener("DOMContentLoaded", function () {
             const menuToggle = document.querySelector(".nav-toggle");
             const dropdownMenu = document.querySelector(".nav-more .dropdown-menu");
             const bars = document.querySelectorAll(".nav-bars .bar");
 
-            menuToggle.addEventListener("click", function (event) {
+            menuToggle.addEventListener("mouseover", function (event) {
                 event.preventDefault();
                 bars.forEach(bar => bar.classList.toggle("x"));
                 dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
             });
 
-            document.addEventListener("click", function (event) {
+            document.addEventListener("mouseover", function (event) {
                 if (!menuToggle.contains(event.target) && !dropdownMenu.contains(event.target)) {
                     bars.forEach(bar => bar.classList.remove("x"));
                     dropdownMenu.style.display = "none";
@@ -1099,33 +1169,37 @@
             });
         });
 
-        // NFT dropdown
+        // Nav dropdown
         document.addEventListener("DOMContentLoaded", function () {
-            let dropdown = document.querySelector(".dropdown-hover");
-            let button = dropdown.querySelector(".nav-link");
-            let menu = dropdown.querySelector(".dropdown-menu");
-            let gap = dropdown.querySelector(".hover-gap");
+            let dropdowns = document.querySelectorAll(".dropdown-hover");
 
-            function showDropdown() {
-                dropdown.classList.add("show");
-            }
+            dropdowns.forEach(dropdown => {
+                let button = dropdown.querySelector(".nav-link");
+                let menu = dropdown.querySelector(".dropdown-menu");
+                let gap = dropdown.querySelector(".hover-gap");
 
-            function hideDropdown() {
-                dropdown.classList.remove("show");
-            }
-
-            // Keep dropdown open when hovering over button, gap, or menu
-            [button, gap, menu].forEach(element => {
-                element.addEventListener("mouseenter", showDropdown);
-            });
-
-            // Close dropdown only if leaving button, gap, and menu
-            dropdown.addEventListener("mouseleave", function (e) {
-                if (!button.contains(e.relatedTarget) &&
-                    !gap.contains(e.relatedTarget) &&
-                    !menu.contains(e.relatedTarget)) {
-                    hideDropdown();
+                function showDropdown() {
+                    dropdown.classList.add("show");
+                    
                 }
+
+                function hideDropdown() {
+                    dropdown.classList.remove("show");
+                }
+
+                // Keep dropdown open when hovering over button, gap, or menu
+                [button, gap, menu].forEach(element => {
+                    element.addEventListener("mouseenter", showDropdown);
+                });
+
+                // Close dropdown only if leaving button, gap, and menu
+                dropdown.addEventListener("mouseleave", function (e) {
+                    if (!button.contains(e.relatedTarget) &&
+                        !gap.contains(e.relatedTarget) &&
+                        !menu.contains(e.relatedTarget)) {
+                        hideDropdown();
+                    }
+                });
             });
         });
 
