@@ -92,6 +92,11 @@
             color: white !important;
         }
 
+        .nav-more:hover {
+            border-top-right-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
         .navbar-nav .nav-item:last-child {
             flex: 0 0 72px;
             height: 72px;
@@ -794,6 +799,19 @@
         .nav-link .pfp {
             max-height: 100%;
         }
+
+        .nav-more .nav-link {
+            height: 100%;
+            width: 100%;
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
     </style>
 </head>
 
@@ -875,7 +893,7 @@
                         Tokens</span></a>
             </li>
 
-            <li class="nav-item nav-more dropdown dropdown-hover">
+            <li class="nav-item dropdown dropdown-hover">
                 <a class="nav-link nav-highlight nav-title d-flex align-items-center" href="#" role="button"
                     data-bs-toggle="dropdown" aria-expanded="false"><img src="/img/no-user.png"
                         class="pfp rounded-circle img-fluid bg-mint"><span
@@ -906,7 +924,7 @@
         <a class="nav-link nav-highlight nav-title d-none" href="#">Login<span class="nav-subtitle">HIVE
                 Keychain</span></a>
         </li>
-        <li class="nav-item dropdown dropdown-hover">
+        <li class="nav-more dropdown dropdown-hover">
             <a class="nav-link nav-highlight nav-title" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <span class="nav-bars">
                     <span class="bar"></span>
