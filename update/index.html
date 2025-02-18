@@ -56,20 +56,30 @@
             position: relative;
         }
 
-        .navbar-nav .nav-item {
+        .navbar-nav .nav-item .nav-link {
+            padding-left: 1rem;
+            border-right: 1px solid black;
+        }
+
+        .dropdown-menu .nav-item {
+            padding-left: 0;
+            border-bottom: 1px solid black;
+            border-right: 0;
+        }
+
+        .nav-item {
             flex: 1;
             height: 72px;
             display: flex;
             flex-direction: column;
             align-items: flex-start;
             justify-content: center;
-            padding-left: 1rem;
-            border-right: 1px solid black;
             position: relative;
         }
 
-        .navbar-nav .nav-highlight:hover {
-            background: black;
+        .nav-highlight:hover {
+            background-color: black;
+            color: white !important;
         }
 
         .navbar-nav .nav-item:last-child {
@@ -103,11 +113,11 @@
             background-color: white !important;
         } */
 
-        .navbar-nav .nav-highlight:hover .nav-title {
+        .nav-highlight:hover .nav-title {
             color: white !important;
         }
 
-        .navbar-nav .nav-highlight:hover .nav-subtitle {
+        .nav-highlight:hover .nav-subtitle {
             color: white !important;
         }
 
@@ -174,7 +184,7 @@
 
         .navbar-nav .nav-more .dropdown-menu {
             position: absolute;
-            background: rgb(235, 245, 236);
+            background-color: rgb(235, 245, 236);
             border-radius: 10px;
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
             border: 1px solid black;
@@ -560,15 +570,6 @@
             color: #0ed18c !important;
         }
 
-        .content-box {
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #f8f9fa;
-            text-align: center;
-            color: black;
-        }
-
         @media (max-width: 1440px) {
             .node-container {
                 display: flex;
@@ -586,7 +587,6 @@
             margin: auto;
             justify-content: center;
             align-items: center;
-            padding-bottom: 20px;
         }
 
         .node-container .image {
@@ -612,8 +612,9 @@
             .node-container .node-header {
                 cursor: pointer;
             }
+
             .node-container .bottom-right {
-                margin-bottom: auto;
+                margin-bottom: 40px;
             }
 
             .node-container .image {
@@ -703,6 +704,55 @@
             -ms-user-select: none;
             user-select: none;
         }
+
+        /* .nav-nfts.dropdown:hover .dropdown-menu {
+            display: flex;
+            margin-top: 0px;
+        } */
+
+        .navbar-nav .nav-nfts .dropdown-menu {
+            position: absolute;
+            background: rgb(235, 245, 236);
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid black;
+            left: 0;
+            top: 100%;
+            z-index: 1050;
+            width: 100%;
+            /* height: calc(100vh - 140px); */
+            /* margin-top: 6px; */
+            color: black !important;
+            padding: 0;
+            flex-direction: column;
+            overflow-y: auto;
+            margin-top: 6px;
+            /* Creates the visible gap */
+            display: none;/
+        }
+
+        .dropdown-hover {
+            position: relative;
+            display: inline-block;
+        }
+
+        .hover-gap {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            /* Invisible gap area */
+            background: transparent;
+            pointer-events: auto;
+            /* Ensures gap is hoverable */
+        }
+
+        .dropdown-hover.show .dropdown-menu {
+            display: block;
+            /* Show dropdown */
+        }
     </style>
 </head>
 
@@ -759,17 +809,32 @@
                     <span class="nav-brand ms-1">DLUX</span></a>
 
             </li>
-            <li class="nav-item nav-highlight nav-hide">
-                <a class="nav-link nav-title" href="/hub">HUB<span class="nav-subtitle">Social dApps</span></a>
+            <li class="nav-item nav-hide">
+                <a class="nav-link nav-highlight nav-title" href="/hub">HUB<span class="nav-subtitle">Social
+                        dApps</span></a>
             </li>
-            <li class="nav-item nav-highlight nav-hide">
-                <a class="nav-link nav-title" href="/nfts">NFTs<span class="nav-subtitle">Collectible PFPs & TCGs</span></a>
+            <li class="nav-item nav-hide nav-nfts dropdown dropdown-hover">
+                <a class="nav-link nav-highlight nav-title" href="#" role="button" data-bs-toggle="dropdown"
+                    aria-expanded="false">NFTs<span class="nav-subtitle">Collectible PFPs & TCGs</span></a>
+                <div class="hover-gap"></div>
+                <ul class="dropdown-menu">
+                    <li class="nav-item nav-highlight">
+                        <a class="nav-link nav-highlight nav-title" href="/nfts">Market<span
+                                class="nav-subtitle">Browse,
+                                Bid, Buy</span></a>
+                    </li>
+                    <li class="nav-item nav-highlight">
+                        <a class="nav-link nav-highlight nav-title" href="/nfts/sets">Collections<span
+                                class="nav-subtitle">Explore
+                                Community Sets</span></a>
+                    </li>
+                </ul>
             </li>
-            <li class="nav-item nav-highlight nav-hide">
-                <a class="nav-link nav-title" href="/dex">DEX<span class="nav-subtitle">Trade Tokens</span></a>
+            <li class="nav-item nav-hide">
+                <a class="nav-link nav-highlight nav-title" href="/dex">DEX<span class="nav-subtitle">Exchange Tokens</span></a>
             </li>
-            <li class="nav-item nav-highlight">
-                <a class="nav-link nav-title" href="#">Login<span class="nav-subtitle">Using HIVE Keychain</span></a>
+            <li class="nav-item">
+                <a class="nav-link nav-highlight nav-title" href="#">Login<span class="nav-subtitle">HIVE Keychain</span></a>
             </li>
             <li class="nav-item nav-more dropdown text-center">
                 <a class="nav-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -782,10 +847,12 @@
                 <ul class="dropdown-menu dropdown-menu-end container">
                     <li class="nav-show"><a class="dropdown-item subnav-title" href="/hub">HUB<span
                                 class="subnav-subtitle">Social dApps</span></a></li>
-                    <li class="nav-show"><a class="dropdown-item subnav-title" href="/nfts">NFTs<span
-                                class="subnav-subtitle">Collectible PFPs & TCGs</span></a></li>
                     <li class="nav-show"><a class="dropdown-item subnav-title" href="/dex">DEX<span
-                                class="subnav-subtitle">Trade Tokens</span></a></li>
+                                class="subnav-subtitle">Exchange Tokens</span></a></li>
+                    <li class="nav-show"><a class="dropdown-item subnav-title" href="/nfts">NFT Market<span
+                                class="subnav-subtitle">Browse, Bid, Buy</span></a></li>
+                    <li class="nav-show"><a class="dropdown-item subnav-title" href="/nfts/sets">NFT Collections<span
+                                class="subnav-subtitle">Explore Community Sets</span></a></li>
                     <li><a class="dropdown-item subnav-title" href="/dex">Rewards<span class="subnav-subtitle">Run
                                 a DePIN Service Node</span></a></li>
                     <li><a class="dropdown-item subnav-title" href="/build">Publishing<span
@@ -821,9 +888,10 @@
     <section class="hero-section container-fluid d-flex">
         <div class="hero-text container">
             <h1 class="hero-header text-mint">DLUX</h1>
-            <p class="hero-sub mb-3 text-mint">DePIN for HIVE<br><span class="text-turq">dApps • Storage • Tokens</span>
+            <p class="hero-sub mb-3 text-mint">Layer 2 for HIVE<br><span class="text-turq">dApps • Storage •
+                    Tokens</span>
             </p>
-            <p class="hero-lead mb-4 text-mint">Empowering Users With<br>Web3 Solutions</p>
+            <p class="hero-lead mb-4 text-mint">Web3 Solutions for<br>Decentralized Communities</p>
             <div>
                 <a class="btn btn-hero btn-turq btn-lg py-2 px-4 me-sm-2 mb-2 rounded-pill" href="#vision">Our
                     Vision</a>
@@ -905,14 +973,14 @@
             </a-scene>
         </div>
     </section>
-    <section class="video-section d-flex align-items-center py-5" id="vision">
+    <section class="video-section d-flex align-items-center" id="vision">
         <video autoplay muted loop playsinline preload="auto" onloadeddata="this.play();">
             <source src="/vid/blue_dust.m4v" type="video/mp4">
             Your browser does not support the video tag.
         </video>
         <div class="node-container">
-            <div class="image"><img src="/img/hypercube.png" class="img-fluid rounded-circle"
-                    alt="DLUX Node Network"></div>
+            <div class="image"><img src="/img/hypercube.png" class="img-fluid rounded-circle" alt="DLUX Node Network">
+            </div>
             <div class="text-box top-left">
                 <div class="d-flex flex-column">
                     <div class="d-flex node-header py-3 px-2 mb-xxl-2 pb-xxl-0 px-xxl-3" data-bs-target="#honeycomb">
@@ -921,9 +989,12 @@
                                 class="ms-auto fw-light d-xxl-none fa-fw fa-solid fa-plus"></i></h3>
                     </div>
                     <div class="collapse d-xxl-flex flex-column flex-grow-1" id="honeycomb">
-                        <p class="card-text px-2 px-xxl-3">DeFi tokens and smart contracts powered by our open source, fully customizable, node based DAO.
+                        <p class="card-text px-2 px-xxl-3">Our fully customizable and open source DAO powers community
+                            tokens and smart contracts.
                         </p>
-                        <button class="mx-2 mt-3 mb-2 mb-xxl-1 mx-xxl-3 align-self-baseline btn btn-turq rounded-pill btn-hero">Learn More</button>
+                        <a href="/update/honeycomb/"
+                            class="mx-2 mt-3 mb-2 mb-xxl-1 mx-xxl-3 align-self-baseline btn btn-turq rounded-pill btn-hero">Learn
+                            More</a>
                     </div>
                 </div>
             </div>
@@ -935,10 +1006,12 @@
                                 class="ms-auto fw-light d-xxl-none fa-fw fa-solid fa-plus"></i></h3>
                     </div>
                     <div class="collapse d-xxl-flex flex-column flex-grow-1" id="storage">
-                        <p class="card-text px-2 px-xxl-3">Secure, personal, and encrypted IPFS cloud distributed across
-                            redundant edge nodes.
+                        <p class="card-text px-2 px-xxl-3">Encryptable IPFS file storage across
+                            redundant edge nodes to ensure reliable availability.
                         </p>
-                        <button class="mx-2 mt-3 mb-2 mb-xxl-1 mx-xxl-3 align-self-baseline btn btn-turq rounded-pill btn-hero">Learn More</button>
+                        <a href="/new/token/"
+                            class="mx-2 mt-3 mb-2 mb-xxl-1 mx-xxl-3 align-self-baseline btn btn-turq rounded-pill btn-hero">Learn
+                            More</a>
                     </div>
                 </div>
             </div>
@@ -950,9 +1023,12 @@
                                 class="ms-auto fw-light d-xxl-none fa-fw fa-solid fa-plus"></i></h3>
                     </div>
                     <div class="collapse d-xxl-flex flex-column flex-grow-1" id="rewards">
-                        <p class="card-text px-2 px-xxl-3">Turn your existing hardware into a DePIN node for storage, streaming, transcoding, or governance.
+                        <p class="card-text px-2 px-xxl-3">Turn your existing hardware into DePIN nodes for storage,
+                            streaming, transcoding, or governance.
                         </p>
-                        <button class="mx-2 mt-3 mb-2 mb-xxl-1 mx-xxl-3 align-self-baseline btn btn-turq rounded-pill btn-hero">Learn More</button>
+                        <a href="#"
+                            class="mx-2 mt-3 mb-2 mb-xxl-1 mx-xxl-3 align-self-baseline btn btn-turq rounded-pill btn-hero">Get
+                            Started</a>
                     </div>
                 </div>
             </div>
@@ -965,11 +1041,12 @@
                                 class="ms-auto fw-light d-xxl-none fa-fw fa-solid fa-plus"></i></h3>
                     </div>
                     <div class="collapse d-xxl-flex flex-column flex-grow-1" id="publishing">
-                        <p class="card-text px-2 px-xxl-3">Our HUB supports  dApps, WebXR, photo, audio, video, and
+                        <p class="card-text px-2 px-xxl-3">Our HUB supports dApps, WebXR, photo, audio, video, and
                             anything else you can
                             imagine.
                         </p>
-                        <button class="mx-2 mt-3 mb-2 mb-xxl-1 mx-xxl-3 align-self-baseline btn btn-turq rounded-pill btn-hero">Learn More</button>
+                        <a class="mx-2 mt-3 mb-2 mb-xxl-1 mx-xxl-3 align-self-baseline btn btn-turq rounded-pill btn-hero"
+                            href="/new/">Get Started</a>
                     </div>
                 </div>
             </div>
@@ -987,15 +1064,17 @@
             </div>
             <div class="how-box">
                 <h3 class="card-title">L2 Nodes</h3>
-                <p class="card-text mb-auto">The global network of Honeycomb Layer 2 nodes utilize spare compute resources to
+                <p class="card-text mb-auto">The global network of Honeycomb Layer 2 nodes utilize spare compute
+                    resources to
                     power decentralized storage, token exchange, video transcoding, streaming, and turn servers. </p>
-                <a href="#" class="">Run a DLUX Node</a>
+                <a href="#" class="">Run a Honeycomb Node</a>
             </div>
             <div class="how-box">
                 <h3 class="card-title">Platform</h3>
                 <p class="card-text mb-auto">HIVE scalability, DLUX node architecture, IPFS data storage, and
-                    censorship resistant Publishing empower next generation Web3 dApps to do more for their users.</p>
-                <a href="#">Build on DLUX</a>
+                    censorship resistant publishing empower next generation Web3 dApps to do more for their communities.
+                </p>
+                <a href="/build/">Build on DLUX</a>
             </div>
         </div>
     </section>
@@ -1003,7 +1082,7 @@
         // Change More icon
         document.addEventListener("DOMContentLoaded", function () {
             const menuToggle = document.querySelector(".nav-toggle");
-            const dropdownMenu = document.querySelector(".dropdown-menu");
+            const dropdownMenu = document.querySelector(".nav-more .dropdown-menu");
             const bars = document.querySelectorAll(".nav-bars .bar");
 
             menuToggle.addEventListener("click", function (event) {
@@ -1016,6 +1095,36 @@
                 if (!menuToggle.contains(event.target) && !dropdownMenu.contains(event.target)) {
                     bars.forEach(bar => bar.classList.remove("x"));
                     dropdownMenu.style.display = "none";
+                }
+            });
+        });
+
+        // NFT dropdown
+        document.addEventListener("DOMContentLoaded", function () {
+            let dropdown = document.querySelector(".dropdown-hover");
+            let button = dropdown.querySelector(".nav-link");
+            let menu = dropdown.querySelector(".dropdown-menu");
+            let gap = dropdown.querySelector(".hover-gap");
+
+            function showDropdown() {
+                dropdown.classList.add("show");
+            }
+
+            function hideDropdown() {
+                dropdown.classList.remove("show");
+            }
+
+            // Keep dropdown open when hovering over button, gap, or menu
+            [button, gap, menu].forEach(element => {
+                element.addEventListener("mouseenter", showDropdown);
+            });
+
+            // Close dropdown only if leaving button, gap, and menu
+            dropdown.addEventListener("mouseleave", function (e) {
+                if (!button.contains(e.relatedTarget) &&
+                    !gap.contains(e.relatedTarget) &&
+                    !menu.contains(e.relatedTarget)) {
+                    hideDropdown();
                 }
             });
         });
