@@ -25,6 +25,14 @@
             overflow-x: hidden;
         }
 
+        #vision {
+            background-color: #101419;
+        }
+
+        #how {
+            background-color: #1a2129;
+        }
+
         .text-mint {
             color: rgb(235, 245, 236) !important;
         }
@@ -39,7 +47,6 @@
             left: 50%;
             transform: translateX(-50%);
             background: rgb(235, 245, 236);
-            /* background: rgba(255, 255, 255, 0.7); */
             border-radius: 10px;
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
@@ -87,16 +94,6 @@
             position: relative;
         }
 
-        .nav-highlight:hover {
-            background-color: black;
-            color: white !important;
-        }
-
-        .nav-more:hover {
-            border-top-right-radius: 10px;
-            border-top-right-radius: 10px;
-        }
-
         .navbar-nav .nav-item:last-child {
             flex: 0 0 72px;
             height: 72px;
@@ -128,9 +125,7 @@
             fill: white;
         }
 */
-        .nav-more .nav-link:hover .bar {
-            background-color: white !important;
-        }
+
 
         .nav-highlight:hover .nav-title {
             color: white !important;
@@ -176,8 +171,6 @@
             display: block;
         }
 
-
-
         .nav-logo {
             width: 40px;
         }
@@ -204,8 +197,6 @@
             position: relative;
         }
 
-
-
         .navbar-nav .nav-more .dropdown-menu {
             position: absolute;
             background-color: rgb(235, 245, 236);
@@ -216,7 +207,6 @@
             top: 100%;
             z-index: 1050;
             width: 484px;
-            /* height: calc(100vh - 140px); */
             margin-top: 6px;
             color: black;
             padding: 0;
@@ -224,21 +214,30 @@
             overflow-y: auto;
         }
 
-        /* 
-        .navbar-nav .nav-more .dropdown-menu.show {
-            display: flex !important;
-        } */
-
-        /*  .navbar-nav .nav-more .dropdown-footer {
-            margin-top: auto;
-            height: 72px;
-            text-align: center;
-            align-items: center;
-            justify-content: center;
-            border-top: 1px solid black;
-        } */
+        .navbar-nav .nav-item .dropdown-menu {
+            position: absolute;
+            background: rgb(235, 245, 236);
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid black;
+            left: 0;
+            top: 100%;
+            color: black !important;
+            padding: 0;
+            flex-direction: column;
+            overflow-y: auto;
+            margin-top: 6px;
+            z-index: 1050;
+            align-items: flex-start;
+            min-width: 200px;
+        }
 
         .navbar-nav .nav-more .dropdown-menu li {
+            color: black;
+        }
+
+        .navbar-nav .nav-item .dropdown-menu li {
             color: black;
         }
 
@@ -285,6 +284,30 @@
             background-color: black;
         }
 
+        .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover .subnav-subtitle {
+            color: white !important;
+        }
+
+        .navbar-nav .nav-item .dropdown-menu li .dropdown-item {
+            height: 72px;
+            color: black;
+            border-bottom: 1px solid black;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .navbar-nav .nav-item .dropdown-menu li .dropdown-item:hover {
+            height: 72px;
+            color: white !important;
+            background-color: black;
+        }
+
+        .navbar-nav .nav-item .dropdown-menu li .dropdown-item:hover .subnav-subtitle {
+            color: white !important;
+        }
+
         .subnav-title {
             font-family: 'Space Grotesk', serif;
             font-size: 1.25rem;
@@ -301,172 +324,18 @@
             line-height: 1.25;
         }
 
-        .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover .subnav-subtitle {
+        .navbar-nav .nav-item .dropdown-menu li .dropdown-item:hover {
+            height: 72px;
+            color: white !important;
+            background-color: black;
+        }
+
+        .navbar-nav .nav-item .dropdown-menu li .dropdown-item:hover .subnav-subtitle {
             color: white !important;
         }
 
         .nav-show {
             display: none;
-        }
-
-        .footer-marquee {
-            width: 100%;
-            height: 72px;
-            overflow: hidden;
-            bottom: 0;
-            left: 0;
-            display: flex;
-            white-space: nowrap;
-        }
-
-        .marquee-wrapper {
-            display: flex;
-            width: 200%;
-            animation: marquee 8s linear infinite;
-        }
-
-        .marquee-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            width: 100%;
-            font-size: 2.55em;
-            font-weight: 400;
-            font-family: "Audiowide", serif;
-        }
-
-        @keyframes marquee {
-            from {
-                transform: translateX(0);
-            }
-
-            to {
-                transform: translateX(-50%);
-            }
-        }
-
-
-        @media (max-width: 1440px) {
-            .navbar-nav .nav-item {
-                align-items: center;
-                text-align: center;
-                padding-left: 0;
-            }
-
-            .navbar-nav .nav-link {
-                text-align: center;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 100%;
-            }
-
-            .navbar-nav .nav-brand {
-                display: none;
-            }
-
-            .navbar-nav .nav-subtitle {
-                display: none;
-            }
-
-            .navbar-nav .nav-item:first-child {
-                flex: 0 0 72px;
-            }
-        }
-
-        @media (max-width: 992px) {
-            .navbar-nav {
-                flex-direction: unset;
-            }
-
-            .navbar-username {
-                display: none;
-            }
-
-        }
-
-        @media (max-width: 768px) {
-            .nav-hide {
-                display: none !important;
-            }
-
-            .navbar-username {
-                display: flex !important;
-            }
-
-            .nav-show {
-                display: block !important;
-            }
-
-            .navbar-nav .nav-more {
-                height: 64px;
-                width: 64px;
-            }
-
-            .navbar-nav {
-                flex-direction: unset;
-                height: 64px !important;
-            }
-
-            .nav-item {
-                height: 64px !important;
-            }
-
-            .aframe-container {
-                height: 40vh !important;
-                width: 100vw !important;
-            }
-
-            .hero-text {
-                position: absolute;
-                bottom: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 90%;
-            }
-
-            .dropdown-menu {
-                width: calc(100vw - 40px) !important;
-
-            }
-
-
-            .how-grid {
-                flex-direction: column;
-                align-items: center;
-                width: 100%;
-            }
-
-            .how-grid .how-box {
-                width: 100%;
-                max-width: 400px;
-            }
-        }
-
-        @media (max-width: 576px) {
-
-            .hero-header {
-                font-size: 5em !important;
-            }
-
-            .hero-sub {
-                font-size: 2em !important;
-            }
-
-            .btn-hero {
-                min-width: calc(100% - 10px) !important;
-            }
-
-            .nav-toggle {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 100%;
-                height: 100%;
-                font-size: 1.75em;
-                font-weight: 500;
-            }
         }
 
         .hero-section {
@@ -513,14 +382,6 @@
             top: 0;
             height: 100vh;
             width: 60vw;
-        }
-
-        .node-section {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
         }
 
         .nav-bars {
@@ -618,18 +479,7 @@
             color: #0ed18c !important;
         }
 
-        @media (max-width: 1440px) {
-            .node-container {
-                display: flex;
-                flex-direction: column;
-            }
-
-            .node-container .text-box {
-                position: relative;
-            }
-        }
-
-        .node-container {
+        .vision-container {
             position: relative;
             width: 100%;
             margin: auto;
@@ -637,7 +487,7 @@
             align-items: center;
         }
 
-        .node-container .image {
+        .vision-container .image {
             max-width: 500px;
             animation: bounce 3s infinite ease-in-out;
             margin-top: 10px;
@@ -645,38 +495,128 @@
             justify-self: center;
         }
 
-        .node-container .text-box {
+        .vision-container .text-box {
             width: 320px;
             background-color: #1a2129;
             text-align: center;
             border-radius: 10px;
             margin-bottom: 10px;
             text-align: start;
-            /* border: 1px solid white; */
             color: rgb(235, 245, 236);
         }
 
+        .vision-section {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .vision-section video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .hover-gap {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background: transparent;
+            pointer-events: auto;
+        }
+
+        .nav-dropdown .dropdown-toggle::after {
+            display: none;
+        }
+
+        .nav-link .pfp {
+            max-height: 100%;
+        }
+
+        .nav-more .nav-link {
+            height: 100%;
+            width: 100%;
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
         @media (max-width: 1400px) {
-            .node-container .node-header {
+            .navbar-nav .nav-item {
+                align-items: center;
+                text-align: center;
+                padding-left: 0;
+            }
+
+            .navbar-nav .nav-link {
+                text-align: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+            }
+
+            .navbar-nav .nav-brand {
+                display: none;
+            }
+
+            .navbar-nav .nav-subtitle {
+                display: none;
+            }
+
+            .nav-item .dropdown-menu .subnav-subtitle {
+                display: none;
+            }
+
+            .navbar-nav .nav-item:first-child {
+                flex: 0 0 72px;
+            }
+
+            .vision-container {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .vision-container .text-box {
+                position: relative;
+            }
+
+            .vision-container .vision-box-header {
                 cursor: pointer;
             }
 
-            .node-container .bottom-right {
+            .vision-container .bottom-right {
                 margin-bottom: 40px;
             }
 
-            .node-container .image {
+            .vision-container .image {
                 margin: 50px;
             }
         }
 
-
         @media (min-width: 1400px) {
-            .node-container {
+            .vision-container {
                 min-height: 960px;
             }
 
-            .node-container .image {
+            .vision-container .image {
                 margin-top: unset;
                 position: absolute;
                 top: 15%;
@@ -685,7 +625,7 @@
                 max-height: 500px;
             }
 
-            .node-container .text-box {
+            .vision-container .text-box {
                 position: absolute;
                 height: 268px;
                 width: 360px;
@@ -712,12 +652,117 @@
             }
         }
 
-        #vision {
-            background-color: #101419;
+        @media (max-width: 992px) {
+            .navbar-nav {
+                flex-direction: unset;
+            }
+
+            .navbar-username {
+                display: none;
+            }
+
         }
 
-        #how {
-            background-color: #1a2129;
+        @media (max-width: 768px) {
+            .nav-hide {
+                display: none !important;
+            }
+
+            .navbar-username {
+                display: flex !important;
+            }
+
+            .nav-show {
+                display: block !important;
+            }
+
+            .navbar-nav .nav-more {
+                height: 64px;
+                width: 64px;
+            }
+
+            .navbar-nav {
+                flex-direction: unset;
+                height: 64px !important;
+            }
+
+            .nav-item {
+                height: 64px !important;
+            }
+
+            .aframe-container {
+                height: 40vh !important;
+                width: 100vw !important;
+            }
+
+            .hero-text {
+                position: absolute;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 90%;
+            }
+
+            .nav-item .dropdown-menu {
+                left: calc(50% - 5px) !important;
+                transform: translateX(-50%);
+                width: calc(100vw - 40px) !important;
+            }
+
+            .nav-more .dropdown-menu {
+                width: calc(100vw - 40px) !important;
+            }
+
+            .how-grid {
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+            }
+
+            .how-grid .how-box {
+                width: 100%;
+                max-width: 400px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .dropdown:hover .dropdown-menu {
+                display: block;
+            }
+
+            .nav-highlight:hover {
+                background-color: black;
+                color: white !important;
+            }
+
+            .nav-more .nav-link:hover .bar {
+                background-color: white !important;
+            }
+        }
+
+        @media (max-width: 576px) {
+
+            .hero-header {
+                font-size: 5em !important;
+            }
+
+            .hero-sub {
+                font-size: 2em !important;
+            }
+
+            .hero-buttons .btn-hero {
+                min-width: calc(100% - 10px) !important;
+            }
+
+            .nav-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100%;
+                font-size: 1.75em;
+                font-weight: 500;
+            }
         }
 
         @keyframes bounce {
@@ -730,108 +775,6 @@
             50% {
                 transform: translateY(-10px);
             }
-        }
-
-        .video-section {
-            position: relative;
-            width: 100%;
-            overflow: hidden;
-        }
-
-        .video-section video {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            pointer-events: none;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-
-        /* .nav-nfts.dropdown:hover .dropdown-menu {
-            display: flex;
-            margin-top: 0px;
-        } */
-
-        .navbar-nav .nav-item .dropdown-menu {
-            position: absolute;
-            background: rgb(235, 245, 236);
-            border-bottom-left-radius: 10px;
-            border-bottom-right-radius: 10px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            border: 1px solid black;
-            left: 0;
-            top: 100%;
-
-
-            color: black !important;
-            padding: 0;
-            flex-direction: column;
-            overflow-y: auto;
-            margin-top: 6px;
-
-            z-index: 1100;
-            align-items: flex-start;
-
-
-        }
-
-
-
-        .hover-gap {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            height: 10px;
-            /* Invisible gap area */
-            background: transparent;
-            pointer-events: auto;
-            /* Ensures gap is hoverable */
-        }
-
-        /* .dropdown-hover {
-            position: relative;
-            display: inline-block;
-        } */
-
-        @media (min-width: 768px) {
-            .dropdown:hover .dropdown-menu {
-                display: block;
-            }
-        }
-
-        .dropdown-toggle::after {
-            display: none;
-            /* Hides the default caret on hover */
-        }
-
-        /*  .dropdown-hover.show .dropdown-menu {
-            display: block;
-        
-        } */
-
-        .nav-link .pfp {
-            max-height: 100%;
-        }
-
-        .nav-more .nav-link {
-            height: 100%;
-            width: 100%;
-            border-top-right-radius: 8px;
-            border-bottom-right-radius: 8px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
         }
     </style>
 </head>
@@ -892,19 +835,19 @@
                 <a class="nav-link nav-highlight nav-title" href="/hub">HUB<span class="nav-subtitle">Social
                         dApps</span></a>
             </li>
-            <li class="nav-item nav-hide dropdown">
-                <a class="nav-link nav-highlight nav-title" href="#" role="button" data-bs-toggle="dropdown"
-                    aria-expanded="false">NFTs<span class="nav-subtitle">Collectible PFPs & TCGs</span></a>
+            <li class="nav-item nav-hide dropdown nav-dropdown">
+                <a class="nav-link nav-highlight nav-title dropdown-toggle" href="#" role="button"
+                    data-bs-toggle="dropdown" aria-expanded="false">NFTs<span class="nav-subtitle">Collectible PFPs &
+                        TCGs</span></a>
                 <div class="hover-gap"></div>
                 <ul class="dropdown-menu">
-                    <li class="nav-item nav-highlight">
-                        <a class="nav-link nav-highlight nav-title" href="/nfts">Market<span
-                                class="nav-subtitle">Browse,
+                    <li>
+                        <a class="dropdown-item subnav-title" href="/nfts">Market<span class="subnav-subtitle">Browse,
                                 Bid, Buy</span></a>
                     </li>
-                    <li class="nav-item nav-highlight">
-                        <a class="nav-link nav-highlight nav-title" href="/nfts/sets">Collections<span
-                                class="nav-subtitle">Explore
+                    <li>
+                        <a class="dropdown-item subnav-title" href="/nfts/sets">Collections<span
+                                class="subnav-subtitle">Explore
                                 Community Sets</span></a>
                     </li>
                 </ul>
@@ -913,30 +856,30 @@
                 <a class="nav-link nav-highlight nav-title" href="/dex">DEX<span class="nav-subtitle">Exchange
                         Tokens</span></a>
             </li>
-            <li class="nav-item dropdown">
+            <li class="nav-item dropdown nav-dropdown">
                 <a class="nav-link nav-highlight nav-title dropdown-toggle d-flex align-items-center" href="#"
                     role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <img src="/img/no-user.png" class="pfp rounded-circle img-fluid bg-mint"><span
                         class="navbar-username ms-2">username</span></a>
                 <div class="hover-gap"></div>
-                <ul class="dropdown-menu">
-                    <li class="nav-item nav-highlight">
-                        <a class="nav-link nav-highlight nav-title" href="#">Messages<span class="nav-subtitle">Sting
+                <ul class="dropdown-menu container">
+                    <li>
+                        <a class="dropdown-item subnav-title" href="#">Messages<span class="subnav-subtitle">Sting
                                 Chat</span></a>
                     </li>
-                    <li class="nav-item nav-highlight">
-                        <a class="nav-link nav-highlight nav-title" href="/user/">Profile<span class="nav-subtitle">HIVE
+                    <li>
+                        <a class="dropdown-item subnav-title" href="/user/">Profile<span class="subnav-subtitle">HIVE
                                 Blog</span></a>
                     </li>
-                    <li class="nav-item nav-highlight">
-                        <a class="nav-link nav-highlight nav-title" href="/user#wallet/">Wallet<span
-                                class="nav-subtitle">Honeycomb Tokens</span></a>
-                    <li class="nav-item nav-highlight">
-                        <a class="nav-link nav-highlight nav-title" href="/user#inventory/">Inventory<span
-                                class="nav-subtitle">NFT Collection</span></a>
-                    <li class="nav-item nav-highlight">
-                        <a class="nav-link nav-highlight nav-title" href="/user#cloud/">Cloud<span
-                                class="nav-subtitle">SPK Network</span></a>
+                    <li>
+                        <a class="dropdown-item subnav-title" href="/user#wallet/">Wallet<span
+                                class="subnav-subtitle">Honeycomb Tokens</span></a>
+                    <li>
+                        <a class="dropdown-item subnav-title" href="/user#inventory/">Inventory<span
+                                class="subnav-subtitle">NFT Collection</span></a>
+                    <li>
+                        <a class="dropdown-item subnav-title" href="/user#cloud/">Cloud<span class="subnav-subtitle">SPK
+                                Network</span></a>
                     </li>
             </li>
             </li>
@@ -944,7 +887,7 @@
         <a class="nav-link nav-highlight nav-title d-none" href="#">Login<span class="nav-subtitle">HIVE
                 Keychain</span></a>
         </li>
-        <li class="nav-more dropdown">
+        <li class="nav-more dropdown nav-dropdown">
             <a class="nav-link nav-highlight nav-title dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                 aria-expanded="false">
                 <span class="nav-bars">
@@ -976,20 +919,6 @@
                             DLUX Documentation</span></a></li>
                 <li class="subnav-blog"><a class="dropdown-extra" href="/@disregardfiat">Blog</a></li>
                 <li class="subnav-pk"><a class="dropdown-extra" href="/about">Press Kit</a></li>
-                <!-- <li class="dropdown-footer">
-                        <footer class="footer-marquee">
-                            <div class="marquee-wrapper">
-                                <div class="marquee-content"><span class="me-2">DLUX</span><span
-                                        class="mx-2">DLUX</span><span class="mx-2">DLUX</span><span
-                                        class="mx-2">DLUX</span><span class="mx-2">DLUX</span><span
-                                        class="ms-2">DLUX</span></div>
-                                <div class="marquee-content"><span class="me-2">DLUX</span><span
-                                        class="mx-2">DLUX</span><span class="mx-2">DLUX</span><span
-                                        class="mx-2">DLUX</span><span class="mx-2">DLUX</span><span
-                                        class="ms-2">DLUX</span></div>
-                            </div>
-                        </footer>
-                    </li> -->
             </ul>
         </li>
         </ul>
@@ -1000,8 +929,8 @@
             <p class="hero-sub mb-3 text-mint">Layer 2 for HIVE<br><span class="text-turq">dApps • Storage •
                     Tokens</span>
             </p>
-            <p class="hero-lead mb-4 text-mint">Web3 Solutions for<br>Decentralized Communities</p>
-            <div>
+            <p class="hero-lead mb-4 text-mint">Open Source Tools for<br>Decentralized Communities</p>
+            <div class="hero-buttons">
                 <a class="btn btn-hero btn-turq btn-lg py-2 px-4 me-sm-2 mb-2 rounded-pill" href="#vision">Our
                     Vision</a>
                 <button type="button" class="btn btn-hero btn-outline-light btn-lg py-2 px-4 mb-2 rounded-pill">Node
@@ -1082,23 +1011,23 @@
             </a-scene>
         </div>
     </section>
-    <section class="video-section d-flex align-items-center" id="vision">
+    <section class="vision-section d-flex align-items-center" id="vision">
         <video autoplay muted loop playsinline preload="auto" onloadeddata="this.play();">
             <source src="/vid/blue_dust.m4v" type="video/mp4">
-            Your browser does not support the video tag.
         </video>
-        <div class="node-container">
+        <div class="vision-container">
             <div class="image"><img src="/img/hypercube.png" class="img-fluid rounded-circle" alt="DLUX Node Network">
             </div>
             <div class="text-box top-left">
                 <div class="d-flex flex-column">
-                    <div class="d-flex node-header py-3 px-2 mb-xxl-2 pb-xxl-0 px-xxl-3" data-bs-target="#honeycomb">
+                    <div class="d-flex vision-box-header py-3 px-2 mb-xxl-2 pb-xxl-0 px-xxl-3"
+                        data-bs-target="#honeycomb">
                         <h3 class="card-title fs-3 fw-semibold d-flex flex-grow-1"><i
                                 class="fa-fw fa-solid fa-atom me-2"></i><span class="me-auto">Honeycomb</span><i
                                 class="ms-auto fw-light d-xxl-none fa-fw fa-solid fa-plus"></i></h3>
                     </div>
                     <div class="collapse d-xxl-flex flex-column flex-grow-1" id="honeycomb">
-                        <p class="card-text px-2 px-xxl-3">Our fully customizable and open source DAO powers community
+                        <p class="card-text px-2 px-xxl-3">Our fully customizable node based DAO powers community
                             tokens and smart contracts.
                         </p>
                         <a href="/update/honeycomb/"
@@ -1109,7 +1038,8 @@
             </div>
             <div class="text-box top-right">
                 <div class="d-flex flex-column">
-                    <div class="d-flex node-header py-3 px-2 mb-xxl-2 pb-xxl-0 px-xxl-3" data-bs-target="#storage">
+                    <div class="d-flex vision-box-header py-3 px-2 mb-xxl-2 pb-xxl-0 px-xxl-3"
+                        data-bs-target="#storage">
                         <h3 class="card-title fs-3 fw-semibold d-flex flex-grow-1"><i
                                 class="fa-fw fa-solid fa-hard-drive me-2"></i><span class="me-auto">Storage</span><i
                                 class="ms-auto fw-light d-xxl-none fa-fw fa-solid fa-plus"></i></h3>
@@ -1126,7 +1056,8 @@
             </div>
             <div class="text-box bottom-left">
                 <div class="d-flex flex-column">
-                    <div class="d-flex node-header py-3 px-2 mb-xxl-2 pb-xxl-0 px-xxl-3" data-bs-target="#rewards">
+                    <div class="d-flex vision-box-header py-3 px-2 mb-xxl-2 pb-xxl-0 px-xxl-3"
+                        data-bs-target="#rewards">
                         <h3 class="card-title fs-3 fw-semibold d-flex flex-grow-1"><i
                                 class="fa-fw fa-solid fa-circle-nodes me-2"></i><span class="me-auto">Rewards</span><i
                                 class="ms-auto fw-light d-xxl-none fa-fw fa-solid fa-plus"></i></h3>
@@ -1143,7 +1074,8 @@
             </div>
             <div class="text-box bottom-right">
                 <div class="d-flex flex-column">
-                    <div class="d-flex node-header py-3 px-2 mb-xxl-2 pb-xxl-0 px-xxl-3" data-bs-target="#publishing">
+                    <div class="d-flex vision-box-header py-3 px-2 mb-xxl-2 pb-xxl-0 px-xxl-3"
+                        data-bs-target="#publishing">
                         <h3 class="card-title fs-3 fw-semibold d-flex flex-grow-1"><i
                                 class="fa-fw fa-solid fa-mountain-sun me-2 fs-4"></i><span
                                 class="me-auto">Publishing</span><i
@@ -1163,7 +1095,7 @@
     </section>
     <section class="how-section py-5" id="how">
         <h2 class="section-title text-mint mt-5 fs-1">How it Works</h2>
-        <div class="how-grid flex-wrap mb-5">
+        <div class="how-grid flex-wrap mb-5 px-1">
             <div class="how-box">
                 <h3 class="card-title">Blockchain</h3>
                 <p class="card-text mb-auto">Three second transaction times and social network
@@ -1188,173 +1120,79 @@
         </div>
     </section>
     <script>
-        /* document.addEventListener("DOMContentLoaded", function () {
-            let dropdowns = document.querySelectorAll(".dropdown-hover");
 
-            function setupHoverDropdowns() {
-                dropdowns.forEach(dropdown => {
-                    let button = dropdown.querySelector(".nav-link");
-                    let menu = dropdown.querySelector(".dropdown-menu");
-                    let gap = dropdown.querySelector(".hover-gap");
-
-                    function showDropdown() {
-                        dropdown.classList.add("show");
-                    }
-
-                    function hideDropdown() {
-                        dropdown.classList.remove("show");
-                    }
-
-                    // Keep dropdown open when hovering over button, gap, or menu
-                    [button, gap, menu].forEach(element => {
-                        element.addEventListener("mouseenter", showDropdown);
-                    });
-
-                    // Close dropdown only if leaving button, gap, and menu
-                    dropdown.addEventListener("mouseleave", function (e) {
-                        if (!button.contains(e.relatedTarget) &&
-                            !gap.contains(e.relatedTarget) &&
-                            !menu.contains(e.relatedTarget)) {
-                            hideDropdown();
-                        }
-                    });
-                });
-            }
-
-            function setupClickDropdowns() {
-                dropdowns.forEach(dropdown => {
-                    let button = dropdown.querySelector(".nav-more");
-                    let menu = dropdown.querySelector(".nav-more .dropdown-menu");
-                    let bars = dropdown.querySelectorAll(".nav-bars .bar");
-
-                    button.addEventListener("click", function (event) {
-                        event.preventDefault();
-                        bars.forEach(bar => bar.classList.toggle("x"));
-                        menu.style.display = menu.style.display === "block" ? "none" : "block";
-                    });
-
-                    document.addEventListener("click", function (event) {
-                        if (!button.contains(event.target) && !menu.contains(event.target)) {
-                            bars.forEach(bar => bar.classList.remove("x"));
-                            menu.style.display = "none";
-                        }
-                    });
-                });
-            }
-
-            function applyDropdownBehavior() {
-                if (window.innerWidth > 576) {
-                    setupHoverDropdowns();
-                } else {
-                    setupClickDropdowns();
-                }
-            }
-
-            applyDropdownBehavior(); // Apply on load
-
-            // Reapply behavior when resizing
-            window.addEventListener("resize", function () {
-                location.reload(); // Refresh page to reset listeners and behavior
-            });
-        }); */
-
-
-
-        // More button
+        // More button animation
         document.addEventListener("DOMContentLoaded", function () {
-            const menuToggle = document.querySelector(".nav-more .nav-link");
+            const menuToggle = document.querySelector(".nav-more");
             const dropdownMenu = document.querySelector(".nav-more .dropdown-menu");
             const bars = document.querySelectorAll(".nav-bars .bar");
 
             menuToggle.addEventListener("click", function (event) {
                 event.preventDefault();
                 bars.forEach(bar => bar.classList.toggle("x"));
-                /* dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block"; */
+
             });
 
             document.addEventListener("click", function (event) {
                 if (!menuToggle.contains(event.target) && !dropdownMenu.contains(event.target)) {
                     bars.forEach(bar => bar.classList.remove("x"));
-                    /*  dropdownMenu.style.display = "none"; */
+
                 }
             });
         });
 
+        // Dropdown mouseover clear other dropdowns
         document.addEventListener("DOMContentLoaded", function () {
-            const navMoreDropdown = document.querySelector(".nav-more .dropdown");
-            const navMoreToggle = document.querySelector(".nav-more .dropdown-toggle");
-            const otherDropdowns = document.querySelectorAll(".nav-item.dropdown");
+            const dropdowns = document.querySelectorAll(".nav-dropdown");
+            const navMoreDropdown = document.querySelector(".nav-more.dropdown");
             const bars = document.querySelectorAll(".nav-bars .bar");
+            let isHoverListenerActive = false;
 
-            otherDropdowns.forEach(dropdown => {
-                dropdown.addEventListener("mouseover", function () {
-                    const dropdownInstance = bootstrap.Dropdown.getInstance(navMoreToggle);
-                    if (dropdownInstance) {
+            function addDropdownHoverListeners() {
+                if (!isHoverListenerActive) {
+                    dropdowns.forEach(dropdown => {
+                        dropdown.addEventListener("mouseover", dropdownHoverHandler);
+                    });
+                    isHoverListenerActive = true;
+                }
+            }
+
+            function removeDropdownHoverListeners() {
+                if (isHoverListenerActive) {
+                    dropdowns.forEach(dropdown => {
+                        dropdown.removeEventListener("mouseover", dropdownHoverHandler);
+                    });
+                    isHoverListenerActive = false;
+                }
+            }
+
+            function dropdownHoverHandler() {
+                dropdowns.forEach(otherDropdown => {
+                    const toggleButton = otherDropdown.querySelector(".dropdown-toggle");
+                    const dropdownInstance = bootstrap.Dropdown.getInstance(toggleButton);
+
+                    if (dropdownInstance && otherDropdown !== this) {
                         dropdownInstance.hide();
-                        bars.forEach(bar => bar.classList.remove("x")); // Hide the dropdown using Bootstrap's API
+
+                        // Only remove 'x' class if not hovering over .nav-more .dropdown
+                        if (!navMoreDropdown.matches(":hover")) {
+                            bars.forEach(bar => bar.classList.remove("x"));
+                        }
                     }
                 });
-            });
+            }
+
+            function handleResize() {
+                if (window.innerWidth > 768) {
+                    addDropdownHoverListeners();
+                } else {
+                    removeDropdownHoverListeners();
+                }
+            }
+
+            handleResize(); // Run on load
+            window.addEventListener("resize", handleResize); // Update on resize
         });
-
-
-
-
-        /*  // Nav dropdown
-         document.addEventListener("DOMContentLoaded", function () {
- 
-             let dropdowns = document.querySelectorAll(".dropdown-hover");
- 
-             dropdowns.forEach(dropdown => {
-                 let button = dropdown.querySelector(".nav-link");
-                 let menu = dropdown.querySelector(".dropdown-menu");
-                 let gap = dropdown.querySelector(".hover-gap");
- 
-                 function showDropdown() {
-                     dropdown.classList.add("show");
- 
-                 }
- 
-                 function hideDropdown() {
-                     dropdown.classList.remove("show");
-                 }
- 
-                 // Keep dropdown open when hovering over button, gap, or menu
-                 [button, gap, menu].forEach(element => {
-                     element.addEventListener("mouseenter", showDropdown);
-                 });
- 
-                 // Close dropdown only if leaving button, gap, and menu
-                 dropdown.addEventListener("mouseleave", function (e) {
-                     if (!button.contains(e.relatedTarget) &&
-                         !gap.contains(e.relatedTarget) &&
-                         !menu.contains(e.relatedTarget)) {
-                         hideDropdown();
-                     }
-                 });
-             });
- 
- 
-         }); */
-
-        /*  document.addEventListener("DOMContentLoaded", function () {
-             let navMore = document.getElementById("nav-more");
- 
-             function updateNavMoreClass() {
-                 if (window.innerWidth >= 768) {
-                     navMore.classList.add("dropdown-hover");
-                 } else {
-                     navMore.classList.remove("dropdown-hover");
-                 }
-             }
- 
-             updateNavMoreClass(); // Apply on page load
- 
-             window.addEventListener("resize", function () {
-                 updateNavMoreClass();
-             });
-         }); */
-
 
         // Change Aframe position
         function updateAFramePosition() {
@@ -1371,9 +1209,9 @@
         window.addEventListener("load", updateAFramePosition);
         window.addEventListener("resize", updateAFramePosition);
 
-        // Node Headers clickable
+        // Vision Headers clickable
         function updateCollapseAttributes() {
-            document.querySelectorAll(".node-header").forEach(box => {
+            document.querySelectorAll(".vision-box-header").forEach(box => {
                 if (window.innerWidth <= 1400) {
                     box.setAttribute("data-bs-toggle", "collapse");
                 } else {
@@ -1384,13 +1222,9 @@
         document.addEventListener("DOMContentLoaded", updateCollapseAttributes);
         window.addEventListener("resize", updateCollapseAttributes);
 
-
-
-
     </script>
     <!-- Bootstrap -->
     <script src="/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 </body>
 
 </html>
