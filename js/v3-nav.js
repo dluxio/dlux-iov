@@ -952,7 +952,7 @@ export default {
     // add sting chat
     this.addStingChat();
 
-    const navMore = document.querySelector(".nav-more");
+    const navMore = document.querySelector(".nav-more .nav-link");
     const dropdownMenus = document.querySelectorAll(".nav-dropdown");
     const bars = document.querySelectorAll(".nav-bars .bar");
 
@@ -1052,156 +1052,158 @@ export default {
     },
   },
   template: `<div>
-<nav class="navbar navbar-floating navbar-expand-lg p-0 container">
+  <nav class="navbar navbar-floating navbar-expand-lg p-0 container">
     <ul class="navbar-nav mx-auto">
-        <li class="nav-item">
-            <a class="nav-link d-flex align-items-center" href="/">
-                <svg class="nav-logo" viewBox="0 0 333 333" xmlns="http://www.w3.org/2000/svg">
-                    <polygon class="cls-1"
-                        points="184.59 135.97 184.21 135.97 110.55 11.06 219.49 9.03 228.91 24.43 137.69 26.25 146.62 41 165.61 72.39 184.6 103.79 193.82 119.03 211.76 119.03 248.48 119.03 284.59 119.02 302.68 119.02 256.79 39.98 273.78 40.15 329.46 134.96 184.59 135.97" />
-                    <polygon class="cls-2"
-                        points="110.55 11.06 184.21 135.97 184.59 135.97 175.83 150.85 175.52 150.85 101.87 27.04 110.55 11.06" />
-                    <polygon class="cls-3"
-                        points="184.01 40.5 146.62 41 137.69 26.25 228.91 24.43 184.6 103.79 174.99 87.86 201.39 40.27 184.08 40.5 184.01 40.5" />
-                    <polygon class="cls-1"
-                        points="56.71 41.63 74.44 41.74 148.19 166.21 129.63 166.16 56.71 41.63" />
-                    <polygon class="cls-2"
-                        points="85.44 214.65 102.95 182.4 111.45 166.74 102.39 151.26 83.85 119.57 65.61 88.41 56.48 72.79 11.43 152.31 2.99 137.56 56.71 41.63 129.63 166.16 60.3 293.15 3.54 200.14 12.08 184.24 59.71 262.05 67.94 246.89 85.44 214.65" />
-                    <polygon class="cls-2"
-                        points="184.08 40.5 201.39 40.27 174.99 87.86 184.6 103.79 165.61 72.39 184.01 40.5 184.08 40.5" />
-                    <polygon class="cls-2"
-                        points="211.76 118.76 256.63 39.89 256.79 39.98 302.68 119.02 284.59 119.02 284.59 118.95 266.04 87.37 256.42 71.01 230.02 118.48 211.76 118.76" />
-                    <polygon class="cls-3"
-                        points="56.48 72.79 65.61 88.41 65.55 88.45 47.66 120.4 38.4 136.96 92.7 135.78 102.16 151.4 11.43 152.5 11.43 152.31 56.48 72.79" />
-                    <polygon class="cls-3"
-                        points="256.42 71.01 266.04 87.37 265.75 87.54 248.48 118.39 248.48 119.03 211.76 119.03 211.76 118.76 230.02 118.48 256.42 71.01" />
-                    <polygon class="cls-1"
-                        points="83.85 119.57 102.39 151.26 102.16 151.4 92.7 135.78 38.4 136.96 47.66 120.4 47.95 120.56 83.29 119.89 83.85 119.57" />
-                    <polygon class="cls-3"
-                        points="175.83 150.85 184.59 135.97 329.46 134.96 320.41 150.21 175.83 150.85" />
-                    <polygon class="cls-3"
-                        points="129.63 166.16 148.19 166.21 148.38 166.53 78.48 292.56 60.3 293.15 129.63 166.16" />
-                    <polygon class="cls-1"
-                        points="48.62 214.87 67.94 246.89 59.71 262.05 12.08 184.24 102.95 182.4 94.06 198.74 39.65 199.99 48.59 214.81 48.62 214.87" />
-                    <polygon class="cls-3"
-                        points="102.95 182.4 85.44 214.65 48.62 214.87 48.59 214.81 39.65 199.99 94.06 198.74 102.95 182.4" />
-                    <polygon class="cls-1"
-                        points="175.84 182.61 319.13 180.4 330.01 196.91 185.61 198.39 175.84 182.61 175.84 182.61" />
-                    <polygon class="cls-2"
-                        points="175.47 182.61 175.84 182.61 175.84 182.61 185.61 198.39 113.76 323.97 104.73 308.18 175.47 182.61" />
-                    <polygon class="cls-3"
-                        points="167.45 261.43 149.16 293.24 140.56 308.18 231.79 307.99 222.72 323.59 113.76 323.97 185.61 198.39 330.01 196.91 276.31 291.28 259.33 291.82 303.59 213.44 284.52 213.57 249.4 213.81 230.83 213.93 212.56 214.06 194.63 214.18 185.75 229.62 167.45 261.43" />
-                    <polygon class="cls-2"
-                        points="212.56 214.06 230.83 213.93 258.27 260.81 267.49 244.22 284.52 213.57 303.59 213.44 259.33 291.82 259.17 291.92 212.56 214.06" />
-                    <polygon class="cls-1"
-                        points="230.83 213.93 249.4 213.81 267.23 244.08 267.49 244.22 258.27 260.81 230.83 213.93" />
-                    <polygon class="cls-2"
-                        points="167.45 261.43 185.75 229.62 176.49 245.76 203.93 292.76 186.62 292.91 186.56 292.91 167.45 261.43" />
-                    <polygon class="cls-1"
-                        points="186.56 292.91 186.62 292.91 203.93 292.76 176.49 245.76 185.75 229.62 231.79 307.99 140.56 308.18 149.16 293.24 186.56 292.91" />
-                </svg>
-                <span class="nav-brand ms-1">DLUX</span></a>
-        </li>
-        <li class="nav-item nav-hide">
-            <a class="nav-link nav-highlight nav-title" href="/hub">HUB<span class="nav-subtitle">Social
-                    dApps</span></a>
-        </li>
-        <li class="nav-item nav-hide dropdown nav-dropdown">
-            <a class="nav-link nav-highlight nav-title dropdown-toggle" href="#" role="button"
-                data-bs-toggle="dropdown" aria-expanded="false">NFTs<span class="nav-subtitle">Collectible PFPs &
-                    TCGs</span></a>
-            <div class="hover-gap"></div>
-            <ul class="dropdown-menu">
-                <li>
-                    <a class="dropdown-item subnav-title" href="/nfts">Marketplace<span class="subnav-subtitle">Sales and Auctions</span></a>
-                </li>
-                <li>
-                    <a class="dropdown-item subnav-title" href="/nfts/sets">Browse Sets<span
-                            class="subnav-subtitle">Discover New Collections
-                            </span></a>
-                </li>
-            </ul>
-        </li>
-        <li class="nav-item nav-hide">
-            <a class="nav-link nav-highlight nav-title" href="/dex">DEX<span class="nav-subtitle">Exchange
-                    Tokens</span></a>
-        </li>
-        <li v-show="!user" class="nav-item nav-hide">
-            <a class="nav-link nav-highlight nav-title" href="#" role="button" data-bs-toggle="modal" data-bs-target="#loginModal" aria-controls="loginModal">Login<span class="nav-subtitle">HIVE
-                    Username</span></a>
-        </li>
-        <li v-show="user" class="nav-item dropdown nav-dropdown">
-            <a class="nav-link nav-highlight nav-title dropdown-toggle d-flex align-items-center" href="#"
-                role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <img :src="avatar" class="pfp rounded-circle img-fluid bg-mint"><span
-                    class="navbar-username ms-2">{{user}}</span></a>
-            <div class="hover-gap"></div>
-            <ul class="dropdown-menu container">
-                <li>
-                    <a class="dropdown-item subnav-title" href="/user#blog/" @click="showTab('blog')">Profile<span class="subnav-subtitle">HIVE
-                            Blog</span></a>
-                </li>
-                <li>
-                    <a class="dropdown-item subnav-title" href="/user#wallet/" @click="showTab('wallet')">Wallet<span
-                            class="subnav-subtitle">Honeycomb Tokens</span></a>
-                <li>
-                    <a class="dropdown-item subnav-title" href="/user#inventory/" @click="showTab('inventory')">Inventory<span
-                            class="subnav-subtitle">NFT Collection</span></a>
-                <li>
-                    <a class="dropdown-item subnav-title" href="/user#drive/" @click="showTab('drive')">IPFS Drive<span class="subnav-subtitle">SPK
-                            Network</span></a>
-                </li>
-                <li class="subnav-extra-top"><a class="dropdown-extra" role="button" href="#"  @click="toggleChat" data-bs-toggle="offcanvas"
-                  data-bs-target="#offcanvasSting" aria-controls="offcanvasSting">Sting Chat</a></li>
-                <li class="subnav-extra-middle"><a class="dropdown-extra" role="button" href="#" data-bs-toggle="modal"
-                  data-bs-target="#loginModal" aria-controls="loginModal">Switch User</a></li>
-                <li class="subnav-extra-bottom"><a class="dropdown-extra" role="button" href="#" @click="logout()">Logout</a></li>
-            </ul>
+      <li class="nav-item">
+        <a class="nav-link d-flex align-items-center" href="/">
+          <svg class="nav-logo" viewBox="0 0 333 333" xmlns="http://www.w3.org/2000/svg">
+            <polygon class="cls-1"
+              points="184.59 135.97 184.21 135.97 110.55 11.06 219.49 9.03 228.91 24.43 137.69 26.25 146.62 41 165.61 72.39 184.6 103.79 193.82 119.03 211.76 119.03 248.48 119.03 284.59 119.02 302.68 119.02 256.79 39.98 273.78 40.15 329.46 134.96 184.59 135.97" />
+            <polygon class="cls-2"
+              points="110.55 11.06 184.21 135.97 184.59 135.97 175.83 150.85 175.52 150.85 101.87 27.04 110.55 11.06" />
+            <polygon class="cls-3"
+              points="184.01 40.5 146.62 41 137.69 26.25 228.91 24.43 184.6 103.79 174.99 87.86 201.39 40.27 184.08 40.5 184.01 40.5" />
+            <polygon class="cls-1" points="56.71 41.63 74.44 41.74 148.19 166.21 129.63 166.16 56.71 41.63" />
+            <polygon class="cls-2"
+              points="85.44 214.65 102.95 182.4 111.45 166.74 102.39 151.26 83.85 119.57 65.61 88.41 56.48 72.79 11.43 152.31 2.99 137.56 56.71 41.63 129.63 166.16 60.3 293.15 3.54 200.14 12.08 184.24 59.71 262.05 67.94 246.89 85.44 214.65" />
+            <polygon class="cls-2"
+              points="184.08 40.5 201.39 40.27 174.99 87.86 184.6 103.79 165.61 72.39 184.01 40.5 184.08 40.5" />
+            <polygon class="cls-2"
+              points="211.76 118.76 256.63 39.89 256.79 39.98 302.68 119.02 284.59 119.02 284.59 118.95 266.04 87.37 256.42 71.01 230.02 118.48 211.76 118.76" />
+            <polygon class="cls-3"
+              points="56.48 72.79 65.61 88.41 65.55 88.45 47.66 120.4 38.4 136.96 92.7 135.78 102.16 151.4 11.43 152.5 11.43 152.31 56.48 72.79" />
+            <polygon class="cls-3"
+              points="256.42 71.01 266.04 87.37 265.75 87.54 248.48 118.39 248.48 119.03 211.76 119.03 211.76 118.76 230.02 118.48 256.42 71.01" />
+            <polygon class="cls-1"
+              points="83.85 119.57 102.39 151.26 102.16 151.4 92.7 135.78 38.4 136.96 47.66 120.4 47.95 120.56 83.29 119.89 83.85 119.57" />
+            <polygon class="cls-3" points="175.83 150.85 184.59 135.97 329.46 134.96 320.41 150.21 175.83 150.85" />
+            <polygon class="cls-3"
+              points="129.63 166.16 148.19 166.21 148.38 166.53 78.48 292.56 60.3 293.15 129.63 166.16" />
+            <polygon class="cls-1"
+              points="48.62 214.87 67.94 246.89 59.71 262.05 12.08 184.24 102.95 182.4 94.06 198.74 39.65 199.99 48.59 214.81 48.62 214.87" />
+            <polygon class="cls-3"
+              points="102.95 182.4 85.44 214.65 48.62 214.87 48.59 214.81 39.65 199.99 94.06 198.74 102.95 182.4" />
+            <polygon class="cls-1"
+              points="175.84 182.61 319.13 180.4 330.01 196.91 185.61 198.39 175.84 182.61 175.84 182.61" />
+            <polygon class="cls-2"
+              points="175.47 182.61 175.84 182.61 175.84 182.61 185.61 198.39 113.76 323.97 104.73 308.18 175.47 182.61" />
+            <polygon class="cls-3"
+              points="167.45 261.43 149.16 293.24 140.56 308.18 231.79 307.99 222.72 323.59 113.76 323.97 185.61 198.39 330.01 196.91 276.31 291.28 259.33 291.82 303.59 213.44 284.52 213.57 249.4 213.81 230.83 213.93 212.56 214.06 194.63 214.18 185.75 229.62 167.45 261.43" />
+            <polygon class="cls-2"
+              points="212.56 214.06 230.83 213.93 258.27 260.81 267.49 244.22 284.52 213.57 303.59 213.44 259.33 291.82 259.17 291.92 212.56 214.06" />
+            <polygon class="cls-1"
+              points="230.83 213.93 249.4 213.81 267.23 244.08 267.49 244.22 258.27 260.81 230.83 213.93" />
+            <polygon class="cls-2"
+              points="167.45 261.43 185.75 229.62 176.49 245.76 203.93 292.76 186.62 292.91 186.56 292.91 167.45 261.43" />
+            <polygon class="cls-1"
+              points="186.56 292.91 186.62 292.91 203.93 292.76 176.49 245.76 185.75 229.62 231.79 307.99 140.56 308.18 149.16 293.24 186.56 292.91" />
+          </svg>
+          <span class="nav-brand ms-1">DLUX</span></a>
+      </li>
+      <li class="nav-item nav-hide">
+        <a class="nav-link nav-highlight nav-title" href="/hub">HUB<span class="nav-subtitle">Social
+            dApps</span></a>
+      </li>
+      <li class="nav-item nav-hide dropdown nav-dropdown">
+        <a class="nav-link nav-highlight nav-title dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+          aria-expanded="false">NFTs<span class="nav-subtitle">Collectible PFPs &
+            TCGs</span></a>
+        <div class="hover-gap"></div>
+        <ul class="dropdown-menu">
+          <li>
+            <a class="dropdown-item subnav-title" href="/nfts">Marketplace<span class="subnav-subtitle">Sales and
+                Auctions</span></a>
           </li>
-          <li class="nav-more dropdown nav-dropdown">
-              <a class="nav-link nav-highlight nav-title dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                  aria-expanded="false">
-                  <span class="nav-bars">
-                      <span class="bar"></span>
-                      <span class="bar"></span>
-                      <span class="bar"></span>
-                  </span>
-              </a>
-              <div class="hover-gap"></div>
-              <ul class="dropdown-menu dropdown-menu-end container">
-                  <li class="nav-show"><a class="dropdown-item subnav-title" href="/hub">HUB<span
-                              class="subnav-subtitle">Social dApps</span></a></li>
-                  <li class="nav-show"><a class="dropdown-item subnav-title" href="/dex">DEX<span
-                              class="subnav-subtitle">Exchange Tokens</span></a></li>
-                  <li class="nav-show"><a class="dropdown-item subnav-title" href="/nfts">NFT Market<span
-                              class="subnav-subtitle">Browse, Bid, Buy</span></a></li>
-                  <li class="nav-show"><a class="dropdown-item subnav-title" href="/nfts/sets">NFT Collections<span
-                              class="subnav-subtitle">Explore Community Sets</span></a></li>
-                  <li><a class="dropdown-item subnav-title" href="/dex">Rewards<span class="subnav-subtitle">Run
-                              a DePIN Service Node</span></a></li>
-                  <li><a class="dropdown-item subnav-title" href="/build">Publishing<span class="subnav-subtitle">Build
-                              and Post With DLUX</span></a></li>
-                  <li><a class="dropdown-item subnav-title" href="/build">Storage<span class="subnav-subtitle">Web3
-                              IPFS Pinning</span></a></li>
-                  <li><a class="dropdown-item subnav-title" href="/new/token">Honeycomb<span
-                              class="subnav-subtitle">Launch Your DeFi Project</span></a></li>
-                  <li><a class="dropdown-item subnav-title" href="/docs" target="_blank">Docs<span
-                              class="subnav-subtitle">Explore
-                              DLUX Documentation</span></a></li>
-                  <li class="subnav-extra-top"><a class="dropdown-extra" href="/@disregardfiat">Blog</a></li>
-                  <li class="subnav-extra-bottom"><a class="dropdown-extra" href="/about">Press Kit</a></li>
-              </ul>
+          <li>
+            <a class="dropdown-item subnav-title" href="/nfts/sets">Browse Sets<span class="subnav-subtitle">Discover
+                New Collections
+              </span></a>
           </li>
-      </ul>
+        </ul>
+      </li>
+      <li class="nav-item nav-hide">
+        <a class="nav-link nav-highlight nav-title" href="/dex">DEX<span class="nav-subtitle">Exchange
+            Tokens</span></a>
+      </li>
+      <li v-show="!user" class="nav-item nav-hide">
+        <a class="nav-link nav-highlight nav-title" href="#" role="button" data-bs-toggle="modal"
+          data-bs-target="#loginModal" aria-controls="loginModal">Login<span class="nav-subtitle">HIVE
+            Username</span></a>
+      </li>
+      <li v-show="user" class="nav-item dropdown nav-dropdown">
+        <a class="nav-link nav-highlight nav-title dropdown-toggle d-flex align-items-center" href="#" role="button"
+          data-bs-toggle="dropdown" aria-expanded="false">
+          <img :src="avatar" class="pfp rounded-circle img-fluid bg-mint"><span
+            class="navbar-username ms-2">{{user}}</span></a>
+        <div class="hover-gap"></div>
+        <ul class="dropdown-menu container">
+          <li>
+            <a class="dropdown-item subnav-title" href="/user#blog/" @click="showTab('blog')">Profile<span
+                class="subnav-subtitle">HIVE
+                Blog</span></a>
+          </li>
+          <li>
+            <a class="dropdown-item subnav-title" href="/user#wallet/" @click="showTab('wallet')">Wallet<span
+                class="subnav-subtitle">Honeycomb Tokens</span></a>
+          <li>
+            <a class="dropdown-item subnav-title" href="/user#inventory/" @click="showTab('inventory')">Inventory<span
+                class="subnav-subtitle">NFT Collection</span></a>
+          <li>
+            <a class="dropdown-item subnav-title" href="/user#drive/" @click="showTab('drive')">IPFS Drive<span
+                class="subnav-subtitle">SPK
+                Network</span></a>
+          </li>
+          <li class="subnav-extra-top"><a class="dropdown-extra" role="button" href="#" @click="toggleChat"
+              data-bs-toggle="offcanvas" data-bs-target="#offcanvasSting" aria-controls="offcanvasSting">Sting Chat</a>
+          </li>
+          <li class="subnav-extra-middle"><a class="dropdown-extra" role="button" href="#" data-bs-toggle="modal"
+              data-bs-target="#loginModal" aria-controls="loginModal">Switch User</a></li>
+          <li class="subnav-extra-bottom"><a class="dropdown-extra" role="button" href="#" @click="logout()">Logout</a>
+          </li>
+        </ul>
+      </li>
+      <li class="nav-more dropdown nav-dropdown">
+        <a class="nav-link nav-highlight nav-title dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+          aria-expanded="false">
+          <span class="nav-bars">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+          </span>
+        </a>
+        <div class="hover-gap"></div>
+        <ul class="dropdown-menu dropdown-menu-end container">
+          <li class="nav-show"><a class="dropdown-item subnav-title" href="/hub">HUB<span class="subnav-subtitle">Social
+                dApps</span></a></li>
+          <li class="nav-show"><a class="dropdown-item subnav-title" href="/dex">DEX<span
+                class="subnav-subtitle">Exchange Tokens</span></a></li>
+          <li class="nav-show"><a class="dropdown-item subnav-title" href="/nfts">NFT Market<span
+                class="subnav-subtitle">Browse, Bid, Buy</span></a></li>
+          <li class="nav-show"><a class="dropdown-item subnav-title" href="/nfts/sets">NFT Collections<span
+                class="subnav-subtitle">Explore Community Sets</span></a></li>
+          <li><a class="dropdown-item subnav-title" href="#">Rewards<span class="subnav-subtitle">Run
+                a DePIN Service Node</span></a></li>
+          <li><a class="dropdown-item subnav-title" href="/build">Publishing<span class="subnav-subtitle">Build
+                and Post With DLUX</span></a></li>
+          <li><a class="dropdown-item subnav-title" href="#">Storage<span class="subnav-subtitle">Web3
+                IPFS Pinning</span></a></li>
+          <li><a class="dropdown-item subnav-title" href="#">Honeycomb<span class="subnav-subtitle">Launch Your
+                DeFi Project</span></a></li>
+          <li><a class="dropdown-item subnav-title" href="/docs" target="_blank">Docs<span
+                class="subnav-subtitle">Explore
+                DLUX Documentation</span></a></li>
+          <li class="subnav-extra-top"><a class="dropdown-extra" href="/@disregardfiat">Blog</a></li>
+          <li class="subnav-extra-bottom"><a class="dropdown-extra" href="/about">Press Kit</a></li>
+        </ul>
+      </li>
+    </ul>
   </nav>
-
   <!-- toast -->
   <div class="position-fixed bottom-0 end-0 p-3 toast-container" style="z-index: 11">
     <div v-for="op in ops">
       <toast-vue :alert="op" />
     </div>
   </div>
-
   <!-- sting chat -->
   <div class="offcanvas offcanvas-end bg-blur-darkg bg-img-none text-white-50" tabindex="-1" id="offcanvasSting"
     aria-labelledby="offcanvasStingLabel">
@@ -1217,137 +1219,134 @@ export default {
       <div id="stingChat" class=""></div>
     </div>
   </div>
-
   <!-- Vertically centered scrollable modal -->
   <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">User Management</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-header">
+          <h5 class="modal-title">User Management</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- login method selector -->
+          <div class="d-flex flex-column">
+            <div class="row mb-3">
+              <div class="dropdown">
+                <button class="btn btn-secondary w-100 p-0" :class="{'disabled': node}" :disabled="node" role="button"
+                  id="authDropdown" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false">
+                  <button v-if="HKC" class="btn btn-hivekeychain h-100 w-100 dropdown-toggle"><img
+                      src="/img/keychain.png" style="height:50px !important;" class="img-responsive p-2 mx-3"></button>
+                  <button v-if="HAS" class="btn btn-hiveauth h-100 w-100 dropdown-toggle"><img src="/img/hiveauth.svg"
+                      style="height:50px !important;" class="img-responsive p-2 mx-3"></button>
+                  <button v-if="HSR" class="btn btn-hivesigner h-100 w-100 dropdown-toggle"><img
+                      src="/img/hivesigner.svg" style="height:50px !important;"
+                      class="img-responsive p-2 mx-3"></button>
+                  <button v-if="PEN" class="btn btn-pen h-100 w-100 dropdown-toggle"><img src="/img/dlux-pen.png"
+                      style="height:50px !important;" class="img-responsive p-2 mx-3"></button>
+                </button>
+                <!-- login method options -->
+                <ul class="dropdown-menu dropdown-menu-dark text-center bg-black p-2" aria-labelledby="authDropdown">
+                  <li class="p-2"><button class="btn btn-hivekeychain h-100 w-100" @click="useKC()"><img
+                        src="/img/keychain.png" class="img-responsive" style="height:50px !important;"></button></li>
+                  <li class="p-2" v-if="!node"><button class="btn btn-hiveauth h-100 w-100" @click="useHAS()"><img
+                        src="/img/hiveauth.svg" class="img-responsive" style="height:50px !important;"></button></li>
+                  <li class="p-2" v-if="!node"><button class="btn btn-hivesigner h-100 w-100" @click="useHS()"><img
+                        src="/img/hivesigner.svg" class="img-responsive" style="height:50px !important;"></button></li>
+                  <li class="p-2 d-none"><button class="btn btn-pen h-100 w-100" @click="usePEN()"><img
+                        src="/img/dlux-pen.png" class="img-responsive" style="height:50px !important;"></button></li>
+                </ul>
+              </div>
+              <!-- login method description -->
+              <div class="small text-muted text-center mt-2">
+                <span v-if="HKC">Hive Keychain requires a Firefox or Chrome extension</span>
+                <span v-if="HAS">Hive Auth requires websockets and a PKSA Application</span>
+                <span v-if="HSR">Hive Signer generates a link</span>
+                <span v-if="PEN">dlux Pen stores your active key locally</span>
+              </div>
+            </div>
           </div>
-          <div class="modal-body">
-            <!-- login method selector -->
-            <div class="d-flex flex-column">
-              <div class="row mb-3">
-                <div class="dropdown">
-                  <button class="btn btn-secondary w-100 p-0" :class="{'disabled': node}" :disabled="node" role="button"
-                    id="authDropdown" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false">
-                    <button v-if="HKC" class="btn btn-hivekeychain h-100 w-100 dropdown-toggle"><img src="/img/keychain.png"
-                        style="height:50px !important;" class="img-responsive p-2 mx-3"></button>
-                    <button v-if="HAS" class="btn btn-hiveauth h-100 w-100 dropdown-toggle"><img src="/img/hiveauth.svg"
-                        style="height:50px !important;" class="img-responsive p-2 mx-3"></button>
-                    <button v-if="HSR" class="btn btn-hivesigner h-100 w-100 dropdown-toggle"><img src="/img/hivesigner.svg"
-                        style="height:50px !important;" class="img-responsive p-2 mx-3"></button>
-                    <button v-if="PEN" class="btn btn-pen h-100 w-100 dropdown-toggle"><img src="/img/dlux-pen.png"
-                        style="height:50px !important;" class="img-responsive p-2 mx-3"></button>
-                  </button>
-                  <!-- login method options -->
-                  <ul class="dropdown-menu dropdown-menu-dark text-center bg-black p-2" aria-labelledby="authDropdown">
-                    <li class="p-2"><button class="btn btn-hivekeychain h-100 w-100" @click="useKC()"><img
-                          src="/img/keychain.png" class="img-responsive" style="height:50px !important;"></button></li>
-                    <li class="p-2" v-if="!node"><button class="btn btn-hiveauth h-100 w-100" @click="useHAS()"><img
-                          src="/img/hiveauth.svg" class="img-responsive" style="height:50px !important;"></button></li>
-                    <li class="p-2" v-if="!node"><button class="btn btn-hivesigner h-100 w-100" @click="useHS()"><img
-                          src="/img/hivesigner.svg" class="img-responsive" style="height:50px !important;"></button></li>
-                    <li class="p-2 d-none"><button class="btn btn-pen h-100 w-100" @click="usePEN()"><img
-                          src="/img/dlux-pen.png" class="img-responsive" style="height:50px !important;"></button></li>
-                  </ul>
-                </div>
-                <!-- login method description -->
-                <div class="small text-muted text-center mt-2">
-                  <span v-if="HKC">Hive Keychain requires a Firefox or Chrome extension</span>
-                  <span v-if="HAS">Hive Auth requires websockets and a PKSA Application</span>
-                  <span v-if="HSR">Hive Signer generates a link</span>
-                  <span v-if="PEN">dlux Pen stores your active key locally</span>
+          <!-- current user -->
+          <div class="mb-3">
+            <div>
+              <label class="form-label">Current user</label>
+              <div v-if="!user" class="bg-darkest rounded d-flex align-items-center p-2">
+                <img src="/img/no-user.png" alt="" width="50" height="50" class="img-fluid rounded-circle me-2 cover">
+                <span class="flex-grow-1 text-center">NONE SELECTED</span>
+              </div>
+              <div v-if="user" class="bg-darkest rounded d-flex align-items-center p-2">
+                <img :src="avatar" id="userImage" alt="" width="50" height="50"
+                  class="img-fluid rounded-circle bg-light me-2 cover">
+                <span id="userName">{{user}}</span>
+                <div class="ms-auto">
+                  <a class="btn btn-outline-secondary btn-sm me-1"
+                    :class="[{'btn-outline-success':HAS_.wsconn && HAS_.token},{'btn-outline-warning':!HAS_.wsconn && HAS_.token},{'btn-outline-secondary':!HAS_.token}]"
+                    :href="HAS_.uri" v-if="HAS"><i class="fa-solid fa-satellite-dish"></i></a>
+                  <a class="btn btn-outline-danger btn-sm" role="button" @click="logout()"><i
+                      class="fas fa-power-off fa-fw"></i></a>
                 </div>
               </div>
             </div>
-
-            <!-- current user -->
-            <div class="mb-3">
+            <div class="mt-2" v-if="HAS && haspich > 100">
               <div>
-                <label class="form-label">Current user</label>
-
-                <div v-if="!user" class="bg-darkest rounded d-flex align-items-center p-2">
-                  <img src="/img/no-user.png" alt="" width="50" height="50" class="img-fluid rounded-circle me-2 cover">
-                  <span class="flex-grow-1 text-center">NONE SELECTED</span>
-
-                </div>
-                <div v-if="user" class="bg-darkest rounded d-flex align-items-center p-2">
-                  <img :src="avatar" id="userImage" alt="" width="50" height="50"
-                    class="img-fluid rounded-circle bg-light me-2 cover">
-                  <span id="userName">{{user}}</span>
-                  <div class="ms-auto">
-                    <a class="btn btn-outline-secondary btn-sm me-1"
-                      :class="[{'btn-outline-success':HAS_.wsconn && HAS_.token},{'btn-outline-warning':!HAS_.wsconn && HAS_.token},{'btn-outline-secondary':!HAS_.token}]"
-                      :href="HAS_.uri" v-if="HAS"><i class="fa-solid fa-satellite-dish"></i></a>
-                    <a class="btn btn-outline-danger btn-sm" role="button" @click="logout()"><i
-                        class="fas fa-power-off fa-fw"></i></a>
-                  </div>
-                </div>
-              </div>
-              <div class="mt-2" v-if="HAS && haspich > 100">
-                <div>
-                  <div class="bg-white rounded text-center">
-                    <a class="no-decoration" :href="HAS_.uri"><img :src="haspic" :height="haspich + 'px'"
-                        class="img-responsive p-2 mx-3">
-                      <p v-show="haspich > 100" class="text-dark">Tap or scan with PKSA App for {{user}}</p>
-                    </a>
-                  </div>
+                <div class="bg-white rounded text-center">
+                  <a class="no-decoration" :href="HAS_.uri"><img :src="haspic" :height="haspich + 'px'"
+                      class="img-responsive p-2 mx-3">
+                    <p v-show="haspich > 100" class="text-dark">Tap or scan with PKSA App for {{user}}</p>
+                  </a>
                 </div>
               </div>
             </div>
-
-            <!-- add user-->
-            <div v-if="!decrypted.pin">
-              <label class="form-label">Add user</label>
-              <div class="position-relative has-validation">
-                <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
-                  <i class="fa-solid fa-at fa-fw"></i>
-                </span>
-                <input v-model="userField" autocapitalize="off" placeholder="username" @keyup.enter="setUser()"
-                  class="px-4 form-control bg-dark border-dark text-info">
-                <span v-if="userField" class="position-absolute end-0 top-50 translate-middle-y pe-2">
-                  <button type="button" @click="setUser()" class="btn btn-sm btn-primary"><i
-                      class="fa-solid fa-plus fa-fw"></i></button>
-                </span>
-              </div>
-              <p v-if="userPinFeedback"></p>
-              <div class="small text-muted text-center mt-1 mb-2">
-                Usernames are stored locally. <a class="no-decoration text-info" target="_blank"
-                  href="https://signup.hive.io/">Get Account</a>
-              </div>
-            </div>
-
-            <!-- recent users -->
-            <div class="mt-1" v-if="recentUsers.length">
-              <label class="form-label">Recent users</label>
-              <div class="d-none position-relative has-validation">
-                <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
-                  <i class="fa-solid fa-at fa-fw"></i>
-                </span>
-                <input type="search" v-model="filterUsers" autocapitalize="off" placeholder="search" @keyup="searchRecents()"
-                  class="ps-4 form-control bg-dark border-dark text-info">
-              </div>
-            </div>
-            <div class="d-flex hover justify-content-between align-items-center py-3 border-light-50 border-top"
-              v-if="!filterUsers" v-for="name in recentUsers">
-              <div class="flex-fill text-center"><a class="text-info" role="button"
-                  @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
-              <div class="flex-shrink me-2 d-none"><i class="fa-solid fa-feather-pointed fa-fw"></i></div>
-              <div class="flex-shrink me-2"><a class="text-danger ms-auto" role="button" @click="deleteRecentUser(name)"
-                  alt="Remove username"><i class="fa-solid fa-trash-can"></i></a></div>
-            </div>
-            <div class="d-flex hover justify-content-between align-items-center py-3 border-light-50 border-top"
-              v-if="filterUsers" v-for="name in filterRecents">
-              <div class="flex-fill text-center"><a class="text-info" role="button"
-                  @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
-              <div class="flex-shrink me-2 d-none"><i class="fa-solid fa-feather-pointed fa-fw"></i></div>
-              <div class="flex-shrink me-2"><a class="text-danger ms-auto" role="button"
-                  @click="deleteRecentUser(name);searchRecents()" alt="Remove username"><i
-                    class="fa-solid fa-trash-can"></i></a></div>
           </div>
+          <!-- add user-->
+          <div v-if="!decrypted.pin">
+            <label class="form-label">Add user</label>
+            <div class="position-relative has-validation">
+              <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
+                <i class="fa-solid fa-at fa-fw"></i>
+              </span>
+              <input v-model="userField" autocapitalize="off" placeholder="username" @keyup.enter="setUser()"
+                class="px-4 form-control bg-dark border-dark text-info">
+              <span v-if="userField" class="position-absolute end-0 top-50 translate-middle-y pe-2">
+                <button type="button" @click="setUser()" class="btn btn-sm btn-primary"><i
+                    class="fa-solid fa-plus fa-fw"></i></button>
+              </span>
+            </div>
+            <p v-if="userPinFeedback"></p>
+            <div class="small text-muted text-center mt-1 mb-2">
+              Usernames are stored locally. <a class="no-decoration text-info" target="_blank"
+                href="https://signup.hive.io/">Get Account</a>
+            </div>
+          </div>
+          <!-- recent users -->
+          <div class="mt-1" v-if="recentUsers.length">
+            <label class="form-label">Recent users</label>
+            <div class="d-none position-relative has-validation">
+              <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
+                <i class="fa-solid fa-at fa-fw"></i>
+              </span>
+              <input type="search" v-model="filterUsers" autocapitalize="off" placeholder="search"
+                @keyup="searchRecents()" class="ps-4 form-control bg-dark border-dark text-info">
+            </div>
+          </div>
+          <div class="d-flex hover justify-content-between align-items-center py-3 border-light-50 border-top"
+            v-if="!filterUsers" v-for="name in recentUsers">
+            <div class="flex-fill text-center"><a class="text-info" role="button"
+                @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
+            <div class="flex-shrink me-2 d-none"><i class="fa-solid fa-feather-pointed fa-fw"></i></div>
+            <div class="flex-shrink me-2"><a class="text-danger ms-auto" role="button" @click="deleteRecentUser(name)"
+                alt="Remove username"><i class="fa-solid fa-trash-can"></i></a></div>
+          </div>
+          <div class="d-flex hover justify-content-between align-items-center py-3 border-light-50 border-top"
+            v-if="filterUsers" v-for="name in filterRecents">
+            <div class="flex-fill text-center"><a class="text-info" role="button"
+                @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
+            <div class="flex-shrink me-2 d-none"><i class="fa-solid fa-feather-pointed fa-fw"></i></div>
+            <div class="flex-shrink me-2"><a class="text-danger ms-auto" role="button"
+                @click="deleteRecentUser(name);searchRecents()" alt="Remove username"><i
+                  class="fa-solid fa-trash-can"></i></a></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>`,
