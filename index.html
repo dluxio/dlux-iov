@@ -224,83 +224,83 @@
     <div class="front">
       <foot-vue />
     </div>
+  </div>
 
-  
   <script>
 
-   /*  // Nav more button animation
-    document.addEventListener("DOMContentLoaded", function () {
-      const menuToggle = document.querySelector(".nav-more");
-      const dropdownMenu = document.querySelector(".nav-more .dropdown-menu");
-      const bars = document.querySelectorAll(".nav-bars .bar");
-
-      menuToggle.addEventListener("click", function (event) {
-        event.preventDefault();
-        bars.forEach(bar => bar.classList.toggle("x"));
-
-      });
-
-      document.addEventListener("click", function (event) {
-        if (!menuToggle.contains(event.target) && !dropdownMenu.contains(event.target)) {
-          bars.forEach(bar => bar.classList.remove("x"));
-
-        }
-      });
-    });
-
-    // Nav dropdown mouseover clears other dropdowns
-    document.addEventListener("DOMContentLoaded", function () {
-      const dropdowns = document.querySelectorAll(".nav-dropdown");
-      const navMoreDropdown = document.querySelector(".nav-more.dropdown");
-      const bars = document.querySelectorAll(".nav-bars .bar");
-      let isHoverListenerActive = false;
-
-      function addDropdownHoverListeners() {
-        if (!isHoverListenerActive) {
-          dropdowns.forEach(dropdown => {
-            dropdown.addEventListener("mouseover", dropdownHoverHandler);
-          });
-          isHoverListenerActive = true;
-        }
-      }
-
-      function removeDropdownHoverListeners() {
-        if (isHoverListenerActive) {
-          dropdowns.forEach(dropdown => {
-            dropdown.removeEventListener("mouseover", dropdownHoverHandler);
-          });
-          isHoverListenerActive = false;
-        }
-      }
-
-      function dropdownHoverHandler() {
-        dropdowns.forEach(otherDropdown => {
-          const toggleButton = otherDropdown.querySelector(".dropdown-toggle");
-          const dropdownInstance = bootstrap.Dropdown.getInstance(toggleButton);
-
-          if (dropdownInstance && otherDropdown !== this) {
-            dropdownInstance.hide();
-
-            // Only remove 'x' class if not hovering over .nav-more .dropdown
-            if (!navMoreDropdown.matches(":hover")) {
-              bars.forEach(bar => bar.classList.remove("x"));
-            }
-          }
-        });
-      }
-
-      function handleResize() {
-        if (window.innerWidth > 768) {
-          addDropdownHoverListeners();
-        } else {
-          removeDropdownHoverListeners();
-        }
-      }
-
-      handleResize(); // Run on load
-      window.addEventListener("resize", handleResize); // Update on resize
-    });
- */
+    /*  // Nav more button animation
+     document.addEventListener("DOMContentLoaded", function () {
+       const menuToggle = document.querySelector(".nav-more");
+       const dropdownMenu = document.querySelector(".nav-more .dropdown-menu");
+       const bars = document.querySelectorAll(".nav-bars .bar");
+ 
+       menuToggle.addEventListener("click", function (event) {
+         event.preventDefault();
+         bars.forEach(bar => bar.classList.toggle("x"));
+ 
+       });
+ 
+       document.addEventListener("click", function (event) {
+         if (!menuToggle.contains(event.target) && !dropdownMenu.contains(event.target)) {
+           bars.forEach(bar => bar.classList.remove("x"));
+ 
+         }
+       });
+     });
+ 
+     // Nav dropdown mouseover clears other dropdowns
+     document.addEventListener("DOMContentLoaded", function () {
+       const dropdowns = document.querySelectorAll(".nav-dropdown");
+       const navMoreDropdown = document.querySelector(".nav-more.dropdown");
+       const bars = document.querySelectorAll(".nav-bars .bar");
+       let isHoverListenerActive = false;
+ 
+       function addDropdownHoverListeners() {
+         if (!isHoverListenerActive) {
+           dropdowns.forEach(dropdown => {
+             dropdown.addEventListener("mouseover", dropdownHoverHandler);
+           });
+           isHoverListenerActive = true;
+         }
+       }
+ 
+       function removeDropdownHoverListeners() {
+         if (isHoverListenerActive) {
+           dropdowns.forEach(dropdown => {
+             dropdown.removeEventListener("mouseover", dropdownHoverHandler);
+           });
+           isHoverListenerActive = false;
+         }
+       }
+ 
+       function dropdownHoverHandler() {
+         dropdowns.forEach(otherDropdown => {
+           const toggleButton = otherDropdown.querySelector(".dropdown-toggle");
+           const dropdownInstance = bootstrap.Dropdown.getInstance(toggleButton);
+ 
+           if (dropdownInstance && otherDropdown !== this) {
+             dropdownInstance.hide();
+ 
+             // Only remove 'x' class if not hovering over .nav-more .dropdown
+             if (!navMoreDropdown.matches(":hover")) {
+               bars.forEach(bar => bar.classList.remove("x"));
+             }
+           }
+         });
+       }
+ 
+       function handleResize() {
+         if (window.innerWidth > 768) {
+           addDropdownHoverListeners();
+         } else {
+           removeDropdownHoverListeners();
+         }
+       }
+ 
+       handleResize(); // Run on load
+       window.addEventListener("resize", handleResize); // Update on resize
+     });
+  */
     // Change Aframe position
     function updateAFramePosition() {
       const entity = document.querySelector("#hypercube"); // Replace with your entity ID
@@ -336,6 +336,7 @@
     integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
-</div></body>
+  </div>
+</body>
 
 </html>

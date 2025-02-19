@@ -1125,7 +1125,7 @@ export default {
         <a class="nav-link nav-highlight nav-title" href="/dex">DEX<span class="nav-subtitle">Exchange
             Tokens</span></a>
       </li>
-      <li v-show="!user" class="nav-item nav-hide">
+      <li v-if="!user" class="nav-item">
         <a class="nav-link nav-highlight nav-title" href="#" role="button" data-bs-toggle="modal"
           data-bs-target="#loginModal" aria-controls="loginModal">Login<span class="nav-subtitle">HIVE
             Username</span></a>
