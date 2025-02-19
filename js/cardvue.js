@@ -15,7 +15,7 @@ export default {
     template: `
     <div class="card text-white">
    <div class="card-header px-2 pt-1 pb-0">
-      <div class="d-flex align-items-center flex-wrap">
+      <div class="d-flex align-items-center position-relative">
             <div class="d-flex align-items-center mt-1 mb-2">
                 <a :href="'/@' + post.author" class="no-decoration">
                <img v-if="post.author" :src="'https://images.hive.blog/u/' + post.author + '/avatar'"
@@ -39,8 +39,8 @@ export default {
                   </div> 
                </div>
                <!-- label -->
-               <h5 class="m-0 ms-auto align-self-end"><span class="badge square rounded-top border border-bottom-0 bg-info border-light-50"><i
-               :class="post_select.types[post.type].icon"></i>{{ post.type }}</span></h5>
+               <div class="position-absolute bottom-0 end-0"><span class="badge square rounded-top border border-bottom-0 bg-info border-light-50"><i
+               :class="post_select.types[post.type].icon"></i>{{ post.type }}</span></div>
       </div >
    </div >
    <div class="card-body px-2">

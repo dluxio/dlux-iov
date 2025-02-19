@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-100">
+<html lang="en">
 
 <head>
   <title>DLUX</title>
@@ -9,9 +9,15 @@
   <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
   <!-- Bootstrap -->
   <link href="/css/custom.css" rel="stylesheet" />
+  <link href="/css/v3.css" rel="stylesheet" />
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Space+Grotesk:wght@300..700&display=swap"
+    rel="stylesheet">
   <!-- Icons -->
   <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
-  <script type="module" src="/js/indexvue.js"></script>
+  <script type="module" src="/js/v3-index.js"></script>
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/img/dlux-icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -22,323 +28,307 @@
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js')
   </script>
   <script src="/js/aframe.min.js"></script>
-  <style>
-    /* Scroll arrows */
-    #section07 a {
-      padding-top: 80px;
-    }
-
-    #section07 a span {
-      position: absolute;
-      top: 0;
-      left: 50%;
-      width: 24px;
-      height: 24px;
-      margin-left: -12px;
-      border-left: 1px solid #fff;
-      border-bottom: 1px solid #fff;
-      -webkit-transform: rotate(-45deg);
-      transform: rotate(-45deg);
-      -webkit-animation: sdb07 2s infinite;
-      animation: sdb07 2s infinite;
-      opacity: 0;
-      box-sizing: border-box;
-    }
-
-    #section07 a span:nth-of-type(1) {
-      -webkit-animation-delay: 0s;
-      animation-delay: 0s;
-    }
-
-    #section07 a span:nth-of-type(2) {
-      top: 16px;
-      -webkit-animation-delay: .15s;
-      animation-delay: .15s;
-    }
-
-    #section07 a span:nth-of-type(3) {
-      top: 32px;
-      -webkit-animation-delay: .3s;
-      animation-delay: .3s;
-    }
-
-    @-webkit-keyframes sdb07 {
-      0% {
-        opacity: 0;
-      }
-
-      50% {
-        opacity: 1;
-      }
-
-      100% {
-        opacity: 0;
-      }
-    }
-
-    @keyframes sdb07 {
-      0% {
-        opacity: 0;
-      }
-
-      50% {
-        opacity: 1;
-      }
-
-      100% {
-        opacity: 0;
-      }
-    }
-  </style>
 </head>
 
-<body class="d-flex h-100 align-items-stretch text-white">
-  <div id="section07" class="position-fixed bottom-0 start-50 translate-middle-x mb-3" :class="{
-    'd-none': window.scrollY }">
-    <a class="btn btn-lg">
-      <div><span></span><span></span><span></span></div>
-      <div>Scroll</div>
-    </a>
-  </div>
-  <div class="bg-ascene">
-    <a-scene embedded renderer="antialias: true">
-      <a-entity camera fov="50" touchEnabled="false" wasd-controls-enabled="false" look-controls-enabled="false"
-        touchEnabled="false"></a-entity>
-      <a-entity animation="property: rotation; to: 0 0 359; dur: 6000; easing: linear; loop: true">
-        <a-entity light="type: directional; color: #033EFD; intensity: 0.6;" position="-14.14 0 0"></a-entity>
-        <a-entity light="type: directional; color: #FB00FF; intensity: 0.6;" position="10 10 0"></a-entity>
-        <a-entity light="type: directional; color: #21FFB5; intensity: 0.6;" position="10 -10 0"></a-entity>
-      </a-entity>
-
-      <a-entity id="hypercube" position="0 0 -15" scale="0.4 0.4 0.4" rotation="-3.18 -53.6 50.9">
-        <a-entity animation="property: rotation; from:0 0 0; to: 360 360 720; dur: 20000; easing: linear; loop: true">
-          <a-entity class="opp_sides" position="" rotation="">
-            <a-entity class="logo_side" position="-4.5 -4.5 -4.5" rotation="">
-              <a-box width="5" position="4.5 0 0"></a-box>
-              <a-box depth="8" position="7 0 3.5"></a-box>
-              <a-entity height="8" width="1.6" position="7.5 1.5 3.5" rotation="45 90 90" cloak></a-entity>
-              <a-entity position="6.5 2.5 6.5" rotation="90 90 90" cloak-tri></a-entity>
-              <a-box width="7" position="3 0 7"></a-box>
-              <a-entity height="8" width="1.6" position="5.5 7.5 1.5" rotation="-135 0 90" cloak></a-entity>
-              <a-box depth="4" position="0 0 4"></a-box>
-            </a-entity>
-            <a-entity class="logo_side" position="4.5 4.5 4.5" rotation="0 180 0">
-              <a-box width="5" position="4.5 0 0"></a-box>
-              <a-box depth="8" position="7 0 3.5"></a-box>
-              <a-box width="7" position="3 0 7"></a-box>
-              <a-box depth="4" position="0 0 4"></a-box>
-            </a-entity>
-          </a-entity>
-          <a-entity class="opp_sides" position="" rotation="270 0 180">
-            <a-entity class="logo_side" position="-4.5 -4.5 -4.5" rotation="">
-              <a-box width="5" position="4.5 0 0"></a-box>
-              <a-box depth="8" position="7 0 3.5"></a-box>
-              <a-entity height="8" width="1.6" position="7.5 1.5 3.5" rotation="45 90 90" cloak></a-entity>
-              <a-entity position="6.5 2.5 6.5" rotation="90 90 90" cloak-tri></a-entity>
-              <a-box width="7" position="3 0 7"></a-box>
-              <a-entity height="8" width="1.6" position="5.5 7.5 1.5" rotation="-135 0 90" cloak></a-entity>
-              <a-box depth="4" position="0 0 4"></a-box>
-            </a-entity>
-            <a-entity class="logo_side" position="4.5 4.5 4.5" rotation="0 180 0">
-              <a-box width="5" position="4.5 0 0"></a-box>
-              <a-box depth="8" position="7 0 3.5"></a-box>
-              <a-box width="7" position="3 0 7"></a-box>
-              <a-box depth="4" position="0 0 4"></a-box>
-            </a-entity>
-          </a-entity>
-          <a-entity class="opp_sides" position="" rotation="180 0 270">
-            <a-entity class="logo_side" position="-4.5 -4.5 -4.5" rotation="">
-              <a-box width="5" position="4.5 0 0"></a-box>
-              <a-box depth="8" position="7 0 3.5"></a-box>
-              <a-entity height="8" width="1.6" position="7.5 1.5 3.5" rotation="45 90 90" cloak></a-entity>
-              <a-box width="7" position="3 0 7"></a-box>
-              <a-entity height="8" width="1.6" position="5.5 7.5 1.5" rotation="-135 0 90" cloak></a-entity>
-              <a-box depth="4" position="0 0 4"></a-box>
-            </a-entity>
-            <a-entity class="logo_side" position="4.5 4.5 4.5" rotation="0 180 0">
-              <a-box width="5" position="4.5 0 0"></a-box>
-              <a-box depth="8" position="7 0 3.5"></a-box>
-              <a-box width="7" position="3 0 7"></a-box>
-              <a-box depth="4" position="0 0 4"></a-box>
-            </a-entity>
-          </a-entity>
-        </a-entity>
-    </a-scene>
-  </div>
-  <div id="app" class="d-flex w-100 flex-column w-100">
+<body>
+  <div id="app">
     <!-- navbar -->
     <div>
       <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
         @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" />
     </div>
-    <main class="mb-auto px-2" style="margin-top: 94px;">
-      <div id="logo" ref="logo" class="d-flex flex-row px-2 click-me" @click="startscroll()"></div>
-      <div id="dapps" ref="dapps">
-        <div class="d-flex flex-column dlux-turq jumbo-dlux container px-3 py-4 p-md-5 my-4 my-lg-5">
-          <div class="dlux-header d-flex display-4">
-            <h1 class="d-flex mb-0">
-              <span class="text-white">dlux is:</span>
-              <div class="d-flex ms-1">
-                <div class="box text-center">
-                  <ul class="scroll mb-1">
-                    <li class="scroll">Your</li>
-                    <li class="scroll">Game</li>
-                    <li class="scroll">Soc</li>
-                    <li class="scroll">Web</li>
-                    <li class="scroll">Your</li>
-                  </ul>
-                </div>
-                <span class="text-turq">Fi</span>
-              </div>
-            </h1>
+    <section class="hero-section container-fluid d-flex">
+      <div class="hero-text container">
+        <h1 class="hero-header text-mint">DLUX</h1>
+        <p class="hero-sub mb-3 text-mint">Layer 2 for HIVE<br><span class="text-turq">dApps • Storage •
+            Tokens</span>
+        </p>
+        <p class="hero-lead mb-4 text-mint">Open Source Tools for<br>Decentralized Communities</p>
+        <div class="hero-buttons">
+          <a class="btn btn-hero btn-turq btn-lg py-2 px-4 me-sm-2 mb-2 rounded-pill" href="#vision">Our
+            Vision</a>
+          <button type="button" class="btn btn-hero btn-outline-light btn-lg py-2 px-4 mb-2 rounded-pill">Node
+            Rewards</button>
+        </div>
+      </div>
+      <div class="aframe-container">
+        <a-scene embedded renderer="antialias: true" vr-mode-ui="enabled: false">
+          <a-entity camera fov="50" touchEnabled="false" wasd-controls-enabled="false" look-controls-enabled="false"
+            touchEnabled="false"></a-entity>
+          <a-entity animation="property: rotation; to: 0 0 359; dur: 6000; easing: linear; loop: true">
+            <a-entity light="type: directional; color: #033EFD; intensity: 0.6;" position="-14.14 0 0"></a-entity>
+            <a-entity light="type: directional; color: #FB00FF; intensity: 0.6;" position="10 10 0"></a-entity>
+            <a-entity light="type: directional; color: #21FFB5; intensity: 0.6;" position="10 -10 0"></a-entity>
+          </a-entity>
+
+          <a-entity id="hypercube" position="0 0 0" scale="0.4 0.4 0.4" rotation="-3.18 -53.6 50.9">
+            <a-entity
+              animation="property: rotation; from:0 0 0; to: 360 360 720; dur: 20000; easing: linear; loop: true">
+              <a-entity class="opp_sides" position="" rotation="">
+                <a-entity class="logo_side" position="-4.5 -4.5 -4.5" rotation="">
+                  <a-box width="5" position="4.5 0 0"></a-box>
+                  <a-box depth="8" position="7 0 3.5"></a-box>
+                  <a-entity height="8" width="1.6" position="7.5 1.5 3.5" rotation="45 90 90" cloak></a-entity>
+                  <a-entity position="6.5 2.5 6.5" rotation="90 90 90" cloak-tri></a-entity>
+                  <a-box width="7" position="3 0 7"></a-box>
+                  <a-entity height="8" width="1.6" position="5.5 7.5 1.5" rotation="-135 0 90" cloak></a-entity>
+                  <a-box depth="4" position="0 0 4"></a-box>
+                </a-entity>
+                <a-entity class="logo_side" position="4.5 4.5 4.5" rotation="0 180 0">
+                  <a-box width="5" position="4.5 0 0"></a-box>
+                  <a-box depth="8" position="7 0 3.5"></a-box>
+                  <a-box width="7" position="3 0 7"></a-box>
+                  <a-box depth="4" position="0 0 4"></a-box>
+                </a-entity>
+              </a-entity>
+              <a-entity class="opp_sides" position="" rotation="270 0 180">
+                <a-entity class="logo_side" position="-4.5 -4.5 -4.5" rotation="">
+                  <a-box width="5" position="4.5 0 0"></a-box>
+                  <a-box depth="8" position="7 0 3.5"></a-box>
+                  <a-entity height="8" width="1.6" position="7.5 1.5 3.5" rotation="45 90 90" cloak></a-entity>
+                  <a-entity position="6.5 2.5 6.5" rotation="90 90 90" cloak-tri></a-entity>
+                  <a-box width="7" position="3 0 7"></a-box>
+                  <a-entity height="8" width="1.6" position="5.5 7.5 1.5" rotation="-135 0 90" cloak></a-entity>
+                  <a-box depth="4" position="0 0 4"></a-box>
+                </a-entity>
+                <a-entity class="logo_side" position="4.5 4.5 4.5" rotation="0 180 0">
+                  <a-box width="5" position="4.5 0 0"></a-box>
+                  <a-box depth="8" position="7 0 3.5"></a-box>
+                  <a-box width="7" position="3 0 7"></a-box>
+                  <a-box depth="4" position="0 0 4"></a-box>
+                </a-entity>
+              </a-entity>
+              <a-entity class="opp_sides" position="" rotation="180 0 270">
+                <a-entity class="logo_side" position="-4.5 -4.5 -4.5" rotation="">
+                  <a-box width="5" position="4.5 0 0"></a-box>
+                  <a-box depth="8" position="7 0 3.5"></a-box>
+                  <a-entity height="8" width="1.6" position="7.5 1.5 3.5" rotation="45 90 90" cloak></a-entity>
+                  <a-box width="7" position="3 0 7"></a-box>
+                  <a-entity height="8" width="1.6" position="5.5 7.5 1.5" rotation="-135 0 90" cloak></a-entity>
+                  <a-box depth="4" position="0 0 4"></a-box>
+                </a-entity>
+                <a-entity class="logo_side" position="4.5 4.5 4.5" rotation="0 180 0">
+                  <a-box width="5" position="4.5 0 0"></a-box>
+                  <a-box depth="8" position="7 0 3.5"></a-box>
+                  <a-box width="7" position="3 0 7"></a-box>
+                  <a-box depth="4" position="0 0 4"></a-box>
+                </a-entity>
+              </a-entity>
+            </a-entity>
+        </a-scene>
+      </div>
+    </section>
+    <section class="vision-section d-flex align-items-center" id="vision">
+      <video autoplay muted loop playsinline preload="auto" onloadeddata="this.play();">
+        <source src="/vid/blue_dust.m4v" type="video/mp4">
+      </video>
+      <div class="vision-container">
+        <div class="image"><img src="/img/hypercube.png" class="img-fluid rounded-circle" alt="DLUX Node Network">
+        </div>
+        <div class="text-box top-left">
+          <div class="d-flex flex-column">
+            <div class="d-flex vision-box-header py-3 px-2 mb-xxl-2 pb-xxl-0 px-xxl-3" data-bs-target="#honeycomb">
+              <h3 class="card-title fs-3 fw-semibold d-flex flex-grow-1"><i
+                  class="fa-fw fa-solid fa-atom me-2"></i><span class="me-auto">Honeycomb</span><i
+                  class="ms-auto fw-light d-xxl-none fa-fw fa-solid fa-plus"></i></h3>
+            </div>
+            <div class="collapse d-xxl-flex flex-column flex-grow-1" id="honeycomb">
+              <p class="card-text px-2 px-xxl-3">Our fully customizable node based DAO powers community
+                tokens and smart contracts.
+              </p>
+              <a href="/update/honeycomb/"
+                class="mx-2 mt-3 mb-2 mb-xxl-1 mx-xxl-3 align-self-baseline btn btn-turq rounded-pill btn-hero">Learn
+                More</a>
+            </div>
           </div>
-          <div class="mt-2 text-white">
-            <h5 >2D, 3D, AR, VR, XR, ANYTHING</h5>
-            <p >Build it. Share it. Experience it.</p>
-            <p >{{dappstats}} dApps in the Hub.</p>
+        </div>
+        <div class="text-box top-right">
+          <div class="d-flex flex-column">
+            <div class="d-flex vision-box-header py-3 px-2 mb-xxl-2 pb-xxl-0 px-xxl-3" data-bs-target="#storage">
+              <h3 class="card-title fs-3 fw-semibold d-flex flex-grow-1"><i
+                  class="fa-fw fa-solid fa-hard-drive me-2"></i><span class="me-auto">Storage</span><i
+                  class="ms-auto fw-light d-xxl-none fa-fw fa-solid fa-plus"></i></h3>
+            </div>
+            <div class="collapse d-xxl-flex flex-column flex-grow-1" id="storage">
+              <p class="card-text px-2 px-xxl-3">Encryptable IPFS file storage across
+                redundant edge nodes to ensure reliable availability.
+              </p>
+              <a href="/new/token/"
+                class="mx-2 mt-3 mb-2 mb-xxl-1 mx-xxl-3 align-self-baseline btn btn-turq rounded-pill btn-hero">Learn
+                More</a>
+            </div>
           </div>
-          <div class="mt-3">
-            <a class="btn btn-dlux btn-lg btn-turq mt-2" href="/hub/">Browse dApps<i
-                class="fas fa-mountain-sun ms-2"></i></a>
-            <a class="btn btn-dlux btn-lg btn-outline-turq mt-2" href="/new/">Start Building<i
-                class="fa-solid fa-shapes ms-2"></i></a>
+        </div>
+        <div class="text-box bottom-left">
+          <div class="d-flex flex-column">
+            <div class="d-flex vision-box-header py-3 px-2 mb-xxl-2 pb-xxl-0 px-xxl-3" data-bs-target="#rewards">
+              <h3 class="card-title fs-3 fw-semibold d-flex flex-grow-1"><i
+                  class="fa-fw fa-solid fa-circle-nodes me-2"></i><span class="me-auto">Rewards</span><i
+                  class="ms-auto fw-light d-xxl-none fa-fw fa-solid fa-plus"></i></h3>
+            </div>
+            <div class="collapse d-xxl-flex flex-column flex-grow-1" id="rewards">
+              <p class="card-text px-2 px-xxl-3">Turn your existing hardware into DePIN nodes for storage,
+                streaming, transcoding, or governance.
+              </p>
+              <a href="#"
+                class="mx-2 mt-3 mb-2 mb-xxl-1 mx-xxl-3 align-self-baseline btn btn-turq rounded-pill btn-hero">Get
+                Started</a>
+            </div>
+          </div>
+        </div>
+        <div class="text-box bottom-right">
+          <div class="d-flex flex-column">
+            <div class="d-flex vision-box-header py-3 px-2 mb-xxl-2 pb-xxl-0 px-xxl-3" data-bs-target="#publishing">
+              <h3 class="card-title fs-3 fw-semibold d-flex flex-grow-1"><i
+                  class="fa-fw fa-solid fa-mountain-sun me-2 fs-4"></i><span class="me-auto">Publishing</span><i
+                  class="ms-auto fw-light d-xxl-none fa-fw fa-solid fa-plus"></i></h3>
+            </div>
+            <div class="collapse d-xxl-flex flex-column flex-grow-1" id="publishing">
+              <p class="card-text px-2 px-xxl-3">Our HUB supports dApps, WebXR, photo, audio, video, and
+                anything else you can
+                imagine.
+              </p>
+              <a class="mx-2 mt-3 mb-2 mb-xxl-1 mx-xxl-3 align-self-baseline btn btn-turq rounded-pill btn-hero"
+                href="/new/">Get Started</a>
+            </div>
           </div>
         </div>
       </div>
-
-        <div class="d-flex flex-column dlux-tang jumbo-dlux container px-3 py-4 p-md-5 my-4 my-lg-5">
-          <div class="dlux-header">
-            <h1>
-              <span class="text-white">dlux is:</span>
-              <span class="dlux-is">DeFi</span>
-            </h1>
-          </div>
-          <div class="mt-2">
-            <h5 class="text-white">DECENTRALIZED TOKEN EXCHANGE</h5>
-            <p class="text-white">Build your own communities. Decentralized file storage with SPK Network.</p>
-          </div>
-          <div class="mt-3">
-            <a class="btn btn-dlux btn-lg btn-tang mt-2" href="/nfts/sets">Collect NFTs<i
-                class="fas fa-store fa-fw ms-2"></i></a>
-            <a class="btn btn-dlux btn-lg btn-outline-tang mt-2" href="/dex">Trade Tokens<i
-                class="fa-solid fa-building-columns ms-2"></i></a>
-          </div>
+    </section>
+    <section class="how-section py-5" id="how">
+      <h2 class="section-title text-mint mt-5 fs-1">How it Works</h2>
+      <div class="how-grid flex-wrap mb-5 px-1">
+        <div class="how-box">
+          <h3 class="card-title">Blockchain</h3>
+          <p class="card-text mb-auto">Three second transaction times and social network
+            features make HIVE the most developer friendly blockchain in the world. DLUX Layer 2 brings new
+            features to its thousands of Montly Active Users.</p>
+          <a href="#">HIVE Blockchain Explorer</a>
         </div>
-      
- 
-        <div class="d-flex flex-column hive jumbo-dlux container px-3 py-4 p-md-5 my-4 my-lg-5">
-          <div class="dlux-header">
-            <h1>
-              <span class="text-white">dlux is:</span>
-              <span class="dlux-is">Hive</span>
-            </h1>
-          </div>
-          <div class="mt-2">
-            <h5 class="text-white">OWN YOUR ACCOUNT &amp; CONTENT</h5>
-            <p class="text-white">Earn rewards, publish anything, communicate with end to end encryption.</p>
-            <p class="text-white">~${{reward}} earned this week.</p>
-          </div>
-          <div class="mt-3">
-            <a class="btn btn-dlux btn-lg btn-hive mt-2" href="https://signup.hive.io/" target="_blank">Get Account<i
-                class="fab fa-fw fa-hive ms-2"></i></a>
-            <a class="btn btn-dlux btn-lg btn-outline-hive mt-2" href="#/" data-bs-toggle="offcanvas"
-              data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login<i
-                class="fas fa-fw fa-key ms-2"></i></a>
-          </div>
+        <div class="how-box">
+          <h3 class="card-title">L2 Nodes</h3>
+          <p class="card-text mb-auto">The global network of Honeycomb Layer 2 nodes utilize spare compute
+            resources to
+            power decentralized storage, token exchange, video transcoding, streaming, and turn servers. </p>
+          <a href="#" class="">Run a Honeycomb Node</a>
         </div>
-      
-
-        <div class="d-flex flex-column dlux-purp jumbo-dlux container px-3 py-4 p-md-5 my-4 my-lg-5">
-          <div class="dlux-header">
-            <h1>
-              <span class="text-white">dlux is:</span>
-              <span class="dlux-is">Open</span>
-            </h1>
-          </div>
-          <div class="mt-2">
-            <h5 class="text-white">LEARN MORE</h5>
-            <p class="text-white">Learn how to build, store, grow, trade, and expand YOUR decentralized world.</p>
-          </div>
-          <div class="mt-3">
-            <a class="btn btn-dlux btn-lg btn-purp mt-2" href="/about/">About Page<i
-                class="fas fa-fw fa-info-circle ms-2"></i></a>
-            <a class="btn btn-dlux btn-lg btn-outline-purp mt-2" href="/docs/" target="_blank">Documentation<i
-                class="fas fa-fw fa-book ms-2"></i></a>
-          </div>
+        <div class="how-box">
+          <h3 class="card-title">Platform</h3>
+          <p class="card-text mb-auto">HIVE scalability, DLUX node architecture, IPFS data storage, and
+            censorship resistant publishing empower next generation Web3 dApps to do more for their communities.
+          </p>
+          <a href="/build/">Build on DLUX</a>
         </div>
-   
-    </main>
+      </div>
+    </section>
     <div class="front">
       <foot-vue />
     </div>
-  </div>
+
+  
   <script>
-      (function () {
-        "use strict";
-        window.addEventListener("load", function () {
-          var forms = document.getElementsByClassName("needs-validation");
-          var validation = Array.prototype.filter.call(forms, function (form) {
-            form.addEventListener(
-              "submit",
-              function (event) {
-                if (form.checkValidity() === false) {
-                  event.preventDefault();
-                  event.stopPropagation();
-                }
-                form.classList.add("was-validated");
-              },
-              false
-            );
-          });
-        });
-      })();
-    var disabletab = document.getElementsByClassName("disabled-input");
-    for (var i = 0; i < disabletab.length; i++) {
-      disabletab[i].setAttribute("tabindex", "-1");
-    }
-    var toastElList = [].slice.call(document.querySelectorAll(".toast"));
-    var toastList = toastElList.map(function (toastEl) {
-      return new bootstrap.Toast(toastEl, option)
-    });
-    var tooltipTriggerList = [].slice.call(
-      document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    );
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-    const sqrt8 = Math.sqrt(8);
-    AFRAME.registerComponent('cloak', {
-      init: function () {
-        var geometry = new THREE.PlaneGeometry(sqrt8, 6);
-        var material = new THREE.MeshBasicMaterial({ colorWrite: false });
-        var mesh = new THREE.Mesh(geometry, material);
-        this.el.object3D.add(mesh);
-      }
-    });
-    AFRAME.registerComponent('cloak-tri', {
-      init: function () {
-        let v1 = new THREE.Vector3(0, 2, 0);
-        let v2 = new THREE.Vector3(0, 0, 2);
-        let v3 = new THREE.Vector3(2, 0, 0);
-        let geometry = new THREE.BufferGeometry().setFromPoints([v1, v2, v3]);
-        let material = new THREE.MeshBasicMaterial({
-          colorWrite: false
-        });
-        let mesh = new THREE.Mesh(geometry, material);
-        this.el.object3D.add(mesh);
-      }
-    });
-    document.addEventListener('DOMContentLoaded', () => {
-      window.addEventListener('scroll', function (e) {
-        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        var docHeight = document.documentElement.scrollHeight;
-        var winHeight = window.innerHeight;
-        var scrollPercent = (scrollTop) / (docHeight - winHeight);
-        var scroll360 = Math.round(((scrollPercent * 10) + Number.EPSILON) * 100) / 1000 * 360;
-        document.getElementById('hypercube').setAttribute('rotation', `-3.18 -${53.6 + scroll360 / 2} ${50.9 + scroll360}`);
-        document.getElementById('hypercube').setAttribute('position', `0 0 -${15 - (scrollPercent * 10)}`);
+
+   /*  // Nav more button animation
+    document.addEventListener("DOMContentLoaded", function () {
+      const menuToggle = document.querySelector(".nav-more");
+      const dropdownMenu = document.querySelector(".nav-more .dropdown-menu");
+      const bars = document.querySelectorAll(".nav-bars .bar");
+
+      menuToggle.addEventListener("click", function (event) {
+        event.preventDefault();
+        bars.forEach(bar => bar.classList.toggle("x"));
+
       });
-    })
+
+      document.addEventListener("click", function (event) {
+        if (!menuToggle.contains(event.target) && !dropdownMenu.contains(event.target)) {
+          bars.forEach(bar => bar.classList.remove("x"));
+
+        }
+      });
+    });
+
+    // Nav dropdown mouseover clears other dropdowns
+    document.addEventListener("DOMContentLoaded", function () {
+      const dropdowns = document.querySelectorAll(".nav-dropdown");
+      const navMoreDropdown = document.querySelector(".nav-more.dropdown");
+      const bars = document.querySelectorAll(".nav-bars .bar");
+      let isHoverListenerActive = false;
+
+      function addDropdownHoverListeners() {
+        if (!isHoverListenerActive) {
+          dropdowns.forEach(dropdown => {
+            dropdown.addEventListener("mouseover", dropdownHoverHandler);
+          });
+          isHoverListenerActive = true;
+        }
+      }
+
+      function removeDropdownHoverListeners() {
+        if (isHoverListenerActive) {
+          dropdowns.forEach(dropdown => {
+            dropdown.removeEventListener("mouseover", dropdownHoverHandler);
+          });
+          isHoverListenerActive = false;
+        }
+      }
+
+      function dropdownHoverHandler() {
+        dropdowns.forEach(otherDropdown => {
+          const toggleButton = otherDropdown.querySelector(".dropdown-toggle");
+          const dropdownInstance = bootstrap.Dropdown.getInstance(toggleButton);
+
+          if (dropdownInstance && otherDropdown !== this) {
+            dropdownInstance.hide();
+
+            // Only remove 'x' class if not hovering over .nav-more .dropdown
+            if (!navMoreDropdown.matches(":hover")) {
+              bars.forEach(bar => bar.classList.remove("x"));
+            }
+          }
+        });
+      }
+
+      function handleResize() {
+        if (window.innerWidth > 768) {
+          addDropdownHoverListeners();
+        } else {
+          removeDropdownHoverListeners();
+        }
+      }
+
+      handleResize(); // Run on load
+      window.addEventListener("resize", handleResize); // Update on resize
+    });
+ */
+    // Change Aframe position
+    function updateAFramePosition() {
+      const entity = document.querySelector("#hypercube"); // Replace with your entity ID
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        entity.setAttribute("position", "0 2 -3"); // Adjust for smaller screens
+      } else if (window.matchMedia("(max-width: 992px)").matches) {
+        entity.setAttribute("position", "2 0 -3"); // Adjust for smaller screens
+      } else {
+        entity.setAttribute("position", "2 0 -2.6"); // Default for larger screens
+      }
+    }
+    // Run on load and on resize
+    window.addEventListener("load", updateAFramePosition);
+    window.addEventListener("resize", updateAFramePosition);
+
+    // Vision Headers clickable
+    function updateCollapseAttributes() {
+      document.querySelectorAll(".vision-box-header").forEach(box => {
+        if (window.innerWidth <= 1400) {
+          box.setAttribute("data-bs-toggle", "collapse");
+        } else {
+          box.removeAttribute("data-bs-toggle");
+        }
+      });
+    }
+    document.addEventListener("DOMContentLoaded", updateCollapseAttributes);
+    window.addEventListener("resize", updateCollapseAttributes);
+
   </script>
   <!-- Bootstrap -->
   <script src="/js/bootstrap.bundle.min.js"></script>
@@ -346,6 +336,6 @@
     integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
-</body>
+</div></body>
 
 </html>

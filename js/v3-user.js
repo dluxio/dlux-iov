@@ -1,6 +1,6 @@
 //import Vue from "https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.esm.browser.js";
 import { createApp, toRaw } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
-import Navue from "/js/navue.js";
+import Navue from "/js/v3-nav.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
 import Popper from "/js/pop.js";

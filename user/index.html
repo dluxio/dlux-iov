@@ -17,6 +17,12 @@
     <script src="/js/cryptojs.min.js"></script>
     <!-- Bootstrap -->
     <link href="/css/custom.css" rel="stylesheet" />
+    <link href="/css/v3.css" rel="stylesheet" />
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Space+Grotesk:wght@300..700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet"
         href="https://cdn.rawgit.com/CoffeePerry/simplemde-theme-bootstrap-dark/master/dist/simplemde-theme-bootstrap-dark.min.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -74,7 +80,7 @@
     <script src="/js/purify.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
     <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
-    <script type="module" src="/js/vueme.js"></script>
+    <script type="module" src="/js/v3-user.js"></script>
     <!-- <link href="/css/smde-comment.css" rel="stylesheet" /> -->
     <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
 
@@ -98,8 +104,8 @@
                                         Login to see this page
                                     </div>
                                     <button class="fs-6 btn btn-success btn-success-lg text-black" type="button"
-                                        data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers"
-                                        aria-controls="offcanvasUsers"
+                                        data-bs-toggle="modal" data-bs-target="#loginModal"
+                                        aria-controls="loginModal"
                                         style="font-family: 'Lucida Console', Monaco, monospace;">login</button>
                                 </div>
                             </div>
@@ -148,8 +154,8 @@
                                     <button type="button" v-show="!me && account" class="btn btn-outline-primary btn-lg"
                                         data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions<i
                                             class="fas fa-ellipsis-h ms-2"></i></button>
-                                    <div class="dropdown-menu bg-black nav-item dropdown-menu-right"> <a
-                                            class="dropdown-item" type="button" @click="follow(pageAccount)"
+                                    <div class="dropdown-menu bg-black dropdown-menu-right"> <a class="dropdown-item"
+                                            type="button" @click="follow(pageAccount)"
                                             v-if="!relations.follows">Follow</a> <a class="dropdown-item" type="button"
                                             @click="unfollow(pageAccount)" v-if="relations.follows">Unfollow</a>
                                         <modal-vue type="send" token="DLUX" :balance="accountapi.balance"
@@ -173,9 +179,9 @@
                                             @click="activeTab = 'inventory'" data-bs-toggle="tab"
                                             aria-controls="inventory" aria-expanded="true"
                                             href="#inventory">Inventory</a></li>
-                                    <li class="nav-item"> <a class="nav-link" id="cloudtab" role="tab"
-                                            data-bs-toggle="tab" @click="activeTab = 'cloud'" aria-controls="cloud"
-                                            aria-expanded="true" href="#cloud">Cloud</a></li>
+                                    <li class="nav-item"> <a class="nav-link" id="drivetab" role="tab"
+                                            data-bs-toggle="tab" @click="activeTab = 'drive'" aria-controls="drive"
+                                            aria-expanded="true" href="#drive">Drive</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -186,9 +192,9 @@
                         <div role="tabpanel" class="tab-pane fade show active" id="blog" aria-labelledby="blogtab">
                             <!-- blog repeat -->
                             <!--main view-->
-                            <div class="container-fluid">
-                                <div class="row">
-                                    <div class="col-sm-6 col-lg-3 my-2" v-for="post in displayPosts" :key="post.url">
+                            <div class="container">
+                                <div class="row" >
+                                    <div class="col-sm-6 col-lg-4 col-xl-3 my-2 card-group" v-for="post in displayPosts" :key="post.url">
                                         <card-vue :post="post" :account="account" :post_select="postSelect"
                                             :voteval="voteVal" :head_block="sstats.head_block"
                                             :broca_refill="sstats.broca_refill" :broca="spkapi.broca"
@@ -1376,10 +1382,10 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- cloud tab -->
-                        <div role="tabpanel" ref="cloudTab" class="tab-pane fade" id="cloud" aria-labelledby="cloudtab">
+                        <!-- drive tab -->
+                        <div role="tabpanel" ref="driveTab" class="tab-pane fade" id="drive" aria-labelledby="drivetab">
                             <div class="container">
-                                <div class="rounded my-3 pt-1" >
+                                <div class="rounded my-3 pt-1">
                                     <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount"
                                         @tosign="toSign=$event" :prop_contracts="contracts" :accountinfo="accountinfo"
                                         :spkapi="spkapi" @done="getSapi"></contract-vue>
@@ -1601,106 +1607,106 @@
             },
         };
     </script>
-<script>
-    function deepLink(link) {
-        if (link) location.hash = link; // Update the hash in the URL
+    <script>
+        function deepLink(link) {
+            if (link) location.hash = link; // Update the hash in the URL
 
-        let url = location.href.replace(/\/$/, ''); // Remove trailing slash from URL
+            let url = location.href.replace(/\/$/, ''); // Remove trailing slash from URL
 
-        if (location.hash) {
-            let hash = url.split('#')[1]; // Extract hash from URL
-            let parentTab = null;
-            let childTab = null;
+            if (location.hash) {
+                let hash = url.split('#')[1]; // Extract hash from URL
+                let parentTab = null;
+                let childTab = null;
 
-            // Check if hash includes nested tabs (e.g., #wallet/spk or #cloud/contracts)
-            if (hash.includes('/')) {
-                const parts = hash.split('/'); // Split into parent and sub-tab parts
-                console.log("Hash parts:", parts);
+                // Check if hash includes nested tabs (e.g., #wallet/spk or #drive/contracts)
+                if (hash.includes('/')) {
+                    const parts = hash.split('/'); // Split into parent and sub-tab parts
+                    console.log("Hash parts:", parts);
 
-                // Determine parent tab group (e.g., #usertabs) and child tab group (e.g., #wallettabs or #cloudtabs)
-                const parentGroup = parts[0] === 'wallet' ? '#usertabs' : parts[0] === 'cloud' ? '#usertabs' : null;
-                const childGroup = parts[0] === 'wallet' ? '#wallettabs' : parts[0] === 'cloud' ? '#cloudtabs' : null;
+                    // Determine parent tab group (e.g., #usertabs) and child tab group (e.g., #wallettabs or #drivetabs)
+                    const parentGroup = parts[0] === 'wallet' ? '#usertabs' : parts[0] === 'drive' ? '#usertabs' : null;
+                    const childGroup = parts[0] === 'wallet' ? '#wallettabs' : parts[0] === 'drive' ? '#drivetabs' : null;
 
-                // Select the parent tab from the parent group
-                parentTab = parentGroup ? document.querySelector(`${parentGroup} a[href="#${parts[0]}"]`) : null;
-                console.log("Parent Tab:", parentTab);
+                    // Select the parent tab from the parent group
+                    parentTab = parentGroup ? document.querySelector(`${parentGroup} a[href="#${parts[0]}"]`) : null;
+                    console.log("Parent Tab:", parentTab);
 
-                // Select the child tab from the child group
-                childTab = childGroup ? document.querySelector(`${childGroup} a[href="#${parts[1]}"]`) : null;
-                console.log("Child Tab:", childTab);
+                    // Select the child tab from the child group
+                    childTab = childGroup ? document.querySelector(`${childGroup} a[href="#${parts[1]}"]`) : null;
+                    console.log("Child Tab:", childTab);
 
-                if (parentTab) {
-                    const parentTabInstance = new bootstrap.Tab(parentTab); // Bootstrap tab instance for parent tab
-                    console.log("Activating parent tab:", parentTab);
-                    parentTabInstance.show(); // Show the parent tab
+                    if (parentTab) {
+                        const parentTabInstance = new bootstrap.Tab(parentTab); // Bootstrap tab instance for parent tab
+                        console.log("Activating parent tab:", parentTab);
+                        parentTabInstance.show(); // Show the parent tab
 
-                    // Check if the parent tab is already active, trigger the event manually if needed
-                    if (parentTab.classList.contains('active')) {
-                        console.log("Parent tab already active, directly activating child tab.");
-                        if (childTab) {
-                            const childTabInstance = new bootstrap.Tab(childTab);
-                            childTabInstance.show(); // Show the child tab
+                        // Check if the parent tab is already active, trigger the event manually if needed
+                        if (parentTab.classList.contains('active')) {
+                            console.log("Parent tab already active, directly activating child tab.");
+                            if (childTab) {
+                                const childTabInstance = new bootstrap.Tab(childTab);
+                                childTabInstance.show(); // Show the child tab
+                            }
+                        } else {
+                            // Wait for the parent tab to be fully activated and then activate the child tab
+                            parentTab.addEventListener('shown.bs.tab', function () {
+                                console.log("Parent tab activated. Now activating child tab.");
+                                if (childTab) {
+                                    const childTabInstance = new bootstrap.Tab(childTab); // Bootstrap tab instance for child tab
+                                    childTabInstance.show(); // Show the child tab
+                                } else {
+                                    console.log("Child Tab is null.");
+                                }
+                            });
                         }
                     } else {
-                        // Wait for the parent tab to be fully activated and then activate the child tab
-                        parentTab.addEventListener('shown.bs.tab', function () {
-                            console.log("Parent tab activated. Now activating child tab.");
-                            if (childTab) {
-                                const childTabInstance = new bootstrap.Tab(childTab); // Bootstrap tab instance for child tab
-                                childTabInstance.show(); // Show the child tab
-                            } else {
-                                console.log("Child Tab is null.");
-                            }
-                        });
+                        console.log("Parent Tab is null.");
                     }
                 } else {
-                    console.log("Parent Tab is null.");
-                }
-            } else {
-                // Handle the case where only a parent tab is specified (single-level hash)
-                parentTab = document.querySelector(`#usertabs a[href="#${hash}"]`);
-                console.log("Single-level hash, Parent Tab:", parentTab);
+                    // Handle the case where only a parent tab is specified (single-level hash)
+                    parentTab = document.querySelector(`#usertabs a[href="#${hash}"]`);
+                    console.log("Single-level hash, Parent Tab:", parentTab);
 
-                if (parentTab) {
-                    const parentTabInstance = new bootstrap.Tab(parentTab);
-                    parentTabInstance.show();
-                } else {
-                    console.log("Parent Tab is null.");
+                    if (parentTab) {
+                        const parentTabInstance = new bootstrap.Tab(parentTab);
+                        parentTabInstance.show();
+                    } else {
+                        console.log("Parent Tab is null.");
+                    }
                 }
+
+                // Update the URL without adding duplicate hashes
+                url = location.href.replace(/\/#/, '#');
+                history.replaceState(null, null, url); // Replace the history state with the updated URL
             }
 
-            // Update the URL without adding duplicate hashes
-            url = location.href.replace(/\/#/, '#');
-            history.replaceState(null, null, url); // Replace the history state with the updated URL
+            // Update URL based on selected tab
+            const selectableTabList = [].slice.call(document.querySelectorAll('a[data-bs-toggle="tab"]'));
+            selectableTabList.forEach((selectableTab) => {
+                selectableTab.addEventListener('click', function () {
+                    const hash = selectableTab.getAttribute('href');
+                    const parentTab = selectableTab.closest('#usertabs') ? '#usertabs' : selectableTab.closest('#wallettabs') ? '#wallettabs' : selectableTab.closest('#drivetabs') ? '#drivetabs' : null;
+                    let newUrl;
+
+                    // Update URL based on selected tab
+                    if (parentTab === '#usertabs') {
+                        newUrl = url.split('#')[0] + hash;
+                    } else if (parentTab === '#wallettabs' || parentTab === '#drivetabs') {
+                        const parentActiveTab = document.querySelector('#usertabs .active').getAttribute('href');
+                        newUrl = url.split('#')[0] + parentActiveTab + '/' + hash.substring(1); // Append sub-tab hash
+                    }
+
+                    console.log("Updating URL to:", newUrl);
+                    history.replaceState(null, null, newUrl); // Replace the state in history
+                });
+            });
         }
 
-        // Update URL based on selected tab
-        const selectableTabList = [].slice.call(document.querySelectorAll('a[data-bs-toggle="tab"]'));
-        selectableTabList.forEach((selectableTab) => {
-            selectableTab.addEventListener('click', function () {
-                const hash = selectableTab.getAttribute('href');
-                const parentTab = selectableTab.closest('#usertabs') ? '#usertabs' : selectableTab.closest('#wallettabs') ? '#wallettabs' : selectableTab.closest('#cloudtabs') ? '#cloudtabs' : null;
-                let newUrl;
-
-                // Update URL based on selected tab
-                if (parentTab === '#usertabs') {
-                    newUrl = url.split('#')[0] + hash;
-                } else if (parentTab === '#wallettabs' || parentTab === '#cloudtabs') {
-                    const parentActiveTab = document.querySelector('#usertabs .active').getAttribute('href');
-                    newUrl = url.split('#')[0] + parentActiveTab + '/' + hash.substring(1); // Append sub-tab hash
-                }
-
-                console.log("Updating URL to:", newUrl);
-                history.replaceState(null, null, newUrl); // Replace the state in history
-            });
+        // Ensure that deepLink runs after the DOM is loaded
+        document.addEventListener('DOMContentLoaded', function () {
+            deepLink(location.hash); // Call deepLink on page load to handle any deep linking in the URL
         });
-    }
-
-    // Ensure that deepLink runs after the DOM is loaded
-    document.addEventListener('DOMContentLoaded', function () {
-        deepLink(location.hash); // Call deepLink on page load to handle any deep linking in the URL
-    });
-</script>
+    </script>
 
 
 
@@ -1729,6 +1735,8 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
+
 
 </body>
 

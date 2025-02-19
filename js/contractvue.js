@@ -168,13 +168,13 @@ export default {
                 </div>
                
                 <div class="mx-auto ">
-                    <ul id="cloudtabs" class="nav nav-tabs rounded mx-auto my-2 fs-5 " role="tablist" style="background-color: rgb(0,0,0,0.3)">
+                    <ul id="drivetabs" class="nav nav-tabs rounded mx-auto my-2 fs-5 " role="tablist" style="background-color: rgb(0,0,0,0.3)">
                         <li class="nav-item">
-                            <a class="nav-link active px-4" href="#contracts" id="contractstab" @click="activeTab = 'cloud'" role="tab" data-bs-toggle="tab"
+                            <a class="nav-link active px-4" href="#contracts" id="contractstab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
                                 aria-controls="contractstab" aria-expanded="true">CONTRACTS</a>
                         </li>
                         <li v-if="!cc" class="nav-item">
-                            <a class="nav-link px-4" aria-current="page" href="#files" id="filestab" @click="activeTab = 'cloud'" role="tab" data-bs-toggle="tab"
+                            <a class="nav-link px-4" aria-current="page" href="#files" id="filestab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
                                 aria-controls="filestab" aria-expanded="false">FILES</a>
                         </li>
                         <li v-if="cc" class="nav-item">
@@ -1106,8 +1106,8 @@ export default {
                     const parts = hash.split('/');
                     console.log('Hash parts:', parts);
 
-                    const parentGroup = parts[0] === 'wallet' ? '#usertabs' : parts[0] === 'cloud' ? '#usertabs' : null;
-                    const childGroup = parts[0] === 'wallet' ? '#wallettabs' : parts[0] === 'cloud' ? '#cloudtabs' : null;
+                    const parentGroup = parts[0] === 'wallet' ? '#usertabs' : parts[0] === 'drive' ? '#usertabs' : null;
+                    const childGroup = parts[0] === 'wallet' ? '#wallettabs' : parts[0] === 'drive' ? '#drivetabs' : null;
 
                     parentTab = parentGroup ? document.querySelector(`${parentGroup} a[href="#${parts[0]}"]`) : null;
                     console.log('Parent Tab:', parentTab);
@@ -1143,12 +1143,12 @@ export default {
             selectableTabList.forEach((selectableTab) => {
                 selectableTab.addEventListener('click', function () {
                     const hash = selectableTab.getAttribute('href');
-                    const parentTab = selectableTab.closest('#usertabs') ? '#usertabs' : selectableTab.closest('#wallettabs') ? '#wallettabs' : selectableTab.closest('#cloudtabs') ? '#cloudtabs' : null;
+                    const parentTab = selectableTab.closest('#usertabs') ? '#usertabs' : selectableTab.closest('#wallettabs') ? '#wallettabs' : selectableTab.closest('#drivetabs') ? '#drivetabs' : null;
                     let newUrl;
 
                     if (parentTab === '#usertabs') {
                         newUrl = url.split('#')[0] + hash;
-                    } else if (parentTab === '#wallettabs' || parentTab === '#cloudtabs') {
+                    } else if (parentTab === '#wallettabs' || parentTab === '#drivetabs') {
                         const parentActiveTab = document.querySelector('#usertabs .active').getAttribute('href');
                         newUrl = url.split('#')[0] + parentActiveTab + '/' + hash.substring(1);
                     }
