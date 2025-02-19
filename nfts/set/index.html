@@ -92,7 +92,7 @@
     <main role="main" class="flex-shrink-0">
 
       <div class="container p-0" v-if="ready">
-        <div class="card bg-dark text-white rounded-top">
+        <div class="card bg-dark border-dark border-1 text-white rounded-top">
           <div>
             <img class="banner-img w-100 img-fluid rounded-top"
               :src="makeLink('https://ipfs.dlux.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.banner : '')"></img>
@@ -102,7 +102,7 @@
                 :src="makeLink('https://ipfs.dlux.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.logo : '')"></img>
             </div>
           </div>
-          <div v-cloak class="card-body p-0 rounded-bottom"
+          <div v-cloak class="card-body p-0 border-dark border-top rounded-bottom"
             :style="{'background': getSetDetailsColors(chains[jsontoken].sets[setname].computed ? chains[jsontoken].sets[setname].computed : '')}"
             style="border: none; ">
 
