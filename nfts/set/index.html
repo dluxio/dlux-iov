@@ -78,7 +78,7 @@
   </style>
 </head>
 
-<body class="d-flex text-white" style="margin-top: 94px;" id="explore">
+<body style="margin-top: 94px;" id="explore">
   <div id="app" v-cloak>
     <div>
       <nav-vue 
@@ -92,7 +92,7 @@
     <main role="main" class="flex-shrink-0">
 
       <div class="container p-0" v-if="ready">
-        <div class="card bg-dark text-white">
+        <div class="card bg-dark text-white rounded-top">
           <div>
             <img class="banner-img w-100 img-fluid"
               :src="makeLink('https://ipfs.dlux.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.banner : '')"></img>

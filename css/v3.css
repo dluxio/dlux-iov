@@ -10,7 +10,7 @@ html {
 }
 
 #how {
-    background-color: #1a2129;
+    /* background-color: #1a2129; */
 }
 
 .text-mint {
@@ -459,19 +459,22 @@ html {
 .how-box {
     padding: 20px;
     border-radius: 10px;
-    border: 1px solid rgb(235, 245, 236);
+    /* border: 1px solid rgb(235, 245, 236); */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid black;
     text-align: start;
     flex: 1;
     min-width: 250px;
     max-width: 500px;
-    color: rgb(235, 245, 236);
+    /* color: rgb(235, 245, 236); */
+    color: black;
     display: flex;
     flex-direction: column;
 }
 
 .how-box a {
-    color: rgb(235, 245, 236);
+    /* color: rgb(235, 245, 236); */
+    color: black;
     text-decoration: none;
     font-family: 'Space Grotesk', serif;
     font-size: 1.2rem;
