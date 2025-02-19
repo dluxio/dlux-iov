@@ -1177,19 +1177,19 @@ export default {
                 dApps</span></a></li>
           <li class="nav-show"><a class="dropdown-item subnav-title" href="/dex">DEX<span
                 class="subnav-subtitle">Exchange Tokens</span></a></li>
-          <li class="nav-show"><a class="dropdown-item subnav-title" href="/nfts">NFT Market<span
-                class="subnav-subtitle">Browse, Bid, Buy</span></a></li>
-          <li class="nav-show"><a class="dropdown-item subnav-title" href="/nfts/sets">NFT Collections<span
-                class="subnav-subtitle">Explore Community Sets</span></a></li>
-          <li><a class="dropdown-item subnav-title" href="#">Rewards<span class="subnav-subtitle">Run
-                a DePIN Service Node</span></a></li>
-          <li><a class="dropdown-item subnav-title" href="/build">Publishing<span class="subnav-subtitle">Build
+          <li class="nav-show"><a class="dropdown-item subnav-title" href="/nfts">NFT Marketplace<span
+                class="subnav-subtitle">Sales and Auctions</span></a></li>
+          <li class="nav-show"><a class="dropdown-item subnav-title" href="/nfts/sets">Browse NFT Sets<span
+                class="subnav-subtitle">Discover New Collections</span></a></li>
+          <li><a class="dropdown-item subnav-title" href="/build/">Publishing<span class="subnav-subtitle">Build
                 and Post With DLUX</span></a></li>
           <li><a class="dropdown-item subnav-title" href="#">Storage<span class="subnav-subtitle">Web3
                 IPFS Pinning</span></a></li>
-          <li><a class="dropdown-item subnav-title" href="#">Honeycomb<span class="subnav-subtitle">Launch Your
+          <li><a class="dropdown-item subnav-title" href="/nodes/">Node Rewards<span class="subnav-subtitle">Run
+                a DePIN Service Node</span></a></li>
+          <li><a class="dropdown-item subnav-title" href="/dao/">Honeycomb DAO<span class="subnav-subtitle">Launch Your
                 DeFi Project</span></a></li>
-          <li><a class="dropdown-item subnav-title" href="/docs" target="_blank">Docs<span
+          <li><a class="dropdown-item subnav-title" href="/docs/" target="_blank">Docs<span
                 class="subnav-subtitle">Explore
                 DLUX Documentation</span></a></li>
           <li class="subnav-extra-top"><a class="dropdown-extra" href="/@disregardfiat">Blog</a></li>

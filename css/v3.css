@@ -343,17 +343,30 @@ html {
     z-index: 2;
 }
 
-.hero-header {
+.hero-brand {
     font-family: "Audiowide", serif;
     font-size: 10em;
     line-height: 1;
 }
 
-.hero-sub {
+.hero-title {
+    font-family: 'Space Grotesk';
+    font-size: 5em;
+    font-weight: 400;
+    line-height: 1.1;
+
+}
+
+.hero-subtitle {
     font-family: 'Space Grotesk';
     font-size: 2.5em;
     font-weight: 400;
     line-height: 1.1;
+
+}
+
+.hero-text-800 {
+    max-width: 800px;
 }
 
 .hero-lead {
@@ -503,7 +516,7 @@ html {
     overflow: hidden;
 }
 
-.vision-section video {
+.bg-video {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -687,7 +700,9 @@ html {
         width: 100vw !important;
     }
 
-    .hero-text {
+   
+
+    .hero-text-bottom {
         position: absolute;
         bottom: 20px;
         left: 50%;
@@ -734,12 +749,18 @@ html {
 
 @media (max-width: 576px) {
 
-    .hero-header {
+    
+    .hero-brand {
         font-size: 5em !important;
     }
 
-    .hero-sub {
+    .hero-title {
+        font-size: 4em !important;
+    }
+
+    .hero-subtitle {
         font-size: 2em !important;
+        margin-bottom: auto;
     }
 
     .hero-buttons .btn-hero {

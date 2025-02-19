@@ -13306,8 +13306,8 @@ a-scene {
 }
 
 .btn-outline-fusch {
-  color: #fb00ff;
-  border-color: #fb00ff;
+  color: #fff !important;
+  border-color: #fb00ff !important;
 }
 
 .btn-outline-fusch:hover {

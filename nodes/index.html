@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>DLUX</title>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
+  <!-- Bootstrap -->
+  <link href="/css/custom.css" rel="stylesheet" />
+  <link href="/css/v3.css" rel="stylesheet" />
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Space+Grotesk:wght@300..700&display=swap"
+    rel="stylesheet">
+  <!-- Icons -->
+  <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
+  <script type="module" src="/js/v3-index.js"></script>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/img/dlux-icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#111222">
+  <meta name="apple-mobile-web-app-title" content="DLUX">
+  <script>
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js')
+  </script>
+  <script src="/js/aframe.min.js"></script>
+</head>
+
+<body>
+  <div id="app">
+    <!-- navbar -->
+    <div>
+      <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
+        @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" />
+    </div>
+    <section class="hero-section container-fluid d-flex">
+      <video autoplay muted loop playsinline preload="auto" onloadeddata="this.play();" class="bg-video">
+        <source src="/vid/connected_dots.webmhd.webm" type="video/webm">
+       <!--  <source src="/vid/vecteezy_abstract-connected-dots-and-lines-on-blue-background_51007777-Apple Devices HD (Most Compatible).m4v" type="video/mp4"> -->
+      </video>
+      <div class="hero-text hero-text-bottom container">
+        <p class="hero-title mb-3 text-mint">Put Your Computer to Work
+        </p>
+        <p class="hero-subtitle mb-4 text-mint">Earn tokens for running service nodes that contribute to the network.</p>
+        <div class="hero-buttons">
+          <a class="btn btn-hero btn-turq btn-lg py-2 px-4 me-sm-2 mb-2 rounded-pill" href="#vision">Get Started</a>
+        </div>
+      </div>
+      
+    </section>
+    <section class="vision-section d-flex align-items-center" id="vision">
+      <video autoplay muted loop playsinline preload="auto" onloadeddata="this.play();" class="bg-video">
+        <source src="/vid/glowing_hexagon.webmhd.webm" type="video/webm">
+      </video>
+      <div class="hero-text container my-5 text-center">
+        <p class="hero-title mb-3 text-mint">Honeycomb
+        </p>
+        <p class="hero-lead mb-4 text-mint">Looking to launch your own token?<br>Build your decentralized community with our DAO.</p>
+        <div class="hero-buttons">
+          <a class="btn btn-hero btn-turq btn-lg py-2 px-4 me-sm-2 mb-2 rounded-pill" href="/dao/">Learn More</a>
+        </div>
+      </div>
+    </section>
+   
+    <div class="">
+      <foot-vue />
+    </div>
+  </div>
+  <script>
+    // Change Aframe position
+    function updateAFramePosition() {
+      const entity = document.querySelector("#hypercube"); // Replace with your entity ID
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        entity.setAttribute("position", "0 2 -3"); // Adjust for smaller screens
+      } else if (window.matchMedia("(max-width: 992px)").matches) {
+        entity.setAttribute("position", "2 0 -3"); // Adjust for smaller screens
+      } else {
+        entity.setAttribute("position", "2 0 -2.6"); // Default for larger screens
+      }
+    }
+    // Run on load and on resize
+    window.addEventListener("load", updateAFramePosition);
+    window.addEventListener("resize", updateAFramePosition);
+
+    // Vision Headers clickable
+    function updateCollapseAttributes() {
+      document.querySelectorAll(".vision-box-header").forEach(box => {
+        if (window.innerWidth <= 1400) {
+          box.setAttribute("data-bs-toggle", "collapse");
+        } else {
+          box.removeAttribute("data-bs-toggle");
+        }
+      });
+    }
+    document.addEventListener("DOMContentLoaded", updateCollapseAttributes);
+    window.addEventListener("resize", updateCollapseAttributes);
+
+  </script>
+  <!-- Bootstrap -->
+  <script src="/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
+    integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
+  </div>
+</body>
+
+</html>

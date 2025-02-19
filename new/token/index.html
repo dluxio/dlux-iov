@@ -13,7 +13,14 @@
 	<meta name="apple-mobile-web-app-title" content="DLUX">
 	<meta name="theme-color" content="#111222" />
 	<link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
+	<!-- Bootstrap -->
 	<link href="/css/custom.css" rel="stylesheet" />
+	<link href="/css/v3.css" rel="stylesheet" />
+	<!-- Fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Space+Grotesk:wght@300..700&display=swap"
+	  rel="stylesheet">
 	<!-- Markdown -->
 	<script src="https://unpkg.com/showdown@1.x/dist/showdown.min.js"></script>
 	<link rel="stylesheet" href="/css/simplemde-bs-dark.css">
@@ -31,7 +38,7 @@
 	<script>
 		var client = new dhive.Client(["https://api.hive.blog", "https://api.hive.blog", "https://anyx.io", "https://api.openhive.network"]);
 	</script>
-	<script type="module" src="/js/vueme.js"></script>
+	<script type="module" src="/js/v3-user.js"></script>
 	<script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
 	<script>
 		if ('serviceWorker' in navigator) {
@@ -49,8 +56,8 @@
 	</script>
 </head>
 
-<body class="d-flex h-100 align-items-stretch">
-	<div id="app" class="d-flex w-100 flex-column w-100">
+<body>
+	<div id="app">
 		<!-- navbar -->
 		<div>
 			<nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event)"
@@ -67,18 +74,18 @@
 									Login to see this page
 								</div>
 								<button class="fs-6 btn btn-success btn-success-lg text-black" type="button"
-									data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers"
-									aria-controls="offcanvasUsers"
+									data-bs-toggle="modal" data-bs-target="#loginModal"
+									aria-controls="loginModal"
 									style="font-family: 'Lucida Console', Monaco, monospace;">login</button>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-			<div v-if="account" class="">
-				<div class="d-flex flex-column justify-content-center bg-blur-darkg-50">
+			<div v-if="account" class="container p-0 rounded-top">
+				<div class="d-flex flex-column justify-content-center bg-blur-darkg-50 rounded-top">
 					<!-- toolbar -->
-					<div class="d-flex bg-dark py-1 border-0">
+					<div class="d-flex bg-dark py-1 border-0 rounded-top">
 						<div class="d-flex flex-wrap align-items-center ms-4 me-auto justify-content-center">
 							<div class="display-6 text-honey-50 fw-bold">HONEYCOMB</div>
 							<i class="fa-solid fa-atom display-6 text-honey-50 mx-1"></i>
