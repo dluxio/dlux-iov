@@ -787,6 +787,10 @@ var app = new Vue({
     "foot-vue": FootVue,
   },
   methods: {
+    makeQr(ref, link = "test", opts = {}){
+      var qrcode = new QRCode(this.$refs[ref], opts);
+      qrcode.makeCode(link);
+    },
     checkAccount(name, key) {
       fetch("https://api.hive.blog", {
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${this[name]}\"]], \"id\":1}`,
@@ -1019,6 +1023,7 @@ var app = new Vue({
     this.getTickers();
     this.getHiveStats();
     this.getDluxStats();
+    this.makeQr('qrcode', follow);
   },
   computed: {
     reward:{
