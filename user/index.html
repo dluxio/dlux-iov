@@ -86,14 +86,43 @@
 
 </head>
 
-<body class="d-flex h-100 align-items-stretch text-white" id="explore">
-    <div id="app" v-cloak class="d-flex flex-column w-100">
+<body id="explore">
+    <div id="app" v-cloak>
         <!-- navbar -->
         <div>
             <nav-vue @login="account = $event;newme($event)" @logout="account = '';init(true)" @ack="removeOp($event)"
                 @refresh="run($event)" :op="toSign" :lapi="lapi" />
         </div>
-        <main role="main" class="mb-auto text-white" v-cloak style="padding-top: 94px;">
+        <main role="main" class="mb-auto text-white" v-cloak style="padding-top: 150px;">
+            <div class="container fixed-top p-0" style="margin-top: 72px; z-index: 900;">
+                <div class="d-flex flex-column justify-content-between align-items-center nav-blur px-2 rounded-bottom"
+                    style="background-color: rgba(0,0,0,0.6)">
+                    <div class="d-flex align-items-center pt-2 pb-1 px-1 w-100">
+                        <div class="d-flex align-items-center">
+                            <div style="padding-top: 5px; padding-bottom: 5px;">
+                                <ul id="usertabs" class="nav nav-tabs" role="tablist">
+                                    <li class="nav-item"> <a class="nav-link active" id="blogtab" role="tab"
+                                            data-bs-toggle="tab" aria-controls="blog" aria-expanded="true"
+                                            @click="activeTab = 'blog'" href="#blog">Blog</a>
+                                    </li>
+                                    <li class="nav-item"> <a class="nav-link" id="wallettab" role="tab"
+                                            data-bs-toggle="tab" @click="activeTab = 'wallet'" aria-controls="wallet"
+                                            aria-expanded="true" href="#wallet">Wallet</a></li>
+                                    <li class="nav-item"> <a class="nav-link" id="inventorytab" role="tab"
+                                            @click="activeTab = 'inventory'" data-bs-toggle="tab"
+                                            aria-controls="inventory" aria-expanded="true"
+                                            href="#inventory">Inventory</a></li>
+                                    <li class="nav-item"> <a class="nav-link" id="drivetab" role="tab"
+                                            data-bs-toggle="tab" @click="activeTab = 'drive'" aria-controls="drive"
+                                            aria-expanded="true" href="#drive">Drive</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
             <div class="container-fluid px-0">
                 <div v-if="!pageAccount && !account">
                     <div class="container-fluid mt-2">
@@ -104,8 +133,7 @@
                                         Login to see this page
                                     </div>
                                     <button class="fs-6 btn btn-success btn-success-lg text-black" type="button"
-                                        data-bs-toggle="modal" data-bs-target="#loginModal"
-                                        aria-controls="loginModal"
+                                        data-bs-toggle="modal" data-bs-target="#loginModal" aria-controls="loginModal"
                                         style="font-family: 'Lucida Console', Monaco, monospace;">login</button>
                                 </div>
                             </div>
@@ -131,42 +159,47 @@
                         </div>
                         <div class="container">
                             <!-- pfp and info -->
-                            <div class="row pt-3">
-                                <div class="col-md-8 text-white">
-                                    <div class="d-flex flex-wrap">
-                                        <div v-if="pageAccount" class="d-flex"><img
-                                                :src="'https://images.hive.blog/u/' + pageAccount + '/avatar'" alt=""
-                                                class="rounded-circle bg-light me-4 cover profile-img"></div>
-                                        <div class="d-flex flex-column">
-                                            <div class="d-flex">
-                                                <p class="display-4 mb-0">{{pageAccount}}</p>
-                                            </div>
-                                            <div class="d-flex"><small
-                                                    class="lead py-2">{{focus.posting_json_metadata.profile.about}}</small>
+                            <div class="rounded bg-dark">
+                                <div class="row py-2 px-3">
+                                    <div class="col-md-8 text-white ">
+                                        <div class="d-flex flex-wrap">
+                                            <div v-if="pageAccount" class="d-flex"><img
+                                                    :src="'https://images.hive.blog/u/' + pageAccount + '/avatar'"
+                                                    alt="" class="rounded-circle bg-light me-4 cover profile-img"></div>
+                                            <div class="d-flex flex-column">
+                                                <div class="d-flex">
+                                                    <p class="display-4 mb-0">{{pageAccount}}</p>
+                                                </div>
+                                                <div class="d-flex"><small
+                                                        class="lead py-2">{{focus.posting_json_metadata.profile.about}}</small>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-md-4 text-center m-auto"> <a target="_blank"
-                                        class="btn btn-outline-danger btn-lg m-1" role="button"
-                                        :href="'/vr/@' + pageAccount">VR Page<i
-                                            class="fas fa-vr-cardboard mx-2 fa-lg"></i></a>
-                                    <button type="button" v-show="!me && account" class="btn btn-outline-primary btn-lg"
-                                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions<i
-                                            class="fas fa-ellipsis-h ms-2"></i></button>
-                                    <div class="dropdown-menu bg-black dropdown-menu-right"> <a class="dropdown-item"
-                                            type="button" @click="follow(pageAccount)"
-                                            v-if="!relations.follows">Follow</a> <a class="dropdown-item" type="button"
-                                            @click="unfollow(pageAccount)" v-if="relations.follows">Unfollow</a>
-                                        <modal-vue type="send" token="DLUX" :balance="accountapi.balance"
-                                            :account="account" @modalsign="sendIt($event)" v-slot:trigger>
-                                            <a slot="trigger" class="dropdown-item trigger" type="button">Send DLUX</a>
-                                        </modal-vue>
+                                    <div class="col-md-4 text-center m-auto"> <a target="_blank"
+                                            class="btn btn-outline-danger btn-lg m-1" role="button"
+                                            :href="'/vr/@' + pageAccount">VR Page<i
+                                                class="fas fa-vr-cardboard mx-2 fa-lg"></i></a>
+                                        <button type="button" v-show="!me && account"
+                                            class="btn btn-outline-primary btn-lg" data-bs-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false"> Actions<i
+                                                class="fas fa-ellipsis-h ms-2"></i></button>
+                                        <div class="dropdown-menu bg-black dropdown-menu-right"> <a
+                                                class="dropdown-item" type="button" @click="follow(pageAccount)"
+                                                v-if="!relations.follows">Follow</a> <a class="dropdown-item"
+                                                type="button" @click="unfollow(pageAccount)"
+                                                v-if="relations.follows">Unfollow</a>
+                                            <modal-vue type="send" token="DLUX" :balance="accountapi.balance"
+                                                :account="account" @modalsign="sendIt($event)" v-slot:trigger>
+                                                <a slot="trigger" class="dropdown-item trigger" type="button">Send
+                                                    DLUX</a>
+                                            </modal-vue>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <!-- nav tabs -->
-                            <div class="mt-5 mb-2">
+                            <!-- <div class="mt-5 mb-2">
                                 <ul id="usertabs" class="nav nav-tabs" role="tablist">
                                     <li class="nav-item"> <a class="nav-link active" id="blogtab" role="tab"
                                             data-bs-toggle="tab" aria-controls="blog" aria-expanded="true"
@@ -183,7 +216,7 @@
                                             data-bs-toggle="tab" @click="activeTab = 'drive'" aria-controls="drive"
                                             aria-expanded="true" href="#drive">Drive</a></li>
                                 </ul>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                     <!-- page tab content -->
@@ -192,9 +225,10 @@
                         <div role="tabpanel" class="tab-pane fade show active" id="blog" aria-labelledby="blogtab">
                             <!-- blog repeat -->
                             <!--main view-->
-                            <div class="container">
-                                <div class="row" >
-                                    <div class="col-sm-6 col-lg-4 col-xl-3 my-2 card-group" v-for="post in displayPosts" :key="post.url">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="col-sm-6 col-lg-4 col-xl-3 my-2 card-group" v-for="post in displayPosts"
+                                        :key="post.url">
                                         <card-vue :post="post" :account="account" :post_select="postSelect"
                                             :voteval="voteVal" :head_block="sstats.head_block"
                                             :broca_refill="sstats.broca_refill" :broca="spkapi.broca"
@@ -1735,7 +1769,9 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
+    <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"
+        integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous"
+        async></script>
 
 
 </body>

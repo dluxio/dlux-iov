@@ -40,18 +40,18 @@
 	</script>
 </head>
 
-<body class="d-flex h-100 align-items-stretch">
-	<div id="app" class="d-flex w-100 flex-column w-100">
+<body>
+	<div id="app">
 		<!-- navbar -->
 		<div>
 			<nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event)"
 				@logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
 				:lapi="lapi" />
 		</div>
-		<main role="main" class="mb-auto" style="margin-top: 94px;">
+		<main role="main" class="mb-auto" style="margin-top: 150px;">
 			<div class="container">
-				<h3 class="mt-3 hero-title">Publishing</h3>
-				<p class="hero-subtitle">Upload and Post Videos and dApps</p>
+				<h3 class="hero-title">Publishing</h3>
+				<p class="hero-subtitle">Upload and Post dApps and Videos</p>
 				<div class="row mt-4 mb-lg-5">
 					<div class="col-md-8 d-flex flex-column">
 						<div class="border-turq border-bottom border-3">

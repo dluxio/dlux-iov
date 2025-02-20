@@ -1181,12 +1181,11 @@ export default {
                 class="subnav-subtitle">Sales and Auctions</span></a></li>
           <li class="nav-show"><a class="dropdown-item subnav-title" href="/nfts/sets">Browse NFT Sets<span
                 class="subnav-subtitle">Discover New Collections</span></a></li>
-          <li><a class="dropdown-item subnav-title" href="/build/">Publishing<span class="subnav-subtitle">Build
-                and Post With DLUX</span></a></li>
-          <li><a class="dropdown-item subnav-title" href="#">Storage<span class="subnav-subtitle">Web3
-                IPFS Pinning</span></a></li>
-          <li><a class="dropdown-item subnav-title" href="/nodes/">Node Rewards<span class="subnav-subtitle">Run
-                a DePIN Service Node</span></a></li>
+          <li><a class="dropdown-item subnav-title" href="/build/">Publishing<span class="subnav-subtitle">Upload
+                and Post with DLUX</span></a></li>
+          <li><a class="dropdown-item subnav-title" href="/build/">Minting<span class="subnav-subtitle">Craft NFT Sets with DLUX</span></a></li>
+          <li><a class="dropdown-item subnav-title" href="#">Storage<span class="subnav-subtitle">IPFS File Pinning with SPK</span></a></li>
+          <li><a class="dropdown-item subnav-title" href="/nodes/">Node Rewards<span class="subnav-subtitle">Earn Tokens for DePIN Services</span></a></li>
           <li><a class="dropdown-item subnav-title" href="/dao/">Honeycomb DAO<span class="subnav-subtitle">Launch Your
                 DeFi Project</span></a></li>
           <li><a class="dropdown-item subnav-title" href="/docs/" target="_blank">Docs<span

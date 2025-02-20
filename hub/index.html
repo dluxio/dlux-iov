@@ -82,17 +82,16 @@
                 @logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
                 :lapi="lapi" />
         </div>
-        <main role="main" class="mb-auto" style="margin-top: 180px;" v-cloak>
-
+        <main role="main" class="mb-auto" style="padding-top: 150px;" v-cloak>
             <!-- app options -->
             <div class="container fixed-top p-0" style="margin-top: 72px; z-index: 900;">
                 <div class="d-flex flex-column justify-content-between align-items-center nav-blur px-2 rounded-bottom"
                     style="background-color: rgba(0,0,0,0.6)">
-                    <div class="pt-2 pb-1 px-1 w-100" >
+                    <div class="d-flex align-items-center pt-2 pb-1 px-1 w-100">
                         <div class="d-flex align-items-center">
                             <!-- sort dropdown (hidden) -->
                             <div class="mx-1 d-none">
-                                <a class="btn btn-outline-light dropdown-toggle " data-bs-toggle="dropdown"
+                                <a class="btn btn-lg btn-outline-light dropdown-toggle " data-bs-toggle="dropdown"
                                     aria-haspopup="true" aria-expanded="false">{{postSelect.entry
                                     == 'new' ? 'NEW' : postSelect.entry == 'trending' ? 'TRENDING' : 'PROMOTED'}}
                                     <span class="sr-only">Toggle Dropdown</span>
@@ -108,8 +107,8 @@
                             </div>
                             <!-- type dropdown -->
                             <div class="me-2">
-                                <a class="btn btn-outline-light dropdown-toggle " data-bs-toggle="dropdown"
-                                    aria-haspopup="true" aria-expanded="false">TYPE
+                                <a class="btn btn-lg btn-outline-light dropdown-toggle " data-bs-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false">KIND
                                     <span class="sr-only">Toggle Dropdown</span>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-dark bg-black">
@@ -150,7 +149,12 @@
             </div>
 
             <!-- banner message -->
-            <div class="container-fluid mx-0 px-0">
+            <div class="container my-5 py-2">
+                <h3 class="hero-title text-center">HUB</h3>
+				<p class="hero-subtitle text-center">dApps, 360° Photos, and Videos</p>
+            </div>
+
+            <!-- <div class=" container-fluid mx-0 px-0">
                 <div class="row mx-0 px-0">
                     <div class="text-center p-3">
                         <div class="d-flex align-items-center justify-content-center display-4">
@@ -175,7 +179,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <!--main view-->
             <div class="row w-100 m-auto">
