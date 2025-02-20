@@ -1189,14 +1189,14 @@ export default {
                 class="subnav-subtitle">Discover New Collections</span></a></li>
           <li><a class="dropdown-item subnav-title" href="/build/">Publishing<span class="subnav-subtitle">Upload
                 and Post with DLUX</span></a></li>
-          <li><a class="dropdown-item subnav-title" href="/build/">Minting<span class="subnav-subtitle">Craft NFT Sets with DLUX</span></a></li>
-          <li><a class="dropdown-item subnav-title" href="/storage/">Storage<span class="subnav-subtitle">IPFS File Pinning with SPK</span></a></li>
-          <li><a class="dropdown-item subnav-title" href="/nodes/">Node Rewards<span class="subnav-subtitle">Earn Tokens for DePIN Services</span></a></li>
+          <li><a class="dropdown-item disabled subnav-title position-relative" href="/build/">Minting<span class="subnav-subtitle">Craft NFT Sets with DLUX</span><span class="position-absolute top-0 end-0 badge text-bg-primary mt-1 me-2">Coming Soon</span></a></li>
+          <li><a class="dropdown-item subnav-title" href="/storage/">Storage<span class="subnav-subtitle">Pin IPFS Files with SPK</span></a></li>
+          <li><a class="dropdown-item subnav-title" href="/node/">Node Rewards<span class="subnav-subtitle">Earn Tokens for DePIN Services</span></a></li>
           <li><a class="dropdown-item subnav-title" href="/dao/">Honeycomb DAO<span class="subnav-subtitle">Launch Your
                 DeFi Project</span></a></li>
-          <li><a class="dropdown-item subnav-title" href="/docs/" target="_blank">Docs<span
+          <li><a class="dropdown-item subnav-title position-relative" href="/docs/" target="_blank">Docs<span
                 class="subnav-subtitle">Explore
-                DLUX Documentation</span></a></li>
+                DLUX Documentation</span><span class="position-absolute top-50 end-0 translate-middle-y"><i class="mx-2 fa-solid fa-arrow-up-right-from-square"></i></span></a></li>
           <li class="subnav-extra-top"><a class="dropdown-extra" href="/@disregardfiat">Blog</a></li>
           <li class="subnav-extra-bottom"><a class="dropdown-extra" href="/about">Press Kit</a></li>
         </ul>
