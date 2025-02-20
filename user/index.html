@@ -87,13 +87,13 @@
 </head>
 
 <body id="explore">
-    <div id="app" v-cloak>
+    <div id="app" class="d-flex flex-column vh-100" v-cloak>
         <!-- navbar -->
         <div>
             <nav-vue @login="account = $event;newme($event)" @logout="account = '';init(true)" @ack="removeOp($event)"
                 @refresh="run($event)" :op="toSign" :lapi="lapi" />
         </div>
-        <main role="main" class="mb-auto text-white" v-cloak style="padding-top: 150px;">
+        <main role="main" class="d-flex flex-grow-1" v-cloak style="padding-top: 150px;">
             <div class="container fixed-top p-0" style="margin-top: 72px; z-index: 900;">
                 <div class="d-flex flex-column justify-content-between align-items-center nav-blur px-2 rounded-bottom"
                     style="background-color: rgba(0,0,0,0.6)">
@@ -123,11 +123,11 @@
             </div>
 
 
-            <div class="container-fluid px-0">
+            <div class="container-fluid my-auto px-0">
                 <div v-if="!pageAccount && !account">
-                    <div class="container-fluid mt-2">
-                        <div class="container mt-2 pt-md-5">
-                            <div class="card p-1 p-md-3 mt-5 m-lg-5">
+                   
+                        <div class="container">
+                            <div class="card p-1 p-md-3 m-lg-5">
                                 <div class="card-body text-center">
                                     <div class="fs-2 lead mb-3">
                                         Login to see this page
@@ -138,7 +138,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    
                 </div>
                 <div v-show="pageAccount || account">
 
@@ -1572,9 +1572,7 @@
 
         </main>
         <!-- Footer -->
-        <div>
-            <foot-vue />
-        </div>
+        <foot-vue />
     </div>
     <script>
         document.addEventListener("DOMContentLoaded", function () {

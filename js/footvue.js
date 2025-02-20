@@ -1,6 +1,6 @@
 export default {
   template: `
-  <footer class="footer bg-dark">
+  <footer class="footer bg-dark mt-auto">
   <!-- Footer Elements -->
   <div class="container text-center pt-1">
         <div class="py-4">

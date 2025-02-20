@@ -1190,7 +1190,7 @@ export default {
           <li><a class="dropdown-item subnav-title" href="/build/">Publishing<span class="subnav-subtitle">Upload
                 and Post with DLUX</span></a></li>
           <li><a class="dropdown-item subnav-title" href="/build/">Minting<span class="subnav-subtitle">Craft NFT Sets with DLUX</span></a></li>
-          <li><a class="dropdown-item subnav-title" href="#">Storage<span class="subnav-subtitle">IPFS File Pinning with SPK</span></a></li>
+          <li><a class="dropdown-item subnav-title" href="/storage/">Storage<span class="subnav-subtitle">IPFS File Pinning with SPK</span></a></li>
           <li><a class="dropdown-item subnav-title" href="/nodes/">Node Rewards<span class="subnav-subtitle">Earn Tokens for DePIN Services</span></a></li>
           <li><a class="dropdown-item subnav-title" href="/dao/">Honeycomb DAO<span class="subnav-subtitle">Launch Your
                 DeFi Project</span></a></li>
@@ -1224,71 +1224,6 @@ export default {
       <div id="stingChat" class=""></div>
     </div>
   </div>
-  <!-- qr modal -->
-  <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModal" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">User Management</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div v-if="!user" class="d-none">
-  <div class="alert alert-fusch d-flex flex-wrap align-items-center" role="alert">
-    <span class="my-1">Share your HIVE account</span>
-    <span class="ms-auto">
-      <button class="btn btn-fusch me-1 my-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsers"
-        aria-controls="offcanvasUsers">Login</button>
-    </span>
-  </div>
-</div>
-<div class="ms-auto me-auto" style="max-width: 25rem;">
-  <div v-if="!user">
-    <div class="ms-auto me-auto">
-      <div class="fs-3 mb-2">Check New Account Status</div>
-      <div class="text-start">
-        <div class="mb-3">
-          <label class="form-label">Username</label>
-          <div class="position-relative has-validation">
-            <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
-              <i class="fa-solid fa-at fa-fw"></i>
-            </span>
-            <input autocapitalize="off" placeholder="username" class="px-4 form-control bg-dark border-dark text-info">
-          </div>
-        </div>
-      </div>
-      <div class="text-end mb-3">
-        <button class="btn btn-primary">Check</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="container mt-3" v-if="user">
-    <div class="d-flex justify-content-center">
-      <!-- contact card qr code -->
-      <a v-bind:href="'/@' + user" class="card w-100 mb-3 no-decoration">
-        <div>
-          <div class="card-img-top d-flex justify-content-center mt-3 w-100" ref="qrcode"></div>
-          <div class="card-title text-center mt-2">
-            <div>Scan this QR code to find</div>
-            <div class="fs-5 mt-1 mb-3 text-primary">@{{user}} on HIVE</div>
-          </div>
-          <!-- add to apple wallet -->
-          <div class="d-none">
-            <img src="/img/US-UK_Add_to_Apple_Wallet_RGB_101421.svg" class="my-2">
-          </div>
-        </div>
-      </a>
-    </div>
-
-
-    <!-- account creation info widget -->
-
-  </div>
-        </div>
-      </div>
-    </div>
-  </div
   <!-- login modal -->
   <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
