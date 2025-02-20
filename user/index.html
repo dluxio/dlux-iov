@@ -93,56 +93,26 @@
             <nav-vue @login="account = $event;newme($event)" @logout="account = '';init(true)" @ack="removeOp($event)"
                 @refresh="run($event)" :op="toSign" :lapi="lapi" />
         </div>
-        <main role="main" class="d-flex flex-grow-1" v-cloak style="padding-top: 150px;">
-            <div class="container fixed-top p-0" style="margin-top: 72px; z-index: 900;">
-                <div class="d-flex flex-column justify-content-between align-items-center nav-blur px-2 rounded-bottom"
-                    style="background-color: rgba(0,0,0,0.6)">
-                    <div class="d-flex align-items-center pt-2 pb-1 px-1 w-100">
-                        <div class="d-flex align-items-center">
-                            <div style="padding-top: 5px; padding-bottom: 5px;">
-                                <ul id="usertabs" class="nav nav-tabs" role="tablist">
-                                    <li class="nav-item"> <a class="nav-link active" id="blogtab" role="tab"
-                                            data-bs-toggle="tab" aria-controls="blog" aria-expanded="true"
-                                            @click="activeTab = 'blog'" href="#blog">Blog</a>
-                                    </li>
-                                    <li class="nav-item"> <a class="nav-link" id="wallettab" role="tab"
-                                            data-bs-toggle="tab" @click="activeTab = 'wallet'" aria-controls="wallet"
-                                            aria-expanded="true" href="#wallet">Wallet</a></li>
-                                    <li class="nav-item"> <a class="nav-link" id="inventorytab" role="tab"
-                                            @click="activeTab = 'inventory'" data-bs-toggle="tab"
-                                            aria-controls="inventory" aria-expanded="true"
-                                            href="#inventory">Inventory</a></li>
-                                    <li class="nav-item"> <a class="nav-link" id="drivetab" role="tab"
-                                            data-bs-toggle="tab" @click="activeTab = 'drive'" aria-controls="drive"
-                                            aria-expanded="true" href="#drive">Drive</a></li>
-                                </ul>
+        <main role="main" class="d-flex flex-grow-1" v-cloak style="padding-top: 94px;">
+            <div class="container-fluid my-auto px-0">
+
+                <!-- login message -->
+                <div v-if="!pageAccount && !account">
+                    <div class="container">
+                        <div class="card p-1 p-md-3 m-lg-5">
+                            <div class="card-body text-center">
+                                <div class="fs-2 lead mb-3">
+                                    Login to see this page
+                                </div>
+                                <button class="fs-6 btn btn-success btn-success-lg text-black" type="button"
+                                    data-bs-toggle="modal" data-bs-target="#loginModal" aria-controls="loginModal"
+                                    style="font-family: 'Lucida Console', Monaco, monospace;">login</button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-
-            <div class="container-fluid my-auto px-0">
-                <div v-if="!pageAccount && !account">
-                   
-                        <div class="container">
-                            <div class="card p-1 p-md-3 m-lg-5">
-                                <div class="card-body text-center">
-                                    <div class="fs-2 lead mb-3">
-                                        Login to see this page
-                                    </div>
-                                    <button class="fs-6 btn btn-success btn-success-lg text-black" type="button"
-                                        data-bs-toggle="modal" data-bs-target="#loginModal" aria-controls="loginModal"
-                                        style="font-family: 'Lucida Console', Monaco, monospace;">login</button>
-                                </div>
-                            </div>
-                        </div>
-                    
-                </div>
                 <div v-show="pageAccount || account">
-
-
                     <!-- Page header area -->
                     <div class="container-fluid mt-2">
                         <div class="container">
@@ -150,8 +120,8 @@
                                 role="alert">
                                 <span class="my-1">To follow @{{pageAccount}}</span>
                                 <span class="ms-auto">
-                                    <button class="btn btn-turq me-1 my-1" type="button" data-bs-toggle="offcanvas"
-                                        data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
+                                    <button class="btn btn-turq me-1 my-1" type="button" data-bs-toggle="loginModal"
+                                        data-bs-target="#loginModal" aria-controls="loginModal">Login</button>
                                     <button class="btn btn-fusch my-1" type="button" data-bs-toggle="modal"
                                         data-bs-target="#signUpModal">Signup</button>
                                 </span>
@@ -196,6 +166,25 @@
                                             </modal-vue>
                                         </div>
                                     </div>
+                                </div>
+                                <div class="d-flex">
+                                    <ul id="usertabs" class="nav nav-tabs mx-auto my-1" role="tablist">
+                                        <li class="nav-item"> <a class="nav-link active" id="blogtab" role="tab"
+                                                data-bs-toggle="tab" aria-controls="blog" aria-expanded="true"
+                                                @click="activeTab = 'blog'" href="#blog">Blog</a>
+                                        </li>
+                                        <li class="nav-item"> <a class="nav-link" id="wallettab" role="tab"
+                                                data-bs-toggle="tab" @click="activeTab = 'wallet'"
+                                                aria-controls="wallet" aria-expanded="true" href="#wallet">Wallet</a>
+                                        </li>
+                                        <li class="nav-item"> <a class="nav-link" id="inventorytab" role="tab"
+                                                @click="activeTab = 'inventory'" data-bs-toggle="tab"
+                                                aria-controls="inventory" aria-expanded="true"
+                                                href="#inventory">Inventory</a></li>
+                                        <li class="nav-item"> <a class="nav-link" id="drivetab" role="tab"
+                                                data-bs-toggle="tab" @click="activeTab = 'drive'" aria-controls="drive"
+                                                aria-expanded="true" href="#drive">Drive</a></li>
+                                    </ul>
                                 </div>
                             </div>
                             <!-- nav tabs -->
