@@ -19,7 +19,7 @@ export default {
     },
     template: `
     <div class="d-flex flex-column rounded">
-        <div class="rounded-top border-bottom-0" v-if="!nodeview"  style="background-color: rgba(146, 146, 146, 0.3);">
+        <div class="rounded-top border-bottom-0" v-if="!nodeview && saccountapi.pubKey != 'NA'"  style="background-color: rgba(146, 146, 146, 0.3);">
           <div class="container pt-1">
             <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-4">
 
@@ -110,15 +110,16 @@ export default {
     </div>
 
     <!-- register account -->
-    <div v-if="saccountapi.pubKey == 'NA'" class="d-flex justify-content-center">
-        <div class="d-flex p-3 mt-3">
-            <div class="text-center" style="max-width: 600px;">
-                <p class="fs-4 lead">Register your account on SPK Network for free<br>to start storing your files on IPFS</p>
-                <div class="d-flex justify-content-center">
-                <button type="button" class="btn btn-primary my-3" @click="updatePubkey()">
-                <i class="fa-solid fa-user-plus fa-fw me-1"></i> Register Account
+    <div v-if="saccountapi.pubKey == 'NA'">
+        <div class="container">
+            <div class="card p-1 p-md-3 m-lg-5">
+                <div class="card-body text-center">
+                    <div class="fs-4 lead mb-3">
+                        Register your account on SPK Network for free<br>to start storing your files on IPFS
+                    </div>
+                    <button type="button" class="btn btn-primary my-3" @click="updatePubkey()">
+                        <i class="fa-solid fa-user-plus fa-fw me-1"></i> Register Account
                 </button>
-                
                 </div>
             </div>
         </div>
@@ -126,8 +127,6 @@ export default {
 
     <!-- tabs nav -->
     <div v-if="saccountapi.pubKey != 'NA'" class="d-flex flex-column card square rounded-bottom p-0" style="background-color: rgba(0, 0, 0, 0.3);">
-        
-
         <!-- top menu -->
         <div class="pb-1">
             <div class="d-flex flex-wrap align-items-center my-3">

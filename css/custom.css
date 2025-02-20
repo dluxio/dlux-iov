@@ -13666,4 +13666,8 @@ body {
   background-image: linear-gradient(135deg, #126445, #051b63, #660068);
   background-repeat: no-repeat;
   background-attachment: fixed;
+}
+
+.btn-08 {
+  border-radius: 8px !important;
 }/*# sourceMappingURL=custom.css.map */

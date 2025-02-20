@@ -9,9 +9,7 @@ html {
     background-color: #101419;
 }
 
-#how {
-    /* background-color: #1a2129; */
-}
+
 
 .text-mint {
     color: rgb(235, 245, 236) !important;
@@ -34,7 +32,32 @@ html {
     display: flex;
     overflow: visible;
     border: 1px solid black;
-    width: min(1600px, 100% - 40px);
+    width: min(1600px, 100% - 30px);
+}
+
+.navbar-subbar {
+    z-index: 900;
+}
+
+.navbar-subbar-container {
+    display: flex;
+    margin-top: 72px;
+}
+
+.navbar-subbar-content {
+    display: flex;
+    width: 100%;
+    padding-top: 16px;
+    padding-bottom: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    align-items: center;
+    justify-content: start;
+    background-color: rgba(0, 0, 0, 0.6);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
 }
 
 .navbar-nav {
@@ -181,7 +204,6 @@ html {
 .navbar-nav .nav-more .dropdown-menu {
     position: absolute;
     background-color: rgb(235, 245, 236);
-    border-radius: 10px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     border: 1px solid black;
     right: 0;
@@ -689,6 +711,14 @@ html {
         width: 64px;
     }
 
+    .navbar-subbar-container {
+        margin-top: 64px;
+    }
+
+    .navbar-subbar-content {
+        width: 100%
+    }
+
     .navbar-nav {
         flex-direction: unset;
         height: 64px !important;
@@ -703,8 +733,6 @@ html {
         width: 100vw !important;
     }
 
-   
-
     .hero-text-bottom {
         position: absolute;
         bottom: 20px;
@@ -716,11 +744,11 @@ html {
     .nav-item .dropdown-menu {
         left: calc(50% - 5px) !important;
         transform: translateX(-50%);
-        width: calc(100vw - 40px) !important;
+        width: calc(100vw - 30px) !important;
     }
 
     .nav-more .dropdown-menu {
-        width: calc(100vw - 40px) !important;
+        width: calc(100vw - 30px) !important;
     }
 
     .how-grid {
@@ -751,8 +779,11 @@ html {
 }
 
 @media (max-width: 576px) {
+    .navbar-subbar-container {
+        margin-left: 15px;
+        margin-right: 15px;
+    }
 
-    
     .hero-brand {
         font-size: 5em !important;
     }
