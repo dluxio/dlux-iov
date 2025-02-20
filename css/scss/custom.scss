@@ -898,8 +898,13 @@ a-scene {
 }
 
 .btn-blue {
-  color: #fff;
-  background: #033efd;
+  color: black;
+  background: #1c9bfc;
+}
+
+.btn-blue:hover {
+  background: black;
+  color: #1c9bfc;
 }
 
 .btn-outline-blue {
@@ -934,8 +939,8 @@ a-scene {
   background: #fb00ff;
 }
 .btn-fusch:hover {
-  color: #fff;
-  background: #fb00ff8e;
+  color: #fb00ff;
+  background: #fff;
 }
 
 .btn-outline-fusch {
@@ -1018,21 +1023,22 @@ a-scene {
   box-shadow: inset 0px 0px 10px 5px rgba(235,169,55, 0.3);
 }
 .btn-honey {
-  color: #fff !important;
+  color: black !important;
   background: #EBA937 !important;
 }
 .btn-honey:hover {
-  background: #b07f2a !important;
+  color:#EBA937 !important;
+  background: black !important;
+  border-color: #EBA937 !important;
 }
 .btn-outline-honey {
-  color: #fff !important;
+  color: #EBA937 !important;
   border-color: #EBA937 !important;
 }
 
 .btn-outline-honey:hover {
-  color: #fff !important;
-  border-color: #EBA937 !important;
-  background: #b07f2a3e !important;
+  color: black !important;
+  background: #EBA937 !important;
 }
 // HIVE ELEMENTS
 .text-hive {

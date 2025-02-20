@@ -1187,10 +1187,10 @@ export default {
                 class="subnav-subtitle">Sales and Auctions</span></a></li>
           <li class="nav-show"><a class="dropdown-item subnav-title" href="/nfts/sets">Browse NFT Sets<span
                 class="subnav-subtitle">Discover New Collections</span></a></li>
-          <li><a class="dropdown-item subnav-title" href="/build/">Publishing<span class="subnav-subtitle">Upload
+          <li><a class="dropdown-item subnav-title" href="/create/">Publishing<span class="subnav-subtitle">Upload
                 and Post to DLUX</span></a></li>
           <li><a class="dropdown-item subnav-title" href="/storage/">Storage<span class="subnav-subtitle">Pin IPFS Files with SPK</span></a></li>
-          <li><a class="dropdown-item disabled subnav-title position-relative" href="/build/">Minting<span class="subnav-subtitle">Craft NFT Sets on DLUX</span><span class="position-absolute top-0 end-0 badge text-bg-primary mt-1 me-2">Coming Soon</span></a></li>
+          <li><a class="dropdown-item subnav-title position-relative" href="/mint/">Minting<span class="subnav-subtitle">Craft NFT Sets on DLUX</span><span class="position-absolute top-0 end-0 badge text-bg-primary mt-1 me-2">Coming Soon</span></a></li>
           <li><a class="dropdown-item subnav-title" href="/node/">Node Rewards<span class="subnav-subtitle">Earn Tokens for DePIN Services</span></a></li>
           <li><a class="dropdown-item subnav-title" href="/dao/">Honeycomb DAO<span class="subnav-subtitle">Launch Your
                 DeFi Project</span></a></li>

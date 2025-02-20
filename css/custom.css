@@ -13261,8 +13261,13 @@ a-scene {
 }
 
 .btn-blue {
-  color: #fff;
-  background: #033efd;
+  color: black;
+  background: #1c9bfc;
+}
+
+.btn-blue:hover {
+  background: black;
+  color: #1c9bfc;
 }
 
 .btn-outline-blue {
@@ -13301,8 +13306,8 @@ a-scene {
 }
 
 .btn-fusch:hover {
-  color: #fff;
-  background: rgba(251, 0, 255, 0.5568627451);
+  color: #fb00ff;
+  background: #fff;
 }
 
 .btn-outline-fusch {
@@ -13396,23 +13401,24 @@ a-scene {
 }
 
 .btn-honey {
-  color: #fff !important;
+  color: black !important;
   background: #EBA937 !important;
 }
 
 .btn-honey:hover {
-  background: #b07f2a !important;
+  color: #EBA937 !important;
+  background: black !important;
+  border-color: #EBA937 !important;
 }
 
 .btn-outline-honey {
-  color: #fff !important;
+  color: #EBA937 !important;
   border-color: #EBA937 !important;
 }
 
 .btn-outline-honey:hover {
-  color: #fff !important;
-  border-color: #EBA937 !important;
-  background: rgba(176, 127, 42, 0.2431372549) !important;
+  color: black !important;
+  background: #EBA937 !important;
 }
 
 .text-hive {
