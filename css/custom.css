@@ -12668,7 +12668,8 @@ td {
   position: absolute;
   inset: 0;
   border-radius: 0.6em;
-  padding: 1px; /* control the border thickness */
+  padding: 1px;
+  /* control the border thickness */
   background: linear-gradient(45deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -13219,6 +13220,12 @@ a-scene {
   background: #000;
 }
 
+.btn-turq:active:hover {
+  color: #0ed18c;
+  background: #000;
+  border-color: black;
+}
+
 .btn-outline-turq {
   color: #fff;
   border-color: #14d695;
@@ -13270,6 +13277,12 @@ a-scene {
   color: #1c9bfc;
 }
 
+.btn-blue:active:hover {
+  background: black;
+  color: #1c9bfc;
+  border-color: black;
+}
+
 .btn-outline-blue {
   color: #fff;
   border-color: #033efd;
@@ -13308,6 +13321,12 @@ a-scene {
 .btn-fusch:hover {
   color: #fb00ff;
   background: #fff;
+}
+
+.btn-fusch:active:hover {
+  color: #fb00ff;
+  background: #fff;
+  border-color: white;
 }
 
 .btn-outline-fusch {
@@ -13570,7 +13589,7 @@ a-scene {
     max-width: 100%;
   }
 }
-.btn-blue {
+/* .btn-bootstrap {
   --bs-btn-color: #fff;
   --bs-btn-bg: $blue;
   --bs-btn-border-color: $blue;
@@ -13585,8 +13604,7 @@ a-scene {
   --bs-btn-disabled-color: #fff;
   --bs-btn-disabled-bg: #e83283;
   --bs-btn-disabled-border-color: #e83283;
-}
-
+} */
 .btn-outline-warning {
   --bs-btn-active-color: #000;
 }
