@@ -38,7 +38,7 @@ html {
     display: flex;
     overflow: visible;
     border: 1px solid black;
-    width: min(1600px, 100% - 30px);
+    width: min(1600px, 100vw - 24px);
 }
 
 .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover {
@@ -729,11 +729,11 @@ html {
     .nav-item .dropdown-menu {
         left: calc(50% - 5px) !important;
         transform: translateX(-50%);
-        width: calc(100vw - 30px) !important;
+        width: calc(100vw - 24px) !important;
     }
 
     .nav-more .dropdown-menu {
-        width: calc(100vw - 30px) !important;
+        width: calc(100vw - 24px) !important;
     }
 
     .how-grid {
