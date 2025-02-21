@@ -22,7 +22,6 @@ export default {
         <div class="rounded-top border-bottom-0" v-if="!nodeview && saccountapi.pubKey != 'NA'"  style="background-color: rgba(146, 146, 146, 0.3);">
           <div class="container pt-1">
             <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-4">
-
                 <!-- spk token widget -->
                 <div class="order-lg-3 order-xl-0 mb-3 col spk-widg">
                     <div class="card-header d-flex align-items-center border-bottom border-1 px-2 py-1 fs-4"><i class="fa-solid fa-atom me-1"></i><span>SPK Token</span></div>
@@ -47,7 +46,6 @@ export default {
                         </div>    
                     </div>
                 </div>           
-            
                 <!-- spk power widget -->
                 <div class="order-lg-0 order-xl-1 mb-3 col spk-widg">
                     <div class="card-header d-flex align-items-center border-bottom border-1 px-2 py-1 fs-4"><i class="fa-solid fa-bolt me-1"></i>
@@ -60,7 +58,6 @@ export default {
                         <a href="#" data-bs-toggle="modal" data-bs-target="#buyTokenModal" class="text-center text-primary">Get more power</a>
                     </div>
                 </div>
-           
                 <!-- storage widget -->
                 <div class="order-lg-1 order-xl-3 mb-3 col spk-widg">
                     <div class="card-header d-flex align-items-center border-bottom border-1 px-2 py-1 fs-4"><i class="fa-solid fa-chart-pie me-1"></i><span>Storage</span></div>
@@ -72,7 +69,6 @@ export default {
                         <a href="#" data-bs-toggle="modal" data-bs-target="#buyTokenModal" class="text-center text-primary">Get more storage</a>
                     </div>
                 </div>
-
                 <!-- contract widget -->
                 <div class="order-lg-3 order-xl-4 mb-3 col spk-widg">
                     <div class="card-header d-flex align-items-center border-bottom border-1 px-2 py-1 fs-4"><i class="fa-solid fa-cloud-arrow-up me-1"></i><span>Contract</span></div>
@@ -104,15 +100,13 @@ export default {
                         </div>    
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
-
     <!-- register account -->
     <div v-if="saccountapi.pubKey == 'NA'">
-        <div class="container">
-            <div class="card p-1 p-md-3 m-lg-5">
+        <div class="mx-xl-5">
+            <div class="card p-1 p-md-3 mx-lg-5">
                 <div class="card-body text-center">
                     <div class="fs-4 lead mb-3">
                         Register your account on SPK Network for free<br>to start storing your files on IPFS
@@ -124,7 +118,6 @@ export default {
             </div>
         </div>
     </div>
-
     <!-- tabs nav -->
     <div v-if="saccountapi.pubKey != 'NA'" class="d-flex flex-column card square rounded-bottom p-0" style="background-color: rgba(0, 0, 0, 0.3);">
         <!-- top menu -->

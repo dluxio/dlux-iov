@@ -9,7 +9,13 @@ html {
     background-color: #101419;
 }
 
+.padmain {
+    padding-top: 94px;
+  }
 
+  .padmain-subbar {
+    padding-top: 150px;
+  }
 
 .text-mint {
     color: rgb(235, 245, 236) !important;
@@ -642,6 +648,9 @@ html {
 }
 
 @media (min-width: 1400px) {
+
+    
+
     .vision-container {
         min-height: 960px;
     }
