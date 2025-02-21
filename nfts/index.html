@@ -143,7 +143,7 @@
                 @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" @refresh="run($event)"
                 :op="toSign" :lapi="lapi" />
         </div>
-        <main role="main" class="flex-grow-1 padmain-subbar">
+        <main role="main" class="d-flex flex-column flex-grow-1 padmain-subbar" v-cloak>
             <div class="container fixed-top navbar-subbar">
                 <div class="navbar-subbar-container">
                     <div class="navbar-subbar-content">

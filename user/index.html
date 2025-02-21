@@ -85,6 +85,7 @@
     <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
 
 </head>
+
 <body id="explore">
     <div id="app" class="d-flex flex-column vh-100" v-cloak>
         <!-- navbar -->
@@ -92,24 +93,22 @@
             <nav-vue @login="account = $event;newme($event)" @logout="account = '';init(true)" @ack="removeOp($event)"
                 @refresh="run($event)" :op="toSign" :lapi="lapi" />
         </div>
-        <main role="main" class="padmain" v-cloak>
-            <div class="container-fluid my-auto px-0">
-                <!-- login message -->
-                <div v-if="!pageAccount && !account">
-                    <div class="container">
-                        <div class="card p-1 p-md-3 m-lg-5">
-                            <div class="card-body text-center">
-                                <div class="fs-2 lead mb-3">
-                                    Login to see this page
-                                </div>
-                                <button class="fs-6 btn btn-success btn-success-lg text-black" type="button"
-                                    data-bs-toggle="modal" data-bs-target="#loginModal" aria-controls="loginModal"
-                                    style="font-family: 'Lucida Console', Monaco, monospace;">login</button>
-                            </div>
+        <main role="main" class="d-flex flex-column flex-grow-1 padmain" v-cloak>
+            <!-- login message -->
+            <div class="container my-auto" v-if="!pageAccount && !account">
+                <div class="card p-1 p-md-3 m-lg-5">
+                    <div class="card-body text-center">
+                        <div class="fs-2 lead mb-3">
+                            Login to see this page
                         </div>
+                        <button class="fs-6 btn btn-success btn-success-lg text-black" type="button"
+                            data-bs-toggle="modal" data-bs-target="#loginModal" aria-controls="loginModal"
+                            style="font-family: 'Lucida Console', Monaco, monospace;">login</button>
                     </div>
                 </div>
+            </div>
 
+            <div class="container-fluid px-0">
                 <div v-show="pageAccount || account">
                     <!-- Page header area -->
                     <div class="">
@@ -1726,14 +1725,6 @@
             deepLink(location.hash); // Call deepLink on page load to handle any deep linking in the URL
         });
     </script>
-
-
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
-        integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="/js/bootstrap.bundle.min.js"></script>
-
     <script>
         // Add JavaScript to toggle collapse on <tr> click
         document.addEventListener('DOMContentLoaded', function () {
@@ -1752,12 +1743,12 @@
             });
         });
     </script>
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
+        integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"
-        integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous"
-        async></script>
-
 
 </body>
 

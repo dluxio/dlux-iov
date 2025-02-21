@@ -75,14 +75,14 @@
 </head>
 
 <body id="explore">
-    <div id="app" v-cloak>
+    <div id="app" class="d-flex flex-column vh-100" v-cloak>
         <!-- navbar -->
         <div>
             <nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event);getSPKUser($event)"
                 @logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
                 :lapi="lapi" />
         </div>
-        <main role="main" class="mb-auto padmain-subbar" v-cloak>
+        <main role="main" class="d-flex flex-column flex-grow-1 padmain-subbar" v-cloak>
             <!-- app options -->
             <div class="container fixed-top navbar-subbar">
                 <div class="navbar-subbar-container">
@@ -127,8 +127,8 @@
                         </div>
 
                         <!-- search bar -->
-                        <div class="row mx-05">
-                            <div class="position-relative">
+                        <div class="row mx-1">
+                            <div class="position-relative p-0">
                                 <span class="position-absolute ps-2 top-50 translate-middle-y">
                                     <i class="fa-solid fa-magnifying-glass fa-fw"></i>
                                 </span>
@@ -138,7 +138,10 @@
                                     @search="postSelect.entry = 'search';getPosts()">
                             </div>
                         </div>
-                        <a href="/vr" class="d-flex align-items-center ms-auto btn btn-outline-danger"
+                        <a href="/create/" class="d-flex align-items-center ms-auto btn btn-outline-info"
+                        target="_blank"><i class="fas fa-plus force-parent-lh"></i><span
+                            class="d-none d-md-block ms-1">CREATE</span></a>
+                        <a href="/vr/" class="d-flex align-items-center ms-1 btn btn-outline-danger"
                             target="_blank"><i class="fas fa-vr-cardboard force-parent-lh"></i><span
                                 class="d-none d-md-block ms-2">VR</span></a>
                     </div>
@@ -148,8 +151,7 @@
             <!-- banner message -->
             <div class="container">
                 <div class="bg-blur-darkg border border-dark rounded mt-1 mb-2 pb-1">
-                    <div
-                        class="d-flex justify-content-between align-items-center flex-wrap pt-1 mx-2">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap pt-1 mx-2">
                         <h3 class="hero-subtitle mb-0">HUB</h3>
                         <!-- result count -->
                         <h5 class="hero-lead mb-0">dApps, 360° Photos, and Videos</h5>
@@ -215,9 +217,7 @@
                 @modalselect="modalSelect($event)" @vote="vote($event)"></detail-vue>
         </main>
         <!-- Footer -->
-        <div>
-            <foot-vue />
-        </div>
+        <foot-vue />
     </div>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
