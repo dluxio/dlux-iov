@@ -118,6 +118,10 @@ html {
     padding-right: 16px;
 }
 
+.navbar-nav .nav-item .dropdown-menu li:last-child .dropdown-item {
+    border-bottom: 0 !important;
+}
+
 /* .navbar-nav .nav-item:hover {
     background: black;
 }
