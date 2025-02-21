@@ -177,6 +177,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="app" class="d-flex flex-column vh-100">
         <!-- navbar -->
@@ -188,42 +189,39 @@
             <div class="container fixed-top navbar-subbar">
                 <div class="navbar-subbar-container">
                     <div class="navbar-subbar-content">
-
-                        <!-- toolbar -->
-                        <div class="d-flex justify-content-between align-items-center">
-                            <!-- post type dropdown -->
-                            <div class="dropdown d-flex me-1">
-                                <a class="ms-auto me-auto btn btn-outline-light dropdown-toggle" role="button"
-                                    id="postdApp" data-bs-toggle="dropdown" aria-expanded="false">
-                                    TYPE:
-                                    <span class="mx-1"
-                                        v-if="postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'"><i
-                                            class="fa-solid fa-globe fa-fw me-1"></i>360
-                                        Image Gallery</span>
-                                    <span class="mx-1" v-if="postCustom_json.vrHash == 'video'"><i
-                                            class="fa-solid fa-film fa-fw me-1"></i>Video</span>
-                                    <span class="mx-1" v-if="postCustom_json.vrHash == 'blog'"><i
-                                            class="fa-solid fa-book fa-fw me-1"></i>Blog</span>
-                                    <!--
+                        <!-- post type dropdown -->
+                        <div class="dropdown d-flex me-1">
+                            <a class="ms-auto me-auto btn btn-outline-light dropdown-toggle d-flex align-items-center" role="button" id="postdApp"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="me-1">TYPE</span>
+                                <span class="mx-1 d-none d-lg-block"
+                                    v-if="postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'"><i
+                                        class="fa-solid fa-globe fa-fw me-1"></i>360
+                                    Image Gallery</span>
+                                <span class="mx-1 d-none d-lg-block" v-if="postCustom_json.vrHash == 'video'"><i
+                                        class="fa-solid fa-film fa-fw me-1"></i>Video</span>
+                                <span class="mx-1 d-none d-lg-block" v-if="postCustom_json.vrHash == 'blog'"><i
+                                        class="fa-solid fa-book fa-fw me-1"></i>Blog</span>
+                                <!--
                                     <span class="mx-1" v-if="postCustom_json.vrHash == 'dapp'"><i
                                             class="fa-solid fa-mobile-screen-button fa-fw me-1"></i>New dApp</span>
                                     <span class="mx-1" v-if="postCustom_json.vrHash == 'blog'"><i
                                             class="fa-solid fa-shuffle fa-fw me-1"></i>Remix dApp</span>-->
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end"
-                                    aria-labelledby="postdApp">
-                                    <li><a class="dropdown-item"
-                                            :class="{active: postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'}"
-                                            role="button"
-                                            @click="postCustom_json.vrHash = 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k';types='ts,img'"><i
-                                                class="fa-solid fa-globe fa-fw me-2"></i>360 Image Gallery</a></li>
-                                    <li><a class="dropdown-item" :class="{active: postCustom_json.vrHash == 'video'}"
-                                            role="button" @click="postCustom_json.vrHash = 'video';types='img,vid'"><i
-                                                class="fa-solid fa-film fa-fw me-2"></i>Video</a></li>
-                                    <li><a class="dropdown-item" :class="{active: postCustom_json.vrHash == 'blog'}"
-                                            role="button" @click="postCustom_json.vrHash = 'blog';types='img,vid'"><i
-                                                class="fa-solid fa-book fa-fw me-2"></i>Blog</a></li>
-                                    <!--
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark bg-black"
+                                aria-labelledby="postdApp">
+                                <li><a class="dropdown-item"
+                                        :class="{active: postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'}"
+                                        role="button"
+                                        @click="postCustom_json.vrHash = 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k';types='ts,img'"><i
+                                            class="fa-solid fa-globe fa-fw me-2"></i>360 Image Gallery</a></li>
+                                <li><a class="dropdown-item" :class="{active: postCustom_json.vrHash == 'video'}"
+                                        role="button" @click="postCustom_json.vrHash = 'video';types='img,vid'"><i
+                                            class="fa-solid fa-film fa-fw me-2"></i>Video</a></li>
+                                <li><a class="dropdown-item" :class="{active: postCustom_json.vrHash == 'blog'}"
+                                        role="button" @click="postCustom_json.vrHash = 'blog';types='img,vid'"><i
+                                            class="fa-solid fa-book fa-fw me-2"></i>Blog</a></li>
+                                <!--
                                     <li><a class="dropdown-item" :class="{active: postCustom_json.vrHash == 'dapp'}"
                                             role="button"
                                             @click="postCustom_json.vrHash = 'dapp';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'"><i
@@ -234,53 +232,57 @@
                                             @click="postCustom_json.vrHash = 'remix';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'"><i
                                                 class="fa-solid fa-shuffle fa-fw me-2"></i>ReMix dApp</a></li>
                                     -->
-                                </ul>
-                            </div>
+                            </ul>
+                        </div>
 
-                            <!-- toggle buttons -->
-                            <div class="d-flex justify-content-center"
-                                v-if="postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'">
-                                <!-- assets button -->
-                                <a class="ms-md-2 no-decoration" data-bs-toggle="collapse" href="#assetMgr">
-                                    <span class="if-collapsed">
-                                        <button class="me-1 btn btn-outline-light">
-                                            <i class="fa-solid fa-shapes fa-fw me-1"></i> Asset Manager
-                                        </button>
-                                    </span>
-                                    <span class="if-not-collapsed">
-                                        <button class="me-1 btn btn-light">
-                                            <i class="fa-solid fa-shapes fa-fw me-1"></i> Asset Manager
-                                        </button>
-                                    </span>
-                                </a>
-                                <!-- dapp button -->
-                                <a class="ms-md-2 collapsed no-decoration" data-bs-toggle="collapse"
-                                    href="#dappPreview">
-                                    <span class="if-collapsed">
-                                        <button class="me-1 btn btn-outline-light">
-                                            <i class="fa-solid fa-magnifying-glass fa-fw me-1"></i> Preview
-                                        </button>
-                                    </span>
-                                    <span class="if-not-collapsed">
-                                        <button class="me-1 btn btn-light">
-                                            <i class="fa-solid fa-magnifying-glass fa-fw me-1"></i> Preview
-                                        </button>
-                                    </span>
-                                </a>
-                                <!-- post button -->
-                                <a class="ms-md-2 collapsed no-decoration" data-bs-toggle="collapse" href="#editPost">
-                                    <span class="if-collapsed">
-                                        <button class="me-1 btn btn-outline-light">
-                                            <i class="fa-solid fa-pen-to-square fa-fw me-1"></i> Post Details
-                                        </button>
-                                    </span>
-                                    <span class="if-not-collapsed">
-                                        <button class="me-1 btn btn-light">
-                                            <i class="fa-solid fa-pen-to-square fa-fw me-1"></i> Post Details
-                                        </button>
-                                    </span>
-                                </a>
-                            </div>
+                        <!-- toggle buttons -->
+                        <div class="d-flex justify-content-center ms-auto"
+                            v-if="postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'">
+                            <!-- assets button -->
+                            <a class="ms-1 no-decoration" data-bs-toggle="collapse" href="#assetMgr">
+                                <span class="if-collapsed">
+                                    <button class="btn btn-outline-light d-flex align-items-center">
+                                        <i class="fa-solid fa-shapes fa-fw force-parent-lh"></i>
+                                        <span class="d-none d-md-block ms-1">Assets</span>
+                                    </button>
+                                </span>
+                                <span class="if-not-collapsed">
+                                    <button class="btn btn-light d-flex align-items-center">
+                                        <i class="fa-solid fa-shapes fa-fw force-parent-lh"></i><span
+                                        class="d-none d-md-block ms-1">Assets</span>
+                                    </button>
+                                </span>
+                            </a>
+                            <!-- dapp button -->
+                            <a class="ms-1 collapsed no-decoration" data-bs-toggle="collapse" href="#dappPreview">
+                                <span class="if-collapsed">
+                                    <button class="btn btn-outline-light d-flex align-items-center">
+                                        <i class="fa-solid fa-up-down-left-right fa-fw force-parent-lh"></i><span
+                                        class="d-none d-md-block ms-1">Preview</span>
+                                    </button>
+                                </span>
+                                <span class="if-not-collapsed">
+                                    <button class="btn btn-light d-flex align-items-center">
+                                        <i class="fa-solid fa-up-down-left-right fa-fw force-parent-lh"></i><span
+                                        class="d-none d-md-block ms-1">Preview</span>
+                                    </button>
+                                </span>
+                            </a>
+                            <!-- post button -->
+                            <a class="ms-1 collapsed no-decoration" data-bs-toggle="collapse" href="#editPost">
+                                <span class="if-collapsed">
+                                    <button class="btn btn-outline-light d-flex align-items-center">
+                                        <i class="fa-solid fa-pen-to-square fa-fw force-parent-lh"></i><span
+                                        class="d-none d-md-block ms-1">Description</span>
+                                    </button>
+                                </span>
+                                <span class="if-not-collapsed">
+                                    <button class="btn btn-light d-flex align-items-center">
+                                        <i class="fa-solid fa-pen-to-square fa-fw force-parent-lh"></i><span
+                                        class="d-none d-md-block ms-1">Description</span>
+                                    </button>
+                                </span>
+                            </a>
                         </div>
                     </div>
                 </div>
