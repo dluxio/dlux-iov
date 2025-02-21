@@ -225,6 +225,7 @@ html {
     padding: 0;
     flex-direction: column;
     overflow-y: auto;
+    max-height: calc(100vh - 150px);
 }
 
 .navbar-nav .nav-item .dropdown-menu {

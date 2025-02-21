@@ -13653,12 +13653,11 @@ ul.scroll li.scroll {
     transform: translateY((-100% / $scroll-count) * ($scroll-count - 1));
   }
 } */
-.dropdown-menu {
+/* .dropdown-menu {
   overflow: hidden;
   overflow-y: auto;
   max-height: calc(100vh - 86px);
-}
-
+} */
 [data-bs-toggle=collapse].collapsed .if-not-collapsed {
   display: none;
 }
